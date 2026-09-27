@@ -1,0 +1,41 @@
+{
+  "skipToContent": "Skip to content",
+  "nav": {
+    "main": "Main navigation",
+    "tabBar": "Bottom navigation",
+    "more": "More",
+    "student": {
+      "home": "Home",
+      "progress": "My progress",
+      "multiExam": "Multi-unit exam",
+      "ask": "Ask a teacher",
+      "subscription": "Subscription"
+    },
+    "teacher": {
+      "queue": "Review queue",
+      "inbox": "Student questions",
+      "stats": "My stats"
+    },
+    "admin": {
+      "dashboard": "Dashboard",
+      "content": "Content",
+      "questions": "Questions",
+      "blueprints": "Exam blueprints",
+      "users": "Users",
+      "audit": "Audit log",
+      "export": "Data export"
+    }
+  },
+  "role": {
+    "student": "Student",
+    "teacher": "Teacher",
+    "admin": "Admin"
+  },
+  "signOut": "Sign out",
+  "more": {
+    "title": "More"
+  },
+  "placeholder": {
+    "body": "This screen is under construction."
+  }
+}

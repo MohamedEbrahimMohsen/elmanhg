@@ -22,6 +22,8 @@ jobs:
         run: dotnet restore api/
       - name: Build
         run: dotnet build api/ -c Release --no-restore
+      - name: OpenAPI document is up to date
+        run: test -z "$(git status --porcelain api/openapi)"
       - name: Test
         run: dotnet test api/ -c Release --no-build
       - name: Vulnerable packages

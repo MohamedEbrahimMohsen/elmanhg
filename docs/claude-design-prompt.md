@@ -99,7 +99,7 @@ Arabic body text never below 15 px. Arabic-Indic digits (٠١٢٣) in student-fa
 
 **Progress.** Track `--soft`, fill `--accent` for mastery and `--ok` for a passed exam. 6 px tall, fully rounded. The headline counter is a white card, number in Display size, meta line in caption.
 
-**Navigation.** Mobile: bottom tab bar, white, hairline top border, 4 items per role, Lucide stroke icons 22 px at 1.8 px stroke, label 11 px, active `--text` 600, inactive `--text-2`. Desktop: top bar, same items as text tabs, active has a 2 px `--accent` underline. Sub-tabs are pills: 7 px by 14 px, active white with `--border-strong`.
+**Navigation.** Mobile: bottom tab bar, white, hairline top border, at most 4 items, Lucide stroke icons 22 px at 1.8 px stroke, label 12 px (micro), active `--text` 600, inactive `--text-2`. A role with more than 4 destinations shows its 3 primary destinations plus a fourth item "المزيد" that opens a list of the rest. Desktop (≥ 900 px): top bar with every destination as text tabs, active has a 2 px `--accent` underline. Sub-tabs are pills: 7 px by 14 px, active white with `--border-strong`.
 
 **Inputs.** White, `--r-sm`, `--border-strong`, 44 px height, 9 px by 12 px padding, 15 px. Labels 13 px `--text-2` above the field with 6 px gap. Selects in filter rows may be 36 px.
 

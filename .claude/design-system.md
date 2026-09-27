@@ -85,7 +85,7 @@ Arabic body text never below 15 px. Fonts: Google Fonts `Readex Pro:wght@500;600
 | Badge | ok, bad, pending, role, v2, neutral | — | pill, type.micro, padding 2×10. ok/bad = fill + white text; pending/neutral = soft + text.muted; role = text fill; v2 = outline |
 | Progress | mastery (accent), pass (success) | — | height 6, track soft, radius.pill, fill animates motion.slow |
 | Input / Select / Textarea | default | default, focus (2px accent ring, offset 2), error (danger border + caption), disabled | surface, border.strong, radius.sm, height 44, padding 9×12, label type.caption above with gap 6 |
-| TabBar (mobile) | — | active (text, 600), inactive (text.muted) | 4 items, Lucide icons 22px stroke 1.8, label 11px, surface + top hairline |
+| TabBar (mobile) | — | active (text, 600), inactive (text.muted) | at most 4 items; a role with more destinations shows 3 + "المزيد" (list of the rest); Lucide icons 22px stroke 1.8, label type.micro, surface + top hairline |
 | TopTabs (desktop) | — | active (2px accent underline), inactive | text tabs |
 | SubTabs | — | active (surface + border.strong), inactive | pills, padding 7×14 |
 | Table | — | row hover (soft) | inside a Card, no vertical rules, row hairline, header type.caption 600 text.muted, cell 13.5px, padding 9×10, sticky header on desktop, horizontal scroll inside the card on mobile |
@@ -140,7 +140,7 @@ Touch targets ≥44px. Focus visible on every interactive element (2px accent ri
 - Digits: Arabic-Indic (`ar-EG`) in student-facing UI; Latin (`ar-EG-u-nu-latn`) in admin tables, exports and anything copied into formulas. Never mixed within one string.
 
 ## Token → code mapping
-- `src/styles/tokens.css` is generated from the tables above: every token becomes `--ds-<group>-<name>` on `:root` (dots → dashes). No `.dark` block.
+- `src/styles/tokens.css` is generated from the tables above by `npm --prefix web run gen:tokens`: every token becomes `--ds-<group>-<name>` on `:root` (dots → dashes). Composite values split: typography → `-size`, `-line`, `-size-desktop`, `-line-desktop`, `-weight`, `-tracking`; motion → `-duration`, `-easing`; `N mobile · M desktop` → base + `-desktop`. `bp.*` → `--breakpoint-*` inside `@theme`. No `.dark` block.
 - `src/styles/app.css`:
   ```css
   @import "tailwindcss";
