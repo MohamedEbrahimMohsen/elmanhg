@@ -6,5 +6,4 @@ public sealed record GenerateOTPResult(Guid VerificationId,
                                        int VerificationAttempts, 
                                        int ReissueCount, 
                                        int MaxVerificationAttempts, 
-                                       int MaxReissueCount,
-                                       string Code); // CODE HAS TO BE DELETED
+                                       int MaxReissueCount);

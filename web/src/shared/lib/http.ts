@@ -1,8 +1,11 @@
 import { z } from 'zod';
 import { env } from '@/app/env';
 import { ApiError, networkErrorCode, unhandledErrorCode } from './apiError';
+import { getAccessToken, notifyExpired, refreshOnce } from './authToken';
 
 const errorBodySchema = z.object({ code: z.string().optional(), message: z.string().optional() });
+
+const refreshPath = '/api/auth/refresh';
 
 export function resolveApiUrl(path: string): string {
   return new URL(path, env.VITE_API_BASE_URL === '' ? window.location.origin : env.VITE_API_BASE_URL).toString();
@@ -23,24 +26,29 @@ async function toApiError(response: Response): Promise<ApiError> {
   }
 }
 
-export async function http<T>(url: string, init: RequestInit = {}): Promise<T> {
+async function send(url: string, init: RequestInit): Promise<Response> {
   const headers = new Headers(init.headers);
   headers.set('Accept', 'application/json');
   const language = document.documentElement.lang;
   if (language !== '') {
     headers.set('Accept-Language', language);
   }
+  const token = getAccessToken();
+  if (token !== null) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
 
-  let response: Response;
   try {
-    response = await fetch(resolveApiUrl(url), { ...init, headers, credentials: 'include' });
+    return await fetch(resolveApiUrl(url), { ...init, headers, credentials: 'include' });
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
       throw error;
     }
     throw new ApiError(0, [networkErrorCode], error instanceof Error ? error.message : '');
   }
+}
 
+async function parse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     throw await toApiError(response);
   }
@@ -48,4 +56,21 @@ export async function http<T>(url: string, init: RequestInit = {}): Promise<T> {
     return undefined as T;
   }
   return (await response.json()) as T;
+}
+
+export async function http<T>(url: string, init: RequestInit = {}): Promise<T> {
+  let response = await send(url, init);
+
+  if (response.status === 401 && !url.startsWith(refreshPath)) {
+    if (await refreshOnce()) {
+      response = await send(url, init);
+      if (response.status === 401) {
+        notifyExpired();
+      }
+    } else {
+      notifyExpired();
+    }
+  }
+
+  return parse<T>(response);
 }

@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { devSessions } from '@/features/session';
 import { renderApp } from '@/test/renderWithProviders';
+import { testSessions } from '@/test/sessions';
 
 describe('createAppRouter', () => {
   it('sends an anonymous visitor at / to sign in', async () => {
@@ -11,7 +11,7 @@ describe('createAppRouter', () => {
   });
 
   it('sends a signed-in admin at / to the admin home', async () => {
-    renderApp('/', { session: devSessions.admin });
+    renderApp('/', { session: testSessions.admin });
 
     expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
   });

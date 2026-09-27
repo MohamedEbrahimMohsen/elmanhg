@@ -38,6 +38,9 @@ curl http://localhost:5080/health   # → Healthy
 
 The API docs are at `http://localhost:5080/scalar/v1`. Tests run with `dotnet test api/` (Docker required).
 
+While `Sms__Provider=Fake`, sign-in OTP codes are not texted: `FakeSmsSender` writes each code to the API console in Development only.
+The admin account is seeded on start from `AdminSeed__*` in `.env` (sign in with that email and password).
+
 ## Run the frontend locally
 
 ```bash

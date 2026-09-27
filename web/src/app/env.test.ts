@@ -15,16 +15,4 @@ describe('parseEnv', () => {
   it('rejects an API base URL that is not a URL', () => {
     expect(() => parseEnv({ VITE_API_BASE_URL: 'not a url' })).toThrow();
   });
-
-  it('accepts a known dev session role', () => {
-    expect(parseEnv({ VITE_DEV_SESSION_ROLE: 'teacher' }).VITE_DEV_SESSION_ROLE).toBe('teacher');
-  });
-
-  it('treats an empty dev session role as unset', () => {
-    expect(parseEnv({ VITE_DEV_SESSION_ROLE: '' }).VITE_DEV_SESSION_ROLE).toBeUndefined();
-  });
-
-  it('rejects an unknown dev session role', () => {
-    expect(() => parseEnv({ VITE_DEV_SESSION_ROLE: 'owner' })).toThrow();
-  });
 });

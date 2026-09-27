@@ -8,7 +8,32 @@
   "errors": {
     "UNHANDLED_EXCEPTION": "Something went wrong. Please try again.",
     "NETWORK_ERROR": "Could not reach the server. Check your connection and try again.",
-    "VALIDATION_FAILED": "Some fields are not valid."
+    "VALIDATION_FAILED": "Some fields are not valid.",
+    "USER_INVALID_LOGIN": "Email or password is incorrect.",
+    "USER_LOCKED_OUT": "Too many failed attempts. Try again in a few minutes.",
+    "USER_SUSPENDED": "This account is suspended. Contact support.",
+    "USER_CREATION_FAILED": "We could not create your account. Try again.",
+    "PHONE_NUMBER_ALREADY_REGISTERED": "An account already uses this mobile number. Sign in instead.",
+    "PHONE_NUMBER_NOT_REGISTERED": "No account uses this mobile number. Create an account first.",
+    "EMAIL_ALREADY_REGISTERED": "An account already uses this email.",
+    "EMAIL_INVALID": "Enter a valid email address.",
+    "EMAIL_TOO_LONG": "Email is too long.",
+    "PASSWORD_TOO_SHORT": "Password is too short.",
+    "PASSWORD_MUST_CONTAIN_DIGIT": "Password must include a number.",
+    "DISPLAY_NAME_TOO_LONG": "Name is too long.",
+    "OTP_INVALID": "This verification request is not valid. Request a new code.",
+    "OTP_INVALID_FORMAT": "Enter the 6-digit code.",
+    "OTP_EXPIRED": "This code has expired. Request a new one.",
+    "OTP_NOT_MATCHED": "The code is incorrect.",
+    "OTP_ALREADY_USED": "This code was already used. Request a new one.",
+    "OTP_NOT_VERIFIED": "Verify the code first.",
+    "OTP_REACHED_MAX_ATTEMPTS": "Too many wrong codes. Request a new one.",
+    "OTP_REACHED_MAX_REISSUE_COUNT": "You reached the code request limit. Try again later.",
+    "OTP_REISSUE_COOLDOWN": "Please wait before requesting a new code.",
+    "TOO_MANY_REQUESTS": "Too many requests. Wait a moment and try again.",
+    "VALIDATION_PHONE_NUMBER_INVALID_CELLULAR_CODE": "Mobile number must start with 010, 011, 012 or 015.",
+    "VALIDATION_PHONE_NUMBER_MUST_BE_X_DIGITS": "Mobile number must be 11 digits.",
+    "VALIDATION_PHONE_NUMBER_MUST_BE_ONLY_DIGITS": "Mobile number must contain digits only."
   },
   "error": {
     "title": "Something went wrong"

@@ -1,6 +1,7 @@
 using Core.OTP.Entities;
 using Core.OTP.OtpHasher;
 using Core.OTP.Repositories;
+using Core.OTP.Sms;
 using Core.Utilities.Generator;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -8,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace Core.OTP.GenerateOTP;
 
-public sealed class GenerateOTPHandler(IOtpRepository otpRepository, IGenerator generator, IOtpHasher otpHasher, IOptions<OtpOptions> otpOptions) : IRequestHandler<GenerateOTPCommand, GenerateOTPResult>
+public sealed class GenerateOTPHandler(IOtpRepository otpRepository, IGenerator generator, IOtpHasher otpHasher, IOptions<OtpOptions> otpOptions, ISmsSender smsSender) : IRequestHandler<GenerateOTPCommand, GenerateOTPResult>
 {
     private readonly OtpOptions _otpOptions = otpOptions.Value;
     public async Task<GenerateOTPResult> Handle(GenerateOTPCommand request, CancellationToken cancellationToken)
@@ -34,13 +35,13 @@ public sealed class GenerateOTPHandler(IOtpRepository otpRepository, IGenerator 
         }
 
         await otpRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await smsSender.SendOtpAsync(request.PhoneNumber, code, cancellationToken).ConfigureAwait(false);
         return new GenerateOTPResult(VerificationId: otp.VerificationId, 
                                      ExpiresAt: otp.ExpiresAt, 
                                      NextAllowedReissueAt: otp.NextAllowedReissueAt, 
                                      VerificationAttempts: otp.VerificationAttempts,
                                      ReissueCount: otp.ReissueCount,
                                      MaxVerificationAttempts: otp.MaxVerificationAttempts,
-                                     MaxReissueCount: otp.MaxReissueCount,
-                                     Code: code);
+                                     MaxReissueCount: otp.MaxReissueCount);
     }
 }

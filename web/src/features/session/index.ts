@@ -5,9 +5,10 @@ export { roles, createSessionStore, type Role, type Session, type SessionStore }
 export { SessionContext } from './SessionContext';
 export { useSession, useSessionStore } from './hooks/useSession';
 export { useSignOut } from './hooks/useSignOut';
-export { devSessions } from './devSessions';
 export { roleHome, requireRole, redirectSignedIn, redirectToHome } from './guards';
 export { loginSearchSchema } from './schemas/loginSearchSchema';
-export { DevSignInPage } from './pages/DevSignInPage';
+export { restoreSession, installAuthHandlers, startSession, clearSession, toSession } from './authSession';
+export { LoginPage } from './pages/LoginPage';
+export { SignUpPage } from './pages/SignUpPage';
 
 export const sessionLocales = { ar, en };

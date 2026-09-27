@@ -62,7 +62,7 @@ public class Otp : Entity
         if (now < NextAllowedReissueAt)
         {
             var cooldown = NextAllowedReissueAt - now;
-            throw new BaseException(ErrorCodes.OTPReissueCooldown, context: new Dictionary<string, object>
+            throw new RateLimitExceededCoreException(ErrorCodes.OTPReissueCooldown, context: new Dictionary<string, object>
             {
                 ["days"] = cooldown.Days,
                 ["hours"] = cooldown.Hours,
@@ -73,7 +73,7 @@ public class Otp : Entity
 
         if (ReissueCount > MaxReissueCount)
         {
-            throw new BaseException(ErrorCodes.OTPReachedMaxReissueCount);
+            throw new RateLimitExceededCoreException(ErrorCodes.OTPReachedMaxReissueCount);
         }
 
         VerificationId = Guid.NewGuid();
@@ -120,17 +120,17 @@ public class Otp : Entity
     {
         if (!IsVerified)
         {
-            throw new BaseException(ErrorCodes.OTPNotVerified);
+            throw new BadRequestCoreException(ErrorCodes.OTPNotVerified);
         }
 
         if (IsUsed)
         {
-            throw new BaseException(ErrorCodes.OTPAlreadyUsed);
+            throw new BadRequestCoreException(ErrorCodes.OTPAlreadyUsed);
         }
 
         if (ExpiresAt <= DateTimeOffset.UtcNow)
         {
-            throw new BaseException(ErrorCodes.OTPExpired);
+            throw new BadRequestCoreException(ErrorCodes.OTPExpired);
         }
 
         IsUsed = true;

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as StudentRouteRouteImport } from './routes/student/route'
 import { Route as TeacherRouteRouteImport } from './routes/teacher/route'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
@@ -45,6 +46,11 @@ const AdminRouteRoute = AdminRouteRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StudentRouteRoute = StudentRouteRouteImport.update({
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/student': typeof StudentRouteRouteWithChildren
   '/teacher': typeof TeacherRouteRouteWithChildren
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/blueprints': typeof AdminBlueprintsRoute
   '/admin/content': typeof AdminContentRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/blueprints': typeof AdminBlueprintsRoute
   '/admin/content': typeof AdminContentRoute
@@ -195,6 +203,7 @@ export interface FileRoutesById {
   '/student': typeof StudentRouteRouteWithChildren
   '/teacher': typeof TeacherRouteRouteWithChildren
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/blueprints': typeof AdminBlueprintsRoute
   '/admin/content': typeof AdminContentRoute
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
     | '/student'
     | '/teacher'
     | '/login'
+    | '/signup'
     | '/admin/audit'
     | '/admin/blueprints'
     | '/admin/content'
@@ -242,6 +252,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/signup'
     | '/admin/audit'
     | '/admin/blueprints'
     | '/admin/content'
@@ -266,6 +277,7 @@ export interface FileRouteTypes {
     | '/student'
     | '/teacher'
     | '/login'
+    | '/signup'
     | '/admin/audit'
     | '/admin/blueprints'
     | '/admin/content'
@@ -291,6 +303,7 @@ export interface RootRouteChildren {
   StudentRouteRoute: typeof StudentRouteRouteWithChildren
   TeacherRouteRoute: typeof TeacherRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -314,6 +327,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/student': {
@@ -522,6 +542,7 @@ const rootRouteChildren: RootRouteChildren = {
   StudentRouteRoute: StudentRouteRouteWithChildren,
   TeacherRouteRoute: TeacherRouteRouteWithChildren,
   LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

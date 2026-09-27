@@ -1,11 +1,44 @@
 {
   "signIn": {
     "title": "Sign in",
-    "devNotice": "Development sign-in, to be replaced by real sign-in.",
-    "as": {
-      "student": "Sign in as student",
-      "teacher": "Sign in as teacher",
-      "admin": "Sign in as admin"
-    }
+    "methodLabel": "Sign-in method",
+    "phoneTab": "Mobile",
+    "emailTab": "Email",
+    "noAccount": "New to Elmanhg?",
+    "createAccount": "Create an account"
+  },
+  "signUp": {
+    "title": "Create account",
+    "haveAccount": "Already have an account?",
+    "signIn": "Sign in"
+  },
+  "fields": {
+    "displayName": "Your name",
+    "phoneNumber": "Mobile number",
+    "phoneHint": "11 digits, starting with 010, 011, 012 or 015",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 8 characters, including a number",
+    "code": "Verification code"
+  },
+  "actions": {
+    "sendCode": "Send code",
+    "verify": "Verify",
+    "resendCode": "Resend code",
+    "changeNumber": "Change number",
+    "signIn": "Continue",
+    "createAccount": "Create account"
+  },
+  "otp": {
+    "sentTo": "We sent a 6-digit code to {phoneNumber}.",
+    "resent": "A new code is on its way."
+  },
+  "validation": {
+    "phone": "Enter an 11-digit mobile number starting with 010, 011, 012 or 015.",
+    "email": "Enter a valid email address.",
+    "passwordLength": "Password must be at least 8 characters.",
+    "passwordDigit": "Password must include a number.",
+    "code": "Enter the 6-digit code.",
+    "displayNameLength": "Name must be 100 characters or fewer."
   }
 }

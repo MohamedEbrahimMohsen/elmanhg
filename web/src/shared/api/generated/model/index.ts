@@ -5,4 +5,13 @@
  * OpenAPI spec version: 1.0.0
  */
 
-
+export * from './authResult';
+export * from './authUserResult';
+export * from './generateOTPCommand';
+export * from './generateOTPResult';
+export * from './loginWithEmailCommand';
+export * from './loginWithPhoneCommand';
+export * from './registerWithEmailCommand';
+export * from './registerWithPhoneCommand';
+export * from './verifyOTPCommand';
+export * from './verifyOTPResult';
