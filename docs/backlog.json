@@ -1,0 +1,721 @@
+{
+  "project": "Elmanhg",
+  "source": "docs/PRD.md v1.0",
+  "labels": ["epic", "story", "task", "v1", "v2", "student", "teacher", "admin", "backend", "frontend", "ai", "payments", "infra"],
+  "epics": [
+    {
+      "key": "E1",
+      "title": "Platform foundation, auth and roles",
+      "labels": ["v1", "backend", "frontend", "infra"],
+      "description": "Solution skeleton, PostgreSQL, authentication, the three roles, teacher-subject assignment, audit logging. PRD §3, §14, §15, §16.",
+      "stories": [
+        {
+          "title": "Bootstrap backend solution (.NET 10, DDD/CQRS, PostgreSQL)",
+          "description": "As a developer I need a runnable API skeleton so that every later story has a home. PRD §18.",
+          "tasks": [
+            "Create solution from the DDD template: Api, Application, Domain, Infrastructure, Tests",
+            "Add PostgreSQL via EF Core 10 with Npgsql, JSONB support and migrations pipeline",
+            "Configure MediatR pipeline: validation, logging, unit-of-work behaviours",
+            "Add health endpoint, Swagger, structured logging, and environment config",
+            "Add CI workflow: restore, build, test, vulnerability scan"
+          ]
+        },
+        {
+          "title": "Bootstrap frontend app (React, TypeScript, Vite, RTL)",
+          "description": "As a developer I need the SPA skeleton with Arabic RTL, routing and API client so that screens can be added feature by feature.",
+          "tasks": [
+            "Scaffold Vite React TS app with Tailwind and shadcn/ui",
+            "Configure i18next with Arabic default, RTL direction and Arabic-Indic digit formatting",
+            "Set up TanStack Query and Orval codegen from the API's OpenAPI spec",
+            "Add React Hook Form and Zod base form components",
+            "Add layout shells for Student, Teacher and Admin with role-based route guards"
+          ]
+        },
+        {
+          "title": "Authentication with phone OTP and email",
+          "description": "As a student I can sign up and log in with my phone number or email so that my progress is saved. PRD §7.1.",
+          "tasks": [
+            "User aggregate: id, role, phone, email, display name, status",
+            "Register and login commands with OTP provider abstraction (SMS gateway to be chosen)",
+            "JWT issuance with refresh tokens and role claims",
+            "Rate limiting on OTP requests and login attempts",
+            "Frontend: sign up, OTP verify, login, logout screens"
+          ]
+        },
+        {
+          "title": "Role-based authorisation and teacher subject scoping",
+          "description": "As the platform I enforce the permission matrix server-side so that a teacher can only act on assigned subjects. PRD §16.",
+          "tasks": [
+            "Authorization policies per role applied to every endpoint",
+            "TeacherSubject entity and admin commands to assign/unassign subjects",
+            "Subject-scope filter behaviour that rejects any teacher request outside assigned subjects",
+            "Integration tests: physics teacher cannot read or mutate math content",
+            "Frontend: hide navigation the current role cannot use"
+          ]
+        },
+        {
+          "title": "Audit log for content and validation actions",
+          "description": "As an admin I can see who changed what and when so that content disputes can be resolved. PRD §14, §17 rule 13.",
+          "tasks": [
+            "AuditLog entity and append-only repository",
+            "Domain event handler that writes an audit row for content changes and validation decisions",
+            "Query with filters: actor, entity type, date range",
+            "Admin audit log page with pagination"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "E2",
+      "title": "Content tree management",
+      "labels": ["v1", "admin", "backend", "frontend"],
+      "description": "Subjects, units, lessons, objectives, lesson states and publishing. PRD §5.1, §5.2, §10.1.",
+      "stories": [
+        {
+          "title": "Subject and unit CRUD with ordering",
+          "description": "As an admin I can create and order subjects and units so that the curriculum tree matches the syllabus.",
+          "tasks": [
+            "Subject and Unit aggregates with order field",
+            "Create, update, reorder, delete commands with validators",
+            "List and detail queries including counts of lessons and questions",
+            "Admin UI: subject list, unit list with drag or up/down reorder"
+          ]
+        },
+        {
+          "title": "Lesson authoring with explanation, objectives and summary",
+          "description": "As an admin I can author a lesson's three content areas so that students have something to study. PRD §5.1.",
+          "tasks": [
+            "Lesson aggregate with state, explanation, summary, video URL, ordered objectives",
+            "Rich text storage format decision and sanitisation on save",
+            "Image upload endpoint to object storage with size and type limits",
+            "LaTeX rendering support in the rich text editor and viewer",
+            "Admin UI: lesson editor with objectives list editing and preview"
+          ]
+        },
+        {
+          "title": "Lesson lifecycle: draft, published, archived",
+          "description": "As an admin I can publish or archive a lesson so that only ready content is visible to students. PRD §5.2.",
+          "tasks": [
+            "Publish, unpublish and archive commands with state transition rules",
+            "Published_at tracking and domain events for downstream servable recalculation",
+            "Student queries filter to published lessons only",
+            "Admin UI: publish/archive actions with confirmation"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "E3",
+      "title": "Question bank and teacher validation workflow",
+      "labels": ["v1", "admin", "teacher", "backend", "frontend"],
+      "description": "Question authoring, versioning, validation states, teacher queue, servable rule. PRD §5.3, §5.4, §8.1, §17 rules 1 to 4.",
+      "stories": [
+        {
+          "title": "Question aggregate with typed body and grading spec",
+          "description": "As an admin I can create questions of the v1 types so that the bank can be built. PRD §5.4, §6.",
+          "tasks": [
+            "Question entity with JSONB body and grading_spec, difficulty, objective link, explanation, max score, version",
+            "Per-type body and grading_spec schemas with validation for mcq, multi, tf, fill, short",
+            "Create and update commands; content edit on approved question resets to pending and bumps version",
+            "QuestionRevision snapshot on every content edit",
+            "Unit tests for the reset-to-pending rule and version increments"
+          ]
+        },
+        {
+          "title": "Admin question editor with live preview and test grader",
+          "description": "As an admin I can author a question, preview it as a student and test-grade an answer before saving. PRD §10.1.",
+          "tasks": [
+            "Type-specific editor forms for the five v1 types",
+            "Student-view preview component reused from the quiz UI",
+            "Test-answer box that calls the real grading endpoint",
+            "Question list with status, type, version, teacher and rejection reason filters",
+            "Edit-and-resubmit flow for rejected questions"
+          ]
+        },
+        {
+          "title": "Bulk question import from spreadsheet",
+          "description": "As an admin I can import many questions at once so that reaching 100,000 is feasible. PRD §10.1.",
+          "tasks": [
+            "Spreadsheet template per v1 type with documentation",
+            "Import command: parse, validate rows, report errors per row, create as pending",
+            "Idempotency via import batch id",
+            "Admin UI: upload, dry-run report, confirm import"
+          ]
+        },
+        {
+          "title": "Servable rule",
+          "description": "As the platform I compute servable as approved and lesson published and not retired, never stored. PRD §17 rule 1.",
+          "tasks": [
+            "Servable specification in the domain layer used by every question query",
+            "Retire question command",
+            "Platform-wide servable count query, cached and invalidated on publish and validation events",
+            "Tests covering each condition of the rule"
+          ]
+        },
+        {
+          "title": "Teacher validation queue",
+          "description": "As a teacher I can approve or reject pending questions in my subjects so that only validated content is served. PRD §8.1.",
+          "tasks": [
+            "Pending questions query scoped to assigned subjects with unit, lesson, type, difficulty, age filters",
+            "Approve command, optional difficulty change, records validated_by and validated_at",
+            "Reject command requiring a reason",
+            "Guard: teachers cannot edit question content; admins cannot approve",
+            "Teacher UI: queue list, question detail with revision and rejection history, approve/reject actions",
+            "Bulk approve only for questions opened in the current session"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "E4",
+      "title": "Grading engine (v1 deterministic types)",
+      "labels": ["v1", "backend"],
+      "description": "Score every v1 answer type with Arabic normalisation and partial credit. PRD §6, §6.2.",
+      "stories": [
+        {
+          "title": "Arabic answer normalisation",
+          "description": "As the grader I normalise text so that spelling variants do not cause false negatives. PRD §6.2.",
+          "tasks": [
+            "Normaliser: strip tashkeel and tatweel, unify alef forms, taa marbuta, alef maqsura, digits, whitespace, case",
+            "Per-question toggles for each normalisation rule",
+            "Unit tests with Egyptian spelling variants"
+          ]
+        },
+        {
+          "title": "Graders for mcq, multi-select, true/false",
+          "description": "As the grader I return exact or partial scores for choice questions. PRD §6.",
+          "tasks": [
+            "Grader interface returning score, normalised score and feedback",
+            "MCQ and true/false exact match graders",
+            "Multi-select grader with optional partial credit max(0, (correct minus wrong) divided by total)",
+            "Unit tests including the partial-credit edge cases"
+          ]
+        },
+        {
+          "title": "Graders for fill-in-the-blank and short answer",
+          "description": "As the grader I score text and numeric answers with accepted lists and tolerances. PRD §6.",
+          "tasks": [
+            "Fill-in grader with per-blank accepted answers and per-blank partial credit",
+            "Short numeric grader with absolute and percentage tolerance",
+            "Short text grader with accepted list",
+            "Unit tests"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "E5",
+      "title": "Quiz engine, attempts, mastery and progress",
+      "labels": ["v1", "student", "backend", "frontend"],
+      "description": "Adaptive quiz sessions, attempt log, mastery, headline counter and progress page. PRD §7.2, §7.3, §7.6, §17 rules 5 to 7.",
+      "stories": [
+        {
+          "title": "Attempt log and session model",
+          "description": "As the platform I store every answer forever so that mastery and training data can be derived. PRD §15.",
+          "tasks": [
+            "Session and Attempt entities with kind, scope, answer JSON, score, question version, time taken",
+            "Start session, submit answer, finish session commands",
+            "Indexes for per-student per-question lookups",
+            "Auto-save semantics so a refresh resumes a session"
+          ]
+        },
+        {
+          "title": "Adaptive question selection",
+          "description": "As a student each quiz prefers unseen and previously wrong questions so that practice feels purposeful. PRD §7.2.",
+          "tasks": [
+            "Selector service implementing bucket order: unseen, last wrong, correct once, rest by least recent",
+            "Random within bucket, no repeats within a session, shorter quiz when pool is small",
+            "Query for a student's per-question attempt summary used by the selector",
+            "Unit tests for bucket ordering with seeded randomness"
+          ]
+        },
+        {
+          "title": "Quiz screen with immediate feedback",
+          "description": "As a student I answer one question at a time and see the correct answer and explanation immediately. PRD §7.2.",
+          "tasks": [
+            "Practice tab: choose 5, 10 or 20 and start",
+            "Question renderer components for the five v1 types, touch friendly",
+            "Feedback panel with correct answer, explanation and Ask the Avatar button",
+            "Prefetch next question to keep transitions under 300 ms",
+            "Quiz result screen with score, time and per-question review"
+          ]
+        },
+        {
+          "title": "Mastery calculation and headline counter",
+          "description": "As a student I see mastered questions and how many remain out of the platform total. PRD §7.3.",
+          "tasks": [
+            "QuestionMastery materialised table updated on every attempt: correct on two most recent attempts at 0.8 threshold",
+            "Lesson, unit and subject mastery percentage queries weighted by question count",
+            "Headline counter query: servable total minus mastered, plus seen count",
+            "Recalculation job when questions are retired or lessons unpublished",
+            "Home page widgets: counter, subject cards with mastery, next recommended lesson, streak"
+          ]
+        },
+        {
+          "title": "Progress page",
+          "description": "As a student I can see my mastery, exam scores, weak spots and history. PRD §7.6.",
+          "tasks": [
+            "Progress query: per subject mastery, best exam scores, streak",
+            "Weak spots query: lowest mastery lessons and objectives",
+            "Session history query with filters",
+            "Progress page UI with Train now shortcuts"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "E6",
+      "title": "Exams and blueprints",
+      "labels": ["v1", "student", "admin", "backend", "frontend"],
+      "description": "Blueprint editor, unit exams, multi-unit exams, timer, retakes and results. PRD §7.4, §7.5, §10.2, §17 rules 8 and 9.",
+      "stories": [
+        {
+          "title": "Exam blueprint authoring",
+          "description": "As an admin I define per-unit and per-subject blueprints so that exams have a fixed shape. PRD §10.2.",
+          "tasks": [
+            "ExamBlueprint entity: type counts, difficulty mix, time limit, pass mark",
+            "Save command with shortfall validation against servable questions",
+            "Admin UI: blueprint editor per unit and subject default, showing shortfall per type"
+          ]
+        },
+        {
+          "title": "Unit exam generation and sitting",
+          "description": "As a student I sit a unit exam built from its blueprint with a timer and no feedback until submission. PRD §7.4.",
+          "tasks": [
+            "Generator: pick questions matching blueprint, prefer not-yet-mastered, across all lessons in the unit",
+            "Exam session with time limit, server-side deadline enforcement and auto-submit",
+            "Auto-save each answer; resume after refresh",
+            "Submit command grades all answers and computes score, per-lesson breakdown, weakest objectives",
+            "Exam start screen showing blueprint summary; exam screen with countdown; result screen"
+          ]
+        },
+        {
+          "title": "Multi-unit exam builder",
+          "description": "As a student I choose two or more units and a size and get a merged exam. PRD §7.5.",
+          "tasks": [
+            "Blueprint merge service: proportional scaling to 20, 40 or 60 questions, fallback to subject default",
+            "Multi-unit session scope and result breakdown per unit",
+            "Builder UI: unit multi-select within a subject, size choice, start"
+          ]
+        },
+        {
+          "title": "Retakes and best score",
+          "description": "As a student I can retake exams without limit and see my best score with full history. PRD §17 rule 9.",
+          "tasks": [
+            "Best score query per unit and per multi-unit scope",
+            "Attempt history list on the result screen",
+            "Progress page integration"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "E7",
+      "title": "Student navigation and free tier gating",
+      "labels": ["v1", "student", "frontend", "backend"],
+      "description": "Landing, subject and unit browsing, lesson tabs, free tier limits. PRD §7.1, §11.1.",
+      "stories": [
+        {
+          "title": "Subject, unit and lesson browsing",
+          "description": "As a student I browse the tree with mastery indicators so that I know what to study next.",
+          "tasks": [
+            "Student tree queries returning only published lessons with per-node mastery",
+            "Subject page, unit page, lesson page with Explanation, Objectives, Summary and Practice tabs",
+            "Breadcrumbs and next-lesson navigation",
+            "Mobile layout verified at 375 px"
+          ]
+        },
+        {
+          "title": "Landing page and onboarding",
+          "description": "As a visitor I understand the 100,000 questions promise and can sign up in under three minutes. PRD §2.1.",
+          "tasks": [
+            "Landing page with live servable count",
+            "Onboarding: choose subjects of interest after sign up",
+            "Analytics events for funnel tracking"
+          ]
+        },
+        {
+          "title": "Free tier limits",
+          "description": "As a free student I can read the first lesson per unit and answer ten quiz questions per day, then see a paywall. PRD §11.1.",
+          "tasks": [
+            "Entitlement service: plan, daily quiz question quota, avatar quota, lesson access rule",
+            "Server-side enforcement on quiz start and answer submit",
+            "Frontend: locked lesson indicators, daily counter, paywall modal linking to subscription"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "E8",
+      "title": "AI Avatar",
+      "labels": ["v1", "student", "ai", "backend", "frontend"],
+      "description": "Grounded Arabic assistant with context bundles, exam refusal, rate limits and logging. PRD §9.",
+      "stories": [
+        {
+          "title": "AI service skeleton (Python FastAPI)",
+          "description": "As a developer I have a separate AI service the .NET API calls so that prompts and models iterate independently. PRD §18.",
+          "tasks": [
+            "FastAPI project with auth between services, health endpoint, structured logging",
+            "Claude API client with model and prompt version configuration",
+            "Deployment config and CI",
+            "Contract: chat endpoint accepting context bundle and message history"
+          ]
+        },
+        {
+          "title": "Lesson content retrieval",
+          "description": "As the avatar I answer from lesson content so that answers are grounded and cite the section. PRD §9.2.",
+          "tasks": [
+            "Embedding pipeline for explanation, summary, objectives and question explanations into pgvector",
+            "Re-index job on lesson publish and question approval",
+            "Retrieval endpoint returning top chunks with section references"
+          ]
+        },
+        {
+          "title": "Avatar chat with context bundles",
+          "description": "As a student I open the avatar from a lesson, a quiz question or exam review and get a short Arabic answer. PRD §9.1.",
+          "tasks": [
+            "Context bundle builder for each entry point",
+            "System prompt: Arabic, short, step based, cites section, refuses off-curriculum",
+            "Refusal rule when the student has an in-progress exam",
+            "Rate limiting per plan per day",
+            "Avatar slide-in panel UI with entry points wired"
+          ]
+        },
+        {
+          "title": "Conversation logging",
+          "description": "As the platform I store every avatar conversation with model and prompt version for evaluation and training. PRD §9.3, §13.",
+          "tasks": [
+            "AvatarConversation and AvatarMessage entities",
+            "Persist context bundle, model id and prompt version per message",
+            "Admin view of recent conversations with search"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "E9",
+      "title": "Ask a Teacher",
+      "labels": ["v1", "student", "teacher", "backend", "frontend"],
+      "description": "Paid Q&A threads with 24 hour SLA, voice replies transcribed to text, one follow-up, ratings. PRD §12, §17 rule 11.",
+      "stories": [
+        {
+          "title": "Thread creation with attached context and quota",
+          "description": "As a subscribed student I send a question with the lesson or question context attached and an optional image.",
+          "tasks": [
+            "TeacherThread and TeacherMessage entities with context JSON, status, SLA due time",
+            "Create thread command checking add-on entitlement and monthly quota",
+            "Image attachment upload",
+            "Student UI: new question form with auto-attached context, my threads list, thread view"
+          ]
+        },
+        {
+          "title": "Teacher inbox, claiming and text replies",
+          "description": "As a teacher I claim threads in my subjects and reply in text.",
+          "tasks": [
+            "Inbox query scoped to assigned subjects with SLA badges",
+            "Claim command with first-claim-wins concurrency handling",
+            "Text reply command; student notification",
+            "Teacher inbox and thread UI"
+          ]
+        },
+        {
+          "title": "Voice replies with transcription",
+          "description": "As a teacher I record a voice reply, review the transcript and send both. PRD §12.1 step 4.",
+          "tasks": [
+            "Browser audio recording component and upload to object storage",
+            "Transcription job via the AI service with Arabic model; evaluate provider on Egyptian dialect",
+            "Teacher transcript review and correction before send",
+            "Student playback UI with text alongside audio"
+          ]
+        },
+        {
+          "title": "SLA timers, reminders and follow-up rules",
+          "description": "As the platform I enforce the 24 hour SLA and the single follow-up rule.",
+          "tasks": [
+            "Background job scheduling reminders at 12 h and 20 h and an admin alert on breach",
+            "Follow-up command allowing exactly one student follow-up and one teacher reply, then closing the thread",
+            "Rating command 1 to 5 on close",
+            "Realtime push of replies to the student via SignalR"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "E10",
+      "title": "Subscriptions and Paymob payments",
+      "labels": ["v1", "payments", "backend", "frontend"],
+      "description": "Plans, Paymob checkout, webhook-driven entitlement, grace period, refunds. PRD §11.",
+      "stories": [
+        {
+          "title": "Plan catalogue and subscription state",
+          "description": "As the platform I model Free, Base and Ask a Teacher plans with lifecycle states.",
+          "tasks": [
+            "Subscription and Payment entities with states Active, PastDue, Cancelled, Expired",
+            "Plan configuration: prices, periods, quotas",
+            "Entitlement query used by the free tier and Ask a Teacher gates"
+          ]
+        },
+        {
+          "title": "Paymob checkout integration",
+          "description": "As a student I pay by card or mobile wallet through Paymob and my plan activates.",
+          "tasks": [
+            "Paymob API client: auth token, order registration, payment key, iframe or redirect URL",
+            "Checkout initiation command and frontend redirect flow",
+            "Subscription page UI with plan comparison and current status"
+          ]
+        },
+        {
+          "title": "Webhook-driven entitlement",
+          "description": "As the platform I change entitlement only on HMAC-verified Paymob webhooks. PRD §17 rule 12.",
+          "tasks": [
+            "Webhook endpoint with HMAC verification and raw payload storage",
+            "Idempotent processing keyed by Paymob transaction id",
+            "State transitions on success, failure and cancellation",
+            "Renewal handling with 3 day grace period then downgrade job",
+            "Integration tests with recorded webhook payloads"
+          ]
+        },
+        {
+          "title": "Refunds and payment log",
+          "description": "As an admin I can refund a payment and see all transactions.",
+          "tasks": [
+            "Refund command calling Paymob and recording locally",
+            "Payment log query with filters",
+            "Admin payments page"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "E11",
+      "title": "Admin dashboards and user management",
+      "labels": ["v1", "admin", "backend", "frontend"],
+      "description": "Basic dashboard set and user administration. PRD §10.3, §10.4.",
+      "stories": [
+        {
+          "title": "Dashboard metrics queries",
+          "description": "As an admin I see live counts for students, subscribers, content, solve rate, success rate, validation, Ask a Teacher and payments.",
+          "tasks": [
+            "Read-model or SQL views for each card in PRD §10.3",
+            "Date range and subject filters",
+            "Caching with short TTL",
+            "DAU and MAU tracking from login and activity events"
+          ]
+        },
+        {
+          "title": "Dashboard UI",
+          "description": "As an admin I view cards and charts on one page.",
+          "tasks": [
+            "KPI card components",
+            "Time series charts for attempts, revenue and validation throughput",
+            "Filters bar with date range and subject"
+          ]
+        },
+        {
+          "title": "Student and teacher administration",
+          "description": "As an admin I manage students, teachers and admins. PRD §10.4.",
+          "tasks": [
+            "Student search, profile, progress view, suspend, grant complimentary plan",
+            "Teacher invite, subject assignment, deactivate",
+            "Admin invite and deactivate with last-admin protection",
+            "Admin users pages"
+          ]
+        },
+        {
+          "title": "Teacher personal stats card",
+          "description": "As a teacher I see my approvals, rejections, decision time and SLA compliance. PRD §8.4.",
+          "tasks": [
+            "Per-teacher stats query",
+            "Stats card UI on the teacher home"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "E12",
+      "title": "Training-data capture and export",
+      "labels": ["v1", "admin", "backend", "ai"],
+      "description": "Append-only records for Ask a Teacher, avatar, attempts, and PII-stripped JSONL exports. PRD §13.",
+      "stories": [
+        {
+          "title": "Append-only training records",
+          "description": "As the platform I write text-only training records keyed by anonymised student id.",
+          "tasks": [
+            "Training record tables per source with hashed student id",
+            "Event handlers writing records on thread close, avatar message and attempt",
+            "Retention and privacy review checklist"
+          ]
+        },
+        {
+          "title": "JSONL export",
+          "description": "As an admin I download date-ranged JSONL per source with PII stripped.",
+          "tasks": [
+            "Export job producing files to object storage with signed download links",
+            "Admin export page with source and date range selection",
+            "Export audit entry"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "E13",
+      "title": "Non-functional: performance, security, infrastructure",
+      "labels": ["v1", "infra", "backend", "frontend"],
+      "description": "Hosting, observability, performance targets, security hardening. PRD §14.",
+      "stories": [
+        {
+          "title": "Hosting and environments",
+          "description": "As a team we have dev, staging and production with automated deploys.",
+          "tasks": [
+            "Choose hosting for API, AI service, PostgreSQL, object storage",
+            "Infrastructure as code and secrets management",
+            "Deploy pipelines for API, AI service and frontend",
+            "Backups and restore drill for PostgreSQL"
+          ]
+        },
+        {
+          "title": "Observability",
+          "description": "As a team we can see errors, latency and job health.",
+          "tasks": [
+            "Centralised logs and traces",
+            "Error alerting and uptime checks against the 99.5 percent target",
+            "Background job dashboard"
+          ]
+        },
+        {
+          "title": "Performance targets",
+          "description": "As a student pages load fast on 3G-class connections. PRD §14.",
+          "tasks": [
+            "Lesson page budget under 2 s on throttled network; code splitting and image optimisation",
+            "Quiz transition under 300 ms with prefetching",
+            "Load test quiz submit and exam submit endpoints"
+          ]
+        },
+        {
+          "title": "Security hardening",
+          "description": "As the platform we protect student data and payments.",
+          "tasks": [
+            "Security review of authorisation on every endpoint",
+            "Rate limits on auth, avatar and Ask a Teacher",
+            "Input sanitisation for rich text and uploads",
+            "Dependency vulnerability scanning in CI"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "E14",
+      "title": "v2: Essay questions with AI grading",
+      "labels": ["v2", "ai", "backend", "frontend", "admin", "teacher"],
+      "description": "Rubric authoring, LLM grading with justification, confidence threshold, teacher override. PRD §6, §6.1.",
+      "stories": [
+        {
+          "title": "Essay question authoring with rubric",
+          "description": "As an admin I write an essay question with criteria, weights and a model answer.",
+          "tasks": [
+            "Essay body and grading spec schema: criteria, weights, model answer",
+            "Editor UI for rubric",
+            "Validation queue support for essay review"
+          ]
+        },
+        {
+          "title": "LLM essay grader",
+          "description": "As the grader I return per-criterion scores, an Arabic justification and a confidence value.",
+          "tasks": [
+            "Grading prompt and structured JSON output in the AI service",
+            "Grading job in .NET calling the AI service asynchronously with retry",
+            "Pending state shown to the student until the grade is final",
+            "Evaluation set of teacher-graded essays to measure agreement"
+          ]
+        },
+        {
+          "title": "Student essay input",
+          "description": "As a student I write an essay answer in a rich Arabic editor on my phone.",
+          "tasks": [
+            "Rich Arabic editor component with autosave",
+            "Result view showing per-criterion feedback"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "E15",
+      "title": "v2: Math with steps",
+      "labels": ["v2", "ai", "backend", "frontend"],
+      "description": "Step-by-step input, CAS final answer check, LLM step grading. PRD §6.",
+      "stories": [
+        {
+          "title": "Math step input component",
+          "description": "As a student I enter steps and a final answer with LaTeX preview on my phone.",
+          "tasks": [
+            "Math input with LaTeX preview and a touch keypad",
+            "Ordered steps list with add, remove and reorder",
+            "Autosave"
+          ]
+        },
+        {
+          "title": "CAS final answer check",
+          "description": "As the grader I check the final answer for mathematical equivalence.",
+          "tasks": [
+            "SymPy equivalence endpoint in the AI service with parsing of common notations",
+            "Tolerance and form rules per question",
+            "Unit tests with equivalent forms"
+          ]
+        },
+        {
+          "title": "LLM step grading",
+          "description": "As the grader I award per-step credit against the model solution.",
+          "tasks": [
+            "Step grading prompt with structured output",
+            "Combine step and final scores per question spec",
+            "Low confidence routing to teacher review"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "E16",
+      "title": "v2: Science drag-and-drop",
+      "labels": ["v2", "frontend", "backend", "admin"],
+      "description": "Diagram authoring, student canvas, deterministic grading. PRD §6.",
+      "stories": [
+        {
+          "title": "Admin diagram authoring tool",
+          "description": "As an admin I upload a diagram, define drop zones and draggable items with correct placements.",
+          "tasks": [
+            "Drag-and-drop body schema: image, zones, items, correct map, order constraints",
+            "Canvas authoring UI with zone drawing and item placement",
+            "Preview as student"
+          ]
+        },
+        {
+          "title": "Student canvas and grading",
+          "description": "As a student I drag items to zones on my phone and get per-item credit.",
+          "tasks": [
+            "Touch-first canvas component",
+            "Deterministic grader with per-item partial credit",
+            "Feedback overlay showing correct placements"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "E17",
+      "title": "v2: Teacher AI grade review queue",
+      "labels": ["v2", "teacher", "backend", "frontend"],
+      "description": "Low-confidence AI grades reviewed and overridable by teachers; overrides captured as training data. PRD §8.3.",
+      "stories": [
+        {
+          "title": "Review queue and override",
+          "description": "As a teacher I see low-confidence AI grades in my subjects and can accept or override them.",
+          "tasks": [
+            "Queue query scoped to assigned subjects with confidence threshold configuration",
+            "Accept and override commands updating the attempt score and notifying the student",
+            "Training record for every override",
+            "Teacher review queue UI"
+          ]
+        }
+      ]
+    }
+  ]
+}
