@@ -20,7 +20,7 @@ public sealed class AppDbContextTests(ApiFactory factory)
         var applied = await context.Database.GetAppliedMigrationsAsync(TestContext.Current.CancellationToken);
 
         pending.Should().BeEmpty();
-        applied.Should().ContainSingle().Which.Should().EndWith("_InitialCreate");
+        applied.Should().SatisfyRespectively(first => first.Should().EndWith("_InitialCreate"), second => second.Should().EndWith("_AddUserProfileFields"));
     }
 
     [Fact]

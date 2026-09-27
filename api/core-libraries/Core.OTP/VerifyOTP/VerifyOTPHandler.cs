@@ -15,15 +15,20 @@ public sealed class VerifyOTPHandler(IOtpRepository otpRepository, IOtpHasher ot
         
         if (otp == null)
         {
-            throw new BaseException(ErrorCodes.OtpInvalid);
+            throw new BadRequestCoreException(ErrorCodes.OtpInvalid);
         }
 
         var errorCode = otp.Verify(codeHash);
         await otpRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
-        if(!string.IsNullOrEmpty(errorCode))
+        if (errorCode == ErrorCodes.OTPReachedMaxAttempts)
         {
-            throw new BaseException(errorCode);
+            throw new RateLimitExceededCoreException(errorCode);
+        }
+
+        if (!string.IsNullOrEmpty(errorCode))
+        {
+            throw new BadRequestCoreException(errorCode);
         }
 
         return new VerifyOTPResult();

@@ -8,7 +8,32 @@
   "errors": {
     "UNHANDLED_EXCEPTION": "حدث خطأ غير متوقع. حاول مرة أخرى.",
     "NETWORK_ERROR": "تعذّر الاتصال بالخادم. تحقّق من اتصالك وحاول مرة أخرى.",
-    "VALIDATION_FAILED": "بعض البيانات غير صحيحة."
+    "VALIDATION_FAILED": "بعض البيانات غير صحيحة.",
+    "USER_INVALID_LOGIN": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+    "USER_LOCKED_OUT": "محاولات فاشلة كثيرة. حاول مرة أخرى بعد دقائق.",
+    "USER_SUSPENDED": "هذا الحساب موقوف. تواصل مع الدعم.",
+    "USER_CREATION_FAILED": "تعذّر إنشاء حسابك. حاول مرة أخرى.",
+    "PHONE_NUMBER_ALREADY_REGISTERED": "يوجد حساب مسجل بهذا الرقم. سجّل الدخول بدلًا من ذلك.",
+    "PHONE_NUMBER_NOT_REGISTERED": "لا يوجد حساب بهذا الرقم. أنشئ حسابًا أولًا.",
+    "EMAIL_ALREADY_REGISTERED": "يوجد حساب مسجل بهذا البريد الإلكتروني.",
+    "EMAIL_INVALID": "أدخل بريدًا إلكترونيًا صحيحًا.",
+    "EMAIL_TOO_LONG": "البريد الإلكتروني طويل جدًا.",
+    "PASSWORD_TOO_SHORT": "كلمة المرور قصيرة جدًا.",
+    "PASSWORD_MUST_CONTAIN_DIGIT": "يجب أن تحتوي كلمة المرور على رقم.",
+    "DISPLAY_NAME_TOO_LONG": "الاسم طويل جدًا.",
+    "OTP_INVALID": "طلب التحقق غير صالح. اطلب رمزًا جديدًا.",
+    "OTP_INVALID_FORMAT": "أدخل الرمز المكوّن من 6 أرقام.",
+    "OTP_EXPIRED": "انتهت صلاحية الرمز. اطلب رمزًا جديدًا.",
+    "OTP_NOT_MATCHED": "الرمز غير صحيح.",
+    "OTP_ALREADY_USED": "تم استخدام هذا الرمز. اطلب رمزًا جديدًا.",
+    "OTP_NOT_VERIFIED": "تحقق من الرمز أولًا.",
+    "OTP_REACHED_MAX_ATTEMPTS": "محاولات خاطئة كثيرة. اطلب رمزًا جديدًا.",
+    "OTP_REACHED_MAX_REISSUE_COUNT": "وصلت للحد الأقصى لطلب الرموز. حاول لاحقًا.",
+    "OTP_REISSUE_COOLDOWN": "انتظر قليلًا قبل طلب رمز جديد.",
+    "TOO_MANY_REQUESTS": "طلبات كثيرة. انتظر قليلًا وحاول مرة أخرى.",
+    "VALIDATION_PHONE_NUMBER_INVALID_CELLULAR_CODE": "رقم الموبايل يجب أن يبدأ بـ 010 أو 011 أو 012 أو 015.",
+    "VALIDATION_PHONE_NUMBER_MUST_BE_X_DIGITS": "رقم الموبايل يجب أن يكون 11 رقمًا.",
+    "VALIDATION_PHONE_NUMBER_MUST_BE_ONLY_DIGITS": "رقم الموبايل يجب أن يحتوي على أرقام فقط."
   },
   "error": {
     "title": "حدث خطأ"

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using Core.Errors;
+using Core.Identity.Exceptions;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -22,5 +24,29 @@ public class RefreshTokenService<TUser, TKey>(SignInManager<TUser> signInManager
                                         .Protect(new AuthenticationTicket(principal, authProperties, IdentityConstants.BearerScheme));
 
         return refreshToken;
+    }
+
+    public async Task<TUser> ValidateTokenAsync(string refreshToken, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(refreshToken))
+        {
+            throw new UnauthorizedCoreException(ErrorCodes.RefreshTokenIsRequired);
+        }
+
+        var ticket = bearerOptions.Get(IdentityConstants.BearerScheme).RefreshTokenProtector.Unprotect(refreshToken);
+
+        if (ticket?.Properties?.ExpiresUtc is null || ticket.Properties.ExpiresUtc < DateTimeOffset.UtcNow)
+        {
+            throw new UnauthorizedCoreException(ErrorCodes.RefreshTokenIsExpired);
+        }
+
+        var user = await signInManager.ValidateSecurityStampAsync(ticket.Principal).ConfigureAwait(false);
+
+        if (user is null)
+        {
+            throw new UnauthorizedCoreException(ErrorCodes.RefreshTokenUserNotFound);
+        }
+
+        return user;
     }
 }

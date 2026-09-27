@@ -13,7 +13,7 @@ export default defineConfig({
       override: {
         mutator: { path: 'src/shared/lib/http.ts', name: 'http' },
         fetch: { includeHttpResponseReturnType: false },
-        query: { useQuery: true, useSuspenseQuery: true, signal: true },
+        query: { useSuspenseQuery: true, signal: true },
       },
       mock: { generators: [{ type: 'msw' }] },
     },

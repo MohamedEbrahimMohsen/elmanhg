@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { devSessions } from './devSessions';
+import { testSessions } from '@/test/sessions';
 import { createSessionStore, type Session } from './sessionStore';
 
 describe('createSessionStore', () => {
   it('returns the initial session', () => {
-    expect(createSessionStore(devSessions.admin).get()).toEqual(devSessions.admin);
+    expect(createSessionStore(testSessions.admin).get()).toEqual(testSessions.admin);
   });
 
   it('notifies subscribers on set and stops after unsubscribe', () => {
@@ -14,10 +14,10 @@ describe('createSessionStore', () => {
       seen.push(store.get());
     });
 
-    store.set(devSessions.student);
+    store.set(testSessions.student);
     unsubscribe();
-    store.set(devSessions.teacher);
+    store.set(testSessions.teacher);
 
-    expect(seen).toEqual([devSessions.student]);
+    expect(seen).toEqual([testSessions.student]);
   });
 });

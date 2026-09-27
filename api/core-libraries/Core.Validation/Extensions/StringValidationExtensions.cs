@@ -52,7 +52,7 @@ public static class StringValidationExtensions
         return ruleBuilder
             .ValidateRequired(ValidationErrors.ValidationPhoneNumberIsRequired)
             .ValidateOnlyDigits(ValidationErrors.ValidationPhoneNumberMustBeOnlyDigits)
-            .Length(phoneLength).WithMessage(ValidationErrors.ValidationPhoneNumberMustBeXDigits)
+            .Length(phoneLength).WithErrorCode(ValidationErrors.ValidationPhoneNumberMustBeXDigits)
             .Must(phone => !string.IsNullOrEmpty(phone) && codes.Any(code => phone.StartsWith(code)))
                 .WithErrorCode(errorCode ?? ValidationErrors.ValidationPhoneNumberInvalidCellulerCode);
     }

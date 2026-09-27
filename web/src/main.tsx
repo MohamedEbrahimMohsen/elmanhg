@@ -8,17 +8,17 @@ import './styles/app.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from '@tanstack/react-router';
-import { env } from '@/app/env';
 import { initI18n } from '@/app/i18n';
 import { AppProviders } from '@/app/providers';
 import { createQueryClient } from '@/app/queryClient';
 import { createAppRouter } from '@/app/router';
-import { createSessionStore, devSessions } from '@/features/session';
+import { createSessionStore, installAuthHandlers, restoreSession } from '@/features/session';
 
 initI18n();
 
 const queryClient = createQueryClient();
-const sessionStore = createSessionStore(env.VITE_DEV_SESSION_ROLE ? devSessions[env.VITE_DEV_SESSION_ROLE] : null);
+const sessionStore = createSessionStore(null);
+installAuthHandlers({ sessionStore, queryClient });
 const router = createAppRouter({ queryClient, sessionStore });
 
 const rootElement = document.getElementById('root');
@@ -26,10 +26,12 @@ if (rootElement === null) {
   throw new Error('Root element #root not found');
 }
 
-createRoot(rootElement).render(
-  <StrictMode>
-    <AppProviders queryClient={queryClient} sessionStore={sessionStore}>
-      <RouterProvider router={router} />
-    </AppProviders>
-  </StrictMode>,
-);
+void restoreSession(sessionStore).then(() => {
+  createRoot(rootElement).render(
+    <StrictMode>
+      <AppProviders queryClient={queryClient} sessionStore={sessionStore}>
+        <RouterProvider router={router} />
+      </AppProviders>
+    </StrictMode>,
+  );
+});

@@ -1,8 +1,9 @@
 import { http as mswHttp, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { i18n } from '@/app/i18n';
 import { server } from '@/test/msw/server';
 import { ApiError } from './apiError';
+import { registerAuthHandlers, setAccessToken } from './authToken';
 import { http } from './http';
 
 describe('http', () => {
@@ -64,5 +65,55 @@ describe('http', () => {
 
     expect(error).not.toBeInstanceOf(ApiError);
     expect(error).toMatchObject({ name: 'AbortError' });
+  });
+
+  it('sends the access token as a bearer header', async () => {
+    setAccessToken('t1');
+    server.use(mswHttp.get('*/api/probe', ({ request }) => HttpResponse.json(request.headers.get('authorization'))));
+
+    await expect(http('/api/probe')).resolves.toBe('Bearer t1');
+  });
+
+  it('refreshes once and retries a request that returned 401', async () => {
+    setAccessToken('expired');
+    server.use(
+      mswHttp.get('*/api/probe', ({ request }) =>
+        request.headers.get('authorization') === 'Bearer fresh'
+          ? HttpResponse.json({ value: 2 })
+          : new HttpResponse(null, { status: 401 }),
+      ),
+    );
+    registerAuthHandlers({
+      refresh: () => {
+        setAccessToken('fresh');
+        return Promise.resolve(true);
+      },
+      onExpired: vi.fn(),
+    });
+
+    await expect(http('/api/probe')).resolves.toEqual({ value: 2 });
+  });
+
+  it('calls onExpired and throws when refresh fails', async () => {
+    const onExpired = vi.fn();
+    server.use(mswHttp.get('*/api/probe', () => new HttpResponse(null, { status: 401 })));
+    registerAuthHandlers({ refresh: () => Promise.resolve(false), onExpired });
+
+    const error: unknown = await http('/api/probe').catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toMatchObject({ status: 401 });
+    expect(onExpired).toHaveBeenCalledOnce();
+  });
+
+  it('does not refresh when the refresh endpoint itself returns 401', async () => {
+    const refresh = vi.fn(() => Promise.resolve(true));
+    server.use(mswHttp.post('*/api/auth/refresh', () => new HttpResponse(null, { status: 401 })));
+    registerAuthHandlers({ refresh, onExpired: vi.fn() });
+
+    const error: unknown = await http('/api/auth/refresh', { method: 'POST' }).catch((caught: unknown) => caught);
+
+    expect(error).toMatchObject({ status: 401 });
+    expect(refresh).not.toHaveBeenCalled();
   });
 });

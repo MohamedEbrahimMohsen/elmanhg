@@ -1,9 +1,12 @@
+using Core.OTP.Sms;
 using Elmanhg.Infrastructure.Data.Context;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Testcontainers.PostgreSql;
 
 [assembly: AssemblyFixture(typeof(Elmanhg.Tests.Integration.Infrastructure.ApiFactory))]
@@ -16,8 +19,12 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     private const string TestingEnvironment = "Testing";
     // Signs nothing outside this in-memory host; the JwtBearer options delegate only requires it to be non-empty.
     private const string TestJwtKey = "elmanhg-tests-signing-key-not-a-secret-0123456789";
+    // Keys only the HMAC of OTP codes inside this in-memory host; codes are read back from RecordingSmsSender.
+    private const string TestOtpSecret = "elmanhg-tests-otp-secret";
 
     private readonly PostgreSqlContainer _database = new PostgreSqlBuilder(PostgresImage).Build();
+
+    public RecordingSmsSender Sms { get; } = new();
 
     public async ValueTask InitializeAsync()
     {
@@ -36,7 +43,33 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["CoreJwt:Audience"] = "Elmanhg.Tests",
             ["CoreJwt:Key"] = TestJwtKey,
             ["CoreAuditing:Enabled"] = "false",
+            ["CoreOtp:Secret"] = TestOtpSecret,
+            ["Sms:Provider"] = "Fake",
+            ["Auth:DisplayNameMaxLength"] = "100",
+            ["Auth:EmailMaxLength"] = "256",
+            ["Auth:RefreshTokenCookieName"] = "elmanhg_refresh",
+            ["Auth:RefreshTokenCookiePath"] = "/api/auth",
+            ["Auth:RefreshTokenCookieSecure"] = "true",
+            ["Auth:OtpRequestPermitLimit"] = "1000",
+            ["Auth:OtpRequestWindowSeconds"] = "600",
+            ["Auth:CredentialPermitLimit"] = "1000",
+            ["Auth:CredentialWindowSeconds"] = "60",
+            ["IdentityOptions:User:RequireUniqueEmail"] = "false",
+            ["IdentityOptions:Password:RequiredLength"] = "8",
+            ["IdentityOptions:Password:RequireDigit"] = "true",
+            ["IdentityOptions:Password:RequireLowercase"] = "false",
+            ["IdentityOptions:Password:RequireUppercase"] = "false",
+            ["IdentityOptions:Password:RequireNonAlphanumeric"] = "false",
+            ["IdentityOptions:Password:RequiredUniqueChars"] = "1",
+            ["IdentityOptions:Lockout:AllowedForNewUsers"] = "true",
+            ["IdentityOptions:Lockout:MaxFailedAccessAttempts"] = "5",
+            ["IdentityOptions:Lockout:DefaultLockoutTimeSpan"] = "00:15:00",
         }));
+        builder.ConfigureTestServices(services =>
+        {
+            services.RemoveAll<ISmsSender>();
+            services.AddSingleton<ISmsSender>(Sms);
+        });
     }
 
     public new async ValueTask DisposeAsync()
