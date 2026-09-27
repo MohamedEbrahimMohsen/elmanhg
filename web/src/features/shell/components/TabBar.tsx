@@ -11,8 +11,8 @@ export interface TabBarProps {
 export function TabBar({ role }: TabBarProps) {
   const { t } = useTranslation('shell');
   const nav = navByRole[role];
-  const items: readonly NavItem[] = [
-    ...tabBarItems(nav),
+  const items: readonly Omit<NavItem, 'capability'>[] = [
+    ...tabBarItems(role, nav),
     ...(nav.morePath ? [{ key: 'more', to: nav.morePath, labelKey: 'nav.more', icon: Ellipsis }] : []),
   ];
 

@@ -26,6 +26,14 @@ public static class ErrorCodes
     public const string PasswordTooShort = "PASSWORD_TOO_SHORT";
     public const string PasswordMustContainDigit = "PASSWORD_MUST_CONTAIN_DIGIT";
 
+    // SUBJECTS & TEACHERS
+    public const string SubjectOutOfScope = "SUBJECT_OUT_OF_SCOPE";
+    public const string SubjectNotFound = "SUBJECT_NOT_FOUND";
+    public const string TeacherSubjectAlreadyAssigned = "TEACHER_SUBJECT_ALREADY_ASSIGNED";
+    public const string TeacherSubjectNotAssigned = "TEACHER_SUBJECT_NOT_ASSIGNED";
+    public const string TeacherIdRequired = "TEACHER_ID_REQUIRED";
+    public const string SubjectIdRequired = "SUBJECT_ID_REQUIRED";
+
     // PLATFORM
     public const string TooManyRequests = "TOO_MANY_REQUESTS";
     public const string AdminSeedFailed = "ADMIN_SEED_FAILED";

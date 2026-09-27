@@ -98,4 +98,11 @@
   <data name="VALIDATION_PHONE_NUMBER_MUST_BE_ONLY_DIGITS" xml:space="preserve"><value>رقم الموبايل يجب ان يحتوي على ارقام فقط.</value></data>
   <data name="VALIDATION_PHONE_NUMBER_MUST_BE_X_DIGITS" xml:space="preserve"><value>رقم الموبايل يجب ان يكون 11 رقما.</value></data>
   <data name="VALIDATION_PHONE_NUMBER_INVALID_CELLULAR_CODE" xml:space="preserve"><value>رقم الموبايل يجب ان يبدأ بـ 010 او 011 او 012 او 015.</value></data>
+  <data name="SUBJECT_OUT_OF_SCOPE" xml:space="preserve"><value>هذه المادة غير مسندة اليك.</value></data>
+  <data name="SUBJECT_NOT_FOUND" xml:space="preserve"><value>المادة غير موجودة.</value></data>
+  <data name="TEACHER_SUBJECT_ALREADY_ASSIGNED" xml:space="preserve"><value>هذه المادة مسندة بالفعل الى المعلم.</value></data>
+  <data name="TEACHER_SUBJECT_NOT_ASSIGNED" xml:space="preserve"><value>هذه المادة غير مسندة الى المعلم.</value></data>
+  <data name="TEACHER_ID_REQUIRED" xml:space="preserve"><value>اختر المعلم.</value></data>
+  <data name="SUBJECT_ID_REQUIRED" xml:space="preserve"><value>اختر المادة.</value></data>
+  <data name="USER_NOT_TEACHER" xml:space="preserve"><value>يمكن اسناد المواد الى المعلمين فقط.</value></data>
 </root>

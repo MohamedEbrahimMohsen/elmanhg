@@ -6,6 +6,7 @@ export { SessionContext } from './SessionContext';
 export { useSession, useSessionStore } from './hooks/useSession';
 export { useSignOut } from './hooks/useSignOut';
 export { roleHome, requireRole, redirectSignedIn, redirectToHome } from './guards';
+export { can, roleCapabilities, type Capability } from './permissions';
 export { loginSearchSchema } from './schemas/loginSearchSchema';
 export { restoreSession, installAuthHandlers, startSession, clearSession, toSession } from './authSession';
 export { LoginPage } from './pages/LoginPage';

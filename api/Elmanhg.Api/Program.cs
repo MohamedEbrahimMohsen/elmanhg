@@ -8,6 +8,7 @@ using Core.Logging;
 using Core.OTP;
 using Core.Utilities;
 using DotNetEnv;
+using Elmanhg.Api.Authorization;
 using Elmanhg.Api.RateLimiting;
 using Elmanhg.Application;
 using Elmanhg.Application.Auth.SeedAdmin;
@@ -47,7 +48,7 @@ builder.Services.AddOpenApi();
 
 #region IDENTITY
 builder.Services.AddCoreIdentity<User, Guid, Role, AppDbContext>(configuration: builder.Configuration, dbContextOptions: options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnectionString"), npgsql => npgsql.EnableRetryOnFailure()), identityOptions: options => builder.Configuration.GetSection(nameof(IdentityOptions)).Bind(options));
-builder.Services.AddAuthorizationBuilder().AddPolicy(DefaultCodes.AuthenticatedUser, policy => policy.RequireAuthenticatedUser());
+builder.Services.AddAuthorizationBuilder().AddPolicy(DefaultCodes.AuthenticatedUser, policy => policy.RequireAuthenticatedUser()).AddPermissionMatrixPolicies();
 #endregion
 
 #region CORE SERVICES

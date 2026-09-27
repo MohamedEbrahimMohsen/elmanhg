@@ -15,7 +15,7 @@ export function MorePage({ role }: MorePageProps) {
     <section className="flex flex-col gap-3">
       <h1 className="font-display text-h1 font-bold lg:text-h1-desktop">{t('more.title')}</h1>
       <ul className="flex flex-col gap-2">
-        {overflowItems(navByRole[role]).map(({ key, to, labelKey, icon: Icon }) => (
+        {overflowItems(role, navByRole[role]).map(({ key, to, labelKey, icon: Icon }) => (
           <li key={key}>
             <Link
               to={to}

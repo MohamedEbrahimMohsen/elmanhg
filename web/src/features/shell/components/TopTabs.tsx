@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { roleHome, type Role } from '@/features/session';
-import { navByRole } from '../navConfig';
+import { navByRole, visibleNavItems } from '../navConfig';
 
 export interface TopTabsProps {
   role: Role;
@@ -13,7 +13,7 @@ export function TopTabs({ role }: TopTabsProps) {
   return (
     <nav aria-label={t('nav.main')} className="hidden lg:block">
       <ul className="mx-auto flex max-w-layout gap-1 overflow-x-auto px-4 lg:px-6">
-        {navByRole[role].items.map((item) => (
+        {visibleNavItems(role, navByRole[role]).map((item) => (
           <li key={item.key}>
             <Link
               to={item.to}

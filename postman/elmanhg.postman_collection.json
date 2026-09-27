@@ -9,7 +9,9 @@
     { "key": "accessToken", "value": "" },
     { "key": "phoneNumber", "value": "01012345678" },
     { "key": "verificationId", "value": "" },
-    { "key": "otpCode", "value": "" }
+    { "key": "otpCode", "value": "" },
+    { "key": "teacherId", "value": "" },
+    { "key": "subjectId", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -273,6 +275,61 @@
               "raw": "{{baseUrl}}/api/auth/logout",
               "host": ["{{baseUrl}}"],
               "path": ["api", "auth", "logout"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Teachers",
+      "description": "Admin only (Users.Manage). Set teacherId and subjectId, and sign in as an admin first so accessToken is set.",
+      "item": [
+        {
+          "name": "Assign subject",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns the assignment\", function () { pm.expect(pm.response.json().subjectId).to.eql(pm.collectionVariables.get(\"subjectId\")); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teachers/{{teacherId}}/subjects/{{subjectId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "teachers", "{{teacherId}}", "subjects", "{{subjectId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unassign subject",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teachers/{{teacherId}}/subjects/{{subjectId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "teachers", "{{teacherId}}", "subjects", "{{subjectId}}"]
             }
           },
           "response": []

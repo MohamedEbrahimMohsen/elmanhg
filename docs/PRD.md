@@ -466,11 +466,14 @@ AuditLog(id, actor_id, action, entity, entity_id, diff_json, created_at)
 | Change question difficulty | – | ✓ at validation | ✓ |
 | Manage blueprints | – | – | ✓ |
 | Reply to Ask a Teacher | – | ✓ (assigned subjects) | ✓ |
+| Ask a Teacher (submit) | ✓ | – | – |
 | Override AI grade (v2) | – | ✓ (assigned subjects) | ✓ |
 | View own progress | ✓ | – | – |
 | View any student's progress | – | – | ✓ |
+| Manage own subscription | ✓ | – | – |
 | Dashboards / finance | – | own stats only | ✓ |
 | Manage users / teachers | – | – | ✓ |
+| View audit log | – | – | ✓ |
 | Export training data | – | – | ✓ |
 
 Admins deliberately cannot approve questions. This keeps the "validated by a real teacher" claim true.
