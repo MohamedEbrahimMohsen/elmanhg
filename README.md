@@ -7,6 +7,7 @@ Arabic-first exam-prep platform for Egyptian Thanaweya Amma students. Students d
 | File | What it is |
 |---|---|
 | [docs/PRD.md](docs/PRD.md) | Product requirements, v1 and v2 scope, business rules |
+| [docs/constitution.md](docs/constitution.md) | Engineering rules for every change (wins on conflict) |
 | [docs/design-system.md](docs/design-system.md) | "Glass" design system: colours, type, spacing, components. Light only. |
 | [docs/prototype.md](docs/prototype.md) | How to run and click through the wireframe prototype |
 | [docs/claude-design-prompt.md](docs/claude-design-prompt.md) | Brief for Claude Design to build the high-fidelity front end |
@@ -18,6 +19,10 @@ Arabic-first exam-prep platform for Egyptian Thanaweya Amma students. Students d
 |---|---|
 | `prototype/` | Working wireframe. Vanilla JS, no build step. Open `prototype/index.html`. |
 | `scripts/` | `import_backlog.py` pushes the backlog to GitHub issues and the project. `build_design_handoff.py` builds the Claude Design upload zip. |
+
+## How features are built
+
+The local `/feature` command in `.claude/commands/feature.md` runs each story through plan, implement, review, PR, CodeRabbit triage and merge. Run artifacts live in `.process/<story>-<slug>/`.
 
 ## Project board
 

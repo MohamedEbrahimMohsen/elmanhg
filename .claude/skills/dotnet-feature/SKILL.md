@@ -1,13 +1,26 @@
 ---
 name: dotnet-feature
-description: "The engineering handbook for implementing ANY backend work in the E3A solution (.NET 10 · ASP.NET Core API · MediatR 14 · FluentValidation 12 · EF Core 10 · vendored core-libraries Core.*) in Mohamed's DDD/CQRS style. Use whenever the user asks to implement, add, create, or scaffold anything in the E3A API: a feature, command, query, handler, validator, entity, repository, controller, endpoint, migration, or error code. Trigger on: new command, new query, add handler, add entity, wire endpoint, add error code. The feature pipeline agents (feature-planner/implementer/reviewer) follow this skill. All cross-cutting types come from the vendored api/core-libraries (Core.DDD, Core.CQRS, Core.EntityFrameworkCore, Core.Errors, Core.Validation, etc.) — no external extensions packages."
+description: "The engineering handbook for implementing ANY backend work in the Elmanhg solution (.NET 10 · ASP.NET Core API · MediatR 14 · FluentValidation 12 · EF Core 10 · vendored core-libraries Core.*) in Mohamed's DDD/CQRS style. Use whenever the user asks to implement, add, create, or scaffold anything in the Elmanhg API: a feature, command, query, handler, validator, entity, repository, controller, endpoint, migration, or error code. Trigger on: new command, new query, add handler, add entity, wire endpoint, add error code. The feature pipeline agents (feature-planner/implementer/reviewer) follow this skill. All cross-cutting types come from the vendored api/core-libraries (Core.DDD, Core.CQRS, Core.EntityFrameworkCore, Core.Errors, Core.Validation, etc.) — no external extensions packages."
 ---
 
-# E3A Feature Implementation Handbook
+# Elmanhg Feature Implementation Handbook
 
-Target stack: **.NET 10 · EF Core 10 (Azure SQL) · MediatR 14 · FluentValidation 12 · vendored `api/core-libraries` (`Core.*`)**
+Target stack: **.NET 10 · EF Core 10 (PostgreSQL) · MediatR 14 · FluentValidation 12 · vendored `api/core-libraries` (`Core.*`)**
 
-Companion documents: `docs/constitution.md` (wins on conflict) · `conventions/dotnet-testing.md` · `.claude/rules/docs-sync.md` · `.process/todo-api/` (worked pipeline example).
+Companion documents: `docs/constitution.md` (wins on conflict) · `docs/PRD.md` (product rules) · `conventions/dotnet-testing.md` · `.claude/rules/docs-sync.md`.
+
+## Elmanhg deltas — read before anything below
+
+1. **Database is PostgreSQL**, via `Npgsql.EntityFrameworkCore.PostgreSQL`. `UseNpgsql(...)` with `EnableRetryOnFailure()`. Never `UseSqlServer`, never SQL Server-only features (`rowversion`, `NEWSEQUENTIALID`, `datetime2`). Concurrency tokens use PostgreSQL `xmin` (`.IsRowVersion()` on a `uint Version` property mapped to `xmin`). Timestamps are `timestamptz` (`DateTimeOffset`, UTC).
+2. **JSON columns** (question body, grading spec, blueprint counts, context bundles) are `jsonb`: `.HasColumnType("jsonb")` on a typed owned model or a `JsonDocument`/`string` with a documented shape. Never serialise to `nvarchar`/`text` by hand.
+3. **Vector search** (AI Avatar retrieval) uses `pgvector` via `Pgvector.EntityFrameworkCore`, only in the stories that need it.
+4. **Integration tests** hit a real PostgreSQL through `Testcontainers.PostgreSql`. No in-memory provider, no SQLite stand-in.
+5. **Reuse-first from Morabh.** The canonical implementation of every cross-cutting capability lives at `D:\Personal\Projects\Projects\Morabh\repos\apis`:
+   - `Core/` (Core.DDD, Core.CQRS, Core.EntityFrameworkCore, Core.Errors, Core.Exceptions, Core.Identity, Core.OTP, Core.Localization, Core.Logging, Core.Auditing, Core.Cache, Core.Notifications, Core.Queues, Core.Utilities, Core.Validation) is vendored into `api/core-libraries/` in this repo. Copy it, do not reference the Morabh path at build time. When vendoring, swap every SQL Server dependency for Npgsql and drop `Core.Azure` unless a story needs it.
+   - Before designing **any** feature (login, register, OTP, refresh tokens, audit log, localisation, notifications, error codes, paging, file upload…), search the Morabh repo (`Core/`, `Morabh.Application/`, `Morabh.Domain/`, `Morabh.Infrastructure/`, `Morabh.APIs/`, `CRUD_FEATURE_CREATION_GUIDE.md`, `ErrorCodes.md`, `AuditLogs.md`, `Localization.md`). If it exists, copy it into the matching Elmanhg layer, rename namespaces `Morabh.*` → `Elmanhg.*`, and adapt it to the Elmanhg domain. The plan must name the Morabh source file for every reused piece.
+   - Only when nothing in Morabh covers it, write it from scratch — in the same shape, layering, naming and error-code style as the Morabh code. Murabaha/BNPL business logic is never copied.
+6. **Solution layout**: `api/Elmanhg.slnx` with `Elmanhg.Api`, `Elmanhg.Application`, `Elmanhg.Domain`, `Elmanhg.Infrastructure`, `Elmanhg.Jobs` (background jobs, when needed), `Elmanhg.Tests`, plus `core-libraries/`. Mirror Morabh's project structure.
+7. **Secrets**: environment variables and a gitignored `.env`; `appsettings.json` holds shape and safe defaults only. External providers without credentials in this repo (Paymob, SMS gateway, Claude API, transcription) sit behind an interface with a `Fake*` implementation selected by config, so the app and tests run offline.
 
 **Core-first, always.** Before writing any helper, middleware, validator extension, client, or base type — check `api/core-libraries/`. Re-implementing an existing `Core.*` capability is a defect, not a style choice. **Mirror, don't modernize** — when in doubt, open a neighboring slice; consistency beats cleverness.
 
@@ -20,9 +33,9 @@ Apply everywhere, every file, no exceptions.
 ### Namespaces — always file-scoped
 ```csharp
 // ✅
-namespace E3A.Domain.Tenants;
+namespace Elmanhg.Domain.Tenants;
 // ❌
-namespace E3A.Domain.Tenants { }
+namespace Elmanhg.Domain.Tenants { }
 ```
 
 ### Types
@@ -92,6 +105,20 @@ public DateTime CreatedAt { get; init; }
 ### No magic values (constitution §0.3)
 Tunables → `[Topic]Options` + `SectionName` const bound from configuration; invariants → named constants with a WHY comment.
 
+### Async — never block, never fire-and-forget
+```csharp
+// ❌
+var tenant = tenantRepository.GetByIdAsync(id, cancellationToken).Result;
+public async void Publish(Guid tenantId) { }
+await Task.Run(() => tenantRepository.GetByIdAsync(id, cancellationToken));
+// ✅
+var tenant = await tenantRepository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
+```
+PROHIBITED: `.Result`, `.Wait()`, `GetAwaiter().GetResult()`, `async void`, `Task.Run` wrapping async I/O, `Thread.Sleep`, `Task.WhenAll` over calls sharing one `DbContext` (not thread-safe).
+
+### No escape hatches
+`dynamic`, `object` parameters, `IServiceProvider` injection / service locators, `HttpContext` below `Elmanhg.Api`, `// TODO`, commented-out code, swallowed exceptions (`catch { }`, `catch { return null; }`) — all PROHIBITED.
+
 ---
 
 ## 2. Naming Reference
@@ -99,7 +126,7 @@ Tunables → `[Topic]Options` + `SectionName` const bound from configuration; in
 | Thing | Convention | Example |
 |-------|-----------|---------|
 | File | PascalCase | `CreateTenantHandler.cs` |
-| Namespace | file-scoped, mirrors folder | `namespace E3A.Application.Tenants.CreateTenant;` |
+| Namespace | file-scoped, mirrors folder | `namespace Elmanhg.Application.Tenants.CreateTenant;` |
 | Command | `[Verb][Noun]Command` sealed record | `CreateTenantCommand` |
 | Query | `[Verb][Noun]Query` sealed record | `GetTenantsQuery` |
 | Handler | `[Verb][Noun]Handler` sealed class | `CreateTenantHandler` |
@@ -134,26 +161,26 @@ Tunables → `[Topic]Options` + `SectionName` const bound from configuration; in
 api/
 ├── core-libraries/             Core.DDD · Core.CQRS · Core.EntityFrameworkCore · Core.Errors
 │                               Core.Exceptions · Core.Validation · Core.Identity · Core.Localization
-│                               Core.Auditing · Core.Azure · Core.Queues · Core.Logging · Core.Cache
+│                               Core.Auditing · Core.Queues · Core.Logging · Core.Cache · Core.OTP · Core.Notifications
 │                               Core.Notifications · Core.OTP · Core.Utilities
-├── E3A.Domain/
+├── Elmanhg.Domain/
 │   ├── Identity/               User.cs, Role.cs, RoleNames.cs (template)
 │   └── {Area}/                 Entity + ValueObjects + Enums (+ext same file) + Extensions
 │                               + I{Entity}Repository — aggregate folder holds all of it
-├── E3A.Application/
+├── Elmanhg.Application/
 │   ├── {Area}/{UseCase}/       Command|Query + Validator + Handler (folder-per-use-case)
 │   ├── {Area}/Shared/          shared Results + ResultGenerators for the area
 │   ├── Exceptions/             ErrorCodes.cs
 │   └── DependencyInjection.cs
-├── E3A.Infrastructure/
+├── Elmanhg.Infrastructure/
 │   ├── Data/Context/           AppDbContext.cs  ← ONE shared context; all areas add DbSets here
 │   ├── {Area}/                 TenantRepository.cs …
 │   └── DependencyInjection.cs
-├── E3A.Api/                    ← ALL controllers live here only
+├── Elmanhg.Api/                    ← ALL controllers live here only
 │   ├── Controllers/{Area}/     TenantsController.cs (+ Requests.cs when HTTP shape differs)
 │   ├── Resources/              Messages.ar.resx, Messages.en.resx
 │   └── Program.cs
-└── E3A.Tests/                  xUnit + NSubstitute + FluentAssertions
+└── Elmanhg.Tests/                  xUnit + NSubstitute + FluentAssertions
 ```
 
 **Tests are REQUIRED** per `conventions/dotnet-testing.md` — entity branches, every handler branch, every validator rule (repository implementations and controllers are out of scope). This supersedes any older no-tests rule.
@@ -176,7 +203,7 @@ All entities implement `ISoftDeletable` — call `.SoftDelete()`, never set `IsD
 ### 4.2 Aggregate Root
 
 ```csharp
-namespace E3A.Domain.Tenants;
+namespace Elmanhg.Domain.Tenants;
 
 public class Tenant : AggregateRoot
 {
@@ -227,7 +254,7 @@ Rules:
 ### 4.3 Child Entity
 
 ```csharp
-namespace E3A.Domain.Tenants;
+namespace Elmanhg.Domain.Tenants;
 
 public class TenantSubscription : AuditEntity
 {
@@ -258,7 +285,7 @@ public class TenantSubscription : AuditEntity
 ### 4.4 Value Objects
 
 ```csharp
-namespace E3A.Domain.Tenants;
+namespace Elmanhg.Domain.Tenants;
 
 public sealed record TenantAddress(string Country, string City);
 public sealed record TenantContact(string Email, string? Phone)
@@ -269,7 +296,7 @@ public sealed record TenantContact(string Email, string? Phone)
 
 ### 4.5 LocalizedText (from Core.DDD)
 
-Every genuinely bilingual field MUST use `LocalizedText`. Plain `string` for bilingual fields is PROHIBITED. (e3a is currently EN-only — plain `string` is correct until a field is genuinely bilingual.)
+Every genuinely bilingual field MUST use `LocalizedText`. Plain `string` for bilingual fields is PROHIBITED. (elmanhg is currently EN-only — plain `string` is correct until a field is genuinely bilingual.)
 
 ```csharp
 public LocalizedText Name { get; private set; } = default!;
@@ -292,7 +319,7 @@ Never call `.Localized()` in an admin result. Never return raw `LocalizedText` i
 ### 4.6 Enums + Extensions (same file)
 
 ```csharp
-namespace E3A.Domain.Tenants;
+namespace Elmanhg.Domain.Tenants;
 
 public enum TenantStatus { Active, Suspended, Terminated }
 
@@ -319,7 +346,7 @@ public static class TenantStatusExtensions
 ### 4.7 Domain Extensions (complex calculations only)
 
 ```csharp
-namespace E3A.Domain.Tenants;
+namespace Elmanhg.Domain.Tenants;
 
 public static class TenantSubscriptionExtensions
 {
@@ -345,7 +372,7 @@ throw new BusinessRuleViolationException(ErrorCodes.TenantAlreadySuspended);
 ### 4.9 Repository Interface
 
 ```csharp
-namespace E3A.Domain.Tenants;
+namespace Elmanhg.Domain.Tenants;
 
 // Simple — generic base covers everything
 public interface ITenantRepository : IRepository<Tenant> { }
@@ -366,10 +393,10 @@ Only add custom methods when base methods genuinely cannot express the query.
 
 ### 5.1 ErrorCodes — Flat Static Class
 
-Single flat class in `E3A.Application/Exceptions/ErrorCodes.cs`. No nesting. Group with comment separators only.
+Single flat class in `Elmanhg.Application/Exceptions/ErrorCodes.cs`. No nesting. Group with comment separators only.
 
 ```csharp
-namespace E3A.Application.Exceptions;
+namespace Elmanhg.Application.Exceptions;
 
 public static class ErrorCodes
 {
@@ -387,7 +414,7 @@ public static class ErrorCodes
 ### 5.2 Command
 
 ```csharp
-namespace E3A.Application.Tenants.CreateTenant;
+namespace Elmanhg.Application.Tenants.CreateTenant;
 
 public sealed record CreateTenantCommand(string NameArabic, string NameEnglish, string Slug, Guid OwnerUserId) : IRequest<TenantResult>;
 ```
@@ -395,7 +422,7 @@ public sealed record CreateTenantCommand(string NameArabic, string NameEnglish, 
 ### 5.3 Query
 
 ```csharp
-namespace E3A.Application.Tenants.GetTenants;
+namespace Elmanhg.Application.Tenants.GetTenants;
 
 public sealed record GetTenantsQuery(string? Search, TenantStatus? Status, int PageNumber = 1, int PageSize = 20) : IRequest<PageData<TenantResult>>;
 ```
@@ -403,7 +430,7 @@ public sealed record GetTenantsQuery(string? Search, TenantStatus? Status, int P
 ### 5.4 Validator (separate file, same folder as command)
 
 ```csharp
-namespace E3A.Application.Tenants.CreateTenant;
+namespace Elmanhg.Application.Tenants.CreateTenant;
 
 public sealed class CreateTenantValidator : AbstractValidator<CreateTenantCommand>
 {
@@ -440,7 +467,7 @@ public sealed class CreateTenantValidator : AbstractValidator<CreateTenantComman
 ### 5.5 Command Handler
 
 ```csharp
-namespace E3A.Application.Tenants.CreateTenant;
+namespace Elmanhg.Application.Tenants.CreateTenant;
 
 public sealed class CreateTenantHandler(ITenantRepository tenantRepository, ICurrentUserService currentUserService) : IRequestHandler<CreateTenantCommand, TenantResult>
 {
@@ -480,6 +507,8 @@ Handler rules:
 - Business rule checks live in the DOMAIN (entity methods throw); the handler orchestrates.
 - Never validate manually in handlers — the `Core.CQRS` `ValidationBehaviour` pipeline enforces validators → 422.
 - Auditing: business mutations opt in via `IAuditableCommand` (Core.Auditing) — pipeline-side; handlers are never modified for auditing.
+- Read-only queries pass `asNoTracking: true` wherever the Core repository method exposes it — tracking only for entities the handler mutates (§6.6).
+- A handler that keeps growing gets a domain method on the aggregate — never a one-handler "helper" service.
 
 ### 5.7 Results
 
@@ -494,7 +523,7 @@ public sealed record TenantAdminResult(Guid Id, string NameArabic, string NameEn
 ### 5.8 Result Generator (when mapping is non-trivial)
 
 ```csharp
-namespace E3A.Application.Tenants.Shared;
+namespace Elmanhg.Application.Tenants.Shared;
 
 public static class TenantResultGenerator
 {
@@ -537,7 +566,7 @@ Handlers depend on repositories (aggregate-folder interfaces), never on concrete
 ### 5.11 DependencyInjection.cs (Application)
 
 ```csharp
-namespace E3A.Application;
+namespace Elmanhg.Application;
 
 public static class DependencyInjection
 {
@@ -549,7 +578,7 @@ public static class DependencyInjection
     }
 }
 ```
-(Mirror the actual signature already in `E3A.Application/DependencyInjection.cs` — the repo is the truth.)
+(Mirror the actual signature already in `Elmanhg.Application/DependencyInjection.cs` — the repo is the truth.)
 
 ---
 
@@ -558,7 +587,7 @@ public static class DependencyInjection
 ### 6.1 Repository Implementation
 
 ```csharp
-namespace E3A.Infrastructure.Tenants;
+namespace Elmanhg.Infrastructure.Tenants;
 
 // Simple — generic base covers everything
 public class TenantRepository(AppDbContext context) : Repository<Tenant>(context), ITenantRepository { }
@@ -582,7 +611,7 @@ public class TenantSubscriptionRepository(AppDbContext context) : Repository<Ten
 ONE `AppDbContext` for the whole solution. Per-area DbContext subclasses are PROHIBITED. Actual signature (mirror it):
 
 ```csharp
-namespace E3A.Infrastructure.Data.Context;
+namespace Elmanhg.Infrastructure.Data.Context;
 
 public class AppDbContext(DbContextOptions options, IMediator mediator) : CoreDbContext<User, Role, Guid>(options, mediator)
 {
@@ -634,6 +663,8 @@ private static void ConfigureTenants(ModelBuilder modelBuilder)
 | `HasQueryFilter(e => !e.IsDeleted)` | every ISoftDeletable entity — in `ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries` only |
 | `HasIndex(...).IsUnique()` | unique business keys |
 | `ValueGeneratedNever()` | child entities with manually assigned IDs |
+| `HasPrecision(18, 2)` (or the currency's scale) | every money `decimal` — `double`/`float` for money PROHIBITED |
+| `IsRowVersion()` on `byte[] RowVersion` | aggregates edited concurrently by humans (§6.8) |
 
 ### 6.4 Soft-Delete Global Filters — MANDATORY for every entity
 
@@ -642,7 +673,7 @@ Never append `.Where(!IsDeleted)` in queries. The global filter method is the si
 ### 6.5 DependencyInjection.cs (Infrastructure)
 
 ```csharp
-namespace E3A.Infrastructure;
+namespace Elmanhg.Infrastructure;
 
 public static class DependencyInjection
 {
@@ -656,16 +687,70 @@ public static class DependencyInjection
 ```
 (No configuration parameter — mirror the actual signature. DbContext/Identity wiring lives in `Program.cs` via the `Core.*` composition already there.)
 
+### 6.6 Query Rules
+
+```csharp
+// ❌ DON'T — materialise then filter; count to test existence
+var subscriptions = await FindAsync(x => x.TenantId == tenantId, cancellationToken).ConfigureAwait(false);
+var active = subscriptions.Where(x => x.Status == SubscriptionStatus.Active).ToList();
+if (await CountAsync(x => x.Slug == slug, cancellationToken).ConfigureAwait(false) > 0) { }
+
+// ✅ DO — the whole predicate reaches SQL; existence is AnyAsync inside the repository
+return await FindAsync(x => x.TenantId == tenantId && x.Status == SubscriptionStatus.Active, cancellationToken, asNoTracking: true).ConfigureAwait(false);
+
+public async Task<bool> IsSlugExistsAsync(string slug, CancellationToken cancellationToken)
+{
+    return await _dbSet.AnyAsync(x => x.Slug == slug, cancellationToken).ConfigureAwait(false);
+}
+```
+
+- `asNoTracking: true` on every read that does not mutate.
+- No awaited repository call inside a `foreach` over query results (N+1) — load the set once with one predicate. (The §8.3 suffix loop probes, it does not iterate results — allowed.)
+- Multiple collection `Include` on a write path → `AsSplitQuery()`.
+- Lazy-loading proxies (`UseLazyLoadingProxies`) PROHIBITED.
+- Raw SQL only inside `Elmanhg.Infrastructure`, parameterised only: `FromSql($"...")` / `ExecuteSql($"...")`. `FromSqlRaw` / `ExecuteSqlRaw` with interpolation or concatenation = SQL injection, BLOCKING.
+- `ExecuteUpdateAsync` / `ExecuteDeleteAsync` bypass `CoreDbContext` — no audit stamping, no domain events, and `ExecuteDeleteAsync` hard-deletes past `ISoftDeletable`. Only for non-audited bulk maintenance the plan names; never a load-modify-save loop over many rows either.
+
+### 6.7 Migrations
+
+```bash
+dotnet ef migrations add AddTenantRowVersion -p api/Elmanhg.Infrastructure -s api/Elmanhg.Api
+dotnet ef migrations script --idempotent -p api/Elmanhg.Infrastructure -s api/Elmanhg.Api
+```
+(Mirror the repo's actual project paths.)
+
+| Rule | Detail |
+|------|--------|
+| Name | `<Verb><What>` PascalCase — `AddTenantRowVersion`, `CreateInvoicesTable` |
+| Same change | entity/mapping change → migration in the same change |
+| Review | open the generated file — no `DropColumn` / `DropTable` / `RenameColumn` unless the plan names it as a contract step |
+| Expand/contract | across releases: (1) add nullable column/new table, write both · (2) backfill in batches · (3) switch reads · (4) drop old column later. Never rename in one step |
+| NOT NULL | never add a NOT NULL column without a default to a populated table |
+| Transactions | EF Core 10 does not wrap all migrations in one transaction — review via `--idempotent` script |
+| Startup | `Database.Migrate()` / `EnsureCreated()` at startup outside local development PROHIBITED — mirror the existing deployment path |
+
+### 6.8 Transactions, Concurrency & Side Effects
+
+- One `SaveChangesAsync` per command is atomic — that IS the transaction. Explicit `BeginTransactionAsync` only across multiple saves or raw SQL, wrapped in `CreateExecutionStrategy().ExecuteAsync(...)` when retry-on-failure is on (PostgreSQL).
+- Concurrency token on human-edited aggregates:
+```csharp
+public byte[] RowVersion { get; private set; } = [];
+
+builder.Property(x => x.RowVersion).IsRowVersion();
+```
+- `DbUpdateConcurrencyException` → 409 is mapped in `CoreExceptionMiddleware`, never a handler `try`/`catch` — verify the existing mapping before adding an error code.
+- Side effects that must follow a commit (emails, notifications, webhooks) → outbox row written in the same `SaveChangesAsync`, dispatched by a worker. Check `Core.Queues` / `Core.Notifications` first.
+
 ---
 
 ## 7. API Layer
 
-All controllers live in `E3A.Api` ONLY. Module/layer projects have NO controllers.
+All controllers live in `Elmanhg.Api` ONLY. Module/layer projects have NO controllers.
 
 ### 7.1 DefaultCodes — Policy Names
 
 ```csharp
-namespace E3A.Domain.SharedKernel;
+namespace Elmanhg.Domain.SharedKernel;
 
 public static class DefaultCodes
 {
@@ -688,7 +773,7 @@ public sealed record CreateTenantRequest(string NameArabic, string NameEnglish, 
 ### 7.3 Controller
 
 ```csharp
-namespace E3A.Api.Controllers.Tenants;
+namespace Elmanhg.Api.Controllers.Tenants;
 
 [ApiController]
 [Route("api/tenants")]
@@ -741,12 +826,12 @@ Controller rules:
 
 ### 7.4 Program.cs
 
-`E3A.Api/Program.cs` already composes the full `Core.*` pipeline (Azure App Configuration + Managed Identity in production, Core.Identity, Core.CQRS, Core.Exceptions middleware, Core.Localization, Core.Logging, Scalar OpenAPI). Mirror the existing composition when adding registrations — **middleware order is fixed; do not change it**. New policies go into the existing `AddAuthorization` block.
+`Elmanhg.Api/Program.cs` already composes the full `Core.*` pipeline (environment variables + `.env` locally, Core.Identity, Core.CQRS, Core.Exceptions middleware, Core.Localization, Core.Logging, Scalar OpenAPI). Mirror the existing composition when adding registrations — **middleware order is fixed; do not change it**. New policies go into the existing `AddAuthorization` block.
 
 ### 7.5 Localization Resources
 
 ```
-E3A.Api/Resources/
+Elmanhg.Api/Resources/
 ├── Messages.ar.resx    ← Arabic strings; key = ErrorCode constant value
 └── Messages.en.resx    ← English strings; key = ErrorCode constant value
 ```
@@ -896,6 +981,61 @@ else
 
 Related design point: when a state is genuinely normal — "this engineer has no upload yet" — prefer letting the caller **avoid the request** (expose `HasDraft` on the result) over making them provoke and catch a 404. Never leak `Exception.StackTrace` into a response body outside Development.
 
+### 8.8 Outbound HTTP goes through typed clients — never `new HttpClient()`
+
+```csharp
+// ❌ DON'T — socket exhaustion, no resilience
+private readonly HttpClient http = new();
+
+// ✅ DO — typed client + one standard resilience handler (check Core.* for an existing client first)
+services.AddHttpClient<GitHubClient>(client => client.BaseAddress = new Uri(options.BaseUrl)).AddStandardResilienceHandler(resilience => resilience.Retry.DisableForUnsafeHttpMethods());
+```
+
+POST retries only with an idempotency key.
+
+### 8.9 Background work gets a scope per iteration
+
+```csharp
+// ❌ DON'T — scoped AppDbContext / repository captured by a singleton BackgroundService
+public sealed class ExpireSubscriptionsWorker(ITenantSubscriptionRepository repository) : BackgroundService
+
+// ✅ DO — new scope every iteration, honour stoppingToken, catch-and-log per iteration
+using var scope = scopeFactory.CreateScope();
+var repository = scope.ServiceProvider.GetRequiredService<ITenantSubscriptionRepository>();
+```
+
+The worker is the only place `IServiceScopeFactory` is allowed; a failed iteration is logged, never kills the loop.
+
+### 8.10 Secrets & tokens use cryptographic randomness
+
+`IGenerator` (§8.2) is for identifiers like slugs. Anything an attacker must not guess (OTPs, API keys, reset tokens) → `Core.OTP` / `IGenerator` only if backed by `RandomNumberGenerator` — verify in `core-libraries`; otherwise `RandomNumberGenerator.GetInt32` / `GetBytes`. Never `Random`. Secret comparison → `CryptographicOperations.FixedTimeEquals`, never `==`.
+
+### 8.11 Never weaken a test to go green
+
+```csharp
+// ❌ DON'T
+[Fact(Skip = "flaky after refactor")]
+```
+
+Updating a test because behaviour **intentionally** changed is fine (§9). Editing, skipping, or deleting a test to hide a failure is not → stop and write `BLOCKED: <test> — <why>` in the report.
+
+### 8.12 Options are validated at startup
+
+```csharp
+services.AddOptions<EngineersOptions>().BindConfiguration(EngineersOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+```
+
+A missing/invalid cap fails the boot, not the first request. `IOptions<T>` in singletons, `IOptionsSnapshot<T>` in scoped services. Mirror the existing registration style in `Program.cs`.
+
+### 8.13 Regex on user input is bounded
+
+```csharp
+// ✅ DO
+private static readonly Regex SlugPattern = new("^[a-z0-9-]+$", RegexOptions.NonBacktracking);
+```
+
+`RegexOptions.NonBacktracking` or an explicit `matchTimeout` — never an unbounded pattern over user input (ReDoS).
+
 ---
 
 ## 9. Checklist — Adding a New Feature
@@ -930,22 +1070,95 @@ Related design point: when a state is genuinely normal — "this engineer has no
 - [ ] Repos registered in `AddInfrastructure`; open-generic `IRepository<>` registration present
 
 **API**
-- [ ] Controller in `E3A.Api` only — kebab-case plural route
+- [ ] Controller in `Elmanhg.Api` only — kebab-case plural route
 - [ ] `[Authorize(Policy = DefaultCodes.Xxx)]` on every action — never role strings; `[AllowAnonymous]` only for public reads
 - [ ] Policy constant added to `DefaultCodes`
 - [ ] API input: `Request` suffix record when HTTP shape differs; controller thin: map → send → `Ok(result)`
 - [ ] New error codes added to both `Messages.ar.resx` and `Messages.en.resx`
-- [ ] `postman/e3a.postman_collection.json` updated: request added/modified/deleted for every endpoint change
+- [ ] `postman/elmanhg.postman_collection.json` updated: request added/modified/deleted for every endpoint change
 
 **Tests (per conventions/dotnet-testing.md)**
 - [ ] Entity: factory + every domain-method branch
 - [ ] Every handler branch; every validator rule
 - [ ] Repositories and controllers NOT tested (out of scope by convention)
 - [ ] Existing tests added/updated/removed as needed to keep the suite true
+- [ ] Success path asserts the outcome + `SaveChangesAsync` `Received(1)`; every throwing path asserts exception type + error code + `SaveChangesAsync` `DidNotReceive()`
+- [ ] No test only asserts a mock returned what it was told to return
+- [ ] No existing test skipped/weakened to go green (§8.11)
 
 **Cross-cutting**
 - [ ] File-scoped namespaces everywhere; no file exceeds ~100 lines
 - [ ] Every DO/DON'T catalog entry (§8) honoured: caps in `[Area]Options` not entity constants · `IGenerator` for identifiers · `Is…ExistsAsync` + suffix loop for unique slugs · `Deleted` not `Removed` · soft-delete filter only in the global method · one JSON contract across every serialization path · expected 4xx logged as `Warning`, not `Error`
 - [ ] If a serialization path changed, the **emitted JSON** was inspected — not just the object it came from (§8.6)
 - [ ] `dotnet build` zero new warnings · `dotnet test` green
+- [ ] `dotnet format --verify-no-changes` exits 0 · `dotnet list package --vulnerable --include-transitive` clean
+- [ ] Entity change → EF mapping + migration, reviewed for destructive ops (§6.7)
+- [ ] Reads: `asNoTracking`, predicate before materialising, no N+1, parameterised SQL only (§6.6)
+- [ ] §8.8–§8.13 honoured: typed HTTP clients · scope per worker iteration · crypto RNG for secrets · no weakened tests · options `ValidateOnStart` · bounded regex
+- [ ] §10 security, §11 dependency, §12 LLM-mistake lists walked
+- [ ] Guard grep prints nothing: `git diff origin/main -U0 -- '*.cs' | grep -E '^\+.*(DateTime\.(Now|UtcNow)|\.Result\b|\.Wait\(\)|new HttpClient\(|FromSqlRaw|async void)'`
+- [ ] Anything not done → report ends with `BLOCKED: <reason>`
 - [ ] `/docs` updated when behavior/scope changed (`.claude/rules/docs-sync.md`)
+
+---
+
+## 10. Security Gotchas (every row is BLOCKING)
+
+| Gotcha | Rule |
+|--------|------|
+| SQL injection | `FromSqlRaw` / `ExecuteSqlRaw` + interpolation — never (§6.6) |
+| Missing auth | every action has a policy (§7.3); `[AllowAnonymous]` only for public catalog reads |
+| BOLA | lookups filtered by owner/tenant; another owner's id → `NotFoundCoreException` (404), never a leak of existence |
+| Overposting | commands never carry `TenantId`, `Role`, `IsAdmin`, `Status`, `Price` unless the use case sets them by design and authorises it |
+| Identity source | user/tenant ids come from `ICurrentUserService` claims — never the request body |
+| JWT | owned by `Core.Identity` — never `ValidateIssuerSigningKey = false`, never `RequireSignedTokens = false` |
+| Deserialization | never `BinaryFormatter` / `SoapFormatter` / `NetDataContractSerializer` / `LosFormatter` / `ObjectStateFormatter`; `XmlReader` with `DtdProcessing.Prohibit` |
+| CORS | never `AllowAnyOrigin()` with credentials, never `SetIsOriginAllowed(_ => true)` |
+| Error leakage | developer exception page / `StackTrace` only in Development (§8.7) |
+| File paths | user-supplied path → `Path.GetFullPath` + `StartsWith(root + Path.DirectorySeparatorChar)` |
+| Uploads | size-limited, extension allow-listed (`ValidateImageExtensions` / `ValidateMaxFileSize`), random names, never under `wwwroot` |
+| SSRF | any URL from user input → scheme + host allow-list, block private/link-local/metadata IPs, no auto-redirect |
+| Secrets | none in `appsettings*.json` or fixtures — environment variables / host secret store; a leaked key is rotated, not just removed |
+| Logging | never log tokens, passwords, OTPs, full request bodies, or PII |
+| DataProtection | keys persisted and protected in multi-instance deployments |
+
+---
+
+## 11. Dependencies & Licences
+
+A package is added only if the plan names it with an exact version. Core-first (§ header) beats any package.
+
+| Package | Status (2026-09) | Rule |
+|---------|------------------|------|
+| FluentAssertions ≥ 8 | commercial (Xceed) | do not bump past the repo's licensed/pinned major; alternative `AwesomeAssertions` |
+| MediatR ≥ 13 | dual RPL-1.5 / commercial, licence key | repo is on 14 — key lives in configuration, never committed; major bumps only with a decision record |
+| AutoMapper ≥ 15 | dual RPL-1.5 / commercial | do not add — `[Noun]ResultGenerator` (§5.8) is the mapper |
+| MassTransit ≥ 9 | commercial | do not add — `Core.Queues` (+ Hangfire for scheduled jobs) |
+| Moq | avoid (SponsorLink) | NSubstitute |
+| Swashbuckle.AspNetCore | dropped from .NET 10 templates | `Microsoft.AspNetCore.OpenApi` + Scalar (already wired) |
+| Newtonsoft.Json | legacy | System.Text.Json only (§8.6) |
+| Microsoft.EntityFrameworkCore.InMemory | wrong relational behaviour | never in any test project |
+
+- Verify before adding: `dotnet package search <Id> --exact-match`; licence + publish date on `https://www.nuget.org/packages/<Id>/<version>`.
+- If the repo uses Central Package Management (`Directory.Packages.props`), a `.csproj` `PackageReference` has no `Version`; if lock files are on, commit the updated `packages.lock.json` (`dotnet restore --force-evaluate`).
+
+---
+
+## 12. LLM Mistakes to Avoid (.NET 10)
+
+| ❌ Wrong | ✅ Right |
+|----------|---------|
+| `Startup.cs`, `WebHost.CreateDefaultBuilder`, `IWebHostBuilder` hosting | minimal hosting in `Program.cs` (§7.4) |
+| `services.AddSwaggerGen()` / `app.UseSwagger()` | existing OpenAPI + Scalar wiring |
+| `Microsoft.OpenApi` v1 types (`OpenApiString`) in transformers | v2 — `JsonNode` |
+| `app.UseProblemDetails()` (Hellang) | `CoreExceptionMiddleware` already formats errors |
+| `services.AddFluentValidation()` (deprecated auto-validation) | `AddValidatorsFromAssembly(...)` + `Core.CQRS` `ValidationBehaviour` |
+| `services.AddMediatR(typeof(Program))` (v11 signature) | `AddMediatR(configuration => configuration.RegisterServicesFromAssembly(...))` (§5.11) |
+| `DateTime.Now` / `DateTime.UtcNow` | `DateTimeOffset.UtcNow` (§1) |
+| `ToListAsync()` then filter in memory | predicate before materialising (§6.6) |
+| `catch (Exception) { }` / `catch { return null; }` | throw core exceptions; middleware maps them |
+| invented package ids, invented `Core.*` APIs | verify in `api/core-libraries` / §11 before use |
+| xUnit v2 patterns on v3 (`Task InitializeAsync`, `Xunit.Abstractions`) | match the repo's xUnit major |
+| `Task.WhenAll` over one `DbContext` | sequential awaits (§1 Async) |
+| sync-over-async in constructors, filters, DI factories | async all the way |
+| editing/skipping a failing test | fix the code, or `BLOCKED` (§8.11) |

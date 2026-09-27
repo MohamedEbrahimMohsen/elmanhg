@@ -34,12 +34,14 @@ updated in the same change. Examples of divergence triggers:
 
 | Change touches… | Doc that must agree |
 |---|---|
-| Scope, phases, feature list | `docs/implementation-plan.md` |
-| Plugin layout, ingestion/mapping, naming, marketplace format, team merge rules | `docs/plugin-spec.md` |
-| Scanner rules, tiers, sanitize behavior, hooks policy | `docs/security-scan.md` |
-| Azure resources, pipeline sequence, serving/caching, backend structure | `docs/architecture.md` |
-| Engineering rules, style, config policy | `docs/constitution.md` |
-| Any UI page's content, flow, or components | `docs/design-prompt.md` |
+| Scope, phases, feature list, business rules, roles, plans/pricing, grading, mastery, exams | `docs/PRD.md` |
+| Engineering rules, style, config policy, stack | `docs/constitution.md` |
+| Colours, type, spacing, components, UI rules | `docs/design-system.md` **and** `.claude/design-system.md` (tokens) — both must agree |
+| Any UI page's content, flow, or states | `docs/claude-design-prompt.md` §4–§6 and `docs/prototype.md` |
+| Epics / stories / sub-tasks | `docs/backlog.json` |
+| How to run the system, what is faked, run results | `docs/implementation-report.md` (created at the end of the autopilot run) |
+
+`.claude/design-system.md` is the one allowed exception to "docs live only in `/docs`": the pipeline reads tokens from it.
 
 ## Reviewer output
 

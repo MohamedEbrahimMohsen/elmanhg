@@ -1,141 +1,134 @@
 ---
-description: Design → implement → review → PR + CodeRabbit cycle for a .NET feature (Fable 5 plans & reviews & triages, Opus 5 implements)
-argument-hint: <feature description>
+description: Story → plan → implement → review → PR → CodeRabbit triage → merge, for one GitHub story of the Elmanhg project (all stages Opus 5.5 medium). Supports unattended autopilot across the whole board.
+argument-hint: "#<story-issue> | --board (run every open story in order)"
 allowed-tools: Task, Read, Write, Bash, Grep, Glob
 ---
 
-Run the three-stage feature pipeline for: **$ARGUMENTS**
+Run the Elmanhg feature pipeline for: **$ARGUMENTS**
 
-You are the orchestrator. You do not plan, implement, or review yourself — you route, gate, and report. Writing code yourself defeats the entire pipeline.
+You are the **orchestrator**. You route, gate, record, and report. You never plan, implement, review, or triage yourself — every stage is a fresh subagent. Writing code yourself defeats the pipeline.
 
-## Pre-flight — git must be clean (BEFORE anything, including Stage 0)
+## Unit of work
 
-Run `git status --porcelain` and `git status -sb` first.
+- One **story** issue (label `story`) = one plan = one branch = one PR = one squash merge.
+- The story's `### Sub-tasks` checklist is the scope. All of it is planned and built in that one run.
+- `--board` runs every open story in the order below, one after another, without stopping.
 
-- **Any uncommitted change** (modified, staged, or untracked files) → **STOP. Start nothing.** Show the dev the dirty files and tell them to commit or stash first. The pipeline's diffs, reviews, and rework rounds are only trustworthy on a clean tree — a pre-existing change would be attributed to the implementer and reviewed as its work.
-- **Unpushed commits** (branch ahead of its upstream) → STOP and surface them the same way; the dev decides whether to push first or explicitly instructs you to proceed despite them.
-- Re-run the check after the dev cleans up; only a clean result enters Stage 0.
+**Board order** (dependencies first): E1, E2, E3, E4, E5, E6, E10, E7, E8, E9, E11, E12, E13, E14, E15, E16, E17. Within an epic, `S1, S2, …`. The story's key is in its title: `[E3.S2] …`.
 
-## Stage 0 — Workflow acceptance (ALWAYS FIRST after pre-flight, no exceptions)
+## Models
 
-Before anything else, show the dev the pipeline and get explicit acceptance — this workflow changes everything and the dev must consciously enter it.
+| Stage | Agent | Model |
+|---|---|---|
+| Orchestrate, git, gates, merge | this session | session model |
+| 1 · Plan | `feature-planner` | Opus 5.5, effort medium |
+| 2 · Implement, rework, CodeRabbit fix | `feature-implementer` (fresh each time) | Opus 5.5, effort medium |
+| 3 · Review, CodeRabbit triage, verify | `feature-reviewer` (fresh each time) | Opus 5.5, effort medium |
 
-1. **Show the chart**: render `docs/feature-pipeline.svg` to the dev (attach/render the file if the session supports it; otherwise reproduce the mermaid fallback below).
-2. **State the terms in one short block**, with the models unmissable:
-   - Stage 1 plan → **`FABLE 5`** · Stage 2 implement → **`OPUS 5`** · Stage 3 review → **`FABLE 5`** (model aliases in `.claude/agents/*.md` frontmatter resolve to the current model of that tier)
-   - Two dev gates: plan approval before implementation, and the round-2 stop
-   - Rework cap: max 2 review rounds, then re-plan
-3. **Ask for acceptance and WAIT.** Only a clear yes proceeds. A "no" or a change request stops the pipeline — surface what they want changed.
-4. On acceptance, derive the `<feature-slug>`, create `.process/<feature-slug>/`, and:
-   - record the acceptance in `.process/<feature-slug>/00-acceptance.md` (date, feature request, the dev's acceptance reply verbatim);
-   - copy `docs/feature-pipeline.svg` to `.process/<feature-slug>/00-pipeline.svg` — a frozen snapshot of the exact flow the dev accepted, so later changes to the pipeline never rewrite this feature's history;
-   - create `.process/<feature-slug>/04-metrics.md` with the run-log header (see Metrics below).
+Model and effort come from each agent's frontmatter. Never let one subagent do two stages. Never continue a reviewer that watched its findings get fixed — always launch a fresh one.
+
+## Modes
+
+- **Attended** (default): the plan gate and the round-2 stop wait for the dev.
+- **Autopilot**: active when the dev's instruction in this session says so (e.g. "run everything without interruption"). Record that instruction verbatim in every story's `00-acceptance.md`. In autopilot every gate below uses its **autopilot rule**; nothing waits for a human.
 
 ```mermaid
 flowchart TD
-  A["/feature request"] --> S["create .process/&lt;slug&gt;/"]
-  S --> P["Stage 1 · plan — <b>FABLE 5</b>"]
-  P -->|blocked| B["stop — needs decision"]
-  P --> G{"approval gate — dev"}
-  G -->|revise| P
-  G -->|approve| I["Stage 2 · implement — <b>OPUS 5</b>"]
-  I --> R["Stage 3 · review — <b>FABLE 5</b>"]
-  R -->|approved| PR["commit · push · open PR"]
-  R -->|changes requested| C["rework · fresh reviewer · max 2 rounds"]
-  C --> I
-  C -->|2nd fail| X["stop — re-plan with dev"]
-  PR --> CR["CodeRabbit reviews (external)"]
-  CR --> T["Stage 4 · triage — <b>FABLE 5</b> decides<br/>critical must-fix · major/minor its call"]
-  T -->|0 to implement| D["report to dev"]
-  T -->|implement list| F["fix — <b>OPUS 5</b> · verify — <b>FABLE 5</b> · push"]
-  F -->|new comments · ≤2 cycles| CR
-  F --> D
+  S["Story #N"] --> PF["Pre-flight: clean tree · on main · pull"]
+  PF --> A["Stage 0 · acceptance → 00-acceptance.md"]
+  A --> P["Stage 1 · plan → 01-plan.md · Opus 5.5 medium"]
+  P -->|BLOCKED| BI["issue + skip story (+ dependants)"]
+  P --> G{"plan gate · dev / autopilot: auto-approve"}
+  G --> BR["branch feature/N-slug"]
+  BR --> I["Stage 2 · implement → 02-implementation.md · Opus 5.5 medium"]
+  I --> R["Stage 3 · review → 03-review.md · Opus 5.5 medium"]
+  R -->|CHANGES_REQUESTED r1| RW["rework (fresh) → review r2 (fresh)"]
+  RW -->|APPROVED| PR
+  RW -->|still failing| D{"build + tests green?"}
+  D -->|yes · autopilot| PR
+  D -->|no| BI
+  R -->|APPROVED| PR["commit · push · PR"]
+  PR --> CR["CodeRabbit ≤ 15 min"]
+  CR -->|comments| T["Stage 4 · triage → fix → verify · ≤ 2 cycles"]
+  CR -->|none| M
+  T --> M["squash merge · close story · metrics"]
+  M --> N["next story"]
+  BI --> N
 ```
 
-## Stage 1 — Plan (**FABLE 5**)
+## Pre-flight (every story)
 
-Launch the `feature-planner` subagent with the raw feature request and the slug.
+1. `git status --porcelain` must be empty; `git switch main && git pull --ff-only`.
+   - Attended: dirty tree → stop and show the files.
+   - Autopilot: a dirty tree left by a crashed previous story → stash it with the message `autopilot-leftover-<story>`, record it in the final report, continue.
+2. Git must never prompt: the repo-local credential helper pins github.com to the `gh` token of `MohamedEbrahimMohsen`. If a git command asks for credentials, stop the run and report — do not click through anything.
+3. Skip stories that are closed, and stories whose dependency story was skipped (record why).
 
-It writes `.process/<feature-slug>/01-plan.md`.
+## Stage 0 — Acceptance
 
-**Gate.** Show the user the plan's *Goal*, *Scope*, *Decisions*, and *Files to create* — not the whole document — and ask for approval before spending an implementation. If the plan comes back `BLOCKED`, stop and surface the decision it needs.
+Create `.process/<N>-<slug>/` (`slug` = kebab-case of the title without the `[Ex.Sy]` key). Write:
+- `00-acceptance.md` — date, story number and title, the dev's acceptance reply verbatim (autopilot: the dev's session instruction verbatim, plus "auto-accepted under autopilot").
+- `00-story.md` — the issue title and body verbatim (`gh issue view <N> --json title,body`).
+- `04-metrics.md` — the run-log header (see Metrics).
 
-## Stage 2 — Implement (**OPUS 5**)
+## Stage 1 — Plan
 
-**Branch first.** Implementation never happens on the current branch directly:
+Launch `feature-planner` with: the story number, the paths to `00-story.md`, the slug, and the instruction to write `.process/<N>-<slug>/01-plan.md`.
 
-1. Determine the current branch. **If it is not `main`, warn the dev**: the default is to branch from `main`; branching from anything else needs their explicit confirmation ("base it on `<current>` anyway" or "switch to `main` first"). Do not proceed until they choose.
-2. Create `feature/<feature-slug>` from the agreed base and check it out. Record the base branch and feature branch in `04-metrics.md`.
+- `BLOCKED` → open a GitHub issue (label `blocked`, body = the planner's BLOCKED section, link to the story), comment on the story, skip it and its dependants.
+- **Gate.** Attended: show Goal, Scope, Decisions, Files to create; wait for approval. Autopilot: auto-approve, append `Plan gate: auto-approved (autopilot) <timestamp>` to `00-acceptance.md`.
+- Every item the plan puts under **Deferred** becomes a GitHub issue (label `deferred`, linked to the story) after the story merges.
 
-Then launch the `feature-implementer` subagent with the path to `01-plan.md` and the slug. Pass the path, not the contents — it must read the plan itself.
+## Stage 2 — Implement
 
-**Postman collection is part of every implementation.** The repo-root `postman/e3a.postman_collection.json` (+ local environment file) must always mirror the real API surface: the implementer adds a request for every new endpoint, modifies requests whose contract changed, and deletes requests for removed endpoints — in the same change. An endpoint change without its collection change is an incomplete implementation.
+1. `git switch -c feature/<N>-<slug>` from an up-to-date `main`.
+2. Launch `feature-implementer` with the path to `01-plan.md` and the slug (the path, not the contents). It writes `02-implementation.md`.
+3. Postman: `postman/elmanhg.postman_collection.json` mirrors the API surface in the same change.
 
-It writes `.process/<feature-slug>/02-implementation.md`.
+## Stage 3 — Review
 
-## Stage 3 — Review (**FABLE 5**)
+Launch a fresh `feature-reviewer` with the paths to `01-plan.md` and `02-implementation.md`. It writes `03-review.md`, first line `VERDICT: …`.
 
-Launch the `feature-reviewer` subagent with the paths to `01-plan.md` and `02-implementation.md` and the slug. It reads the working tree itself.
+- **APPROVED** → Stage 4.
+- **CHANGES_REQUESTED, round 1** → fresh `feature-implementer` in rework mode with `03-review.md`, then a fresh `feature-reviewer` → `03-review-r2.md`.
+- **CHANGES_REQUESTED, round 2** → no round 3.
+  - Attended: stop and hand the open findings to the dev.
+  - Autopilot: run the build and tests yourself (`dotnet build api/ && dotnet test api/`, `npm --prefix web run build && npm --prefix web test -- --run`, `python -m pytest ai/` for the touched stacks).
+    - Green → proceed to Stage 4, and after merge open one issue (label `review-debt`) listing every still-open finding verbatim.
+    - Red → do not merge. Push the branch, open the PR as draft, open an issue (label `failed`) with the failing output and the findings, skip the story and its dependants.
 
-It writes `.process/<feature-slug>/03-review.md`, whose first line is `VERDICT: APPROVED` or `VERDICT: CHANGES_REQUESTED`.
+## Stage 4 — PR, CodeRabbit, merge
 
-## The loop
+1. **Commit & PR.** Stage everything (code + `.process/<N>-<slug>/`), commit `feat(<epic-key>): <story title>` with the attribution trailer, push, `gh pr create --base main` with body: the plan's Goal, `Closes #<N>`, links to the `.process` artifacts, the attribution line.
+2. **CodeRabbit.** Poll the PR's reviews and comments (`gh api repos/{owner}/{repo}/pulls/<pr>/comments`, `/reviews`, `/issues/<pr>/comments`) every 60 s for up to 15 minutes, ignoring CodeRabbit's summary/walkthrough comment. Save actionable comments verbatim to `05-coderabbit-comments.md`, numbered RC1….
+   - Nothing actionable within 15 min → `05-coderabbit-comments.md` says so; go to merge.
+   - Autopilot: if the **first** PR of the run gets no CodeRabbit activity at all (not even a summary), stop polling on later PRs, and open one issue (`coderabbit-not-reviewing`).
+3. **Triage** — fresh `feature-reviewer` in triage mode: verify each claim in the code, classify Critical (must fix) / Major / Minor (fix or reject with rationale; the constitution and style guides outrank CodeRabbit's generic preferences) / DEV-DECISION. Writes `06-coderabbit-triage.md`, first line `TRIAGE: N to implement, M rejected, K dev-decisions`. Autopilot: DEV-DECISION items become issues (label `dev-decision`).
+4. **Fix** — fresh `feature-implementer` scoped to exactly the IMPLEMENT items → `07-coderabbit-rework.md`. **Verify** — fresh `feature-reviewer` → `08-coderabbit-verify.md`. Commit, push. New actionable comments → repeat once (`-r2`). Cap: 2 cycles; leftovers become one `review-debt` issue.
+5. **Merge.** `gh pr merge <pr> --squash --delete-branch`. If merge is refused (conflict with main), rebase the branch on main, re-run build + tests, push, retry once; still refused → issue (`failed`) and skip. After merge: `git switch main && git pull --ff-only`, confirm the story issue closed, tick its checklist items, create the `deferred` issues.
 
-- **APPROVED** → proceed to Stage 4.
-- **CHANGES_REQUESTED, round 1** → launch a fresh `feature-implementer` in rework mode with `03-review.md`. Then launch a **fresh** `feature-reviewer` on the result (never continue the previous reviewer — a reviewer that watched itself get obeyed stops being independent). Write `03-review-r2.md`.
-- **CHANGES_REQUESTED, round 2** → stop. Do not start round 3. Present the still-open findings and hand the decision to the user. Two failed rounds means the plan was wrong, not the implementation — the fix is usually to re-plan, not to retry.
-
-## Stage 4 — PR & external review (CodeRabbit → **FABLE 5** triage → **OPUS 5** fix)
-
-After internal APPROVED, the feature goes through external review before it is done:
-
-1. **Commit & push & open PR.** Commit the feature branch (conventional message naming the slice), push, and open a PR to the base branch (`gh` if installed; otherwise the GitHub REST API authenticated via `git credential fill` — never store the token). PR body: the slice's Goal + a link-list of the `.process/<slug>/` artifacts. If the dev prefers to do git themselves, wait for them to say the PR exists.
-2. **Wait for CodeRabbit.** Poll the PR's review + issue comments every few minutes (up to ~15 minutes; if nothing arrives, ask the dev whether CodeRabbit is enabled). Save all comments verbatim to `.process/<slug>/05-coderabbit-comments.md` (numbered RC1…/PC1…).
-3. **Triage — a fresh `feature-reviewer` (FABLE 5) decides.** It must read the cited code itself and verify every CodeRabbit claim (CodeRabbit is sometimes wrong), then classify each comment with its OWN severity judgment and rule:
-   - **Critical** (real bug/security/data-loss) → MUST implement, no discretion.
-   - **Major / Minor** → the reviewer decides IMPLEMENT or REJECT, each with stated rationale. The repo's constitution + skill (incl. the §8 DO/DON'T catalog) **outrank CodeRabbit's generic preferences**.
-   - Genuine product calls → **DEV-DECISION**, escalated to the dev.
-   - If the reviewer downgrades a CodeRabbit-labelled Critical, the orchestrator must surface that prominently to the dev with a veto option.
-   Output: `06-coderabbit-triage.md`, first line `TRIAGE: N to implement, M rejected, K dev-decisions`, IMPLEMENT items numbered.
-4. **Implement** — a fresh `feature-implementer` (OPUS 5) scoped to EXACTLY the numbered IMPLEMENT items (every REJECT stays rejected), build + full test suite re-run, report to `07-coderabbit-rework.md`.
-5. **Verify** — a fresh `feature-reviewer` (FABLE 5) scoped verification (items resolved, deviations sound, scope contained, build/tests independently re-run) → `08-coderabbit-verify.md`, VERDICT line first.
-6. **Loop**: commit + push the fixes; if CodeRabbit posts new actionable comments on the new commits, repeat 2–5 with `-r2` suffixed artifacts. **Cap: 2 CodeRabbit cycles**, then hand the open threads to the dev — same philosophy as the internal rework cap.
-7. Skip-path: if triage yields `0 to implement` and no dev-decisions, Stage 4 completes immediately.
-
-Every Stage-4 step gets its metrics row. Only after Stage 4 completes (or the dev ends it) does the pipeline report.
-
-## Metrics — `.process/<feature-slug>/04-metrics.md`
-
-Maintain a run log across the whole pipeline. Append a row **immediately after each stage completes** (the subagent result carries its usage — tokens, tool uses, duration; the orchestrator supplies wall-clock timestamps):
+## Metrics — `.process/<N>-<slug>/04-metrics.md`
 
 ```markdown
 | # | Stage | Agent | Model | Started | Finished | Duration | Tokens | Tool uses | Outcome |
 |---|-------|-------|-------|---------|----------|----------|--------|-----------|---------|
-| 1 | Plan | feature-planner | FABLE 5 | 14:02 | 14:19 | 16m 28s | 179,314 | 33 | plan written |
-| 2 | Implement | feature-implementer | OPUS 5 | … | … | … | … | … | done |
-| 3 | Review r1 | feature-reviewer | FABLE 5 | … | … | … | … | … | CHANGES_REQUESTED (4 findings) |
-| 4 | Rework r2 | feature-implementer | OPUS 5 | … | … | … | … | … | done |
-| 5 | Review r2 | feature-reviewer | FABLE 5 | … | … | … | … | … | APPROVED |
 ```
 
-Close the file with a summary block: review rounds used, total tokens, total wall time, verdict. Record real numbers from the subagent results only — if the session does not surface usage for a stage, write `n/a`; never estimate or invent. Also log Stage-0 acceptance time and any BLOCKED/stopped outcome — the metrics file must reflect the ACTUAL flow taken, including the paths that ended early.
+One row per stage, appended as it completes, from the subagent's reported usage. `n/a` when the session does not surface a number; never estimate. Close with a summary block: review rounds, CodeRabbit cycles, total tokens, wall time, verdict, PR link.
 
-## Report
+## Board report (autopilot, after the last story)
 
-When the pipeline ends, give the user:
-
-- Verdict and how many rounds it took, and the feature branch the work sits on (base branch noted if it was not `main`)
-- The CodeRabbit disposition: N implemented / M rejected (with the strongest rejection rationale) / K escalated, any downgraded Criticals flagged for veto, and whether the cycle cap was hit
-- Files created and modified, with line counts
-- Any deviations the implementer declared
-- Any non-blocking findings, as a follow-up list
-- Whether the build and tests were actually run, or only claimed
-
-Do not paste the artifacts into chat. Link the artifacts under `.process/<feature-slug>/` (acceptance, pipeline snapshot, plan, implementation, review(s), metrics) and keep the summary short. Include the headline metrics (rounds · total tokens · total wall time) in the summary line.
+Write `docs/implementation-report.md`:
+- One row per story: status (merged / merged-with-debt / skipped / failed / blocked), PR, review rounds, CodeRabbit N fixed / M rejected, issues opened.
+- Every issue opened during the run, grouped by label.
+- Fakes still standing in for real providers (Paymob, SMS, Claude API, transcription, hosting) and what is needed to switch each to real.
+- How to run the system locally (commands that were actually verified).
+Commit it through a normal PR and merge it.
 
 ## Rules
 
-- Never skip the pre-flight, Stage 0, or a pipeline stage, even for a one-line change. A one-line change with no plan is how the wrong one-line change ships.
-- Never implement on the base branch itself — Stage 2 always works on `feature/<feature-slug>`.
-- Never let one subagent do two stages.
-- Never edit the artifacts yourself. They are the audit trail.
+- Never skip pre-flight, a stage, or the review, even for a one-line change.
+- Never implement on `main`.
+- Never edit an approved `.process/` artifact; write the next one.
+- Never force-push, never `reset --hard`, never delete a remote branch other than the story's own merged branch.
+- A skipped or failed story is always a GitHub issue. Nothing fails silently.

@@ -13,3 +13,25 @@ Thumbs.db
 
 # Local-only Claude Code settings
 .claude/settings.local.json
+.claude/pipeline.local.yml
+
+# .NET
+bin/
+obj/
+*.user
+TestResults/
+
+# Node
+node_modules/
+dist/
+coverage/
+
+# Python
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Secrets and personal overrides
+.env
+.env.local
+.claude/pipeline.local.yml

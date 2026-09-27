@@ -1,0 +1,166 @@
+# Constitution
+
+The rules for ALL implementation work in this repo. The stack: **.NET 10 · ASP.NET Core API (controllers) · MediatR 14 + FluentValidation 12 via the vendored `api/core-libraries/` (`Core.*`, copied from Morabh) (`Core.DDD`, `Core.CQRS`, `Core.EntityFrameworkCore`, `Core.Errors`, …) · EF Core 10 + PostgreSQL (Npgsql) · `Elmanhg.Jobs` background host (Hangfire)**. Backend patterns are detailed in `.claude/skills/dotnet-feature/SKILL.md`; the feature pipeline (`feature-planner` → `feature-implementer` → `feature-reviewer`, artifacts in `.process/`) is the standard way features are built. When a rule here conflicts with a generic "best practice", this file wins. New code must be indistinguishable from existing code.
+
+---
+
+## 0. Prime Directives
+
+1. **Ask before implementing.** Plan/design approval is not a build trigger. Do not write code until the dev explicitly says implement (an explicit instruction like "fix X" in a message counts for that task). An explicit autopilot instruction from the dev (e.g. "implement the whole board without interruption") counts for every story it covers.
+2. **Mirror, don't modernize.** The repo's way IS the standard. Open a neighboring file and match it.
+3. **No magic values — configuration or named constants, nothing inline.**
+   - Every **tunable or environment-dependent value** (limits, caps, URLs, container/queue names, feature switches, allowed extensions) lives in `appsettings.json`, bound through a `[Topic]Options` class with a `public const string SectionName`.
+   - Every **true invariant** (values that must never change or the product breaks — e.g. a wire-format version string, a hash prefix another system parses) is a **named constant with a WHY comment**, never an inline literal.
+   - If unsure which it is: options.
+4. **Secrets are NEVER committed.** Not in `appsettings.json`, not in code, not in deployment parameters. Local secrets go in `.env` (gitignored, `.env.example` committed); deployed secrets go in the host's environment variables (`Section__Key` double-underscore convention). External providers without credentials (Paymob, SMS, Claude API, transcription) run behind an interface with a `Fake*` implementation selected by config.
+5. **The domain stays tested.** Every aggregate behaviour, every handler branch, and every validator rule lands with its test — see `conventions/dotnet-testing.md`. A guard clause without a test that trips it is untested.
+6. **Zero-cost bias.** Any change that adds an always-on resource or paid tier needs explicit approval first.
+
+---
+
+## 1. C# Style — Non-Negotiable
+
+### 1.1 Type/member definitions — ALWAYS one line, never wrap
+
+```csharp
+// ✅ DO — one line, however long
+public sealed class CreateTenantHandler(ITenantRepository tenantRepository, ICurrentUserService currentUserService, IGenerator generator) : IRequestHandler<CreateTenantCommand, CreateTenantResult>
+
+// ❌ DON'T — parameter wrapping
+public sealed class CreateTenantHandler(
+    ITenantRepository tenantRepository,
+    ICurrentUserService currentUserService) : IRequestHandler<CreateTenantCommand, CreateTenantResult>
+```
+
+Exception: multi-property **records** with many fields may list one parameter per line — mirror the file you're extending.
+
+### 1.2 Method bodies — block-bodied with braces, never expression-bodied
+
+Expression bodies are for **properties/accessors only**.
+
+```csharp
+// ✅ DO
+public string GetStoragePath(string prefix)
+{
+    return $"{prefix}/{Slug}/{Id}.json";
+}
+
+// ✅ DO — computed property
+public bool IsSuspended => Status == TenantStatus.Suspended;
+
+// ❌ DON'T
+public string GetStoragePath(string prefix) => $"{prefix}/{Slug}/{Id}.json";
+```
+
+### 1.3 Braces on every `if` — even one-liners
+
+```csharp
+// ✅ DO
+if (tenant.Owner is null)
+{
+    errors.Add("Missing owner.");
+}
+
+// ❌ DON'T
+if (x is null) throw new InvalidOperationException();
+var y = x ?? throw new InvalidOperationException();
+```
+
+### 1.4 Everything else
+
+- File-scoped namespaces matching folders (`namespace Elmanhg.Infrastructure.Tenants;`).
+- `var` everywhere.
+- Records for data shapes (`sealed record`); services/handlers/validators `sealed class`; primary constructors preferred.
+- Collection expressions: `[]` for empty, `?? []` for null-coalescing, `[.. spread]`.
+- `DateTimeOffset` ONLY — `DateTime` is PROHIBITED. `DateTimeOffset.UtcNow` for stamps.
+- `CancellationToken cancellationToken` — full name, never `ct`, threaded to every downstream async call.
+- `.ConfigureAwait(false)` on every await outside test method bodies.
+- No comments explaining WHAT. A comment is allowed only for a hidden WHY-invariant.
+- These rules apply to test code too.
+
+---
+
+## 2. Configuration Pattern
+
+```csharp
+// Elmanhg.Application/Shared/Options/ProvisioningOptions.cs
+public sealed class ProvisioningOptions
+{
+    public const string SectionName = "Provisioning";
+
+    public int MaxTenantsPerOwner { get; set; }
+    public long MaxUploadBytes { get; set; }
+    // ...
+}
+```
+
+- Bound in the layer's `DependencyInjection.cs` (`Elmanhg.Application` / `Elmanhg.Infrastructure`) — the ONLY registration points.
+- Injected as `IOptions<ProvisioningOptions>` via primary constructor; read `.Value` once into a field/local.
+- **Configuration is never committed.** `appsettings.json` is git-ignored. The
+  template writes it and the project scaffolder fills in the per-solution values
+  (database name, service name, JWT issuer/audience/key, OTP secret), so a freshly
+  scaffolded machine has a working file that git never sees. Every other
+  environment supplies its own: `dotnet user-secrets` locally, app settings or Key
+  Vault when deployed (`Section__Key` double-underscore convention). Consequences
+  to remember: CI and fresh clones have NO configuration, so integration-style runs
+  must supply it explicitly; and a new options section must be announced to the dev
+  so it can be mirrored into every environment rather than silently defaulting to
+  0/empty.
+- **Never re-add `appsettings.json` to the index.** Removing or weakening its
+  `.gitignore` entry, or committing it with `git add -f`, is a blocking review
+  finding — it publishes the signing key and the connection string in one commit.
+- Tests construct options directly: `Options.Create(new ProvisioningOptions { ... })` — test values mirror the committed defaults unless the test targets a limit.
+
+---
+
+## 3. Naming Taxonomy
+
+| Thing | Convention | Example |
+|---|---|---|
+| Use-case slice | `Elmanhg.Application/{Area}/{UseCase}/{Command\|Query, Handler, Validator, Result}` | `Tenants/CreateTenant/` |
+| Command / Query | `[Verb][Noun]Command` / `Get[Noun]Query`, `List[Nouns]Query` | `CreateTenantCommand`, `ListTenantsQuery` |
+| Handler | `[Name minus Command]Handler` / `[QueryName]Handler` | `CreateTenantHandler` |
+| Result | `[Noun]Result` (+ `[Noun]ResultGenerator` when non-trivial), area `Shared/` when reused | `TenantResult` |
+| Options | `[Topic]Options` + `SectionName` const | `ProvisioningOptions` |
+| Controller | `[Nouns]Controller` in `Elmanhg.Api/Controllers/{Area}/`, kebab-case plural routes | `TenantsController`, `api/tenants` |
+| Entity + repo interface | aggregate folder `Elmanhg.Domain/{Area}/` | `Tenant`, `ITenantRepository` |
+| Repo implementation | `Elmanhg.Infrastructure/{Area}/` | `TenantRepository` |
+
+**PROHIBITED names:** `DTO`, `Response` (for internal results), `Model`, `Manager`, `Helper`, `Utils`.
+
+**No abbreviated identifiers.** Full descriptive names always, even when longer — `SemanticVersion` not `SemVer`, `request` not `req`, `document` not `doc`, `cancellationToken` not `ct`, `configuration` not `config`/`cfg`. The only tolerated short forms are universal lambda placeholders (`x =>`, `f =>`) and loop indexers (`i`). Don't swing to the other extreme either — names should be normal words, not sentences.
+
+---
+
+## 4. Layer Rules
+
+- **`Elmanhg.Api`** — thin controllers only: map Request → Command/Query → `mediator.Send` → `Ok(result)`. No business logic. Resources (`Messages.ar/en.resx`) live here.
+- **`Elmanhg.Application`** — vertical slices `{Area}/{UseCase}/`, `Exceptions/ErrorCodes.cs`, options, MediatR pipeline behaviors from `Core.CQRS`.
+- **`Elmanhg.Domain`** — aggregates (Core.DDD bases: private ctor + `Create` factory, guarded domain methods setting `UpdationDate`), enums + extensions, repository interfaces in aggregate folders.
+- **`Elmanhg.Infrastructure`** — ONE `AppDbContext` (named private config methods, global soft-delete filters, no `ApplyConfigurationsFromAssembly`), repositories (`Repository<T>` base, never saving), external provider adapters.
+- **`Elmanhg.Tests`** — xUnit + NSubstitute + FluentAssertions per `conventions/dotnet-testing.md`: entity branches, every handler branch, every validator rule; repos/controllers out of scope.
+- Errors: no `try`/`catch` in handlers — throw `Core.Errors` exceptions; `Core.Exceptions` middleware formats responses. Never invent an exception type for a covered status code.
+- One `SaveChangesAsync` per handler, at the end. Full backend detail: `.claude/skills/dotnet-feature/SKILL.md`.
+
+---
+
+## 5. Frontend (web/) and AI service (ai/)
+
+- `web/`: governed by `.claude/skills/react-feature/SKILL.md` (React 19 + TypeScript strict + Vite 8 + Tailwind v4 + shadcn + TanStack Query + i18next RTL). Every visual value is a token from `.claude/design-system.md` (Glass, light only). Screen content and flow come from `prototype/`.
+- No magic values: API base URL and tunables come from Vite env (`import.meta.env.VITE_*`) with `.env.example` committed, real `.env.local` gitignored.
+- `ai/`: Python FastAPI service called only by the .NET API over HTTP with a shared service key. Typed code, pydantic models, pytest, ruff. Every model/provider call sits behind an interface with a fake for tests and offline runs. Prompt text built from student input is treated as untrusted.
+
+---
+
+## 6. Definition of Done (per change)
+
+- Style checklist (§1) passes on every touched file.
+- No inline magic values (§0.3); options bound in `AddApplication` / `AddInfrastructure`.
+- `dotnet build` clean — zero new warnings. `dotnet test` green. `web/` build + tests green, `ai/` pytest green, for every touched stack.
+- Domain, handler, and validator changes carry tests (§0.5).
+- No secrets in the diff (§0.4).
+- **Docs sync** (full rule: `.claude/rules/docs-sync.md`): a change that alters business
+  logic, scope, architecture, policies, or contracts must update the owning doc in `/docs`
+  in the same change — implementation and docs may never give two different answers to the
+  same question. Incompleteness is fine (plan says 10 features, 6 built — normal);
+  divergence is a blocking finding. Reviewers must check this distinction explicitly.

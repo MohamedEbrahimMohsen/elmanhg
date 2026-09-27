@@ -1,0 +1,110 @@
+# NOTE (Elmanhg): the local /feature command (.claude/commands/feature.md) drives runs in this repo; this file records
+# the same choices for the global pipeline, which is only a fallback here. Every agent runs Opus 5.5 at medium effort.
+#
+# .claude/pipeline.yml — the ONLY file a dev edits to control /feature in this repo.
+#
+# How to read it
+#   stacks     every technology in this repo. The agents detect which ones a task touches; you never declare it.
+#              Every stack has the SAME keys. Turn a feature on or off per stack. Delete stacks you don't have.
+#   tests      unit · postman · e2e (Agy) · coverage — per stack
+#   security   packages · secrets · sast · prompt-injection — per stack
+#   steps      the global switch for each step, and which model runs it.
+#              A feature runs only if its step is on AND the stack's switch is on AND the plan gate didn't turn it off.
+#              A step with a model is its own run; a step without one is a command or a flag inside the step above it.
+#   gates      human decisions. Cannot be turned off.
+#   implement  always on. opencode → OpenCode CLI; opus | sonnet → Claude. Personal choice → .claude/pipeline.local.yml (gitignored).
+
+stacks:
+  dotnet:
+    root:    api/
+    build:   dotnet build api/
+    test:    dotnet test api/
+    style:   .claude/skills/dotnet-feature/SKILL.md
+    testing: .claude/conventions/dotnet-testing.md
+    ui:      false
+    tests:
+      unit:     { on: true }
+      postman:  { on: true,  assert: true, collection: postman/elmanhg.postman_collection.json, environment: postman/local.postman_environment.json, run: "" }
+      e2e:      { on: false, start: "dotnet run --project api/", url: http://localhost:5000/swagger }   # Agy opens url and walks the plan's scenarios
+      coverage: { on: false, cmd: 'dotnet test api/ --collect:"XPlat Code Coverage"', min: 80 }   # SonarQube: dotnet sonarscanner begin … && dotnet build && dotnet test && dotnet sonarscanner end
+    security:
+      packages:         { on: true,  cmd: "dotnet list api/ package --vulnerable --include-transitive" }
+      secrets:          { on: false, cmd: "gitleaks detect --no-git -s api/" }   # gitleaks not installed on this machine
+      sast:             { on: false, cmd: "semgrep --config auto --error api/" }
+      prompt-injection: { on: false }           # agent pass; turn on where this stack builds LLM prompts from user input
+  react:
+    root:    web/
+    build:   npm --prefix web run build
+    test:    npm --prefix web test -- --run
+    style:   .claude/skills/react-feature/SKILL.md
+    testing: .claude/conventions/react-testing.md
+    ui:      true                                  # true → design system + Figma required
+    tests:
+      unit:     { on: true }
+      postman:  { on: false }                     # no HTTP API in this stack
+      e2e:      { on: false, start: "npm --prefix web run dev", url: http://localhost:5173 }   # Agy opens url and walks the plan's scenarios
+      coverage: { on: false, cmd: 'npm --prefix web test -- --run --coverage', min: 70 }
+    security:
+      packages:         { on: true,  cmd: "npm --prefix web audit --audit-level=high" }
+      secrets:          { on: false, cmd: "gitleaks detect --no-git -s web/" }   # gitleaks not installed on this machine
+      sast:             { on: false, cmd: "semgrep --config auto --error web/" }
+      prompt-injection: { on: false }           # agent pass; turn on where this stack builds LLM prompts from user input
+
+  ai:
+    root:    ai/
+    build:   python -m compileall -q ai/
+    test:    python -m pytest ai/
+    style:   none                                  # typed FastAPI + pydantic + pytest + ruff, mirror existing ai/ code
+    testing: none
+    ui:      false
+    tests:
+      unit:     { on: true }
+      postman:  { on: false }
+      e2e:      { on: false }
+      coverage: { on: false }
+    security:
+      packages:         { on: false }
+      secrets:          { on: false }
+      sast:             { on: false }
+      prompt-injection: { on: true }            # the AI Avatar builds prompts from student input
+
+design:                                            # read only when a touched stack has ui: true
+  system:    .claude/design-system.md              # tokens + rules from the UI/UX team. Missing → UI work stops.
+  figma:     none                                  # Elmanhg has no Figma. Screens come from prototype/ + docs/claude-design-prompt.md
+  figma_mcp: false                                 # true → the planner reads frames itself; false → export PNGs
+
+implementer:                                       # used when a step says model: opencode
+  model: litellm/deepseek-flash#high
+  cmd:   opencode run -m "{model}" "$(cat {prompt})"
+
+agy:                                               # Antigravity · runs E2E · used when a step says model: agy
+  model: "Gemini 3.8 Flash (High)"
+  cmd:   agy --model "{model}" --dangerously-skip-permissions -p "$(cat {prompt})"
+  ready_timeout: 120                               # seconds to wait for the app's url before failing
+
+github:
+  base:        main
+  pr_reviewer: coderabbit                          # CodeRabbit.ai (public repo, free plan)
+
+triage:
+  memory:     .claude/triage-memory.md
+  promote_at: 3
+
+steps:
+  split:        { on: false }                                    # stories already carry their sub-task checklist
+  split-gate:   { gate: dev }
+  explore:      { on: false }                                    # the planner explores
+  design-gate:  { gate: dev }                                    # UI stacks: design system + Figma
+  plan:         { on: true,  model: opus,     effort: medium }
+  plan-gate:    { gate: dev }                                    # you can override any test/security switch here, for this task only
+  implement:    { model: opus,     effort: medium }               # always on · unit tests written here
+  postman:      { on: true,  model: opus,     effort: medium }   # done inside implement
+  style-check:  { on: false }                                    # the reviewer walks the style guide
+  coverage:     { on: true }                                     # command · below min = blocking
+  security:     { on: true,  model: opus,     effort: medium, fail_on: high }   # commands + prompt-injection agent · findings ≥ fail_on = blocking
+  e2e:          { on: false }
+  review:       { on: true,  model: opus,     effort: medium, max_rounds: 2 }
+  pr:           { on: true,  draft: true }
+  collect:      { on: true,  model: orchestrator }               # CodeRabbit comments polled by the orchestrator
+  triage:       { on: true,  model: opus,     effort: medium, max_cycles: 2 }
+  pr-gate:      { gate: dev+peer }
