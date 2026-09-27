@@ -1,0 +1,27 @@
+# .claude/pipeline.local.yml — PERSONAL overrides. Gitignored. Copy this file to pipeline.local.yml and edit.
+# Only these keys are read; everything else is ignored:
+#   steps.<name>.model / steps.<name>.effort
+#   implementer.model / implementer.cmd
+#   agy.model / agy.cmd
+#   autopilot.*   (POC only; read ONLY from this file — an `autopilot:` block in pipeline.yml is ignored with a warning)
+# Use it when your own subscription lets you run a step on a different model than the team default.
+
+# steps:                                       # uncomment to run the implementer on Claude instead of OpenCode
+#   implement: { model: opus, effort: medium }
+#   postman:   { model: opus, effort: medium }
+
+# agy:
+#   model: "Gemini 3.8 Flash (High)"
+
+# AUTOPILOT (POC only) — the human gates stay the default. Uncomment and set on: true to let /feature run
+# unattended: plan-judge replaces you at split/design/plan gates, PRs squash-merge when green.
+# Start it with ~/.claude/bin/autopilot.sh --epic <n>  (or --prd docs/PRD.md). Refuses to start unless on: true.
+# autopilot:
+#   on: true                                 # false (or delete the block) = back to human gates
+#   judge: { model: opus, effort: medium }   # replaces you at backlog / split / plan gates. opus = latest Opus (5.5)
+#   hours: 72                                # stops when the app is done or this many hours pass
+#   max_attempts: 3                          # tries per task: 1 = implementer (OpenCode), 2 = Claude Sonnet, 3 = Claude Opus, then skipped
+#
+# Fixed, nothing to set: PRs squash-merge when CI + review + security + E2E are green · a failed task is skipped,
+# the run continues · a broken main gets a "repair main" task first · subscription usage limit → waits, then resumes.
+# Optional, rarely needed: ladder: [implementer, sonnet, opus] · timeout_min: 240 (kills a frozen task process)

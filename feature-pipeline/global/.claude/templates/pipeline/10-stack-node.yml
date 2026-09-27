@@ -1,0 +1,17 @@
+  node:
+    root:    services/
+    build:   npm --prefix services run build
+    test:    npm --prefix services test
+    style:   .claude/skills/node-feature/SKILL.md
+    testing: .claude/conventions/node-testing.md
+    ui:      false
+    tests:
+      unit:     { on: true }
+      postman:  { on: true,  assert: true, collection: postman/services.postman_collection.json, environment: postman/local.postman_environment.json, run: "" }
+      e2e:      { on: false, start: "npm --prefix services run start", url: http://localhost:3000/health }   # Agy opens url and walks the plan's scenarios
+      coverage: { on: false, cmd: 'npm --prefix services test -- --coverage', min: 70 }
+    security:
+      packages:         { on: true,  cmd: "npm --prefix services audit --audit-level=high" }
+      secrets:          { on: true,  cmd: "gitleaks detect --no-git -s services/" }
+      sast:             { on: false, cmd: "semgrep --config auto --error services/" }
+      prompt-injection: { on: false }           # agent pass; turn on where this stack builds LLM prompts from user input

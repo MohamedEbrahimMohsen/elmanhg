@@ -1,0 +1,24 @@
+package: momenta-feature-pipeline
+side: project
+version: 1.0.0
+base: 1.0.0
+files:
+  README.md: 879947127feb
+  conventions/dotnet-testing.md: a50868f90d1d
+  conventions/flutter-testing.md: beab0796a260
+  conventions/kmp-testing.md: 6b49f039e13a
+  conventions/node-testing.md: 4ce5c70ec22b
+  conventions/python-django-testing.md: d7beffe406e3
+  conventions/python-flask-testing.md: 3fb4d2c424c9
+  conventions/python-testing.md: 46a0fd7b9ce8
+  conventions/react-testing.md: 9c3efbfb9f53
+  skills/dotnet-feature/SKILL.md: e3e56875a419
+  skills/flutter-feature/SKILL.md: 20eabaa02de2
+  skills/kmp-feature/SKILL.md: 9766d95266df
+  skills/node-feature/SKILL.md: ac6006619a57
+  skills/python-django-feature/SKILL.md: 1ebd7f3e1273
+  skills/python-feature/SKILL.md: 14ed894e4091
+  skills/python-flask-feature/SKILL.md: 01b14ed48b10
+  skills/react-feature/SKILL.md: 000d12bfa385
+changes:
+  - { v: 1.0.0, date: 2026-09-27, by: "Claude", note: "initial team release" }

@@ -1,0 +1,17 @@
+  react:
+    root:    web/
+    build:   npm --prefix web run build
+    test:    npm --prefix web test -- --run
+    style:   .claude/skills/react-feature/SKILL.md
+    testing: .claude/conventions/react-testing.md
+    ui:      true                                  # true → design system + Figma required
+    tests:
+      unit:     { on: true }
+      postman:  { on: false }                     # no HTTP API in this stack
+      e2e:      { on: false, start: "npm --prefix web run dev", url: http://localhost:5173 }   # Agy opens url and walks the plan's scenarios
+      coverage: { on: false, cmd: 'npm --prefix web test -- --run --coverage', min: 70 }
+    security:
+      packages:         { on: true,  cmd: "npm --prefix web audit --audit-level=high" }
+      secrets:          { on: true,  cmd: "gitleaks detect --no-git -s web/" }
+      sast:             { on: false, cmd: "semgrep --config auto --error web/" }
+      prompt-injection: { on: false }           # agent pass; turn on where this stack builds LLM prompts from user input

@@ -1,0 +1,351 @@
+<title>Feature Pipeline Guide</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f7f5fb; --ink:#1d1730; --muted:#6b6480; --line:#d9d3e8; --card:#ffffff; --code:#f0ecf8;
+  --purple:#4b2a8a; --purple-ink:#ffffff; --lime:#b5e31c; --lime-ink:#1d1730;
+  --sonnet:#a58ad6; --opencode:#2f5f8f; --agy:#1a7f5a; --github:#3a3a44; --stop:#c98a1c; --soft:#e9e3f5; --soft-ink:#3a2a63; --edge:#8a82a0;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ color-scheme:dark;
+  --bg:#15111f; --ink:#ece8f5; --muted:#a49cb8; --line:#3a3350; --card:#1e1830; --code:#251d3a;
+  --purple:#6a44b8; --sonnet:#7d5fb5; --opencode:#3f7ab5; --github:#4a4a58; --soft:#2a2240; --soft-ink:#d8cff0; }}
+:root[data-theme="dark"]{ color-scheme:dark;
+  --bg:#15111f; --ink:#ece8f5; --muted:#a49cb8; --line:#3a3350; --card:#1e1830; --code:#251d3a;
+  --purple:#6a44b8; --sonnet:#7d5fb5; --opencode:#3f7ab5; --github:#4a4a58; --soft:#2a2240; --soft-ink:#d8cff0; }
+body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;margin:0;padding-inline:16px;padding-block:24px 64px;line-height:1.5}
+.wrap{max-width:920px;margin:0 auto}
+h1{font-size:2rem;font-weight:600;margin:0 0 4px;text-wrap:balance}
+.sub{color:var(--muted);margin:0 0 28px;max-width:65ch}
+h2{font-size:1.35rem;font-weight:600;margin:48px 0 12px;padding-top:12px;border-top:2px solid var(--line);text-wrap:balance}
+h2 .n{display:inline-block;width:32px;height:32px;line-height:32px;text-align:center;border-radius:50%;background:var(--purple);color:var(--purple-ink);font-size:.95rem;margin-inline-end:10px}
+h3{font-size:1.05rem;font-weight:600;margin:20px 0 8px}
+p{max-width:70ch;margin:8px 0}
+code,pre{font-family:"IBM Plex Mono",monospace}
+code{background:var(--code);padding:1px 6px;border-radius:4px;font-size:.92em}
+pre{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font-size:.88rem;line-height:1.55;margin:10px 0}
+pre code{background:none;padding:0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:12px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card b{display:block;margin-bottom:4px}
+.card.gate{border-left:6px solid var(--lime)}
+.card.stop{border-left:6px solid var(--stop)}
+.card small{color:var(--muted)}
+.steps{counter-reset:s;list-style:none;padding:0;margin:12px 0}
+.steps li{position:relative;padding-inline-start:44px;margin:12px 0}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;inset-inline-start:0;top:0;width:30px;height:30px;border-radius:50%;background:var(--lime);color:var(--lime-ink);font-weight:600;text-align:center;line-height:30px}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.78rem;font-weight:600;vertical-align:middle}
+.t-opus{background:var(--purple);color:#fff}.t-sonnet{background:var(--sonnet);color:#1d1730}.t-oc{background:var(--opencode);color:#fff}.t-you{background:var(--lime);color:#1d1730}.t-gh{background:var(--github);color:#fff}.t-agy{background:var(--agy);color:#fff}
+table{border-collapse:collapse;width:100%;font-size:.92rem;margin:10px 0}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.dia{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px;margin:12px 0}
+svg{display:block;margin:0 auto;font-family:"IBM Plex Sans",system-ui,sans-serif;max-width:100%}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:.85rem;margin:8px 0 0}
+.legend span{display:inline-flex;align-items:center;gap:6px}.legend i{width:13px;height:13px;border-radius:3px;display:inline-block}
+.tree{font-family:"IBM Plex Mono",monospace;font-size:.85rem;background:var(--code);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;white-space:pre;line-height:1.6}
+.tree .c{color:var(--muted)}
+.callout{background:var(--soft);color:var(--soft-ink);border-radius:10px;padding:12px 16px;margin:14px 0;max-width:none}
+.callout b{color:inherit}
+.chat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0;font-size:.92rem}
+.chat .a{border-inline-start:4px solid var(--purple);padding-inline-start:12px;margin:6px 0;white-space:pre-wrap;font-family:"IBM Plex Mono",monospace;font-size:.85rem}
+.chat .u{border-inline-start:4px solid var(--lime);padding-inline-start:12px;margin:6px 0;font-weight:600}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:640px){.two{grid-template-columns:1fr}}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px}
+.toc a{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:.85rem;color:var(--ink);text-decoration:none}
+.toc a:hover,.toc a:focus{border-color:var(--purple)}
+kbd{font-family:"IBM Plex Mono",monospace;background:var(--code);border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:.85em}
+</style>
+
+<div class="wrap">
+<h1>Feature Pipeline Guide</h1>
+<p class="sub">How to install <code>/feature</code> and ship a task with it. Ten minutes to install, one command to run. You approve three times; the agents do the rest.</p>
+
+<nav class="toc">
+<a href="#what">What it is</a><a href="#install">Install</a><a href="#config">Configure the repo</a><a href="#run">Run a task</a><a href="#gates">The 3 gates</a><a href="#story">Stories</a><a href="#frontend">Frontend</a><a href="#tests">Tests &amp; security</a><a href="#files">Where things are</a><a href="#trouble">When it stops</a><a href="#rules">Rules</a><a href="#update">Updating</a><a href="#auto">PRD &amp; autopilot</a>
+</nav>
+
+<h2 id="what"><span class="n">1</span>What it is</h2>
+<p>You give it a GitHub issue number. It plans, writes the code and tests, reviews itself, opens a PR, handles PR-Agent comments, and hands you a PR that is ready for human review. It stops and waits for you at three points. It never merges.</p>
+
+<div class="dia"><svg id="flow" xmlns="http://www.w3.org/2000/svg"></svg></div>
+<div class="legend">
+<span><i style="background:var(--lime)"></i>you decide</span>
+<span><i style="background:var(--purple)"></i>Opus 5.5 · thinks</span>
+<span><i style="background:var(--sonnet)"></i>Sonnet · reads &amp; lists</span>
+<span><i style="background:var(--opencode)"></i>implementer · writes code (OpenCode by default)</span>
+<span><i style="background:var(--agy)"></i>Agy · clicks through the app</span>
+<span><i style="background:var(--soft);border:1px solid var(--line)"></i>a command, no model</span>
+<span><i style="background:var(--github)"></i>GitHub</span>
+<span><i style="background:var(--stop)"></i>loop / stop</span>
+</div>
+
+<h2 id="install"><span class="n">2</span>Install · 10 minutes</h2>
+<ol class="steps">
+<li><b>Get the package.</b> Unzip <code>feature-pipeline.zip</code> anywhere, e.g. <code>D:\tools\feature-pipeline</code>. Keep it; you re-run it for updates.</li>
+<li><b>Open a terminal in your repo</b> and run the installer.
+<div class="two">
+<div><small>PowerShell (Windows)</small><pre><code>D:\tools\feature-pipeline\install.ps1</code></pre></div>
+<div><small>Git Bash / macOS / Linux</small><pre><code>/d/tools/feature-pipeline/install.sh</code></pre></div>
+</div>
+</li>
+<li><b>Pick the project role</b> when asked. It decides which stacks the repo gets.
+<div class="cards">
+<div class="card"><b>1 · backend</b><small>dotnet</small></div>
+<div class="card"><b>2 · frontend</b><small>react</small></div>
+<div class="card"><b>3 · fullstack</b><small>dotnet + react</small></div>
+<div class="card"><b>4 · mobile-flutter</b><small>flutter</small></div>
+<div class="card"><b>5 · mobile-kmp</b><small>kmp</small></div>
+<div class="card"><b>6 · ai</b><small>python + node + react<br>AI tools + POC web app</small></div>
+<div class="card"><b>7 · custom</b><small>type the stacks: dotnet · react · node · flutter · kmp · python · python-flask · python-django</small></div>
+</div>
+</li>
+<li><b>Done.</b> Two folders now exist:
+<div class="tree"><b>~/.claude/</b>            <span class="c">← your machine · the engine · same for every repo · never edit</span>
+├── commands/feature.md
+├── agents/            <span class="c">9 agents</span>
+├── skills/            <span class="c">team skills the agents read</span>
+└── templates/
+
+<b>&lt;repo&gt;/.claude/</b>      <span class="c">← the repo · committed · this is what you edit</span>
+├── pipeline.yml       <span class="c">THE config</span>
+├── skills/&lt;stack&gt;-feature/SKILL.md
+├── conventions/&lt;stack&gt;-testing.md
+├── design-system.md   <span class="c">UI repos only</span>
+└── README.md</div>
+</li>
+</ol>
+<div class="callout"><b>Already have things in <code>~/.claude</code>?</b> Nothing is deleted. If a file with the same name exists and differs, the installer lists it and asks: overwrite · keep yours · abort. Your own commands and skills are untouched.</div>
+
+<h2 id="config"><span class="n">3</span>Configure the repo · 5 minutes, once</h2>
+<p>Open <code>.claude/pipeline.yml</code>. Every stack has the same shape. Check the numbered lines; everything else can wait.</p>
+<pre><code>stacks:
+  dotnet:
+    root:    <b>api/</b>                <span class="c"># ① where the code lives · solution at repo root → .</span>
+    build:   <b>dotnet build api/</b>    <span class="c"># ② the real build command</span>
+    test:    <b>dotnet test api/</b>     <span class="c"># ③ the real test command</span>
+    tests:
+      unit:     { on: true }
+      postman:  { on: true, assert: true, collection: <b>postman/myapp.postman_collection.json</b> }   <span class="c"># ④</span>
+      e2e:      { on: false, start: "dotnet run --project api/", url: http://localhost:5000/swagger }
+      coverage: { on: false, cmd: ..., min: 80 }
+    security:
+      packages:         { on: true,  cmd: "dotnet list api/ package --vulnerable --include-transitive" }
+      secrets:          { on: true,  cmd: "gitleaks detect --no-git -s api/" }
+      sast:             { on: false, cmd: "semgrep --config auto --error api/" }
+      prompt-injection: { on: false }
+
+agy:
+  model: <b>"Gemini 3.8 Flash (High)"</b>   <span class="c"># ⑤ the E2E model</span>
+
+github:
+  base: <b>main</b>                      <span class="c"># ⑥ the branch PRs go to</span></code></pre>
+<p>Switch on what the stack needs with <code>on: true</code>, switch off what it doesn't. The same keys exist in every stack, so anything one stack can do, every stack can.</p>
+<p>Then run <code>/feature</code> with no arguments once. It checks every path and command and prints exactly what is wrong, if anything.</p>
+
+<h3>Optional: use your own Claude subscription for the implementer</h3>
+<p>Team default writes code with OpenCode (cheap). If your plan allows Opus for that too, copy <code>.claude/pipeline.local.example.yml</code> → <code>.claude/pipeline.local.yml</code>. It is gitignored; only your runs change.</p>
+
+<h2 id="run"><span class="n">4</span>Run a task</h2>
+<p>Only tasks assigned to you. Pass the issue number or link. The agent never picks work from the board.</p>
+<pre><code>claude
+/feature #101</code></pre>
+<p>What you see, in order:</p>
+<table>
+<tr><th>Step</th><th>Who</th><th>You do</th></tr>
+<tr><td>Config + git check</td><td>—</td><td>nothing, unless it prints a fix</td></tr>
+<tr><td>Explore repo, detect stacks</td><td><span class="tag t-sonnet">Sonnet</span></td><td>nothing</td></tr>
+<tr><td>Plan</td><td><span class="tag t-opus">Opus</span></td><td>nothing</td></tr>
+<tr><td><b>Plan gate</b></td><td><span class="tag t-you">you</span></td><td>read the Decisions table, approve or revise</td></tr>
+<tr><td>Implement + tests → Postman → style → coverage → security → E2E → review (≤2 rounds)</td><td><span class="tag t-oc">impl</span> <span class="tag t-sonnet">Sonnet</span> <span class="tag t-opus">Opus</span> <span class="tag t-agy">Agy</span></td><td>nothing</td></tr>
+<tr><td>Draft PR · CI · PR-Agent · triage · fix (≤2 cycles)</td><td><span class="tag t-gh">GitHub</span> <span class="tag t-opus">Opus</span> <span class="tag t-oc">impl</span></td><td>nothing, unless asked a product question</td></tr>
+<tr><td><b>PR ready</b></td><td><span class="tag t-you">you</span></td><td>review the PR on GitHub, get one teammate's approval, squash merge</td></tr>
+</table>
+<div class="callout"><b>Closed the terminal at a gate?</b> Run <code>/feature #101</code> again. It continues from where it stopped.</div>
+
+<h2 id="gates"><span class="n">5</span>The three gates</h2>
+<p>These are the only moments the pipeline waits for a human. Answer clearly; "yes", "approve", "revise: …" all work.</p>
+<div class="cards">
+<div class="card gate"><b>Split gate</b><small>stories only</small><p>You see the proposed sub-tasks in order, with a reason each. Edit, reorder, drop, or approve. Approved sub-tasks become GitHub sub-issues assigned to you.</p></div>
+<div class="card gate"><b>Plan gate</b><small>every task</small><p>You see: detected stacks, the full Decisions table, files to create, and the test switches for this run. This is where you catch a wrong assumption. Read the Decisions, not just the Goal.</p></div>
+<div class="card gate"><b>PR gate</b><small>every task</small><p>The PR is marked ready. You review it like any PR. One teammate approves. You merge. The agent is not involved.</p></div>
+</div>
+<div class="chat">
+<div class="a">Plan for #101 — Add refund endpoint
+Stacks: dotnet — because the issue names an endpoint and an error code
+
+Decisions
+| # | Question                      | Decision              | Why                      |
+| 1 | refund after 30 days?         | reject, ORDER_TOO_OLD | policy doc §4            |
+| 2 | partial refunds?              | out of scope          | not in acceptance criteria|
+
+dotnet  tests: unit ON · postman ON (assert ON) · e2e OFF · coverage OFF
+        security: packages ON · secrets ON · sast OFF · prompt-injection OFF
+Approve / revise?</div>
+<div class="u">approve</div>
+</div>
+
+<h2 id="story"><span class="n">6</span>Stories and sub-tasks</h2>
+<p>Give it the story number. It proposes sub-tasks (or checks the ones already there), you approve, then it runs them <b>one at a time, in order</b>. Each sub-task is one branch and one PR.</p>
+<div class="dia"><svg id="storyflow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 150"></svg></div>
+<p>After each PR: merge it, then run <code>/feature #100</code> again. It tells you "next up: #103 (3 of 4)" and continues. It never starts the next sub-task before the previous one is merged.</p>
+<div class="callout"><b>Rule: one PR per sub-task, never per function.</b> A big task is a big PR. That is fine. Small PRs come from small tasks, not from cutting one task into pieces.</div>
+
+<h2 id="frontend"><span class="n">7</span>Frontend tasks: two things must exist</h2>
+<div class="cards">
+<div class="card stop"><b>Design system</b><p><code>.claude/design-system.md</code> with the tokens (colours, type, spacing, components). Owned by the UI/UX team. Missing → the run stops before planning.</p></div>
+<div class="card stop"><b>Figma frames</b><p>When asked, paste the Figma link(s) for the task's screens. If the repo has no Figma MCP, export the frames as PNG into <code>.process/&lt;task&gt;/figma/</code>. No frames → stop.</p></div>
+</div>
+<p>Every visual value in the code must be a token from the design system. A raw <code>#hex</code> or <code>13px</code> is a blocking finding. Every state the frame shows (loading, empty, error) must exist in code.</p>
+
+<h2 id="tests"><span class="n">8</span>Tests and security: you decide, per stack and per task</h2>
+<p>Defaults come from <code>pipeline.yml</code>, per stack. At the plan gate you can override for this task only ("no unit tests, it's a POC", "run e2e this time").</p>
+<div class="two">
+<div class="card"><b>tests</b>
+<table><tr><th>Switch</th><th>What</th><th>Default</th></tr>
+<tr><td>unit</td><td>plan's tests; updates or deletes the existing tests the change breaks</td><td>on</td></tr>
+<tr><td>postman</td><td>API stacks: a request per added / changed / removed endpoint · <code>assert</code> checks status + error code per scenario</td><td>on (API)</td></tr>
+<tr><td>e2e</td><td>starts the app; Agy opens it and walks the plan's scenarios, one screenshot each</td><td>off</td></tr>
+<tr><td>coverage</td><td>coverage command; review fails below <code>min</code></td><td>off</td></tr></table></div>
+<div class="card"><b>security</b>
+<table><tr><th>Switch</th><th>What</th><th>Default</th></tr>
+<tr><td>packages</td><td>known-vulnerable dependencies</td><td>on</td></tr>
+<tr><td>secrets</td><td>keys and tokens committed by mistake</td><td>on</td></tr>
+<tr><td>sast</td><td>static analysis: injection, unsafe APIs</td><td>off</td></tr>
+<tr><td>prompt-injection</td><td>an agent checks every place untrusted text reaches an LLM prompt or tool</td><td>off</td></tr></table></div>
+</div>
+<p>Security findings rated <code>high</code> or worse block the review (<code>steps.security.fail_on</code>). Findings in code the PR didn't touch are listed as pre-existing and never block.</p>
+<div class="callout"><b>About E2E:</b> Agy runs with <code>--dangerously-skip-permissions</code>, so it can act on your machine without asking. Point it at a local or test environment only, never production data.</div>
+<p>The security checks call tools that must be installed: <code>gitleaks</code>, <code>semgrep</code>, <code>osv-scanner</code>, <code>pip-audit</code>. The config check names the missing one, only for switches that are on.</p>
+
+<h2 id="files"><span class="n">9</span>Where things are</h2>
+<p>Every run leaves a folder in the repo. Everything the agents read, decided, and wrote is in it. Committed with the PR.</p>
+<div class="tree"><b>.process/101-add-refund-endpoint/</b>
+├── 00-status.md              <span class="c">where the run is · who it waits for</span>
+├── 01-context.md             <span class="c">what the repo had · STACKS: dotnet</span>
+├── 02-plan.md                <span class="c">the plan you approved</span>
+├── 03-implementation-dotnet.md
+├── 03-postman-dotnet.md
+├── 04-style-dotnet.md
+├── 04-security-dotnet.md     <span class="c">SECURITY: N findings ≥ high</span>
+├── 05-e2e-react.md           <span class="c">E2E: P passed, F failed · screenshots in e2e/react/</span>
+├── 05-review.md              <span class="c">verdict + numbered findings</span>
+├── 06-pr-comments.md         <span class="c">PR-Agent, verbatim</span>
+├── 07-triage.md              <span class="c">fix / reject / asked you, per comment</span>
+├── 08-fix-dotnet.md
+├── 09-verify.md
+└── metrics.md                <span class="c">tokens per model · time per step · rounds</span></div>
+<p>Also in the repo: <code>.claude/triage-memory.md</code>. Every PR-Agent comment pattern the triager decided on. Same pattern next time → same decision, no re-reading. When one hits 3, the report asks you to make it a style rule.</p>
+
+<h2 id="trouble"><span class="n">10</span>When it stops</h2>
+<table>
+<tr><th>It says</th><th>Do</th></tr>
+<tr><td><code>stacks.react.root web/ not found</code> + a list</td><td>It searched for the folder. Pick the right one (it fixes the whole stack block), <code>n</code> if this task creates it, <code>d</code> if the repo doesn't have that stack.</td></tr>
+<tr><td>dirty tree / unpushed commits</td><td>Commit or stash, run again.</td></tr>
+<tr><td>issue assigned to someone else</td><td>It's not yours. Ask them, or get it reassigned.</td></tr>
+<tr><td><code>BLOCKED</code> in the plan</td><td>The planner needs a product decision only you can make. Answer it, it re-plans.</td></tr>
+<tr><td>no design system / no Figma</td><td>Get the file from UI/UX · paste the Figma links.</td></tr>
+<tr><td>two review rounds failed</td><td>The plan was wrong. Revise the plan, don't retry the code.</td></tr>
+<tr><td>PR-Agent posted nothing after 15 minutes</td><td>Check PR-Agent is enabled on the repo, then run again.</td></tr>
+<tr><td>a downgraded "critical" comment</td><td>The triager thinks the bot overrated it. You get a veto. Read it.</td></tr>
+<tr><td><code>gitleaks not on PATH</code> (or semgrep, osv-scanner, pip-audit)</td><td>Install the tool, or switch that check off for the stack.</td></tr>
+<tr><td><code>app did not start</code> (E2E)</td><td>The <code>start</code> or <code>url</code> under <code>tests.e2e</code> is wrong for your machine. Fix it, run again.</td></tr>
+<tr><td>E2E scenarios failed</td><td>Open the screenshots in <code>.process/&lt;task&gt;/e2e/</code>. It goes back to rework on its own.</td></tr>
+<tr><td>a security finding you believe is wrong</td><td>The reviewer can mark a proven false positive non-blocking. Raising <code>fail_on</code> to hide it is never the fix.</td></tr>
+<tr><td><code>BLOCKED: …</code> in a report</td><td>An agent stopped instead of guessing. Answer its question, run again.</td></tr>
+<tr><td><code>test integrity</code> finding</td><td>Code edited, skipped, or deleted an existing test the plan didn't list. Never allowed.</td></tr>
+</table>
+
+<h2 id="rules"><span class="n">11</span>Rules that never change</h2>
+<ul>
+<li>You always pass the issue. The agent never chooses work.</li>
+<li>You never declare the stack. The agent detects it; you correct it at the plan gate.</li>
+<li>One PR per sub-task. Next sub-task only after merge.</li>
+<li>The agent never merges. Dev review + one teammate, always.</li>
+<li>A green build is one that was run, not one that was reported.</li>
+<li>Don't edit files under <code>~/.claude</code>. Edit <code>&lt;repo&gt;/.claude/pipeline.yml</code>, the skills, and the conventions.</li>
+</ul>
+
+<h2 id="update"><span class="n">12</span>Updating</h2>
+<p>Unzip the new package over the old one and run the installer again. It shows the version on both sides and every file that differs, then asks. Your <code>pipeline.yml</code>, <code>triage-memory.md</code>, and <code>design-system.md</code> are never touched.</p>
+<p>Changed a skill or convention in a repo? Run <code>bump.sh .claude "what you changed"</code> (or <code>bump.ps1</code>) so the version moves and the team can see it. If the change should become the team default, send the diff to Mohamed.</p>
+
+
+<h2 id="auto"><span class="n">13</span>New app from a PRD, and autopilot (POC only)</h2>
+<p><b>Normal:</b> write <code>docs/PRD.md</code>, run <code>/product docs/PRD.md</code>. It writes assumptions and ADRs, creates the epic and stories on GitHub (story 1 = walking skeleton: scaffold, <code>init.sh</code>, <code>scripts/verify.sh</code>, CI), and waits for you to approve the backlog. Then <code>/feature #&lt;story&gt;</code> as usual.</p>
+<p><b>Autopilot:</b> nobody at the gates. Throwaway POCs only. Off unless you switch it on in your own <code>.claude/pipeline.local.yml</code>:</p>
+<pre><code>autopilot:
+  on: true
+  judge: { model: opus, effort: medium }   # opus = latest Opus (5.5)
+  hours: 72                                # ends when the app is done or 72h pass
+  max_attempts: 3                          # 1 OpenCode · 2 Claude Sonnet · 3 Claude Opus · then skipped
+
+<span class="c"># then</span>
+bash ~/.claude/bin/autopilot.sh --prd docs/PRD.md</code></pre>
+<table><tr><th>At</th><th>Normal</th><th>Autopilot</th></tr>
+<tr><td>backlog · split · plan gate</td><td>you</td><td><span class="tag t-opus">plan-judge</span> fresh eyes, ≤2 revisions, logged</td></tr>
+<tr><td>design gate</td><td>design system + Figma</td><td>design system required, Figma optional</td></tr>
+<tr><td>PR gate</td><td>you + a teammate</td><td>squash-merge when CI + review + security + E2E are green</td></tr>
+<tr><td>a task fails 3 times</td><td>—</td><td>labelled <code>autopilot:blocked</code>, next independent task runs</td></tr>
+<tr><td>main goes red</td><td>—</td><td>reverted by PR; still red → a “repair main” task runs first</td></tr>
+<tr><td>usage limit hit</td><td>—</td><td>waits 20 min, retries the same task (not counted as a try)</td></tr></table>
+<p>It never stops on a failure: a failed task is skipped, a broken main gets a "repair main" task first, a subscription usage limit means it waits and resumes. It ends when: everything is merged · 72h pass · nothing is left that can run · main can't be repaired after 3 tries. Read <code>.process/autopilot/REPORT.md</code> when you're back.</p>
+<div class="callout"><b>Autopilot runs Claude with permission checks off.</b> Use a disposable VM or container and a repo-scoped token. Copy <code>~/.claude/settings.autopilot.example.json</code> to <code>.claude/settings.local.json</code>; its deny list still applies. Never on a team repo.</div>
+</div>
+<script>
+(function(){
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const edge = css('--edge'), ink = css('--ink'), muted = css('--muted');
+  const col = {you:['--lime','--lime-ink'], opus:['--purple','--purple-ink'], sonnet:['--sonnet','--lime-ink'], oc:['--opencode','--purple-ink'], gh:['--github','--purple-ink'], stop:['--stop','--purple-ink'], soft:['--soft','--soft-ink'], agy:['--agy','--purple-ink']};
+  const box = (x,y,w,h,k,t,s,small) => { const [bg,fg]=col[k].map(css);
+    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="${bg}" ${k==='soft'?`stroke="${css('--line')}"`:''}/>
+      <text x="${x+w/2}" y="${y+(small?20:24)}" text-anchor="middle" font-size="${small?12:14}" font-weight="600" fill="${fg}">${t}</text>
+      ${s?`<text x="${x+w/2}" y="${y+(small?36:41)}" text-anchor="middle" font-size="${small?11:12}" fill="${fg}" opacity=".85">${s}</text>`:''}`; };
+  // main flow
+  const W=760, CX=300, BW=260, BH=52, GAP=26;
+  const steps=[
+    {k:'gh',t:'Issue #101',s:'assigned to you · acceptance criteria'},
+    {k:'soft',t:'/feature #101',s:'config check · clean git · pull main'},
+    {k:'sonnet',t:'Explore repo',s:'finds what exists · detects stacks'},
+    {k:'opus',t:'Plan',s:'files · decisions · tests',side:{k:'stop',t:'Blocked',s:'needs your decision'}},
+    {k:'you',t:'You approve the plan',s:'read the Decisions table',loop:3},
+    {k:'oc',t:'Implement + tests',s:'then Postman'},
+    {k:'sonnet',t:'Style check',s:'rules, literally'},
+    {k:'soft',t:'Coverage',s:'command · below min blocks'},
+    {k:'soft',t:'Security',s:'packages · secrets · sast · prompt injection'},
+    {k:'agy',t:'E2E · Agy',s:'opens the app · walks scenarios'},
+    {k:'opus',t:'Review',s:'gates all of the above',side:{k:'stop',t:'Changes · ≤2 rounds',s:'then stop, re-plan'},loopTo:5},
+    {k:'gh',t:'Draft PR',s:'CI · PR-Agent comments',side:{k:'stop',t:'Fix · ≤2 cycles',s:'triage → fix → verify'},loopTo:11},
+    {k:'opus',t:'Triage comments',s:'fix · reject · ask you'},
+    {k:'you',t:'You review the PR',s:'+ one teammate approves'},
+    {k:'gh',t:'Squash merge',s:'issue closed'},
+  ];
+  const H=20+steps.length*(BH+GAP);
+  const svg=document.getElementById('flow'); svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.setAttribute('width',W); svg.setAttribute('height',H);
+  let out=`<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${edge}"/></marker></defs>`;
+  const yOf=i=>20+i*(BH+GAP);
+  steps.forEach((st,i)=>{ const y=yOf(i);
+    out+=box(CX-BW/2,y,BW,BH,st.k,st.t,st.s);
+    if(i<steps.length-1) out+=`<line x1="${CX}" y1="${y+BH}" x2="${CX}" y2="${y+BH+GAP}" stroke="${edge}" stroke-width="1.5" marker-end="url(#ar)"/>`;
+    if(st.side){ const sx=CX+BW/2+36, sw=190, sh=46, sy=y+3;
+      out+=`<line x1="${CX+BW/2}" y1="${y+BH/2}" x2="${sx}" y2="${y+BH/2}" stroke="${edge}" stroke-width="1.5" marker-end="url(#ar)"/>`+box(sx,sy,sw,sh,st.side.k,st.side.t,st.side.s,true);
+      if(st.loopTo!==undefined){ const ty=yOf(st.loopTo)+BH/2, rx=sx+sw+12;
+        out+=`<path d="M${sx+sw} ${sy+sh/2} H${rx} V${ty} H${CX+BW/2+2}" fill="none" stroke="${edge}" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#ar)"/>`; } }
+    if(st.loop!==undefined){ const ty=yOf(st.loop)+BH/2, lx=CX-BW/2-26;
+      out+=`<path d="M${CX-BW/2} ${y+BH/2} H${lx} V${ty} H${CX-BW/2-2}" fill="none" stroke="${edge}" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#ar)"/><text x="${lx-6}" y="${(y+BH/2+ty)/2}" text-anchor="end" font-size="11" fill="${muted}">revise</text>`; }
+    if(st.k==='you') out+=`<text x="${CX-BW/2-10}" y="${y+BH/2+4}" text-anchor="end" font-size="11" font-weight="600" fill="${ink}">waits for you</text>`;
+  });
+  svg.innerHTML=out;
+  // story strip
+  const s2=document.getElementById("storyflow"); let o2=`<defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${edge}"/></marker></defs>`;
+  o2+=box(10,50,120,50,'gh','Story #100','4 sub-tasks');
+  o2+=`<line x1="130" y1="75" x2="160" y2="75" stroke="${edge}" stroke-width="1.5" marker-end="url(#ar2)"/>`;
+  o2+=box(160,50,120,50,'you','You approve','the split');
+  const xs=[310,420,530,640];
+  xs.forEach((x,i)=>{ o2+=`<line x1="${i?xs[i-1]+100:280}" y1="75" x2="${x}" y2="75" stroke="${edge}" stroke-width="1.5" marker-end="url(#ar2)"/>`;
+    o2+=box(x,50,100,50,i<2?'gh':'soft',`#10${i+1}`,i<2?'merged':i===2?'in progress':'next',true);
+    if(i<3) o2+=`<text x="${x+100+5}" y="66" font-size="10" fill="${muted}">merge</text>`; });
+  o2+=`<text x="380" y="130" text-anchor="middle" font-size="12" fill="${muted}">one branch · one PR · one review each — next one starts only after merge</text>`;
+  s2.innerHTML=o2;
+})();
+</script>

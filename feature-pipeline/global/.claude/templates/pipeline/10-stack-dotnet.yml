@@ -1,0 +1,17 @@
+  dotnet:
+    root:    api/
+    build:   dotnet build api/
+    test:    dotnet test api/
+    style:   .claude/skills/dotnet-feature/SKILL.md
+    testing: .claude/conventions/dotnet-testing.md
+    ui:      false
+    tests:
+      unit:     { on: true }
+      postman:  { on: true,  assert: true, collection: postman/myapp.postman_collection.json, environment: postman/local.postman_environment.json, run: "" }
+      e2e:      { on: false, start: "dotnet run --project api/", url: http://localhost:5000/swagger }   # Agy opens url and walks the plan's scenarios
+      coverage: { on: false, cmd: 'dotnet test api/ --collect:"XPlat Code Coverage"', min: 80 }   # SonarQube: dotnet sonarscanner begin … && dotnet build && dotnet test && dotnet sonarscanner end
+    security:
+      packages:         { on: true,  cmd: "dotnet list api/ package --vulnerable --include-transitive" }
+      secrets:          { on: true,  cmd: "gitleaks detect --no-git -s api/" }
+      sast:             { on: false, cmd: "semgrep --config auto --error api/" }
+      prompt-injection: { on: false }           # agent pass; turn on where this stack builds LLM prompts from user input

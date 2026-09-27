@@ -1,0 +1,17 @@
+  kmp:
+    root:    kmp/
+    build:   cd kmp/ && ./gradlew build
+    test:    cd kmp/ && ./gradlew allTests
+    style:   .claude/skills/kmp-feature/SKILL.md
+    testing: .claude/conventions/kmp-testing.md
+    ui:      true                                  # true → design system + Figma required
+    tests:
+      unit:     { on: true }
+      postman:  { on: false }                     # no HTTP API in this stack
+      e2e:      { on: false, start: "cd kmp/ && ./gradlew :composeApp:wasmJsBrowserDevelopmentRun", url: http://localhost:8080 }   # Agy opens url and walks the plan's scenarios
+      coverage: { on: false, cmd: 'cd kmp/ && ./gradlew koverXmlReport', min: 70 }
+    security:
+      packages:         { on: true,  cmd: "osv-scanner -r kmp/" }
+      secrets:          { on: true,  cmd: "gitleaks detect --no-git -s kmp/" }
+      sast:             { on: false, cmd: "semgrep --config auto --error kmp/" }
+      prompt-injection: { on: false }           # agent pass; turn on where this stack builds LLM prompts from user input
