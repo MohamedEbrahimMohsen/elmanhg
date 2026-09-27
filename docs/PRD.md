@@ -449,7 +449,7 @@ TeacherMessage(id, thread_id, sender_id, kind[Text|Voice], text, audio_url?, tra
 AvatarConversation(id, student_id, context_json, model, prompt_version, started_at)
 AvatarMessage(id, conversation_id, role, text, created_at)
 
-AuditLog(id, actor_id, action, entity, entity_id, diff_json, created_at)
+AuditLog(id, actor_id, actor_name, actor_role, action, entity, entity_id, outcome, error_code, diff_json, trace_id, created_at)  -- append-only
 ```
 
 ---

@@ -5,12 +5,15 @@
  * OpenAPI spec version: 1.0.0
  */
 
+export * from './auditLogResult';
 export * from './authResult';
 export * from './authUserResult';
 export * from './generateOTPCommand';
 export * from './generateOTPResult';
+export * from './getAuditLogsParams';
 export * from './loginWithEmailCommand';
 export * from './loginWithPhoneCommand';
+export * from './pageDataOfAuditLogResult';
 export * from './registerWithEmailCommand';
 export * from './registerWithPhoneCommand';
 export * from './teacherSubjectResult';

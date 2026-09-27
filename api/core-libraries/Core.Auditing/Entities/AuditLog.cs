@@ -14,10 +14,11 @@ public class AuditLog : Entity
     public string Outcome { get; private set; } = default!;
     public string? ErrorCode { get; private set; }
     public string? TraceId { get; private set; }
+    public string? Diff { get; private set; }
 
     private AuditLog() : base(Guid.NewGuid()) { }
 
-    public static AuditLog Create(DateTimeOffset timestamp, Guid? actorUserId, string? actorUserName, string? actorRole, string action, string resourceType, Guid? resourceId, string outcome, string? errorCode, string? traceId)
+    public static AuditLog Create(DateTimeOffset timestamp, Guid? actorUserId, string? actorUserName, string? actorRole, string action, string resourceType, Guid? resourceId, string outcome, string? errorCode, string? traceId, string? diff)
     {
         return new AuditLog()
         {
@@ -30,7 +31,8 @@ public class AuditLog : Entity
             ResourceId = resourceId,
             Outcome = outcome,
             ErrorCode = errorCode,
-            TraceId = traceId
+            TraceId = traceId,
+            Diff = diff
         };
     }
 }

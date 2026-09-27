@@ -14,6 +14,7 @@ export default defineConfig({
         mutator: { path: 'src/shared/lib/http.ts', name: 'http' },
         fetch: { includeHttpResponseReturnType: false },
         query: { useSuspenseQuery: true, signal: true },
+        mock: { exactOptional: true },
       },
       mock: { generators: [{ type: 'msw' }] },
     },
@@ -25,6 +26,7 @@ export default defineConfig({
       mode: 'tags-split',
       target: 'src/shared/api/generated/zod',
       fileExtension: '.zod.ts',
+      override: { operations: { GetAuditLogs: { zod: { generate: { query: false } } } } },
     },
   },
 });

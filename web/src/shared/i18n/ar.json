@@ -33,7 +33,11 @@
     "TOO_MANY_REQUESTS": "طلبات كثيرة. انتظر قليلًا وحاول مرة أخرى.",
     "VALIDATION_PHONE_NUMBER_INVALID_CELLULAR_CODE": "رقم الموبايل يجب أن يبدأ بـ 010 أو 011 أو 012 أو 015.",
     "VALIDATION_PHONE_NUMBER_MUST_BE_X_DIGITS": "رقم الموبايل يجب أن يكون 11 رقمًا.",
-    "VALIDATION_PHONE_NUMBER_MUST_BE_ONLY_DIGITS": "رقم الموبايل يجب أن يحتوي على أرقام فقط."
+    "VALIDATION_PHONE_NUMBER_MUST_BE_ONLY_DIGITS": "رقم الموبايل يجب أن يحتوي على أرقام فقط.",
+    "AUDIT_LOG_PAGE_NUMBER_INVALID": "رقم الصفحة يجب ان يكون 1 او اكثر.",
+    "AUDIT_LOG_PAGE_SIZE_INVALID": "حجم الصفحة خارج النطاق المسموح.",
+    "AUDIT_LOG_FILTER_TOO_LONG": "نص التصفية طويل جدا.",
+    "AUDIT_LOG_DATE_RANGE_INVALID": "يجب ان يكون تاريخ النهاية بعد تاريخ البداية."
   },
   "error": {
     "title": "حدث خطأ"

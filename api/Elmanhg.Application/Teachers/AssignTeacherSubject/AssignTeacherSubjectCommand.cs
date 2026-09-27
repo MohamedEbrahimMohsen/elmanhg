@@ -6,7 +6,7 @@ namespace Elmanhg.Application.Teachers.AssignTeacherSubject;
 
 public sealed record AssignTeacherSubjectCommand(Guid TeacherId, Guid SubjectId) : IRequest<TeacherSubjectResult>, IAuditableCommand
 {
-    public string AuditAction => "AssignTeacherSubject";
+    public string AuditAction => "Teacher.AssignSubject";
     public string AuditResourceType => "Teacher";
     public Guid? AuditResourceId => TeacherId;
 }
