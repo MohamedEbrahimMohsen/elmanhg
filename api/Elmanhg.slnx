@@ -1,0 +1,28 @@
+<Solution>
+  <Folder Name="/core-libraries/">
+    <Project Path="core-libraries/Core.Auditing/Core.Auditing.csproj" />
+    <Project Path="core-libraries/Core.Cache/Core.Cache.csproj" />
+    <Project Path="core-libraries/Core.CQRS/Core.CQRS.csproj" />
+    <Project Path="core-libraries/Core.DDD/Core.DDD.csproj" />
+    <Project Path="core-libraries/Core.EntityFrameworkCore/Core.EntityFrameworkCore.csproj" />
+    <Project Path="core-libraries/Core.Errors/Core.Errors.csproj" />
+    <Project Path="core-libraries/Core.Exceptions/Core.Exceptions.csproj" />
+    <Project Path="core-libraries/Core.Identity/Core.Identity.csproj" />
+    <Project Path="core-libraries/Core.Localization/Core.Localization.csproj" />
+    <Project Path="core-libraries/Core.Logging/Core.Logging.csproj" />
+    <Project Path="core-libraries/Core.Notifications/Core.Notifications.csproj" />
+    <Project Path="core-libraries/Core.OTP/Core.OTP.csproj" />
+    <Project Path="core-libraries/Core.Queues/Core.Queues.csproj" />
+    <Project Path="core-libraries/Core.Utilities/Core.Utilities.csproj" />
+    <Project Path="core-libraries/Core.Validation/Core.Validation.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Project Path="Elmanhg.Api/Elmanhg.Api.csproj" />
+  <Project Path="Elmanhg.Application/Elmanhg.Application.csproj" />
+  <Project Path="Elmanhg.Domain/Elmanhg.Domain.csproj" />
+  <Project Path="Elmanhg.Infrastructure/Elmanhg.Infrastructure.csproj" />
+  <Project Path="Elmanhg.Tests/Elmanhg.Tests.csproj" />
+</Solution>

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\core-libraries\Core.Auditing\Core.Auditing.csproj" />
+    <ProjectReference Include="..\core-libraries\Core.CQRS\Core.CQRS.csproj" />
+    <ProjectReference Include="..\core-libraries\Core.Identity\Core.Identity.csproj" />
+    <ProjectReference Include="..\core-libraries\Core.Localization\Core.Localization.csproj" />
+    <ProjectReference Include="..\core-libraries\Core.Utilities\Core.Utilities.csproj" />
+    <ProjectReference Include="..\core-libraries\Core.Validation\Core.Validation.csproj" />
+    <ProjectReference Include="..\Elmanhg.Domain\Elmanhg.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

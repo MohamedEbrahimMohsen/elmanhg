@@ -19,6 +19,22 @@ Arabic-first exam-prep platform for Egyptian Thanaweya Amma students. Students d
 |---|---|
 | `prototype/` | Working wireframe. Vanilla JS, no build step. Open `prototype/index.html`. |
 | `scripts/` | `import_backlog.py` pushes the backlog to GitHub issues and the project. `build_design_handoff.py` builds the Claude Design upload zip. |
+| `api/` | ASP.NET Core 10 backend: `Elmanhg.slnx`, DDD/CQRS on `core-libraries/` vendored from Morabh `Core/`, with SQL Server swapped for PostgreSQL/Npgsql. |
+| `postman/` | Postman collection mirroring the API surface. |
+
+## Run the backend locally
+
+```bash
+cp .env.example .env
+cp api/Elmanhg.Api/appsettings.example.json api/Elmanhg.Api/appsettings.json
+docker compose up -d postgres
+dotnet tool restore
+dotnet ef database update --project api/Elmanhg.Infrastructure --startup-project api/Elmanhg.Api
+dotnet run --project api/Elmanhg.Api --launch-profile http
+curl http://localhost:5080/health   # → Healthy
+```
+
+The API docs are at `http://localhost:5080/scalar/v1`. Tests run with `dotnet test api/` (Docker required).
 
 ## How features are built
 

@@ -1,0 +1,3 @@
+<Project>
+  <!-- Stops MSBuild walking up to api/Directory.Build.props: vendored Core keeps its own csproj settings and is not held to TreatWarningsAsErrors. -->
+</Project>
