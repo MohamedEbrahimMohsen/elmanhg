@@ -38,6 +38,14 @@ describe('AppShell', () => {
     expect(within(nav).queryByRole('link', { name: 'More' })).toBeNull();
   });
 
+  it('shows only teacher destinations in the top tabs', async () => {
+    renderApp('/teacher', { session: testSessions.teacher });
+
+    const nav = await screen.findByRole('navigation', { name: 'Main navigation' });
+
+    expect(linkNames(nav)).toEqual(['Review queue', 'Student questions', 'My stats']);
+  });
+
   it('marks the current destination as the current page', async () => {
     renderApp('/student/progress', { session: testSessions.student });
 

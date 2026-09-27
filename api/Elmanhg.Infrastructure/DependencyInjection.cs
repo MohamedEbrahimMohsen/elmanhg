@@ -1,5 +1,9 @@
 using Core.OTP.Sms;
+using Elmanhg.Domain.Subjects;
+using Elmanhg.Domain.Teachers;
 using Elmanhg.Infrastructure.Sms;
+using Elmanhg.Infrastructure.Subjects;
+using Elmanhg.Infrastructure.Teachers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -16,6 +20,8 @@ public static class DependencyInjection
             SmsProvider.Fake => serviceProvider.GetRequiredService<FakeSmsSender>(),
             _ => throw new InvalidOperationException("Unsupported Sms:Provider."),
         });
+        services.AddScoped<ISubjectRepository, SubjectRepository>();
+        services.AddScoped<ITeacherSubjectRepository, TeacherSubjectRepository>();
         return services;
     }
 }

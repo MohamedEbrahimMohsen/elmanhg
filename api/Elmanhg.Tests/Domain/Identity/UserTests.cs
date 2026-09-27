@@ -43,6 +43,17 @@ public sealed class UserTests
     }
 
     [Fact]
+    public void CreateTeacher_Always_CreatesActiveTeacherWithConfirmedEmail()
+    {
+        var user = User.CreateTeacher("Teacher", "t@elmanhg.test");
+
+        user.Role.Should().Be(UserRole.Teacher);
+        user.IsActive.Should().BeTrue();
+        user.UserName.Should().Be(user.Email).And.Be("t@elmanhg.test");
+        user.EmailConfirmed.Should().BeTrue();
+    }
+
+    [Fact]
     public void Suspend_ActiveUser_SetsSuspendedAndStampsUpdationDate()
     {
         var user = User.CreateStudentWithPhone("Ahmed", "01012345678");

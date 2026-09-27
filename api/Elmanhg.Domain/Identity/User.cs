@@ -43,6 +43,14 @@ public class User : IdentityUser<Guid>, IAuditEntity
         return user;
     }
 
+    public static User CreateTeacher(string displayName, string email)
+    {
+        var user = Create(displayName, UserRole.Teacher, userName: email);
+        user.Email = email;
+        user.EmailConfirmed = true;
+        return user;
+    }
+
     public void Suspend()
     {
         if (Status == UserStatus.Suspended)

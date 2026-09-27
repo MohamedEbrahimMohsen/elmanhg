@@ -13,5 +13,6 @@ export * from './loginWithEmailCommand';
 export * from './loginWithPhoneCommand';
 export * from './registerWithEmailCommand';
 export * from './registerWithPhoneCommand';
+export * from './teacherSubjectResult';
 export * from './verifyOTPCommand';
 export * from './verifyOTPResult';

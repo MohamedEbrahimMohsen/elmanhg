@@ -98,4 +98,11 @@
   <data name="VALIDATION_PHONE_NUMBER_MUST_BE_ONLY_DIGITS" xml:space="preserve"><value>Mobile number must contain digits only.</value></data>
   <data name="VALIDATION_PHONE_NUMBER_MUST_BE_X_DIGITS" xml:space="preserve"><value>Mobile number must be 11 digits.</value></data>
   <data name="VALIDATION_PHONE_NUMBER_INVALID_CELLULAR_CODE" xml:space="preserve"><value>Mobile number must start with 010, 011, 012 or 015.</value></data>
+  <data name="SUBJECT_OUT_OF_SCOPE" xml:space="preserve"><value>This subject is not assigned to you.</value></data>
+  <data name="SUBJECT_NOT_FOUND" xml:space="preserve"><value>Subject not found.</value></data>
+  <data name="TEACHER_SUBJECT_ALREADY_ASSIGNED" xml:space="preserve"><value>This subject is already assigned to the teacher.</value></data>
+  <data name="TEACHER_SUBJECT_NOT_ASSIGNED" xml:space="preserve"><value>This subject is not assigned to the teacher.</value></data>
+  <data name="TEACHER_ID_REQUIRED" xml:space="preserve"><value>Choose a teacher.</value></data>
+  <data name="SUBJECT_ID_REQUIRED" xml:space="preserve"><value>Choose a subject.</value></data>
+  <data name="USER_NOT_TEACHER" xml:space="preserve"><value>Subjects can only be assigned to teachers.</value></data>
 </root>

@@ -69,6 +69,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         {
             services.RemoveAll<ISmsSender>();
             services.AddSingleton<ISmsSender>(Sms);
+            services.AddControllers().AddApplicationPart(typeof(ApiFactory).Assembly);
+            services.AddMediatR(configuration => configuration.RegisterServicesFromAssembly(typeof(ApiFactory).Assembly));
         });
     }
 
