@@ -1,0 +1,88 @@
+0023778Z ##[group]Run dotnet test api/ -c Release --no-build
+4229Z ^[[36;1mdotnet test api/ -c Release --no-build^[[0m
+8189Z shell: /usr/bin/bash -e {0}
+8492Z env:
+8705Z   DOTNET_NOLOGO: true
+8970Z   DOTNET_CLI_TELEMETRY_OPTOUT: true
+9279Z   DOTNET_ROOT: /usr/share/dotnet
+9555Z ##[endgroup]
+0785Z Running tests from /home/runner/work/elmanhg/elmanhg/api/Elmanhg.Tests/bin/Release/net10.0/Elmanhg.Tests.dll (net10.0|x64)
+6444Z ^[[31mfailed^[[m Elmanhg.Tests.Integration.Composition.PipelineCompositionTests.Resolve_PipelineBehaviours_AuditBehaviourIsOutermost ^[[90m(95ms)^[[m
+9072Z   Expected type to be Core.Auditing.AuditBehaviour`2[[Elmanhg.Tests.Integration.Composition.PipelineProbeRequest, Elmanhg.Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null],[MediatR.Unit, MediatR.Contracts, Version=2.0.1.0, Culture=neutral, PublicKeyToken=bb9a41a5e8aaa7e2]], but found Core.CQRS.Behaviours.ValidationBehaviour`2[[Elmanhg.Tests.Integration.Composition.PipelineProbeRequest, Elmanhg.Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null],[MediatR.Unit, MediatR.Contracts, Version=2.0.1.0, Culture=neutral, PublicKeyToken=bb9a41a5e8aaa7e2]].
+5319Z   from /home/runner/work/elmanhg/elmanhg/api/Elmanhg.Tests/bin/Release/net10.0/Elmanhg.Tests.dll (net10.0|x64)
+8889Z ^[[31m  Expected type to be Core.Auditing.AuditBehaviour`2[[Elmanhg.Tests.Integration.Composition.PipelineProbeRequest, Elmanhg.Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null],[MediatR.Unit, MediatR.Contracts, Version=2.0.1.0, Culture=neutral, PublicKeyToken=bb9a41a5e8aaa7e2]], but found Core.CQRS.Behaviours.ValidationBehaviour`2[[Elmanhg.Tests.Integration.Composition.PipelineProbeRequest, Elmanhg.Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null],[MediatR.Unit, MediatR.Contracts, Version=2.0.1.0, Culture=neutral, PublicKeyToken=bb9a41a5e8aaa7e2]].
+4546Z ^[[m^[[90m    at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+6057Z     at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+4570Z     at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+4228Z     at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+4283Z     at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+5684Z     at FluentAssertions.Execution.AssertionScope.FailWith(String message)
+4703Z     at FluentAssertions.Types.TypeAssertions.Be(Type expected, String because, Object[] becauseArgs)
+4771Z     at FluentAssertions.Primitives.ReferenceTypeAssertions`2.BeOfType(Type expectedType, String because, Object[] becauseArgs)
+4289Z     at FluentAssertions.Primitives.ReferenceTypeAssertions`2.BeOfType[T](String because, Object[] becauseArgs)
+5924Z     at Elmanhg.Tests.Integration.Composition.PipelineCompositionTests.Resolve_PipelineBehaviours_AuditBehaviourIsOutermost() in /home/runner/work/elmanhg/elmanhg/api/Elmanhg.Tests/Integration/Composition/PipelineCompositionTests.cs:29^[[90m
+4181Z     at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+6293Z     at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+5646Z ^[[m^[[31mfailed^[[m Elmanhg.Tests.Integration.AuditLogs.AuditLogsEndpointTests.Get_PageSizeOne_ReturnsNewestFirstWithTotals ^[[90m(457ms)^[[m
+4688Z   Expected var item = body.GetProperty("items").EnumerateArray() to contain a single item, but the collection is empty.
+6031Z   from /home/runner/work/elmanhg/elmanhg/api/Elmanhg.Tests/bin/Release/net10.0/Elmanhg.Tests.dll (net10.0|x64)
+5171Z ^[[31m  Expected var item = body.GetProperty("items").EnumerateArray() to contain a single item, but the collection is empty.
+4628Z ^[[m^[[90m    at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+4257Z     at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+4056Z     at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+3943Z     at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+3953Z     at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+3861Z     at FluentAssertions.Execution.AssertionScope.FailWith(String message)
+4214Z     at FluentAssertions.Collections.GenericCollectionAssertions`3.ContainSingle(String because, Object[] becauseArgs)
+5420Z     at Elmanhg.Tests.Integration.AuditLogs.AuditLogsEndpointTests.Get_PageSizeOne_ReturnsNewestFirstWithTotals() in /home/runner/work/elmanhg/elmanhg/api/Elmanhg.Tests/Integration/AuditLogs/AuditLogsEndpointTests.cs:101^[[90m
+3751Z     --- End of stack trace from previous location ---
+9329Z ^[[m^[[31mfailed^[[m Elmanhg.Tests.Integration.AuditLogs.AuditLogsEndpointTests.Get_AfterAssign_ReturnsSuccessEntryWithCreatedDiff ^[[90m(416ms)^[[m
+5929Z   Expected var item = body.GetProperty("items").EnumerateArray() to contain a single item, but the collection is empty.
+7846Z   from /home/runner/work/elmanhg/elmanhg/api/Elmanhg.Tests/bin/Release/net10.0/Elmanhg.Tests.dll (net10.0|x64)
+0230Z ^[[31m  Expected var item = body.GetProperty("items").EnumerateArray() to contain a single item, but the collection is empty.
+2029Z ^[[m^[[90m    at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+4316Z     at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+5698Z     at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+7069Z     at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+8337Z     at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+9590Z     at FluentAssertions.Execution.AssertionScope.FailWith(String message)
+1083Z     at FluentAssertions.Collections.GenericCollectionAssertions`3.ContainSingle(String because, Object[] becauseArgs)
+4336Z     at Elmanhg.Tests.Integration.AuditLogs.AuditLogsEndpointTests.Get_AfterAssign_ReturnsSuccessEntryWithCreatedDiff() in /home/runner/work/elmanhg/elmanhg/api/Elmanhg.Tests/Integration/AuditLogs/AuditLogsEndpointTests.cs:25^[[90m
+6652Z     --- End of stack trace from previous location ---
+6163Z ^[[m^[[31mfailed^[[m Elmanhg.Tests.Integration.AuditLogs.AuditLogsEndpointTests.Get_AfterUnassign_ReturnsEntryWithIsDeletedDiff ^[[90m(259ms)^[[m
+4429Z   System.IndexOutOfRangeException : Index was outside the bounds of the array.
+5023Z   from /home/runner/work/elmanhg/elmanhg/api/Elmanhg.Tests/bin/Release/net10.0/Elmanhg.Tests.dll (net10.0|x64)
+7128Z ^[[31m  Xunit.MicrosoftTestingPlatform.XunitException: System.IndexOutOfRangeException : Index was outside the bounds of the array.
+8915Z ^[[m^[[90m    at System.Text.Json.JsonDocument.GetArrayIndexElement(Int32 currentIndex, Int32 arrayIndex)
+1350Z     at Elmanhg.Tests.Integration.AuditLogs.AuditLogsEndpointTests.Get_AfterUnassign_ReturnsEntryWithIsDeletedDiff() in /home/runner/work/elmanhg/elmanhg/api/Elmanhg.Tests/Integration/AuditLogs/AuditLogsEndpointTests.cs:48^[[90m
+3970Z     --- End of stack trace from previous location ---
+0057Z ^[[m^[[31mfailed^[[m Elmanhg.Tests.Integration.AuditLogs.AuditLogsEndpointTests.Get_AfterFailedAssign_ReturnsFailureEntryWithErrorCode ^[[90m(243ms)^[[m
+0449Z   Expected var item = body.GetProperty("items").EnumerateArray() to contain a single item, but the collection is empty.
+2339Z   from /home/runner/work/elmanhg/elmanhg/api/Elmanhg.Tests/bin/Release/net10.0/Elmanhg.Tests.dll (net10.0|x64)
+4632Z ^[[31m  Expected var item = body.GetProperty("items").EnumerateArray() to contain a single item, but the collection is empty.
+6398Z ^[[m^[[90m    at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+7689Z     at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+9027Z     at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+0415Z     at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+1677Z     at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+2882Z     at FluentAssertions.Execution.AssertionScope.FailWith(String message)
+4816Z     at FluentAssertions.Collections.GenericCollectionAssertions`3.ContainSingle(String because, Object[] becauseArgs)
+7857Z     at Elmanhg.Tests.Integration.AuditLogs.AuditLogsEndpointTests.Get_AfterFailedAssign_ReturnsFailureEntryWithErrorCode() in /home/runner/work/elmanhg/elmanhg/api/Elmanhg.Tests/Integration/AuditLogs/AuditLogsEndpointTests.cs:63^[[90m
+0055Z     --- End of stack trace from previous location ---
+0787Z ^[[m^[[m/home/runner/work/elmanhg/elmanhg/api/Elmanhg.Tests/bin/Release/net10.0/Elmanhg.Tests.dll (net10.0|x64) ^[[31mfailed with 5 error(s)^[[m ^[[90m(19s 124ms)^[[m
+2945Z Exit code: 2
+4900Z     Host: unix:///var/run/docker.sock
+5636Z     Server Version: 28.0.4
+6163Z     Kernel Version: 6.17.0-1022-azure
+6792Z     API Version: 1.48
+7317Z     Operating System: Ubuntu 24.04.5 LTS
+8001Z     Total Memory: 15.61 GB
+3937Z 
+2496Z ^[[31mTest run summary: Failed!
+3707Z ^[[m  total: 256
+4204Z ^[[31m  failed: 5
+4640Z ^[[m  succeeded: 251
+4995Z   skipped: 0
+5336Z   duration: 19s 341ms
+6164Z Test run completed with non-success exit code: 2 (see: https://aka.ms/testingplatform/exitcodes)
+0632Z ##[error]Process completed with exit code 2.

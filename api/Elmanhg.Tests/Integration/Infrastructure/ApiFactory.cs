@@ -36,13 +36,14 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment(TestingEnvironment);
+        // AddCoreAuditing reads this flag while Program registers services, before ConfigureAppConfiguration sources are applied.
+        builder.UseSetting("CoreAuditing:Enabled", "true");
         builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["ConnectionStrings:DbConnectionString"] = _database.GetConnectionString(),
             ["CoreJwt:Issuer"] = "Elmanhg.Tests",
             ["CoreJwt:Audience"] = "Elmanhg.Tests",
             ["CoreJwt:Key"] = TestJwtKey,
-            ["CoreAuditing:Enabled"] = "true",
             ["AuditLogs:MaxPageSize"] = "100",
             ["AuditLogs:FilterMaxLength"] = "256",
             ["CoreOtp:Secret"] = TestOtpSecret,
