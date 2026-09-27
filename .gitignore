@@ -20,6 +20,11 @@ bin/
 obj/
 *.user
 TestResults/
+/api/Elmanhg.Api/appsettings.json
+/api/Elmanhg.Api/appsettings.Development.json
+/api/Elmanhg.Api/appsettings.Production.json
+[Ll]ogs/
+artifacts/
 
 # Node
 node_modules/

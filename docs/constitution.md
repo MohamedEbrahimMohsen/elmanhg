@@ -96,12 +96,13 @@ public sealed class ProvisioningOptions
 
 - Bound in the layer's `DependencyInjection.cs` (`Elmanhg.Application` / `Elmanhg.Infrastructure`) — the ONLY registration points.
 - Injected as `IOptions<ProvisioningOptions>` via primary constructor; read `.Value` once into a field/local.
-- **Configuration is never committed.** `appsettings.json` is git-ignored. The
-  template writes it and the project scaffolder fills in the per-solution values
-  (database name, service name, JWT issuer/audience/key, OTP secret), so a freshly
-  scaffolded machine has a working file that git never sees. Every other
-  environment supplies its own: `dotnet user-secrets` locally, app settings or Key
-  Vault when deployed (`Section__Key` double-underscore convention). Consequences
+- **Configuration is never committed.** `appsettings.json` is git-ignored. Locally
+  it is copied by hand from the committed `api/Elmanhg.Api/appsettings.example.json`,
+  and secrets and per-machine values (connection string, JWT key, OTP secret) come
+  from the repo-root `.env` (copied from the committed `.env.example`), which the API
+  loads as environment variables in Development only (`Section__Key`
+  double-underscore convention). There are no `dotnet user-secrets`. Deployed
+  environments supply the same keys as host environment variables. Consequences
   to remember: CI and fresh clones have NO configuration, so integration-style runs
   must supply it explicitly; and a new options section must be announced to the dev
   so it can be mirrored into every environment rather than silently defaulting to

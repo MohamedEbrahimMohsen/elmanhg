@@ -1,0 +1,42 @@
+name: api-ci
+on:
+  pull_request:
+    paths: ['api/**', 'global.json', '.config/**', '.github/workflows/api-ci.yml']
+  push:
+    branches: [main]
+    paths: ['api/**', 'global.json', '.config/**', '.github/workflows/api-ci.yml']
+permissions:
+  contents: read
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Restore
+        run: dotnet restore api/
+      - name: Build
+        run: dotnet build api/ -c Release --no-restore
+      - name: Test
+        run: dotnet test api/ -c Release --no-build
+      - name: Vulnerable packages
+        run: dotnet list api/ package --vulnerable --include-transitive 2>&1 | tee vulnerable.txt && ! grep -q 'has the following vulnerable' vulnerable.txt
+      - name: Restore tools
+        run: dotnet tool restore
+      - name: Migrations are up to date
+        env:
+          ConnectionStrings__DbConnectionString: Host=localhost;Database=elmanhg_design;Username=design
+        run: dotnet ef migrations has-pending-model-changes --project api/Elmanhg.Infrastructure --startup-project api/Elmanhg.Api --configuration Release --no-build
+      - name: Idempotent migration script
+        env:
+          ConnectionStrings__DbConnectionString: Host=localhost;Database=elmanhg_design;Username=design
+        run: dotnet ef migrations script --idempotent --project api/Elmanhg.Infrastructure --startup-project api/Elmanhg.Api --configuration Release --no-build --output artifacts/migrations.sql
+      - uses: actions/upload-artifact@v4
+        with:
+          name: migrations-sql
+          path: artifacts/migrations.sql

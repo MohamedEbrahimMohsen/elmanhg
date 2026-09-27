@@ -1,0 +1,6 @@
+<Project>
+  <!-- Core pins versions inline, verbatim from Morabh. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+</Project>

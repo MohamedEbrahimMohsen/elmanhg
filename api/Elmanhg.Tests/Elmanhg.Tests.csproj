@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3.mtp-v2" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Elmanhg.Api\Elmanhg.Api.csproj" />
+    <ProjectReference Include="..\Elmanhg.Application\Elmanhg.Application.csproj" />
+    <ProjectReference Include="..\Elmanhg.Domain\Elmanhg.Domain.csproj" />
+    <ProjectReference Include="..\Elmanhg.Infrastructure\Elmanhg.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
