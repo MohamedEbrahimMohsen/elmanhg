@@ -8,6 +8,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddCoreAuditing(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddScoped<IAuditChangeCollector, AuditChangeCollector>();
+
         var options = configuration.GetSection(AuditOptions.SectionName).Get<AuditOptions>() ?? new AuditOptions();
 
         if (options.Enabled)

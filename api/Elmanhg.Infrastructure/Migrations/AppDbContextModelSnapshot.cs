@@ -44,6 +44,9 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Diff")
+                        .HasColumnType("jsonb");
+
                     b.Property<string>("ErrorCode")
                         .HasColumnType("text");
 
@@ -68,6 +71,10 @@ namespace Elmanhg.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Timestamp");
+
+                    b.HasIndex("ResourceType", "Timestamp");
 
                     b.ToTable("AuditLogs");
                 });

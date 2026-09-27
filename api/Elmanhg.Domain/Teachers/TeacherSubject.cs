@@ -6,7 +6,7 @@ using Elmanhg.Domain.Subjects;
 
 namespace Elmanhg.Domain.Teachers;
 
-public class TeacherSubject : AuditEntity
+public class TeacherSubject : AuditEntity, IAuditedEntity
 {
     public Guid TeacherId { get; private set; }
     public Guid SubjectId { get; private set; }

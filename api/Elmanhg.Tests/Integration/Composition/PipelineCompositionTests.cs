@@ -1,3 +1,4 @@
+using Core.Auditing;
 using Core.CQRS.Behaviours;
 using Elmanhg.Tests.Integration.Infrastructure;
 using FluentAssertions;
@@ -18,5 +19,15 @@ public sealed class PipelineCompositionTests(ApiFactory factory)
         var behaviours = scope.ServiceProvider.GetServices<IPipelineBehavior<PipelineProbeRequest, Unit>>();
 
         behaviours.Should().ContainItemsAssignableTo<ValidationBehaviour<PipelineProbeRequest, Unit>>();
+    }
+
+    [Fact]
+    public void Resolve_PipelineBehaviours_AuditBehaviourIsOutermost()
+    {
+        using var scope = factory.Services.CreateScope();
+
+        var behaviours = scope.ServiceProvider.GetServices<IPipelineBehavior<PipelineProbeRequest, Unit>>();
+
+        behaviours.First().Should().BeOfType<AuditBehaviour<PipelineProbeRequest, Unit>>();
     }
 }

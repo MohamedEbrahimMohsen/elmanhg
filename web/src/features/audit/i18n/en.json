@@ -1,0 +1,49 @@
+{
+  "page": {
+    "title": "Audit log",
+    "loading": "Loading audit log"
+  },
+  "filters": {
+    "actor": "Actor",
+    "actorHint": "Email or mobile number",
+    "resourceType": "Entity type",
+    "allResourceTypes": "All entity types",
+    "from": "From",
+    "to": "To",
+    "apply": "Apply filters",
+    "clear": "Clear filters",
+    "errors": {
+      "actorTooLong": "Actor filter is too long.",
+      "date": "Enter a valid date.",
+      "dateRange": "End date must be on or after the start date."
+    }
+  },
+  "table": {
+    "caption": "Audit entries",
+    "time": "Time",
+    "actor": "Actor",
+    "action": "Action",
+    "entity": "Entity",
+    "entityId": "ID",
+    "details": "Details",
+    "changes": "Show changes",
+    "system": "System"
+  },
+  "outcome": {
+    "Success": "Success",
+    "Failure": "Failed"
+  },
+  "empty": {
+    "noData": "No audit entries yet.",
+    "noResults": "No entries match these filters."
+  },
+  "error": {
+    "title": "Could not load the audit log"
+  },
+  "pagination": {
+    "label": "Pagination",
+    "previous": "Previous page",
+    "next": "Next page",
+    "status": "Page {page} of {total}"
+  }
+}

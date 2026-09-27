@@ -1,3 +1,4 @@
+using Core.Auditing;
 using Core.EntityFrameworkCore.Context;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Subjects;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.Data.Context;
 
-public class AppDbContext(DbContextOptions options, IMediator mediator) : CoreDbContext<User, Role, Guid>(options, mediator)
+public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditChangeCollector auditChangeCollector) : CoreDbContext<User, Role, Guid>(options, mediator, auditChangeCollector)
 {
     // Enum names are short identifiers; the column width is a schema invariant, not a tunable.
     private const int EnumColumnMaxLength = 50;

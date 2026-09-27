@@ -33,7 +33,11 @@
     "TOO_MANY_REQUESTS": "Too many requests. Wait a moment and try again.",
     "VALIDATION_PHONE_NUMBER_INVALID_CELLULAR_CODE": "Mobile number must start with 010, 011, 012 or 015.",
     "VALIDATION_PHONE_NUMBER_MUST_BE_X_DIGITS": "Mobile number must be 11 digits.",
-    "VALIDATION_PHONE_NUMBER_MUST_BE_ONLY_DIGITS": "Mobile number must contain digits only."
+    "VALIDATION_PHONE_NUMBER_MUST_BE_ONLY_DIGITS": "Mobile number must contain digits only.",
+    "AUDIT_LOG_PAGE_NUMBER_INVALID": "Page number must be 1 or more.",
+    "AUDIT_LOG_PAGE_SIZE_INVALID": "Page size is out of the allowed range.",
+    "AUDIT_LOG_FILTER_TOO_LONG": "Filter text is too long.",
+    "AUDIT_LOG_DATE_RANGE_INVALID": "The end date must be after the start date."
   },
   "error": {
     "title": "Something went wrong"

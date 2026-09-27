@@ -1,5 +1,7 @@
-﻿using Core.Auditing.Entities;
+﻿using Core.Auditing;
+using Core.Auditing.Entities;
 using Core.DDD.Entities;
+using Core.EntityFrameworkCore.Auditing;
 using Core.Notifications.Entities;
 using Core.OTP.Entities;
 using MediatR;
@@ -10,7 +12,7 @@ using System.Text.Json;
 
 namespace Core.EntityFrameworkCore.Context;
 
-public class CoreDbContext<TUser, TRole, TKey>(DbContextOptions options, IMediator mediator) : IdentityDbContext<TUser, TRole, TKey>(options), ICoreDbContext
+public class CoreDbContext<TUser, TRole, TKey>(DbContextOptions options, IMediator mediator, IAuditChangeCollector auditChangeCollector) : IdentityDbContext<TUser, TRole, TKey>(options), ICoreDbContext
     where TUser : IdentityUser<TKey>, IEntity, new()
     where TRole : IdentityRole<TKey>, new()
     where TKey : IEquatable<TKey>, new()
@@ -76,6 +78,13 @@ public class CoreDbContext<TUser, TRole, TKey>(DbContextOptions options, IMediat
             builder.ConfigureLocalized(x => x.Content);
         });
 
+        modelBuilder.Entity<AuditLog>(builder =>
+        {
+            builder.Property(x => x.Diff).HasColumnType("jsonb");
+            builder.HasIndex(x => x.Timestamp);
+            builder.HasIndex(x => new { x.ResourceType, x.Timestamp });
+        });
+
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
 
@@ -102,7 +111,10 @@ public class CoreDbContext<TUser, TRole, TKey>(DbContextOptions options, IMediat
         foreach (var e in events ?? [])
             e.ClearDomainEvents();
 
-        return await base.SaveChangesAsync(cancellationToken);
+        var auditedChanges = AuditChangeReader.Read(ChangeTracker);
+        var result = await base.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        auditChangeCollector.Record(auditedChanges);
+        return result;
     }
 
     public DbSet<Otp> Otps { get; set; }

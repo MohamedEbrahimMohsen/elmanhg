@@ -7,7 +7,7 @@ import { Label } from '@/shared/ui/label';
 export interface TextFieldProps<TValues extends FieldValues> {
   name: Path<TValues>;
   label: string;
-  type?: 'text' | 'email' | 'tel' | 'password';
+  type?: 'text' | 'email' | 'tel' | 'password' | 'date';
   autoComplete?: string;
   description?: string;
 }

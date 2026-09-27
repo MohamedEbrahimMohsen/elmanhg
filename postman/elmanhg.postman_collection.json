@@ -335,6 +335,70 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "AuditLogs",
+      "description": "Admin only (AuditLog.View). Sign in as an admin first so accessToken is set. Enable actor, resourceType, from or to to filter; from is inclusive, to is exclusive, both ISO 8601 with offset.",
+      "item": [
+        {
+          "name": "Get audit logs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns a page\", function () { pm.expect(pm.response.json().items).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/audit-logs?pageNumber=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "audit-logs"],
+              "query": [
+                { "key": "pageNumber", "value": "1" },
+                { "key": "pageSize", "value": "20" },
+                { "key": "actor", "value": "admin@elmanhg.local", "disabled": true },
+                { "key": "resourceType", "value": "Teacher", "disabled": true },
+                { "key": "from", "value": "2026-01-01T00:00:00Z", "disabled": true },
+                { "key": "to", "value": "2026-12-31T00:00:00Z", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get audit log resource types",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns a list\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/audit-logs/resource-types",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "audit-logs", "resource-types"]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }
