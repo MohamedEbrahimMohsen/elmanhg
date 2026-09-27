@@ -1,0 +1,15 @@
+# Build output
+elmanhg-claude-design-handoff.zip
+
+# Python
+__pycache__/
+*.pyc
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local-only Claude Code settings
+.claude/settings.local.json

@@ -1,0 +1,67 @@
+# Elmanhg (المنهج) — clickable wireframe prototype
+
+A throwaway, wireframe-grade prototype of the platform in `docs/PRD.md`, for the product owner to click through. It is **not** the production system.
+
+## How to open
+
+Double-click `index.html` (or open `file:///D:/Personal/elmanhg/prototype/index.html` in Chrome, Edge or Firefox). There is no build step, no server, no internet needed.
+
+Files:
+- `index.html` — shell (Arabic, RTL)
+- `styles.css` — grey/white wireframe styling, mobile-first
+- `data.js` — seed data (`window.SEED`)
+- `app.js` — all logic and rendering (vanilla JS)
+
+## Switching persona (no login)
+
+The top bar has two dropdowns:
+- **الدور** (role): طالب / معلّم / مدير
+- **المستخدم** (current user for that role):
+  - Students: **أحمد** (Base + Ask a Teacher, has practice history) and **سارة** (Free)
+  - Teachers: **أ. محمد** (Physics only) and **أ. هدى** (Math only)
+  - Admin: **المدير**
+
+## Resetting data
+
+All state is saved in `localStorage` under the key `elmanhg.v1`. Click **إعادة ضبط البيانات** in the top bar to restore the seed. (Clearing site data in the browser also works.)
+
+## Suggested walkthrough
+
+1. **Student home (أحمد)**: headline "متبقّي لك X سؤال من Y", "شاهدت N", streak, next suggested lesson, subject cards with mastery %.
+2. **الفيزياء → الكهربية التيارية → التيار الكهربي وقانون أوم**: tabs الشرح / الأهداف / الملخص / التدريب. In التدريب pick 5/10/20.
+3. **Quiz**: answer, press تحقّق for instant feedback (correct answer + explanation), then **اسأل المساعد** to open the avatar panel with that question's context.
+4. **Unit exam** (from the unit page): see the blueprint summary, start, note the countdown and "محفوظ تلقائيًا". Reload the page: the exam resumes. Open the avatar during the exam and it refuses to reveal answers. Submit to see score, per-lesson breakdown, weakest objectives and all attempts (best score is highlighted).
+5. **Unit "التكامل" exam**: shows a shortfall message, because lesson "التكامل المحدد" is still a draft.
+6. **امتحان متعدد الوحدات**: choose 2+ units and 10/20 questions. The blueprints are merged proportionally, and any shortfall is shown.
+7. **اسأل معلّم**: one thread is past its SLA (red **متأخر** badge). The other has a simulated voice reply with its transcript. You can send one follow-up, then rate 1–5 to close.
+8. **Switch to سارة (Free)**: only the first lesson in each unit is open. After 10 quiz questions today the paywall appears. Exams are paywalled too. Click **اشترك** to open the fake Paymob checkout, then **نجاح الدفع**. This simulates the webhook, which activates the plan.
+9. **Teacher (أ. محمد)**: validation queue shows Physics only, with filters. Open a question to approve it (optionally change difficulty first) or reject it (a reason is required). Opening a Math question or thread by URL shows "غير مسموح". The inbox lets you claim a thread and reply with text or a simulated voice note plus an editable transcript. A personal stats card is at the top.
+10. **Admin**:
+    - Dashboard cards are computed live and can be filtered by subject and period.
+    - Content tree supports CRUD, reordering with ▲▼, and publish/unpublish/archive. Publish "التكامل المحدد" and watch the servable total rise.
+    - Question editor has a live preview and a **جرّب الإجابة** box that runs the real grader. Editing the stem, options or answer of an approved question sends it back to *pending* with version +1. Changing only the difficulty keeps it approved. Rejected questions get **تعديل وإعادة إرسال**.
+    - Blueprint editor refuses to save when there is a shortfall.
+    - Users page: suspend students, grant plans, assign subjects to teachers. The last active admin cannot be deactivated.
+    - Audit log.
+    - JSONL training-data export, with student ids hashed.
+
+## Business rules implemented (PRD §17)
+
+`servable()` is derived. Other rules implemented:
+- Edits reset a question to pending.
+- Only teachers of the subject can validate, and rejecting needs a reason.
+- Quiz selection order: unseen → wrong → correct once → least-recent.
+- Mastery means the last two attempts are ≥ 0.8.
+- Headline counter.
+- Exams are built from blueprints, with shortfall checks.
+- Unlimited retakes, and the best score is shown.
+- The avatar refuses to answer during an exam.
+- Ask-a-Teacher has a 24h SLA and one follow-up.
+- Entitlement changes only through the (simulated) webhook.
+- Audit log.
+
+Essay and math-with-steps questions are marked **v2**:
+- Essay uses a keyword-overlap heuristic with a fake AI justification.
+- Math-with-steps checks only the final answer ("تصحيح الخطوات في الإصدار 2").
+
+For console testing, `window.ElmanhgTest` exposes `grade`, `normAr`, `servable`, `selectQuiz`, `mergeBlueprints` and `state()`.

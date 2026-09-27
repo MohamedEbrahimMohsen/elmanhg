@@ -1,0 +1,17 @@
+  python-django:
+    root:    djangoapp/
+    build:   ruff check djangoapp/ && python djangoapp/manage.py check
+    test:    pytest djangoapp/
+    style:   .claude/skills/python-django-feature/SKILL.md
+    testing: .claude/conventions/python-django-testing.md
+    ui:      false
+    tests:
+      unit:     { on: true }
+      postman:  { on: true,  assert: true, collection: postman/djangoapp.postman_collection.json, environment: postman/local.postman_environment.json, run: "" }
+      e2e:      { on: false, start: "python djangoapp/manage.py runserver 8001", url: http://localhost:8001 }   # Agy opens url and walks the plan's scenarios
+      coverage: { on: false, cmd: 'pytest djangoapp/ --cov=djangoapp --cov-report=term', min: 80 }
+    security:
+      packages:         { on: true,  cmd: "pip-audit -r djangoapp/requirements.txt" }
+      secrets:          { on: true,  cmd: "gitleaks detect --no-git -s djangoapp/" }
+      sast:             { on: false, cmd: "semgrep --config auto --error djangoapp/" }
+      prompt-injection: { on: false }           # agent pass; turn on where this stack builds LLM prompts from user input
