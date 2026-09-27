@@ -1,0 +1,48 @@
+name: web-ci
+on:
+  pull_request:
+    paths: ['web/**', 'api/openapi/**', '.claude/design-system.md', '.gitattributes', '.github/workflows/web-ci.yml']
+  push:
+    branches: [main]
+    paths: ['web/**', 'api/openapi/**', '.claude/design-system.md', '.gitattributes', '.github/workflows/web-ci.yml']
+permissions:
+  contents: read
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    env:
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: web/.nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Design tokens are up to date
+        run: npm run gen:tokens && test -z "$(git status --porcelain src/styles/tokens.css)"
+      - name: API client is up to date
+        run: npm run gen:api && test -z "$(git status --porcelain src/shared/api/generated)"
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Format
+        run: npm run format:check
+      - name: No literal tokens or physical directions
+        run: |
+          if grep -rnE --include='*.ts' --include='*.tsx' --exclude-dir=generated '\b(ml|mr|pl|pr|left|right)-[0-9]|\btext-(left|right)\b' src; then exit 1; fi
+          if grep -rnE --include='*.ts' --include='*.tsx' --exclude-dir=generated '#[0-9a-fA-F]{3,8}\b|\[[0-9.]+(px|rem)\]|\b(bg|text|border|ring)-(slate|gray|zinc|neutral|red|orange|amber|yellow|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|pink|rose)-[0-9]{2,3}\b' src; then exit 1; fi
+      - name: Test
+        run: npm test -- --run --coverage
+      - name: Build
+        run: npm run build
+      - name: Route tree is up to date
+        run: test -z "$(git status --porcelain src/routeTree.gen.ts)"
+      - name: Vulnerable packages
+        run: npm audit --audit-level=high

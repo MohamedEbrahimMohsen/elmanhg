@@ -155,7 +155,7 @@ Track `--soft`, fill `--accent` (mastery) or `--ok` (exam pass). Height 6 px, fu
 
 ### 5.7 Navigation
 
-Mobile: bottom tab bar, 4 items, icons 22 px stroke 1.8, active in `--text` 600, inactive `--text-2`. Desktop: top bar with the same items as text tabs, active underlined 2 px `--accent`.
+Mobile: bottom tab bar, at most 4 items, icons 22 px stroke 1.8, active in `--text` 600, inactive `--text-2`. A role with more than 4 destinations shows its 3 primary destinations plus a fourth item "المزيد" that opens a list of the rest. Desktop (≥ 900 px): top bar with every destination as text tabs, active underlined 2 px `--accent`.
 
 ### 5.8 Inputs
 
@@ -201,6 +201,6 @@ Stroke icons, 1.8 px, round caps, 22 px in navigation and 16 px inline. Lucide s
 
 ## 10. Implementation notes
 
-- Tailwind config: map every token above to `theme.extend.colors`, `borderRadius`, `boxShadow`, `fontFamily`.
+- Tailwind CSS v4, CSS-first: `web/src/styles/tokens.css` is generated from `.claude/design-system.md` by `npm run gen:tokens` (never hand-edited) and mapped to utilities with `@theme inline` in `web/src/styles/app.css`. There is no `tailwind.config.*`.
 - shadcn/ui: override `--radius` to 14 px and the primary/accent CSS variables. Replace default Inter with the two fonts.
-- The prototype in `prototype/styles.css` is the visual reference until the React app exists.
+- The prototype in `prototype/` remains the reference for screen content and flow.

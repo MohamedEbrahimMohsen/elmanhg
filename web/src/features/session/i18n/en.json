@@ -1,0 +1,11 @@
+{
+  "signIn": {
+    "title": "Sign in",
+    "devNotice": "Development sign-in, to be replaced by real sign-in.",
+    "as": {
+      "student": "Sign in as student",
+      "teacher": "Sign in as teacher",
+      "admin": "Sign in as admin"
+    }
+  }
+}

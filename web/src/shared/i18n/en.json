@@ -1,0 +1,23 @@
+{
+  "app": {
+    "name": "Elmanhg"
+  },
+  "validation": {
+    "required": "This field is required."
+  },
+  "errors": {
+    "UNHANDLED_EXCEPTION": "Something went wrong. Please try again.",
+    "NETWORK_ERROR": "Could not reach the server. Check your connection and try again.",
+    "VALIDATION_FAILED": "Some fields are not valid."
+  },
+  "error": {
+    "title": "Something went wrong"
+  },
+  "actions": {
+    "retry": "Retry"
+  },
+  "notFound": {
+    "body": "This page does not exist or is not available.",
+    "back": "Back"
+  }
+}
