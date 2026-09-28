@@ -5,10 +5,13 @@ namespace Elmanhg.Domain.Questions.Grading;
 
 public static class TextGrader
 {
-    // Students type these separators on Arabic keyboards; they mean the ASCII characters.
-    private const char ArabicDecimalSeparator = '٫';
-    private const char MinusSign = '−';
+    // Students type these separators on Arabic keyboards; ٬ groups thousands, the others mean the ASCII characters.
+    private const char ArabicDecimalSeparator = '\u066B';
+    private const char ArabicThousandsSeparator = '\u066C';
+    private const char MinusSign = '\u2212';
+    private const NumberStyles PlainDecimal = NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint;
     private const decimal PercentDivisor = 100m;
+    private static readonly AnswerNormalization NumberRules = new(UnifyAlef: false, UnifyTaaMarbuta: false, UnifyAlefMaqsura: false);
 
     public static decimal GradeFill(FillGradingSpec spec, FillAnswer answer)
     {
@@ -27,7 +30,7 @@ public static class TextGrader
             }
         }
 
-        var hits = blanks.Count(x => x.Id is not null && responses.TryGetValue(x.Id, out var response) && Matches(response, x.AcceptedAnswers ?? [], spec.UnifyLetterVariants));
+        var hits = blanks.Count(x => x.Id is not null && responses.TryGetValue(x.Id, out var response) && Matches(response, x.AcceptedAnswers ?? [], spec.Normalization ?? AnswerNormalization.Default));
         return (decimal)hits / blanks.Count;
     }
 
@@ -39,7 +42,7 @@ public static class TextGrader
             return TryParseNumber(answer.Text, out var number) && number >= spec.Value.Value - allowed && number <= spec.Value.Value + allowed ? 1m : 0m;
         }
 
-        return Matches(answer.Text, spec.AcceptedAnswers ?? [], spec.UnifyLetterVariants ?? true) ? 1m : 0m;
+        return Matches(answer.Text, spec.AcceptedAnswers ?? [], spec.Normalization ?? AnswerNormalization.Default) ? 1m : 0m;
     }
 
     private static decimal AllowedDifference(ShortGradingSpec spec)
@@ -47,23 +50,24 @@ public static class TextGrader
         return spec.ToleranceMode == ToleranceMode.Percent ? Math.Abs(spec.Value.GetValueOrDefault()) * spec.Tolerance.GetValueOrDefault() / PercentDivisor : spec.Tolerance.GetValueOrDefault();
     }
 
-    private static bool Matches(string? answer, List<string> accepted, bool unifyLetterVariants)
+    private static bool Matches(string? answer, List<string> accepted, AnswerNormalization rules)
     {
-        var normalised = AnswerNormalizer.Normalize(answer, unifyLetterVariants);
+        var normalised = AnswerNormalizer.Normalize(answer, rules);
         if (normalised.Length == 0)
         {
             return false;
         }
 
-        return accepted.Any(x => AnswerNormalizer.Normalize(x, unifyLetterVariants) == normalised);
+        return accepted.Any(x => AnswerNormalizer.Normalize(x, rules) == normalised);
     }
 
     private static bool TryParseNumber(string? text, out decimal value)
     {
-        var candidate = AnswerNormalizer.Normalize(text, false)
+        var candidate = AnswerNormalizer.Normalize(text, NumberRules)
+            .Replace(ArabicThousandsSeparator.ToString(), string.Empty)
             .Replace(ArabicDecimalSeparator, '.')
             .Replace(',', '.')
             .Replace(MinusSign, '-');
-        return decimal.TryParse(candidate, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+        return decimal.TryParse(candidate, PlainDecimal, CultureInfo.InvariantCulture, out value);
     }
 }

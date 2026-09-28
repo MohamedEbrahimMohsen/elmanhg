@@ -21,13 +21,19 @@ public sealed class TextGraderTests
     [Fact]
     public void GradeFill_SpellingVariantWithUnifyOn_Matches()
     {
-        TextGrader.GradeFill(Capital(unifyLetterVariants: true), Fill(("1", "القاهره"))).Should().Be(1m);
+        TextGrader.GradeFill(Capital(AnswerNormalization.Default), Fill(("1", "القاهره"))).Should().Be(1m);
     }
 
     [Fact]
     public void GradeFill_SpellingVariantWithUnifyOff_DoesNotMatch()
     {
-        TextGrader.GradeFill(Capital(unifyLetterVariants: false), Fill(("1", "القاهره"))).Should().Be(0m);
+        TextGrader.GradeFill(Capital(new AnswerNormalization(UnifyTaaMarbuta: false)), Fill(("1", "القاهره"))).Should().Be(0m);
+    }
+
+    [Fact]
+    public void GradeFill_AnswerWithByteSwappedBom_ReturnsOne()
+    {
+        TextGrader.GradeFill(TwoBlanks(), Fill(("1", "20\uFFFE"), ("2", "5"))).Should().Be(1m);
     }
 
     [Fact]
@@ -82,14 +88,70 @@ public sealed class TextGraderTests
         TextGrader.GradeShort(Text("ماء"), new ShortAnswer("هواء")).Should().Be(0m);
     }
 
+    [Fact]
+    public void GradeShort_NumericWithExponent_ReturnsZero()
+    {
+        TextGrader.GradeShort(Numeric(9.8m, 0.1m, ToleranceMode.Absolute), new ShortAnswer("9.8e0")).Should().Be(0m);
+    }
+
+    [Fact]
+    public void GradeShort_NumericWithArabicThousandsSeparator_ReturnsOne()
+    {
+        TextGrader.GradeShort(Numeric(1000m, 0m, ToleranceMode.Absolute), new ShortAnswer("١٬٠٠٠")).Should().Be(1m);
+    }
+
+    [Fact]
+    public void GradeShort_NumericWithRightToLeftMark_ReturnsOne()
+    {
+        TextGrader.GradeShort(Numeric(9.8m, 0.1m, ToleranceMode.Absolute), new ShortAnswer("\u200F٩٫٧٥")).Should().Be(1m);
+    }
+
+    [Fact]
+    public void GradeShort_NumericWithArabicComma_ReturnsOne()
+    {
+        TextGrader.GradeShort(Numeric(9.8m, 0m, ToleranceMode.Absolute), new ShortAnswer("٩،٨")).Should().Be(1m);
+    }
+
+    [Fact]
+    public void GradeShort_NumericIgnoresLetterRules_ParsesArabicDigits()
+    {
+        var spec = new ShortGradingSpec(9.8m, 0.1m, ToleranceMode.Absolute, null, new AnswerNormalization(false, false, false, false, false, false, false, false));
+
+        TextGrader.GradeShort(spec, new ShortAnswer("٩٫٨")).Should().Be(1m);
+    }
+
+    [Fact]
+    public void GradeFill_NullNormalization_UsesDefaultRules()
+    {
+        var spec = new FillGradingSpec([new FillBlankAnswers("1", ["القاهرة"])], null);
+
+        TextGrader.GradeFill(spec, Fill(("1", "القاهره"))).Should().Be(1m);
+    }
+
+    [Fact]
+    public void GradeShort_TextNullNormalization_UsesDefaultRules()
+    {
+        var spec = new ShortGradingSpec(null, null, null, ["القاهرة"], null);
+
+        TextGrader.GradeShort(spec, new ShortAnswer("القاهره")).Should().Be(1m);
+    }
+
+    [Fact]
+    public void GradeShort_TextFoldCaseOff_DoesNotMatchOtherCase()
+    {
+        var spec = new ShortGradingSpec(null, null, null, ["newton"], new AnswerNormalization(FoldCase: false));
+
+        TextGrader.GradeShort(spec, new ShortAnswer("Newton")).Should().Be(0m);
+    }
+
     private static FillGradingSpec TwoBlanks()
     {
         return new FillGradingSpec([new FillBlankAnswers("1", ["20"]), new FillBlankAnswers("2", ["5", "five"])]);
     }
 
-    private static FillGradingSpec Capital(bool unifyLetterVariants)
+    private static FillGradingSpec Capital(AnswerNormalization normalization)
     {
-        return new FillGradingSpec([new FillBlankAnswers("1", ["القاهرة"])], unifyLetterVariants);
+        return new FillGradingSpec([new FillBlankAnswers("1", ["القاهرة"])], normalization);
     }
 
     private static FillAnswer Fill(params (string Id, string Text)[] blanks)
@@ -104,6 +166,6 @@ public sealed class TextGraderTests
 
     private static ShortGradingSpec Text(string accepted)
     {
-        return new ShortGradingSpec(null, null, null, [accepted], true);
+        return new ShortGradingSpec(null, null, null, [accepted], AnswerNormalization.Default);
     }
 }

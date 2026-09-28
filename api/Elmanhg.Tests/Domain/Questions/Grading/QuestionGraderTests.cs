@@ -48,4 +48,22 @@ public sealed class QuestionGraderTests
 
         grade.Outcome.Should().Be(GradeOutcome.Correct);
     }
+
+    [Fact]
+    public void Grade_FillWithPartialNormalizationJson_AppliesRuleOff()
+    {
+        var grade = QuestionGrader.Grade(QuestionType.Fill, PartialNormalizationSpec, 1, Json("""{"blanks":[{"id":"1","text":"القاهره"}]}"""));
+
+        grade.Outcome.Should().Be(GradeOutcome.Incorrect);
+    }
+
+    [Fact]
+    public void Grade_FillWithPartialNormalizationJson_KeepsOtherRulesOn()
+    {
+        var grade = QuestionGrader.Grade(QuestionType.Fill, PartialNormalizationSpec, 1, Json("""{"blanks":[{"id":"1","text":"القاهرَة"}]}"""));
+
+        grade.Outcome.Should().Be(GradeOutcome.Correct);
+    }
+
+    private const string PartialNormalizationSpec = """{"blanks":[{"id":"1","acceptedAnswers":["القاهرة"]}],"normalization":{"unifyTaaMarbuta":false}}""";
 }

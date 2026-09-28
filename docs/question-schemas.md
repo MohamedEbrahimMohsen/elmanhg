@@ -56,7 +56,7 @@ Canonical JSON, exactly as stored. Keys are camelCase; enum values are camelCase
 {"blanks":[{"id":"1"}]}
 ```
 ```json
-{"blanks":[{"id":"1","acceptedAnswers":["20","٢٠"]}],"unifyLetterVariants":true}
+{"blanks":[{"id":"1","acceptedAnswers":["20","٢٠"]}],"normalization":{"stripTashkeel":true,"stripTatweel":true,"unifyAlef":true,"unifyTaaMarbuta":true,"unifyAlefMaqsura":true,"convertDigits":true,"collapseWhitespace":true,"foldCase":true}}
 ```
 
 **Short**, numeric answer:
@@ -76,10 +76,23 @@ Canonical JSON, exactly as stored. Keys are camelCase; enum values are camelCase
 {"answerKind":"text"}
 ```
 ```json
-{"acceptedAnswers":["ماء"],"unifyLetterVariants":true}
+{"acceptedAnswers":["ماء"],"normalization":{"stripTashkeel":true,"stripTatweel":true,"unifyAlef":true,"unifyTaaMarbuta":true,"unifyAlefMaqsura":true,"convertDigits":true,"collapseWhitespace":true,"foldCase":true}}
 ```
 
-`unifyLetterVariants` (PRD §6.2 "configurable per question, default on") defaults to `true` for fill and text short answers.
+`normalization` (PRD §6.2) holds the answer-normalisation rules of fill and text short answers. Each rule can be switched off per question; every rule defaults to `true`:
+
+| Key | Effect when `true` | Default |
+|---|---|---|
+| `stripTashkeel` | remove tashkeel (U+064B–U+065F, U+0670, U+06D6–U+06ED) | `true` |
+| `stripTatweel` | remove tatweel (U+0640) | `true` |
+| `unifyAlef` | map أ إ آ ٱ (U+0623, U+0625, U+0622, U+0671) to ا (U+0627) | `true` |
+| `unifyTaaMarbuta` | map ة (U+0629) to ه (U+0647) | `true` |
+| `unifyAlefMaqsura` | map ى (U+0649) to ي (U+064A) | `true` |
+| `convertDigits` | map Arabic-Indic (U+0660–U+0669) and Extended Arabic-Indic (U+06F0–U+06F9) digits to ASCII | `true` |
+| `collapseWhitespace` | replace each inner run of whitespace with one space | `true` |
+| `foldCase` | lower-case Latin letters (invariant culture) | `true` |
+
+A missing `normalization` object means every rule is on; a partial object means the missing rules are on.
 
 ## Rules
 
@@ -102,6 +115,7 @@ A request whose `body` or `gradingSpec` breaks a rule gets `422` with the code b
 | Fill | blank ids are unique | `QUESTION_BLANK_ID_DUPLICATE` |
 | Fill | each blank's `[[id]]` appears in the stem exactly once | `QUESTION_BLANK_PLACEHOLDER_MISSING` |
 | Fill | the spec lists every blank once, and only those blanks | `QUESTION_BLANK_ANSWERS_MISMATCH` |
+| Fill, Short text | `normalization`, when present, is an object of booleans | `QUESTION_GRADING_SPEC_INVALID` |
 | Fill, Short text | 1 to `Content:QuestionAcceptedAnswersMaxCount` accepted answers, none empty, each at most `Content:QuestionAnswerMaxLength` after trimming | `QUESTION_ACCEPTED_ANSWERS_INVALID` |
 | Short | `answerKind` is present (`numeric` or `text`; any other value is `QUESTION_BODY_INVALID`) | `QUESTION_ANSWER_KIND_REQUIRED` |
 | Short numeric | `value` is present | `QUESTION_NUMERIC_VALUE_REQUIRED` |
@@ -112,7 +126,8 @@ A request whose `body` or `gradingSpec` breaks a rule gets `422` with the code b
 
 ## Canonical storage
 
-- `Body` and `GradingSpec` are `jsonb` columns. The server re-serialises the typed records, so unknown properties are dropped and defaults are written out (`partialCredit`, `unifyLetterVariants`). Numeric short specs keep only `value`, `tolerance` and `toleranceMode`; text short specs keep only `acceptedAnswers` and `unifyLetterVariants`. The true/false body is always `{}`.
+- `Body` and `GradingSpec` are `jsonb` columns. The server re-serialises the typed records, so unknown properties are dropped and defaults are written out (`partialCredit`, all eight `normalization` rules). Numeric short specs keep only `value`, `tolerance` and `toleranceMode`; text short specs keep only `acceptedAnswers` and `normalization`. The true/false body is always `{}`.
+- **Migration** (`AddAnswerNormalizationRules`): the earlier single `unifyLetterVariants` flag was replaced by `normalization`. Every stored `Questions.GradingSpec` and every `QuestionRevisions.Snapshot` `gradingSpec` that held the flag was rewritten: the three letter rules (`unifyAlef`, `unifyTaaMarbuta`, `unifyAlefMaqsura`) take the old value (missing meant `true`), the other five rules are `true`, and the old key is removed. Numeric short specs never had the flag and are unchanged. Audit diffs (`AuditLogs`) are append-only history and keep the old key. The migration's `Down` reverses the rewrite (`unifyLetterVariants` takes `unifyAlef`).
 - Choice option `text` is sanitised rich text, like the stem and explanation (`docs/rich-text.md`).
 - Accepted answers are plain text, trimmed. They are normalised at grading time (PRD §6.2), never at save time.
 - Fill spec entries follow the body's blank order.
@@ -196,8 +211,8 @@ The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of
 - **Short numeric** (the spec has `value`): the answer is parsed as a number and is correct when `|answer − value| ≤ tolerance` (`absolute`) or `≤ |value| × tolerance / 100` (`percent`).
 - **Short text**: the normalised answer must equal one of the normalised accepted answers.
 - An answer that normalises to empty never matches.
-- **Normalisation** (PRD §6.2): strip tashkeel (U+064B–U+065F, U+0670, U+06D6–U+06ED) and tatweel (U+0640); map Arabic-Indic (U+0660–U+0669) and Extended Arabic-Indic (U+06F0–U+06F9) digits to ASCII; when `unifyLetterVariants` is on, map أ إ آ ٱ to ا, ة to ه and ى to ي; collapse whitespace, trim, and lower-case. Numeric answers are normalised with the letter rule off.
-- **Numeric parsing**: after normalisation, `٫` (U+066B) and `,` become `.`, and `−` (U+2212) becomes `-`; the rest must be a plain decimal number (invariant culture). Anything else, such as a trailing unit, does not parse and scores 0.
+- **Normalisation** (PRD §6.2): the student answer and every accepted answer go through the same steps. Always, in this order: drop unpaired UTF-16 surrogates and the noncharacter U+FFFE (both make NFC fail); Unicode NFC (so a decomposed hamza or madda, such as ا + U+0654, becomes أ); remove invisible marks (U+061C, U+200B–U+200F, U+202A–U+202E, U+2060, U+2066–U+2069, U+FEFF); map ، (U+060C) to `,` and ی (U+06CC) to ي (U+064A). Then the question's `normalization` rules (see **Fill** and **Short** above), each applied only when on. Finally the answer is always trimmed. With `collapseWhitespace` off, inner whitespace is kept verbatim (tabs and runs included); the ends are still trimmed. Hamza seats (ئ ؤ ء) are never unified.
+- **Numeric parsing**: numeric answers ignore the question's `normalization` rules and use a fixed profile: every rule on except the three letter rules. After normalisation, `٬` (U+066C, the Arabic thousands separator) is removed, then `٫` (U+066B) and `,` become `.`, and `−` (U+2212) becomes `-`; the rest must be a plain decimal number: an optional leading sign, digits and one decimal point (invariant culture). Exponents such as `9.8e0`, inner whitespace, thousands separators other than `٬`, and anything else (such as a trailing unit) do not parse and score 0. `,` always means a decimal point, so `1,000` reads as 1.
 - **Result**: the normalised score is in [0, 1]. The outcome is `Correct` (≥ 1), `Partial` (> 0) or `Incorrect`. `score = round(normalised × maxScore, 2)` and `normalisedScore = round(normalised, 4)`, both rounding half away from zero.
 
 ## Changing a schema

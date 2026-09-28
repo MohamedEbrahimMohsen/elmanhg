@@ -35,6 +35,19 @@ export const validationQueuePageSize = 20;
 
 export const optionIdAlphabet = 'abcdefghij';
 
+export const normalizationRules = [
+  'stripTashkeel',
+  'stripTatweel',
+  'unifyAlef',
+  'unifyTaaMarbuta',
+  'unifyAlefMaqsura',
+  'convertDigits',
+  'collapseWhitespace',
+  'foldCase',
+] as const;
+
+export type NormalizationRule = (typeof normalizationRules)[number];
+
 function isOneOf<T extends string>(values: readonly T[], value: string): value is T {
   return (values as readonly string[]).includes(value);
 }

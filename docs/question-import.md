@@ -64,9 +64,9 @@ Mapping (the shapes are those in `docs/question-schemas.md`):
 | Mcq `correct` | one option letter |
 | Multi `correct`, `partial_credit` | letters separated by `\|`; partial credit empty means false |
 | TrueFalse `correct_answer` | boolean |
-| Fill `blank_N` | accepted answers for blank id `N`, separated by `\|`; an empty column adds no blank. The stem must hold each `[[N]]` once. `unify_letter_variants` empty means true |
+| Fill `blank_N` | accepted answers for blank id `N`, separated by `\|`; an empty column adds no blank. The stem must hold each `[[N]]` once. `unify_letter_variants` empty or `true` turns the three letter rules (`unifyAlef`, `unifyTaaMarbuta`, `unifyAlefMaqsura`) on, `false` turns them off; the other normalisation rules are always on for imported questions (change them in the editor) |
 | Short numeric | `value`; `tolerance` empty means 0; `tolerance_mode` empty means absolute |
-| Short text | `accepted_answers` separated by `\|`; `unify_letter_variants` empty means true |
+| Short text | `accepted_answers` separated by `\|`; `unify_letter_variants` empty or `true` turns the three letter rules (`unifyAlef`, `unifyTaaMarbuta`, `unifyAlefMaqsura`) on, `false` turns them off; the other normalisation rules are always on for imported questions (change them in the editor) |
 
 ## Text and math
 

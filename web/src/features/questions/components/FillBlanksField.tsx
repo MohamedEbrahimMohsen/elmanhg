@@ -5,7 +5,7 @@ import { Button } from '@/shared/ui/button';
 import { questionBlanksMax } from '../api/questionOptions';
 import { nextBlankId } from '../api/questionValues';
 import type { QuestionValues } from '../schemas/questionEditorSchema';
-import { CheckboxField } from './CheckboxField';
+import { NormalizationRulesField } from './NormalizationRulesField';
 import { TextAreaField } from './TextAreaField';
 
 export function FillBlanksField() {
@@ -59,7 +59,7 @@ export function FillBlanksField() {
           {t('editor.blanks.add')}
         </Button>
       </div>
-      <CheckboxField<QuestionValues> name="unifyLetterVariants" label={t('editor.blanks.unify')} />
+      <NormalizationRulesField />
     </fieldset>
   );
 }

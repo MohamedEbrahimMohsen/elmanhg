@@ -88,13 +88,36 @@ public sealed class FillQuestionRulesTests
     }
 
     [Fact]
-    public void Normalize_MissingUnifyFlag_DefaultsTrueTrimsAndFollowsBodyOrder()
+    public void Normalize_MissingNormalization_WritesAllRulesOnTrimsAndFollowsBodyOrder()
     {
         var body = """{"blanks":[{"id":"b"},{"id":"a"}]}""";
         var spec = """{"blanks":[{"id":"a","acceptedAnswers":[" x "]},{"id":"b","acceptedAnswers":["y "]}]}""";
 
         var (_, normalizedSpec) = FillQuestionRules.Normalize(Json(body), Json(spec));
 
-        normalizedSpec.Should().Be("""{"blanks":[{"id":"b","acceptedAnswers":["y"]},{"id":"a","acceptedAnswers":["x"]}],"unifyLetterVariants":true}""");
+        normalizedSpec.Should().Be("""{"blanks":[{"id":"b","acceptedAnswers":["y"]},{"id":"a","acceptedAnswers":["x"]}],"normalization":{"stripTashkeel":true,"stripTatweel":true,"unifyAlef":true,"unifyTaaMarbuta":true,"unifyAlefMaqsura":true,"convertDigits":true,"collapseWhitespace":true,"foldCase":true}}""");
+    }
+
+    [Fact]
+    public void Normalize_PartialNormalization_WritesEveryRuleWithMissingOn()
+    {
+        var body = """{"blanks":[{"id":"b"},{"id":"a"}]}""";
+        var spec = """{"blanks":[{"id":"a","acceptedAnswers":[" x "]},{"id":"b","acceptedAnswers":["y "]}],"normalization":{"unifyAlef":false}}""";
+
+        var (_, normalizedSpec) = FillQuestionRules.Normalize(Json(body), Json(spec));
+
+        normalizedSpec.Should().Be("""{"blanks":[{"id":"b","acceptedAnswers":["y"]},{"id":"a","acceptedAnswers":["x"]}],"normalization":{"stripTashkeel":true,"stripTatweel":true,"unifyAlef":false,"unifyTaaMarbuta":true,"unifyAlefMaqsura":true,"convertDigits":true,"collapseWhitespace":true,"foldCase":true}}""");
+    }
+
+    [Fact]
+    public void Validate_NormalizationNotAnObject_ReturnsQuestionGradingSpecInvalid()
+    {
+        FillQuestionRules.Validate(Stem, Json(OneBlank), Json("""{"blanks":[{"id":"1","acceptedAnswers":["20"]}],"normalization":"off"}"""), _options).Should().Contain(ErrorCodes.QuestionGradingSpecInvalid);
+    }
+
+    [Fact]
+    public void Validate_NormalizationRuleNotBoolean_ReturnsQuestionGradingSpecInvalid()
+    {
+        FillQuestionRules.Validate(Stem, Json(OneBlank), Json("""{"blanks":[{"id":"1","acceptedAnswers":["20"]}],"normalization":{"unifyAlef":"no"}}"""), _options).Should().Contain(ErrorCodes.QuestionGradingSpecInvalid);
     }
 }

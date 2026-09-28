@@ -82,10 +82,26 @@ public sealed class ShortQuestionRulesTests
     }
 
     [Fact]
-    public void Normalize_Text_TrimsAnswersAndDefaultsUnifyTrue()
+    public void Normalize_Text_TrimsAnswersAndDefaultsAllRulesOn()
     {
         var (_, spec) = ShortQuestionRules.Normalize(Json(Text), Json("""{"acceptedAnswers":[" ماء "],"value":1}"""));
 
-        JsonNode.DeepEquals(JsonNode.Parse(spec), JsonNode.Parse("""{"acceptedAnswers":["ماء"],"unifyLetterVariants":true}""")).Should().BeTrue();
+        JsonNode.DeepEquals(JsonNode.Parse(spec), JsonNode.Parse("""{"acceptedAnswers":["ماء"],"normalization":{"stripTashkeel":true,"stripTatweel":true,"unifyAlef":true,"unifyTaaMarbuta":true,"unifyAlefMaqsura":true,"convertDigits":true,"collapseWhitespace":true,"foldCase":true}}""")).Should().BeTrue();
+    }
+
+    [Fact]
+    public void Normalize_TextWithRulesOff_KeepsChosenRules()
+    {
+        var (_, spec) = ShortQuestionRules.Normalize(Json(Text), Json("""{"acceptedAnswers":["ماء"],"normalization":{"foldCase":false,"convertDigits":false}}"""));
+
+        JsonNode.DeepEquals(JsonNode.Parse(spec), JsonNode.Parse("""{"acceptedAnswers":["ماء"],"normalization":{"stripTashkeel":true,"stripTatweel":true,"unifyAlef":true,"unifyTaaMarbuta":true,"unifyAlefMaqsura":true,"convertDigits":false,"collapseWhitespace":true,"foldCase":false}}""")).Should().BeTrue();
+    }
+
+    [Fact]
+    public void Normalize_NumericWithNormalization_DropsNormalization()
+    {
+        var (_, spec) = ShortQuestionRules.Normalize(Json(Numeric), Json("""{"value":9.8,"tolerance":0.1,"toleranceMode":"absolute","normalization":{"foldCase":false}}"""));
+
+        spec.Should().Be("""{"value":9.8,"tolerance":0.1,"toleranceMode":"absolute"}""");
     }
 }
