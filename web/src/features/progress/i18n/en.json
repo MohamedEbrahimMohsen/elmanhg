@@ -19,7 +19,9 @@
     "bestExam": "Best exam",
     "unitMasteryValue": "{percent, number}%",
     "bestExamValue": "{score, number}%",
-    "noExam": "—"
+    "noExam": "—",
+    "exam": "Exam",
+    "startExam": "Unit exam"
   },
   "weakSpots": {
     "title": "Weak spots",

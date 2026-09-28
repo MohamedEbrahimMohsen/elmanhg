@@ -1,6 +1,6 @@
 # Quiz sessions and the attempt log
 
-A **session** is one run of questions by one student: a lesson quiz today, a unit or multi-unit exam later (E6). Every answer is graded at once and stored as an **attempt**. Attempts are stored forever (PRD §7.3) and are the source for mastery (#77), history (#78) and training-data export (E12).
+A **session** is one run of questions by one student: a lesson quiz or a unit exam (a multi-unit exam follows in #82). Exams have their own contract in `docs/exams.md`; this document covers the shared model and quizzes. Every answer is graded at once and stored as an **attempt**. Attempts are stored forever (PRD §7.3) and are the source for mastery (#77), history (#78) and training-data export (E12).
 
 ## Model
 
@@ -12,16 +12,18 @@ All three tables map one to one to PRD §15. Names follow constitution §3 (no a
 |---|---|---|
 | `Id` | `id` | |
 | `StudentId` | `student_id` | FK `Users`, restrict |
-| `Kind` | `kind` | `Quiz`, `UnitExam`, `MultiUnitExam`. Only `Quiz` can be started today. |
+| `Kind` | `kind` | `Quiz` via `/api/sessions`, `UnitExam` via `/api/exams` (`docs/exams.md`). `MultiUnitExam` is reserved for #82. |
 | `Scope` | `scope_json` | jsonb. A quiz stores `{"lessonId":"<guid>"}`. |
 | `ScopeKey` | `scope_key` | Canonical string used for resume and uniqueness. A quiz uses `lesson:<guid>`; exams use `unit:<guid>` through `UnitExamScope` (Domain), already read by progress best scores (#78). |
-| `IsTestMode` | `is_test_mode` | True when an Admin runs the quiz. |
+| `IsTestMode` | `is_test_mode` | True when an Admin runs the quiz or exam. |
 | `StartedAt` | `started_at` | |
 | `LastActivityAt` | `last_activity_at` | Set at start, on resume, on each attempt and on finish. |
 | `SubmittedAt` | `submitted_at?` | Null while the session is open. |
 | `ScorePercent` | `score_pct?` | numeric(5,2), set on finish. |
 | `Version` | `xmin` | PostgreSQL system column used as the row-version concurrency token; no DDL. |
-| — | `time_limit_min?` | Added by E6 (exams). |
+| `TimeLimitMinutes` | `time_limit_min?` | Exams only: the blueprint's limit, copied at start. Null for quizzes and untimed exams. |
+| `PassMark` | `pass_mark?` | Exams only: the blueprint's pass mark, copied at start. |
+| `Deadline` | `deadline?` | Exams only: `StartedAt + TimeLimitMinutes`; null when untimed. |
 
 ### SessionItem (a served question)
 
@@ -31,8 +33,10 @@ All three tables map one to one to PRD §15. Names follow constitution §3 (no a
 | `QuestionId` | FK `Questions`, restrict. Unique `(SessionId, QuestionId)`: a question never appears twice in one session (PRD §7.2). |
 | `QuestionVersion` | The version the student saw. |
 | `MaxScore` | Copied from the served version. |
+| `SavedAnswer` | Exams only: jsonb, the canonical draft answer, overwritten by each save until submission (`docs/exams.md`). |
+| `AnswerSavedAt` | Exams only: when the draft was last saved. |
 
-Items are chosen and written when the session starts and never change afterwards.
+The served questions are chosen and written when the session starts and never change afterwards; an exam item's saved answer does, until submission.
 
 ### Attempt (append-only)
 
@@ -57,6 +61,8 @@ Items are chosen and written when the session starts and never change afterwards
 2. **Answer** — `POST /api/sessions/{id}/answers { questionId, answer, timeTakenMilliseconds? }`. One answer per question, graded at once and saved immediately. There is no draft state for quizzes. A new attempt in a non-test session also updates the student's `QuestionMastery` row in the same save (`docs/mastery.md`); a replayed answer does not.
 3. **Finish** — `POST /api/sessions/{id}/finish`. Allowed at any time, including mid-quiz. Nothing finishes a session automatically.
 4. **Read** — `GET /api/sessions/{id}` returns the items, the saved attempts and `currentPosition`: the lowest unanswered position, or null when every item is answered or the session is finished.
+
+The answer and finish endpoints serve quizzes only: an exam session id returns 404 `SESSION_NOT_FOUND`, and the domain refuses `RecordAttempt` and `Submit()` on an exam. Exams save drafts and submit through `/api/exams` (`docs/exams.md`).
 
 ## Selection
 
@@ -105,7 +111,7 @@ The client may report `timeTakenMilliseconds`. The server measures `elapsed = no
 
 ## Scoring
 
-`ScorePercent = round(Σ attempt.Score / Σ item.MaxScore × 100, 2)`. Unanswered items count 0. The same formula will serve exams.
+`ScorePercent = round(Σ attempt.Score / Σ item.MaxScore × 100, 2)`. Unanswered items count 0. Exams use the same formula (`docs/exams.md`).
 
 ## What is revealed
 
@@ -128,6 +134,8 @@ This is the audit-log pattern from `docs/audit-log.md`. `Attempt` has no mutatin
 | `IX_Attempts_SessionId_QuestionId` (unique) | One attempt per served question. |
 | `IX_Sessions_InProgressScope` (unique, `WHERE "SubmittedAt" IS NULL AND "IsDeleted" = false`) on `(StudentId, Kind, ScopeKey)` | One open session per student and scope. |
 | `IX_Sessions_StudentId_StartedAt` | History (#78). |
+| `IX_Sessions_OneOpenExam` (unique, `WHERE "Kind" <> 'Quiz' AND "SubmittedAt" IS NULL AND "IsDeleted" = false`) on `StudentId` | At most one open exam per student; a violation maps to 409 `EXAM_ALREADY_IN_PROGRESS`. |
+| `IX_Sessions_OpenExamDeadline` (`WHERE "SubmittedAt" IS NULL AND "Deadline" IS NOT NULL AND "IsDeleted" = false`) on `Deadline` | The auto-submit sweep for expired exams. |
 | `IX_SessionItems_SessionId_Position`, `IX_SessionItems_SessionId_QuestionId` (unique) | Item order; no repeated question. |
 
 ## Access

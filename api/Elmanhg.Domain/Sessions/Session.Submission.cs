@@ -7,15 +7,21 @@ public partial class Session
 
     public void Submit()
     {
+        if (IsExam)
+        {
+            throw new InvalidOperationException("Exams are submitted with SubmitExam.");
+        }
+
         if (IsSubmitted)
         {
             return;
         }
 
         var now = UtcNowToMicroseconds();
-        var possible = Items.Sum(x => x.MaxScore);
-        ScorePercent = Math.Round(Attempts.Sum(x => x.Score) * 100m / possible, ScorePercentDecimals, MidpointRounding.AwayFromZero);
+        ScorePercent = CalculateScorePercent();
         SubmittedAt = now;
         Touch(now);
     }
+
+    private decimal CalculateScorePercent() => Math.Round(Attempts.Sum(x => x.Score) * 100m / Items.Sum(x => x.MaxScore), ScorePercentDecimals, MidpointRounding.AwayFromZero);
 }

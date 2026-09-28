@@ -31,6 +31,8 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public const string QuestionMasteryPerStudentIndex = "IX_QuestionMasteries_StudentId_QuestionId";
     public const string SubjectDefaultBlueprintIndex = "IX_ExamBlueprints_SubjectDefault";
     public const string UnitBlueprintIndex = "IX_ExamBlueprints_UnitId";
+    public const string OneOpenExamIndex = "IX_Sessions_OneOpenExam";
+    public const string OpenExamDeadlineIndex = "IX_Sessions_OpenExamDeadline";
 
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<TeacherSubject> TeacherSubjects { get; set; }
@@ -75,6 +77,10 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: QuestionMasteryPerStudentIndex })
         {
             throw new ConflictCoreException(ErrorCodes.SessionModifiedConcurrently, innerException: exception);
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: OneOpenExamIndex })
+        {
+            throw new ConflictCoreException(ErrorCodes.ExamAlreadyInProgress, innerException: exception);
         }
         catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: SubjectDefaultBlueprintIndex or UnitBlueprintIndex })
         {
@@ -221,10 +227,13 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
             builder.HasMany(x => x.Attempts).WithOne().HasForeignKey(x => x.SessionId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.StudentId, x.StartedAt });
             builder.HasIndex(x => new { x.StudentId, x.Kind, x.ScopeKey }).IsUnique().HasFilter("\"SubmittedAt\" IS NULL AND \"IsDeleted\" = false").HasDatabaseName(InProgressSessionIndex);
+            builder.HasIndex(x => x.StudentId, OneOpenExamIndex).IsUnique().HasFilter("\"Kind\" <> 'Quiz' AND \"SubmittedAt\" IS NULL AND \"IsDeleted\" = false");
+            builder.HasIndex(x => x.Deadline, OpenExamDeadlineIndex).HasFilter("\"SubmittedAt\" IS NULL AND \"Deadline\" IS NOT NULL AND \"IsDeleted\" = false");
         });
         modelBuilder.Entity<SessionItem>(builder =>
         {
             builder.Property(x => x.Id).ValueGeneratedNever();
+            builder.Property(x => x.SavedAnswer).HasColumnType("jsonb");
             builder.HasOne<Question>().WithMany().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.SessionId, x.Position }).IsUnique();
             builder.HasIndex(x => new { x.SessionId, x.QuestionId }).IsUnique();

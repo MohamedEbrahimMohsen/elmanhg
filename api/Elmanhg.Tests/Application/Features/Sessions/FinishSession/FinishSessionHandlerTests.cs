@@ -3,6 +3,7 @@ using Core.Identity.Tokens.CurrentUser;
 using Core.Localization;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Sessions.FinishSession;
+using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Tests.Builders;
@@ -77,6 +78,19 @@ public sealed class FinishSessionHandlerTests
 
         (await act.Should().ThrowAsync<NotFoundCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.SessionNotFound);
         _session.SubmittedAt.Should().BeNull();
+        await _sessionRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_ExamSession_ThrowsNotFound()
+    {
+        var exam = Session.StartUnitExam(_builder.StudentId, _builder.Questions.Unit, ExamBlueprint.CreateForUnit(_builder.Questions.Unit, ExamBlueprintBuilder.Shape(new ExamTypeCount(QuestionType.Mcq, 1)), ExamBlueprintBuilder.Plenty(), Guid.NewGuid()), _builder.BuildQuestions(1), [_builder.Questions.Lesson], false, DateTimeOffset.UtcNow);
+        SessionRepositoryStub.StubFind(_sessionRepository, exam);
+
+        var act = () => _handler.Handle(new FinishSessionCommand(exam.Id), TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<NotFoundCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.SessionNotFound);
+        exam.SubmittedAt.Should().BeNull();
         await _sessionRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 }

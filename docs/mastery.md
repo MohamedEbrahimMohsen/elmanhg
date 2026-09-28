@@ -10,7 +10,7 @@ These restate PRD §7.3. The threshold is `Mastery:CorrectThreshold` (0.8).
 |---|---|
 | Correct attempt | `NormalisedScore` at or above 0.8. Partial credit below 0.8 is wrong. |
 | Question mastered | The **two most recent** attempts, by attempt time, are both correct. One wrong attempt clears it. |
-| Seen | A servable question the student has attempted at least once outside test mode. |
+| Seen | A servable question the student has attempted at least once outside test mode, in a quiz or a submitted exam. |
 | Lesson mastery % | mastered / servable questions in the lesson. |
 | Unit / subject mastery % | Weighted by question count: Σ mastered / Σ servable over the lessons. |
 | Questions remaining | Servable total − mastered. |
@@ -34,6 +34,7 @@ The pair (`StudentId`, `QuestionId`) is unique (`IX_QuestionMasteries_StudentId_
 ## Update rule
 
 - `SubmitAnswerHandler` updates mastery in the **same save** as the new attempt, so the two are atomic. There is no domain event.
+- Exam attempts (non-test) update mastery when the exam is submitted, in the same save as the submission (`ExamSubmission`, `docs/exams.md`); each attempt applies `Start` or `Record` exactly as a quiz answer does. Saved exam drafts never touch mastery. Test-mode exams never do.
 - Only a newly created attempt counts. A replayed answer (the same answer again) does not update mastery a second time.
 - Test-mode (admin) sessions never write mastery.
 - The first attempt creates the row with `IsMastered = false`, even for a full score: mastery needs two attempts.
@@ -59,7 +60,7 @@ The pair (`StudentId`, `QuestionId`) is unique (`IX_QuestionMasteries_StudentId_
 
 ## Streak
 
-- The number of consecutive calendar days, in `Progress:StreakTimeZone` (default `Africa/Cairo`), with at least one attempt in a non-test quiz session.
+- The number of consecutive calendar days, in `Progress:StreakTimeZone` (default `Africa/Cairo`), with at least one attempt in a non-test quiz session. Exam attempts do not count toward the streak (PRD §7.6).
 - It counts back from today if the student was active today, otherwise from yesterday. Two or more idle days give 0.
 - It looks back at most `Progress:StreakMaxDays` (365) days.
 
@@ -122,4 +123,4 @@ The progress endpoints (`docs/progress.md`) use the same policy.
 - the suggested next lesson with its mastery bar and "درّب الآن", which opens `/student/lesson/{id}/practice`;
 - one card per subject with a mastery bar and its available questions. Cards are not links until #85 adds subject pages.
 
-It has loading, error-with-retry and empty states. Every quiz answer invalidates the `/api/mastery*` queries, so the numbers are fresh when the student returns home.
+It has loading, error-with-retry and empty states. Every quiz answer and every exam submission invalidates the `/api/mastery*` queries, so the numbers are fresh when the student returns home.

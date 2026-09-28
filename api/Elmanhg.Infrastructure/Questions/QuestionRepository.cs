@@ -1,6 +1,7 @@
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
+using Elmanhg.Domain.Sessions.Exams;
 using Elmanhg.Infrastructure.Data.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -60,6 +61,19 @@ public class QuestionRepository(AppDbContext context) : Repository<Question>(con
             .WhereServable(_context.Set<Lesson>())
             .Where(x => x.LessonId == lessonId)
             .Select(x => x.Id)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<List<ExamCandidate>> GetServableExamCandidatesAsync(IReadOnlyCollection<Guid> unitIds, CancellationToken cancellationToken)
+    {
+        return await _dbSet
+            .WhereServable(_context.Set<Lesson>())
+            .Join(_context.Set<Lesson>(), question => question.LessonId, lesson => lesson.Id, (question, lesson) => new { question, lesson.UnitId })
+            .Where(x => unitIds.Contains(x.UnitId))
+            .OrderBy(x => x.question.Id)
+            .Select(x => new ExamCandidate(x.question.Id, x.question.LessonId, x.question.Type, x.question.Difficulty))
+            .AsNoTracking()
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
     }

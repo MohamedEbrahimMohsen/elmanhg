@@ -27,9 +27,15 @@ describe('sessionHistory', () => {
     expect(sessionLink(openQuizItem)).toEqual({ to: '/student/quiz/$sessionId', labelKey: 'history.continue' });
   });
 
-  it('gives no link for exams', () => {
-    expect(sessionLink(examItem)).toBeNull();
-    expect(sessionLink({ ...examItem, kind: 'MultiUnitExam', submittedAt: null })).toBeNull();
+  it('links a finished exam to its result', () => {
+    expect(sessionLink(examItem)).toEqual({ to: '/student/exam-result/$sessionId', labelKey: 'history.view' });
+  });
+
+  it('links an open exam to continue', () => {
+    expect(sessionLink({ ...examItem, submittedAt: null, scorePercent: null })).toEqual({
+      to: '/student/exam/$sessionId',
+      labelKey: 'history.continue',
+    });
   });
 
   it('labels every session kind', () => {

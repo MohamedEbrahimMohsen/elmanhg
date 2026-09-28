@@ -37,5 +37,5 @@ export function renderApp(
       <RouterProvider router={router} />
     </AppProviders>,
   );
-  return { ...renderResult, router };
+  return { ...renderResult, router, queryClient };
 }

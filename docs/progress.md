@@ -7,7 +7,7 @@ The progress page (`/student/progress`, "تقدّمي") shows a student how far 
 The page has four sections. Each one loads, fails and retries on its own.
 
 1. **Summary.** The headline counter and the day streak come from `GET /api/mastery/overview`, the same data and rules as the student home. The streak is student-wide (consecutive days with at least one non-test quiz attempt), so it is shown once here, not per subject.
-2. **Subjects.** One card per subject with its mastery bar and a unit table: unit mastery % and best unit-exam score. The score is rounded to a whole percent, and "—" means no exam yet.
+2. **Subjects.** One card per subject with its mastery bar and a unit table: unit mastery % and best unit-exam score. The score is rounded to a whole percent, and "—" means no exam yet. The last column links «امتحان الوحدة» to the unit's exam start, `/student/exam-start/{unitId}` (the entry point until the unit page ships in #85).
 3. **Weak spots.** The weakest lessons and the weakest objectives, each with "درّب الآن".
 4. **History.** A paged table of the student's quiz and exam sessions, filterable by all, quizzes or exams.
 
@@ -16,7 +16,7 @@ The page has four sections. Each one loads, fails and retries on its own.
 - Every subject (order, then creation date) is listed. Within it, every unit (order, then creation date) is listed.
 - Unit and subject counts use `IQuestionMasteryRepository.GetLessonCountsAsync` and `MasteryTotals`, the same weighted rule as `docs/mastery.md`. A unit without servable questions shows 0/0/0 %.
 - **Best unit-exam score** is the highest `ScorePercent` over the student's `UnitExam` sessions that are submitted, not in test mode and not deleted, grouped by `ScopeKey`. A unit matches the key `unit:<guid>`, built by `UnitExamScope` (Domain). The score is null when there is none. Multi-unit exams do not count toward a unit's best (PRD §7.4: the best score is the displayed one).
-- Unit exams are created in E6 (#81), which must start exams with `UnitExamScope`.
+- Unit exams (#81) use `UnitExamScope` (`docs/exams.md`).
 
 ## Weak spots
 
@@ -35,7 +35,7 @@ Both lists use the product's single mastery definition (`docs/mastery.md`), not 
 - Filter `kind`: absent = all, `Quiz` = quizzes, `Exam` = unit and multi-unit exams. The filter and page live in the URL (`?kind=Exam&page=2`).
 - Paged with `PageData`: `pageSize` defaults to 20 and may not exceed `Progress:HistoryMaxPageSize` (50).
 - **Scope name.** A quiz shows its lesson's name, looked up across all lesson states, so an archived lesson keeps its name. A unit exam shows its unit's name. A multi-unit exam, or a deleted lesson or unit, has no name, and the page shows "غير متاح".
-- **Links.** A finished quiz links "عرض" to `/student/quiz-result/{id}`. An open quiz links "متابعة" to `/student/quiz/{id}`. Exams have no link until the exam result pages (E6, #81).
+- **Links.** A finished quiz links "عرض" to `/student/quiz-result/{id}`. An open quiz links "متابعة" to `/student/quiz/{id}`. A finished exam links "عرض" to `/student/exam-result/{id}`; an open exam links "متابعة" to `/student/exam/{id}`.
 - An open session shows "جارٍ" instead of a score.
 
 ## API

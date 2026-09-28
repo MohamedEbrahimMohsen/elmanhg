@@ -167,7 +167,11 @@
     "EXAM_BLUEPRINT_DIFFICULTY_MIX_INVALID": "Difficulty percentages must be 0–100 and add up to 100.",
     "EXAM_BLUEPRINT_TIME_LIMIT_INVALID": "The time limit is not valid.",
     "EXAM_BLUEPRINT_PASS_MARK_INVALID": "The pass mark must be between 1 and 100.",
-    "EXAM_BLUEPRINT_MODIFIED_CONCURRENTLY": "The blueprint was changed at the same time. Try again."
+    "EXAM_BLUEPRINT_MODIFIED_CONCURRENTLY": "The blueprint was changed at the same time. Try again.",
+    "EXAM_TIME_EXPIRED": "The exam time is over. Your saved answers will be submitted.",
+    "EXAM_SHORTFALL": "The exam cannot be created: not enough questions are available.",
+    "EXAM_ALREADY_IN_PROGRESS": "You already have an exam in progress. Finish it first.",
+    "UNIT_EXAM_NO_BLUEPRINT": "This unit has no exam yet."
   },
   "error": {
     "title": "Something went wrong"

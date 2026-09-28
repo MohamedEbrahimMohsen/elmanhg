@@ -17,11 +17,15 @@ public partial class Session : AuditEntity
     public DateTimeOffset LastActivityAt { get; private set; }
     public DateTimeOffset? SubmittedAt { get; private set; }
     public decimal? ScorePercent { get; private set; }
+    public int? TimeLimitMinutes { get; private set; }
+    public int? PassMark { get; private set; }
+    public DateTimeOffset? Deadline { get; private set; }
     public uint Version { get; private set; }
     public List<SessionItem> Items { get; private set; } = [];
     public List<Attempt> Attempts { get; private set; } = [];
 
     public bool IsSubmitted => SubmittedAt is not null;
+    public bool IsExam => Kind != SessionKind.Quiz;
     public long TotalTimeTakenMilliseconds => Attempts.Sum(x => (long)x.TimeTakenMilliseconds);
     public int? CurrentPosition => IsSubmitted ? null : Items.OrderBy(x => x.Position).FirstOrDefault(x => FindAttempt(x.QuestionId) is null)?.Position;
 
@@ -67,11 +71,9 @@ public partial class Session : AuditEntity
     }
 
     // timestamptz stores whole microseconds; truncating here keeps the first response identical to every later read and replay.
-    private static DateTimeOffset UtcNowToMicroseconds()
-    {
-        var now = DateTimeOffset.UtcNow;
-        return now.AddTicks(-(now.Ticks % TimeSpan.TicksPerMicrosecond));
-    }
+    private static DateTimeOffset ToMicroseconds(DateTimeOffset value) => value.AddTicks(-(value.Ticks % TimeSpan.TicksPerMicrosecond));
+
+    private static DateTimeOffset UtcNowToMicroseconds() => ToMicroseconds(DateTimeOffset.UtcNow);
 
     private void Touch(DateTimeOffset now)
     {

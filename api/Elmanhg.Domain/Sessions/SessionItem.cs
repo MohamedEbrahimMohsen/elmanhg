@@ -10,6 +10,8 @@ public class SessionItem : Entity
     public Guid QuestionId { get; private set; }
     public int QuestionVersion { get; private set; }
     public int MaxScore { get; private set; }
+    public string? SavedAnswer { get; private set; }
+    public DateTimeOffset? AnswerSavedAt { get; private set; }
 
     private SessionItem(Guid id) : base(id) { }
 
@@ -23,5 +25,11 @@ public class SessionItem : Entity
             QuestionVersion = question.Version,
             MaxScore = question.MaxScore,
         };
+    }
+
+    internal void SaveAnswer(string answer, DateTimeOffset savedAt)
+    {
+        SavedAnswer = answer;
+        AnswerSavedAt = savedAt;
     }
 }

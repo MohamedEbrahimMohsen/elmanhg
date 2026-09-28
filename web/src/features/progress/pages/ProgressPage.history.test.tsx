@@ -13,6 +13,7 @@ import { masteryOverview } from '@/test/masteryFixtures';
 import { server } from '@/test/msw/server';
 import {
   examItem,
+  examSessionId,
   finishedQuizId,
   finishedQuizItem,
   openQuizId,
@@ -78,7 +79,10 @@ describe('ProgressPage history', () => {
       `/student/quiz-result/${finishedQuizId}`,
     );
     expect(within(ohm).getByRole('link', { name: 'Continue' })).toHaveAttribute('href', `/student/quiz/${openQuizId}`);
-    expect(within(exam).queryByRole('link')).toBeNull();
+    expect(within(exam).getByRole('link', { name: 'View' })).toHaveAttribute(
+      'href',
+      `/student/exam-result/${examSessionId}`,
+    );
   });
 
   it('filters to exams through the URL', async () => {

@@ -11,6 +11,7 @@ using DotNetEnv;
 using Elmanhg.Api.Authorization;
 using Elmanhg.Api.FileStorage;
 using Elmanhg.Api.RateLimiting;
+using Elmanhg.Api.Workers;
 using Elmanhg.Application;
 using Elmanhg.Application.Auth.SeedAdmin;
 using Elmanhg.Domain.Identity;
@@ -75,6 +76,7 @@ builder.Services.AddCoreEntityFrameworkCore<User, Role, Guid, AppDbContext>();
 builder.Services.AddCoreUtilities();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
+builder.Services.AddHostedService<ExpiredExamSubmissionWorker>();
 builder.Services.AddAuthRateLimiting();
 #endregion
 

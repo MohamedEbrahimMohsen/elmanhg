@@ -1037,6 +1037,9 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreationDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTimeOffset?>("Deadline")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -1053,6 +1056,9 @@ namespace Elmanhg.Infrastructure.Migrations
 
                     b.Property<DateTimeOffset>("LastActivityAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("PassMark")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Scope")
                         .IsRequired()
@@ -1075,6 +1081,9 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("SubmittedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int?>("TimeLimitMinutes")
+                        .HasColumnType("integer");
+
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uuid");
 
@@ -1096,6 +1105,13 @@ namespace Elmanhg.Infrastructure.Migrations
                         .HasDatabaseName("IX_Sessions_InProgressScope")
                         .HasFilter("\"SubmittedAt\" IS NULL AND \"IsDeleted\" = false");
 
+                    b.HasIndex(new[] { "StudentId" }, "IX_Sessions_OneOpenExam")
+                        .IsUnique()
+                        .HasFilter("\"Kind\" <> 'Quiz' AND \"SubmittedAt\" IS NULL AND \"IsDeleted\" = false");
+
+                    b.HasIndex(new[] { "Deadline" }, "IX_Sessions_OpenExamDeadline")
+                        .HasFilter("\"SubmittedAt\" IS NULL AND \"Deadline\" IS NOT NULL AND \"IsDeleted\" = false");
+
                     b.ToTable("Sessions");
                 });
 
@@ -1103,6 +1119,9 @@ namespace Elmanhg.Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("AnswerSavedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
@@ -1121,6 +1140,9 @@ namespace Elmanhg.Infrastructure.Migrations
 
                     b.Property<int>("QuestionVersion")
                         .HasColumnType("integer");
+
+                    b.Property<string>("SavedAnswer")
+                        .HasColumnType("jsonb");
 
                     b.Property<Guid>("SessionId")
                         .HasColumnType("uuid");

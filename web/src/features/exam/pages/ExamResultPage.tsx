@@ -1,0 +1,65 @@
+import { Link, Navigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
+import { ContentErrorState, ContentListSkeleton } from '@/features/content';
+import { useGetExamSession } from '@/shared/api/generated/exams/exams';
+import { Button } from '@/shared/ui/button';
+import { sortedExamItems, unitIdOf } from '../api/examSession';
+import { ExamLessonBreakdown } from '../components/ExamLessonBreakdown';
+import { ExamResultSummary } from '../components/ExamResultSummary';
+import { ExamReviewItem } from '../components/ExamReviewItem';
+import { ExamWeakestObjectives } from '../components/ExamWeakestObjectives';
+
+export interface ExamResultPageProps {
+  sessionId: string;
+}
+
+export function ExamResultPage({ sessionId }: ExamResultPageProps) {
+  const { t } = useTranslation('exam');
+  const { data, error, isPending, isError, refetch } = useGetExamSession(sessionId, { query: { staleTime: Infinity } });
+
+  if (isError) {
+    return (
+      <ContentErrorState
+        title={t('result.errorTitle')}
+        error={error}
+        onRetry={() => {
+          void refetch();
+        }}
+      />
+    );
+  }
+  if (isPending) {
+    return <ContentListSkeleton label={t('result.loading')} />;
+  }
+  if (data.submittedAt === null) {
+    return <Navigate to="/student/exam/$sessionId" params={{ sessionId }} replace />;
+  }
+
+  const unitId = unitIdOf(data);
+  return (
+    <section className="flex flex-col gap-4">
+      <h1 className="font-display text-h1 font-bold lg:text-h1-desktop">
+        {t('result.title', { unit: data.units[0]?.name ?? '' })}
+      </h1>
+      <ExamResultSummary session={data} />
+      <ExamLessonBreakdown lessons={data.lessons} />
+      <ExamWeakestObjectives objectives={data.weakestObjectives} />
+      <h2 className="font-display text-h2 font-bold lg:text-h2-desktop">{t('result.review')}</h2>
+      {sortedExamItems(data).map((item) => (
+        <ExamReviewItem key={item.questionId} item={item} />
+      ))}
+      <div className="flex flex-wrap gap-3">
+        {unitId !== null ? (
+          <Button asChild variant="primary">
+            <Link to="/student/exam-start/$unitId" params={{ unitId }}>
+              {t('result.retake')}
+            </Link>
+          </Button>
+        ) : null}
+        <Button asChild variant="secondary">
+          <Link to="/student/progress">{t('result.progress')}</Link>
+        </Button>
+      </div>
+    </section>
+  );
+}
