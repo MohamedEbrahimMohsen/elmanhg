@@ -22,6 +22,9 @@ public static class DependencyInjection
         services.AddOptions<AuditLogsOptions>().BindConfiguration(AuditLogsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<ContentOptions>().BindConfiguration(ContentOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<QuestionValidationOptions>().BindConfiguration(QuestionValidationOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<SessionsOptions>().BindConfiguration(SessionsOptions.SectionName).ValidateDataAnnotations()
+            .Validate(x => x.MinQuizSize <= x.DefaultQuizSize && x.DefaultQuizSize <= x.MaxQuizSize, "Sessions:MinQuizSize <= DefaultQuizSize <= MaxQuizSize is required.")
+            .ValidateOnStart();
         return services;
     }
 }

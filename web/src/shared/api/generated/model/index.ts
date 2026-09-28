@@ -6,6 +6,7 @@
  */
 
 export * from './approveQuestionRequest';
+export * from './attemptResult';
 export * from './auditLogResult';
 export * from './authResult';
 export * from './authUserResult';
@@ -55,11 +56,15 @@ export * from './registerWithPhoneCommand';
 export * from './rejectQuestionRequest';
 export * from './reviewSessionResult';
 export * from './servableQuestionCountResult';
+export * from './sessionItemResult';
+export * from './sessionResult';
+export * from './startQuizSessionCommand';
 export * from './stream';
 export * from './subjectDetailResult';
 export * from './subjectNameRequest';
 export * from './subjectPositionRequest';
 export * from './subjectResult';
+export * from './submitAnswerRequest';
 export * from './teacherResult';
 export * from './teacherSubjectResult';
 export * from './unitNameRequest';

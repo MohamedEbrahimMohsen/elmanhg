@@ -237,4 +237,17 @@
   <data name="GRADE_FEEDBACK_CHOICE_TALLY" xml:space="preserve"><value>الاختيارات الصحيحة: {right} من {total}، والخاطئة: {wrong}.</value></data>
   <data name="GRADE_FEEDBACK_BLANK_TALLY" xml:space="preserve"><value>الفراغات الصحيحة: {right} من {total}.</value></data>
   <data name="GRADE_FEEDBACK_NOT_A_NUMBER" xml:space="preserve"><value>اكتب الإجابة رقمًا فقط، بدون وحدات.</value></data>
+  <data name="SESSION_NOT_FOUND" xml:space="preserve"><value>الجلسة غير موجودة.</value></data>
+  <data name="SESSION_ID_REQUIRED" xml:space="preserve"><value>الجلسة مطلوبة.</value></data>
+  <data name="SESSION_QUESTION_COUNT_INVALID" xml:space="preserve"><value>عدد الاسئلة خارج النطاق المسموح.</value></data>
+  <data name="SESSION_QUESTION_NOT_FOUND" xml:space="preserve"><value>هذا السؤال ليس ضمن الجلسة.</value></data>
+  <data name="SESSION_ALREADY_IN_PROGRESS" xml:space="preserve"><value>توجد جلسة جارية لهذا الدرس. حاول مرة اخرى لاستكمالها.</value></data>
+  <data name="ATTEMPT_ANSWER_TOO_LONG" xml:space="preserve"><value>الاجابة طويلة جدا.</value></data>
+  <data name="ATTEMPT_TIME_TAKEN_INVALID" xml:space="preserve"><value>الوقت المستغرق يجب ان يكون صفرا او اكثر.</value></data>
+  <data name="SESSION_NO_SERVABLE_QUESTIONS" xml:space="preserve"><value>لا توجد اسئلة متاحة لهذا الدرس بعد.</value></data>
+  <data name="SESSION_QUESTION_NOT_SERVABLE" xml:space="preserve"><value>لا يمكن عرض احد الاسئلة حاليا.</value></data>
+  <data name="SESSION_QUESTION_DUPLICATE" xml:space="preserve"><value>لا يمكن ان يظهر السؤال مرتين في الجلسة نفسها.</value></data>
+  <data name="SESSION_ALREADY_SUBMITTED" xml:space="preserve"><value>انتهت هذه الجلسة بالفعل.</value></data>
+  <data name="SESSION_QUESTION_ALREADY_ANSWERED" xml:space="preserve"><value>لقد اجبت عن هذا السؤال بالفعل.</value></data>
+  <data name="SESSION_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>تم تعديل هذه الجلسة بواسطة طلب آخر. حاول مرة أخرى.</value></data>
 </root>

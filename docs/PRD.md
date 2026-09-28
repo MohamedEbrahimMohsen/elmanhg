@@ -440,11 +440,12 @@ QuestionRevision(question_id, version, snapshot_json, edited_by, edited_at)
 
 ExamBlueprint(id, name, type_counts_json, difficulty_mix_json?, time_limit_min?, pass_mark)
 
-Session(id, student_id, kind[Quiz|UnitExam|MultiUnitExam], scope_json,
-        started_at, submitted_at?, score_pct?, time_limit_min?)
+Session(id, student_id, kind[Quiz|UnitExam|MultiUnitExam], scope_json, scope_key, is_test_mode,
+        started_at, last_activity_at, submitted_at?, score_pct?, time_limit_min?)
+SessionItem(id, session_id, position, question_id, question_version, max_score)  -- the questions served, fixed at start
 Attempt(id, session_id, student_id, question_id, question_version,
         answer_json, score, normalised_score, graded_by[Auto|AI|Teacher],
-        grade_json?, time_taken_ms, created_at)
+        grade_json?, time_taken_ms, created_at)  -- append-only
 QuestionMastery(student_id, question_id, mastered bool, last_two_json, updated_at)  -- materialised
 
 Subscription(id, student_id, plan, status, current_period_end, paymob_ref)

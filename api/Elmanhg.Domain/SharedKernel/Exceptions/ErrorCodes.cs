@@ -34,4 +34,11 @@ public static class ErrorCodes
     // REVIEW SESSIONS
     public const string QuestionNotOpenedInSession = "QUESTION_NOT_OPENED_IN_SESSION";
     public const string ReviewSessionExpired = "REVIEW_SESSION_EXPIRED";
+
+    // SESSIONS
+    public const string SessionNoServableQuestions = "SESSION_NO_SERVABLE_QUESTIONS";
+    public const string SessionQuestionNotServable = "SESSION_QUESTION_NOT_SERVABLE";
+    public const string SessionQuestionDuplicate = "SESSION_QUESTION_DUPLICATE";
+    public const string SessionAlreadySubmitted = "SESSION_ALREADY_SUBMITTED";
+    public const string SessionQuestionAlreadyAnswered = "SESSION_QUESTION_ALREADY_ANSWERED";
 }

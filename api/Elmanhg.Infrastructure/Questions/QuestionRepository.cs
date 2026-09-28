@@ -41,4 +41,25 @@ public class QuestionRepository(AppDbContext context) : Repository<Question>(con
             .ToDictionaryAsync(x => x.Key, x => x.Count, cancellationToken)
             .ConfigureAwait(false);
     }
+
+    public async Task<List<Question>> GetRandomServableInLessonAsync(Guid lessonId, int count, CancellationToken cancellationToken)
+    {
+        return await _dbSet
+            .WhereServable(_context.Set<Lesson>())
+            .Where(x => x.LessonId == lessonId)
+            .OrderBy(x => EF.Functions.Random())
+            .Take(count)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<List<QuestionRevision>> GetRevisionsAsync(IReadOnlyCollection<Guid> questionIds, CancellationToken cancellationToken)
+    {
+        return await _context.Set<QuestionRevision>()
+            .Where(x => questionIds.Contains(x.QuestionId))
+            .AsNoTracking()
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
 }

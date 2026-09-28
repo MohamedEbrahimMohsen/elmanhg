@@ -8,12 +8,13 @@ public sealed record QuestionGrade(decimal Score, decimal NormalisedScore, Grade
 
     public static QuestionGrade FromNormalised(NormalisedGrade grade, int maxScore)
     {
-        var outcome = grade.Value switch
-        {
-            >= 1m => GradeOutcome.Correct,
-            > 0m => GradeOutcome.Partial,
-            _ => GradeOutcome.Incorrect,
-        };
-        return new QuestionGrade(Math.Round(grade.Value * maxScore, ScoreDecimals, MidpointRounding.AwayFromZero), Math.Round(grade.Value, NormalisedScoreDecimals, MidpointRounding.AwayFromZero), outcome, grade.Feedback);
+        return new QuestionGrade(Math.Round(grade.Value * maxScore, ScoreDecimals, MidpointRounding.AwayFromZero), Math.Round(grade.Value, NormalisedScoreDecimals, MidpointRounding.AwayFromZero), ToOutcome(grade.Value), grade.Feedback);
     }
+
+    public static GradeOutcome ToOutcome(decimal normalisedScore) => normalisedScore switch
+    {
+        >= 1m => GradeOutcome.Correct,
+        > 0m => GradeOutcome.Partial,
+        _ => GradeOutcome.Incorrect,
+    };
 }

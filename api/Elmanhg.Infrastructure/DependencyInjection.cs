@@ -6,6 +6,7 @@ using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.ReviewSessions;
+using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.Units;
@@ -14,6 +15,7 @@ using Elmanhg.Infrastructure.Lessons;
 using Elmanhg.Infrastructure.Questions;
 using Elmanhg.Infrastructure.ReviewSessions;
 using Elmanhg.Infrastructure.RichText;
+using Elmanhg.Infrastructure.Sessions;
 using Elmanhg.Infrastructure.Sms;
 using Elmanhg.Infrastructure.Spreadsheets;
 using Elmanhg.Infrastructure.Storage;
@@ -54,6 +56,7 @@ public static class DependencyInjection
         services.AddScoped<IQuestionRepository, QuestionRepository>();
         services.AddScoped<IQuestionImportBatchRepository, QuestionImportBatchRepository>();
         services.AddScoped<IReviewSessionRepository, ReviewSessionRepository>();
+        services.AddScoped<ISessionRepository, SessionRepository>();
         return services;
     }
 }
