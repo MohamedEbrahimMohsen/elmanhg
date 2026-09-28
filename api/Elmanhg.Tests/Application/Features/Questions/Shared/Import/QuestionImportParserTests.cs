@@ -77,6 +77,18 @@ public sealed class QuestionImportParserTests
     }
 
     [Fact]
+    public async Task ParseAsync_NumericShortRowWithPercentTolerance_KeepsPercentMode()
+    {
+        var parse = await ParseAsync(Sheet("Short", ["stem", "answer_kind", "value", "tolerance", "tolerance_mode", "difficulty"], ["g = ?", "numeric", "-200", "5", "Percent", "medium"]));
+
+        parse.Errors.Should().BeEmpty();
+        var spec = parse.Rows.Single().Fields.GradingSpec;
+        spec.GetProperty("value").GetDecimal().Should().Be(-200m);
+        spec.GetProperty("tolerance").GetDecimal().Should().Be(5m);
+        spec.GetProperty("toleranceMode").GetString().Should().Be("percent");
+    }
+
+    [Fact]
     public async Task ParseAsync_TextShortRow_ReturnsAcceptedAnswers()
     {
         var parse = await ParseAsync(Sheet("Short", ["stem", "answer_kind", "accepted_answers", "difficulty"], ["H2O is?", "text", "ماء", "easy"]));

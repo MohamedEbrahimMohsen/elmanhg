@@ -26,7 +26,7 @@ public sealed class EgyptianSpellingVariantsTests
     [InlineData("NaCl", "nacl")]
     public void GradeShort_EgyptianVariantOfAcceptedAnswer_ReturnsOne(string answer, string accepted)
     {
-        TextGrader.GradeShort(Spec(accepted), new ShortAnswer(answer)).Should().Be(1m);
+        TextGrader.GradeShort(Spec(accepted), new ShortAnswer(answer)).Value.Should().Be(1m);
     }
 
     [Theory]
@@ -37,7 +37,7 @@ public sealed class EgyptianSpellingVariantsTests
     [InlineData("١٣", "12")]
     public void GradeShort_DifferentWord_ReturnsZero(string answer, string accepted)
     {
-        TextGrader.GradeShort(Spec(accepted), new ShortAnswer(answer)).Should().Be(0m);
+        TextGrader.GradeShort(Spec(accepted), new ShortAnswer(answer)).Value.Should().Be(0m);
     }
 
     private static ShortGradingSpec Spec(string accepted)

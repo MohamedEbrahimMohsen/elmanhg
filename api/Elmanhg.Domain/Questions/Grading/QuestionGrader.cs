@@ -12,8 +12,8 @@ public static class QuestionGrader
             QuestionType.Mcq => ChoiceGrader.GradeMcq(ReadSpec<McqGradingSpec>(gradingSpec), ReadAnswer<McqAnswer>(answer)),
             QuestionType.Multi => ChoiceGrader.GradeMulti(ReadSpec<MultiGradingSpec>(gradingSpec), ReadAnswer<MultiAnswer>(answer)),
             QuestionType.TrueFalse => ChoiceGrader.GradeTrueFalse(ReadSpec<TrueFalseGradingSpec>(gradingSpec), ReadAnswer<TrueFalseAnswer>(answer)),
-            QuestionType.Fill => new NormalisedGrade(TextGrader.GradeFill(ReadSpec<FillGradingSpec>(gradingSpec), ReadAnswer<FillAnswer>(answer)), null),
-            QuestionType.Short => new NormalisedGrade(TextGrader.GradeShort(ReadSpec<ShortGradingSpec>(gradingSpec), ReadAnswer<ShortAnswer>(answer)), null),
+            QuestionType.Fill => TextGrader.GradeFill(ReadSpec<FillGradingSpec>(gradingSpec), ReadAnswer<FillAnswer>(answer)),
+            QuestionType.Short => TextGrader.GradeShort(ReadSpec<ShortGradingSpec>(gradingSpec), ReadAnswer<ShortAnswer>(answer)),
             _ => throw new InvalidOperationException("Unsupported question type."),
         };
         return QuestionGrade.FromNormalised(grade, maxScore);
