@@ -7,16 +7,16 @@ public static class QuestionGrader
 {
     public static QuestionGrade Grade(QuestionType type, string gradingSpec, int maxScore, JsonElement answer)
     {
-        var normalised = type switch
+        var grade = type switch
         {
             QuestionType.Mcq => ChoiceGrader.GradeMcq(ReadSpec<McqGradingSpec>(gradingSpec), ReadAnswer<McqAnswer>(answer)),
             QuestionType.Multi => ChoiceGrader.GradeMulti(ReadSpec<MultiGradingSpec>(gradingSpec), ReadAnswer<MultiAnswer>(answer)),
             QuestionType.TrueFalse => ChoiceGrader.GradeTrueFalse(ReadSpec<TrueFalseGradingSpec>(gradingSpec), ReadAnswer<TrueFalseAnswer>(answer)),
-            QuestionType.Fill => TextGrader.GradeFill(ReadSpec<FillGradingSpec>(gradingSpec), ReadAnswer<FillAnswer>(answer)),
-            QuestionType.Short => TextGrader.GradeShort(ReadSpec<ShortGradingSpec>(gradingSpec), ReadAnswer<ShortAnswer>(answer)),
+            QuestionType.Fill => new NormalisedGrade(TextGrader.GradeFill(ReadSpec<FillGradingSpec>(gradingSpec), ReadAnswer<FillAnswer>(answer)), null),
+            QuestionType.Short => new NormalisedGrade(TextGrader.GradeShort(ReadSpec<ShortGradingSpec>(gradingSpec), ReadAnswer<ShortAnswer>(answer)), null),
             _ => throw new InvalidOperationException("Unsupported question type."),
         };
-        return QuestionGrade.FromNormalised(normalised, maxScore);
+        return QuestionGrade.FromNormalised(grade, maxScore);
     }
 
     private static T ReadSpec<T>(string json) where T : class

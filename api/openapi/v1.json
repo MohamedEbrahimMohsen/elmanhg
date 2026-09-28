@@ -3342,7 +3342,8 @@
           "score",
           "normalisedScore",
           "outcome",
-          "maxScore"
+          "maxScore",
+          "feedback"
         ],
         "type": "object",
         "properties": {
@@ -3372,6 +3373,12 @@
               "string"
             ],
             "format": "int32"
+          },
+          "feedback": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },

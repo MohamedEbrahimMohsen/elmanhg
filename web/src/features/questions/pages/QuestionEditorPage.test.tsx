@@ -101,6 +101,7 @@ const gradeResult = (overrides: Partial<QuestionGradeResult> = {}): QuestionGrad
   normalisedScore: 1,
   outcome: 'Correct',
   maxScore: 1,
+  feedback: null,
   ...overrides,
 });
 
@@ -206,6 +207,26 @@ describe('QuestionEditorPage', () => {
 
     expect(await preview.findByText('Partially correct')).toBeInTheDocument();
     expect(preview.getByText('Score 0.5 / 1')).toBeInTheDocument();
+  });
+
+  it('shows the grader feedback', async () => {
+    server.use(
+      getGradeQuestionDraftMockHandler(
+        gradeResult({
+          outcome: 'Partial',
+          score: 0.5,
+          normalisedScore: 0.5,
+          feedback: 'Correct choices: 1 of 2; wrong choices: 0.',
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    openEditor();
+
+    const preview = await findPreview();
+    await user.click(preview.getByRole('button', { name: 'Try the answer' }));
+
+    expect(await preview.findByText('Correct choices: 1 of 2; wrong choices: 0.')).toBeInTheDocument();
   });
 
   it('explains why the draft cannot be graded', async () => {

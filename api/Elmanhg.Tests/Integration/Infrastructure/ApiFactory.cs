@@ -1,3 +1,4 @@
+using Core.Localization;
 using Core.OTP.Sms;
 using Elmanhg.Infrastructure.Data.Context;
 using Microsoft.AspNetCore.Hosting;
@@ -7,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Localization;
 using Testcontainers.PostgreSql;
 
 [assembly: AssemblyFixture(typeof(Elmanhg.Tests.Integration.Infrastructure.ApiFactory))]
@@ -109,6 +111,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             services.RemoveAll<ISmsSender>();
             services.AddSingleton<ISmsSender>(Sms);
             services.AddSingleton(LessonEvents);
+            services.RemoveAll<ILocalizer>();
+            services.AddScoped<ILocalizer>(x => new Localizer(new ApiResourceStringLocalizerFactory(x.GetRequiredService<IStringLocalizerFactory>())));
             services.AddControllers().AddApplicationPart(typeof(ApiFactory).Assembly);
             services.AddMediatR(configuration => configuration.RegisterServicesFromAssembly(typeof(ApiFactory).Assembly));
         });

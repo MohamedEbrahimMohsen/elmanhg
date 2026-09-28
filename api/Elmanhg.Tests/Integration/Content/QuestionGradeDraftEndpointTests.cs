@@ -46,6 +46,46 @@ public sealed class QuestionGradeDraftEndpointTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task Post_MultiPartialInEnglish_ReturnsTallyFeedback()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var admin = await AdminClientAsync();
+        admin.DefaultRequestHeaders.Add("Accept-Language", "en");
+
+        using var response = await admin.PostAsJsonAsync(Route, Draft("Multi", "<p>Vectors?</p>", """{"options":[{"id":"a","text":"Force"},{"id":"b","text":"Velocity"},{"id":"c","text":"Mass"}]}""", """{"correctOptionIds":["a","b"],"partialCredit":true}""", """{"optionIds":["a"]}"""), cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        (await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken)).GetProperty("feedback").GetString().Should().Be("Correct choices: 1 of 2; wrong choices: 0.");
+    }
+
+    [Fact]
+    public async Task Post_McqUnansweredInArabic_ReturnsUnansweredFeedback()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var admin = await AdminClientAsync();
+        admin.DefaultRequestHeaders.Add("Accept-Language", "ar");
+
+        using var response = await admin.PostAsJsonAsync(Route, Draft("Mcq", "<p>2 + 2 = ?</p>", """{"options":[{"id":"a","text":"3"},{"id":"b","text":"4"}]}""", """{"correctOptionId":"b"}""", "{}"), cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken);
+        body.GetProperty("outcome").GetString().Should().Be("Incorrect");
+        body.GetProperty("feedback").GetString().Should().Be("لم تتم الإجابة عن السؤال.");
+    }
+
+    [Fact]
+    public async Task Post_CorrectTrueFalse_ReturnsNullFeedback()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var admin = await AdminClientAsync();
+
+        using var response = await admin.PostAsJsonAsync(Route, Draft("TrueFalse", "<p>Mass is a vector.</p>", "{}", """{"correctAnswer":false}""", """{"value":false}"""), cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        (await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken)).GetProperty("feedback").ValueKind.Should().Be(JsonValueKind.Null);
+    }
+
+    [Fact]
     public async Task Post_InvalidDraft_Returns422QuestionCorrectOptionInvalid()
     {
         using var admin = await AdminClientAsync();

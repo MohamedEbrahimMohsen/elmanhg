@@ -150,12 +150,12 @@ Rules:
 
 ## 6. Question types and grading
 
-Every answer produces a **score in [0, max_score]** and a **normalised score in [0, 1]**. Deterministic types return 0 or 1 (or a partial for multi-select). AI-graded types return a partial score plus a written justification.
+Every answer produces a **score in [0, max_score]** and a **normalised score in [0, 1]**. Deterministic types return 0 or 1 (or a partial for multi-select). AI-graded types return a partial score plus a written justification. Every grade may also carry a short feedback line in the student's language (for example, how many correct and wrong options a multi-select answer chose); the rules are in docs/question-schemas.md.
 
 | Type | Version | Student input | Grading | Partial credit |
 |---|---|---|---|---|
 | MCQ (single) | v1 | One option | Exact match | No |
-| Multi-select | v1 | Set of options | Set match; optional partial (correct − wrong)/total, floor 0 | Optional |
+| Multi-select | v1 | Set of options | Set match; optional partial max(0, (correct chosen − wrong chosen) / number of correct options) | Optional |
 | True/False | v1 | Boolean | Exact match | No |
 | Fill-in-the-blank | v1 | One string per blank | Normalised match (Arabic diacritics stripped, whitespace collapsed, alef/hamza/taa-marbuta variants unified); accepted-answers list per blank | Per blank |
 | Short answer (numeric/text) | v1 | String or number | Numeric: tolerance ±x or %; Text: accepted list with normalisation | No |

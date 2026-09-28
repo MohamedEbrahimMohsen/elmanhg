@@ -205,8 +205,13 @@ A student's answer (and the `answer` of `POST /api/questions/grade-draft`) is a 
 
 The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of the stored grading spec, the max score and the answer. `POST /api/questions/grade-draft` (admin, `Content.Manage`) validates an unsaved draft with the same rules as create and update, canonicalises it, and grades the `answer` with the same graders; it saves nothing and is not audited. Attempts reuse the same graders.
 
-- **Mcq, TrueFalse**: exact match (1 or 0).
-- **Multi**: without `partialCredit`, 1 when the selected set equals the correct set, else 0. With it, `max(0, (right − wrong) / |correct|)`; an unknown id counts as wrong and a repeated id counts once.
+- **Mcq, TrueFalse**: exact match (1 or 0). A missing `optionId` or `value` is unanswered and scores 0.
+- **Multi**: the rule uses three counts:
+  - `right`: the distinct selected ids that are correct.
+  - `wrong`: the distinct selected ids that are not correct. An id that is not an option counts as wrong. Ids compare exactly, so case matters. A repeated id counts once. A null id is ignored.
+  - `total`: the number of correct options.
+
+  Without `partialCredit` (the default), the score is 1 when `right = total` and `wrong = 0`, else 0. With `partialCredit`, the score is `max(0, (right − wrong) / total)`. For example, with 3 correct options, choosing all three plus one wrong option scores 2/3. With no selection, the answer is unanswered and scores 0 in both modes.
 - **Fill**: `hits / blanks`. A blank hits when its normalised answer equals any of its normalised accepted answers.
 - **Short numeric** (the spec has `value`): the answer is parsed as a number and is correct when `|answer − value| ≤ tolerance` (`absolute`) or `≤ |value| × tolerance / 100` (`percent`).
 - **Short text**: the normalised answer must equal one of the normalised accepted answers.
@@ -214,6 +219,12 @@ The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of
 - **Normalisation** (PRD §6.2): the student answer and every accepted answer go through the same steps. Always, in this order: drop unpaired UTF-16 surrogates and the noncharacter U+FFFE (both make NFC fail), and invisible marks (U+061C, U+200B–U+200F, U+202A–U+202E, U+2060, U+2066–U+2069, U+FEFF), so none of them can split a letter from its mark; Unicode NFC (so a decomposed hamza or madda, such as ا + U+0654, becomes أ); map ، (U+060C) to `,` and ی (U+06CC) to ي (U+064A). Then the question's `normalization` rules (see **Fill** and **Short** above), each applied only when on. Finally the answer is always trimmed. With `collapseWhitespace` off, inner whitespace is kept verbatim (tabs and runs included); the ends are still trimmed. Hamza seats (ئ ؤ ء) are never unified.
 - **Numeric parsing**: numeric answers ignore the question's `normalization` rules and use a fixed profile: every rule on except the three letter rules. After normalisation, `٬` (U+066C, the Arabic thousands separator) is removed, then `٫` (U+066B) and `,` become `.`, and `−` (U+2212) becomes `-`; the rest must be a plain decimal number: an optional leading sign, digits and one decimal point (invariant culture). Exponents such as `9.8e0`, inner whitespace, thousands separators other than `٬`, and anything else (such as a trailing unit) do not parse and score 0. `,` always means a decimal point, so `1,000` reads as 1.
 - **Result**: the normalised score is in [0, 1]. The outcome is `Correct` (≥ 1), `Partial` (> 0) or `Incorrect`. `score = round(normalised × maxScore, 2)` and `normalisedScore = round(normalised, 4)`, both rounding half away from zero.
+- **Feedback**: every grade carries an optional feedback line, returned as `feedback`. It is localised to the request language (`Accept-Language`, Arabic by default) and is `null` when there is nothing to add.
+  - An unanswered Mcq, TrueFalse or Multi answer returns «لم تتم الإجابة عن السؤال.» / "No answer was given."
+  - A Multi answer that is not exactly the correct set returns «الاختيارات الصحيحة: {right} من {total}، والخاطئة: {wrong}.» / "Correct choices: {right} of {total}; wrong choices: {wrong}." This applies in both partial-credit modes.
+  - Every other case returns `null`.
+
+  The feedback never contains the verdict, the correct answer or the explanation. Fill and Short return no feedback.
 
 ## Changing a schema
 

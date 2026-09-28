@@ -233,4 +233,6 @@
   <data name="QUESTION_IMPORT_HELP_TOLERANCE" xml:space="preserve"><value>Numeric answers: allowed difference, 0 or more. Empty means 0.</value></data>
   <data name="QUESTION_IMPORT_HELP_TOLERANCE_MODE" xml:space="preserve"><value>Numeric answers: absolute (plus or minus the tolerance) or percent (plus or minus that percent of the value). Empty means absolute.</value></data>
   <data name="QUESTION_IMPORT_HELP_ACCEPTED_ANSWERS" xml:space="preserve"><value>Text answers: accepted answers separated by |.</value></data>
+  <data name="GRADE_FEEDBACK_UNANSWERED" xml:space="preserve"><value>No answer was given.</value></data>
+  <data name="GRADE_FEEDBACK_CHOICE_TALLY" xml:space="preserve"><value>Correct choices: {right} of {total}; wrong choices: {wrong}.</value></data>
 </root>
