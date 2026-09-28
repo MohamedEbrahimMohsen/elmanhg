@@ -463,6 +463,9 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("integer");
 
+                    b.Property<DateTimeOffset?>("PublishedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("State")
                         .IsRequired()
                         .HasMaxLength(50)

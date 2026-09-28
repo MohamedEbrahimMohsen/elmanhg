@@ -46,6 +46,30 @@
       "Draft": "مسودة",
       "Published": "منشور",
       "Archived": "مؤرشف"
+    },
+    "moved": "تم نقل الدرس.",
+    "published": "تم نشر الدرس.",
+    "unpublished": "تمت إعادة الدرس إلى مسودة.",
+    "archived": "تمت أرشفة الدرس.",
+    "deleted": "تم حذف الدرس."
+  },
+  "lessonActions": {
+    "label": "إجراءات {name}",
+    "publish": "نشر",
+    "unpublish": "إعادة إلى مسودة",
+    "archive": "أرشفة",
+    "delete": "حذف",
+    "confirm": {
+      "publish": "نشر {name}؟ سيظهر للطلاب.",
+      "unpublish": "إعادة {name} إلى مسودة؟ لن يظهر للطلاب.",
+      "archive": "أرشفة {name}؟ لن يظهر للطلاب.",
+      "delete": "حذف {name}؟"
+    },
+    "confirmButton": {
+      "publish": "نعم، انشر",
+      "unpublish": "نعم، أعد إلى مسودة",
+      "archive": "نعم، أرشف",
+      "delete": "نعم، احذف"
     }
   },
   "lessonEditor": {

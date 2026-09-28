@@ -64,7 +64,13 @@
     "LESSON_IMAGE_REQUIRED": "Choose an image.",
     "LESSON_IMAGE_TYPE_INVALID": "Use a PNG, JPEG, WebP or GIF image.",
     "LESSON_IMAGE_TOO_LARGE": "The image is too large.",
-    "UNIT_HAS_LESSONS": "This unit has lessons and cannot be deleted."
+    "UNIT_HAS_LESSONS": "This unit has lessons and cannot be deleted.",
+    "LESSON_ALREADY_PUBLISHED": "This lesson is already published.",
+    "LESSON_ALREADY_DRAFT": "This lesson is already a draft.",
+    "LESSON_ALREADY_ARCHIVED": "This lesson is already archived.",
+    "LESSON_NOT_PUBLISHED": "Only a published lesson can be archived. Delete a draft instead.",
+    "LESSON_IS_PUBLISHED": "Move this lesson to draft or archive it before deleting it.",
+    "LESSON_POSITION_INVALID": "Position must be 1 or more."
   },
   "error": {
     "title": "Something went wrong"

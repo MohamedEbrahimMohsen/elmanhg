@@ -1,3 +1,4 @@
+using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Infrastructure.Data.Context;
 using Elmanhg.Tests.Integration.Auth;
@@ -91,6 +92,34 @@ public sealed class SubjectsEndpointTests(ApiFactory factory)
         var units = (await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken)).GetProperty("units").EnumerateArray().ToList();
         units.Single(x => x.GetProperty("id").GetGuid() == withLessons).GetProperty("lessonCount").GetInt32().Should().Be(2);
         units.Single(x => x.GetProperty("id").GetGuid() == withoutLessons).GetProperty("lessonCount").GetInt32().Should().Be(0);
+    }
+
+    [Fact]
+    public async Task GetById_Student_CountsPublishedLessonsOnly()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var (subjectId, unitId) = await SeedLessonsInEveryStateAsync();
+        using var client = await StudentClientAsync();
+
+        using var response = await client.GetAsync($"{Route}/{subjectId}", cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var units = (await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken)).GetProperty("units").EnumerateArray().ToList();
+        units.Single(x => x.GetProperty("id").GetGuid() == unitId).GetProperty("lessonCount").GetInt32().Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetById_Admin_CountsLessonsInEveryState()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var (subjectId, unitId) = await SeedLessonsInEveryStateAsync();
+        using var admin = await AdminClientAsync();
+
+        using var response = await admin.GetAsync($"{Route}/{subjectId}", cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var units = (await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken)).GetProperty("units").EnumerateArray().ToList();
+        units.Single(x => x.GetProperty("id").GetGuid() == unitId).GetProperty("lessonCount").GetInt32().Should().Be(3);
     }
 
     [Fact]
@@ -299,6 +328,23 @@ public sealed class SubjectsEndpointTests(ApiFactory factory)
     {
         var admin = await ScopeTestData.SeedAdminAsync(factory, TestContext.Current.CancellationToken).ConfigureAwait(false);
         return await ScopeTestData.SignedInClientAsync(factory, admin, TestContext.Current.CancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<(Guid SubjectId, Guid UnitId)> SeedLessonsInEveryStateAsync()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var subjectId = await SeedSubjectAsync().ConfigureAwait(false);
+        var unitId = await ContentTestData.SeedUnitAsync(factory, subjectId, "Mechanics", 1, cancellationToken).ConfigureAwait(false);
+        await ContentTestData.SeedLessonInStateAsync(factory, unitId, "Newton's laws", 1, LessonState.Draft, cancellationToken).ConfigureAwait(false);
+        await ContentTestData.SeedLessonInStateAsync(factory, unitId, "Momentum", 2, LessonState.Published, cancellationToken).ConfigureAwait(false);
+        await ContentTestData.SeedLessonInStateAsync(factory, unitId, "Energy", 3, LessonState.Archived, cancellationToken).ConfigureAwait(false);
+        return (subjectId, unitId);
+    }
+
+    private async Task<HttpClient> StudentClientAsync()
+    {
+        var student = await ScopeTestData.SeedStudentAsync(factory, TestContext.Current.CancellationToken).ConfigureAwait(false);
+        return await ScopeTestData.SignedInClientAsync(factory, student, TestContext.Current.CancellationToken).ConfigureAwait(false);
     }
 
     private async Task<HttpClient> TeacherClientAsync(Guid? assignedSubjectId)

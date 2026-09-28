@@ -47,6 +47,7 @@ public static class ErrorCodes
     // LESSONS
     public const string LessonNotFound = "LESSON_NOT_FOUND";
     public const string LessonIdRequired = "LESSON_ID_REQUIRED";
+    public const string LessonPositionInvalid = "LESSON_POSITION_INVALID";
     public const string LessonNameRequired = "LESSON_NAME_REQUIRED";
     public const string LessonNameTooLong = "LESSON_NAME_TOO_LONG";
     public const string LessonExplanationTooLong = "LESSON_EXPLANATION_TOO_LONG";

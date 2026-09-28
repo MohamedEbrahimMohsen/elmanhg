@@ -5,7 +5,7 @@ using Elmanhg.Domain.Units;
 
 namespace Elmanhg.Domain.Lessons;
 
-public class Lesson : AuditEntity, IAuditedEntity
+public partial class Lesson : AuditEntity, IAuditedEntity
 {
     public Guid UnitId { get; private set; }
     public string Name { get; private set; } = string.Empty;
@@ -14,6 +14,7 @@ public class Lesson : AuditEntity, IAuditedEntity
     public string Explanation { get; private set; } = string.Empty;
     public string Summary { get; private set; } = string.Empty;
     public string? VideoUrl { get; private set; }
+    public DateTimeOffset? PublishedAt { get; private set; }
     public List<LessonObjective> Objectives { get; private set; } = [];
 
     private Lesson(Guid id, Guid? createdBy) : base(id, createdBy) { }
@@ -68,6 +69,40 @@ public class Lesson : AuditEntity, IAuditedEntity
         Summary = summary;
         VideoUrl = string.IsNullOrWhiteSpace(videoUrl) ? null : videoUrl.Trim();
         UpdatedBy = updatedBy;
+        UpdationDate = DateTimeOffset.UtcNow;
+    }
+
+    public void MoveTo(int order, Guid updatedBy)
+    {
+        if (order < 1)
+        {
+            throw new BusinessRuleViolationCoreException(ErrorCodes.ContentOrderInvalid);
+        }
+
+        if (Order == order)
+        {
+            return;
+        }
+
+        Order = order;
+        UpdatedBy = updatedBy;
+        UpdationDate = DateTimeOffset.UtcNow;
+    }
+
+    public void Delete(Guid deletedBy)
+    {
+        if (State == LessonState.Published)
+        {
+            throw new BusinessRuleViolationCoreException(ErrorCodes.LessonIsPublished);
+        }
+
+        foreach (var objective in Objectives)
+        {
+            objective.Delete(deletedBy);
+        }
+
+        SoftDelete();
+        UpdatedBy = deletedBy;
         UpdationDate = DateTimeOffset.UtcNow;
     }
 }

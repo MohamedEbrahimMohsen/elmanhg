@@ -49,6 +49,29 @@ public static class ContentTestData
         return lesson.Id;
     }
 
+    public static async Task<Guid> SeedLessonInStateAsync(ApiFactory factory, Guid unitId, string name, int order, LessonState state, CancellationToken cancellationToken)
+    {
+        using var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var unit = await context.Units.SingleAsync(x => x.Id == unitId, cancellationToken).ConfigureAwait(false);
+        var creator = Guid.NewGuid();
+        var lesson = Lesson.Create(unit, name, order, creator);
+        if (state is LessonState.Published or LessonState.Archived)
+        {
+            lesson.Publish(creator);
+        }
+
+        if (state is LessonState.Archived)
+        {
+            lesson.Archive(creator);
+        }
+
+        lesson.ClearDomainEvents();
+        context.Lessons.Add(lesson);
+        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return lesson.Id;
+    }
+
     public static async Task<Lesson> ReadLessonAsync(ApiFactory factory, Guid lessonId, CancellationToken cancellationToken)
     {
         using var scope = factory.Services.CreateScope();

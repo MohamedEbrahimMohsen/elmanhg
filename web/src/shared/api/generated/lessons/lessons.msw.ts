@@ -79,6 +79,56 @@ export const getUpdateLessonMockHandler = (overrideResponse?: void | ((info: Par
   }, options)
 }
 
+export const getDeleteLessonMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.delete('*/api/lessons/:lessonId', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 200
+      })
+  }, options)
+}
+
+export const getPublishLessonMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.post('*/api/lessons/:lessonId/publish', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 200
+      })
+  }, options)
+}
+
+export const getUnpublishLessonMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.post('*/api/lessons/:lessonId/unpublish', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 200
+      })
+  }, options)
+}
+
+export const getArchiveLessonMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.post('*/api/lessons/:lessonId/archive', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 200
+      })
+  }, options)
+}
+
+export const getReorderLessonMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.put('*/api/lessons/:lessonId/position', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 200
+      })
+  }, options)
+}
+
 export const getUploadLessonImageMockHandler = (overrideResponse?: UploadLessonImageResult | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<UploadLessonImageResult> | UploadLessonImageResult), options?: RequestHandlerOptions) => {
   return http.post('*/api/lessons/:lessonId/images', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
 
@@ -95,5 +145,10 @@ export const getLessonsMock = () => [
   getCreateLessonMockHandler(),
   getGetLessonMockHandler(),
   getUpdateLessonMockHandler(),
+  getDeleteLessonMockHandler(),
+  getPublishLessonMockHandler(),
+  getUnpublishLessonMockHandler(),
+  getArchiveLessonMockHandler(),
+  getReorderLessonMockHandler(),
   getUploadLessonImageMockHandler()
 ]
