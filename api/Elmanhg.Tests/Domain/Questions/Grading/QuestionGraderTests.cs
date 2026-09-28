@@ -12,7 +12,7 @@ public sealed class QuestionGraderTests
     {
         var grade = QuestionGrader.Grade(QuestionType.Mcq, """{"correctOptionId":"b"}""", 2, Json("""{"optionId":"b"}"""));
 
-        grade.Should().Be(new QuestionGrade(2m, 1m, GradeOutcome.Correct));
+        grade.Should().Be(new QuestionGrade(2m, 1m, GradeOutcome.Correct, null));
     }
 
     [Fact]
@@ -20,7 +20,7 @@ public sealed class QuestionGraderTests
     {
         var grade = QuestionGrader.Grade(QuestionType.Multi, """{"correctOptionIds":["a","b","c"],"partialCredit":true}""", 2, Json("""{"optionIds":["a","b","d"]}"""));
 
-        grade.Should().Be(new QuestionGrade(0.67m, 0.3333m, GradeOutcome.Partial));
+        grade.Should().Be(new QuestionGrade(0.67m, 0.3333m, GradeOutcome.Partial, GradeFeedback.ChoiceTally(2, 1, 3)));
     }
 
     [Fact]
@@ -63,6 +63,54 @@ public sealed class QuestionGraderTests
         var grade = QuestionGrader.Grade(QuestionType.Fill, PartialNormalizationSpec, 1, Json("""{"blanks":[{"id":"1","text":"القاهرَة"}]}"""));
 
         grade.Outcome.Should().Be(GradeOutcome.Correct);
+    }
+
+    [Fact]
+    public void Grade_MultiWithoutPartialCreditKey_DefaultsToAllOrNothing()
+    {
+        var grade = QuestionGrader.Grade(QuestionType.Multi, """{"correctOptionIds":["a","b"]}""", 1, Json("""{"optionIds":["a"]}"""));
+
+        grade.Should().Be(new QuestionGrade(0m, 0m, GradeOutcome.Incorrect, GradeFeedback.ChoiceTally(1, 0, 2)));
+    }
+
+    [Fact]
+    public void Grade_MultiTwoThirds_RoundsAwayFromZero()
+    {
+        var grade = QuestionGrader.Grade(QuestionType.Multi, """{"correctOptionIds":["a","b","c"],"partialCredit":true}""", 1, Json("""{"optionIds":["a","b","c","d"]}"""));
+
+        grade.Should().Be(new QuestionGrade(0.67m, 0.6667m, GradeOutcome.Partial, GradeFeedback.ChoiceTally(3, 1, 3)));
+    }
+
+    [Fact]
+    public void Grade_McqUnanswered_ReturnsUnansweredFeedback()
+    {
+        var grade = QuestionGrader.Grade(QuestionType.Mcq, """{"correctOptionId":"b"}""", 2, Json("{}"));
+
+        grade.Should().Be(new QuestionGrade(0m, 0m, GradeOutcome.Incorrect, GradeFeedback.Unanswered));
+    }
+
+    [Fact]
+    public void Grade_UndefinedType_ThrowsInvalidOperation()
+    {
+        var act = () => QuestionGrader.Grade((QuestionType)99, """{"correctOptionId":"b"}""", 1, Json("""{"optionId":"b"}"""));
+
+        act.Should().Throw<InvalidOperationException>().WithMessage("Unsupported question type.");
+    }
+
+    [Fact]
+    public void Grade_NullGradingSpec_ThrowsInvalidOperation()
+    {
+        var act = () => QuestionGrader.Grade(QuestionType.Mcq, "null", 1, Json("""{"optionId":"b"}"""));
+
+        act.Should().Throw<InvalidOperationException>().WithMessage("Question grading spec is not readable.");
+    }
+
+    [Fact]
+    public void Grade_NullAnswer_ThrowsInvalidOperation()
+    {
+        var act = () => QuestionGrader.Grade(QuestionType.Mcq, """{"correctOptionId":"b"}""", 1, Json("null"));
+
+        act.Should().Throw<InvalidOperationException>().WithMessage("Question answer was not validated.");
     }
 
     private const string PartialNormalizationSpec = """{"blanks":[{"id":"1","acceptedAnswers":["القاهرة"]}],"normalization":{"unifyTaaMarbuta":false}}""";

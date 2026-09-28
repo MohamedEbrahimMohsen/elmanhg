@@ -1,12 +1,12 @@
 # Elmanhg — autopilot progress
 
-Last updated: 2026-09-28, cloud session, after story #68 merged (main at `e2831a8`).
+Last updated: 2026-09-28, cloud session, after story #70 merged (main at `0eb4983`).
 The laptop run stopped after #64. A Claude Code cloud session continued from #65 (see "Running in a cloud
 session" below). The next story to run is the first row of "Remaining stories".
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (13 of 59)
+## Finished stories (14 of 59)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -23,17 +23,17 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 11 | #66 [E3.S3] Bulk question import from spreadsheet | #152 | 2 | skipped (too many files) | #153 |
 | 12 | #67 [E3.S4] Servable rule | #154 | 1 | 2 comments: 1 fixed, 1 rejected | #155 (dev decision), #156 |
 | 13 | #68 [E3.S5] Teacher validation queue | #157 | 1 | skipped (too many files) | #158 |
+| 14 | #70 [E4.S1] Arabic answer normalisation | #159 | 2 | 1 comment, fixed (2 fix cycles) | #160 |
 
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (46), in run order
+## Remaining stories (45), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
 | Order | Issue | Story |
 |---|---|---|
-| 5 | #70 | [E4.S1] Arabic answer normalisation |
 | 6 | #71 | [E4.S2] Graders for mcq, multi-select, true/false |
 | 7 | #72 | [E4.S3] Graders for fill-in-the-blank and short answer |
 | 8 | #74 | [E5.S1] Attempt log and session model |
@@ -114,7 +114,7 @@ The flow is `.claude/commands/feature.md`. Every stage is a fresh subagent: `fea
 - **Auditing:** mark commands `IAuditableCommand` and entities `IAuditedEntity`. The audit table is append-only, enforced by a database trigger. Details are in `docs/audit-log.md`.
 - **Student-facing lesson reads return Published lessons only** (PRD §5.2).
 - **Servable rule (#67):** `ServableQuestionSpecification` in Domain (Approved AND lesson Published AND not retired) is the only definition. Every serving read (quiz, exam, counts) must use it; admin reads stay unfiltered. Retirement is final (`QUESTION_RETIRED`), pending #155. `GET /api/questions/servable-count` is anonymous and cached (`questions:servable-count`, 60 s TTL). It is invalidated by question and lesson domain events, which are published before commit.
-- **Graders already exist (from #65):** the Arabic answer normaliser and deterministic graders for all five v1 types live in `api/Elmanhg.Domain/Questions/Grading/`, with `POST /api/questions/grade-draft`. #70–#72 extend them rather than create them: #70 adds per-rule toggles and the Egyptian spelling corpus, and #71/#72 add feedback text. Edge cases are in #151. `Question.Reject` and `Resubmit` exist; #68 adds the teacher approve/reject commands and UI.
+- **Graders already exist (from #65):** the Arabic answer normaliser and deterministic graders for all five v1 types live in `api/Elmanhg.Domain/Questions/Grading/`, with `POST /api/questions/grade-draft`. #70–#72 extend them rather than create them: #70 added 8 per-question normalisation toggles (`normalization` object in the grading spec; a missing value means on) and the always-on Unicode steps. #71/#72 add feedback text. Leftovers are in #151 and #160. `Question.Reject` and `Resubmit` exist; #68 adds the teacher approve/reject commands and UI.
 - **Validation (#68):** `Approve`/`Reject` take the reviewed version, and a mismatch returns 409 `QUESTION_VERSION_CHANGED`. There is no concurrency token yet (#158). `QuestionDecision` is the append-only approve/reject history, and `Question.SubmittedAt` drives queue age. Bulk approve requires a server-side `ReviewSession` with a `ReviewSessionOpening` per question at its current version.
 - **Question content** is jsonb, one schema per type, documented in `docs/question-schemas.md`. A content edit on an Approved question sends it back to Pending, bumps the version, and saves a `QuestionRevision`.
 - **Web:**
@@ -155,10 +155,11 @@ per-story `feature/<n>-<slug>` branches, PRs, and squash-merge on green CI.
 - **Visual Studio's `api/.vs/` cache:** now in `.gitignore`. Earlier it blocked the pre-flight stash.
 - **Flaky web test:** `RichTextEditor.test.tsx` "inserts an inline formula" sometimes times out under `--coverage` (tracked in #148). Re-run CI once before treating a web-ci failure as real.
 - **Postgres port:** another project's container uses 5432 on this machine. For a local `docker compose up`, map the database to another port such as 55432 in `.env`.
+- **Unicode escapes in agent-written code:** a `\u200C` inside an Edit/Write tool argument is decoded into the raw character. Agents must write `\\u` or use a script (the #70 lesson).
 - **Docker can stop mid-run** in the cloud container (seen once, after the MCP servers reconnected). Agents run `bash scripts/cloud-setup.sh` whenever `docker info` fails.
 - **Metrics:** start and finish times in `04-metrics.md` for #54–#58 were approximate. From #60 on they are computed from the agents' reported durations.
 - **Local dev config:** after each story that adds config keys, copy the new sections from `appsettings.example.json` into your local `appsettings.json`, or `dotnet run` fails its startup validation.
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158 · `dev-decision`: #155 (#135 confirmed and closed).
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160 · `dev-decision`: #155 (#135 confirmed and closed).

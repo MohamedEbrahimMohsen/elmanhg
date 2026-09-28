@@ -13,4 +13,6 @@ export interface QuestionGradeResult {
   outcome: string;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   maxScore: number | string;
+  /** @nullable */
+  feedback: string | null;
 }

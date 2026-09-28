@@ -233,4 +233,6 @@
   <data name="QUESTION_IMPORT_HELP_TOLERANCE" xml:space="preserve"><value>للاجابة الرقمية: الفرق المسموح، 0 او اكثر. الخانة الفارغة تعني 0.</value></data>
   <data name="QUESTION_IMPORT_HELP_TOLERANCE_MODE" xml:space="preserve"><value>للاجابة الرقمية: absolute (زائد او ناقص الفرق) او percent (زائد او ناقص نسبة مئوية من القيمة). الخانة الفارغة تعني absolute.</value></data>
   <data name="QUESTION_IMPORT_HELP_ACCEPTED_ANSWERS" xml:space="preserve"><value>للاجابة النصية: الاجابات المقبولة مفصولة بالرمز |.</value></data>
+  <data name="GRADE_FEEDBACK_UNANSWERED" xml:space="preserve"><value>لم تتم الإجابة عن السؤال.</value></data>
+  <data name="GRADE_FEEDBACK_CHOICE_TALLY" xml:space="preserve"><value>الاختيارات الصحيحة: {right} من {total}، والخاطئة: {wrong}.</value></data>
 </root>

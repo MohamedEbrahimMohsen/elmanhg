@@ -165,6 +165,7 @@ export const GradeQuestionDraftResponse = zod.object({
   "score": zod.union([zod.number(),zod.stringFormat('double', gradeQuestionDraftResponseScoreRegExpTwo)]),
   "normalisedScore": zod.union([zod.number(),zod.stringFormat('double', gradeQuestionDraftResponseNormalisedScoreRegExpTwo)]),
   "outcome": zod.string(),
-  "maxScore": zod.union([zod.int(),zod.stringFormat('int32', gradeQuestionDraftResponseMaxScoreRegExpTwo)])
+  "maxScore": zod.union([zod.int(),zod.stringFormat('int32', gradeQuestionDraftResponseMaxScoreRegExpTwo)]),
+  "feedback": zod.string().nullable()
 })
 

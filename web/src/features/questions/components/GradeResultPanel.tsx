@@ -45,6 +45,7 @@ export function GradeResultPanel({ result }: GradeResultPanelProps) {
             maxScore: formatNumber(Number(result.maxScore), lng, 'latin'),
           })}
         </p>
+        {result.feedback ? <p className="text-caption text-text-muted">{result.feedback}</p> : null}
       </div>
     </div>
   );
