@@ -16,8 +16,22 @@ export function masteryOverview(overrides?: Partial<MasteryOverviewResult>): Mas
       masteryPercent: 10,
     },
     subjects: [
-      { subjectId: physicsId, name: 'Physics', servableCount: 50, masteredCount: 20, seenCount: 30, masteryPercent: 40 },
-      { subjectId: chemistryId, name: 'Chemistry', servableCount: 10, masteredCount: 0, seenCount: 0, masteryPercent: 0 },
+      {
+        subjectId: physicsId,
+        name: 'Physics',
+        servableCount: 50,
+        masteredCount: 20,
+        seenCount: 30,
+        masteryPercent: 40,
+      },
+      {
+        subjectId: chemistryId,
+        name: 'Chemistry',
+        servableCount: 10,
+        masteredCount: 0,
+        seenCount: 0,
+        masteryPercent: 0,
+      },
     ],
     ...overrides,
   };
