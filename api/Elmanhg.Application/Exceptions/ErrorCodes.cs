@@ -118,6 +118,7 @@ public static class ErrorCodes
     public const string SessionQuestionCountInvalid = "SESSION_QUESTION_COUNT_INVALID";
     public const string SessionQuestionNotFound = "SESSION_QUESTION_NOT_FOUND";
     public const string SessionAlreadyInProgress = "SESSION_ALREADY_IN_PROGRESS";
+    public const string SessionModifiedConcurrently = "SESSION_MODIFIED_CONCURRENTLY";
     public const string AttemptAnswerTooLong = "ATTEMPT_ANSWER_TOO_LONG";
     public const string AttemptTimeTakenInvalid = "ATTEMPT_TIME_TAKEN_INVALID";
 

@@ -249,4 +249,5 @@
   <data name="SESSION_QUESTION_DUPLICATE" xml:space="preserve"><value>A question cannot appear twice in one session.</value></data>
   <data name="SESSION_ALREADY_SUBMITTED" xml:space="preserve"><value>This session has already ended.</value></data>
   <data name="SESSION_QUESTION_ALREADY_ANSWERED" xml:space="preserve"><value>You have already answered this question.</value></data>
+  <data name="SESSION_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>This session was changed by another request. Please try again.</value></data>
 </root>

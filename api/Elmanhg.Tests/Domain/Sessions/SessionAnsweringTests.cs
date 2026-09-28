@@ -29,6 +29,18 @@ public sealed class SessionAnsweringTests
     }
 
     [Fact]
+    public void RecordAttempt_ItemFromAnotherSession_ThrowsAndAddsNoAttempt()
+    {
+        var session = _builder.Build();
+        var other = _builder.Build();
+
+        var act = () => session.RecordAttempt(other.Items[0], SessionBuilder.AnswerB, SessionBuilder.Grade(1m), 0);
+
+        act.Should().Throw<InvalidOperationException>().WithMessage("Session item does not belong to this session.");
+        session.Attempts.Should().BeEmpty();
+    }
+
+    [Fact]
     public void RecordAttempt_WithFeedback_StoresGradeJson()
     {
         var session = _builder.Build();

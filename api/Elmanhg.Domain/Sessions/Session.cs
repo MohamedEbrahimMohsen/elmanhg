@@ -17,6 +17,7 @@ public partial class Session : AuditEntity
     public DateTimeOffset LastActivityAt { get; private set; }
     public DateTimeOffset? SubmittedAt { get; private set; }
     public decimal? ScorePercent { get; private set; }
+    public uint Version { get; private set; }
     public List<SessionItem> Items { get; private set; } = [];
     public List<Attempt> Attempts { get; private set; } = [];
 

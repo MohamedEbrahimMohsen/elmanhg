@@ -20,6 +20,7 @@ All three tables map one to one to PRD §15. Names follow constitution §3 (no a
 | `LastActivityAt` | `last_activity_at` | Set at start, on resume, on each attempt and on finish. |
 | `SubmittedAt` | `submitted_at?` | Null while the session is open. |
 | `ScorePercent` | `score_pct?` | numeric(5,2), set on finish. |
+| `Version` | `xmin` | PostgreSQL system column used as the row-version concurrency token; no DDL. |
 | — | `time_limit_min?` | Added by E6 (exams). |
 
 ### SessionItem (a served question)
@@ -69,6 +70,7 @@ The validator checks that the answer is a JSON object of at most `Sessions:Answe
 - A different answer for an answered question returns 409 `SESSION_QUESTION_ALREADY_ANSWERED`.
 - Two concurrent first answers are stopped by the unique index `IX_Attempts_SessionId_QuestionId`; the loser gets the same 409.
 - Two concurrent starts for the same lesson are stopped by `IX_Sessions_InProgressScope`; the loser gets 409 `SESSION_ALREADY_IN_PROGRESS`, and a retry resumes.
+- A concurrent answer, finish or resume on one session is serialised by the `xmin` row version on `Sessions`. The loser gets 409 `SESSION_MODIFIED_CONCURRENTLY` and its whole save rolls back (no attempt is written); a retry resolves it (an answer that lost to a finish then gets 400 `SESSION_ALREADY_SUBMITTED`; a finish that lost to an answer then counts it).
 - Finishing twice changes nothing and returns the same result.
 - Answering a finished session returns 400 `SESSION_ALREADY_SUBMITTED`, except that replaying the saved answer still returns the saved attempt.
 
@@ -123,6 +125,8 @@ Session commands are not audited (`docs/audit-log.md`, "Not audited"): the attem
 | `Sessions:MaxQuizSize` | 20 | Largest allowed `questionCount`. The UI offers 5, 10 and 20. |
 | `Sessions:AnswerMaxLength` | 4000 | Maximum raw length of an answer's JSON. |
 
+The app fails to start unless `MinQuizSize <= DefaultQuizSize <= MaxQuizSize`.
+
 ## API
 
 | Method | Route | Body | Response |
@@ -152,4 +156,5 @@ Session commands are not audited (`docs/audit-log.md`, "Not audited"): the attem
 | `SESSION_QUESTION_DUPLICATE` | 400 | The same question was drawn twice (a guard). |
 | `SESSION_ALREADY_SUBMITTED` | 400 | Answering or resuming a finished session. |
 | `SESSION_QUESTION_ALREADY_ANSWERED` | 409 | A different answer for an answered question, or a concurrent first answer. |
+| `SESSION_MODIFIED_CONCURRENTLY` | 409 | A concurrent answer, finish or resume changed the session first; retry. |
 | `LESSON_ID_REQUIRED`, `LESSON_NOT_FOUND`, `QUESTION_ID_REQUIRED`, `QUESTION_NOT_FOUND`, `QUESTION_ANSWER_INVALID`, `USER_NOT_AUTHENTICATED` | 422 / 404 / 422 / 404 / 422 / 401 | Reused codes. |

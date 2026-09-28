@@ -249,4 +249,5 @@
   <data name="SESSION_QUESTION_DUPLICATE" xml:space="preserve"><value>لا يمكن ان يظهر السؤال مرتين في الجلسة نفسها.</value></data>
   <data name="SESSION_ALREADY_SUBMITTED" xml:space="preserve"><value>انتهت هذه الجلسة بالفعل.</value></data>
   <data name="SESSION_QUESTION_ALREADY_ANSWERED" xml:space="preserve"><value>لقد اجبت عن هذا السؤال بالفعل.</value></data>
+  <data name="SESSION_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>تم تعديل هذه الجلسة بواسطة طلب آخر. حاول مرة أخرى.</value></data>
 </root>

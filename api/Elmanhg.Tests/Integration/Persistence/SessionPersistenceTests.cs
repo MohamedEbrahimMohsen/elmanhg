@@ -59,6 +59,47 @@ public sealed class SessionPersistenceTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task SaveChanges_AnswerAfterConcurrentFinish_ThrowsSessionModifiedConcurrently()
+    {
+        var (studentId, lessonId, questionId) = await SeedAsync();
+        var sessionId = await AddSessionAsync(studentId, lessonId, questionId);
+        using var answerScope = factory.Services.CreateScope();
+        using var finishScope = factory.Services.CreateScope();
+        var (answerContext, answerSession) = await LoadAsync(answerScope, sessionId);
+        var (finishContext, finishSession) = await LoadAsync(finishScope, sessionId);
+        answerSession.RecordAttempt(answerSession.Items[0], SessionBuilder.AnswerB, SessionBuilder.Grade(1m), 0);
+        finishSession.Submit();
+        await finishContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var act = () => answerContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<ConflictCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.SessionModifiedConcurrently);
+        (await SessionTestData.ReadAttemptsAsync(factory, sessionId)).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task SaveChanges_FinishAfterConcurrentAnswer_ThrowsSessionModifiedConcurrently()
+    {
+        var (studentId, lessonId, questionId) = await SeedAsync();
+        var sessionId = await AddSessionAsync(studentId, lessonId, questionId);
+        using var answerScope = factory.Services.CreateScope();
+        using var finishScope = factory.Services.CreateScope();
+        var (answerContext, answerSession) = await LoadAsync(answerScope, sessionId);
+        var (finishContext, finishSession) = await LoadAsync(finishScope, sessionId);
+        answerSession.RecordAttempt(answerSession.Items[0], SessionBuilder.AnswerB, SessionBuilder.Grade(1m), 0);
+        finishSession.Submit();
+        await answerContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var act = () => finishContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<ConflictCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.SessionModifiedConcurrently);
+        (await SessionTestData.ReadAttemptsAsync(factory, sessionId)).Should().HaveCount(1);
+        using var readScope = factory.Services.CreateScope();
+        var submittedAt = await readScope.ServiceProvider.GetRequiredService<AppDbContext>().Sessions.Where(x => x.Id == sessionId).Select(x => x.SubmittedAt).SingleAsync(TestContext.Current.CancellationToken);
+        submittedAt.Should().BeNull();
+    }
+
+    [Fact]
     public async Task SaveChanges_SubmittedSessionSameScope_AllowsNewSession()
     {
         var (studentId, lessonId, questionId) = await SeedAsync();

@@ -13,6 +13,11 @@ public partial class Session
 
     public Attempt RecordAttempt(SessionItem item, string answer, QuestionGrade grade, int? reportedTimeTakenMilliseconds)
     {
+        if (!Items.Contains(item))
+        {
+            throw new InvalidOperationException("Session item does not belong to this session.");
+        }
+
         var existing = FindAttempt(item.QuestionId);
         if (existing is not null)
         {
