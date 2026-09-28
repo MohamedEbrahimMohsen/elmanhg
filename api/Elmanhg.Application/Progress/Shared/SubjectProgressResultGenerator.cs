@@ -7,7 +7,7 @@ namespace Elmanhg.Application.Progress.Shared;
 
 public static class SubjectProgressResultGenerator
 {
-    public static List<SubjectProgressResult> Generate(IReadOnlyList<Subject> subjects, IReadOnlyList<CurriculumUnit> units, IReadOnlyCollection<LessonMasteryCount> counts, IReadOnlyCollection<UnitExamBestScore> bests)
+    public static List<SubjectProgressResult> Generate(IReadOnlyList<Subject> subjects, IReadOnlyList<CurriculumUnit> units, IReadOnlyCollection<LessonMasteryCount> counts, IReadOnlyCollection<ExamBestScore> bests)
     {
         var bestByKey = bests.ToDictionary(x => x.ScopeKey, x => x.BestScorePercent);
         return subjects

@@ -87,5 +87,19 @@
     "previewLoading": "جارٍ حساب الامتحان…",
     "unitShares": "الأسئلة من كل وحدة",
     "unitShare": "{unit}: {count, number} سؤال"
+  },
+  "attempts": {
+    "title": "محاولاتك السابقة",
+    "best": "أفضل درجة: {score, number} / 100",
+    "caption": "محاولاتك في هذا الامتحان، الأحدث أولًا",
+    "date": "التاريخ",
+    "score": "الدرجة",
+    "actions": "إجراءات",
+    "scoreValue": "{score, number} / 100",
+    "bestBadge": "الأفضل",
+    "view": "عرض",
+    "current": "هذه المحاولة",
+    "loading": "جارٍ تحميل محاولاتك…",
+    "errorTitle": "تعذّر تحميل محاولاتك."
   }
 }

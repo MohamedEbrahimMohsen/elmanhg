@@ -2332,6 +2332,47 @@
         }
       }
     },
+    "/api/exams/units/{unitId}/attempts": {
+      "get": {
+        "tags": [
+          "Exams"
+        ],
+        "operationId": "GetUnitExamAttempts",
+        "parameters": [
+          {
+            "name": "unitId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamAttemptsResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamAttemptsResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamAttemptsResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/exams/subjects/{subjectId}/multi-unit": {
       "get": {
         "tags": [
@@ -2530,6 +2571,47 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ExamSessionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exams/{sessionId}/attempts": {
+      "get": {
+        "tags": [
+          "Exams"
+        ],
+        "operationId": "GetExamAttempts",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamAttemptsResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamAttemptsResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamAttemptsResult"
                 }
               }
             }
@@ -3723,6 +3805,60 @@
           "answerSavedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "ExamAttemptResult": {
+        "required": [
+          "sessionId",
+          "submittedAt",
+          "scorePercent",
+          "isBest"
+        ],
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "scorePercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "isBest": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ExamAttemptsResult": {
+        "required": [
+          "bestScorePercent",
+          "attempts"
+        ],
+        "type": "object",
+        "properties": {
+          "bestScorePercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "attempts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExamAttemptResult"
+            }
           }
         }
       },
@@ -5885,7 +6021,8 @@
           "scopeName",
           "startedAt",
           "submittedAt",
-          "scorePercent"
+          "scorePercent",
+          "isBestScore"
         ],
         "type": "object",
         "properties": {
@@ -5935,6 +6072,9 @@
               "string"
             ],
             "format": "double"
+          },
+          "isBestScore": {
+            "type": "boolean"
           }
         }
       },

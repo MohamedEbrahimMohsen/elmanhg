@@ -1,6 +1,6 @@
 # Unit exams
 
-A **unit exam** is a session of kind `UnitExam` (`docs/sessions.md`) built from the unit's exam blueprint (`docs/exam-blueprints.md`, PRD §7.4). All questions are on one page, every answer is auto-saved as a draft with no feedback, and the whole exam is graded when it is submitted. [Multi-unit exams](#multi-unit-exams) (#82) reuse the sitting endpoints; best score and the attempts list are #83.
+A **unit exam** is a session of kind `UnitExam` (`docs/sessions.md`) built from the unit's exam blueprint (`docs/exam-blueprints.md`, PRD §7.4). All questions are on one page, every answer is auto-saved as a draft with no feedback, and the whole exam is graded when it is submitted. [Multi-unit exams](#multi-unit-exams) (#82) reuse the sitting endpoints; retakes, best score and the attempts list are in [Retakes and best score](#retakes-and-best-score) (#83).
 
 ## Start and resolution
 
@@ -102,6 +102,17 @@ Only a shortfall of the **union** pool blocks the exam: 400 `EXAM_SHORTFALL`, co
 
 **Result.** `ExamSessionResult.subjectId` is the scope's subject, `units` lists every selected unit in scope order (a deleted unit has a null name), and `unitBreakdown` sums the per-lesson shares by each lesson's live unit, in scope order. Only units with at least one placed item appear; the list is empty while the exam is open. A unit exam returns one row. Multi-unit sessions never feed a unit's best score (`docs/progress.md`).
 
+## Retakes and best score
+
+PRD §7.4 and §17 rule 9: retakes are unlimited, the best score is the displayed exam score, and every attempt is kept and visible.
+
+- **Retakes.** Starting a unit or multi-unit exam resumes only an **open** sitting of the same scope. Once the previous sitting is submitted (by the student or by auto-submit), start opens a new sitting. There is no limit and no cooldown.
+- **Counted sittings.** `ExamBestScoreSpecification` (Domain) is the single definition: an exam (kind not `Quiz`) that is not test mode, is submitted and has a score, belongs to the signed-in student and is not soft-deleted. Auto-submitted sittings count. Open, test-mode, quiz, other-student and other-scope sittings never appear in a list or set a best. Every read goes through `WhereCountsTowardBestScore` (SQL) or `IsSatisfiedBy` (in memory); no other code restates the filter.
+- **Scope identity.** Sittings are grouped by `Kind` and `ScopeKey`. A unit exam's key is `unit:{unitId}`. A multi-unit exam's key is `units:{size}:{sorted unit ids}`, so the same unit set and the same size is the same exam, and a different size or unit set is a different exam.
+- **The list.** Newest first (`submittedAt` descending, then id descending), with no paging: one student and one scope give a small list. `bestScorePercent` is the highest score in the list, or null when the list is empty. Every sitting whose score equals the best is flagged `isBest`, so ties are all flagged.
+- **Multi-unit sittings** never feed a unit's best score (`docs/progress.md`); they have their own list under their own key.
+- An Admin (test mode) gets 200 with an empty list and a null best.
+
 ## API
 
 Policy `Assessments.Take` (Students and Admins). Teachers get 403, anonymous callers 401. Another student's session id and a quiz id both return 404 `SESSION_NOT_FOUND`.
@@ -110,10 +121,12 @@ Policy `Assessments.Take` (Students and Admins). Teachers get 403, anonymous cal
 |---|---|---|---|
 | GET | `/api/exams/units/{unitId}` | — | 200 `UnitExamOverviewResult` |
 | POST | `/api/exams/units/{unitId}` | — | 200 `ExamSessionResult` (new, resumed or auto-submitted) |
+| GET | `/api/exams/units/{unitId}/attempts` | — | 200 `ExamAttemptsResult` (the unit exam's counted sittings; 404 `UNIT_NOT_FOUND`) |
 | GET | `/api/exams/subjects/{subjectId}/multi-unit` | — | 200 `MultiUnitExamOverviewResult` |
 | GET | `/api/exams/subjects/{subjectId}/multi-unit/preview?unitIds=&unitIds=&size=` | — | 200 `MultiUnitExamPreviewResult` |
 | POST | `/api/exams/subjects/{subjectId}/multi-unit` | `{ unitIds, size }` | 200 `ExamSessionResult` (new, resumed or auto-submitted) |
 | GET | `/api/exams/{sessionId}` | — | 200 `ExamSessionResult` |
+| GET | `/api/exams/{sessionId}/attempts` | — | 200 `ExamAttemptsResult` (the counted sittings of that session's scope, unit or multi-unit) |
 | PUT | `/api/exams/{sessionId}/answers/{questionId}` | `{ answer }` | 200 `ExamAnswerSavedResult` |
 | POST | `/api/exams/{sessionId}/submit` | — | 200 `ExamSessionResult` |
 
@@ -125,6 +138,7 @@ Policy `Assessments.Take` (Students and Admins). Teachers get 403, anonymous cal
 `ExamLessonResult { lessonId, name?, questionCount, correctCount, score, maxScore, scorePercent }`
 `ExamObjectiveResult { objectiveId, text, lessonId, lessonName?, questionCount, scorePercent }`
 `ExamAnswerSavedResult { questionId, answerSavedAt }`
+`ExamAttemptsResult { bestScorePercent?, attempts[] { sessionId, submittedAt, scorePercent, isBest } }`
 
 `serverNow` lets the client anchor its countdown to the server clock.
 
@@ -159,9 +173,9 @@ Policy `Assessments.Take` (Students and Admins). Teachers get 403, anonymous cal
 
 Feature `web/src/features/exam/`.
 
-- **`/student/exam-start/{unitId}`**: "امتحان: {unit}", the blueprint summary (type, count, available; the available cell turns red when short), the time or «مفتوح», the pass mark and the note «لا تظهر الإجابات الصحيحة إلا بعد التسليم. تُحفظ إجاباتك تلقائيًا.». The subject default shows «النموذج الافتراضي للمادة». Actions: «ابدأ الامتحان»; «استكمل الامتحان» when this unit's exam is open; a warning with a link when another exam is open; the shortfall warning with no start button; «لا يوجد امتحان لهذه الوحدة بعد.» with no blueprint. Loading, error-with-retry and RTL states. Reached from the progress unit table until #85 adds the unit page.
+- **`/student/exam-start/{unitId}`**: "امتحان: {unit}", the blueprint summary (type, count, available; the available cell turns red when short), the time or «مفتوح», the pass mark and the note «لا تظهر الإجابات الصحيحة إلا بعد التسليم. تُحفظ إجاباتك تلقائيًا.». The subject default shows «النموذج الافتراضي للمادة». Actions: «ابدأ الامتحان»; «استكمل الامتحان» when this unit's exam is open; a warning with a link when another exam is open; the shortfall warning with no start button; «لا يوجد امتحان لهذه الوحدة بعد.» with no blueprint. Loading, error-with-retry and RTL states. After the actions, the card «محاولاتك السابقة» with «أفضل درجة: {score} / 100» and one row per sitting, newest first (date, the score with the «الأفضل» chip on every best sitting, «عرض» to its result); it has its own loading and error-with-retry states and is hidden when there are no sittings. Reached from the progress unit table until #85 adds the unit page.
 - **`/student/exam/{sessionId}`**: a sticky header with the title, the countdown and the save status («محفوظ تلقائيًا», «جارٍ الحفظ…», «تم الحفظ {time}», or the save error). The countdown is anchored to `serverNow`, turns red and is announced once in the last two minutes, and at 0 shows «انتهى الوقت. جارٍ تسليم امتحانك…» and submits. Every question is on the page with its saved answer restored. Each change is saved after 800 ms; saves for one question are chained so the newest lands last, and pending saves are flushed before submitting. «تسليم الامتحان» (sticky at the bottom on mobile) asks for confirmation with the count of unanswered questions. A submitted exam opens its result.
-- **`/student/exam-result/{sessionId}`**: the score out of 100 with «ناجح» or «لم تبلغ درجة النجاح ({passMark})», answered count and time, the per-lesson table with «درّب الآن» to `/student/lesson/{lessonId}/practice`, the weakest objectives or «لا توجد أهداف ضعيفة. أحسنت!», a review of every question (the student's answer with feedback, or «لم تُجب عن هذا السؤال.» with the correct answer), «إعادة الامتحان» to the exam start and «تقدّمي». An open exam opens the exam screen.
+- **`/student/exam-result/{sessionId}`**: the score out of 100 with «ناجح» or «لم تبلغ درجة النجاح ({passMark})», answered count and time, the per-lesson table with «درّب الآن» to `/student/lesson/{lessonId}/practice`, the weakest objectives or «لا توجد أهداف ضعيفة. أحسنت!», the same «محاولاتك السابقة» card for this exam's scope (the row being viewed says «هذه المحاولة» with no link; hidden when empty), a review of every question (the student's answer with feedback, or «لم تُجب عن هذا السؤال.» with the correct answer), «إعادة الامتحان» to the exam start and «تقدّمي». An open exam opens the exam screen.
 - **`/student/multi-exam`** (the builder, «امتحان متعدد الوحدات»): a subject select, the subject's units as checkboxes with «({count} سؤال متاح)» (a unit with no blueprint is disabled and says «لا يوجد امتحان لهذه الوحدة»), and the size as radios «20 / 40 / 60 سؤال». With fewer than two units it says «اختر وحدتين على الأقل.»; with two or more it shows the live merged preview «النموذج المدمج (تناسبيًا)» (the blueprint summary and «الأسئلة من كل وحدة»), then «ابدأ الامتحان», or the shortfall warning with no button. When any exam is open it shows «لديك امتحان جارٍ.» with a link and no start button. The selection lives in the URL (`?subjectId=&unitIds=[…]&size=`); changing the subject clears the units and size. Loading, error-with-retry, no-subjects, no-units and RTL states.
 - A multi-unit exam is titled «امتحان متعدد: {units}» and its result «نتيجة امتحان متعدد: {units}» (the unit names joined by « + »). The result adds the per-unit table «حسب الوحدة» (unit, score, correct answers), and «إعادة الامتحان» opens the builder with the same subject, units and size.
 - Progress history links a finished exam «عرض» to its result and an open one «متابعة» to the exam (`docs/progress.md`).

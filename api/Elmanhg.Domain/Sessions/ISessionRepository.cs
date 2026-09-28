@@ -7,5 +7,6 @@ public interface ISessionRepository : IRepository<Session>
 {
     Task<List<QuestionAttemptSummary>> GetAttemptSummariesAsync(Guid studentId, IReadOnlyCollection<Guid> questionIds, decimal correctThreshold, CancellationToken cancellationToken);
     Task<List<DateOnly>> GetQuizActivityDaysAsync(Guid studentId, string timeZone, DateTimeOffset since, CancellationToken cancellationToken);
-    Task<List<UnitExamBestScore>> GetBestUnitExamScoresAsync(Guid studentId, CancellationToken cancellationToken);
+    Task<List<ExamBestScore>> GetBestExamScoresAsync(Guid studentId, CancellationToken cancellationToken);
+    Task<List<ExamAttemptSummary>> GetExamAttemptsAsync(Guid studentId, SessionKind kind, string scopeKey, CancellationToken cancellationToken);
 }

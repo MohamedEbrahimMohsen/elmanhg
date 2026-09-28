@@ -112,6 +112,7 @@ export const openQuizItem: SessionHistoryItemResult = {
   startedAt: '2026-09-20T09:00:00Z',
   submittedAt: null,
   scorePercent: null,
+  isBestScore: false,
 };
 
 export const finishedQuizItem: SessionHistoryItemResult = {
@@ -123,6 +124,7 @@ export const finishedQuizItem: SessionHistoryItemResult = {
   startedAt: '2026-09-19T09:00:00Z',
   submittedAt: '2026-09-19T09:20:00Z',
   scorePercent: 72.4,
+  isBestScore: false,
 };
 
 export const examItem: SessionHistoryItemResult = {
@@ -134,6 +136,7 @@ export const examItem: SessionHistoryItemResult = {
   startedAt: '2026-09-18T09:00:00Z',
   submittedAt: '2026-09-18T10:00:00Z',
   scorePercent: 90,
+  isBestScore: false,
 };
 
 export function sessionHistoryPage(

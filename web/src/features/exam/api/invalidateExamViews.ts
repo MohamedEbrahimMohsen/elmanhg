@@ -3,6 +3,7 @@ import { invalidateMastery } from '@/features/mastery';
 
 export const unitExamOverviewQueryPrefix = '/api/exams/units/';
 export const examSubjectQueryPrefix = '/api/exams/subjects/';
+export const examAttemptsQuerySuffix = '/attempts';
 
 export async function invalidateExamViews(queryClient: QueryClient): Promise<void> {
   await Promise.all([
@@ -11,7 +12,9 @@ export async function invalidateExamViews(queryClient: QueryClient): Promise<voi
         const [first] = query.queryKey;
         return (
           typeof first === 'string' &&
-          (first.startsWith(unitExamOverviewQueryPrefix) || first.startsWith(examSubjectQueryPrefix))
+          (first.startsWith(unitExamOverviewQueryPrefix) ||
+            first.startsWith(examSubjectQueryPrefix) ||
+            (first.startsWith('/api/exams/') && first.endsWith(examAttemptsQuerySuffix)))
         );
       },
     }),

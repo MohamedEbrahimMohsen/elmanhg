@@ -4,6 +4,7 @@ using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Progress.GetSessionHistory;
 using Elmanhg.Domain.Lessons;
+using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Units;
 using Elmanhg.Tests.Builders;
@@ -99,6 +100,42 @@ public sealed class GetSessionHistoryHandlerTests
 
         var item = result.Items.Should().ContainSingle().Subject;
         (item.Kind, item.ScopeName, item.UnitId, item.LessonId).Should().Be(("MultiUnitExam", "Mechanics + Waves", (Guid?)null, (Guid?)null));
+    }
+
+    [Fact]
+    public async Task Handle_SubmittedExams_FlagsSittingsMatchingTheirScopeBest()
+    {
+        var first = SubmittedExam(new ExamSessionBuilder());
+        var second = SubmittedExam(new ExamSessionBuilder());
+        StubPage([first, second], pageNumber: 1, totalItems: 2, totalPages: 1);
+        _unitRepository.FindAsync(Arg.Any<Expression<Func<CurriculumUnit, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<CurriculumUnit>, IQueryable<CurriculumUnit>>?>(), Arg.Any<Func<IQueryable<CurriculumUnit>, IOrderedQueryable<CurriculumUnit>>?>(), Arg.Any<bool>()).Returns([]);
+        _sessionRepository.GetBestExamScoresAsync(_builder.StudentId, Arg.Any<CancellationToken>()).Returns([new ExamBestScore(first.ScopeKey, 0m), new ExamBestScore(second.ScopeKey, 50m)]);
+
+        var result = await _handler.Handle(new GetSessionHistoryQuery(SessionHistoryKind.Exam), TestContext.Current.CancellationToken);
+
+        result.Items.Select(x => x.IsBestScore).Should().Equal(true, false);
+    }
+
+    [Fact]
+    public async Task Handle_NoCountedExamOnPage_DoesNotLoadBestScores()
+    {
+        var open = _builder.Build();
+        var finished = _builder.Build();
+        finished.RecordAttempt(finished.Items[0], SessionBuilder.AnswerB, SessionBuilder.Grade(1m), 0);
+        finished.Submit();
+        StubPage([open, finished], pageNumber: 1, totalItems: 2, totalPages: 1);
+
+        var result = await _handler.Handle(new GetSessionHistoryQuery(null), TestContext.Current.CancellationToken);
+
+        result.Items.Select(x => x.IsBestScore).Should().Equal(false, false);
+        await _sessionRepository.DidNotReceive().GetBestExamScoresAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+    }
+
+    private static Session SubmittedExam(ExamSessionBuilder builder)
+    {
+        var session = builder.Build();
+        session.SubmitExam(new Dictionary<Guid, QuestionGrade>(), ExamSessionBuilder.Now.AddMinutes(1));
+        return session;
     }
 
     private void StubPage(List<Session> sessions, int pageNumber, int totalItems, int totalPages)

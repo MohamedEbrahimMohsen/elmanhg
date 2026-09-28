@@ -61,6 +61,7 @@
       "noData": "No sessions yet.",
       "noResults": "No sessions of this type.",
       "clear": "Show all"
-    }
+    },
+    "best": "Best"
   }
 }

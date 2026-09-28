@@ -6,7 +6,7 @@ namespace Elmanhg.Application.Progress.Shared;
 
 public static class SessionHistoryResultGenerator
 {
-    public static SessionHistoryItemResult Generate(Session session, IReadOnlyList<Lesson> lessons, IReadOnlyList<CurriculumUnit> units)
+    public static SessionHistoryItemResult Generate(Session session, IReadOnlyList<Lesson> lessons, IReadOnlyList<CurriculumUnit> units, IReadOnlyDictionary<string, decimal> bestByScopeKey)
     {
         var (lessonId, unitId, scopeName) = session.Kind switch
         {
@@ -15,7 +15,7 @@ public static class SessionHistoryResultGenerator
             SessionKind.MultiUnitExam => ForUnits(session.GetExamUnitIds(), units),
             _ => (null, null, null),
         };
-        return new SessionHistoryItemResult(session.Id, session.Kind.ToString(), lessonId, unitId, scopeName, session.StartedAt, session.SubmittedAt, session.ScorePercent);
+        return new SessionHistoryItemResult(session.Id, session.Kind.ToString(), lessonId, unitId, scopeName, session.StartedAt, session.SubmittedAt, session.ScorePercent, ExamBestScoreSpecification.IsSatisfiedBy(session) && bestByScopeKey.TryGetValue(session.ScopeKey, out var best) && best == session.ScorePercent);
     }
 
     private static (Guid? LessonId, Guid? UnitId, string? ScopeName) ForLesson(Guid lessonId, IReadOnlyList<Lesson> lessons) => (lessonId, null, lessons.FirstOrDefault(x => x.Id == lessonId)?.Name);

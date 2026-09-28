@@ -1786,6 +1786,55 @@
           "response": []
         },
         {
+          "name": "Get exam attempts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"lists the submitted sitting\", function () { pm.expect(pm.response.json().attempts.length).to.be.above(0); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examSessionId}}/attempts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examSessionId}}", "attempts"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get unit exam attempts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/units/{{unitId}}/attempts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "units", "{{unitId}}", "attempts"]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Get multi-unit exam overview",
           "event": [
             {

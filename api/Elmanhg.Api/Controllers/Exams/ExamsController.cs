@@ -1,5 +1,7 @@
+using Elmanhg.Application.Exams.GetExamAttempts;
 using Elmanhg.Application.Exams.GetExamSession;
 using Elmanhg.Application.Exams.GetMultiUnitExamOverview;
+using Elmanhg.Application.Exams.GetUnitExamAttempts;
 using Elmanhg.Application.Exams.GetUnitExamOverview;
 using Elmanhg.Application.Exams.PreviewMultiUnitExam;
 using Elmanhg.Application.Exams.SaveExamAnswer;
@@ -37,6 +39,15 @@ public class ExamsController(IMediator mediator) : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("units/{unitId:guid}/attempts", Name = "GetUnitExamAttempts")]
+    [Authorize(Policy = DefaultCodes.AssessmentsTake)]
+    [ProducesResponseType<ExamAttemptsResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetUnitExamAttempts([FromRoute] Guid unitId, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetUnitExamAttemptsQuery(unitId), cancellationToken);
+        return Ok(result);
+    }
+
     [HttpGet("subjects/{subjectId:guid}/multi-unit", Name = "GetMultiUnitExamOverview")]
     [Authorize(Policy = DefaultCodes.AssessmentsTake)]
     [ProducesResponseType<MultiUnitExamOverviewResult>(StatusCodes.Status200OK)]
@@ -70,6 +81,15 @@ public class ExamsController(IMediator mediator) : ControllerBase
     public async Task<ActionResult> GetExamSession([FromRoute] Guid sessionId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetExamSessionQuery(sessionId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("{sessionId:guid}/attempts", Name = "GetExamAttempts")]
+    [Authorize(Policy = DefaultCodes.AssessmentsTake)]
+    [ProducesResponseType<ExamAttemptsResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetExamAttempts([FromRoute] Guid sessionId, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetExamAttemptsQuery(sessionId), cancellationToken);
         return Ok(result);
     }
 

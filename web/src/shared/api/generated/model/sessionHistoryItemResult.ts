@@ -22,4 +22,5 @@ export interface SessionHistoryItemResult {
      * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
      */
   scorePercent: number | string | null;
+  isBestScore: boolean;
 }

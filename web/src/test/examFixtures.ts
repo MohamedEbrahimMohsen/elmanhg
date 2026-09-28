@@ -1,4 +1,5 @@
 import type {
+  ExamAttemptsResult,
   ExamItemResult,
   ExamSessionResult,
   MultiUnitExamOverviewResult,
@@ -11,6 +12,7 @@ export const examUnitId = '34343434-3434-4343-8343-343434343434';
 export const examLessonId = '56565656-5656-4565-8565-565656565656';
 export const examSubjectId = '90909090-9090-4909-8909-909090909090';
 export const examSecondUnitId = '45454545-4545-4454-8454-454545454545';
+export const earlierSittingId = '78787878-7878-4787-8787-787878787878';
 
 export function examItem(position: number, overrides?: Partial<ExamItemResult>): ExamItemResult {
   return {
@@ -179,4 +181,19 @@ export function multiExam(items: ExamItemResult[], overrides?: Partial<ExamSessi
     ],
     ...overrides,
   });
+}
+
+export function examAttempts(overrides?: Partial<ExamAttemptsResult>): ExamAttemptsResult {
+  return {
+    bestScorePercent: 90,
+    attempts: [
+      { sessionId: examSessionId, submittedAt: '2026-09-28T10:12:30Z', scorePercent: 80, isBest: false },
+      { sessionId: earlierSittingId, submittedAt: '2026-09-27T09:00:00Z', scorePercent: 90, isBest: true },
+    ],
+    ...overrides,
+  };
+}
+
+export function noExamAttempts(): ExamAttemptsResult {
+  return { bestScorePercent: null, attempts: [] };
 }

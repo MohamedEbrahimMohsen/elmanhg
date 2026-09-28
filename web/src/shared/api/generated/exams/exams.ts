@@ -29,6 +29,7 @@ import type {
 
 import type {
   ExamAnswerSavedResult,
+  ExamAttemptsResult,
   ExamSessionResult,
   MultiUnitExamOverviewResult,
   MultiUnitExamPreviewResult,
@@ -273,7 +274,153 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getStartUnitExamMutationOptions(options), queryClient);
     }
-    export const getGetMultiUnitExamOverviewUrl = (subjectId: string,) => {
+    export const getGetUnitExamAttemptsUrl = (unitId: string,) => {
+
+
+
+
+  return `/api/exams/units/${unitId}/attempts`
+}
+
+export const getUnitExamAttempts = async (unitId: string, options?: Parameters<typeof http>[1]): Promise<ExamAttemptsResult> => {
+
+  return http<ExamAttemptsResult>(getGetUnitExamAttemptsUrl(unitId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetUnitExamAttemptsQueryKey = (unitId: string,) => {
+    return [
+    `/api/exams/units/${unitId}/attempts`
+    ] as const;
+    }
+
+
+export const getGetUnitExamAttemptsQueryOptions = <TData = Awaited<ReturnType<typeof getUnitExamAttempts>>, TError = unknown>(unitId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUnitExamAttempts>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUnitExamAttemptsQueryKey(unitId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUnitExamAttempts>>> = ({ signal }) => getUnitExamAttempts(unitId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: unitId !== null && unitId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUnitExamAttempts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetUnitExamAttemptsQueryResult = NonNullable<Awaited<ReturnType<typeof getUnitExamAttempts>>>
+export type GetUnitExamAttemptsQueryError = unknown
+
+
+export function useGetUnitExamAttempts<TData = Awaited<ReturnType<typeof getUnitExamAttempts>>, TError = unknown>(
+ unitId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUnitExamAttempts>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUnitExamAttempts>>,
+          TError,
+          Awaited<ReturnType<typeof getUnitExamAttempts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUnitExamAttempts<TData = Awaited<ReturnType<typeof getUnitExamAttempts>>, TError = unknown>(
+ unitId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUnitExamAttempts>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUnitExamAttempts>>,
+          TError,
+          Awaited<ReturnType<typeof getUnitExamAttempts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUnitExamAttempts<TData = Awaited<ReturnType<typeof getUnitExamAttempts>>, TError = unknown>(
+ unitId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUnitExamAttempts>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetUnitExamAttempts<TData = Awaited<ReturnType<typeof getUnitExamAttempts>>, TError = unknown>(
+ unitId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUnitExamAttempts>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetUnitExamAttemptsQueryOptions(unitId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetUnitExamAttemptsSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getUnitExamAttempts>>, TError = unknown>(unitId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getUnitExamAttempts>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUnitExamAttemptsQueryKey(unitId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUnitExamAttempts>>> = ({ signal }) => getUnitExamAttempts(unitId, { signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getUnitExamAttempts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetUnitExamAttemptsSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getUnitExamAttempts>>>
+export type GetUnitExamAttemptsSuspenseQueryError = unknown
+
+
+export function useGetUnitExamAttemptsSuspense<TData = Awaited<ReturnType<typeof getUnitExamAttempts>>, TError = unknown>(
+ unitId: string, options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getUnitExamAttempts>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUnitExamAttemptsSuspense<TData = Awaited<ReturnType<typeof getUnitExamAttempts>>, TError = unknown>(
+ unitId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getUnitExamAttempts>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUnitExamAttemptsSuspense<TData = Awaited<ReturnType<typeof getUnitExamAttempts>>, TError = unknown>(
+ unitId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getUnitExamAttempts>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetUnitExamAttemptsSuspense<TData = Awaited<ReturnType<typeof getUnitExamAttempts>>, TError = unknown>(
+ unitId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getUnitExamAttempts>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetUnitExamAttemptsSuspenseQueryOptions(unitId,options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetMultiUnitExamOverviewUrl = (subjectId: string,) => {
 
 
 
@@ -810,6 +957,152 @@ export function useGetExamSessionSuspense<TData = Awaited<ReturnType<typeof getE
  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetExamSessionSuspenseQueryOptions(sessionId,options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetExamAttemptsUrl = (sessionId: string,) => {
+
+
+
+
+  return `/api/exams/${sessionId}/attempts`
+}
+
+export const getExamAttempts = async (sessionId: string, options?: Parameters<typeof http>[1]): Promise<ExamAttemptsResult> => {
+
+  return http<ExamAttemptsResult>(getGetExamAttemptsUrl(sessionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetExamAttemptsQueryKey = (sessionId: string,) => {
+    return [
+    `/api/exams/${sessionId}/attempts`
+    ] as const;
+    }
+
+
+export const getGetExamAttemptsQueryOptions = <TData = Awaited<ReturnType<typeof getExamAttempts>>, TError = unknown>(sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExamAttempts>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetExamAttemptsQueryKey(sessionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getExamAttempts>>> = ({ signal }) => getExamAttempts(sessionId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: sessionId !== null && sessionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getExamAttempts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetExamAttemptsQueryResult = NonNullable<Awaited<ReturnType<typeof getExamAttempts>>>
+export type GetExamAttemptsQueryError = unknown
+
+
+export function useGetExamAttempts<TData = Awaited<ReturnType<typeof getExamAttempts>>, TError = unknown>(
+ sessionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExamAttempts>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getExamAttempts>>,
+          TError,
+          Awaited<ReturnType<typeof getExamAttempts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetExamAttempts<TData = Awaited<ReturnType<typeof getExamAttempts>>, TError = unknown>(
+ sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExamAttempts>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getExamAttempts>>,
+          TError,
+          Awaited<ReturnType<typeof getExamAttempts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetExamAttempts<TData = Awaited<ReturnType<typeof getExamAttempts>>, TError = unknown>(
+ sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExamAttempts>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetExamAttempts<TData = Awaited<ReturnType<typeof getExamAttempts>>, TError = unknown>(
+ sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExamAttempts>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetExamAttemptsQueryOptions(sessionId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetExamAttemptsSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getExamAttempts>>, TError = unknown>(sessionId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getExamAttempts>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetExamAttemptsQueryKey(sessionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getExamAttempts>>> = ({ signal }) => getExamAttempts(sessionId, { signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getExamAttempts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetExamAttemptsSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getExamAttempts>>>
+export type GetExamAttemptsSuspenseQueryError = unknown
+
+
+export function useGetExamAttemptsSuspense<TData = Awaited<ReturnType<typeof getExamAttempts>>, TError = unknown>(
+ sessionId: string, options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getExamAttempts>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetExamAttemptsSuspense<TData = Awaited<ReturnType<typeof getExamAttempts>>, TError = unknown>(
+ sessionId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getExamAttempts>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetExamAttemptsSuspense<TData = Awaited<ReturnType<typeof getExamAttempts>>, TError = unknown>(
+ sessionId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getExamAttempts>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetExamAttemptsSuspense<TData = Awaited<ReturnType<typeof getExamAttempts>>, TError = unknown>(
+ sessionId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getExamAttempts>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetExamAttemptsSuspenseQueryOptions(sessionId,options)
 
   const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
