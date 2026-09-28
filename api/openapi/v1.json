@@ -2252,6 +2252,191 @@
         }
       }
     },
+    "/api/exam-blueprints/subjects/{subjectId}": {
+      "get": {
+        "tags": [
+          "ExamBlueprints"
+        ],
+        "operationId": "GetSubjectExamBlueprints",
+        "parameters": [
+          {
+            "name": "subjectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubjectExamBlueprintsResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubjectExamBlueprintsResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubjectExamBlueprintsResult"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "ExamBlueprints"
+        ],
+        "operationId": "SaveSubjectExamBlueprint",
+        "parameters": [
+          {
+            "name": "subjectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExamBlueprintInput"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExamBlueprintInput"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExamBlueprintInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamBlueprintResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamBlueprintResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamBlueprintResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exam-blueprints/units/{unitId}": {
+      "put": {
+        "tags": [
+          "ExamBlueprints"
+        ],
+        "operationId": "SaveUnitExamBlueprint",
+        "parameters": [
+          {
+            "name": "unitId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExamBlueprintInput"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExamBlueprintInput"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExamBlueprintInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamBlueprintResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamBlueprintResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamBlueprintResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exam-blueprints/{examBlueprintId}": {
+      "delete": {
+        "tags": [
+          "ExamBlueprints"
+        ],
+        "operationId": "DeleteExamBlueprint",
+        "parameters": [
+          {
+            "name": "examBlueprintId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/auth/otp/send": {
       "post": {
         "tags": [
@@ -3125,6 +3310,236 @@
           "id": {
             "type": "string",
             "format": "uuid"
+          }
+        }
+      },
+      "ExamBlueprintInput": {
+        "required": [
+          "typeCounts",
+          "difficultyMix",
+          "timeLimitMinutes",
+          "passMark"
+        ],
+        "type": "object",
+        "properties": {
+          "typeCounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExamTypeCountInput"
+            }
+          },
+          "difficultyMix": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ExamDifficultyMixInput"
+              }
+            ]
+          },
+          "timeLimitMinutes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "passMark": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "ExamBlueprintResult": {
+        "required": [
+          "id",
+          "subjectId",
+          "unitId",
+          "typeCounts",
+          "difficultyMix",
+          "questionCount",
+          "timeLimitMinutes",
+          "passMark"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "typeCounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExamTypeCountResult"
+            }
+          },
+          "difficultyMix": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ExamDifficultyMixResult"
+              }
+            ]
+          },
+          "questionCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "timeLimitMinutes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "passMark": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "ExamDifficultyMixInput": {
+        "required": [
+          "easyPercent",
+          "mediumPercent",
+          "hardPercent"
+        ],
+        "type": "object",
+        "properties": {
+          "easyPercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "mediumPercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "hardPercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "ExamDifficultyMixResult": {
+        "required": [
+          "easyPercent",
+          "mediumPercent",
+          "hardPercent"
+        ],
+        "type": "object",
+        "properties": {
+          "easyPercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "mediumPercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "hardPercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "ExamTypeCountInput": {
+        "required": [
+          "type",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/QuestionType"
+              }
+            ]
+          },
+          "count": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "ExamTypeCountResult": {
+        "required": [
+          "type",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/QuestionType"
+          },
+          "count": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -4637,6 +5052,47 @@
           }
         }
       },
+      "SubjectExamBlueprintsResult": {
+        "required": [
+          "subjectId",
+          "subjectName",
+          "defaultBlueprint",
+          "servable",
+          "units"
+        ],
+        "type": "object",
+        "properties": {
+          "subjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "defaultBlueprint": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ExamBlueprintResult"
+              }
+            ]
+          },
+          "servable": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExamTypeCountResult"
+            }
+          },
+          "units": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnitExamBlueprintResult"
+            }
+          }
+        }
+      },
       "SubjectMasteryDetailResult": {
         "required": [
           "subjectId",
@@ -4929,6 +5385,49 @@
           "assignedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "UnitExamBlueprintResult": {
+        "required": [
+          "unitId",
+          "name",
+          "order",
+          "blueprint",
+          "servable"
+        ],
+        "type": "object",
+        "properties": {
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "order": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "blueprint": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ExamBlueprintResult"
+              }
+            ]
+          },
+          "servable": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExamTypeCountResult"
+            }
           }
         }
       },
@@ -5747,6 +6246,9 @@
     },
     {
       "name": "Lessons"
+    },
+    {
+      "name": "ExamBlueprints"
     },
     {
       "name": "Auth"

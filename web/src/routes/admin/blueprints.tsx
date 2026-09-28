@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { PlaceholderPage } from '@/features/shell';
+import { blueprintsSearchSchema, ExamBlueprintsPage } from '@/features/blueprints';
 
 export const Route = createFileRoute('/admin/blueprints')({
-  component: () => <PlaceholderPage titleKey="nav.admin.blueprints" />,
+  validateSearch: blueprintsSearchSchema,
+  component: ExamBlueprintsPage,
 });

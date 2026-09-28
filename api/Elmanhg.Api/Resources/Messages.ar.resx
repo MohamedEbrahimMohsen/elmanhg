@@ -253,4 +253,17 @@
   <data name="SESSION_HISTORY_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة يجب ان يكون 1 او اكثر.</value></data>
   <data name="SESSION_HISTORY_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة خارج النطاق المسموح.</value></data>
   <data name="SESSION_HISTORY_KIND_INVALID" xml:space="preserve"><value>نوع الجلسة غير صالح.</value></data>
+  <data name="EXAM_BLUEPRINT_SHORTFALL" xml:space="preserve"><value>لم يتم الحفظ — عدد الأسئلة المتاحة غير كاف: {types}</value></data>
+  <data name="EXAM_BLUEPRINT_DEFAULT_NOT_DELETABLE" xml:space="preserve"><value>لا يمكن حذف النموذج الافتراضي للمادة.</value></data>
+  <data name="EXAM_BLUEPRINT_NOT_FOUND" xml:space="preserve"><value>نموذج الامتحان غير موجود.</value></data>
+  <data name="EXAM_BLUEPRINT_ID_REQUIRED" xml:space="preserve"><value>اختر نموذج الامتحان.</value></data>
+  <data name="EXAM_BLUEPRINT_EMPTY" xml:space="preserve"><value>يجب تحديد سؤال واحد على الأقل.</value></data>
+  <data name="EXAM_BLUEPRINT_TOO_LARGE" xml:space="preserve"><value>عدد أسئلة النموذج أكبر من الحد المسموح.</value></data>
+  <data name="EXAM_BLUEPRINT_TYPE_DUPLICATE" xml:space="preserve"><value>كل نوع يظهر مرة واحدة فقط.</value></data>
+  <data name="EXAM_BLUEPRINT_TYPE_COUNT_REQUIRED" xml:space="preserve"><value>كل صف في أعداد الأنواع مطلوب.</value></data>
+  <data name="EXAM_BLUEPRINT_COUNT_INVALID" xml:space="preserve"><value>عدد الأسئلة غير صالح.</value></data>
+  <data name="EXAM_BLUEPRINT_DIFFICULTY_MIX_INVALID" xml:space="preserve"><value>نسب الصعوبة يجب أن تكون بين 0 و100 ومجموعها 100.</value></data>
+  <data name="EXAM_BLUEPRINT_TIME_LIMIT_INVALID" xml:space="preserve"><value>زمن الامتحان غير صالح.</value></data>
+  <data name="EXAM_BLUEPRINT_PASS_MARK_INVALID" xml:space="preserve"><value>درجة النجاح يجب أن تكون بين 1 و100.</value></data>
+  <data name="EXAM_BLUEPRINT_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>تم تعديل النموذج في نفس الوقت. أعد المحاولة.</value></data>
 </root>

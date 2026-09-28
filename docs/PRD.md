@@ -330,6 +330,8 @@ Per unit (and a default per subject):
 
 Validation: the blueprint cannot be saved if the unit lacks enough servable questions of any required type; the editor shows the shortfall.
 
+The subject default is checked against the subject's whole servable pool; a unit blueprint against its unit's pool. The difficulty mix is a target (whole percentages summing to 100) and is not part of the save check. Pass mark is 1–100; time limit, when set, is at least 1 minute. A unit blueprint can be removed, returning the unit to the subject default; the subject default cannot be removed. Details: `docs/exam-blueprints.md`.
+
 ### 10.3 Dashboards (v1 basic set)
 
 | Card / chart | Definition |
@@ -427,8 +429,8 @@ Exports (admin only): JSONL per source, date-ranged, with PII stripped.
 User(id, role[Student|Teacher|Admin], phone, email, display_name, status)
 TeacherSubject(teacher_id, subject_id)
 
-Subject(id, name, order, default_blueprint_id?)
-Unit(id, subject_id, name, order, blueprint_id?)
+Subject(id, name, order)
+Unit(id, subject_id, name, order)
 Lesson(id, unit_id, name, order, state[Draft|Published|Archived],
        explanation, summary, video_url?, published_at)
 LessonObjective(id, lesson_id, text, order)
@@ -439,7 +441,7 @@ Question(id, lesson_id, subject_id, type, stem, difficulty, objective_id?, tags[
          retired_at?)
 QuestionRevision(question_id, version, snapshot_json, edited_by, edited_at)
 
-ExamBlueprint(id, name, type_counts_json, difficulty_mix_json?, time_limit_min?, pass_mark)
+ExamBlueprint(id, subject_id, unit_id?, type_counts_json, difficulty_mix_json?, question_count, time_limit_min?, pass_mark)  -- unit_id null = the subject default; one default per subject, one per unit (docs/exam-blueprints.md)
 
 Session(id, student_id, kind[Quiz|UnitExam|MultiUnitExam], scope_json, scope_key, is_test_mode,
         started_at, last_activity_at, submitted_at?, score_pct?, time_limit_min?)

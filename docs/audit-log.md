@@ -75,8 +75,11 @@ An array with one element per changed audited entity. Property keys are camelCas
 | ApproveQuestion | `Question.Approve` | Question | command (the diff shows `validationStatus`, `validatedBy`, `validatedAt`, and `difficulty` when the teacher changed it) |
 | RejectQuestion | `Question.Reject` | Question | command (the diff shows `validationStatus`, `rejectionReason`, `validatedBy`, `validatedAt`) |
 | BulkApproveQuestions | `Question.BulkApprove` | ReviewSession | command (the diff lists every approved Question) |
+| SaveSubjectExamBlueprint | `ExamBlueprint.SaveSubjectDefault` | ExamBlueprint | result |
+| SaveUnitExamBlueprint | `ExamBlueprint.SaveUnit` | ExamBlueprint | result |
+| DeleteExamBlueprint | `ExamBlueprint.Delete` | ExamBlueprint | command |
 
-Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`.
+Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`, `ExamBlueprint`.
 
 `QuestionRevision` and `QuestionDecision` rows are an append-only history and are not diffed.
 

@@ -29,6 +29,7 @@ public static class DependencyInjection
         services.AddOptions<ProgressOptions>().BindConfiguration(ProgressOptions.SectionName).ValidateDataAnnotations()
             .Validate(x => TimeZoneInfo.TryFindSystemTimeZoneById(x.StreakTimeZone, out _), "Progress:StreakTimeZone must be a known IANA time zone id.")
             .ValidateOnStart();
+        services.AddOptions<ExamBlueprintsOptions>().BindConfiguration(ExamBlueprintsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton(Random.Shared);
         return services;

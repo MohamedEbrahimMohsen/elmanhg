@@ -2,6 +2,7 @@ using Core.OTP.Sms;
 using Elmanhg.Application.Shared.RichText;
 using Elmanhg.Application.Shared.Spreadsheets;
 using Elmanhg.Application.Shared.Storage;
+using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
@@ -11,6 +12,7 @@ using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.Units;
+using Elmanhg.Infrastructure.ExamBlueprints;
 using Elmanhg.Infrastructure.Identity;
 using Elmanhg.Infrastructure.Lessons;
 using Elmanhg.Infrastructure.Mastery;
@@ -60,6 +62,7 @@ public static class DependencyInjection
         services.AddScoped<IReviewSessionRepository, ReviewSessionRepository>();
         services.AddScoped<ISessionRepository, SessionRepository>();
         services.AddScoped<IQuestionMasteryRepository, QuestionMasteryRepository>();
+        services.AddScoped<IExamBlueprintRepository, ExamBlueprintRepository>();
         return services;
     }
 }

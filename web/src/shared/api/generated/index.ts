@@ -1,5 +1,6 @@
 export * from './audit-logs/audit-logs';
 export * from './auth/auth';
+export * from './exam-blueprints/exam-blueprints';
 export * from './lessons/lessons';
 export * from './mastery/mastery';
 export * from './progress/progress';

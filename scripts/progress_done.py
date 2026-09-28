@@ -11,7 +11,7 @@ issue, pr, rounds, cr, follow, sha = sys.argv[1:7]
 p = ROOT / "PROGRESS.md"
 s = p.read_text(encoding="utf-8")
 
-row = re.search(rf"^\| [^|]+ \| #{issue} \| (.+?) \|\s*$", s, re.M)
+row = re.search(rf"^\| [^|]+ \| #{issue} \| (.+?) \|[ \t]*$", s, re.M)
 if not row:
     sys.exit(f"#{issue} not found in Remaining")
 title = row.group(1).strip()
@@ -23,7 +23,7 @@ s = s.replace(fin.group(0), f"## Finished stories ({done} of {total})")
 rem = re.search(r"## Remaining stories \((\d+)\)", s)
 s = s.replace(rem.group(0), f"## Remaining stories ({int(rem.group(1)) - 1})")
 
-rows = list(re.finditer(r"^\| (\d+) \| #\d+ \[.*\|\s*$", s, re.M))  # finished rows: "#n [Ek.Sm]" in one cell
+rows = list(re.finditer(r"^\| (\d+) \| #\d+ \[.*\|[ \t]*$", s, re.M))  # finished rows: "#n [Ek.Sm]" in one cell
 last = rows[-1]
 new = f"| {done} | #{issue} {title} | #{pr} | {rounds} | {cr} | {follow} |"
 s = s[: last.end()] + "\n" + new + s[last.end():]
@@ -32,7 +32,7 @@ s = re.sub(r"^Last updated: .*$",
            f"Last updated: laptop session, after story #{issue} merged (main at `{sha}`).",
            s, count=1, flags=re.M)
 s = re.sub(r"(`deferred`: [^·]*?)( ·)", lambda m: m.group(1) + (f", {follow}" if follow.startswith("#") and follow not in m.group(1) else "") + m.group(2), s, count=1)
-nxt = re.search(r"^\| [^|]+ \| (#\d+) \| (.+?) \|\s*$", s, re.M)
+nxt = re.search(r"^\| [^|]+ \| (#\d+) \| (.+?) \|[ \t]*$", s, re.M)
 if nxt:
     s = re.sub(r"^\*\*Next story: .*$", f"**Next story: {nxt.group(1)} {nxt.group(2).strip()}**, the first row of \"Remaining stories\".", s, count=1, flags=re.M)
 p.write_text(s, encoding="utf-8")

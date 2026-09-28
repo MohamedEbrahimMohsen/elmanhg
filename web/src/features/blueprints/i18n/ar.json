@@ -1,0 +1,55 @@
+{
+  "page": {
+    "title": "نماذج الامتحانات",
+    "intro": "لا يمكن حفظ نموذج إذا كان عدد الأسئلة القابلة للعرض غير كافٍ لأي نوع.",
+    "subject": "المادة",
+    "loading": "جارٍ تحميل نماذج الامتحانات",
+    "errorTitle": "تعذّر تحميل نماذج الامتحانات",
+    "subjectsErrorTitle": "تعذّر تحميل المواد",
+    "noSubjects": "لا توجد مواد بعد. أضف مادة من صفحة المحتوى.",
+    "goToContent": "المحتوى",
+    "noUnits": "لا توجد وحدات في هذه المادة بعد."
+  },
+  "editor": {
+    "defaultTitle": "النموذج الافتراضي للمادة",
+    "defaultUnsaved": "لم يُحفظ نموذج افتراضي بعد.",
+    "unitTitle": "وحدة: {name}",
+    "type": "النوع",
+    "required": "العدد المطلوب",
+    "available": "المتاح",
+    "total": "المجموع",
+    "countFor": "العدد المطلوب — {type}",
+    "number": "{value, number}",
+    "timeLimit": "الزمن (دقيقة)",
+    "timeLimitHint": "اتركه فارغًا لامتحان بلا وقت",
+    "passMark": "درجة النجاح",
+    "mixToggle": "توزيع الصعوبة (اختياري)",
+    "mixEasy": "سهل %",
+    "mixMedium": "متوسط %",
+    "mixHard": "صعب %",
+    "currentShortfall": "عجز حالي:",
+    "unitShortfall": "عجز حالي في هذه الوحدة:",
+    "shortfallLine": "{type}: مطلوب {required, number}، متاح {available, number} (ينقص {missing, number})",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "usesDefault": "تستخدم النموذج الافتراضي.",
+    "noDefaultForUnit": "لا يوجد نموذج افتراضي للمادة، فلا يتوفر امتحان لهذه الوحدة.",
+    "createForUnit": "إنشاء نموذج للوحدة",
+    "revert": "استخدام النموذج الافتراضي",
+    "confirmRevert": "حذف نموذج الوحدة؟ ستستخدم الوحدة النموذج الافتراضي للمادة.",
+    "confirm": "تأكيد",
+    "errors": {
+      "countInvalid": "عدد غير صالح",
+      "empty": "يجب تحديد سؤال واحد على الأقل",
+      "tooLarge": "عدد الأسئلة أكبر من ١٠٠",
+      "timeLimitInvalid": "زمن غير صالح",
+      "passMarkInvalid": "درجة النجاح بين ١ و١٠٠",
+      "percentInvalid": "نسبة غير صالحة",
+      "mixSum": "مجموع النسب يجب أن يكون ١٠٠"
+    }
+  },
+  "toasts": {
+    "saved": "تم حفظ النموذج",
+    "deleted": "تم حذف نموذج الوحدة"
+  }
+}

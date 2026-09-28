@@ -42,6 +42,18 @@ public class QuestionRepository(AppDbContext context) : Repository<Question>(con
             .ConfigureAwait(false);
     }
 
+    public async Task<List<ServableQuestionCount>> CountServableByUnitAndTypeAsync(Guid subjectId, CancellationToken cancellationToken)
+    {
+        return await _dbSet
+            .WhereServable(_context.Set<Lesson>())
+            .Where(x => x.SubjectId == subjectId)
+            .Join(_context.Set<Lesson>(), question => question.LessonId, lesson => lesson.Id, (question, lesson) => new { lesson.UnitId, question.Type })
+            .GroupBy(x => new { x.UnitId, x.Type })
+            .Select(x => new ServableQuestionCount(x.Key.UnitId, x.Key.Type, x.Count()))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
     public async Task<List<Guid>> GetServableIdsInLessonAsync(Guid lessonId, CancellationToken cancellationToken)
     {
         return await _dbSet

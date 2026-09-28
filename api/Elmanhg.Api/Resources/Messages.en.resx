@@ -253,4 +253,17 @@
   <data name="SESSION_HISTORY_PAGE_NUMBER_INVALID" xml:space="preserve"><value>The page number must be 1 or more.</value></data>
   <data name="SESSION_HISTORY_PAGE_SIZE_INVALID" xml:space="preserve"><value>The page size is out of the allowed range.</value></data>
   <data name="SESSION_HISTORY_KIND_INVALID" xml:space="preserve"><value>The session type filter is not valid.</value></data>
+  <data name="EXAM_BLUEPRINT_SHORTFALL" xml:space="preserve"><value>Not saved: not enough servable questions: {types}</value></data>
+  <data name="EXAM_BLUEPRINT_DEFAULT_NOT_DELETABLE" xml:space="preserve"><value>The subject's default blueprint cannot be removed.</value></data>
+  <data name="EXAM_BLUEPRINT_NOT_FOUND" xml:space="preserve"><value>Exam blueprint not found.</value></data>
+  <data name="EXAM_BLUEPRINT_ID_REQUIRED" xml:space="preserve"><value>Choose an exam blueprint.</value></data>
+  <data name="EXAM_BLUEPRINT_EMPTY" xml:space="preserve"><value>Choose at least one question.</value></data>
+  <data name="EXAM_BLUEPRINT_TOO_LARGE" xml:space="preserve"><value>The blueprint has more questions than allowed.</value></data>
+  <data name="EXAM_BLUEPRINT_TYPE_DUPLICATE" xml:space="preserve"><value>Each question type can appear only once.</value></data>
+  <data name="EXAM_BLUEPRINT_TYPE_COUNT_REQUIRED" xml:space="preserve"><value>Every type count entry is required.</value></data>
+  <data name="EXAM_BLUEPRINT_COUNT_INVALID" xml:space="preserve"><value>The question count is not valid.</value></data>
+  <data name="EXAM_BLUEPRINT_DIFFICULTY_MIX_INVALID" xml:space="preserve"><value>Difficulty percentages must be 0–100 and add up to 100.</value></data>
+  <data name="EXAM_BLUEPRINT_TIME_LIMIT_INVALID" xml:space="preserve"><value>The time limit is not valid.</value></data>
+  <data name="EXAM_BLUEPRINT_PASS_MARK_INVALID" xml:space="preserve"><value>The pass mark must be between 1 and 100.</value></data>
+  <data name="EXAM_BLUEPRINT_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>The blueprint was changed at the same time. Try again.</value></data>
 </root>
