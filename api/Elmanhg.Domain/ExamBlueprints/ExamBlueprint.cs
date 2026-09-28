@@ -41,6 +41,15 @@ public class ExamBlueprint : AuditEntity, IAuditedEntity
 
     public ExamDifficultyMix? GetDifficultyMix() => DifficultyMix is null ? null : ExamBlueprintJson.DeserializeDifficultyMix(DifficultyMix);
 
+    public void EnsureServable(IReadOnlyDictionary<QuestionType, int> servable)
+    {
+        var shortfalls = ExamBlueprintShortfall.Find(GetTypeCounts(), servable);
+        if (shortfalls.Count > 0)
+        {
+            throw new BusinessRuleViolationCoreException(ErrorCodes.ExamShortfall, context: new Dictionary<string, object> { ["types"] = Describe(shortfalls) });
+        }
+    }
+
     public void Update(ExamBlueprintShape shape, IReadOnlyDictionary<QuestionType, int> servable, Guid updatedBy)
     {
         EnsureNoShortfall(shape, servable);
@@ -77,7 +86,9 @@ public class ExamBlueprint : AuditEntity, IAuditedEntity
         var shortfalls = ExamBlueprintShortfall.Find(shape.TypeCounts, servable);
         if (shortfalls.Count > 0)
         {
-            throw new BusinessRuleViolationCoreException(ErrorCodes.ExamBlueprintShortfall, context: new Dictionary<string, object> { ["types"] = string.Join(", ", shortfalls.Select(x => $"{x.Type} {x.Available}/{x.Required}")) });
+            throw new BusinessRuleViolationCoreException(ErrorCodes.ExamBlueprintShortfall, context: new Dictionary<string, object> { ["types"] = Describe(shortfalls) });
         }
     }
+
+    private static string Describe(IEnumerable<ExamTypeShortfall> shortfalls) => string.Join(", ", shortfalls.Select(x => $"{x.Type} {x.Available}/{x.Required}"));
 }

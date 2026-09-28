@@ -44,6 +44,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseEnvironment(TestingEnvironment);
         // AddCoreAuditing reads this flag while Program registers services, before ConfigureAppConfiguration sources are applied.
         builder.UseSetting("CoreAuditing:Enabled", "true");
+        // The sweep would race tests that expire sessions on purpose; AutoSubmitExam is exercised directly through the mediator.
+        builder.UseSetting("Exams:AutoSubmitEnabled", "false");
         builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["ConnectionStrings:DbConnectionString"] = _database.GetConnectionString(),
@@ -93,6 +95,10 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Progress:HistoryMaxPageSize"] = "50",
             ["ExamBlueprints:MaxQuestionCount"] = "100",
             ["ExamBlueprints:MaxTimeLimitMinutes"] = "300",
+            ["Exams:DeadlineGraceSeconds"] = "30",
+            ["Exams:AutoSubmitIntervalSeconds"] = "60",
+            ["Exams:AutoSubmitBatchSize"] = "50",
+            ["Exams:WeakestObjectiveCount"] = "3",
             ["FileStorage:Provider"] = "Local",
             ["FileStorage:LocalRootPath"] = MediaRoot,
             ["FileStorage:PublicBaseUrl"] = "/api/media",

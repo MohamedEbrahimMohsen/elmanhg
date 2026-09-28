@@ -266,4 +266,8 @@
   <data name="EXAM_BLUEPRINT_TIME_LIMIT_INVALID" xml:space="preserve"><value>The time limit is not valid.</value></data>
   <data name="EXAM_BLUEPRINT_PASS_MARK_INVALID" xml:space="preserve"><value>The pass mark must be between 1 and 100.</value></data>
   <data name="EXAM_BLUEPRINT_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>The blueprint was changed at the same time. Try again.</value></data>
+  <data name="EXAM_TIME_EXPIRED" xml:space="preserve"><value>The exam time is over. Your saved answers will be submitted.</value></data>
+  <data name="EXAM_SHORTFALL" xml:space="preserve"><value>The exam cannot be created: not enough questions are available: {types}</value></data>
+  <data name="EXAM_ALREADY_IN_PROGRESS" xml:space="preserve"><value>You already have an exam in progress. Finish it first.</value></data>
+  <data name="UNIT_EXAM_NO_BLUEPRINT" xml:space="preserve"><value>This unit has no exam yet.</value></data>
 </root>

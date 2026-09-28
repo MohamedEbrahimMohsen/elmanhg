@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import type { UnitProgressResult } from '@/shared/api/generated/model';
 
@@ -6,7 +7,7 @@ export interface UnitProgressTableProps {
   subjectName: string;
 }
 
-const headerKeys = ['unit', 'unitMastery', 'bestExam'] as const;
+const headerKeys = ['unit', 'unitMastery', 'bestExam', 'exam'] as const;
 const cellClassName = 'px-2.5 py-2.25 text-caption';
 
 export function UnitProgressTable({ units, subjectName }: UnitProgressTableProps) {
@@ -40,6 +41,15 @@ export function UnitProgressTable({ units, subjectName }: UnitProgressTableProps
                 {unit.bestExamScorePercent == null
                   ? t('subjects.noExam')
                   : t('subjects.bestExamValue', { score: Math.round(Number(unit.bestExamScorePercent)) })}
+              </td>
+              <td className={cellClassName}>
+                <Link
+                  to="/student/exam-start/$unitId"
+                  params={{ unitId: unit.unitId }}
+                  className="rounded-sm text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+                >
+                  {t('subjects.startExam')}
+                </Link>
               </td>
             </tr>
           ))}

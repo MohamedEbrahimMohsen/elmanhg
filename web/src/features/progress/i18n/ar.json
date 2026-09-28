@@ -19,7 +19,9 @@
     "bestExam": "أفضل امتحان",
     "unitMasteryValue": "{percent, number}٪",
     "bestExamValue": "{score, number}٪",
-    "noExam": "—"
+    "noExam": "—",
+    "exam": "الامتحان",
+    "startExam": "امتحان الوحدة"
   },
   "weakSpots": {
     "title": "نقاط الضعف",

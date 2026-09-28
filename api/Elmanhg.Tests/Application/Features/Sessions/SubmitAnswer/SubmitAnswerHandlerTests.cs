@@ -4,6 +4,7 @@ using Core.Localization;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Sessions.SubmitAnswer;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Mastery;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
@@ -182,6 +183,16 @@ public sealed class SubmitAnswerHandlerTests
 
         await AssertThrowsAsync<ConflictCoreException>(Command(SessionBuilder.AnswerA), DomainErrorCodes.SessionQuestionAlreadyAnswered);
         _session.Attempts.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public async Task Handle_ExamSession_ThrowsNotFound()
+    {
+        var exam = Session.StartUnitExam(_builder.StudentId, _builder.Questions.Unit, ExamBlueprint.CreateForUnit(_builder.Questions.Unit, ExamBlueprintBuilder.Shape(new ExamTypeCount(QuestionType.Mcq, 2)), ExamBlueprintBuilder.Plenty(), Guid.NewGuid()), _questions, [_builder.Questions.Lesson], false, DateTimeOffset.UtcNow);
+        SessionRepositoryStub.StubFind(_sessionRepository, exam);
+
+        await AssertThrowsAsync<NotFoundCoreException>(Command(SessionBuilder.AnswerB) with { SessionId = exam.Id }, ErrorCodes.SessionNotFound);
+        exam.Attempts.Should().BeEmpty();
     }
 
     private SubmitAnswerCommand Command(string answer) => new(_session.Id, QuestionId, QuestionBuilder.Json(answer), 1000);

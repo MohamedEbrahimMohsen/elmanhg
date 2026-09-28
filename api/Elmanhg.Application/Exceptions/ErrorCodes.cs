@@ -138,6 +138,10 @@ public static class ErrorCodes
     public const string ExamBlueprintPassMarkInvalid = "EXAM_BLUEPRINT_PASS_MARK_INVALID";
     public const string ExamBlueprintModifiedConcurrently = "EXAM_BLUEPRINT_MODIFIED_CONCURRENTLY";
 
+    // EXAMS
+    public const string ExamAlreadyInProgress = "EXAM_ALREADY_IN_PROGRESS";
+    public const string UnitExamNoBlueprint = "UNIT_EXAM_NO_BLUEPRINT";
+
     // QUESTION IMPORTS
     public const string QuestionImportFileRequired = "QUESTION_IMPORT_FILE_REQUIRED";
     public const string QuestionImportFileTypeInvalid = "QUESTION_IMPORT_FILE_TYPE_INVALID";

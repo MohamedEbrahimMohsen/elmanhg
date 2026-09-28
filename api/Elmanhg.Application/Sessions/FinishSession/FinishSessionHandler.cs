@@ -20,7 +20,7 @@ public sealed class FinishSessionHandler(ISessionRepository sessionRepository, I
         }
 
         var userId = currentUserService.UserId.Value;
-        var session = await sessionRepository.FirstOrDefaultAsync(x => x.Id == request.SessionId && x.StudentId == userId, cancellationToken, include: query => query.Include(x => x.Items).Include(x => x.Attempts).AsSplitQuery()).ConfigureAwait(false);
+        var session = await sessionRepository.FirstOrDefaultAsync(x => x.Id == request.SessionId && x.StudentId == userId && x.Kind == SessionKind.Quiz, cancellationToken, include: query => query.Include(x => x.Items).Include(x => x.Attempts).AsSplitQuery()).ConfigureAwait(false);
         if (session is null)
         {
             throw new NotFoundCoreException(ErrorCodes.SessionNotFound);

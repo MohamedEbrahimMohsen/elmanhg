@@ -234,6 +234,10 @@ The headline counter is shown on Home as "متبقّي لك X سؤال من 100,
 - Selection prefers questions **not** already mastered, then random. Questions are drawn across all lessons in the unit.
 - Optional time limit set in the blueprint.
 - Submitted as a whole; no per-question feedback until submission (unlike quizzes).
+- A student has at most one exam in progress.
+- Answers are auto-saved as drafts; with a time limit, saves close at the deadline (plus a short grace) and the exam is submitted automatically.
+- Unanswered questions score 0.
+- Submitted exam answers are attempts and count toward mastery (§7.3).
 - Result: score /100, per-lesson breakdown, weakest objectives.
 - Retakes: unlimited. **Best score** is the displayed unit-exam score; all attempts are kept and visible in history.
 
@@ -444,8 +448,9 @@ QuestionRevision(question_id, version, snapshot_json, edited_by, edited_at)
 ExamBlueprint(id, subject_id, unit_id?, type_counts_json, difficulty_mix_json?, question_count, time_limit_min?, pass_mark)  -- unit_id null = the subject default; one default per subject, one per unit (docs/exam-blueprints.md)
 
 Session(id, student_id, kind[Quiz|UnitExam|MultiUnitExam], scope_json, scope_key, is_test_mode,
-        started_at, last_activity_at, submitted_at?, score_pct?, time_limit_min?)
-SessionItem(id, session_id, position, question_id, question_version, max_score)  -- the questions served, fixed at start
+        started_at, last_activity_at, submitted_at?, score_pct?, time_limit_min?, pass_mark?, deadline?)
+SessionItem(id, session_id, position, question_id, question_version, max_score,
+            saved_answer_json?, answer_saved_at?)  -- served questions fixed at start; exam drafts until submission
 Attempt(id, session_id, student_id, question_id, question_version,
         answer_json, score, normalised_score, graded_by[Auto|AI|Teacher],
         grade_json?, time_taken_ms, created_at)  -- append-only

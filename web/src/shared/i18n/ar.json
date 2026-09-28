@@ -167,7 +167,11 @@
     "EXAM_BLUEPRINT_DIFFICULTY_MIX_INVALID": "نسب الصعوبة يجب أن تكون بين 0 و100 ومجموعها 100.",
     "EXAM_BLUEPRINT_TIME_LIMIT_INVALID": "زمن الامتحان غير صالح.",
     "EXAM_BLUEPRINT_PASS_MARK_INVALID": "درجة النجاح يجب أن تكون بين 1 و100.",
-    "EXAM_BLUEPRINT_MODIFIED_CONCURRENTLY": "تم تعديل النموذج في نفس الوقت. أعد المحاولة."
+    "EXAM_BLUEPRINT_MODIFIED_CONCURRENTLY": "تم تعديل النموذج في نفس الوقت. أعد المحاولة.",
+    "EXAM_TIME_EXPIRED": "انتهى وقت الامتحان. سيتم تسليم إجاباتك المحفوظة.",
+    "EXAM_SHORTFALL": "لا يمكن إنشاء الامتحان: عدد الأسئلة المتاحة غير كافٍ.",
+    "EXAM_ALREADY_IN_PROGRESS": "لديك امتحان جارٍ بالفعل. أكمله أولًا.",
+    "UNIT_EXAM_NO_BLUEPRINT": "لا يوجد امتحان لهذه الوحدة بعد."
   },
   "error": {
     "title": "حدث خطأ"

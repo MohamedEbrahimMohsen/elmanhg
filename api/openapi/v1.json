@@ -2252,6 +2252,238 @@
         }
       }
     },
+    "/api/exams/units/{unitId}": {
+      "get": {
+        "tags": [
+          "Exams"
+        ],
+        "operationId": "GetUnitExamOverview",
+        "parameters": [
+          {
+            "name": "unitId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitExamOverviewResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitExamOverviewResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitExamOverviewResult"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Exams"
+        ],
+        "operationId": "StartUnitExam",
+        "parameters": [
+          {
+            "name": "unitId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamSessionResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamSessionResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamSessionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exams/{sessionId}": {
+      "get": {
+        "tags": [
+          "Exams"
+        ],
+        "operationId": "GetExamSession",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamSessionResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamSessionResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamSessionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exams/{sessionId}/answers/{questionId}": {
+      "put": {
+        "tags": [
+          "Exams"
+        ],
+        "operationId": "SaveExamAnswer",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveExamAnswerRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveExamAnswerRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveExamAnswerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamAnswerSavedResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamAnswerSavedResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamAnswerSavedResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exams/{sessionId}/submit": {
+      "post": {
+        "tags": [
+          "Exams"
+        ],
+        "operationId": "SubmitExam",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamSessionResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamSessionResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamSessionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/exam-blueprints/subjects/{subjectId}": {
       "get": {
         "tags": [
@@ -3313,6 +3545,23 @@
           }
         }
       },
+      "ExamAnswerSavedResult": {
+        "required": [
+          "questionId",
+          "answerSavedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "questionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "answerSavedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "ExamBlueprintInput": {
         "required": [
           "typeCounts",
@@ -3428,6 +3677,63 @@
           }
         }
       },
+      "ExamBlueprintSummaryResult": {
+        "required": [
+          "isSubjectDefault",
+          "questionCount",
+          "typeCounts",
+          "difficultyMix",
+          "timeLimitMinutes",
+          "passMark"
+        ],
+        "type": "object",
+        "properties": {
+          "isSubjectDefault": {
+            "type": "boolean"
+          },
+          "questionCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "typeCounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExamTypeAvailabilityResult"
+            }
+          },
+          "difficultyMix": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ExamDifficultyMixResult"
+              }
+            ]
+          },
+          "timeLimitMinutes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "passMark": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "ExamDifficultyMixInput": {
         "required": [
           "easyPercent",
@@ -3496,6 +3802,370 @@
           }
         }
       },
+      "ExamItemResult": {
+        "required": [
+          "position",
+          "questionId",
+          "questionVersion",
+          "type",
+          "stem",
+          "body",
+          "maxScore",
+          "savedAnswer",
+          "answerSavedAt",
+          "attempt",
+          "correctAnswer",
+          "explanation"
+        ],
+        "type": "object",
+        "properties": {
+          "position": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "questionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "questionVersion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "type": {
+            "type": "string"
+          },
+          "stem": {
+            "type": "string"
+          },
+          "body": {
+            "$ref": "#/components/schemas/JsonElement"
+          },
+          "maxScore": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "savedAnswer": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "answerSavedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "attempt": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AttemptResult"
+              }
+            ]
+          },
+          "correctAnswer": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "explanation": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "ExamLessonResult": {
+        "required": [
+          "lessonId",
+          "name",
+          "questionCount",
+          "correctCount",
+          "score",
+          "maxScore",
+          "scorePercent"
+        ],
+        "type": "object",
+        "properties": {
+          "lessonId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "questionCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "correctCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "score": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "maxScore": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "scorePercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "ExamObjectiveResult": {
+        "required": [
+          "objectiveId",
+          "text",
+          "lessonId",
+          "lessonName",
+          "questionCount",
+          "scorePercent"
+        ],
+        "type": "object",
+        "properties": {
+          "objectiveId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "text": {
+            "type": "string"
+          },
+          "lessonId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lessonName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "questionCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "scorePercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "ExamSessionResult": {
+        "required": [
+          "id",
+          "kind",
+          "isTestMode",
+          "subjectName",
+          "units",
+          "startedAt",
+          "timeLimitMinutes",
+          "deadline",
+          "serverNow",
+          "passMark",
+          "submittedAt",
+          "scorePercent",
+          "isPassed",
+          "elapsedMilliseconds",
+          "items",
+          "lessons",
+          "weakestObjectives"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "isTestMode": {
+            "type": "boolean"
+          },
+          "subjectName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "units": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExamUnitResult"
+            }
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timeLimitMinutes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "deadline": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "serverNow": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "passMark": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "submittedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "scorePercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "isPassed": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "elapsedMilliseconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExamItemResult"
+            }
+          },
+          "lessons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExamLessonResult"
+            }
+          },
+          "weakestObjectives": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExamObjectiveResult"
+            }
+          }
+        }
+      },
+      "ExamTypeAvailabilityResult": {
+        "required": [
+          "type",
+          "required",
+          "available"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/QuestionType"
+          },
+          "required": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "available": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "ExamTypeCountInput": {
         "required": [
           "type",
@@ -3540,6 +4210,25 @@
               "string"
             ],
             "format": "int32"
+          }
+        }
+      },
+      "ExamUnitResult": {
+        "required": [
+          "unitId",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -3720,6 +4409,22 @@
             "format": "int32"
           },
           "replayed": {
+            "type": "boolean"
+          }
+        }
+      },
+      "InProgressExamResult": {
+        "required": [
+          "sessionId",
+          "isThisUnit"
+        ],
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "isThisUnit": {
             "type": "boolean"
           }
         }
@@ -4757,6 +5462,17 @@
           }
         }
       },
+      "SaveExamAnswerRequest": {
+        "required": [
+          "answer"
+        ],
+        "type": "object",
+        "properties": {
+          "answer": {
+            "$ref": "#/components/schemas/JsonElement"
+          }
+        }
+      },
       "ServableQuestionCountResult": {
         "required": [
           "count"
@@ -5428,6 +6144,57 @@
             "items": {
               "$ref": "#/components/schemas/ExamTypeCountResult"
             }
+          }
+        }
+      },
+      "UnitExamOverviewResult": {
+        "required": [
+          "unitId",
+          "unitName",
+          "subjectId",
+          "subjectName",
+          "blueprint",
+          "isAvailable",
+          "inProgressExam"
+        ],
+        "type": "object",
+        "properties": {
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitName": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "blueprint": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ExamBlueprintSummaryResult"
+              }
+            ]
+          },
+          "isAvailable": {
+            "type": "boolean"
+          },
+          "inProgressExam": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/InProgressExamResult"
+              }
+            ]
           }
         }
       },
@@ -6246,6 +7013,9 @@
     },
     {
       "name": "Lessons"
+    },
+    {
+      "name": "Exams"
     },
     {
       "name": "ExamBlueprints"

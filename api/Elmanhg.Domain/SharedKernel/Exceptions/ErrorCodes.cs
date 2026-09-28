@@ -45,4 +45,8 @@ public static class ErrorCodes
     // EXAM BLUEPRINTS
     public const string ExamBlueprintShortfall = "EXAM_BLUEPRINT_SHORTFALL";
     public const string ExamBlueprintDefaultNotDeletable = "EXAM_BLUEPRINT_DEFAULT_NOT_DELETABLE";
+
+    // EXAMS
+    public const string ExamTimeExpired = "EXAM_TIME_EXPIRED";
+    public const string ExamShortfall = "EXAM_SHORTFALL";
 }

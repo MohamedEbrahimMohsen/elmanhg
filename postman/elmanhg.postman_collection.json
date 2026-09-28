@@ -22,7 +22,9 @@
     { "key": "sessionId", "value": "" },
     { "key": "sessionQuestionId", "value": "" },
     { "key": "blueprintSubjectId", "value": "" },
-    { "key": "blueprintUnitId", "value": "" }
+    { "key": "blueprintUnitId", "value": "" },
+    { "key": "examSessionId", "value": "" },
+    { "key": "examQuestionId", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -1644,6 +1646,140 @@
               "raw": "{{baseUrl}}/api/sessions/{{sessionId}}/finish",
               "host": ["{{baseUrl}}"],
               "path": ["api", "sessions", "{{sessionId}}", "finish"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Exams",
+      "description": "Sign in as a Student (or an Admin for test mode). `unitId` must have an exam blueprint (its own or the subject default) and enough servable questions. One exam may be open at a time; answers are drafts until Submit exam.",
+      "item": [
+        {
+          "name": "Get unit exam overview",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/units/{{unitId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "units", "{{unitId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Start unit exam",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set(\"examSessionId\", json.id);",
+                  "pm.collectionVariables.set(\"examQuestionId\", json.items[0].questionId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/units/{{unitId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "units", "{{unitId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get exam session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examSessionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examSessionId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Save exam answer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examSessionId}}/answers/{{examQuestionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examSessionId}}", "answers", "{{examQuestionId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"answer\": { \"optionId\": \"b\" }\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit exam",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examSessionId}}/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examSessionId}}", "submit"]
             }
           },
           "response": []
