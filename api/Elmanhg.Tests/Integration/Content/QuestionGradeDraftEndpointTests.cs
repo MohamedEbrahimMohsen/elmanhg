@@ -74,6 +74,48 @@ public sealed class QuestionGradeDraftEndpointTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task Post_FillPartialInEnglish_ReturnsBlankTallyFeedback()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var admin = await AdminClientAsync();
+        admin.DefaultRequestHeaders.Add("Accept-Language", "en");
+
+        using var response = await admin.PostAsJsonAsync(Route, Draft("Fill", "<p>[[1]] + [[2]]</p>", """{"blanks":[{"id":"1"},{"id":"2"}]}""", """{"blanks":[{"id":"1","acceptedAnswers":["20"]},{"id":"2","acceptedAnswers":["5"]}]}""", """{"blanks":[{"id":"1","text":"20"},{"id":"2","text":"7"}]}"""), cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken);
+        body.GetProperty("outcome").GetString().Should().Be("Partial");
+        body.GetProperty("feedback").GetString().Should().Be("Correct blanks: 1 of 2.");
+    }
+
+    [Fact]
+    public async Task Post_ShortNumericWithUnitInArabic_ReturnsNotANumberFeedback()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var admin = await AdminClientAsync();
+        admin.DefaultRequestHeaders.Add("Accept-Language", "ar");
+
+        using var response = await admin.PostAsJsonAsync(Route, Draft("Short", "<p>g = ?</p>", """{"answerKind":"numeric"}""", """{"value":9.8,"tolerance":0.1,"toleranceMode":"absolute"}""", """{"text":"9.8 m/s"}"""), cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken);
+        body.GetProperty("outcome").GetString().Should().Be("Incorrect");
+        body.GetProperty("feedback").GetString().Should().Be("اكتب الإجابة رقمًا فقط، بدون وحدات.");
+    }
+
+    [Fact]
+    public async Task Post_ShortNumericSpecAtDecimalLimit_ReturnsCorrect()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var admin = await AdminClientAsync();
+
+        using var response = await admin.PostAsJsonAsync(Route, Draft("Short", "<p>g = ?</p>", """{"answerKind":"numeric"}""", """{"value":79228162514264337593543950335,"tolerance":1,"toleranceMode":"absolute"}""", """{"text":"79228162514264337593543950335"}"""), cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        (await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken)).GetProperty("outcome").GetString().Should().Be("Correct");
+    }
+
+    [Fact]
     public async Task Post_CorrectTrueFalse_ReturnsNullFeedback()
     {
         var cancellationToken = TestContext.Current.CancellationToken;

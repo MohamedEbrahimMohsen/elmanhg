@@ -68,7 +68,7 @@ Canonical JSON, exactly as stored. Keys are camelCase; enum values are camelCase
 {"value":9.8,"tolerance":0.1,"toleranceMode":"absolute"}
 ```
 
-`toleranceMode` is `absolute` (±tolerance) or `percent` (±tolerance % of the value).
+`toleranceMode` is `absolute` (±tolerance) or `percent` (±tolerance % of the value). A spec has exactly one `tolerance` and one `toleranceMode`; absolute and percent cannot be combined.
 
 **Short**, text answer:
 
@@ -212,19 +212,21 @@ The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of
   - `total`: the number of correct options.
 
   Without `partialCredit` (the default), the score is 1 when `right = total` and `wrong = 0`, else 0. With `partialCredit`, the score is `max(0, (right − wrong) / total)`. For example, with 3 correct options, choosing all three plus one wrong option scores 2/3. With no selection, the answer is unanswered and scores 0 in both modes.
-- **Fill**: `hits / blanks`. A blank hits when its normalised answer equals any of its normalised accepted answers.
-- **Short numeric** (the spec has `value`): the answer is parsed as a number and is correct when `|answer − value| ≤ tolerance` (`absolute`) or `≤ |value| × tolerance / 100` (`percent`).
+- **Fill**: `hits / blanks`. Each blank is compared only with its own accepted answers; it hits when its normalised answer equals any of them. A blank the answer leaves out, or whose text normalises to empty, is a miss. A response whose id is not a blank is ignored; a repeated id uses its first response.
+- **Short numeric** (the spec has `value`): the answer is parsed as a number and is correct when `value − allowed ≤ answer ≤ value + allowed` (both bounds inclusive). `allowed` is `tolerance` (`absolute`) or `|value| × tolerance / 100` (`percent`). A negative `value` gets the same band as its magnitude, and a `value` of 0 with `percent` accepts only 0. A missing or negative tolerance counts as 0 and a missing mode as `absolute` (unreachable after validation). Only the spec takes part in the arithmetic; when a bound would pass the decimal range (±79228162514264337593543950335) it is clamped to that limit, so grading never fails.
 - **Short text**: the normalised answer must equal one of the normalised accepted answers.
 - An answer that normalises to empty never matches.
 - **Normalisation** (PRD §6.2): the student answer and every accepted answer go through the same steps. Always, in this order: drop unpaired UTF-16 surrogates and the noncharacter U+FFFE (both make NFC fail), and invisible marks (U+061C, U+200B–U+200F, U+202A–U+202E, U+2060, U+2066–U+2069, U+FEFF), so none of them can split a letter from its mark; Unicode NFC (so a decomposed hamza or madda, such as ا + U+0654, becomes أ); map ، (U+060C) to `,` and ی (U+06CC) to ي (U+064A). Then the question's `normalization` rules (see **Fill** and **Short** above), each applied only when on. Finally the answer is always trimmed. With `collapseWhitespace` off, inner whitespace is kept verbatim (tabs and runs included); the ends are still trimmed. Hamza seats (ئ ؤ ء) are never unified.
 - **Numeric parsing**: numeric answers ignore the question's `normalization` rules and use a fixed profile: every rule on except the three letter rules. After normalisation, `٬` (U+066C, the Arabic thousands separator) is removed, then `٫` (U+066B) and `,` become `.`, and `−` (U+2212) becomes `-`; the rest must be a plain decimal number: an optional leading sign, digits and one decimal point (invariant culture). Exponents such as `9.8e0`, inner whitespace, thousands separators other than `٬`, and anything else (such as a trailing unit) do not parse and score 0. `,` always means a decimal point, so `1,000` reads as 1.
 - **Result**: the normalised score is in [0, 1]. The outcome is `Correct` (≥ 1), `Partial` (> 0) or `Incorrect`. `score = round(normalised × maxScore, 2)` and `normalisedScore = round(normalised, 4)`, both rounding half away from zero.
 - **Feedback**: every grade carries an optional feedback line, returned as `feedback`. It is localised to the request language (`Accept-Language`, Arabic by default) and is `null` when there is nothing to add.
-  - An unanswered Mcq, TrueFalse or Multi answer returns «لم تتم الإجابة عن السؤال.» / "No answer was given."
+  - An unanswered answer returns «لم تتم الإجابة عن السؤال.» / "No answer was given." An answer is unanswered when: Mcq `optionId` or TrueFalse `value` is missing; Multi has no non-null id; every Fill blank is missing or normalises to empty; a text Short answer normalises to empty; a numeric Short answer normalises to empty under the numeric profile.
   - A Multi answer that is not exactly the correct set returns «الاختيارات الصحيحة: {right} من {total}، والخاطئة: {wrong}.» / "Correct choices: {right} of {total}; wrong choices: {wrong}." This applies in both partial-credit modes.
+  - A Fill answer with two or more blanks that is not fully correct returns «الفراغات الصحيحة: {right} من {total}.» / "Correct blanks: {right} of {total}." A single-blank Fill returns `null`.
+  - A numeric Short answer that does not parse as a number returns «اكتب الإجابة رقمًا فقط، بدون وحدات.» / "Write the answer as a plain number, without units." A number outside the tolerance returns `null`: a direction hint would reveal part of the answer.
   - Every other case returns `null`.
 
-  The feedback never contains the verdict, the correct answer or the explanation. Fill and Short return no feedback.
+  The feedback never contains the verdict, the correct answer or the explanation.
 
 ## Changing a schema
 

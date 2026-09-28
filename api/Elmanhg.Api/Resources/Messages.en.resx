@@ -235,4 +235,6 @@
   <data name="QUESTION_IMPORT_HELP_ACCEPTED_ANSWERS" xml:space="preserve"><value>Text answers: accepted answers separated by |.</value></data>
   <data name="GRADE_FEEDBACK_UNANSWERED" xml:space="preserve"><value>No answer was given.</value></data>
   <data name="GRADE_FEEDBACK_CHOICE_TALLY" xml:space="preserve"><value>Correct choices: {right} of {total}; wrong choices: {wrong}.</value></data>
+  <data name="GRADE_FEEDBACK_BLANK_TALLY" xml:space="preserve"><value>Correct blanks: {right} of {total}.</value></data>
+  <data name="GRADE_FEEDBACK_NOT_A_NUMBER" xml:space="preserve"><value>Write the answer as a plain number, without units.</value></data>
 </root>

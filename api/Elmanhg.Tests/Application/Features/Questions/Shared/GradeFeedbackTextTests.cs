@@ -41,6 +41,22 @@ public sealed class GradeFeedbackTextTests
     }
 
     [Fact]
+    public void Localize_BlankTally_PassesRightAndTotal()
+    {
+        _localizer.GetMessage(GradeFeedbackKeys.BlankTally, Arg.Any<string?>(), Arg.Is<Dictionary<string, object>?>(x => x != null && x["right"].Equals(1) && x["total"].Equals(3) && x.Count == 2)).Returns("blanks");
+
+        GradeFeedbackText.Localize(GradeFeedback.BlankTally(1, 3), _localizer).Should().Be("blanks");
+    }
+
+    [Fact]
+    public void Localize_NotANumber_UsesNotANumberKey()
+    {
+        _localizer.GetMessage(GradeFeedbackKeys.NotANumber, Arg.Any<string?>(), Arg.Any<Dictionary<string, object>?>()).Returns("nan");
+
+        GradeFeedbackText.Localize(GradeFeedback.NotANumber, _localizer).Should().Be("nan");
+    }
+
+    [Fact]
     public void Localize_UndefinedKind_ThrowsInvalidOperation()
     {
         var act = () => GradeFeedbackText.Localize(new GradeFeedback((GradeFeedbackKind)99, 0, 0, 0), _localizer);

@@ -33,12 +33,35 @@ public sealed class QuestionGraderTests
     }
 
     [Fact]
-    public void Grade_FillHalf_ReturnsPartial()
+    public void Grade_FillHalf_ReturnsPartialWithBlankTally()
     {
         var grade = QuestionGrader.Grade(QuestionType.Fill, """{"blanks":[{"id":"1","acceptedAnswers":["20"]},{"id":"2","acceptedAnswers":["5"]}],"unifyLetterVariants":true}""", 1, Json("""{"blanks":[{"id":"1","text":"20"}]}"""));
 
-        grade.NormalisedScore.Should().Be(0.5m);
-        grade.Outcome.Should().Be(GradeOutcome.Partial);
+        grade.Should().Be(new QuestionGrade(0.5m, 0.5m, GradeOutcome.Partial, GradeFeedback.BlankTally(1, 2)));
+    }
+
+    [Fact]
+    public void Grade_ShortPercentJson_ReadsPercentMode()
+    {
+        var grade = QuestionGrader.Grade(QuestionType.Short, """{"value":200,"tolerance":5,"toleranceMode":"percent"}""", 2, Json("""{"text":"210"}"""));
+
+        grade.Should().Be(new QuestionGrade(2m, 1m, GradeOutcome.Correct, null));
+    }
+
+    [Fact]
+    public void Grade_ShortNumericWithUnit_ReturnsNotANumberFeedback()
+    {
+        var grade = QuestionGrader.Grade(QuestionType.Short, """{"value":9.8,"tolerance":0.1,"toleranceMode":"absolute"}""", 1, Json("""{"text":"9.8 m/s"}"""));
+
+        grade.Should().Be(new QuestionGrade(0m, 0m, GradeOutcome.Incorrect, GradeFeedback.NotANumber));
+    }
+
+    [Fact]
+    public void Grade_ShortTextUnanswered_ReturnsUnansweredFeedback()
+    {
+        var grade = QuestionGrader.Grade(QuestionType.Short, """{"acceptedAnswers":["ماء"]}""", 1, Json("{}"));
+
+        grade.Should().Be(new QuestionGrade(0m, 0m, GradeOutcome.Incorrect, GradeFeedback.Unanswered));
     }
 
     [Fact]

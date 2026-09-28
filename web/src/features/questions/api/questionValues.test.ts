@@ -111,6 +111,11 @@ const roundTripCases: QuestionDetailResult[] = [
     body: { answerKind: 'text' },
     gradingSpec: { acceptedAnswers: ['ماء'], normalization: allRulesOn },
   }),
+  detail({
+    type: 'Short',
+    body: { answerKind: 'numeric' },
+    gradingSpec: { value: -200, tolerance: 5, toleranceMode: 'percent' },
+  }),
 ];
 
 describe('questionValues', () => {

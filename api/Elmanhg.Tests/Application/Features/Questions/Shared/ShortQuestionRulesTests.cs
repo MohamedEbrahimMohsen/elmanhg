@@ -20,6 +20,18 @@ public sealed class ShortQuestionRulesTests
     }
 
     [Fact]
+    public void Validate_PercentToleranceOnNegativeValue_ReturnsNoErrors()
+    {
+        ShortQuestionRules.Validate(Json(Numeric), Json("""{"value":-200,"tolerance":5,"toleranceMode":"percent"}"""), _options).Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Validate_PercentToleranceOnZeroValue_ReturnsNoErrors()
+    {
+        ShortQuestionRules.Validate(Json(Numeric), Json("""{"value":0,"tolerance":10,"toleranceMode":"percent"}"""), _options).Should().BeEmpty();
+    }
+
+    [Fact]
     public void Validate_ValidText_ReturnsNoErrors()
     {
         ShortQuestionRules.Validate(Json(Text), Json("""{"acceptedAnswers":["ماء"]}"""), _options).Should().BeEmpty();
