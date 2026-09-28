@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  getGetExamAttemptsQueryKey,
   getGetExamSessionQueryKey,
   getGetMultiUnitExamOverviewQueryKey,
+  getGetUnitExamAttemptsQueryKey,
   getGetUnitExamOverviewQueryKey,
 } from '@/shared/api/generated/exams/exams';
 import { getGetSessionHistoryQueryKey, getGetSubjectProgressQueryKey } from '@/shared/api/generated/progress/progress';
@@ -37,5 +39,21 @@ describe('invalidateExamViews', () => {
     await invalidateExamViews(client);
 
     expect(client.getQueryState(overviewKey)?.isInvalidated).toBe(true);
+  });
+
+  it('marks exam attempts stale', async () => {
+    const client = createTestQueryClient();
+    const attemptsKey = getGetExamAttemptsQueryKey(examSessionId);
+    const unitAttemptsKey = getGetUnitExamAttemptsQueryKey(examUnitId);
+    const sessionKey = getGetExamSessionQueryKey(examSessionId);
+    client.setQueryData(attemptsKey, { bestScorePercent: null, attempts: [] });
+    client.setQueryData(unitAttemptsKey, { bestScorePercent: null, attempts: [] });
+    client.setQueryData(sessionKey, { id: examSessionId });
+
+    await invalidateExamViews(client);
+
+    expect(client.getQueryState(attemptsKey)?.isInvalidated).toBe(true);
+    expect(client.getQueryState(unitAttemptsKey)?.isInvalidated).toBe(true);
+    expect(client.getQueryState(sessionKey)?.isInvalidated).toBe(false);
   });
 });

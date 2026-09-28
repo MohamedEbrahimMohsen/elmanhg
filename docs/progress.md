@@ -15,7 +15,7 @@ The page has four sections. Each one loads, fails and retries on its own.
 
 - Every subject (order, then creation date) is listed. Within it, every unit (order, then creation date) is listed.
 - Unit and subject counts use `IQuestionMasteryRepository.GetLessonCountsAsync` and `MasteryTotals`, the same weighted rule as `docs/mastery.md`. A unit without servable questions shows 0/0/0 %.
-- **Best unit-exam score** is the highest `ScorePercent` over the student's `UnitExam` sessions that are submitted, not in test mode and not deleted, grouped by `ScopeKey`. A unit matches the key `unit:<guid>`, built by `UnitExamScope` (Domain). The score is null when there is none. Multi-unit exams do not count toward a unit's best (PRD §7.4: the best score is the displayed one).
+- **Best unit-exam score** is the highest `ScorePercent` over the student's exam sessions, computed by `ISessionRepository.GetBestExamScoresAsync` over `ExamBestScoreSpecification` (submitted, not test mode, not deleted), grouped by `ScopeKey`. A unit matches the key `unit:<guid>`, built by `UnitExamScope` (Domain). The score is null when there is none. Multi-unit exams do not count toward a unit's best (PRD §7.4: the best score is the displayed one).
 - Unit exams (#81) use `UnitExamScope` (`docs/exams.md`).
 
 ## Weak spots
@@ -37,6 +37,7 @@ Both lists use the product's single mastery definition (`docs/mastery.md`), not 
 - **Scope name.** A quiz shows its lesson's name, looked up across all lesson states, so an archived lesson keeps its name. A unit exam shows its unit's name. A multi-unit exam shows its unit names joined by « + »; a deleted lesson, or an exam whose units are all deleted, has no name and shows «غير متاح».
 - **Links.** A finished quiz links "عرض" to `/student/quiz-result/{id}`. An open quiz links "متابعة" to `/student/quiz/{id}`. A finished exam links "عرض" to `/student/exam-result/{id}`; an open exam links "متابعة" to `/student/exam/{id}`.
 - An open session shows "جارٍ" instead of a score.
+- A finished exam whose score equals the best of its scope (same `ScopeKey`) shows «الأفضل» next to its score (`isBestScore`); ties all show it. Best scores are loaded only when the page holds a counted exam (`docs/exams.md`, Retakes and best score).
 
 ## API
 
@@ -48,7 +49,7 @@ Both lists use the product's single mastery definition (`docs/mastery.md`), not 
 
 `SubjectProgressResult { subjectId, name, servableCount, masteredCount, seenCount, masteryPercent, units[] { unitId, name, servableCount, masteredCount, seenCount, masteryPercent, bestExamScorePercent? } }`
 `WeakSpotsResult { lessons[] { lessonId, lessonName, subjectId, subjectName, …counts, masteryPercent }, objectives[] { objectiveId, text, lessonId, lessonName, subjectId, subjectName, …counts, masteryPercent } }`
-`SessionHistoryItemResult { id, kind (Quiz | UnitExam | MultiUnitExam), lessonId?, unitId?, scopeName?, startedAt, submittedAt?, scorePercent? }`
+`SessionHistoryItemResult { id, kind (Quiz | UnitExam | MultiUnitExam), lessonId?, unitId?, scopeName?, startedAt, submittedAt?, scorePercent?, isBestScore }`
 
 ## Error codes
 

@@ -27,7 +27,14 @@ export function SessionHistoryRow({ item }: SessionHistoryRowProps) {
       <td className={cellClassName}>{item.scopeName ?? t('history.unknownScope')}</td>
       <td className={cellClassName}>
         {item.submittedAt ? (
-          t('history.scoreValue', { score: Math.round(Number(item.scorePercent ?? 0)) })
+          <>
+            {t('history.scoreValue', { score: Math.round(Number(item.scorePercent ?? 0)) })}
+            {item.isBestScore ? (
+              <span className="ms-2 rounded-full bg-accent-soft px-2.5 py-0.5 text-micro font-semibold text-accent">
+                {t('history.best')}
+              </span>
+            ) : null}
+          </>
         ) : (
           <span className="rounded-full bg-soft px-2.5 py-0.5 text-micro font-semibold text-text-muted">
             {t('history.inProgress')}

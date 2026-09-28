@@ -14,7 +14,7 @@ All three tables map one to one to PRD §15. Names follow constitution §3 (no a
 | `StudentId` | `student_id` | FK `Users`, restrict |
 | `Kind` | `kind` | `Quiz` via `/api/sessions`, `UnitExam` via `/api/exams` (`docs/exams.md`). `MultiUnitExam` via `/api/exams/subjects/{id}/multi-unit` (`docs/exams.md#multi-unit-exams`). |
 | `Scope` | `scope_json` | jsonb. A quiz stores `{"lessonId":"<guid>"}`. |
-| `ScopeKey` | `scope_key` | Canonical string used for resume and uniqueness. A quiz uses `lesson:<guid>`; unit exams use `unit:<guid>` through `UnitExamScope` (Domain), already read by progress best scores (#78); multi-unit exams use `units:<size>:<sorted comma-separated unit guids>` through `MultiUnitExamScope` (#82). |
+| `ScopeKey` | `scope_key` | Canonical string used for resume and uniqueness. A quiz uses `lesson:<guid>`; unit exams use `unit:<guid>` through `UnitExamScope` (Domain), also the retake identity for best scores and the attempts list (#83, `docs/exams.md`); multi-unit exams use `units:<size>:<sorted comma-separated unit guids>` through `MultiUnitExamScope` (#82). |
 | `IsTestMode` | `is_test_mode` | True when an Admin runs the quiz or exam. |
 | `StartedAt` | `started_at` | |
 | `LastActivityAt` | `last_activity_at` | Set at start, on resume, on each attempt and on finish. |

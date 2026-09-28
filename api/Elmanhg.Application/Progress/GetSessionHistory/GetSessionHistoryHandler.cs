@@ -33,11 +33,12 @@ public sealed class GetSessionHistoryHandler(ISessionRepository sessionRepositor
             .ToList();
         List<Lesson> lessons = lessonIds.Count == 0 ? [] : await lessonRepository.FindAsync(x => lessonIds.Contains(x.Id), cancellationToken, asNoTracking: true).ConfigureAwait(false);
         List<CurriculumUnit> units = unitIds.Count == 0 ? [] : await unitRepository.FindAsync(x => unitIds.Contains(x.Id), cancellationToken, asNoTracking: true).ConfigureAwait(false);
+        var bestByScopeKey = page.Items.Any(ExamBestScoreSpecification.IsSatisfiedBy) ? (await sessionRepository.GetBestExamScoresAsync(userId, cancellationToken).ConfigureAwait(false)).ToDictionary(x => x.ScopeKey, x => x.BestScorePercent) : new Dictionary<string, decimal>();
 
         return new PageData<SessionHistoryItemResult>
         {
             Items = page.Items
-                .Select(x => SessionHistoryResultGenerator.Generate(x, lessons, units))
+                .Select(x => SessionHistoryResultGenerator.Generate(x, lessons, units, bestByScopeKey))
                 .ToList(),
             PageNumber = page.PageNumber,
             PageSize = page.PageSize,

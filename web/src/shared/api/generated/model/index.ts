@@ -19,6 +19,8 @@ export * from './createQuestionResult';
 export * from './createSubjectResult';
 export * from './createUnitResult';
 export * from './examAnswerSavedResult';
+export * from './examAttemptResult';
+export * from './examAttemptsResult';
 export * from './examBlueprintInput';
 export * from './examBlueprintResult';
 export * from './examBlueprintSummaryResult';

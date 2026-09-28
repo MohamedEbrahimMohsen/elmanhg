@@ -1,9 +1,10 @@
 import { Link, Navigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ContentErrorState, ContentListSkeleton } from '@/features/content';
-import { useGetExamSession } from '@/shared/api/generated/exams/exams';
+import { useGetExamAttempts, useGetExamSession } from '@/shared/api/generated/exams/exams';
 import { Button } from '@/shared/ui/button';
 import { examUnitNames, isMultiUnitExam, sortedExamItems, unitIdOf } from '../api/examSession';
+import { ExamAttemptsSection } from '../components/ExamAttemptsSection';
 import { ExamLessonBreakdown } from '../components/ExamLessonBreakdown';
 import { ExamResultSummary } from '../components/ExamResultSummary';
 import { ExamReviewItem } from '../components/ExamReviewItem';
@@ -17,6 +18,7 @@ export interface ExamResultPageProps {
 export function ExamResultPage({ sessionId }: ExamResultPageProps) {
   const { t } = useTranslation('exam');
   const { data, error, isPending, isError, refetch } = useGetExamSession(sessionId, { query: { staleTime: Infinity } });
+  const attempts = useGetExamAttempts(sessionId);
 
   if (isError) {
     return (
@@ -47,6 +49,7 @@ export function ExamResultPage({ sessionId }: ExamResultPageProps) {
       <ExamLessonBreakdown lessons={data.lessons} />
       {isMulti ? <ExamUnitBreakdown units={data.unitBreakdown} /> : null}
       <ExamWeakestObjectives objectives={data.weakestObjectives} />
+      <ExamAttemptsSection query={attempts} currentSessionId={sessionId} />
       <h2 className="font-display text-h2 font-bold lg:text-h2-desktop">{t('result.review')}</h2>
       {sortedExamItems(data).map((item) => (
         <ExamReviewItem key={item.questionId} item={item} />

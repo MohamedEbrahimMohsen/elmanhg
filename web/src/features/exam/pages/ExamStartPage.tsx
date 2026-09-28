@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { ContentErrorState, ContentListSkeleton } from '@/features/content';
-import { useGetUnitExamOverview } from '@/shared/api/generated/exams/exams';
+import { useGetUnitExamAttempts, useGetUnitExamOverview } from '@/shared/api/generated/exams/exams';
+import { ExamAttemptsSection } from '../components/ExamAttemptsSection';
 import { ExamBlueprintSummary } from '../components/ExamBlueprintSummary';
 import { ExamStartActions } from '../components/ExamStartActions';
 
@@ -11,6 +12,7 @@ export interface ExamStartPageProps {
 export function ExamStartPage({ unitId }: ExamStartPageProps) {
   const { t } = useTranslation('exam');
   const { data, error, isPending, isError, refetch } = useGetUnitExamOverview(unitId);
+  const attempts = useGetUnitExamAttempts(unitId);
 
   if (isError) {
     return (
@@ -37,6 +39,7 @@ export function ExamStartPage({ unitId }: ExamStartPageProps) {
         </div>
       )}
       <ExamStartActions overview={data} />
+      <ExamAttemptsSection query={attempts} />
     </section>
   );
 }

@@ -33,12 +33,25 @@ public class SessionRepository(AppDbContext context) : Repository<Session>(conte
             .ConfigureAwait(false);
     }
 
-    public async Task<List<UnitExamBestScore>> GetBestUnitExamScoresAsync(Guid studentId, CancellationToken cancellationToken)
+    public async Task<List<ExamBestScore>> GetBestExamScoresAsync(Guid studentId, CancellationToken cancellationToken)
     {
         return await _dbSet
-            .Where(x => x.StudentId == studentId && x.Kind == SessionKind.UnitExam && !x.IsTestMode && x.SubmittedAt != null && x.ScorePercent != null)
+            .WhereCountsTowardBestScore(studentId)
             .GroupBy(x => x.ScopeKey)
-            .Select(x => new UnitExamBestScore(x.Key, x.Max(session => session.ScorePercent) ?? 0m))
+            .Select(x => new ExamBestScore(x.Key, x.Max(session => session.ScorePercent) ?? 0m))
+            .AsNoTracking()
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<List<ExamAttemptSummary>> GetExamAttemptsAsync(Guid studentId, SessionKind kind, string scopeKey, CancellationToken cancellationToken)
+    {
+        return await _dbSet
+            .WhereCountsTowardBestScore(studentId)
+            .Where(x => x.Kind == kind && x.ScopeKey == scopeKey)
+            .OrderByDescending(x => x.SubmittedAt)
+            .ThenByDescending(x => x.Id)
+            .Select(x => new ExamAttemptSummary(x.Id, x.SubmittedAt ?? DateTimeOffset.MinValue, x.ScorePercent ?? 0m))
             .AsNoTracking()
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);

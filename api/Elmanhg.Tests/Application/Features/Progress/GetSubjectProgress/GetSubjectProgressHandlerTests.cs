@@ -80,16 +80,26 @@ public sealed class GetSubjectProgressHandlerTests
     [Fact]
     public async Task Handle_UnitExamBest_ReturnsBestOnlyForMatchingUnit()
     {
-        StubBests([new UnitExamBestScore($"unit:{_mechanics.Id:D}", 87.5m), new UnitExamBestScore($"lesson:{_waves.Id:D}", 99m)]);
+        StubBests([new ExamBestScore($"unit:{_mechanics.Id:D}", 87.5m), new ExamBestScore($"lesson:{_waves.Id:D}", 99m)]);
 
         var result = await _handler.Handle(new GetSubjectProgressQuery(), TestContext.Current.CancellationToken);
 
         result[0].Units.Select(x => x.BestExamScorePercent).Should().Equal(87.5m, null);
     }
 
+    [Fact]
+    public async Task Handle_MultiUnitBest_IsNotAUnitBest()
+    {
+        StubBests([new ExamBestScore(new MultiUnitExamScope(_physics.Id, [_mechanics.Id, _waves.Id], 20).ToKey(), 95m)]);
+
+        var result = await _handler.Handle(new GetSubjectProgressQuery(), TestContext.Current.CancellationToken);
+
+        result[0].Units.Select(x => x.BestExamScorePercent).Should().Equal((decimal?)null, null);
+    }
+
     private LessonMasteryCount Count(CurriculumUnit unit, int servable, int mastered, int seen) => new(unit.SubjectId, 1, unit.Id, unit.Order, Guid.NewGuid(), 1, servable, mastered, seen);
 
     private void StubCounts(List<LessonMasteryCount> counts) => _questionMasteryRepository.GetLessonCountsAsync(_studentId, null, Arg.Any<CancellationToken>()).Returns(counts);
 
-    private void StubBests(List<UnitExamBestScore> bests) => _sessionRepository.GetBestUnitExamScoresAsync(_studentId, Arg.Any<CancellationToken>()).Returns(bests);
+    private void StubBests(List<ExamBestScore> bests) => _sessionRepository.GetBestExamScoresAsync(_studentId, Arg.Any<CancellationToken>()).Returns(bests);
 }

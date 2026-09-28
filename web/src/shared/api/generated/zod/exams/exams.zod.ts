@@ -147,6 +147,24 @@ export const StartUnitExamResponse = zod.object({
 }))
 })
 
+export const GetUnitExamAttemptsParams = zod.object({
+  "unitId": zod.uuid()
+})
+
+export const getUnitExamAttemptsResponseBestScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const getUnitExamAttemptsResponseAttemptsItemScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+
+
+export const GetUnitExamAttemptsResponse = zod.object({
+  "bestScorePercent": zod.union([zod.number(),zod.stringFormat('double', getUnitExamAttemptsResponseBestScorePercentRegExpTwo)]).nullable(),
+  "attempts": zod.array(zod.object({
+  "sessionId": zod.uuid(),
+  "submittedAt": zod.iso.datetime({"offset":true}),
+  "scorePercent": zod.union([zod.number(),zod.stringFormat('double', getUnitExamAttemptsResponseAttemptsItemScorePercentRegExpTwo)]),
+  "isBest": zod.boolean()
+}))
+})
+
 export const GetMultiUnitExamOverviewParams = zod.object({
   "subjectId": zod.uuid()
 })
@@ -425,6 +443,24 @@ export const GetExamSessionResponse = zod.object({
   "lessonName": zod.string().nullable(),
   "questionCount": zod.union([zod.int(),zod.stringFormat('int32', getExamSessionResponseWeakestObjectivesItemQuestionCountRegExpTwo)]),
   "scorePercent": zod.union([zod.number(),zod.stringFormat('double', getExamSessionResponseWeakestObjectivesItemScorePercentRegExpTwo)])
+}))
+})
+
+export const GetExamAttemptsParams = zod.object({
+  "sessionId": zod.uuid()
+})
+
+export const getExamAttemptsResponseBestScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const getExamAttemptsResponseAttemptsItemScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+
+
+export const GetExamAttemptsResponse = zod.object({
+  "bestScorePercent": zod.union([zod.number(),zod.stringFormat('double', getExamAttemptsResponseBestScorePercentRegExpTwo)]).nullable(),
+  "attempts": zod.array(zod.object({
+  "sessionId": zod.uuid(),
+  "submittedAt": zod.iso.datetime({"offset":true}),
+  "scorePercent": zod.union([zod.number(),zod.stringFormat('double', getExamAttemptsResponseAttemptsItemScorePercentRegExpTwo)]),
+  "isBest": zod.boolean()
 }))
 })
 

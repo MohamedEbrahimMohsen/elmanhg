@@ -87,5 +87,19 @@
     "previewLoading": "Working out the exam…",
     "unitShares": "Questions from each unit",
     "unitShare": "{unit}: {count, number} questions"
+  },
+  "attempts": {
+    "title": "Your previous attempts",
+    "best": "Best score: {score, number} / 100",
+    "caption": "Your attempts at this exam, newest first",
+    "date": "Date",
+    "score": "Score",
+    "actions": "Actions",
+    "scoreValue": "{score, number} / 100",
+    "bestBadge": "Best",
+    "view": "View",
+    "current": "This attempt",
+    "loading": "Loading your attempts…",
+    "errorTitle": "Could not load your attempts."
   }
 }

@@ -88,7 +88,8 @@ export const GetSessionHistoryResponse = zod.object({
   "scopeName": zod.string().nullable(),
   "startedAt": zod.iso.datetime({"offset":true}),
   "submittedAt": zod.iso.datetime({"offset":true}).nullable(),
-  "scorePercent": zod.union([zod.number(),zod.stringFormat('double', getSessionHistoryResponseItemsItemScorePercentRegExpTwo)]).nullable()
+  "scorePercent": zod.union([zod.number(),zod.stringFormat('double', getSessionHistoryResponseItemsItemScorePercentRegExpTwo)]).nullable(),
+  "isBestScore": zod.boolean()
 })).optional(),
   "pageNumber": zod.union([zod.int(),zod.stringFormat('int64', getSessionHistoryResponsePageNumberRegExpTwo)]).optional(),
   "pageSize": zod.union([zod.int(),zod.stringFormat('int64', getSessionHistoryResponsePageSizeRegExpTwo)]).optional(),
