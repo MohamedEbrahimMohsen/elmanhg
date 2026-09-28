@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { getMasteryMock } from '@/shared/api/generated/mastery/mastery.msw';
 import { getValidationQueueMock } from '@/shared/api/generated/validation-queue/validation-queue.msw';
 import { axe } from '@/test/axe';
 import { server } from '@/test/msw/server';
@@ -15,7 +16,7 @@ const linkNames = (nav: HTMLElement) =>
 
 describe('AppShell', () => {
   beforeEach(() => {
-    server.use(...getValidationQueueMock());
+    server.use(...getValidationQueueMock(), ...getMasteryMock());
   });
 
   it('shows every student destination in the top tabs', async () => {
@@ -92,7 +93,7 @@ describe('AppShell', () => {
   it('redirects a student who opens an admin page to the student home', async () => {
     renderApp('/admin/users', { session: testSessions.student });
 
-    expect(await screen.findByRole('heading', { name: 'Home' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Hello, أحمد' })).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Users' })).toBeNull();
   });
 
@@ -120,7 +121,7 @@ describe('AppShell', () => {
   it('has no axe violations', async () => {
     const { container } = renderApp('/student', { session: testSessions.student });
 
-    await screen.findByRole('heading', { name: 'Home' });
+    await screen.findByRole('heading', { name: 'Hello, أحمد' });
 
     expect((await axe(container)).violations).toEqual([]);
   });

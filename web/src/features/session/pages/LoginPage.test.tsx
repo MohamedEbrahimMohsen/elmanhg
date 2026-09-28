@@ -9,6 +9,7 @@ import {
   getSendOtpResponseMock,
   getVerifyOtpMockHandler,
 } from '@/shared/api/generated/auth/auth.msw';
+import { getMasteryMock } from '@/shared/api/generated/mastery/mastery.msw';
 import type { AuthResult } from '@/shared/api/generated/model';
 import { axe } from '@/test/axe';
 import { server } from '@/test/msw/server';
@@ -79,6 +80,7 @@ describe('LoginPage', () => {
       getSendOtpMockHandler(),
       getVerifyOtpMockHandler({}),
       getLoginWithPhoneMockHandler(authResult('Student')),
+      ...getMasteryMock(),
     );
     const user = userEvent.setup();
     renderApp('/login');
@@ -87,7 +89,7 @@ describe('LoginPage', () => {
     expect(await screen.findByText('We sent a 6-digit code to 01012345678.')).toBeInTheDocument();
     await submitCode(user);
 
-    expect(await screen.findByRole('heading', { name: 'Home' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Hello, Mona' })).toBeInTheDocument();
   });
 
   it('offers sign-up when the mobile number has no account', async () => {
@@ -132,6 +134,7 @@ describe('LoginPage', () => {
         return body.verificationId === 'second-id' ? HttpResponse.json({}) : apiError(400, 'OTP_INVALID');
       }),
       getLoginWithPhoneMockHandler(authResult('Student')),
+      ...getMasteryMock(),
     );
     const user = userEvent.setup();
     renderApp('/login');
@@ -141,7 +144,7 @@ describe('LoginPage', () => {
     expect(await screen.findByText('A new code is on its way.')).toBeInTheDocument();
     await submitCode(user);
 
-    expect(await screen.findByRole('heading', { name: 'Home' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Hello, Mona' })).toBeInTheDocument();
   });
 
   it('does not verify twice when sign-in fails after verification', async () => {
@@ -157,6 +160,7 @@ describe('LoginPage', () => {
         loginCalls += 1;
         return loginCalls === 1 ? apiError(500, 'UNHANDLED_EXCEPTION') : HttpResponse.json(authResult('Student'));
       }),
+      ...getMasteryMock(),
     );
     const user = userEvent.setup();
     renderApp('/login');
@@ -166,13 +170,14 @@ describe('LoginPage', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Something went wrong. Please try again.');
     await user.click(screen.getByRole('button', { name: 'Verify' }));
 
-    expect(await screen.findByRole('heading', { name: 'Home' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Hello, Mona' })).toBeInTheDocument();
   });
 
   it('sends a signed-in visitor away from sign in to their home', async () => {
+    server.use(...getMasteryMock());
     renderApp('/login', { session: testSessions.student });
 
-    expect(await screen.findByRole('heading', { name: 'Home' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Hello, أحمد' })).toBeInTheDocument();
   });
 
   it('renders right-to-left in Arabic', async () => {

@@ -88,6 +88,7 @@ Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUni
 - **Evidence uploads** (Ask a Teacher images and voice): audit the decision, not the file. Lesson content images are the exception: they change content (PRD §17 rule 13), so `UploadLessonImage` is audited as `Lesson.UploadImage` with no diff.
 - **Review sessions and openings** (`StartReviewSession`, `RecordQuestionOpening`): a reading aid that gates bulk approval, not a content or validation change. `ReviewSession` and `ReviewSessionOpening` are not `IAuditedEntity`; the approvals they enable are audited.
 - **Quiz and exam activity** (`StartQuizSession`, `SubmitAnswer`, `FinishSession`): student practice, not a content or validation change. Attempts are their own append-only log (`docs/sessions.md`).
+- **Question mastery** (`QuestionMastery`): derived from the append-only attempt log (`docs/mastery.md`); not an `IAuditedEntity`.
 - **PII entities**: `User` is never marked `IAuditedEntity`, so password hashes and phone numbers never reach a diff.
 
 ## Add a new audited command

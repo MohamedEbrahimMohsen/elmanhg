@@ -4,14 +4,17 @@ using Core.Localization;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Questions.Shared;
 using Elmanhg.Application.Sessions.Shared;
+using Elmanhg.Application.Shared.Options;
+using Elmanhg.Domain.Mastery;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.Sessions.SubmitAnswer;
 
-public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<SubmitAnswerCommand, SessionItemResult>
+public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, IOptions<MasteryOptions> masteryOptions, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<SubmitAnswerCommand, SessionItemResult>
 {
     public async Task<SessionItemResult> Handle(SubmitAnswerCommand request, CancellationToken cancellationToken)
     {
@@ -46,10 +49,28 @@ public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQ
             throw new ApplicationValidationCoreException(ErrorCodes.QuestionAnswerInvalid);
         }
 
-        session.RecordAttempt(item, QuestionAnswerRules.Canonicalize(type, request.Answer), revision.Grade(request.Answer), request.TimeTakenMilliseconds);
+        var isNewAttempt = session.FindAttempt(item.QuestionId) is null;
+        var attempt = session.RecordAttempt(item, QuestionAnswerRules.Canonicalize(type, request.Answer), revision.Grade(request.Answer), request.TimeTakenMilliseconds);
+        if (isNewAttempt && !session.IsTestMode)
+        {
+            await RecordMasteryAsync(userId, attempt, cancellationToken).ConfigureAwait(false);
+        }
 
         await sessionRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return SessionResultGenerator.GenerateItem(session, item, revision, localizer);
+    }
+
+    private async Task RecordMasteryAsync(Guid studentId, Attempt attempt, CancellationToken cancellationToken)
+    {
+        var masteryAttempt = MasteryAttempt.From(attempt);
+        var mastery = await questionMasteryRepository.FirstOrDefaultAsync(x => x.StudentId == studentId && x.QuestionId == attempt.QuestionId, cancellationToken).ConfigureAwait(false);
+        if (mastery is null)
+        {
+            await questionMasteryRepository.AddAsync(QuestionMastery.Start(studentId, attempt.QuestionId, masteryAttempt), cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
+        mastery.Record(masteryAttempt, masteryOptions.Value.CorrectThreshold);
     }
 }

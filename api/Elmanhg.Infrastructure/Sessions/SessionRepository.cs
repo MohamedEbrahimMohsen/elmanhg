@@ -18,4 +18,18 @@ public class SessionRepository(AppDbContext context) : Repository<Session>(conte
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
     }
+
+    public async Task<List<DateOnly>> GetQuizActivityDaysAsync(Guid studentId, string timeZone, DateTimeOffset since, CancellationToken cancellationToken)
+    {
+        var kind = nameof(SessionKind.Quiz);
+        return await _context.Database
+            .SqlQuery<DateOnly>($"""
+                SELECT DISTINCT (a."CreatedAt" AT TIME ZONE {timeZone})::date AS "Value"
+                FROM "Attempts" AS a
+                INNER JOIN "Sessions" AS s ON s."Id" = a."SessionId"
+                WHERE a."StudentId" = {studentId} AND a."CreatedAt" >= {since} AND a."IsDeleted" = false AND s."IsDeleted" = false AND s."IsTestMode" = false AND s."Kind" = {kind}
+                """)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
 }

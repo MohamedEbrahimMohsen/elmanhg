@@ -1,6 +1,6 @@
 # Elmanhg — autopilot progress
 
-Last updated: 2026-09-28, cloud session, after story #76 merged. The session stopped here on the dev's
+Last updated: 2026-09-28, laptop session, after story #76 merged (main at `4f657c3`).
 instruction, at a clean point (no open PR, no branch in flight, main green).
 **Next story: #77 [E5.S4] Mastery calculation and headline counter**, the first row of "Remaining stories".
 The laptop run did #54–#64; the cloud session did #65–#76 (see "Running in a cloud session" and "Hand-off" below).
@@ -34,7 +34,7 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (40), in run order
+## Remaining stories (41), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
@@ -46,6 +46,7 @@ Stories run in dependency order, not issue order. E10 (payments) comes before E7
 | 14 | #81 | [E6.S2] Unit exam generation and sitting |
 | 15 | #82 | [E6.S3] Multi-unit exam builder |
 | 16 | #83 | [E6.S4] Retakes and best score |
+| 16b | #171 | [E1.S6] OTP delivery channels: WhatsApp (Meta), Email (Resend), SMS (disabled) |
 | 17 | #99 | [E10.S1] Plan catalogue and subscription state |
 | 18 | #100 | [E10.S2] Paymob checkout integration |
 | 19 | #101 | [E10.S3] Webhook-driven entitlement |
@@ -114,7 +115,7 @@ The flow is `.claude/commands/feature.md`. Every stage is a fresh subagent: `fea
   - Admins can never approve questions; approval only happens through `Question.Approve(TeacherSubject)`.
 - **Auditing:** mark commands `IAuditableCommand` and entities `IAuditedEntity`. The audit table is append-only, enforced by a database trigger. Details are in `docs/audit-log.md`.
 - **Student-facing lesson reads return Published lessons only** (PRD §5.2).
-- **Servable rule (#67):** `ServableQuestionSpecification` in Domain (Approved AND lesson Published AND not retired) is the only definition. Every serving read (quiz, exam, counts) must use it; admin reads stay unfiltered. Retirement is final (`QUESTION_RETIRED`), pending #155. `GET /api/questions/servable-count` is anonymous and cached (`questions:servable-count`, 60 s TTL). It is invalidated by question and lesson domain events, which are published before commit.
+- **Servable rule (#67):** `ServableQuestionSpecification` in Domain (Approved AND lesson Published AND not retired) is the only definition. Every serving read (quiz, exam, counts) must use it; admin reads stay unfiltered. Retirement is final (`QUESTION_RETIRED`); the dev confirmed this in #155 (closed), so the retire UI has no un-retire. `GET /api/questions/servable-count` is anonymous and cached (`questions:servable-count`, 60 s TTL). It is invalidated by question and lesson domain events, which are published before commit.
 - **Graders already exist (from #65):** the Arabic answer normaliser and deterministic graders for all five v1 types live in `api/Elmanhg.Domain/Questions/Grading/`, with `POST /api/questions/grade-draft`. #70–#72 extend them rather than create them: #70 added 8 per-question normalisation toggles (`normalization` object in the grading spec; a missing value means on) and the always-on Unicode steps. #71 added structured `GradeFeedback` (Domain), localised in Application via `ILocalizer`, and returned as `feedback`. #72 did the same for Fill and Short and made numeric tolerance overflow-safe. `QuestionGrader.Grade` is the single entry point for grading; attempts (#74) must reuse it. Leftovers are in #151 and #160. `Question.Reject` and `Resubmit` exist; #68 adds the teacher approve/reject commands and UI.
 - **Validation (#68):** `Approve`/`Reject` take the reviewed version, and a mismatch returns 409 `QUESTION_VERSION_CHANGED`. There is no concurrency token yet (#158). `QuestionDecision` is the append-only approve/reject history, and `Question.SubmittedAt` drives queue age. Bulk approve requires a server-side `ReviewSession` with a `ReviewSessionOpening` per question at its current version.
 - **Sessions (#74):** `Session` owns `SessionItem`s (the question plus the version served, fixed at start) and append-only `Attempt`s (a DB trigger, like the audit log). `docs/sessions.md` is the contract. Answers are graded against the served `QuestionRevision`. The session has an xmin row version, so a concurrent finish vs answer returns 409 `SESSION_MODIFIED_CONCURRENTLY`. Timestamps are truncated to microseconds in the aggregate. Start resumes the open session for the same lesson. Selection (#75) is `QuestionSelector` in Domain, a pure function with an injected `Random`, using PRD §7.2 buckets. Correct means normalised ≥ `Mastery:CorrectThreshold` (0.8, `MasteryOptions`).
@@ -126,6 +127,24 @@ The flow is `.claude/commands/feature.md`. Every stage is a fresh subagent: `fea
   - The Testing Library async timeout is 3000 ms in `web/src/test/setup.ts`.
   - Mobile tab bar: 3 items + "المزيد". Awaiting dev confirmation in #135.
 - **Docs-sync rule** (`.claude/rules/docs-sync.md`): a change that alters behaviour must update the owning doc in `/docs` in the same PR. Reviewers block on divergence. This file sits at the repo root because the dev asked for it by name; strictly, the rule says docs live in `/docs`.
+
+## Dev decisions, 2026-09-28 (laptop session takes over)
+
+The dev answered these before a 3-day unattended run. The laptop session took over from the cloud session at #76.
+- **Retirement is final** (#155 closed).
+- **External providers:** fakes stay the default, so tests and CI need no keys. Each story also builds the **real adapter**, switched on by config and env keys the dev adds later:
+  - Paymob (E10)
+  - Claude API for the avatar and essay grading (E8 and E14)
+  - OpenAI Whisper for voice-reply transcription (#96)
+  - S3-compatible storage (AWS S3, R2 or MinIO, with MinIO in compose) for voice notes and uploads
+- **OTP delivery (#171, new story, runs before E10):**
+  - WhatsApp through the Meta Cloud API: **enabled**.
+  - Email through Resend.com: **enabled**.
+  - SMS through a generic HTTP adapter for a local telecom: **built but disabled**.
+  - The channel is chosen by config, so it can change without code changes.
+- **Hosting (#112):** production Docker Compose, VPS-ready (Caddy TLS, images pushed to GHCR by CI, runbook in `docs/`). There is no live deploy.
+- **v2 epics E14–E17 are in scope.** Build every story, then write `docs/implementation-report.md`.
+- **Laptop paths:** Morabh is at `D:\Personal\Projects\Projects\Morabh\repos\apis`, and `gh` is available, so `pipeline_orch.py` does PR, poll and merge itself. Start Docker Desktop if `docker info` fails.
 
 ## Running in a cloud session
 
@@ -191,4 +210,4 @@ How the next agent resumes, in a cloud session or on the laptop:
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170 · `dev-decision`: #155 (#135 confirmed and closed).
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170 · `dev-decision`: none open (#135 and #155 confirmed and closed).

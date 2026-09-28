@@ -1649,6 +1649,60 @@
       ]
     },
     {
+      "name": "Mastery",
+      "description": "Sign in as a Student. Answer questions in the Sessions folder first to see mastery.",
+      "item": [
+        {
+          "name": "Get mastery overview",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/mastery/overview",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mastery", "overview"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get subject mastery",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/mastery/subjects/{{subjectId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mastery", "subjects", "{{subjectId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "AuditLogs",
       "description": "Admin only (AuditLog.View). Sign in as an admin first so accessToken is set. Enable actor, resourceType, from or to to filter; from is inclusive, to is exclusive, both ISO 8601 with offset.",
       "item": [

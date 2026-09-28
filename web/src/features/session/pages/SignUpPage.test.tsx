@@ -7,6 +7,7 @@ import {
   getSendOtpMockHandler,
   getVerifyOtpMockHandler,
 } from '@/shared/api/generated/auth/auth.msw';
+import { getMasteryMock } from '@/shared/api/generated/mastery/mastery.msw';
 import type { AuthResult } from '@/shared/api/generated/model';
 import { axe } from '@/test/axe';
 import { server } from '@/test/msw/server';
@@ -39,13 +40,13 @@ async function signUpWithPhone(user: User) {
 
 describe('SignUpPage', () => {
   it('creates a student account with email and lands on the student home', async () => {
-    server.use(getRegisterWithEmailMockHandler(studentResult));
+    server.use(getRegisterWithEmailMockHandler(studentResult), ...getMasteryMock());
     const user = userEvent.setup();
     renderApp('/signup');
 
     await fillEmailSignUp(user);
 
-    expect(await screen.findByRole('heading', { name: 'Home' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Hello, Mona' })).toBeInTheDocument();
   });
 
   it('shows the duplicate-email error on the email field', async () => {
@@ -79,13 +80,14 @@ describe('SignUpPage', () => {
         registeredName = ((await request.json()) as { displayName: string }).displayName;
         return HttpResponse.json(studentResult);
       }),
+      ...getMasteryMock(),
     );
     const user = userEvent.setup();
     renderApp('/signup');
 
     await signUpWithPhone(user);
 
-    expect(await screen.findByRole('heading', { name: 'Home' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Hello, Mona' })).toBeInTheDocument();
     expect(registeredName).toBe('Ahmed');
   });
 

@@ -4,6 +4,7 @@ using Core.Errors;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
+using Elmanhg.Domain.Mastery;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.ReviewSessions;
 using Elmanhg.Domain.Sessions;
@@ -26,6 +27,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
 
     public const string InProgressSessionIndex = "IX_Sessions_InProgressScope";
     public const string AttemptPerQuestionIndex = "IX_Attempts_SessionId_QuestionId";
+    public const string QuestionMasteryPerStudentIndex = "IX_QuestionMasteries_StudentId_QuestionId";
 
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<TeacherSubject> TeacherSubjects { get; set; }
@@ -41,6 +43,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public DbSet<Session> Sessions { get; set; }
     public DbSet<SessionItem> SessionItems { get; set; }
     public DbSet<Attempt> Attempts { get; set; }
+    public DbSet<QuestionMastery> QuestionMasteries { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
@@ -48,7 +51,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         {
             return await base.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is Session))
+        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is Session or QuestionMastery))
         {
             throw new ConflictCoreException(ErrorCodes.SessionModifiedConcurrently, innerException: exception);
         }
@@ -65,6 +68,10 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         {
             throw new ConflictCoreException(DomainErrorCodes.SessionQuestionAlreadyAnswered, innerException: exception);
         }
+        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: QuestionMasteryPerStudentIndex })
+        {
+            throw new ConflictCoreException(ErrorCodes.SessionModifiedConcurrently, innerException: exception);
+        }
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -78,6 +85,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         ConfigureQuestionImportBatches(modelBuilder);
         ConfigureReviewSessions(modelBuilder);
         ConfigureSessions(modelBuilder);
+        ConfigureQuestionMastery(modelBuilder);
         ConfigureTeacherSubjects(modelBuilder);
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
@@ -227,6 +235,19 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         });
     }
 
+    private static void ConfigureQuestionMastery(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<QuestionMastery>(builder =>
+        {
+            builder.Property(x => x.LatestNormalisedScore).HasPrecision(5, 4);
+            builder.Property(x => x.PreviousNormalisedScore).HasPrecision(5, 4);
+            builder.Property(x => x.Version).IsRowVersion();
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Question>().WithMany().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.StudentId, x.QuestionId }).IsUnique().HasDatabaseName(QuestionMasteryPerStudentIndex);
+        });
+    }
+
     private static void ConfigureTeacherSubjects(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TeacherSubject>(builder =>
@@ -254,5 +275,6 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         modelBuilder.Entity<Session>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<SessionItem>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<Attempt>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<QuestionMastery>().HasQueryFilter(x => !x.IsDeleted);
     }
 }
