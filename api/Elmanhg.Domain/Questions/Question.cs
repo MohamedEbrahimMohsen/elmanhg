@@ -26,9 +26,11 @@ public partial class Question : AuditEntity, IAuditedEntity
     public DateTimeOffset? ValidatedAt { get; private set; }
     public string? RejectionReason { get; private set; }
     public Guid? ImportBatchId { get; private set; }
+    public DateTimeOffset? RetiredAt { get; private set; }
     public List<QuestionRevision> Revisions { get; private set; } = [];
 
     public QuestionContent CurrentContent => new(Stem, Body, GradingSpec, Explanation, MaxScore);
+    public bool IsRetired => RetiredAt is not null;
 
     private Question(Guid id, Guid? createdBy) : base(id, createdBy) { }
 

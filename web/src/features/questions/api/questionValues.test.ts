@@ -27,6 +27,7 @@ const detail = (overrides: Partial<QuestionDetailResult>): QuestionDetailResult 
   version: 1,
   validationStatus: 'Pending',
   rejectionReason: null,
+  retiredAt: null,
   ...overrides,
 });
 

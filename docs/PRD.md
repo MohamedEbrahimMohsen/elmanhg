@@ -127,7 +127,7 @@ Rules:
 - Rejection requires a reason. Admin sees the reason and may edit and resubmit: resubmitting applies the edit (a content change still bumps the version), returns the question to Pending and clears the rejection reason.
 - **Any edit to an Approved question's content resets it to Pending.** Content is the stem, body (options, blanks), grading spec, explanation and max score. Edits to difficulty, objective link or tags alone change neither the status nor the version. Every content edit, in any status, increments `version` and writes a `QuestionRevision` snapshot of the new version; version 1 is snapshotted at creation. The type of a question never changes.
 - Approved questions on an unpublished lesson wait silently; the moment the lesson is Published they become servable with no further action.
-- Retiring a question removes it from future quizzes but preserves all historical attempts.
+- Retiring a question (Admin only) removes it from future quizzes but preserves all historical attempts. Retirement is final: a retired question cannot be edited, resubmitted, approved or rejected.
 
 ### 5.4 Question metadata (all types)
 

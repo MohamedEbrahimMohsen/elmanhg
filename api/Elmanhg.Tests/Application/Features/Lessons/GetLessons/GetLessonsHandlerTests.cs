@@ -33,10 +33,11 @@ public sealed class GetLessonsHandlerTests
         var second = Lesson.Create(_unit, "Momentum", 2, Guid.NewGuid());
         _lessonRepository.FindAsync(Arg.Any<Expression<Func<Lesson, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Lesson>, IQueryable<Lesson>>?>(), Arg.Any<Func<IQueryable<Lesson>, IOrderedQueryable<Lesson>>?>(), Arg.Any<bool>()).Returns([first, second]);
         _questionRepository.CountByLessonAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(new Dictionary<Guid, int> { [first.Id] = 3 });
+        _questionRepository.CountServableByLessonAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(new Dictionary<Guid, int> { [first.Id] = 2 });
 
         var result = await _handler.Handle(new GetLessonsQuery(_unit.Id), TestContext.Current.CancellationToken);
 
-        result.Should().Equal(new LessonResult(first.Id, _unit.Id, "Newton's laws", 1, "Draft", 3), new LessonResult(second.Id, _unit.Id, "Momentum", 2, "Draft", 0));
+        result.Should().Equal(new LessonResult(first.Id, _unit.Id, "Newton's laws", 1, "Draft", 3, 2), new LessonResult(second.Id, _unit.Id, "Momentum", 2, "Draft", 0, 0));
     }
 
     [Fact]

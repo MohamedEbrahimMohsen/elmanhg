@@ -2,8 +2,10 @@ using Core.DDD.Models;
 using Elmanhg.Application.Questions.CreateQuestion;
 using Elmanhg.Application.Questions.GetQuestion;
 using Elmanhg.Application.Questions.GetQuestions;
+using Elmanhg.Application.Questions.GetServableQuestionCount;
 using Elmanhg.Application.Questions.GradeQuestionDraft;
 using Elmanhg.Application.Questions.ResubmitQuestion;
+using Elmanhg.Application.Questions.RetireQuestion;
 using Elmanhg.Application.Questions.Shared;
 using Elmanhg.Application.Questions.UpdateQuestion;
 using Elmanhg.Domain.Questions;
@@ -26,6 +28,15 @@ public class QuestionsController(IMediator mediator) : ControllerBase
     {
         var fields = new QuestionFields(request.Type, request.Stem, request.Body, request.GradingSpec, request.Explanation, request.Difficulty, request.ObjectiveId, request.Tags ?? [], request.MaxScore);
         var result = await mediator.Send(new CreateQuestionCommand(request.LessonId, fields), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("servable-count", Name = "GetServableQuestionCount")]
+    [AllowAnonymous]
+    [ProducesResponseType<ServableQuestionCountResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetServableQuestionCount(CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetServableQuestionCountQuery(), cancellationToken);
         return Ok(result);
     }
 
@@ -64,6 +75,15 @@ public class QuestionsController(IMediator mediator) : ControllerBase
     {
         var fields = new QuestionFields(request.Type, request.Stem, request.Body, request.GradingSpec, request.Explanation, request.Difficulty, request.ObjectiveId, request.Tags ?? [], request.MaxScore);
         await mediator.Send(new ResubmitQuestionCommand(questionId, fields), cancellationToken);
+        return Ok();
+    }
+
+    [HttpPost("{questionId:guid}/retire", Name = "RetireQuestion")]
+    [Authorize(Policy = DefaultCodes.ContentManage)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> RetireQuestion([FromRoute] Guid questionId, CancellationToken cancellationToken)
+    {
+        await mediator.Send(new RetireQuestionCommand(questionId), cancellationToken);
         return Ok();
     }
 

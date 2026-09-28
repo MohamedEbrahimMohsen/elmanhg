@@ -13,6 +13,7 @@ export const GetLessonsQueryParams = zod.object({
 
 export const getLessonsResponseOrderRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const getLessonsResponseQuestionCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getLessonsResponseServableQuestionCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 
 
 export const GetLessonsResponseItem = zod.object({
@@ -21,7 +22,8 @@ export const GetLessonsResponseItem = zod.object({
   "name": zod.string(),
   "order": zod.union([zod.int(),zod.stringFormat('int32', getLessonsResponseOrderRegExpTwo)]),
   "state": zod.string(),
-  "questionCount": zod.union([zod.int(),zod.stringFormat('int32', getLessonsResponseQuestionCountRegExpTwo)])
+  "questionCount": zod.union([zod.int(),zod.stringFormat('int32', getLessonsResponseQuestionCountRegExpTwo)]),
+  "servableQuestionCount": zod.union([zod.int(),zod.stringFormat('int32', getLessonsResponseServableQuestionCountRegExpTwo)])
 })
 export const GetLessonsResponse = zod.array(GetLessonsResponseItem)
 

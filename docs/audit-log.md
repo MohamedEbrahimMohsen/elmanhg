@@ -70,6 +70,7 @@ An array with one element per changed audited entity. Property keys are camelCas
 | CreateQuestion | `Question.Create` | Question | result |
 | UpdateQuestion | `Question.Update` | Question | command (the diff lists the changed Question fields; a content edit shows `version`, and `validationStatus` when it resets) |
 | ResubmitQuestion | `Question.Resubmit` | Question | command (the diff shows `validationStatus`, `rejectionReason`, `validatedBy`, `validatedAt`, and the content fields and `version` when the content changed) |
+| RetireQuestion | `Question.Retire` | Question | command (the diff shows `retiredAt`) |
 | ImportQuestions | `Question.Import` | QuestionImportBatch | command (the diff lists the new QuestionImportBatch and every created Question; a replay writes a row with no diff) |
 
 Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`.

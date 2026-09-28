@@ -35,6 +35,7 @@ import type {
   PageDataOfQuestionListItemResult,
   QuestionDetailResult,
   QuestionGradeResult,
+  ServableQuestionCountResult,
   UpdateQuestionRequest
 } from '../model';
 
@@ -283,6 +284,152 @@ export function useGetQuestionsSuspense<TData = Awaited<ReturnType<typeof getQue
  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetQuestionsSuspenseQueryOptions(params,options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetServableQuestionCountUrl = () => {
+
+
+
+
+  return `/api/questions/servable-count`
+}
+
+export const getServableQuestionCount = async ( options?: Parameters<typeof http>[1]): Promise<ServableQuestionCountResult> => {
+
+  return http<ServableQuestionCountResult>(getGetServableQuestionCountUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetServableQuestionCountQueryKey = () => {
+    return [
+    `/api/questions/servable-count`
+    ] as const;
+    }
+
+
+export const getGetServableQuestionCountQueryOptions = <TData = Awaited<ReturnType<typeof getServableQuestionCount>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getServableQuestionCount>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetServableQuestionCountQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getServableQuestionCount>>> = ({ signal }) => getServableQuestionCount({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getServableQuestionCount>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetServableQuestionCountQueryResult = NonNullable<Awaited<ReturnType<typeof getServableQuestionCount>>>
+export type GetServableQuestionCountQueryError = unknown
+
+
+export function useGetServableQuestionCount<TData = Awaited<ReturnType<typeof getServableQuestionCount>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getServableQuestionCount>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getServableQuestionCount>>,
+          TError,
+          Awaited<ReturnType<typeof getServableQuestionCount>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetServableQuestionCount<TData = Awaited<ReturnType<typeof getServableQuestionCount>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getServableQuestionCount>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getServableQuestionCount>>,
+          TError,
+          Awaited<ReturnType<typeof getServableQuestionCount>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetServableQuestionCount<TData = Awaited<ReturnType<typeof getServableQuestionCount>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getServableQuestionCount>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetServableQuestionCount<TData = Awaited<ReturnType<typeof getServableQuestionCount>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getServableQuestionCount>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetServableQuestionCountQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetServableQuestionCountSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getServableQuestionCount>>, TError = unknown>( options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getServableQuestionCount>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetServableQuestionCountQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getServableQuestionCount>>> = ({ signal }) => getServableQuestionCount({ signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getServableQuestionCount>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetServableQuestionCountSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getServableQuestionCount>>>
+export type GetServableQuestionCountSuspenseQueryError = unknown
+
+
+export function useGetServableQuestionCountSuspense<TData = Awaited<ReturnType<typeof getServableQuestionCount>>, TError = unknown>(
+  options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getServableQuestionCount>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetServableQuestionCountSuspense<TData = Awaited<ReturnType<typeof getServableQuestionCount>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getServableQuestionCount>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetServableQuestionCountSuspense<TData = Awaited<ReturnType<typeof getServableQuestionCount>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getServableQuestionCount>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetServableQuestionCountSuspense<TData = Awaited<ReturnType<typeof getServableQuestionCount>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getServableQuestionCount>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetServableQuestionCountSuspenseQueryOptions(options)
 
   const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -603,6 +750,73 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getResubmitQuestionMutationOptions(options), queryClient);
+    }
+    export const getRetireQuestionUrl = (questionId: string,) => {
+
+
+
+
+  return `/api/questions/${questionId}/retire`
+}
+
+export const retireQuestion = async (questionId: string, options?: Parameters<typeof http>[1]): Promise<void> => {
+
+  return http<void>(getRetireQuestionUrl(questionId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getRetireQuestionMutationKey = () => ['retireQuestion'] as const;
+
+export const getRetireQuestionMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retireQuestion>>, TError,RetireQuestionMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof retireQuestion>>, TError,RetireQuestionMutationVariables, TContext> => {
+
+const mutationKey = getRetireQuestionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof retireQuestion>>, RetireQuestionMutationVariables> = (props) => {
+          const {questionId} = props ?? {};
+
+          return  retireQuestion(questionId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RetireQuestionMutationResult = NonNullable<Awaited<ReturnType<typeof retireQuestion>>>
+
+    export type RetireQuestionMutationError = unknown
+    export type RetireQuestionMutationVariables = {questionId: string}
+
+    export const useRetireQuestion = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retireQuestion>>, TError,RetireQuestionMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof retireQuestion>>,
+        TError,
+        RetireQuestionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRetireQuestionMutationOptions(options), queryClient);
     }
     export const getGradeQuestionDraftUrl = () => {
 

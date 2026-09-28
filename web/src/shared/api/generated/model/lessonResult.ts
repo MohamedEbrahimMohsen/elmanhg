@@ -14,4 +14,6 @@ export interface LessonResult {
   state: string;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   questionCount: number | string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  servableQuestionCount: number | string;
 }

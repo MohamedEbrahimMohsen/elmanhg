@@ -1,12 +1,12 @@
 # Elmanhg — autopilot progress
 
-Last updated: 2026-09-28, cloud session, after story #65 merged (main at `d4429a1`).
-The laptop run stopped here because the dev asked it to. A Claude Code cloud session resumes at **#65**
-(see "Running in a cloud session" below).
+Last updated: 2026-09-28, cloud session, after story #66 merged (main at `7f1fda4`).
+The laptop run stopped after #64. A Claude Code cloud session continued from #65 (see "Running in a cloud
+session" below). The next story to run is the first row of "Remaining stories".
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (10 of 59)
+## Finished stories (11 of 59)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -20,17 +20,17 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 8 | #62 [E2.S3] Lesson lifecycle (+ lesson reorder and delete) | #145 | 1 | 1 comment, fixed | #146 |
 | 9 | #64 [E3.S1] Question aggregate with typed body and grading spec | #147 | 2 | skipped (too many files) | #148 |
 | 10 | #65 [E3.S2] Admin question editor, live preview, test grader | #150 | 2 | skipped (too many files) | #151 |
+| 11 | #66 [E3.S3] Bulk question import from spreadsheet | #152 | 2 | skipped (too many files) | #153 |
 
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (49), in run order
+## Remaining stories (48), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
 | Order | Issue | Story |
 |---|---|---|
-| 2 | #66 | [E3.S3] Bulk question import from spreadsheet |
 | 3 | #67 | [E3.S4] Servable rule |
 | 4 | #68 | [E3.S5] Teacher validation queue |
 | 5 | #70 | [E4.S1] Arabic answer normalisation |
@@ -139,6 +139,8 @@ per-story `feature/<n>-<slug>` branches, PRs, and squash-merge on green CI.
   this path.
 - **Node:** the container has Node 22, while CI uses 24 (`web/.nvmrc`). The baseline passed on 22. Treat
   web-ci as authoritative.
+- **CodeRabbit skip = no comments** (dev instruction, 2026-09-28): when CodeRabbit skips a PR (too many files, or rate-limited), record it in `05` and go straight to merge once CI is green.
+- **Spreadsheet import (#66):** ClosedXML reads `.xlsx` through `ISpreadsheetReader`/`Writer` in Infrastructure. Row validation reuses `QuestionFieldsValidator`. Idempotency uses a `QuestionImportBatch` keyed by the client batch id plus a file SHA-256. `docs/question-import.md` holds the template contract.
 - **#135** (mobile tab bar: 3 items + "المزيد") was confirmed by the dev on 2026-09-28 and closed.
 
 ## Gotchas
@@ -156,4 +158,4 @@ per-story `feature/<n>-<slug>` branches, PRs, and squash-merge on green CI.
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151 · `dev-decision`: none open (#135 confirmed and closed).
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153 · `dev-decision`: none open (#135 confirmed and closed).

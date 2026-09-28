@@ -45,6 +45,17 @@ public sealed class GetQuestionHandlerTests
     }
 
     [Fact]
+    public async Task Handle_RetiredQuestion_ReturnsRetiredAt()
+    {
+        var question = new QuestionBuilder().Retired().Build();
+        _questionRepository.GetByIdAsync(question.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Question>, IQueryable<Question>>?>(), Arg.Any<bool>()).Returns(question);
+
+        var result = await _handler.Handle(new GetQuestionQuery(question.Id), TestContext.Current.CancellationToken);
+
+        result.RetiredAt.Should().NotBeNull().And.Be(question.RetiredAt);
+    }
+
+    [Fact]
     public async Task Handle_QuestionNotFound_ThrowsQuestionNotFound()
     {
         var act = () => _handler.Handle(new GetQuestionQuery(Guid.NewGuid()), TestContext.Current.CancellationToken);

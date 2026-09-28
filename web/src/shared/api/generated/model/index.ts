@@ -45,6 +45,7 @@ export * from './questionType';
 export * from './questionValidationStatus';
 export * from './registerWithEmailCommand';
 export * from './registerWithPhoneCommand';
+export * from './servableQuestionCountResult';
 export * from './stream';
 export * from './subjectDetailResult';
 export * from './subjectNameRequest';

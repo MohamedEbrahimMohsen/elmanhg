@@ -130,9 +130,24 @@ A request whose `body` or `gradingSpec` breaks a rule gets `422` with the code b
 ## Validation status
 
 - Every question is created Pending. No request, command or endpoint carries a status.
-- The only way to Approved is `Question.Approve(TeacherSubject)`: it needs a live teacher assignment for the question's subject (`QUESTION_VALIDATOR_NOT_ASSIGNED`) and a Pending question (`QUESTION_NOT_PENDING`). A `TeacherSubject` can only be created for a teacher, so an admin cannot approve (PRD §16, §17 rule 3).
-- The only way to Rejected is `Question.Reject(TeacherSubject, reason)`. It checks the same two rules as approval, in the same order (`QUESTION_NOT_PENDING`, then `QUESTION_VALIDATOR_NOT_ASSIGNED`), and then needs a non-blank reason (`QUESTION_REJECTION_REASON_REQUIRED`). It stores the trimmed reason in `rejectionReason`, and `validatedBy`/`validatedAt` record the teacher who decided.
+- The only way to Approved is `Question.Approve(TeacherSubject)`: it needs an unretired question (`QUESTION_RETIRED`), a Pending question (`QUESTION_NOT_PENDING`) and a live teacher assignment for the question's subject (`QUESTION_VALIDATOR_NOT_ASSIGNED`), checked in that order. A `TeacherSubject` can only be created for a teacher, so an admin cannot approve (PRD §16, §17 rule 3).
+- The only way to Rejected is `Question.Reject(TeacherSubject, reason)`. It checks the same rules as approval, in the same order (`QUESTION_RETIRED`, then `QUESTION_NOT_PENDING`, then `QUESTION_VALIDATOR_NOT_ASSIGNED`), and then needs a non-blank reason (`QUESTION_REJECTION_REASON_REQUIRED`). It stores the trimmed reason in `rejectionReason`, and `validatedBy`/`validatedAt` record the teacher who decided.
 - `PUT /api/questions/{id}/resubmit` (`Question.Resubmit`) needs a Rejected question (`400 QUESTION_NOT_REJECTED` otherwise). It applies the edit exactly like `PUT /api/questions/{id}` (a content change bumps the version and adds a revision; the type still cannot change), then returns the question to Pending and clears `rejectionReason`, `validatedBy` and `validatedAt`. It does not require a content change. The audit entry `Question.Resubmit` keeps the cleared reason in its diff.
+
+## Retirement
+
+- `POST /api/questions/{id}/retire` (Admin, `ContentManage`; audited as `Question.Retire`) stamps `retiredAt` and raises `QuestionRetired`. Any status can be retired (Pending, Approved or Rejected); the status, version and revisions are unchanged, and `updatedBy` plus the audit row record who retired it.
+- Retirement is terminal. There is no un-retire. Retiring again returns `400 QUESTION_ALREADY_RETIRED`. Edit, resubmit, approve and reject on a retired question return `400 QUESTION_RETIRED` before any other check.
+- `retiredAt` (nullable) is returned by `GET /api/questions` (each item) and `GET /api/questions/{id}`. Retired questions stay in the admin bank and every historical attempt keeps pointing at them.
+
+## Servable
+
+- Servable = Approved ∧ lesson Published ∧ not retired (PRD §5.3, §17 rule 1). It is derived on every read and never stored.
+- `ServableQuestionSpecification` (`Elmanhg.Domain/Questions`) is the only definition. `WhereServable(questions, lessons)` composes the rule into SQL; `IsSatisfiedBy(question, lesson)` runs compiled copies of the same expressions in memory.
+- Every serving query (quizzes, exams, blueprints, anything a student is shown) must filter through `WhereServable`. Admin reads never filter by it: `GET /api/questions` lists every status and annotates each item with `isServable`, and `GET /api/lessons` returns `servableQuestionCount` next to `questionCount`.
+- `GET /api/questions/servable-count` is anonymous and returns `{"count": n}`, the platform-wide total shown on the landing page. It is cached in `IMemoryCache` under `questions:servable-count`.
+- The cache entry is removed on every event that can change the total: `LessonPublished`, `LessonUnpublished`, `LessonArchived`, `QuestionApproved`, `QuestionRejected`, `QuestionReturnedToPending` (a content edit on an Approved question) and `QuestionRetired`. Creating, importing, metadata-only edits and resubmitting (Rejected → Pending) cannot change the total and do not invalidate.
+- The entry also expires after `Content:ServableCountCacheSeconds` (default 60). Domain events are published before the transaction commits, so a read that lands between the invalidation and the commit can re-cache the old value; the expiry bounds that staleness.
 
 ## Answer shapes
 

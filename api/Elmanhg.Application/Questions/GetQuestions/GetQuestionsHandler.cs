@@ -24,18 +24,26 @@ public sealed class GetQuestionsHandler(IQuestionRepository questionRepository, 
 
         var lessons = await lessonRepository.FindAsync(x => lessonIds.Contains(x.Id), cancellationToken, asNoTracking: true).ConfigureAwait(false);
         var teachers = await userRepository.FindAsync(x => teacherIds.Contains(x.Id), cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        var lessonNames = lessons.ToDictionary(x => x.Id, x => x.Name);
+        var lessonsById = lessons.ToDictionary(x => x.Id);
         var teacherNames = teachers.ToDictionary(x => x.Id, x => x.DisplayName);
 
         return new PageData<QuestionListItemResult>
         {
             Items = page.Items
-                .Select(x => QuestionResultGenerator.GenerateListItem(x, lessonNames.GetValueOrDefault(x.LessonId, string.Empty), x.ValidatedBy is null ? null : teacherNames.GetValueOrDefault(x.ValidatedBy.Value)))
+                .Select(x => Generate(x, lessonsById, teacherNames))
                 .ToList(),
             PageNumber = page.PageNumber,
             PageSize = page.PageSize,
             TotalItems = page.TotalItems,
             TotalPages = page.TotalPages,
         };
+    }
+
+    private static QuestionListItemResult Generate(Question question, Dictionary<Guid, Lesson> lessonsById, Dictionary<Guid, string> teacherNames)
+    {
+        lessonsById.TryGetValue(question.LessonId, out var lesson);
+        var teacherName = question.ValidatedBy is null ? null : teacherNames.GetValueOrDefault(question.ValidatedBy.Value);
+        var isServable = lesson is not null && ServableQuestionSpecification.IsSatisfiedBy(question, lesson);
+        return QuestionResultGenerator.GenerateListItem(question, lesson?.Name ?? string.Empty, teacherName, isServable);
     }
 }

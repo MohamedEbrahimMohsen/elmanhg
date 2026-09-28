@@ -16,6 +16,7 @@ public partial class Question
         ValidatedAt = now;
         UpdatedBy = assignment.TeacherId;
         UpdationDate = now;
+        RaiseDomainEvent(new QuestionApproved(Id, LessonId));
     }
 
     public void Reject(TeacherSubject assignment, string reason)
@@ -33,10 +34,12 @@ public partial class Question
         ValidatedAt = now;
         UpdatedBy = assignment.TeacherId;
         UpdationDate = now;
+        RaiseDomainEvent(new QuestionRejected(Id, LessonId));
     }
 
     private void EnsureValidatorCanDecide(TeacherSubject assignment)
     {
+        EnsureNotRetired();
         if (ValidationStatus != QuestionValidationStatus.Pending)
         {
             throw new BusinessRuleViolationCoreException(ErrorCodes.QuestionNotPending);

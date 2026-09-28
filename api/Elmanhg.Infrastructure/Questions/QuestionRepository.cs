@@ -1,4 +1,5 @@
 using Core.EntityFrameworkCore.Repositories;
+using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Infrastructure.Data.Context;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,25 @@ public class QuestionRepository(AppDbContext context) : Repository<Question>(con
     public async Task<Dictionary<Guid, int>> CountByLessonAsync(IReadOnlyCollection<Guid> lessonIds, CancellationToken cancellationToken)
     {
         return await _dbSet
+            .Where(x => lessonIds.Contains(x.LessonId))
+            .GroupBy(x => x.LessonId)
+            .Select(x => new { x.Key, Count = x.Count() })
+            .ToDictionaryAsync(x => x.Key, x => x.Count, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<int> CountServableAsync(CancellationToken cancellationToken)
+    {
+        return await _dbSet
+            .WhereServable(_context.Set<Lesson>())
+            .CountAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<Dictionary<Guid, int>> CountServableByLessonAsync(IReadOnlyCollection<Guid> lessonIds, CancellationToken cancellationToken)
+    {
+        return await _dbSet
+            .WhereServable(_context.Set<Lesson>())
             .Where(x => lessonIds.Contains(x.LessonId))
             .GroupBy(x => x.LessonId)
             .Select(x => new { x.Key, Count = x.Count() })

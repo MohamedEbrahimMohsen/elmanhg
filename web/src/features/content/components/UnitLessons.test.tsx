@@ -22,8 +22,16 @@ const physics: SubjectDetailResult = {
 };
 
 const lessons: LessonResult[] = [
-  { id: 'l1', unitId: 'u1', name: "Newton's laws", order: 1, state: 'Draft', questionCount: 0 },
-  { id: 'l2', unitId: 'u1', name: 'Momentum', order: 2, state: 'Draft', questionCount: 0 },
+  {
+    id: 'l1',
+    unitId: 'u1',
+    name: "Newton's laws",
+    order: 1,
+    state: 'Draft',
+    questionCount: 0,
+    servableQuestionCount: 0,
+  },
+  { id: 'l2', unitId: 'u1', name: 'Momentum', order: 2, state: 'Draft', questionCount: 0, servableQuestionCount: 0 },
 ];
 
 const openContent = () => renderApp('/admin/content', { session: testSessions.admin });
