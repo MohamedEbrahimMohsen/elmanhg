@@ -8,7 +8,8 @@ import * as zod from 'zod';
 
 
 export const SendOtpBody = zod.object({
-  "phoneNumber": zod.string()
+  "phoneNumber": zod.string().nullable(),
+  "email": zod.string().nullish()
 })
 
 export const sendOtpResponseVerificationAttemptsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
@@ -24,7 +25,8 @@ export const SendOtpResponse = zod.object({
   "verificationAttempts": zod.union([zod.int(),zod.stringFormat('int32', sendOtpResponseVerificationAttemptsRegExpTwo)]),
   "reissueCount": zod.union([zod.int(),zod.stringFormat('int32', sendOtpResponseReissueCountRegExpTwo)]),
   "maxVerificationAttempts": zod.union([zod.int(),zod.stringFormat('int32', sendOtpResponseMaxVerificationAttemptsRegExpTwo)]),
-  "maxReissueCount": zod.union([zod.int(),zod.stringFormat('int32', sendOtpResponseMaxReissueCountRegExpTwo)])
+  "maxReissueCount": zod.union([zod.int(),zod.stringFormat('int32', sendOtpResponseMaxReissueCountRegExpTwo)]),
+  "channel": zod.enum(['WhatsApp', 'Sms', 'Email'])
 })
 
 export const VerifyOtpBody = zod.object({
@@ -90,6 +92,21 @@ export const LoginWithEmailBody = zod.object({
 })
 
 export const LoginWithEmailResponse = zod.object({
+  "accessToken": zod.string(),
+  "user": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string(),
+  "role": zod.string(),
+  "phoneNumber": zod.string().nullable(),
+  "email": zod.string().nullable()
+})
+})
+
+export const LoginWithEmailCodeBody = zod.object({
+  "verificationId": zod.uuid()
+})
+
+export const LoginWithEmailCodeResponse = zod.object({
   "accessToken": zod.string(),
   "user": zod.object({
   "id": zod.uuid(),

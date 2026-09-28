@@ -13,6 +13,10 @@ public static class ErrorCodes
     public const string PhoneNumberNotRegistered = "PHONE_NUMBER_NOT_REGISTERED";
     public const string EmailAlreadyRegistered = "EMAIL_ALREADY_REGISTERED";
     public const string OtpInvalid = "OTP_INVALID";
+    public const string EmailNotRegistered = "EMAIL_NOT_REGISTERED";
+    public const string EmailCodeSignInNotAllowed = "EMAIL_CODE_SIGN_IN_NOT_ALLOWED";
+    public const string OtpChannelUnavailable = "OTP_CHANNEL_UNAVAILABLE";
+    public const string OtpDeliveryFailed = "OTP_DELIVERY_FAILED";
 
     // VALIDATION
     public const string OtpVerificationIdInvalidFormat = "OTP_VERIFICATION_ID_INVALID_FORMAT";

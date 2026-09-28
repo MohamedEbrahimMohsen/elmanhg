@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { AuthLayout } from '../components/AuthLayout';
-import { EmailSignInForm } from '../components/EmailSignInForm';
+import { EmailSignIn } from '../components/EmailSignIn';
 import { MethodSwitch, type SignInMethod } from '../components/MethodSwitch';
 import { PhoneSignIn } from '../components/PhoneSignIn';
 
@@ -26,7 +26,7 @@ export function LoginPage() {
       }
     >
       <MethodSwitch value={method} onChange={setMethod} />
-      {method === 'phone' ? <PhoneSignIn /> : <EmailSignInForm />}
+      {method === 'phone' ? <PhoneSignIn /> : <EmailSignIn />}
     </AuthLayout>
   );
 }

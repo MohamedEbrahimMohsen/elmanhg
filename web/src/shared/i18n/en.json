@@ -175,7 +175,12 @@
     "MULTI_UNIT_EXAM_UNITS_TOO_FEW": "Choose at least two units of the same subject.",
     "MULTI_UNIT_EXAM_UNIT_DUPLICATE": "A unit was chosen more than once.",
     "MULTI_UNIT_EXAM_SIZE_INVALID": "The number of questions must be 20, 40 or 60.",
-    "MULTI_UNIT_EXAM_NO_BLUEPRINT": "Some chosen units have no exam."
+    "MULTI_UNIT_EXAM_NO_BLUEPRINT": "Some chosen units have no exam.",
+    "OTP_RECIPIENT_REQUIRED": "Enter a mobile number or an email.",
+    "OTP_CHANNEL_UNAVAILABLE": "Sign-in codes can't be sent right now. Try again later.",
+    "OTP_DELIVERY_FAILED": "We couldn't deliver your code. Try again in a moment.",
+    "EMAIL_NOT_REGISTERED": "No account uses this email. Create an account first.",
+    "EMAIL_CODE_SIGN_IN_NOT_ALLOWED": "This account signs in with a password."
   },
   "error": {
     "title": "Something went wrong"

@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useSendOtp, useVerifyOtp } from '@/shared/api/generated/auth/auth';
+import type { GenerateOTPCommand, OtpChannel } from '@/shared/api/generated/model';
 import type { ServerErrorFields } from '@/shared/form/applyServerErrors';
 import { Form } from '@/shared/form/Form';
 import { FormRootError } from '@/shared/form/FormRootError';
@@ -12,13 +13,20 @@ import { TextField } from '@/shared/form/TextField';
 import { ApiError, unhandledErrorCode } from '@/shared/lib/apiError';
 import { Button } from '@/shared/ui/button';
 import { otpSchema, type OtpValues } from '../schemas/otpSchema';
-import type { PhoneStart } from './PhoneStartForm';
+
+export interface OtpDelivery {
+  verificationId: string;
+  channel: OtpChannel;
+}
 
 export interface OtpFormProps {
-  start: PhoneStart;
+  recipient: string;
+  request: GenerateOTPCommand;
+  delivery: OtpDelivery;
+  changeLabel: string;
   onVerified: (verificationId: string) => Promise<void>;
-  onResent: (verificationId: string) => void;
-  onChangeNumber: () => void;
+  onResent: (delivery: OtpDelivery) => void;
+  onChange: () => void;
 }
 
 const serverErrorFields: ServerErrorFields<OtpValues> = {
@@ -27,7 +35,13 @@ const serverErrorFields: ServerErrorFields<OtpValues> = {
   OTP_INVALID_FORMAT: 'code',
 };
 
-export function OtpForm({ start, onVerified, onResent, onChangeNumber }: OtpFormProps) {
+const sentMessageKey: Record<OtpChannel, string> = {
+  WhatsApp: 'otp.sentViaWhatsApp',
+  Sms: 'otp.sentViaSms',
+  Email: 'otp.sentToEmail',
+};
+
+export function OtpForm({ recipient, request, delivery, changeLabel, onVerified, onResent, onChange }: OtpFormProps) {
   const { t } = useTranslation('session');
   const [verified, setVerified] = useState(false);
   const verifyOtp = useVerifyOtp();
@@ -36,9 +50,9 @@ export function OtpForm({ start, onVerified, onResent, onChangeNumber }: OtpForm
 
   const resend = async () => {
     try {
-      const result = await sendOtp.mutateAsync({ data: { phoneNumber: start.phoneNumber } });
+      const result = await sendOtp.mutateAsync({ data: request });
       setVerified(false);
-      onResent(result.verificationId);
+      onResent({ verificationId: result.verificationId, channel: result.channel });
       toast(t('otp.resent'));
     } catch (error) {
       form.setError('root.server', {
@@ -49,16 +63,16 @@ export function OtpForm({ start, onVerified, onResent, onChangeNumber }: OtpForm
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-ui text-text">{t('otp.sentTo', { phoneNumber: start.phoneNumber })}</p>
+      <p className="text-ui text-text">{t(sentMessageKey[delivery.channel], { recipient })}</p>
       <Form
         form={form}
         serverErrorFields={serverErrorFields}
         onSubmit={async ({ code }) => {
           if (!verified) {
-            await verifyOtp.mutateAsync({ data: { verificationId: start.verificationId, code } });
+            await verifyOtp.mutateAsync({ data: { verificationId: delivery.verificationId, code } });
             setVerified(true);
           }
-          await onVerified(start.verificationId);
+          await onVerified(delivery.verificationId);
         }}
       >
         <FormRootError />
@@ -75,8 +89,8 @@ export function OtpForm({ start, onVerified, onResent, onChangeNumber }: OtpForm
         >
           {t('actions.resendCode')}
         </Button>
-        <Button type="button" variant="secondary" onClick={onChangeNumber}>
-          {t('actions.changeNumber')}
+        <Button type="button" variant="secondary" onClick={onChange}>
+          {changeLabel}
         </Button>
       </div>
     </div>

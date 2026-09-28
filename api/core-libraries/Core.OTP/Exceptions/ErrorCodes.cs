@@ -15,4 +15,8 @@ public static class ErrorCodes
     public const string OtpInvalid = "OTP_INVALID";
     public const string OtpInvalidFormat = "OTP_INVALID_FORMAT";
     public const string OtpVerificationIdInvalidFormat = "OTP_VERIFICATION_ID_INVALID_FORMAT";
+    public const string OtpRecipientRequired = "OTP_RECIPIENT_REQUIRED";
+    public const string EmailRequired = "EMAIL_REQUIRED";
+    public const string EmailInvalid = "EMAIL_INVALID";
+    public const string EmailTooLong = "EMAIL_TOO_LONG";
 }

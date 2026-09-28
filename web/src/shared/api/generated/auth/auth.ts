@@ -18,6 +18,7 @@ import type {
   AuthResult,
   GenerateOTPCommand,
   GenerateOTPResult,
+  LoginWithEmailCodeCommand,
   LoginWithEmailCommand,
   LoginWithPhoneCommand,
   RegisterWithEmailCommand,
@@ -518,6 +519,87 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getLoginWithEmailMutationOptions(options), queryClient);
+    }
+    export const getLoginWithEmailCodeUrl = () => {
+
+
+
+
+  return `/api/auth/login/email-code`
+}
+
+export const loginWithEmailCode = async (loginWithEmailCodeCommand: LoginWithEmailCodeCommand, options?: Parameters<typeof http>[1]): Promise<AuthResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return http<AuthResult>(getLoginWithEmailCodeUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(loginWithEmailCodeCommand)
+  }
+);}
+
+
+
+
+
+export const getLoginWithEmailCodeMutationKey = () => ['loginWithEmailCode'] as const;
+
+export const getLoginWithEmailCodeMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginWithEmailCode>>, TError,LoginWithEmailCodeMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof loginWithEmailCode>>, TError,LoginWithEmailCodeMutationVariables, TContext> => {
+
+const mutationKey = getLoginWithEmailCodeMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof loginWithEmailCode>>, LoginWithEmailCodeMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  loginWithEmailCode(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LoginWithEmailCodeMutationResult = NonNullable<Awaited<ReturnType<typeof loginWithEmailCode>>>
+    export type LoginWithEmailCodeMutationBody = LoginWithEmailCodeCommand
+    export type LoginWithEmailCodeMutationError = unknown
+    export type LoginWithEmailCodeMutationVariables = {data: LoginWithEmailCodeCommand}
+
+    export const useLoginWithEmailCode = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginWithEmailCode>>, TError,LoginWithEmailCodeMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof loginWithEmailCode>>,
+        TError,
+        LoginWithEmailCodeMutationVariables,
+        TContext
+      > => {
+      return useMutation(getLoginWithEmailCodeMutationOptions(options), queryClient);
     }
     export const getRefreshAccessTokenUrl = () => {
 

@@ -27,10 +27,15 @@
     "resendCode": "Resend code",
     "changeNumber": "Change number",
     "signIn": "Continue",
-    "createAccount": "Create account"
+    "createAccount": "Create account",
+    "changeEmail": "Change email",
+    "useEmailCode": "Sign in with a code instead",
+    "usePassword": "Sign in with a password instead"
   },
   "otp": {
-    "sentTo": "We sent a 6-digit code to {phoneNumber}.",
+    "sentViaWhatsApp": "We sent a 6-digit code to {recipient} on WhatsApp.",
+    "sentViaSms": "We sent a 6-digit code to {recipient} by text message.",
+    "sentToEmail": "We sent a 6-digit code to your email {recipient}.",
     "resent": "A new code is on its way."
   },
   "validation": {

@@ -90,6 +90,17 @@ public sealed class RegisterWithPhoneHandlerTests
         await _refreshTokenService.DidNotReceive().GenerateTokenAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());
     }
 
+    [Fact]
+    public async Task Handle_EmailOtp_ThrowsOtpInvalid()
+    {
+        var otp = ArrangeOtp(new OtpBuilder().ForEmail("mona@elmanhg.test").Verified());
+
+        var act = () => _handler.Handle(new RegisterWithPhoneCommand(otp.VerificationId, "Ahmed"), TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<BadRequestCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.OtpInvalid);
+        await _userManager.DidNotReceive().CreateAsync(Arg.Any<User>());
+    }
+
     private global::Core.OTP.Entities.Otp ArrangeOtp(OtpBuilder builder)
     {
         var otp = builder.Build();

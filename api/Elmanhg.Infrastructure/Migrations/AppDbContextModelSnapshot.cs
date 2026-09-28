@@ -278,9 +278,15 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("NextAllowedReissueAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("PhoneNumber")
+                    b.Property<string>("Recipient")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("PhoneNumber");
+
+                    b.Property<string>("RecipientType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int>("ReissueBlockCooldownInHours")
                         .HasColumnType("integer");

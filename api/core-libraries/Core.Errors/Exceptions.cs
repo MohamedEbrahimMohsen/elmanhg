@@ -75,3 +75,12 @@ public class BusinessRuleViolationCoreException(string errorCode = "BUSINESS_RUL
 {
     public int StatusCode => (int)HttpStatusCode.BadRequest;
 }
+
+/// <summary>
+/// A downstream dependency needed to complete the request is unavailable.
+/// HTTP 503 Service Unavailable.
+/// </summary>
+public class ServiceUnavailableCoreException(string errorCode = "SERVICE_UNAVAILABLE", string? message = null, Dictionary<string, object>? context = null, Exception? innerException = null) : BaseException(errorCode, message, context, innerException), IHasHttpStatus
+{
+    public int StatusCode => (int)HttpStatusCode.ServiceUnavailable;
+}

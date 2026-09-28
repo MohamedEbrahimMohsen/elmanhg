@@ -8,6 +8,7 @@
     { "key": "baseUrl", "value": "http://localhost:5080" },
     { "key": "accessToken", "value": "" },
     { "key": "phoneNumber", "value": "01012345678" },
+    { "key": "email", "value": "mona@elmanhg.local" },
     { "key": "verificationId", "value": "" },
     { "key": "otpCode", "value": "" },
     { "key": "teacherId", "value": "" },
@@ -56,10 +57,11 @@
     },
     {
       "name": "Auth",
-      "description": "Refresh token travels only in the HttpOnly elmanhg_refresh cookie (Path=/api/auth). The OTP code is logged by FakeSmsSender in the API console; paste it into otpCode.",
+      "description": "Refresh token travels only in the HttpOnly elmanhg_refresh cookie (Path=/api/auth). The OTP code is logged by FakeOtpChannel in the API console; paste it into otpCode.",
       "item": [
         {
           "name": "SendOtp",
+          "description": "Body { phoneNumber } or { email }; the response channel is WhatsApp, Sms or Email.",
           "event": [
             {
               "listen": "test",
@@ -202,6 +204,70 @@
               "raw": "{{baseUrl}}/api/auth/login/phone",
               "host": ["{{baseUrl}}"],
               "path": ["api", "auth", "login", "phone"]
+            },
+            "auth": { "type": "noauth" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"verificationId\": \"{{verificationId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "SendEmailOtp",
+          "description": "Student email accounts only. Sends a sign-in code to email and stores verificationId; run VerifyOtp with the code before LoginWithEmailCode.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"verificationId\", pm.response.json().verificationId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/otp/send",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "otp", "send"]
+            },
+            "auth": { "type": "noauth" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "LoginWithEmailCode",
+          "description": "Signs a student in with a verified email code (run VerifyOtp first). Teachers and admins get 403 EMAIL_CODE_SIGN_IN_NOT_ALLOWED.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"accessToken\", pm.response.json().accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login/email-code",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login", "email-code"]
             },
             "auth": { "type": "noauth" },
             "body": {

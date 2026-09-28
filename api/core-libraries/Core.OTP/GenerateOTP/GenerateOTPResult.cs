@@ -1,9 +1,12 @@
+using Core.OTP.Delivery;
+
 namespace Core.OTP.GenerateOTP;
 
-public sealed record GenerateOTPResult(Guid VerificationId, 
-                                       DateTimeOffset ExpiresAt, 
-                                       DateTimeOffset NextAllowedReissueAt, 
-                                       int VerificationAttempts, 
-                                       int ReissueCount, 
-                                       int MaxVerificationAttempts, 
-                                       int MaxReissueCount);
+public sealed record GenerateOTPResult(Guid VerificationId,
+                                       DateTimeOffset ExpiresAt,
+                                       DateTimeOffset NextAllowedReissueAt,
+                                       int VerificationAttempts,
+                                       int ReissueCount,
+                                       int MaxVerificationAttempts,
+                                       int MaxReissueCount,
+                                       OtpChannel Channel);

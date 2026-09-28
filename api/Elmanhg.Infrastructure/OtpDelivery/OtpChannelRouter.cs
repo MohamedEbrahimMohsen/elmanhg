@@ -1,0 +1,44 @@
+using Core.Errors;
+using Core.OTP.Delivery;
+using Core.OTP.Entities;
+using Elmanhg.Application.Exceptions;
+using Microsoft.Extensions.Options;
+
+namespace Elmanhg.Infrastructure.OtpDelivery;
+
+public sealed class OtpChannelRouter(IOptions<OtpDeliveryOptions> otpDeliveryOptions, IEnumerable<IOtpChannel> channels) : IOtpSender
+{
+    private readonly OtpDeliveryOptions _options = otpDeliveryOptions.Value;
+
+    public async Task<OtpChannel> SendAsync(OtpRecipientType recipientType, string recipient, string code, CancellationToken cancellationToken)
+    {
+        var channel = Resolve(recipientType);
+        await channels.Single(x => x.Channel == channel).SendAsync(recipient, code, cancellationToken).ConfigureAwait(false);
+        return channel;
+    }
+
+    private OtpChannel Resolve(OtpRecipientType recipientType)
+    {
+        if (recipientType == OtpRecipientType.Email)
+        {
+            return IsEnabled(OtpChannel.Email) ? OtpChannel.Email : throw new ServiceUnavailableCoreException(ErrorCodes.OtpChannelUnavailable);
+        }
+
+        var preferred = _options.DefaultPhoneChannel.GetValueOrDefault();
+        var fallback = preferred == OtpChannel.WhatsApp ? OtpChannel.Sms : OtpChannel.WhatsApp;
+        if (IsEnabled(preferred))
+        {
+            return preferred;
+        }
+
+        return IsEnabled(fallback) ? fallback : throw new ServiceUnavailableCoreException(ErrorCodes.OtpChannelUnavailable);
+    }
+
+    private bool IsEnabled(OtpChannel channel) => channel switch
+    {
+        OtpChannel.WhatsApp => _options.WhatsApp.Enabled,
+        OtpChannel.Sms => _options.Sms.Enabled,
+        OtpChannel.Email => _options.Email.Enabled,
+        _ => false,
+    };
+}

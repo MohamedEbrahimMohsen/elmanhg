@@ -175,7 +175,12 @@
     "MULTI_UNIT_EXAM_UNITS_TOO_FEW": "اختر وحدتين على الأقل من نفس المادة.",
     "MULTI_UNIT_EXAM_UNIT_DUPLICATE": "تم اختيار وحدة أكثر من مرة.",
     "MULTI_UNIT_EXAM_SIZE_INVALID": "عدد الأسئلة يجب أن يكون 20 أو 40 أو 60.",
-    "MULTI_UNIT_EXAM_NO_BLUEPRINT": "لا يوجد امتحان لبعض الوحدات المختارة."
+    "MULTI_UNIT_EXAM_NO_BLUEPRINT": "لا يوجد امتحان لبعض الوحدات المختارة.",
+    "OTP_RECIPIENT_REQUIRED": "أدخل رقم موبايل أو بريدًا إلكترونيًا.",
+    "OTP_CHANNEL_UNAVAILABLE": "تعذر إرسال رمز الدخول الآن. حاول مرة أخرى لاحقًا.",
+    "OTP_DELIVERY_FAILED": "تعذر توصيل الرمز. حاول مرة أخرى بعد قليل.",
+    "EMAIL_NOT_REGISTERED": "لا يوجد حساب بهذا البريد الإلكتروني. أنشئ حسابًا أولًا.",
+    "EMAIL_CODE_SIGN_IN_NOT_ALLOWED": "هذا الحساب يسجل الدخول بكلمة المرور."
   },
   "error": {
     "title": "حدث خطأ"

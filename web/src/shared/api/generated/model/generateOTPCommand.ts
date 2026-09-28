@@ -6,5 +6,8 @@
  */
 
 export interface GenerateOTPCommand {
-  phoneNumber: string;
+  /** @nullable */
+  phoneNumber: string | null;
+  /** @nullable */
+  email?: string | null;
 }

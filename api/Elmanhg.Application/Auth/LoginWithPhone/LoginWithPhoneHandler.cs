@@ -1,6 +1,7 @@
 using Core.Errors;
 using Core.Identity.Tokens.AccessToken;
 using Core.Identity.Tokens.RefreshToken;
+using Core.OTP.Entities;
 using Core.OTP.Repositories;
 using Elmanhg.Application.Auth.Shared;
 using Elmanhg.Application.Exceptions;
@@ -15,14 +16,14 @@ public sealed class LoginWithPhoneHandler(UserManager<User> userManager, IOtpRep
     public async Task<AuthResult> Handle(LoginWithPhoneCommand request, CancellationToken cancellationToken)
     {
         var otp = await otpRepository.FindByVerificationId(request.VerificationId, cancellationToken).ConfigureAwait(false);
-        if (otp is null)
+        if (otp is null || otp.RecipientType != OtpRecipientType.Phone)
         {
             throw new BadRequestCoreException(ErrorCodes.OtpInvalid);
         }
 
         otp.MarkUsed();
 
-        var user = await userManager.FindByNameAsync(otp.PhoneNumber).ConfigureAwait(false);
+        var user = await userManager.FindByNameAsync(otp.Recipient).ConfigureAwait(false);
         if (user is null)
         {
             throw new NotFoundCoreException(ErrorCodes.PhoneNumberNotRegistered);

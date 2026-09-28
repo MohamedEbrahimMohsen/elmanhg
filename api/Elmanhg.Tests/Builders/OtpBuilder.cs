@@ -6,7 +6,8 @@ public sealed class OtpBuilder
 {
     public const string CodeHash = "code-hash";
 
-    private string _phoneNumber = "01012345678";
+    private string _recipient = "01012345678";
+    private OtpRecipientType _recipientType = OtpRecipientType.Phone;
     private bool _verified = false;
     private int _reissueCooldownSeconds = 60;
     private int _maxReissueCount = 5;
@@ -14,7 +15,15 @@ public sealed class OtpBuilder
 
     public OtpBuilder ForPhone(string phoneNumber)
     {
-        _phoneNumber = phoneNumber;
+        _recipient = phoneNumber;
+        _recipientType = OtpRecipientType.Phone;
+        return this;
+    }
+
+    public OtpBuilder ForEmail(string email)
+    {
+        _recipient = email;
+        _recipientType = OtpRecipientType.Email;
         return this;
     }
 
@@ -44,7 +53,7 @@ public sealed class OtpBuilder
 
     public Otp Build()
     {
-        var otp = Otp.Create(_phoneNumber, CodeHash, 5, _maxVerificationAttempts, _reissueCooldownSeconds, _maxReissueCount, 24);
+        var otp = Otp.Create(_recipientType, _recipient, CodeHash, 5, _maxVerificationAttempts, _reissueCooldownSeconds, _maxReissueCount, 24);
         if (_verified)
         {
             otp.Verify(CodeHash);

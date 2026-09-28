@@ -35,6 +35,15 @@ public class CoreDbContext<TUser, TRole, TKey>(DbContextOptions options, IMediat
         {
             builder.HasIndex(x => x.VerificationId)
                 .IsUnique();
+
+            // The column predates email codes; renaming it would be a destructive migration.
+            builder.Property(x => x.Recipient)
+                .HasColumnName("PhoneNumber")
+                .IsRequired();
+
+            builder.Property(x => x.RecipientType)
+                .HasConversion<string>()
+                .HasMaxLength(50);
         });
 
         modelBuilder.Entity<Notification>(builder =>

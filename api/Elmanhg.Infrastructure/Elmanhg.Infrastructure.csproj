@@ -4,6 +4,7 @@
     <PackageReference Include="ClosedXML" />
     <PackageReference Include="HtmlSanitizer" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -15,6 +16,10 @@
     <ProjectReference Include="..\core-libraries\Core.EntityFrameworkCore\Core.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\Elmanhg.Application\Elmanhg.Application.csproj" />
     <ProjectReference Include="..\Elmanhg.Domain\Elmanhg.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="OtpDelivery\Email\Templates\*" LogicalName="Elmanhg.Infrastructure.OtpDelivery.Email.Templates.%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>

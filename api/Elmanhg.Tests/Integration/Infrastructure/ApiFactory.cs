@@ -1,5 +1,5 @@
 using Core.Localization;
-using Core.OTP.Sms;
+using Core.OTP.Delivery;
 using Elmanhg.Infrastructure.Data.Context;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -21,12 +21,12 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     private const string TestingEnvironment = "Testing";
     // Signs nothing outside this in-memory host; the JwtBearer options delegate only requires it to be non-empty.
     private const string TestJwtKey = "elmanhg-tests-signing-key-not-a-secret-0123456789";
-    // Keys only the HMAC of OTP codes inside this in-memory host; codes are read back from RecordingSmsSender.
+    // Keys only the HMAC of OTP codes inside this in-memory host; codes are read back from OtpOutbox.
     private const string TestOtpSecret = "elmanhg-tests-otp-secret";
 
     private readonly PostgreSqlContainer _database = new PostgreSqlBuilder(PostgresImage).Build();
 
-    public RecordingSmsSender Sms { get; } = new();
+    public OtpOutbox Otp { get; } = new();
 
     public LessonEventLog LessonEvents { get; } = new();
 
@@ -103,7 +103,16 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["FileStorage:LocalRootPath"] = MediaRoot,
             ["FileStorage:PublicBaseUrl"] = "/api/media",
             ["CoreOtp:Secret"] = TestOtpSecret,
-            ["Sms:Provider"] = "Fake",
+            ["OtpDelivery:DefaultPhoneChannel"] = "WhatsApp",
+            ["OtpDelivery:CountryCallingCode"] = "20",
+            ["OtpDelivery:AttemptTimeoutSeconds"] = "10",
+            ["OtpDelivery:TotalTimeoutSeconds"] = "30",
+            ["OtpDelivery:WhatsApp:Enabled"] = "true",
+            ["OtpDelivery:WhatsApp:Provider"] = "Fake",
+            ["OtpDelivery:Email:Enabled"] = "true",
+            ["OtpDelivery:Email:Provider"] = "Fake",
+            ["OtpDelivery:Sms:Enabled"] = "false",
+            ["OtpDelivery:Sms:Provider"] = "Fake",
             ["Auth:DisplayNameMaxLength"] = "100",
             ["Auth:EmailMaxLength"] = "256",
             ["Auth:RefreshTokenCookieName"] = "elmanhg_refresh",
@@ -126,8 +135,10 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         }));
         builder.ConfigureTestServices(services =>
         {
-            services.RemoveAll<ISmsSender>();
-            services.AddSingleton<ISmsSender>(Sms);
+            services.RemoveAll<IOtpChannel>();
+            services.AddSingleton<IOtpChannel>(new RecordingOtpChannel(OtpChannel.WhatsApp, Otp));
+            services.AddSingleton<IOtpChannel>(new RecordingOtpChannel(OtpChannel.Sms, Otp));
+            services.AddSingleton<IOtpChannel>(new RecordingOtpChannel(OtpChannel.Email, Otp));
             services.AddSingleton(LessonEvents);
             services.RemoveAll<ILocalizer>();
             services.AddScoped<ILocalizer>(x => new Localizer(new ApiResourceStringLocalizerFactory(x.GetRequiredService<IStringLocalizerFactory>())));
