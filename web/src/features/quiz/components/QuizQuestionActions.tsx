@@ -33,7 +33,7 @@ export function QuizQuestionActions({
           <Button className="min-h-12 w-full" disabled={isChecking} onClick={onCheck}>
             {t(isChecking ? 'session.checking' : 'session.check')}
           </Button>
-          <Button variant="secondary" disabled={isPending} onClick={finish}>
+          <Button variant="secondary" disabled={isPending || isChecking} onClick={finish}>
             {t('session.finish')}
           </Button>
         </>
