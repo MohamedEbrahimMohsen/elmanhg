@@ -9,3 +9,6 @@ Branch: `feature/72-graders-for-fill-in-the-blank-and-short-answer` (base `main`
 | 3 | Review r1 | feature-reviewer | Opus 5.5 | 10:48 | 10:56 | 7m 58s | 98,875 | 34 | CHANGES_REQUESTED (1: percent-overflow branch untested) |
 | 4 | Rework r2 | feature-implementer | Opus 5.5 | 10:56 | 10:59 | 3m 22s | 40,578 | 32 | overflow test (6 inputs), mutation-checked; api 1267/1267 |
 | 5 | Review r2 | feature-reviewer | Opus 5.5 | n/a | n/a | n/a | APPROVED |
+| 6 | CodeRabbit | orchestrator | n/a | n/a | n/a | n/a | 1 actionable (Minor: doc qualification) |
+| 7 | Triage | feature-reviewer | Opus 5.5 | n/a | n/a | n/a | 1 implement (broader doc qualification than suggested) |
+| 8 | CR fix + verify | implementer+reviewer | Opus 5.5 | n/a | n/a | n/a | doc precedence sentence; APPROVED |
