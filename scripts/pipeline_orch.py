@@ -8,17 +8,25 @@ python orch.py push <story> <msg>     commit + push follow-up changes on the sto
 python orch.py merge <story> <pr>     squash merge, sync main, close story if still open
 python orch.py issue <label> <title> <body-file> [story]   open an issue (creates label if needed); prints URL
 python orch.py metric <story> <row>   append a metrics row (pipe-separated cells)
+python orch.py sync                   switch to main and fast-forward (after a merge done outside this script)
+
+Without the gh CLI (e.g. a Claude Code cloud session) the steps that talk to GitHub degrade: `start` reads the
+issue from the public REST API, `pr` pushes and writes the PR body to a temp file, `merge` only pushes the
+remaining artifacts; the orchestrator then opens, polls, merges and closes through its GitHub tools.
 """
-import json, os, re, subprocess, sys, time, datetime, pathlib
+import json, os, re, shutil, subprocess, sys, tempfile, time, datetime, pathlib, urllib.request
 
 REPO = "MohamedEbrahimMohsen/elmanhg"
-ROOT = pathlib.Path(r"D:\Personal\elmanhg")
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+HAS_GH = shutil.which("gh") is not None
 ENV = dict(os.environ, GCM_INTERACTIVE="never", GIT_TERMINAL_PROMPT="0")
 AUTOPILOT = ("Dev instruction (2026-09-27): \"this session will be ran once to implement EVERYTHING in this github project "
              "https://github.com/users/MohamedEbrahimMohsen/projects/1 ... You will do the same cycle story after story ... till you "
              "finish without any interruption. don't stop untill you finalized the project, whatever you stuck in it, ignore it and "
-             "generate an ouput report at the end + put them as open issues in GitHub.\" Followed by: \"GO\".")
-TRAILER = "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+             "generate an ouput report at the end + put them as open issues in GitHub.\" Followed by: \"GO\". "
+             "Continued in a cloud session (2026-09-28): \"this should be a very long session, with no stop till you finalize "
+             "everything\"; the dev approved full autopilot (per-story branch, PR, squash-merge on green CI) for that session.")
+TRAILER = "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" + (f"\nClaude-Session: {os.environ['CLAUDE_SESSION_URL']}" if os.environ.get("CLAUDE_SESSION_URL") else "")
 
 
 def run(*args, check=True, capture=True, cwd=ROOT):
@@ -33,7 +41,12 @@ def now():
 
 
 def story(n):
-    d = json.loads(run("gh", "issue", "view", str(n), "--repo", REPO, "--json", "number,title,body,state").stdout)
+    if HAS_GH:
+        d = json.loads(run("gh", "issue", "view", str(n), "--repo", REPO, "--json", "number,title,body,state").stdout)
+    else:
+        with urllib.request.urlopen(f"https://api.github.com/repos/{REPO}/issues/{n}", timeout=30) as r:
+            j = json.load(r)
+        d = {"number": j["number"], "title": j["title"], "body": j["body"] or "", "state": j["state"].upper()}
     m = re.match(r"\[(E\d+)\.S(\d+)\]\s*(.*)", d["title"])
     key = f"{m.group(1)}.S{m.group(2)}"
     slug = re.sub(r"[^a-z0-9]+", "-", m.group(3).lower()).strip("-")[:48].strip("-")
@@ -99,7 +112,10 @@ def pr(n):
     commit(f"feat({key}): {d['title'].split('] ',1)[1]}")
     branch = run("git", "branch", "--show-current").stdout.strip()
     run("git", "push", "-q", "-u", "origin", branch)
-    existing = json.loads(run("gh", "pr", "list", "--repo", REPO, "--head", branch, "--json", "number").stdout)
+    if not HAS_GH:
+        existing = []
+    else:
+        existing = json.loads(run("gh", "pr", "list", "--repo", REPO, "--head", branch, "--json", "number").stdout)
     if existing:
         print(f"PR={existing[0]['number']}"); return
     plan = (p / "01-plan.md").read_text(encoding="utf-8") if (p / "01-plan.md").exists() else ""
@@ -108,6 +124,9 @@ def pr(n):
     body = (f"{goal.group(1).strip() if goal else d['title']}\n\nCloses #{n}\n\n**Pipeline artifacts** (`{rel}/`): "
             + " · ".join(f"[{f.name}](../blob/{branch}/{rel}/{f.name})" for f in sorted(p.glob('*.md')))
             + "\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)")
+    if not HAS_GH:
+        f = pathlib.Path(tempfile.gettempdir()) / f"pr-body-{n}.md"; f.write_text(body, encoding="utf-8")
+        print(f"PR=OPEN_WITH_TOOLS BRANCH={branch} TITLE={d['title']} BODY_FILE={f}"); return
     url = run("gh", "pr", "create", "--repo", REPO, "--base", "main", "--head", branch, "--title", d["title"], "--body", body).stdout.strip()
     print(f"PR={url.rsplit('/',1)[1]}")
 
@@ -171,6 +190,8 @@ def merge(n, prn):
     commit(f"chore(#{n}): pipeline artifacts")
     if run("git", "status", "-sb").stdout.find("ahead") >= 0:
         run("git", "push", "-q")
+    if not HAS_GH:
+        print("PUSHED_ARTIFACTS — wait for CI, merge, then run: pipeline_orch.py sync"); return
     time.sleep(15)
     c = run("gh", "pr", "checks", str(prn), "--repo", REPO, "--watch", "--interval", "20", check=False)
     if c.returncode != 0 and "no checks reported" not in (c.stdout + c.stderr):
@@ -200,6 +221,11 @@ def issue(label, title, body_file, n=None):
     print(url)
 
 
+def sync():
+    run("git", "switch", "main"); run("git", "pull", "--ff-only")
+    print(f"MAIN={run('git','rev-parse','--short','HEAD').stdout.strip()}")
+
+
 def metric(n, row):
     """row: '#|Stage|Agent|Model|duration_ms|tokens|tool_uses|outcome' — finish = now, start = now - duration."""
     p = pdir(n)
@@ -215,4 +241,4 @@ def metric(n, row):
 
 if __name__ == "__main__":
     cmd, *a = sys.argv[1:]
-    {"start": start, "verify": verify, "pr": pr, "poll": poll, "push": push, "merge": merge, "issue": issue, "metric": metric}[cmd](*a)
+    {"start": start, "verify": verify, "pr": pr, "poll": poll, "push": push, "merge": merge, "issue": issue, "metric": metric, "sync": sync}[cmd](*a)

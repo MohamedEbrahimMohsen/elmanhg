@@ -1,7 +1,8 @@
 # Elmanhg — autopilot progress
 
 Last updated: 2026-09-28, after story #64 merged (main at `ef8af53`).
-The run stopped here because the dev asked it to. The next session resumes at **#65**.
+The laptop run stopped here because the dev asked it to. A Claude Code cloud session resumes at **#65**
+(see "Running in a cloud session" below).
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
@@ -120,6 +121,25 @@ The flow is `.claude/commands/feature.md`. Every stage is a fresh subagent: `fea
   - Mobile tab bar: 3 items + "المزيد". Awaiting dev confirmation in #135.
 - **Docs-sync rule** (`.claude/rules/docs-sync.md`): a change that alters behaviour must update the owning doc in `/docs` in the same PR. Reviewers block on divergence. This file sits at the repo root because the dev asked for it by name; strictly, the rule says docs live in `/docs`.
 
+## Running in a cloud session
+
+The run continues in a Claude Code cloud container from 2026-09-28. The dev approved full autopilot there:
+per-story `feature/<n>-<slug>` branches, PRs, and squash-merge on green CI.
+
+- **Toolchain:** run `bash scripts/cloud-setup.sh` after any container restart. It starts Docker, which
+  Testcontainers needs, and copies .NET SDK 10.0.401 out of `mcr.microsoft.com/dotnet/sdk:10.0` because the
+  dotnet download host is blocked. Baseline on `ed2d60f`: api 665/665 and web 240/240, with typecheck, lint
+  and format clean.
+- **No `gh` CLI.** `pipeline_orch.py` detects this. `start` reads the issue from the public REST API, `pr`
+  pushes and writes the PR body to a temp file, and `merge` only pushes the remaining artifacts. The
+  orchestrator opens PRs, polls CodeRabbit and CI, merges, closes stories and opens issues through the GitHub
+  MCP tools, then runs `pipeline_orch.py sync`.
+- **Morabh** is cloned read-only at `/home/user/apis`, not `D:\...\Morabh\repos\apis`. Agent prompts pass
+  this path.
+- **Node:** the container has Node 22, while CI uses 24 (`web/.nvmrc`). The baseline passed on 22. Treat
+  web-ci as authoritative.
+- **#135** (mobile tab bar: 3 items + "المزيد") was confirmed by the dev on 2026-09-28 and closed.
+
 ## Gotchas
 
 - **CodeRabbit (free plan):**
@@ -135,4 +155,4 @@ The flow is `.claude/commands/feature.md`. Every stage is a fresh subagent: `fea
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148 · `dev-decision`: #135.
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148 · `dev-decision`: none open (#135 confirmed and closed).
