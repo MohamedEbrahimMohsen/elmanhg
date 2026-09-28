@@ -93,6 +93,24 @@ public sealed class LessonsEndpointTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task GetList_Admin_ReturnsQuestionCountPerLesson()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var (_, unitId) = await SeedUnitAsync();
+        var first = await ContentTestData.SeedLessonAsync(factory, unitId, "Newton's laws", 1, [], cancellationToken);
+        await ContentTestData.SeedLessonAsync(factory, unitId, "Momentum", 2, [], cancellationToken);
+        await QuestionTestData.SeedQuestionAsync(factory, first, approved: false, cancellationToken);
+        await QuestionTestData.SeedQuestionAsync(factory, first, approved: true, cancellationToken);
+        using var admin = await AdminClientAsync();
+
+        using var response = await admin.GetAsync($"{Route}?unitId={unitId}", cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var lessons = (await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken)).EnumerateArray().ToList();
+        lessons.Select(x => x.GetProperty("questionCount").GetInt32()).Should().Equal(2, 0);
+    }
+
+    [Fact]
     public async Task GetList_UnknownUnit_Returns404UnitNotFound()
     {
         using var admin = await AdminClientAsync();

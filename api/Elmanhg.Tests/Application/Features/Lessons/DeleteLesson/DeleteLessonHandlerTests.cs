@@ -3,6 +3,7 @@ using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Lessons.DeleteLesson;
 using Elmanhg.Domain.Lessons;
+using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Units;
 using FluentAssertions;
@@ -14,6 +15,7 @@ namespace Elmanhg.Tests.Application.Features.Lessons.DeleteLesson;
 public sealed class DeleteLessonHandlerTests
 {
     private readonly ILessonRepository _lessonRepository = Substitute.For<ILessonRepository>();
+    private readonly IQuestionRepository _questionRepository = Substitute.For<IQuestionRepository>();
     private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
     private readonly Guid _currentUserId = Guid.NewGuid();
     private readonly Lesson _lesson = Lesson.Create(CurriculumUnit.Create(Subject.Create("Physics", 1, Guid.NewGuid()), "Mechanics", 1, Guid.NewGuid()), "Newton's laws", 1, Guid.NewGuid());
@@ -23,7 +25,7 @@ public sealed class DeleteLessonHandlerTests
     {
         _currentUserService.UserId.Returns(_currentUserId);
         _lessonRepository.GetWithObjectivesAsync(_lesson.Id, false, Arg.Any<CancellationToken>()).Returns(_lesson);
-        _handler = new DeleteLessonHandler(_lessonRepository, _currentUserService);
+        _handler = new DeleteLessonHandler(_lessonRepository, _questionRepository, _currentUserService);
     }
 
     [Fact]
@@ -44,6 +46,18 @@ public sealed class DeleteLessonHandlerTests
         var act = () => _handler.Handle(new DeleteLessonCommand(_lesson.Id), TestContext.Current.CancellationToken);
 
         (await act.Should().ThrowAsync<BusinessRuleViolationCoreException>()).Which.ErrorCode.Should().Be(DomainErrorCodes.LessonIsPublished);
+        _lesson.IsDeleted.Should().BeFalse();
+        await _lessonRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_LessonWithQuestions_ThrowsLessonHasQuestions()
+    {
+        _questionRepository.AnyInLessonAsync(_lesson.Id, Arg.Any<CancellationToken>()).Returns(true);
+
+        var act = () => _handler.Handle(new DeleteLessonCommand(_lesson.Id), TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<BusinessRuleViolationCoreException>()).Which.ErrorCode.Should().Be(DomainErrorCodes.LessonHasQuestions);
         _lesson.IsDeleted.Should().BeFalse();
         await _lessonRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }

@@ -70,6 +70,7 @@
     "LESSON_ALREADY_ARCHIVED": "هذا الدرس مؤرشف بالفعل.",
     "LESSON_NOT_PUBLISHED": "يمكن ارشفة الدرس المنشور فقط. احذف المسودة بدلا من ذلك.",
     "LESSON_IS_PUBLISHED": "اعد الدرس الى مسودة او ارشفه قبل حذفه.",
+    "LESSON_HAS_QUESTIONS": "لا يمكن حذف الدرس لانه يحتوي على اسئلة.",
     "LESSON_POSITION_INVALID": "الترتيب يجب ان يكون 1 او اكثر."
   },
   "error": {

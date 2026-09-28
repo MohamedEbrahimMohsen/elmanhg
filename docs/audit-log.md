@@ -67,10 +67,12 @@ An array with one element per changed audited entity. Property keys are camelCas
 | ArchiveLesson | `Lesson.Archive` | Lesson | command |
 | ReorderLesson | `Lesson.Reorder` | Lesson | command (the diff lists every sibling whose `Order` changed) |
 | DeleteLesson | `Lesson.Delete` | Lesson | command (the diff lists the lesson and every objective soft-deleted with it) |
+| CreateQuestion | `Question.Create` | Question | result |
+| UpdateQuestion | `Question.Update` | Question | command (the diff lists the changed Question fields; a content edit shows `version`, and `validationStatus` when it resets) |
 
-Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`.
+Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`.
 
-Validation commands (E3) and question commands join this table when they are built.
+Validation commands (E3) join this table when they are built. `QuestionRevision` rows are an append-only history and are not diffed.
 
 ## Not audited (deliberate)
 

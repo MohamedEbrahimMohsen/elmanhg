@@ -41,3 +41,6 @@ coverage/
 .env
 .env.local
 .claude/pipeline.local.yml
+
+# IDE
+.vs/

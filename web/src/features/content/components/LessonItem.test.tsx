@@ -25,9 +25,9 @@ const physics: SubjectDetailResult = {
 };
 
 const lessons: LessonResult[] = [
-  { id: 'l1', unitId: 'u1', name: "Newton's laws", order: 1, state: 'Draft' },
-  { id: 'l2', unitId: 'u1', name: 'Momentum', order: 2, state: 'Published' },
-  { id: 'l3', unitId: 'u1', name: 'Energy', order: 3, state: 'Archived' },
+  { id: 'l1', unitId: 'u1', name: "Newton's laws", order: 1, state: 'Draft', questionCount: 2 },
+  { id: 'l2', unitId: 'u1', name: 'Momentum', order: 2, state: 'Published', questionCount: 0 },
+  { id: 'l3', unitId: 'u1', name: 'Energy', order: 3, state: 'Archived', questionCount: 1 },
 ];
 
 const openTree = async (user: ReturnType<typeof userEvent.setup>, lng: 'en' | 'ar' = 'en') => {
@@ -186,6 +186,41 @@ describe('LessonItem', () => {
     await user.click(group.getByRole('button', { name: 'نشر' }));
 
     expect(screen.getByText("نشر Newton's laws؟ سيظهر للطلاب.")).toBeInTheDocument();
+  });
+
+  it('shows the question count of each lesson', async () => {
+    const user = userEvent.setup();
+    const { rows } = await openTree(user);
+
+    const [first, second, third] = rows;
+    if (!first || !second || !third) {
+      throw new Error('The lesson list is incomplete.');
+    }
+    expect(within(first).getByText('2 questions')).toBeInTheDocument();
+    expect(within(second).getByText('0 questions')).toBeInTheDocument();
+    expect(within(third).getByText('1 question')).toBeInTheDocument();
+  });
+
+  it('shows the question count in Arabic', async () => {
+    const user = userEvent.setup();
+    await openTree(user, 'ar');
+
+    expect(screen.getByText('سؤالان')).toBeVisible();
+  });
+
+  it('explains why a lesson with questions cannot be deleted', async () => {
+    server.use(
+      http.delete('*/api/lessons/:lessonId', () =>
+        HttpResponse.json({ code: 'LESSON_HAS_QUESTIONS' }, { status: 400 }),
+      ),
+    );
+    const user = userEvent.setup();
+    await openTree(user);
+
+    await user.click(actionsOf("Newton's laws").getByRole('button', { name: 'Delete' }));
+    await user.click(actionsOf("Newton's laws").getByRole('button', { name: 'Yes, delete' }));
+
+    expect(await screen.findByText('This lesson has questions and cannot be deleted.')).toBeInTheDocument();
   });
 
   it('has no axe violations while confirming', async () => {

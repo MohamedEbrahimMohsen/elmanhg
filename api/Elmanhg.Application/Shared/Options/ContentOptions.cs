@@ -32,4 +32,34 @@ public sealed class ContentOptions
 
     [Range(1, int.MaxValue)]
     public int LessonImageMaxSizeInMb { get; set; }
+
+    [Range(1, int.MaxValue)]
+    public int QuestionStemMaxLength { get; set; }
+
+    [Range(1, int.MaxValue)]
+    public int QuestionExplanationMaxLength { get; set; }
+
+    [Range(1, int.MaxValue)]
+    public int QuestionOptionsMaxCount { get; set; }
+
+    [Range(1, int.MaxValue)]
+    public int QuestionOptionTextMaxLength { get; set; }
+
+    [Range(1, int.MaxValue)]
+    public int QuestionBlanksMaxCount { get; set; }
+
+    [Range(1, int.MaxValue)]
+    public int QuestionAcceptedAnswersMaxCount { get; set; }
+
+    [Range(1, int.MaxValue)]
+    public int QuestionAnswerMaxLength { get; set; }
+
+    [Range(1, int.MaxValue)]
+    public int QuestionTagsMaxCount { get; set; }
+
+    [Range(1, int.MaxValue)]
+    public int QuestionTagMaxLength { get; set; }
+
+    [Range(1, int.MaxValue)]
+    public int QuestionMaxScoreMax { get; set; }
 }

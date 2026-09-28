@@ -4,9 +4,9 @@ namespace Elmanhg.Application.Lessons.Shared;
 
 public static class LessonResultGenerator
 {
-    public static LessonResult Generate(Lesson lesson)
+    public static LessonResult Generate(Lesson lesson, int questionCount)
     {
-        return new LessonResult(lesson.Id, lesson.UnitId, lesson.Name, lesson.Order, lesson.State.ToString());
+        return new LessonResult(lesson.Id, lesson.UnitId, lesson.Name, lesson.Order, lesson.State.ToString(), questionCount);
     }
 
     public static LessonDetailResult GenerateDetail(Lesson lesson)

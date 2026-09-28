@@ -18,4 +18,11 @@ public static class ErrorCodes
     public const string LessonAlreadyArchived = "LESSON_ALREADY_ARCHIVED";
     public const string LessonNotPublished = "LESSON_NOT_PUBLISHED";
     public const string LessonIsPublished = "LESSON_IS_PUBLISHED";
+    public const string LessonHasQuestions = "LESSON_HAS_QUESTIONS";
+
+    // QUESTIONS
+    public const string QuestionObjectiveNotInLesson = "QUESTION_OBJECTIVE_NOT_IN_LESSON";
+    public const string QuestionTypeImmutable = "QUESTION_TYPE_IMMUTABLE";
+    public const string QuestionNotPending = "QUESTION_NOT_PENDING";
+    public const string QuestionValidatorNotAssigned = "QUESTION_VALIDATOR_NOT_ASSIGNED";
 }
