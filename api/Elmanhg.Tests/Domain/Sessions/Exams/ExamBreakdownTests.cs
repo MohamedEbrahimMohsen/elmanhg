@@ -116,6 +116,30 @@ public sealed class ExamBreakdownTests
         ExamBreakdown.WeakestObjectives(session, [Place(session, 0, _lessonA, 1)], Threshold, 3).Should().BeEmpty();
     }
 
+    [Fact]
+    public void ByUnit_SumsLessonSharesPerUnitInScopeOrder()
+    {
+        Guid unitFirst = Guid.NewGuid(), unitSecond = Guid.NewGuid(), lessonC = Guid.NewGuid();
+        List<ExamShare> lessonShares = [LessonShare(_lessonA, 2, 1, 1m, 2), LessonShare(_lessonB, 1, 0, 0m, 1), LessonShare(lessonC, 3, 3, 3m, 3)];
+        var unitIdByLessonId = new Dictionary<Guid, Guid> { [_lessonA] = unitSecond, [_lessonB] = unitFirst, [lessonC] = unitSecond };
+
+        var shares = ExamBreakdown.ByUnit(lessonShares, unitIdByLessonId, [unitFirst, unitSecond]);
+
+        shares.Select(x => (x.UnitId, x.QuestionCount, x.CorrectCount, x.Score, x.MaxScore, x.ScorePercent)).Should().Equal((unitFirst, 1, 0, 0m, 1, 0m), (unitSecond, 5, 4, 4m, 5, 80.00m));
+    }
+
+    [Fact]
+    public void ByUnit_LessonWithoutUnit_IsSkipped()
+    {
+        var unitId = Guid.NewGuid();
+
+        var shares = ExamBreakdown.ByUnit([LessonShare(_lessonA, 1, 1, 1m, 1), LessonShare(_lessonB, 1, 0, 0m, 1)], new Dictionary<Guid, Guid> { [_lessonA] = unitId }, [unitId]);
+
+        shares.Should().ContainSingle().Which.Should().Match<ExamUnitShare>(x => x.UnitId == unitId && x.QuestionCount == 1 && x.MaxScore == 1);
+    }
+
+    private static ExamShare LessonShare(Guid lessonId, int questionCount, int correctCount, decimal score, int maxScore) => new(lessonId, lessonId, 1, 0, questionCount, correctCount, score, maxScore);
+
     private Session Submitted(int count, params decimal[] answeredScores)
     {
         var session = _builder.Build(count);

@@ -68,6 +68,11 @@ export const startUnitExamResponseLessonsItemCorrectCountRegExpTwo = new RegExp(
 export const startUnitExamResponseLessonsItemScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
 export const startUnitExamResponseLessonsItemMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const startUnitExamResponseLessonsItemScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const startUnitExamResponseUnitBreakdownItemQuestionCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const startUnitExamResponseUnitBreakdownItemCorrectCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const startUnitExamResponseUnitBreakdownItemScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const startUnitExamResponseUnitBreakdownItemMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const startUnitExamResponseUnitBreakdownItemScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
 export const startUnitExamResponseWeakestObjectivesItemQuestionCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const startUnitExamResponseWeakestObjectivesItemScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
 
@@ -76,6 +81,7 @@ export const StartUnitExamResponse = zod.object({
   "id": zod.uuid(),
   "kind": zod.string(),
   "isTestMode": zod.boolean(),
+  "subjectId": zod.uuid().nullable(),
   "subjectName": zod.string().nullable(),
   "units": zod.array(zod.object({
   "unitId": zod.uuid(),
@@ -122,6 +128,15 @@ export const StartUnitExamResponse = zod.object({
   "maxScore": zod.union([zod.int(),zod.stringFormat('int32', startUnitExamResponseLessonsItemMaxScoreRegExpTwo)]),
   "scorePercent": zod.union([zod.number(),zod.stringFormat('double', startUnitExamResponseLessonsItemScorePercentRegExpTwo)])
 })),
+  "unitBreakdown": zod.array(zod.object({
+  "unitId": zod.uuid(),
+  "name": zod.string().nullable(),
+  "questionCount": zod.union([zod.int(),zod.stringFormat('int32', startUnitExamResponseUnitBreakdownItemQuestionCountRegExpTwo)]),
+  "correctCount": zod.union([zod.int(),zod.stringFormat('int32', startUnitExamResponseUnitBreakdownItemCorrectCountRegExpTwo)]),
+  "score": zod.union([zod.number(),zod.stringFormat('double', startUnitExamResponseUnitBreakdownItemScoreRegExpTwo)]),
+  "maxScore": zod.union([zod.int(),zod.stringFormat('int32', startUnitExamResponseUnitBreakdownItemMaxScoreRegExpTwo)]),
+  "scorePercent": zod.union([zod.number(),zod.stringFormat('double', startUnitExamResponseUnitBreakdownItemScorePercentRegExpTwo)])
+})),
   "weakestObjectives": zod.array(zod.object({
   "objectiveId": zod.uuid(),
   "text": zod.string(),
@@ -129,6 +144,189 @@ export const StartUnitExamResponse = zod.object({
   "lessonName": zod.string().nullable(),
   "questionCount": zod.union([zod.int(),zod.stringFormat('int32', startUnitExamResponseWeakestObjectivesItemQuestionCountRegExpTwo)]),
   "scorePercent": zod.union([zod.number(),zod.stringFormat('double', startUnitExamResponseWeakestObjectivesItemScorePercentRegExpTwo)])
+}))
+})
+
+export const GetMultiUnitExamOverviewParams = zod.object({
+  "subjectId": zod.uuid()
+})
+
+export const getMultiUnitExamOverviewResponseUnitsItemServableCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMultiUnitExamOverviewResponseSizesItemRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const GetMultiUnitExamOverviewResponse = zod.object({
+  "subjectId": zod.uuid(),
+  "subjectName": zod.string(),
+  "units": zod.array(zod.object({
+  "unitId": zod.uuid(),
+  "name": zod.string(),
+  "hasBlueprint": zod.boolean(),
+  "isSubjectDefault": zod.boolean(),
+  "servableCount": zod.union([zod.int(),zod.stringFormat('int32', getMultiUnitExamOverviewResponseUnitsItemServableCountRegExpTwo)])
+})),
+  "sizes": zod.array(zod.union([zod.int(),zod.stringFormat('int32', getMultiUnitExamOverviewResponseSizesItemRegExpTwo)])),
+  "inProgressExam": zod.union([zod.null(),zod.object({
+  "sessionId": zod.uuid(),
+  "isThisUnit": zod.boolean()
+})])
+})
+
+export const StartMultiUnitExamParams = zod.object({
+  "subjectId": zod.uuid()
+})
+
+export const startMultiUnitExamBodySizeRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const StartMultiUnitExamBody = zod.object({
+  "unitIds": zod.array(zod.uuid()).nullable(),
+  "size": zod.union([zod.int(),zod.stringFormat('int32', startMultiUnitExamBodySizeRegExpTwo)])
+})
+
+export const startMultiUnitExamResponseTimeLimitMinutesRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const startMultiUnitExamResponsePassMarkRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const startMultiUnitExamResponseScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const startMultiUnitExamResponseElapsedMillisecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const startMultiUnitExamResponseItemsItemPositionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const startMultiUnitExamResponseItemsItemQuestionVersionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const startMultiUnitExamResponseItemsItemMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const startMultiUnitExamResponseItemsItemAttemptTwoScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const startMultiUnitExamResponseItemsItemAttemptTwoNormalisedScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const startMultiUnitExamResponseItemsItemAttemptTwoTimeTakenMillisecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const startMultiUnitExamResponseLessonsItemQuestionCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const startMultiUnitExamResponseLessonsItemCorrectCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const startMultiUnitExamResponseLessonsItemScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const startMultiUnitExamResponseLessonsItemMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const startMultiUnitExamResponseLessonsItemScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const startMultiUnitExamResponseUnitBreakdownItemQuestionCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const startMultiUnitExamResponseUnitBreakdownItemCorrectCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const startMultiUnitExamResponseUnitBreakdownItemScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const startMultiUnitExamResponseUnitBreakdownItemMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const startMultiUnitExamResponseUnitBreakdownItemScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const startMultiUnitExamResponseWeakestObjectivesItemQuestionCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const startMultiUnitExamResponseWeakestObjectivesItemScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+
+
+export const StartMultiUnitExamResponse = zod.object({
+  "id": zod.uuid(),
+  "kind": zod.string(),
+  "isTestMode": zod.boolean(),
+  "subjectId": zod.uuid().nullable(),
+  "subjectName": zod.string().nullable(),
+  "units": zod.array(zod.object({
+  "unitId": zod.uuid(),
+  "name": zod.string().nullable()
+})),
+  "startedAt": zod.iso.datetime({"offset":true}),
+  "timeLimitMinutes": zod.union([zod.int(),zod.stringFormat('int32', startMultiUnitExamResponseTimeLimitMinutesRegExpTwo)]).nullable(),
+  "deadline": zod.iso.datetime({"offset":true}).nullable(),
+  "serverNow": zod.iso.datetime({"offset":true}),
+  "passMark": zod.union([zod.int(),zod.stringFormat('int32', startMultiUnitExamResponsePassMarkRegExpTwo)]),
+  "submittedAt": zod.iso.datetime({"offset":true}).nullable(),
+  "scorePercent": zod.union([zod.number(),zod.stringFormat('double', startMultiUnitExamResponseScorePercentRegExpTwo)]).nullable(),
+  "isPassed": zod.boolean().nullable(),
+  "elapsedMilliseconds": zod.union([zod.int(),zod.stringFormat('int64', startMultiUnitExamResponseElapsedMillisecondsRegExpTwo)]),
+  "items": zod.array(zod.object({
+  "position": zod.union([zod.int(),zod.stringFormat('int32', startMultiUnitExamResponseItemsItemPositionRegExpTwo)]),
+  "questionId": zod.uuid(),
+  "questionVersion": zod.union([zod.int(),zod.stringFormat('int32', startMultiUnitExamResponseItemsItemQuestionVersionRegExpTwo)]),
+  "type": zod.string(),
+  "stem": zod.string(),
+  "body": zod.unknown(),
+  "maxScore": zod.union([zod.int(),zod.stringFormat('int32', startMultiUnitExamResponseItemsItemMaxScoreRegExpTwo)]),
+  "savedAnswer": zod.union([zod.null(),zod.unknown()]),
+  "answerSavedAt": zod.iso.datetime({"offset":true}).nullable(),
+  "attempt": zod.union([zod.null(),zod.object({
+  "id": zod.uuid(),
+  "answer": zod.unknown(),
+  "score": zod.union([zod.number(),zod.stringFormat('double', startMultiUnitExamResponseItemsItemAttemptTwoScoreRegExpTwo)]),
+  "normalisedScore": zod.union([zod.number(),zod.stringFormat('double', startMultiUnitExamResponseItemsItemAttemptTwoNormalisedScoreRegExpTwo)]),
+  "outcome": zod.string(),
+  "feedback": zod.string().nullable(),
+  "timeTakenMilliseconds": zod.union([zod.int(),zod.stringFormat('int32', startMultiUnitExamResponseItemsItemAttemptTwoTimeTakenMillisecondsRegExpTwo)]),
+  "createdAt": zod.iso.datetime({"offset":true})
+})]),
+  "correctAnswer": zod.union([zod.null(),zod.unknown()]),
+  "explanation": zod.string().nullable()
+})),
+  "lessons": zod.array(zod.object({
+  "lessonId": zod.uuid(),
+  "name": zod.string().nullable(),
+  "questionCount": zod.union([zod.int(),zod.stringFormat('int32', startMultiUnitExamResponseLessonsItemQuestionCountRegExpTwo)]),
+  "correctCount": zod.union([zod.int(),zod.stringFormat('int32', startMultiUnitExamResponseLessonsItemCorrectCountRegExpTwo)]),
+  "score": zod.union([zod.number(),zod.stringFormat('double', startMultiUnitExamResponseLessonsItemScoreRegExpTwo)]),
+  "maxScore": zod.union([zod.int(),zod.stringFormat('int32', startMultiUnitExamResponseLessonsItemMaxScoreRegExpTwo)]),
+  "scorePercent": zod.union([zod.number(),zod.stringFormat('double', startMultiUnitExamResponseLessonsItemScorePercentRegExpTwo)])
+})),
+  "unitBreakdown": zod.array(zod.object({
+  "unitId": zod.uuid(),
+  "name": zod.string().nullable(),
+  "questionCount": zod.union([zod.int(),zod.stringFormat('int32', startMultiUnitExamResponseUnitBreakdownItemQuestionCountRegExpTwo)]),
+  "correctCount": zod.union([zod.int(),zod.stringFormat('int32', startMultiUnitExamResponseUnitBreakdownItemCorrectCountRegExpTwo)]),
+  "score": zod.union([zod.number(),zod.stringFormat('double', startMultiUnitExamResponseUnitBreakdownItemScoreRegExpTwo)]),
+  "maxScore": zod.union([zod.int(),zod.stringFormat('int32', startMultiUnitExamResponseUnitBreakdownItemMaxScoreRegExpTwo)]),
+  "scorePercent": zod.union([zod.number(),zod.stringFormat('double', startMultiUnitExamResponseUnitBreakdownItemScorePercentRegExpTwo)])
+})),
+  "weakestObjectives": zod.array(zod.object({
+  "objectiveId": zod.uuid(),
+  "text": zod.string(),
+  "lessonId": zod.uuid(),
+  "lessonName": zod.string().nullable(),
+  "questionCount": zod.union([zod.int(),zod.stringFormat('int32', startMultiUnitExamResponseWeakestObjectivesItemQuestionCountRegExpTwo)]),
+  "scorePercent": zod.union([zod.number(),zod.stringFormat('double', startMultiUnitExamResponseWeakestObjectivesItemScorePercentRegExpTwo)])
+}))
+})
+
+export const PreviewMultiUnitExamParams = zod.object({
+  "subjectId": zod.uuid()
+})
+
+export const previewMultiUnitExamQuerySizeRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const PreviewMultiUnitExamQueryParams = zod.object({
+  "unitIds": zod.array(zod.uuid()).optional(),
+  "size": zod.union([zod.int(),zod.stringFormat('int32', previewMultiUnitExamQuerySizeRegExpTwo)]).optional()
+})
+
+export const previewMultiUnitExamResponseSizeRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const previewMultiUnitExamResponseBlueprintQuestionCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const previewMultiUnitExamResponseBlueprintTypeCountsItemRequiredRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const previewMultiUnitExamResponseBlueprintTypeCountsItemAvailableRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const previewMultiUnitExamResponseBlueprintDifficultyMixTwoEasyPercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const previewMultiUnitExamResponseBlueprintDifficultyMixTwoMediumPercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const previewMultiUnitExamResponseBlueprintDifficultyMixTwoHardPercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const previewMultiUnitExamResponseBlueprintTimeLimitMinutesRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const previewMultiUnitExamResponseBlueprintPassMarkRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const previewMultiUnitExamResponseUnitsItemQuestionCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const PreviewMultiUnitExamResponse = zod.object({
+  "subjectId": zod.uuid(),
+  "size": zod.union([zod.int(),zod.stringFormat('int32', previewMultiUnitExamResponseSizeRegExpTwo)]),
+  "blueprint": zod.object({
+  "isSubjectDefault": zod.boolean(),
+  "questionCount": zod.union([zod.int(),zod.stringFormat('int32', previewMultiUnitExamResponseBlueprintQuestionCountRegExpTwo)]),
+  "typeCounts": zod.array(zod.object({
+  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short']),
+  "required": zod.union([zod.int(),zod.stringFormat('int32', previewMultiUnitExamResponseBlueprintTypeCountsItemRequiredRegExpTwo)]),
+  "available": zod.union([zod.int(),zod.stringFormat('int32', previewMultiUnitExamResponseBlueprintTypeCountsItemAvailableRegExpTwo)])
+})),
+  "difficultyMix": zod.union([zod.null(),zod.object({
+  "easyPercent": zod.union([zod.int(),zod.stringFormat('int32', previewMultiUnitExamResponseBlueprintDifficultyMixTwoEasyPercentRegExpTwo)]),
+  "mediumPercent": zod.union([zod.int(),zod.stringFormat('int32', previewMultiUnitExamResponseBlueprintDifficultyMixTwoMediumPercentRegExpTwo)]),
+  "hardPercent": zod.union([zod.int(),zod.stringFormat('int32', previewMultiUnitExamResponseBlueprintDifficultyMixTwoHardPercentRegExpTwo)])
+})]),
+  "timeLimitMinutes": zod.union([zod.int(),zod.stringFormat('int32', previewMultiUnitExamResponseBlueprintTimeLimitMinutesRegExpTwo)]).nullable(),
+  "passMark": zod.union([zod.int(),zod.stringFormat('int32', previewMultiUnitExamResponseBlueprintPassMarkRegExpTwo)])
+}),
+  "isAvailable": zod.boolean(),
+  "units": zod.array(zod.object({
+  "unitId": zod.uuid(),
+  "name": zod.string(),
+  "questionCount": zod.union([zod.int(),zod.stringFormat('int32', previewMultiUnitExamResponseUnitsItemQuestionCountRegExpTwo)]),
+  "isSubjectDefault": zod.boolean()
 }))
 })
 
@@ -151,6 +349,11 @@ export const getExamSessionResponseLessonsItemCorrectCountRegExpTwo = new RegExp
 export const getExamSessionResponseLessonsItemScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
 export const getExamSessionResponseLessonsItemMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const getExamSessionResponseLessonsItemScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const getExamSessionResponseUnitBreakdownItemQuestionCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getExamSessionResponseUnitBreakdownItemCorrectCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getExamSessionResponseUnitBreakdownItemScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const getExamSessionResponseUnitBreakdownItemMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getExamSessionResponseUnitBreakdownItemScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
 export const getExamSessionResponseWeakestObjectivesItemQuestionCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const getExamSessionResponseWeakestObjectivesItemScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
 
@@ -159,6 +362,7 @@ export const GetExamSessionResponse = zod.object({
   "id": zod.uuid(),
   "kind": zod.string(),
   "isTestMode": zod.boolean(),
+  "subjectId": zod.uuid().nullable(),
   "subjectName": zod.string().nullable(),
   "units": zod.array(zod.object({
   "unitId": zod.uuid(),
@@ -205,6 +409,15 @@ export const GetExamSessionResponse = zod.object({
   "maxScore": zod.union([zod.int(),zod.stringFormat('int32', getExamSessionResponseLessonsItemMaxScoreRegExpTwo)]),
   "scorePercent": zod.union([zod.number(),zod.stringFormat('double', getExamSessionResponseLessonsItemScorePercentRegExpTwo)])
 })),
+  "unitBreakdown": zod.array(zod.object({
+  "unitId": zod.uuid(),
+  "name": zod.string().nullable(),
+  "questionCount": zod.union([zod.int(),zod.stringFormat('int32', getExamSessionResponseUnitBreakdownItemQuestionCountRegExpTwo)]),
+  "correctCount": zod.union([zod.int(),zod.stringFormat('int32', getExamSessionResponseUnitBreakdownItemCorrectCountRegExpTwo)]),
+  "score": zod.union([zod.number(),zod.stringFormat('double', getExamSessionResponseUnitBreakdownItemScoreRegExpTwo)]),
+  "maxScore": zod.union([zod.int(),zod.stringFormat('int32', getExamSessionResponseUnitBreakdownItemMaxScoreRegExpTwo)]),
+  "scorePercent": zod.union([zod.number(),zod.stringFormat('double', getExamSessionResponseUnitBreakdownItemScorePercentRegExpTwo)])
+})),
   "weakestObjectives": zod.array(zod.object({
   "objectiveId": zod.uuid(),
   "text": zod.string(),
@@ -248,6 +461,11 @@ export const submitExamResponseLessonsItemCorrectCountRegExpTwo = new RegExp('^-
 export const submitExamResponseLessonsItemScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
 export const submitExamResponseLessonsItemMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const submitExamResponseLessonsItemScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const submitExamResponseUnitBreakdownItemQuestionCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const submitExamResponseUnitBreakdownItemCorrectCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const submitExamResponseUnitBreakdownItemScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const submitExamResponseUnitBreakdownItemMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const submitExamResponseUnitBreakdownItemScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
 export const submitExamResponseWeakestObjectivesItemQuestionCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const submitExamResponseWeakestObjectivesItemScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
 
@@ -256,6 +474,7 @@ export const SubmitExamResponse = zod.object({
   "id": zod.uuid(),
   "kind": zod.string(),
   "isTestMode": zod.boolean(),
+  "subjectId": zod.uuid().nullable(),
   "subjectName": zod.string().nullable(),
   "units": zod.array(zod.object({
   "unitId": zod.uuid(),
@@ -301,6 +520,15 @@ export const SubmitExamResponse = zod.object({
   "score": zod.union([zod.number(),zod.stringFormat('double', submitExamResponseLessonsItemScoreRegExpTwo)]),
   "maxScore": zod.union([zod.int(),zod.stringFormat('int32', submitExamResponseLessonsItemMaxScoreRegExpTwo)]),
   "scorePercent": zod.union([zod.number(),zod.stringFormat('double', submitExamResponseLessonsItemScorePercentRegExpTwo)])
+})),
+  "unitBreakdown": zod.array(zod.object({
+  "unitId": zod.uuid(),
+  "name": zod.string().nullable(),
+  "questionCount": zod.union([zod.int(),zod.stringFormat('int32', submitExamResponseUnitBreakdownItemQuestionCountRegExpTwo)]),
+  "correctCount": zod.union([zod.int(),zod.stringFormat('int32', submitExamResponseUnitBreakdownItemCorrectCountRegExpTwo)]),
+  "score": zod.union([zod.number(),zod.stringFormat('double', submitExamResponseUnitBreakdownItemScoreRegExpTwo)]),
+  "maxScore": zod.union([zod.int(),zod.stringFormat('int32', submitExamResponseUnitBreakdownItemMaxScoreRegExpTwo)]),
+  "scorePercent": zod.union([zod.number(),zod.stringFormat('double', submitExamResponseUnitBreakdownItemScorePercentRegExpTwo)])
 })),
   "weakestObjectives": zod.array(zod.object({
   "objectiveId": zod.uuid(),

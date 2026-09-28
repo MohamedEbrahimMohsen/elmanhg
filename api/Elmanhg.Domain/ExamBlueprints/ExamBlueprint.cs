@@ -46,7 +46,7 @@ public class ExamBlueprint : AuditEntity, IAuditedEntity
         var shortfalls = ExamBlueprintShortfall.Find(GetTypeCounts(), servable);
         if (shortfalls.Count > 0)
         {
-            throw new BusinessRuleViolationCoreException(ErrorCodes.ExamShortfall, context: new Dictionary<string, object> { ["types"] = Describe(shortfalls) });
+            throw new BusinessRuleViolationCoreException(ErrorCodes.ExamShortfall, context: new Dictionary<string, object> { ["types"] = ExamBlueprintShortfall.Describe(shortfalls) });
         }
     }
 
@@ -86,9 +86,7 @@ public class ExamBlueprint : AuditEntity, IAuditedEntity
         var shortfalls = ExamBlueprintShortfall.Find(shape.TypeCounts, servable);
         if (shortfalls.Count > 0)
         {
-            throw new BusinessRuleViolationCoreException(ErrorCodes.ExamBlueprintShortfall, context: new Dictionary<string, object> { ["types"] = Describe(shortfalls) });
+            throw new BusinessRuleViolationCoreException(ErrorCodes.ExamBlueprintShortfall, context: new Dictionary<string, object> { ["types"] = ExamBlueprintShortfall.Describe(shortfalls) });
         }
     }
-
-    private static string Describe(IEnumerable<ExamTypeShortfall> shortfalls) => string.Join(", ", shortfalls.Select(x => $"{x.Type} {x.Available}/{x.Required}"));
 }

@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { PlaceholderPage } from '@/features/shell';
+import { MultiExamBuilderPage, multiExamSearchSchema } from '@/features/exam';
 
 export const Route = createFileRoute('/student/multi-exam')({
-  component: () => <PlaceholderPage titleKey="nav.student.multiExam" />,
+  validateSearch: multiExamSearchSchema,
+  component: MultiExamBuilderPage,
 });

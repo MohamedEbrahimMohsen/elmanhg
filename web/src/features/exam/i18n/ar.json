@@ -21,6 +21,7 @@
   },
   "exam": {
     "title": "امتحان: {unit}",
+    "multiTitle": "امتحان متعدد: {unit}",
     "loading": "جارٍ تحميل الامتحان…",
     "errorTitle": "تعذّر تحميل الامتحان.",
     "timeLeft": "الوقت المتبقي {minutes}:{seconds}",
@@ -40,6 +41,7 @@
   },
   "result": {
     "title": "نتيجة: {unit}",
+    "multiTitle": "نتيجة امتحان متعدد: {unit}",
     "loading": "جارٍ تحميل النتيجة…",
     "errorTitle": "تعذّر تحميل النتيجة.",
     "score": "{score, number} / 100",
@@ -60,6 +62,30 @@
     "unanswered": "لم تُجب عن هذا السؤال.",
     "correctAnswer": "الإجابة الصحيحة",
     "retake": "إعادة الامتحان",
-    "progress": "تقدّمي"
+    "progress": "تقدّمي",
+    "byUnit": "حسب الوحدة",
+    "unit": "الوحدة",
+    "unitCorrectHeader": "الإجابات الصحيحة",
+    "unitCorrect": "{correct, number} من {total, number}",
+    "unknownUnit": "غير متاح"
+  },
+  "multi": {
+    "title": "امتحان متعدد الوحدات",
+    "subject": "المادة",
+    "loading": "جارٍ تحميل الوحدات…",
+    "errorTitle": "تعذّر تحميل الوحدات.",
+    "subjectsErrorTitle": "تعذّر تحميل المواد.",
+    "noSubjects": "لا توجد مواد بعد.",
+    "noUnits": "لا توجد وحدات في هذه المادة بعد.",
+    "units": "اختر وحدتين أو أكثر:",
+    "available": "({count, number} سؤال متاح)",
+    "noBlueprint": "لا يوجد امتحان لهذه الوحدة",
+    "size": "عدد الأسئلة",
+    "sizeOption": "{size, number} سؤال",
+    "chooseTwo": "اختر وحدتين على الأقل.",
+    "previewTitle": "النموذج المدمج (تناسبيًا)",
+    "previewLoading": "جارٍ حساب الامتحان…",
+    "unitShares": "الأسئلة من كل وحدة",
+    "unitShare": "{unit}: {count, number} سؤال"
   }
 }

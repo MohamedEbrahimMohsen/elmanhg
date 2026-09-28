@@ -16,38 +16,10 @@ public partial class Session
             throw new InvalidOperationException("The blueprint does not apply to this unit.");
         }
 
-        if (questions.Count == 0)
-        {
-            throw new BusinessRuleViolationCoreException(ErrorCodes.SessionNoServableQuestions);
-        }
-
-        if (questions.Any(x => !IsServableInUnit(x, unit, lessons)))
-        {
-            throw new BusinessRuleViolationCoreException(ErrorCodes.SessionQuestionNotServable);
-        }
-
-        if (questions.Select(x => x.Id).Distinct().Count() != questions.Count)
-        {
-            throw new BusinessRuleViolationCoreException(ErrorCodes.SessionQuestionDuplicate);
-        }
-
+        HashSet<Guid> unitIds = [unit.Id];
+        EnsureExamQuestions(questions, x => IsServableInUnits(x, unitIds, lessons));
         var scope = new UnitExamScope(unit.Id);
-        var started = ToMicroseconds(now);
-        var session = new Session(Guid.NewGuid(), studentId)
-        {
-            StudentId = studentId,
-            Kind = SessionKind.UnitExam,
-            Scope = scope.ToJson(),
-            ScopeKey = scope.ToKey(),
-            IsTestMode = isTestMode,
-            StartedAt = started,
-            LastActivityAt = started,
-            TimeLimitMinutes = blueprint.TimeLimitMinutes,
-            PassMark = blueprint.PassMark,
-            Deadline = blueprint.TimeLimitMinutes is null ? null : started.AddMinutes(blueprint.TimeLimitMinutes.Value),
-        };
-        session.Items.AddRange(questions.Select((question, index) => SessionItem.Create(session.Id, index + 1, question)));
-        return session;
+        return CreateExam(studentId, SessionKind.UnitExam, scope.ToJson(), scope.ToKey(), blueprint.TimeLimitMinutes, blueprint.PassMark, questions, isTestMode, now);
     }
 
     public bool IsPastDeadline(DateTimeOffset now, TimeSpan grace) => Deadline is not null && now > Deadline.Value + grace;
@@ -75,9 +47,47 @@ public partial class Session
         Touch(at);
     }
 
-    private static bool IsServableInUnit(Question question, CurriculumUnit unit, IReadOnlyCollection<Lesson> lessons)
+    private static void EnsureExamQuestions(IReadOnlyList<Question> questions, Func<Question, bool> isServable)
+    {
+        if (questions.Count == 0)
+        {
+            throw new BusinessRuleViolationCoreException(ErrorCodes.SessionNoServableQuestions);
+        }
+
+        if (questions.Any(x => !isServable(x)))
+        {
+            throw new BusinessRuleViolationCoreException(ErrorCodes.SessionQuestionNotServable);
+        }
+
+        if (questions.Select(x => x.Id).Distinct().Count() != questions.Count)
+        {
+            throw new BusinessRuleViolationCoreException(ErrorCodes.SessionQuestionDuplicate);
+        }
+    }
+
+    private static Session CreateExam(Guid studentId, SessionKind kind, string scope, string scopeKey, int? timeLimitMinutes, int passMark, IReadOnlyList<Question> questions, bool isTestMode, DateTimeOffset now)
+    {
+        var started = ToMicroseconds(now);
+        var session = new Session(Guid.NewGuid(), studentId)
+        {
+            StudentId = studentId,
+            Kind = kind,
+            Scope = scope,
+            ScopeKey = scopeKey,
+            IsTestMode = isTestMode,
+            StartedAt = started,
+            LastActivityAt = started,
+            TimeLimitMinutes = timeLimitMinutes,
+            PassMark = passMark,
+            Deadline = timeLimitMinutes is null ? null : started.AddMinutes(timeLimitMinutes.Value),
+        };
+        session.Items.AddRange(questions.Select((question, index) => SessionItem.Create(session.Id, index + 1, question)));
+        return session;
+    }
+
+    private static bool IsServableInUnits(Question question, IReadOnlySet<Guid> unitIds, IReadOnlyCollection<Lesson> lessons)
     {
         var lesson = lessons.FirstOrDefault(x => x.Id == question.LessonId);
-        return lesson is not null && lesson.UnitId == unit.Id && ServableQuestionSpecification.IsSatisfiedBy(question, lesson);
+        return lesson is not null && unitIds.Contains(lesson.UnitId) && ServableQuestionSpecification.IsSatisfiedBy(question, lesson);
     }
 }

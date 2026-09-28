@@ -5,10 +5,12 @@ using Elmanhg.Application.Exams.GetExamSession;
 using Elmanhg.Application.Exams.Shared;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Sessions;
+using Elmanhg.Domain.Sessions.Exams;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Units;
 using Elmanhg.Tests.Application.Features.Sessions;
@@ -107,6 +109,32 @@ public sealed class GetExamSessionHandlerTests
         result.ElapsedMilliseconds.Should().Be(120_000);
         result.Lessons.Should().ContainSingle().Which.Should().Match<ExamLessonResult>(x => x.LessonId == _builder.Questions.Lesson.Id && x.ScorePercent == 50.00m && x.Name == _builder.Questions.Lesson.Name);
         result.Items.Should().AllSatisfy(x => x.CorrectAnswer.Should().NotBeNull());
+    }
+
+    [Fact]
+    public async Task Handle_SubmittedMultiUnitExam_ReturnsUnitsSubjectAndUnitBreakdown()
+    {
+        var multi = new MultiUnitExamBuilder();
+        List<Question> questions = [multi.Approved(1), multi.Approved(0)];
+        var plan = MultiUnitBlueprintMerge.Merge([new MultiUnitExamPart(multi.Units[0].Id, multi.UnitBlueprint(0, 30, 50, new ExamTypeCount(QuestionType.Mcq, 1))), new MultiUnitExamPart(multi.Units[1].Id, multi.UnitBlueprint(1, 30, 50, new ExamTypeCount(QuestionType.Mcq, 1)))], 20, MultiUnitExamBuilder.MaxTimeLimitMinutes);
+        var session = Session.StartMultiUnitExam(multi.StudentId, multi.Subject.Id, multi.Units, plan, 20, questions, multi.Lessons, false, MultiUnitExamBuilder.Now);
+        session.SaveExamAnswer(session.Items[1], SessionBuilder.AnswerB, Grace, MultiUnitExamBuilder.Now.AddMinutes(1));
+        session.SubmitExam(new Dictionary<Guid, QuestionGrade> { [session.Items[1].QuestionId] = SessionBuilder.Grade(1m) }, MultiUnitExamBuilder.Now.AddMinutes(2));
+        _currentUserService.UserId.Returns(multi.StudentId);
+        SessionRepositoryStub.StubFind(_sessionRepository, session);
+        _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(questions.SelectMany(x => x.Revisions).ToList());
+        _questionRepository.FindAsync(Arg.Any<Expression<Func<Question, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Question>, IQueryable<Question>>?>(), Arg.Any<Func<IQueryable<Question>, IOrderedQueryable<Question>>?>(), Arg.Any<bool>())
+            .Returns(call => questions.Where(call.Arg<Expression<Func<Question, bool>>>().Compile()).ToList());
+        _lessonRepository.FindAsync(Arg.Any<Expression<Func<Lesson, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Lesson>, IQueryable<Lesson>>?>(), Arg.Any<Func<IQueryable<Lesson>, IOrderedQueryable<Lesson>>?>(), Arg.Any<bool>())
+            .Returns(call => multi.Lessons.Where(call.Arg<Expression<Func<Lesson, bool>>>().Compile()).ToList());
+        _unitRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<CurriculumUnit>, IQueryable<CurriculumUnit>>?>(), Arg.Any<bool>()).Returns(call => multi.Units.FirstOrDefault(x => x.Id == call.ArgAt<Guid>(0)));
+        _subjectRepository.GetByIdAsync(multi.Subject.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Subject>, IQueryable<Subject>>?>(), Arg.Any<bool>()).Returns(multi.Subject);
+
+        var result = await _handler.Handle(new GetExamSessionQuery(session.Id), TestContext.Current.CancellationToken);
+
+        result.Units.Select(x => (x.UnitId, x.Name)).Should().Equal((multi.Units[0].Id, "Mechanics"), (multi.Units[1].Id, "Waves"));
+        (result.SubjectId, result.SubjectName).Should().Be((multi.Subject.Id, "Physics"));
+        result.UnitBreakdown.Select(x => (x.UnitId, x.Name, x.QuestionCount, x.ScorePercent)).Should().Equal((multi.Units[0].Id, "Mechanics", 1, 100.00m), (multi.Units[1].Id, "Waves", 1, 0m));
     }
 
     private async Task AssertThrowsAsync<TException>(Guid sessionId, string errorCode) where TException : BaseException

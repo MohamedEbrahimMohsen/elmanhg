@@ -86,6 +86,21 @@ public sealed class GetSessionHistoryHandlerTests
         await _unitRepository.DidNotReceive().FindAsync(Arg.Any<Expression<Func<CurriculumUnit, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<CurriculumUnit>, IQueryable<CurriculumUnit>>?>(), Arg.Any<Func<IQueryable<CurriculumUnit>, IOrderedQueryable<CurriculumUnit>>?>(), Arg.Any<bool>());
     }
 
+    [Fact]
+    public async Task Handle_MultiUnitExam_JoinsUnitNamesInScopeOrder()
+    {
+        var multi = new MultiUnitExamBuilder();
+        List<CurriculumUnit> units = [multi.Units[1], multi.Units[0]];
+        _unitRepository.FindAsync(Arg.Any<Expression<Func<CurriculumUnit, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<CurriculumUnit>, IQueryable<CurriculumUnit>>?>(), Arg.Any<Func<IQueryable<CurriculumUnit>, IOrderedQueryable<CurriculumUnit>>?>(), Arg.Any<bool>())
+            .Returns(call => units.Where(call.Arg<Expression<Func<CurriculumUnit, bool>>>().Compile()).ToList());
+        StubPage([multi.Build()], pageNumber: 1, totalItems: 1, totalPages: 1);
+
+        var result = await _handler.Handle(new GetSessionHistoryQuery(SessionHistoryKind.Exam), TestContext.Current.CancellationToken);
+
+        var item = result.Items.Should().ContainSingle().Subject;
+        (item.Kind, item.ScopeName, item.UnitId, item.LessonId).Should().Be(("MultiUnitExam", "Mechanics + Waves", (Guid?)null, (Guid?)null));
+    }
+
     private void StubPage(List<Session> sessions, int pageNumber, int totalItems, int totalPages)
     {
         _sessionRepository.FindPaginatedAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>(), Arg.Any<Expression<Func<Session, bool>>?>(), Arg.Any<Func<IQueryable<Session>, IQueryable<Session>>?>(), Arg.Any<Func<IQueryable<Session>, IOrderedQueryable<Session>>?>(), Arg.Any<bool>())

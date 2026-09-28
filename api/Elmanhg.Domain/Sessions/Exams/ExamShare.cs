@@ -5,5 +5,7 @@ public sealed record ExamShare(Guid Id, Guid LessonId, int LessonOrder, int Obje
     // Matches the session score precision.
     private const int PercentDecimals = 2;
 
-    public decimal ScorePercent => MaxScore == 0 ? 0m : Math.Round(Score * 100m / MaxScore, PercentDecimals, MidpointRounding.AwayFromZero);
+    public decimal ScorePercent => Percent(Score, MaxScore);
+
+    public static decimal Percent(decimal score, int maxScore) => maxScore == 0 ? 0m : Math.Round(score * 100m / maxScore, PercentDecimals, MidpointRounding.AwayFromZero);
 }

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ExamSessionResult } from '@/shared/api/generated/model';
 import { Button } from '@/shared/ui/button';
-import { sortedExamItems } from '../api/examSession';
+import { examUnitNames, isMultiUnitExam, sortedExamItems } from '../api/examSession';
 import { useExamAnswers } from '../hooks/useExamAnswers';
 import { useExamCountdown } from '../hooks/useExamCountdown';
 import { useSubmitExam } from '../hooks/useSubmitExam';
@@ -33,7 +33,7 @@ export function ExamRunner({ session, receivedAt }: ExamRunnerProps) {
   return (
     <section className="flex flex-col gap-3">
       <ExamHeader
-        title={t('exam.title', { unit: session.units[0]?.name ?? '' })}
+        title={t(isMultiUnitExam(session) ? 'exam.multiTitle' : 'exam.title', { unit: examUnitNames(session) })}
         remainingMilliseconds={remaining}
         status={answers.status}
         lastSavedAt={answers.lastSavedAt}

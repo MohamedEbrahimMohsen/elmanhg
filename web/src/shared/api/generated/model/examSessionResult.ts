@@ -7,12 +7,15 @@
 import type { ExamItemResult } from './examItemResult';
 import type { ExamLessonResult } from './examLessonResult';
 import type { ExamObjectiveResult } from './examObjectiveResult';
+import type { ExamUnitBreakdownResult } from './examUnitBreakdownResult';
 import type { ExamUnitResult } from './examUnitResult';
 
 export interface ExamSessionResult {
   id: string;
   kind: string;
   isTestMode: boolean;
+  /** @nullable */
+  subjectId: string | null;
   /** @nullable */
   subjectName: string | null;
   units: ExamUnitResult[];
@@ -40,5 +43,6 @@ export interface ExamSessionResult {
   elapsedMilliseconds: number | string;
   items: ExamItemResult[];
   lessons: ExamLessonResult[];
+  unitBreakdown: ExamUnitBreakdownResult[];
   weakestObjectives: ExamObjectiveResult[];
 }

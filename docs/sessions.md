@@ -1,6 +1,6 @@
 # Quiz sessions and the attempt log
 
-A **session** is one run of questions by one student: a lesson quiz or a unit exam (a multi-unit exam follows in #82). Exams have their own contract in `docs/exams.md`; this document covers the shared model and quizzes. Every answer is graded at once and stored as an **attempt**. Attempts are stored forever (PRD §7.3) and are the source for mastery (#77), history (#78) and training-data export (E12).
+A **session** is one run of questions by one student: a lesson quiz, a unit exam or a multi-unit exam. Exams have their own contract in `docs/exams.md`; this document covers the shared model and quizzes. Every answer is graded at once and stored as an **attempt**. Attempts are stored forever (PRD §7.3) and are the source for mastery (#77), history (#78) and training-data export (E12).
 
 ## Model
 
@@ -12,9 +12,9 @@ All three tables map one to one to PRD §15. Names follow constitution §3 (no a
 |---|---|---|
 | `Id` | `id` | |
 | `StudentId` | `student_id` | FK `Users`, restrict |
-| `Kind` | `kind` | `Quiz` via `/api/sessions`, `UnitExam` via `/api/exams` (`docs/exams.md`). `MultiUnitExam` is reserved for #82. |
+| `Kind` | `kind` | `Quiz` via `/api/sessions`, `UnitExam` via `/api/exams` (`docs/exams.md`). `MultiUnitExam` via `/api/exams/subjects/{id}/multi-unit` (`docs/exams.md#multi-unit-exams`). |
 | `Scope` | `scope_json` | jsonb. A quiz stores `{"lessonId":"<guid>"}`. |
-| `ScopeKey` | `scope_key` | Canonical string used for resume and uniqueness. A quiz uses `lesson:<guid>`; exams use `unit:<guid>` through `UnitExamScope` (Domain), already read by progress best scores (#78). |
+| `ScopeKey` | `scope_key` | Canonical string used for resume and uniqueness. A quiz uses `lesson:<guid>`; unit exams use `unit:<guid>` through `UnitExamScope` (Domain), already read by progress best scores (#78); multi-unit exams use `units:<size>:<sorted comma-separated unit guids>` through `MultiUnitExamScope` (#82). |
 | `IsTestMode` | `is_test_mode` | True when an Admin runs the quiz or exam. |
 | `StartedAt` | `started_at` | |
 | `LastActivityAt` | `last_activity_at` | Set at start, on resume, on each attempt and on finish. |

@@ -24,7 +24,8 @@
     { "key": "blueprintSubjectId", "value": "" },
     { "key": "blueprintUnitId", "value": "" },
     { "key": "examSessionId", "value": "" },
-    { "key": "examQuestionId", "value": "" }
+    { "key": "examQuestionId", "value": "" },
+    { "key": "secondUnitId", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -1654,7 +1655,7 @@
     },
     {
       "name": "Exams",
-      "description": "Sign in as a Student (or an Admin for test mode). `unitId` must have an exam blueprint (its own or the subject default) and enough servable questions. One exam may be open at a time; answers are drafts until Submit exam.",
+      "description": "Sign in as a Student (or an Admin for test mode). `unitId` must have an exam blueprint (its own or the subject default) and enough servable questions. One exam may be open at a time; answers are drafts until Submit exam. Multi-unit: set subjectId, unitId and secondUnitId (two units of that subject with blueprints and 20+ servable questions together).",
       "item": [
         {
           "name": "Get unit exam overview",
@@ -1762,6 +1763,115 @@
         },
         {
           "name": "Submit exam",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examSessionId}}/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examSessionId}}", "submit"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get multi-unit exam overview",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/subjects/{{subjectId}}/multi-unit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "subjects", "{{subjectId}}", "multi-unit"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Preview multi-unit exam",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/subjects/{{subjectId}}/multi-unit/preview?unitIds={{unitId}}&unitIds={{secondUnitId}}&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "subjects", "{{subjectId}}", "multi-unit", "preview"],
+              "query": [
+                { "key": "unitIds", "value": "{{unitId}}" },
+                { "key": "unitIds", "value": "{{secondUnitId}}" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Start multi-unit exam",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set(\"examSessionId\", json.id);",
+                  "pm.collectionVariables.set(\"examQuestionId\", json.items[0].questionId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/subjects/{{subjectId}}/multi-unit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "subjects", "{{subjectId}}", "multi-unit"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unitIds\": [\"{{unitId}}\", \"{{secondUnitId}}\"],\n  \"size\": 20\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit multi-unit exam",
           "event": [
             {
               "listen": "test",

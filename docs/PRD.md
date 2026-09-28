@@ -245,6 +245,10 @@ The headline counter is shown on Home as "متبقّي لك X سؤال من 100,
 
 - Student selects 2+ units within one subject.
 - The system merges the selected units' blueprints proportionally to a target size chosen by the student (20/40/60 questions), or uses the subject's default blueprint if units have none.
+- Sizes are exactly 20, 40 or 60.
+- Each unit's share is proportional to its blueprint's question count; if a unit is short of a type, the rest comes from the other selected units.
+- Time limit and pass mark are the question-weighted combination of the units' blueprints; if any contributing blueprint is untimed, the exam is untimed.
+- Result adds a per-unit breakdown.
 - Same rules as unit exam otherwise.
 
 ### 7.6 Progress page

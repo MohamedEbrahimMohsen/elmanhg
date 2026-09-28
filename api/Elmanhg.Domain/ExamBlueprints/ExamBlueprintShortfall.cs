@@ -12,4 +12,6 @@ public static class ExamBlueprintShortfall
             .OrderBy(x => x.Type)
             .ToList();
     }
+
+    public static string Describe(IEnumerable<ExamTypeShortfall> shortfalls) => string.Join(", ", shortfalls.Select(x => $"{x.Type} {x.Available}/{x.Required}"));
 }

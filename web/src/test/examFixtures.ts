@@ -1,8 +1,16 @@
-import type { ExamItemResult, ExamSessionResult, UnitExamOverviewResult } from '@/shared/api/generated/model';
+import type {
+  ExamItemResult,
+  ExamSessionResult,
+  MultiUnitExamOverviewResult,
+  MultiUnitExamPreviewResult,
+  UnitExamOverviewResult,
+} from '@/shared/api/generated/model';
 
 export const examSessionId = '12121212-1212-4121-8121-121212121212';
 export const examUnitId = '34343434-3434-4343-8343-343434343434';
 export const examLessonId = '56565656-5656-4565-8565-565656565656';
+export const examSubjectId = '90909090-9090-4909-8909-909090909090';
+export const examSecondUnitId = '45454545-4545-4454-8454-454545454545';
 
 export function examItem(position: number, overrides?: Partial<ExamItemResult>): ExamItemResult {
   return {
@@ -33,6 +41,7 @@ export function openExam(items: ExamItemResult[], overrides?: Partial<ExamSessio
     id: examSessionId,
     kind: 'UnitExam',
     isTestMode: false,
+    subjectId: examSubjectId,
     subjectName: 'Physics',
     units: [{ unitId: examUnitId, name: 'Mechanics' }],
     startedAt: '2026-09-28T10:00:00Z',
@@ -46,6 +55,7 @@ export function openExam(items: ExamItemResult[], overrides?: Partial<ExamSessio
     elapsedMilliseconds: 0,
     items,
     lessons: [],
+    unitBreakdown: [],
     weakestObjectives: [],
     ...overrides,
   };
@@ -89,7 +99,7 @@ export function overview(overrides?: Partial<UnitExamOverviewResult>): UnitExamO
   return {
     unitId: examUnitId,
     unitName: 'Mechanics',
-    subjectId: '90909090-9090-4909-8909-909090909090',
+    subjectId: examSubjectId,
     subjectName: 'Physics',
     blueprint: {
       isSubjectDefault: false,
@@ -103,4 +113,70 @@ export function overview(overrides?: Partial<UnitExamOverviewResult>): UnitExamO
     inProgressExam: null,
     ...overrides,
   };
+}
+
+export function multiOverview(overrides?: Partial<MultiUnitExamOverviewResult>): MultiUnitExamOverviewResult {
+  return {
+    subjectId: examSubjectId,
+    subjectName: 'Physics',
+    units: [
+      { unitId: examUnitId, name: 'Mechanics', hasBlueprint: true, isSubjectDefault: false, servableCount: 12 },
+      { unitId: examSecondUnitId, name: 'Waves', hasBlueprint: true, isSubjectDefault: false, servableCount: 13 },
+    ],
+    sizes: [20, 40, 60],
+    inProgressExam: null,
+    ...overrides,
+  };
+}
+
+export function multiPreview(overrides?: Partial<MultiUnitExamPreviewResult>): MultiUnitExamPreviewResult {
+  return {
+    subjectId: examSubjectId,
+    size: 20,
+    blueprint: {
+      isSubjectDefault: false,
+      questionCount: 20,
+      typeCounts: [{ type: 'Mcq', required: 20, available: 25 }],
+      difficultyMix: null,
+      timeLimitMinutes: 47,
+      passMark: 57,
+    },
+    isAvailable: true,
+    units: [
+      { unitId: examUnitId, name: 'Mechanics', questionCount: 10, isSubjectDefault: false },
+      { unitId: examSecondUnitId, name: 'Waves', questionCount: 10, isSubjectDefault: false },
+    ],
+    ...overrides,
+  };
+}
+
+export function multiExam(items: ExamItemResult[], overrides?: Partial<ExamSessionResult>): ExamSessionResult {
+  return submittedExam(items, {
+    kind: 'MultiUnitExam',
+    units: [
+      { unitId: examUnitId, name: 'Mechanics' },
+      { unitId: examSecondUnitId, name: 'Waves' },
+    ],
+    unitBreakdown: [
+      {
+        unitId: examUnitId,
+        name: 'Mechanics',
+        questionCount: 1,
+        correctCount: 1,
+        score: 1,
+        maxScore: 1,
+        scorePercent: 100,
+      },
+      {
+        unitId: examSecondUnitId,
+        name: 'Waves',
+        questionCount: 1,
+        correctCount: 0,
+        score: 0,
+        maxScore: 1,
+        scorePercent: 0,
+      },
+    ],
+    ...overrides,
+  });
 }

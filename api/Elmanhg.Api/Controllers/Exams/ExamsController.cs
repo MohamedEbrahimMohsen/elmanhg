@@ -1,7 +1,10 @@
 using Elmanhg.Application.Exams.GetExamSession;
+using Elmanhg.Application.Exams.GetMultiUnitExamOverview;
 using Elmanhg.Application.Exams.GetUnitExamOverview;
+using Elmanhg.Application.Exams.PreviewMultiUnitExam;
 using Elmanhg.Application.Exams.SaveExamAnswer;
 using Elmanhg.Application.Exams.Shared;
+using Elmanhg.Application.Exams.StartMultiUnitExam;
 using Elmanhg.Application.Exams.StartUnitExam;
 using Elmanhg.Application.Exams.SubmitExam;
 using Elmanhg.Domain.SharedKernel;
@@ -31,6 +34,33 @@ public class ExamsController(IMediator mediator) : ControllerBase
     public async Task<ActionResult> StartUnitExam([FromRoute] Guid unitId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new StartUnitExamCommand(unitId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("subjects/{subjectId:guid}/multi-unit", Name = "GetMultiUnitExamOverview")]
+    [Authorize(Policy = DefaultCodes.AssessmentsTake)]
+    [ProducesResponseType<MultiUnitExamOverviewResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetMultiUnitExamOverview([FromRoute] Guid subjectId, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetMultiUnitExamOverviewQuery(subjectId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("subjects/{subjectId:guid}/multi-unit/preview", Name = "PreviewMultiUnitExam")]
+    [Authorize(Policy = DefaultCodes.AssessmentsTake)]
+    [ProducesResponseType<MultiUnitExamPreviewResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> PreviewMultiUnitExam([FromRoute] Guid subjectId, [FromQuery] List<Guid>? unitIds, [FromQuery] int size, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new PreviewMultiUnitExamQuery(new MultiUnitExamSelection(subjectId, unitIds, size)), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("subjects/{subjectId:guid}/multi-unit", Name = "StartMultiUnitExam")]
+    [Authorize(Policy = DefaultCodes.AssessmentsTake)]
+    [ProducesResponseType<ExamSessionResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> StartMultiUnitExam([FromRoute] Guid subjectId, [FromBody] StartMultiUnitExamRequest request, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new StartMultiUnitExamCommand(new MultiUnitExamSelection(subjectId, request.UnitIds, request.Size)), cancellationToken);
         return Ok(result);
     }
 

@@ -133,7 +133,7 @@ Every route below exists in `prototype/app.js`. Match its behaviour one to one. 
 - `#/student/lesson/:id` with tabs الشرح / الأهداف / الملخص / التدريب. Practice tab: pick 5 / 10 / 20 and start. "اسأل المساعد عن الدرس" and "اسأل معلّم" buttons.
 - `#/student/quiz/:sessionId` One question at a time, question counter, type and difficulty chips, option list, "تحقّق", immediate feedback with explanation and "اسأل المساعد", "التالي", "إنهاء التدريب". `#/student/quiz-result/:id` score, time, per-question review.
 - `#/student/exam-start/:unitId` blueprint summary, time limit, best score, attempts list. `#/student/exam/:sessionId` sticky timer, all questions, auto-save, no feedback until submit, resume on refresh. `#/student/exam-result/:id` score, pass or fail, per-lesson breakdown, weakest objectives, retake.
-- `#/student/multi-exam` unit multi-select within a subject, size 10 / 20, start.
+- `#/student/multi-exam` unit multi-select within a subject, size 20 / 40 / 60 (PRD §7.5), live merged preview with shortfall, start.
 - `#/student/progress` per subject mastery with a unit table (mastery, best unit-exam score), weak lessons and weak objectives with "درّب الآن", session history filterable by all / quizzes / exams, paged.
 - `#/student/ask` threads list; `#/student/ask-new` and `#/student/ask-new/:context` compose with auto-attached context; `#/student/thread/:id` thread view with one follow-up and 1 to 5 rating.
 - `#/student/subscription` Aurora gradient header, current plan, plan cards, payment log, simulated Paymob modal with success and failure.
@@ -188,7 +188,7 @@ These are implemented in `prototype/app.js` (`window.ElmanhgTest` exposes the gr
 
 1. Open as أحمد. Home shows the counter. Open الفيزياء → a lesson → التدريب → 5 → answer all → result. Feedback colours and option states match section 2.4.
 2. Start a unit exam, answer two questions, reload the page, the exam resumes with answers intact and the timer still running. Submit. Result shows breakdown. Retake works.
-3. Build a multi-unit exam with two units, size 10.
+3. Build a multi-unit exam with two units, size 20.
 4. Switch to سارة. Answer 10 quiz questions, the 11th shows the paywall. Subscribe via the fake Paymob modal, "نجاح الدفع", the plan activates and the quiz continues.
 5. Open the assistant during an exam. It refuses. Open it after submitting. It answers.
 6. Ask a Teacher as أحمد, switch to أ. محمد, claim, reply by voice, switch back, follow up, rate.
