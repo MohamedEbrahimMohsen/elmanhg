@@ -1,6 +1,10 @@
+using Core.OTP.Delivery;
 using Elmanhg.Infrastructure.Data.Context;
+using Elmanhg.Infrastructure.OtpDelivery;
 using Elmanhg.Tests.Integration.Infrastructure;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
@@ -26,7 +30,64 @@ public sealed class OtpEndpointTests(ApiFactory factory)
         var body = await response.Content.ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken);
         body.GetProperty("verificationId").GetGuid().Should().NotBeEmpty();
         body.TryGetProperty("code", out _).Should().BeFalse();
-        factory.Sms.LatestCodeFor(phone).Should().MatchRegex("^[0-9]{6}$");
+        body.GetProperty("channel").GetString().Should().Be("WhatsApp");
+        factory.Otp.LatestCodeFor(phone).Should().MatchRegex("^[0-9]{6}$");
+        factory.Otp.LatestChannelFor(phone).Should().Be(OtpChannel.WhatsApp);
+    }
+
+    [Fact]
+    public async Task SendOtp_ValidEmail_Returns200AndDeliversByEmail()
+    {
+        using var client = AuthTestClient.Create(factory);
+        var email = AuthTestClient.NewEmail();
+
+        using var response = await client.PostAsJsonAsync(SendRoute, new { email = email.ToUpperInvariant() }, TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken);
+        body.GetProperty("channel").GetString().Should().Be("Email");
+        factory.Otp.LatestCodeFor(email).Should().MatchRegex("^[0-9]{6}$");
+    }
+
+    [Fact]
+    public async Task SendOtp_NoRecipient_Returns422()
+    {
+        using var client = AuthTestClient.Create(factory);
+
+        using var response = await client.PostAsJsonAsync(SendRoute, new { }, TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await ReadCodeAsync(response)).Should().Contain("OTP_RECIPIENT_REQUIRED");
+    }
+
+    [Fact]
+    public async Task SendOtp_WhatsAppDisabledSmsEnabled_DeliversBySms()
+    {
+        await using var smsOnly = WithChannels(whatsAppEnabled: false, smsEnabled: true);
+        using var client = smsOnly.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = false });
+        var phone = AuthTestClient.NewPhoneNumber();
+
+        using var response = await client.PostAsJsonAsync(SendRoute, new { phoneNumber = phone }, TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken);
+        body.GetProperty("channel").GetString().Should().Be("Sms");
+        factory.Otp.LatestChannelFor(phone).Should().Be(OtpChannel.Sms);
+    }
+
+    [Fact]
+    public async Task SendOtp_NoPhoneChannelEnabled_Returns503AndPersistsNothing()
+    {
+        await using var noPhoneChannel = WithChannels(whatsAppEnabled: false, smsEnabled: false);
+        using var client = noPhoneChannel.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = false });
+        var phone = AuthTestClient.NewPhoneNumber();
+
+        using var response = await client.PostAsJsonAsync(SendRoute, new { phoneNumber = phone }, TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
+        (await ReadCodeAsync(response)).Should().Be("OTP_CHANNEL_UNAVAILABLE");
+        using var scope = factory.Services.CreateScope();
+        (await scope.ServiceProvider.GetRequiredService<AppDbContext>().Otps.AnyAsync(x => x.Recipient == phone, TestContext.Current.CancellationToken)).Should().BeFalse();
     }
 
     [Fact]
@@ -60,7 +121,7 @@ public sealed class OtpEndpointTests(ApiFactory factory)
         var phone = AuthTestClient.NewPhoneNumber();
         var verificationId = await AuthTestClient.SendOtpAsync(client, phone, TestContext.Current.CancellationToken);
 
-        using var response = await client.PostAsJsonAsync(VerifyRoute, new { code = factory.Sms.LatestCodeFor(phone), verificationId }, TestContext.Current.CancellationToken);
+        using var response = await client.PostAsJsonAsync(VerifyRoute, new { code = factory.Otp.LatestCodeFor(phone), verificationId }, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         using var scope = factory.Services.CreateScope();
@@ -74,12 +135,21 @@ public sealed class OtpEndpointTests(ApiFactory factory)
         using var client = AuthTestClient.Create(factory);
         var phone = AuthTestClient.NewPhoneNumber();
         var verificationId = await AuthTestClient.SendOtpAsync(client, phone, TestContext.Current.CancellationToken);
-        var wrongCode = factory.Sms.LatestCodeFor(phone) == "000000" ? "111111" : "000000";
+        var wrongCode = factory.Otp.LatestCodeFor(phone) == "000000" ? "111111" : "000000";
 
         using var response = await client.PostAsJsonAsync(VerifyRoute, new { code = wrongCode, verificationId }, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         (await ReadCodeAsync(response)).Should().Be("OTP_NOT_MATCHED");
+    }
+
+    private WebApplicationFactory<Program> WithChannels(bool whatsAppEnabled, bool smsEnabled)
+    {
+        return factory.WithWebHostBuilder(builder => builder.ConfigureTestServices(services => services.PostConfigure<OtpDeliveryOptions>(options =>
+        {
+            options.WhatsApp.Enabled = whatsAppEnabled;
+            options.Sms.Enabled = smsEnabled;
+        })));
     }
 
     private static async Task<string?> ReadCodeAsync(HttpResponseMessage response)

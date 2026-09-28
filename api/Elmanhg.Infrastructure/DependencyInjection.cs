@@ -1,4 +1,3 @@
-using Core.OTP.Sms;
 using Elmanhg.Application.Shared.RichText;
 using Elmanhg.Application.Shared.Spreadsheets;
 using Elmanhg.Application.Shared.Storage;
@@ -16,11 +15,11 @@ using Elmanhg.Infrastructure.ExamBlueprints;
 using Elmanhg.Infrastructure.Identity;
 using Elmanhg.Infrastructure.Lessons;
 using Elmanhg.Infrastructure.Mastery;
+using Elmanhg.Infrastructure.OtpDelivery;
 using Elmanhg.Infrastructure.Questions;
 using Elmanhg.Infrastructure.ReviewSessions;
 using Elmanhg.Infrastructure.RichText;
 using Elmanhg.Infrastructure.Sessions;
-using Elmanhg.Infrastructure.Sms;
 using Elmanhg.Infrastructure.Spreadsheets;
 using Elmanhg.Infrastructure.Storage;
 using Elmanhg.Infrastructure.Subjects;
@@ -35,13 +34,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
-        services.AddOptions<SmsOptions>().BindConfiguration(SmsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
-        services.AddScoped<FakeSmsSender>();
-        services.AddScoped<ISmsSender>(serviceProvider => serviceProvider.GetRequiredService<IOptions<SmsOptions>>().Value.Provider switch
-        {
-            SmsProvider.Fake => serviceProvider.GetRequiredService<FakeSmsSender>(),
-            _ => throw new InvalidOperationException("Unsupported Sms:Provider."),
-        });
+        services.AddOtpDelivery();
         services.AddOptions<FileStorageOptions>().BindConfiguration(FileStorageOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddScoped<LocalDiskFileStorage>();
         services.AddScoped<IFileStorage>(serviceProvider => serviceProvider.GetRequiredService<IOptions<FileStorageOptions>>().Value.Provider switch

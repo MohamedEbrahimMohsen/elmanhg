@@ -62,6 +62,22 @@
             "Query with filters: actor, entity type, date range",
             "Admin audit log page with pagination"
           ]
+        },
+        {
+          "title": "OTP delivery channels: WhatsApp (Meta), Email (Resend), SMS (disabled)",
+          "description": "As a student I receive my sign-in code on WhatsApp (or email) so that I can log in without an SMS gateway. PRD §7.1. Follows #56. Dev decision, 2026-09-28.",
+          "tasks": [
+            "Replace `ISmsSender` with a channel-agnostic `IOtpSender` / `IOtpChannel` abstraction: `WhatsApp`, `Sms`, `Email`",
+            "Config section `OtpDelivery`: per-channel `Enabled`, `Provider` (`Fake` | real), credentials, plus the default phone channel (WhatsApp). Startup validation: an enabled real provider must have its credentials.",
+            "Meta WhatsApp Cloud API adapter (typed HttpClient, template message with the code, error mapping, retries/timeouts)",
+            "Resend email adapter (typed HttpClient, Arabic RTL HTML template + plain-text part)",
+            "Generic HTTP SMS adapter (configurable URL, auth header, body template), disabled by default",
+            "Fakes remain the default in Development, tests and CI, and when no credentials are set",
+            "Phone OTP goes to WhatsApp; if WhatsApp is disabled, it falls back to SMS when that is enabled; otherwise it returns a clear 503 error code",
+            "Frontend: OTP screen says \"sent via WhatsApp\" / \"sent to your email\" based on the channel returned by the API",
+            "Update `docs/PRD.md` §7.1, `appsettings.example.json`, the deployment runbook, Postman",
+            "Tests: adapter request shapes via a stub HTTP handler, channel routing, disabled-channel behaviour, startup validation"
+          ]
         }
       ]
     },

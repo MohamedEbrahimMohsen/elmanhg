@@ -189,12 +189,14 @@ Numeric answers ignore the per-question rules and must be a plain decimal (`docs
 
 ### 7.1 Navigation
 
-1. Landing → sign up (phone + OTP, or email) → choose subjects of interest.
+1. Landing → sign up (phone + one-time code, or email + password) → choose subjects of interest. Students with an email account can also sign in with a one-time code sent to that email; teachers and admins always sign in with email and password.
 2. Home: subjects with per-subject mastery and "next recommended lesson".
 3. Subject → Units (ordered, with mastery %) → Lessons (ordered, with mastery %).
 4. Lesson page tabs: Explanation · Objectives · Summary · Practice.
 
 Free tier: can browse the tree and read the first lesson of each unit; quizzes limited to a small daily count. Paid tier: unlimited.
+
+**Sign-in code delivery.** Phone codes go by WhatsApp (Meta WhatsApp Cloud API, approved authentication template). SMS through a local telecom's HTTP gateway is built but off; when WhatsApp is disabled and SMS is enabled, phone codes go by SMS. Email codes go through Resend. Each channel is switched on and pointed at its provider by configuration only. With no channel enabled for the recipient the request fails with 503 `OTP_CHANNEL_UNAVAILABLE`; a provider failure returns 503 `OTP_DELIVERY_FAILED`. The code screen names the channel used. Configuration and go-live steps: `docs/otp-delivery.md`.
 
 ### 7.2 Quiz engine (per lesson)
 

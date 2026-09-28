@@ -12,6 +12,7 @@ Arabic-first exam-prep platform for Egyptian Thanaweya Amma students. Students d
 | [docs/prototype.md](docs/prototype.md) | How to run and click through the wireframe prototype |
 | [docs/claude-design-prompt.md](docs/claude-design-prompt.md) | Brief for Claude Design to build the high-fidelity front end |
 | [docs/backlog.json](docs/backlog.json) | Epics, stories and sub-tasks, imported into the GitHub project |
+| [docs/otp-delivery.md](docs/otp-delivery.md) | OTP delivery channels (WhatsApp, Email, SMS): configuration and go-live steps |
 
 ## Folders
 
@@ -38,7 +39,7 @@ curl http://localhost:5080/health   # → Healthy
 
 The API docs are at `http://localhost:5080/scalar/v1`. Tests run with `dotnet test api/` (Docker required).
 
-While `Sms__Provider=Fake`, sign-in OTP codes are not texted: `FakeSmsSender` writes each code to the API console in Development only.
+While the OTP channels use `Provider=Fake` (the default), codes are not delivered: `FakeOtpChannel` writes each code to the API console in Development only. See docs/otp-delivery.md to switch on WhatsApp, email or SMS.
 The admin account is seeded on start from `AdminSeed__*` in `.env` (sign in with that email and password).
 
 ## Run the frontend locally

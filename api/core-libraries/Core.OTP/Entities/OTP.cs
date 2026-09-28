@@ -7,7 +7,8 @@ namespace Core.OTP.Entities;
 public class Otp : Entity
 {
     public Guid VerificationId { get; private set; }
-    public string PhoneNumber { get; private set; }
+    public string Recipient { get; private set; }
+    public OtpRecipientType RecipientType { get; private set; }
     public string CodeHash { get; private set; }
     
     public string? RequestIP { get; private set; }
@@ -29,13 +30,14 @@ public class Otp : Entity
     public DateTimeOffset ExpiresAt { get; private set; }
     private Otp(Guid id): base(id) { }
 
-    public static Otp Create(string phoneNumber, string codeHash, int expiresInMinutes, int maxVerificationAttempts, int reissueCooldownSeconds, int maxReissueCount, int reissueBlockCooldownInHours)
+    public static Otp Create(OtpRecipientType recipientType, string recipient, string codeHash, int expiresInMinutes, int maxVerificationAttempts, int reissueCooldownSeconds, int maxReissueCount, int reissueBlockCooldownInHours)
     {
         var id = Guid.NewGuid();
         return new Otp(id)
         {
             VerificationId = Guid.NewGuid(),
-            PhoneNumber = phoneNumber,
+            RecipientType = recipientType,
+            Recipient = recipient,
             CodeHash = codeHash,
             CreatedAt = DateTimeOffset.UtcNow,
             ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(expiresInMinutes),

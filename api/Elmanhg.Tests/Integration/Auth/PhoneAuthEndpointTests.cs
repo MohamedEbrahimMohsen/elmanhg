@@ -56,6 +56,21 @@ public sealed class PhoneAuthEndpointTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task RegisterWithPhone_EmailVerificationId_Returns400()
+    {
+        using var client = AuthTestClient.Create(factory);
+        var email = AuthTestClient.NewEmail();
+        var verificationId = await AuthTestClient.SendAndVerifyEmailOtpAsync(client, factory, email, TestContext.Current.CancellationToken);
+
+        using var response = await client.PostAsJsonAsync(RegisterRoute, new { verificationId, displayName = "Ahmed" }, TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await ReadCodeAsync(response)).Should().Be("OTP_INVALID");
+        using var scope = factory.Services.CreateScope();
+        (await scope.ServiceProvider.GetRequiredService<AppDbContext>().Users.AnyAsync(x => x.UserName == email || x.PhoneNumber == email, TestContext.Current.CancellationToken)).Should().BeFalse();
+    }
+
+    [Fact]
     public async Task RegisterWithPhone_PhoneAlreadyRegistered_Returns409()
     {
         using var client = AuthTestClient.Create(factory);

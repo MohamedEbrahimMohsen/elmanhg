@@ -4,6 +4,7 @@
  * Elmanhg.Api | v1
  * OpenAPI spec version: 1.0.0
  */
+import type { OtpChannel } from './otpChannel';
 
 export interface GenerateOTPResult {
   verificationId: string;
@@ -17,4 +18,5 @@ export interface GenerateOTPResult {
   maxVerificationAttempts: number | string;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   maxReissueCount: number | string;
+  channel: OtpChannel;
 }

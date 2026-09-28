@@ -28,6 +28,18 @@ public sealed class CoreExceptionMiddlewareTests
     }
 
     [Fact]
+    public async Task InvokeAsync_ServiceUnavailableThrown_Returns503WithCode()
+    {
+        var middleware = new CoreExceptionMiddleware(_ => throw new ServiceUnavailableCoreException("PROBE_UNAVAILABLE"), NullLogger<CoreExceptionMiddleware>.Instance);
+
+        await middleware.InvokeAsync(_context);
+
+        _context.Response.StatusCode.Should().Be(StatusCodes.Status503ServiceUnavailable);
+        using var body = await ReadBodyAsync(_context);
+        body.RootElement.GetProperty("code").GetString().Should().Be("PROBE_UNAVAILABLE");
+    }
+
+    [Fact]
     public async Task InvokeAsync_UnhandledExceptionThrown_Returns500WithUnhandledCode()
     {
         var middleware = new CoreExceptionMiddleware(_ => throw new InvalidOperationException("boom"), NullLogger<CoreExceptionMiddleware>.Instance);

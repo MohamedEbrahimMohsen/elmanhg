@@ -91,6 +91,18 @@ public sealed class LoginWithPhoneHandlerTests
         await _otpRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
+    [Fact]
+    public async Task Handle_EmailOtp_ThrowsOtpInvalid()
+    {
+        var otp = ArrangeOtp(new OtpBuilder().ForEmail("mona@elmanhg.test").Verified());
+
+        var act = () => _handler.Handle(new LoginWithPhoneCommand(otp.VerificationId), TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<BadRequestCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.OtpInvalid);
+        await _userManager.DidNotReceive().FindByNameAsync(Arg.Any<string>());
+        await _otpRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
     private global::Core.OTP.Entities.Otp ArrangeOtp(OtpBuilder builder)
     {
         var otp = builder.Build();

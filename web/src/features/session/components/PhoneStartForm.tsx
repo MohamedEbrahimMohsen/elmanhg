@@ -9,11 +9,12 @@ import { FormRootError } from '@/shared/form/FormRootError';
 import { SubmitButton } from '@/shared/form/SubmitButton';
 import { TextField } from '@/shared/form/TextField';
 import { phoneSignInSchema, phoneSignUpSchema } from '../schemas/phoneStartSchema';
+import type { OtpDelivery } from './OtpForm';
 
 export interface PhoneStart {
   phoneNumber: string;
-  verificationId: string;
   displayName: string;
+  delivery: OtpDelivery;
 }
 
 export interface PhoneStartFormProps {
@@ -49,8 +50,8 @@ export function PhoneStartForm({ withDisplayName, onCodeSent }: PhoneStartFormPr
         const result = await sendOtp.mutateAsync({ data: { phoneNumber: values.phoneNumber } });
         onCodeSent({
           phoneNumber: values.phoneNumber,
-          verificationId: result.verificationId,
           displayName: values.displayName ?? '',
+          delivery: { verificationId: result.verificationId, channel: result.channel },
         });
       }}
     >

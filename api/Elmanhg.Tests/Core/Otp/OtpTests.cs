@@ -1,4 +1,5 @@
 using Core.Errors;
+using Core.OTP.Entities;
 using Core.OTP.Exceptions;
 using Elmanhg.Tests.Builders;
 using FluentAssertions;
@@ -59,5 +60,14 @@ public sealed class OtpTests
         otp.MarkUsed();
 
         otp.IsUsed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Create_EmailRecipient_KeepsRecipientAndType()
+    {
+        var otp = global::Core.OTP.Entities.Otp.Create(OtpRecipientType.Email, "mona@elmanhg.test", OtpBuilder.CodeHash, 5, 3, 60, 5, 24);
+
+        otp.Recipient.Should().Be("mona@elmanhg.test");
+        otp.RecipientType.Should().Be(OtpRecipientType.Email);
     }
 }

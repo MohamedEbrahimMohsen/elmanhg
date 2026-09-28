@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import {
+  getLoginWithEmailCodeMockHandler,
   getLoginWithEmailMockHandler,
   getLoginWithPhoneMockHandler,
   getSendOtpMockHandler,
@@ -36,6 +37,13 @@ async function signInWithEmail(user: User) {
 
 async function requestCode(user: User) {
   await user.type(await screen.findByLabelText('Mobile number'), phoneNumber);
+  await user.click(screen.getByRole('button', { name: 'Send code' }));
+}
+
+async function requestEmailCode(user: User) {
+  await user.click(await screen.findByRole('button', { name: 'Email' }));
+  await user.click(screen.getByRole('button', { name: 'Sign in with a code instead' }));
+  await user.type(screen.getByLabelText('Email'), 'mona@elmanhg.test');
   await user.click(screen.getByRole('button', { name: 'Send code' }));
 }
 
@@ -77,7 +85,7 @@ describe('LoginPage', () => {
 
   it('signs a student in with a mobile code', async () => {
     server.use(
-      getSendOtpMockHandler(),
+      getSendOtpMockHandler(getSendOtpResponseMock({ channel: 'WhatsApp' })),
       getVerifyOtpMockHandler({}),
       getLoginWithPhoneMockHandler(authResult('Student')),
       ...getMasteryMock(),
@@ -86,10 +94,75 @@ describe('LoginPage', () => {
     renderApp('/login');
 
     await requestCode(user);
-    expect(await screen.findByText('We sent a 6-digit code to 01012345678.')).toBeInTheDocument();
+    expect(await screen.findByText('We sent a 6-digit code to 01012345678 on WhatsApp.')).toBeInTheDocument();
     await submitCode(user);
 
     expect(await screen.findByRole('heading', { name: 'Hello, Mona' })).toBeInTheDocument();
+  });
+
+  it('says the code went by text message when the API used SMS', async () => {
+    server.use(getSendOtpMockHandler(getSendOtpResponseMock({ channel: 'Sms' })));
+    const user = userEvent.setup();
+    renderApp('/login');
+
+    await requestCode(user);
+
+    expect(await screen.findByText('We sent a 6-digit code to 01012345678 by text message.')).toBeInTheDocument();
+  });
+
+  it('signs a student in with an email code', async () => {
+    server.use(
+      getSendOtpMockHandler(getSendOtpResponseMock({ channel: 'Email' })),
+      getVerifyOtpMockHandler({}),
+      getLoginWithEmailCodeMockHandler(authResult('Student')),
+      ...getMasteryMock(),
+    );
+    const user = userEvent.setup();
+    renderApp('/login');
+
+    await requestEmailCode(user);
+    expect(await screen.findByText('We sent a 6-digit code to your email mona@elmanhg.test.')).toBeInTheDocument();
+    await submitCode(user);
+
+    expect(await screen.findByRole('heading', { name: 'Hello, Mona' })).toBeInTheDocument();
+  });
+
+  it('shows the not-registered message when no account uses the email', async () => {
+    server.use(
+      getSendOtpMockHandler(getSendOtpResponseMock({ channel: 'Email' })),
+      getVerifyOtpMockHandler({}),
+      http.post('*/api/auth/login/email-code', () => apiError(404, 'EMAIL_NOT_REGISTERED')),
+    );
+    const user = userEvent.setup();
+    renderApp('/login');
+
+    await requestEmailCode(user);
+    await submitCode(user);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('No account uses this email. Create an account first.');
+  });
+
+  it('shows the unavailable message when no delivery channel is enabled', async () => {
+    server.use(http.post('*/api/auth/otp/send', () => apiError(503, 'OTP_CHANNEL_UNAVAILABLE')));
+    const user = userEvent.setup();
+    renderApp('/login');
+
+    await requestCode(user);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      "Sign-in codes can't be sent right now. Try again later.",
+    );
+  });
+
+  it('returns to password sign-in from the code option', async () => {
+    const user = userEvent.setup();
+    renderApp('/login');
+
+    await user.click(await screen.findByRole('button', { name: 'Email' }));
+    await user.click(screen.getByRole('button', { name: 'Sign in with a code instead' }));
+    await user.click(screen.getByRole('button', { name: 'Sign in with a password instead' }));
+
+    expect(screen.getByLabelText('Password')).toBeInTheDocument();
   });
 
   it('offers sign-up when the mobile number has no account', async () => {

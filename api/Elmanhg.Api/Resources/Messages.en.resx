@@ -73,6 +73,11 @@
   <data name="OTP_INVALID" xml:space="preserve"><value>This verification request is not valid. Request a new code.</value></data>
   <data name="OTP_VERIFICATION_ID_INVALID_FORMAT" xml:space="preserve"><value>The verification request is missing.</value></data>
   <data name="OTP_INVALID_FORMAT" xml:space="preserve"><value>Enter the 6-digit code.</value></data>
+  <data name="OTP_RECIPIENT_REQUIRED" xml:space="preserve"><value>Enter a mobile number or an email.</value></data>
+  <data name="OTP_CHANNEL_UNAVAILABLE" xml:space="preserve"><value>Sign-in codes can't be sent right now. Try again later.</value></data>
+  <data name="OTP_DELIVERY_FAILED" xml:space="preserve"><value>We couldn't deliver your code. Try again in a moment.</value></data>
+  <data name="EMAIL_NOT_REGISTERED" xml:space="preserve"><value>No account uses this email. Create an account first.</value></data>
+  <data name="EMAIL_CODE_SIGN_IN_NOT_ALLOWED" xml:space="preserve"><value>This account signs in with a password.</value></data>
   <data name="OTP_EXPIRED" xml:space="preserve"><value>This code has expired. Request a new one.</value></data>
   <data name="OTP_NOT_MATCHED" xml:space="preserve"><value>The code is incorrect.</value></data>
   <data name="OTP_ALREADY_VERIFIED" xml:space="preserve"><value>This code was already verified.</value></data>

@@ -41,7 +41,23 @@ public static class AuthTestClient
     public static async Task<Guid> SendAndVerifyOtpAsync(HttpClient client, ApiFactory factory, string phone, CancellationToken cancellationToken)
     {
         var verificationId = await SendOtpAsync(client, phone, cancellationToken).ConfigureAwait(false);
-        using var response = await client.PostAsJsonAsync("/api/auth/otp/verify", new { code = factory.Sms.LatestCodeFor(phone), verificationId }, cancellationToken).ConfigureAwait(false);
+        using var response = await client.PostAsJsonAsync("/api/auth/otp/verify", new { code = factory.Otp.LatestCodeFor(phone), verificationId }, cancellationToken).ConfigureAwait(false);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        return verificationId;
+    }
+
+    public static async Task<Guid> SendEmailOtpAsync(HttpClient client, string email, CancellationToken cancellationToken)
+    {
+        using var response = await client.PostAsJsonAsync("/api/auth/otp/send", new { email }, cancellationToken).ConfigureAwait(false);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken).ConfigureAwait(false);
+        return body.GetProperty("verificationId").GetGuid();
+    }
+
+    public static async Task<Guid> SendAndVerifyEmailOtpAsync(HttpClient client, ApiFactory factory, string email, CancellationToken cancellationToken)
+    {
+        var verificationId = await SendEmailOtpAsync(client, email, cancellationToken).ConfigureAwait(false);
+        using var response = await client.PostAsJsonAsync("/api/auth/otp/verify", new { code = factory.Otp.LatestCodeFor(email.ToLowerInvariant()), verificationId }, cancellationToken).ConfigureAwait(false);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         return verificationId;
     }

@@ -3215,6 +3215,56 @@
         }
       }
     },
+    "/api/auth/login/email-code": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "LoginWithEmailCode",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginWithEmailCodeCommand"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginWithEmailCodeCommand"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginWithEmailCodeCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/refresh": {
       "post": {
         "tags": [
@@ -4618,7 +4668,16 @@
         "type": "object",
         "properties": {
           "phoneNumber": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -4630,7 +4689,8 @@
           "verificationAttempts",
           "reissueCount",
           "maxVerificationAttempts",
-          "maxReissueCount"
+          "maxReissueCount",
+          "channel"
         ],
         "type": "object",
         "properties": {
@@ -4677,6 +4737,9 @@
               "string"
             ],
             "format": "int32"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/OtpChannel"
           }
         }
       },
@@ -5029,6 +5092,18 @@
           }
         }
       },
+      "LoginWithEmailCodeCommand": {
+        "required": [
+          "verificationId"
+        ],
+        "type": "object",
+        "properties": {
+          "verificationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
       "LoginWithEmailCommand": {
         "required": [
           "email",
@@ -5314,6 +5389,13 @@
             "format": "int32"
           }
         }
+      },
+      "OtpChannel": {
+        "enum": [
+          "WhatsApp",
+          "Sms",
+          "Email"
+        ]
       },
       "PageDataOfAuditLogResult": {
         "type": "object",

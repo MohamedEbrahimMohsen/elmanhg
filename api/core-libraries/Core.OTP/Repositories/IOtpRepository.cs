@@ -5,6 +5,6 @@ namespace Core.OTP.Repositories;
 
 public interface IOtpRepository : IRepository<Otp>
 {
-    Task<Otp?> FindAsync(string phoneNumber, string? requestIP, CancellationToken cancellationToken);
+    Task<Otp?> FindAsync(string recipient, string? requestIP, CancellationToken cancellationToken);
     Task<Otp?> FindByVerificationId(Guid verificationId, CancellationToken cancellationToken);
 }

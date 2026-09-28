@@ -27,10 +27,15 @@
     "resendCode": "إعادة إرسال الرمز",
     "changeNumber": "تغيير الرقم",
     "signIn": "متابعة",
-    "createAccount": "إنشاء الحساب"
+    "createAccount": "إنشاء الحساب",
+    "changeEmail": "تغيير البريد الإلكتروني",
+    "useEmailCode": "الدخول برمز بدلًا من كلمة المرور",
+    "usePassword": "الدخول بكلمة المرور بدلًا من الرمز"
   },
   "otp": {
-    "sentTo": "أرسلنا رمزًا من 6 أرقام إلى {phoneNumber}.",
+    "sentViaWhatsApp": "أرسلنا رمزًا من 6 أرقام إلى {recipient} عبر واتساب.",
+    "sentViaSms": "أرسلنا رمزًا من 6 أرقام إلى {recipient} في رسالة نصية.",
+    "sentToEmail": "أرسلنا رمزًا من 6 أرقام إلى بريدك الإلكتروني {recipient}.",
     "resent": "تم إرسال رمز جديد."
   },
   "validation": {

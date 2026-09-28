@@ -73,6 +73,11 @@
   <data name="OTP_INVALID" xml:space="preserve"><value>طلب التحقق غير صالح. اطلب رمزا جديدا.</value></data>
   <data name="OTP_VERIFICATION_ID_INVALID_FORMAT" xml:space="preserve"><value>طلب التحقق غير موجود.</value></data>
   <data name="OTP_INVALID_FORMAT" xml:space="preserve"><value>ادخل الرمز المكون من 6 ارقام.</value></data>
+  <data name="OTP_RECIPIENT_REQUIRED" xml:space="preserve"><value>ادخل رقم موبايل او بريدا الكترونيا.</value></data>
+  <data name="OTP_CHANNEL_UNAVAILABLE" xml:space="preserve"><value>تعذر ارسال رمز الدخول الان. حاول مرة اخرى لاحقا.</value></data>
+  <data name="OTP_DELIVERY_FAILED" xml:space="preserve"><value>تعذر توصيل الرمز. حاول مرة اخرى بعد قليل.</value></data>
+  <data name="EMAIL_NOT_REGISTERED" xml:space="preserve"><value>لا يوجد حساب بهذا البريد الالكتروني. انشئ حسابا اولا.</value></data>
+  <data name="EMAIL_CODE_SIGN_IN_NOT_ALLOWED" xml:space="preserve"><value>هذا الحساب يسجل الدخول بكلمة المرور.</value></data>
   <data name="OTP_EXPIRED" xml:space="preserve"><value>انتهت صلاحية الرمز. اطلب رمزا جديدا.</value></data>
   <data name="OTP_NOT_MATCHED" xml:space="preserve"><value>الرمز غير صحيح.</value></data>
   <data name="OTP_ALREADY_VERIFIED" xml:space="preserve"><value>تم التحقق من هذا الرمز بالفعل.</value></data>
