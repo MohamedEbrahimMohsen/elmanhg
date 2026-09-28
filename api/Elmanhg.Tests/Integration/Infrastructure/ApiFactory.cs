@@ -85,6 +85,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Sessions:MinQuizSize"] = "5",
             ["Sessions:MaxQuizSize"] = "20",
             ["Sessions:AnswerMaxLength"] = "4000",
+            ["Mastery:CorrectThreshold"] = "0.8",
             ["FileStorage:Provider"] = "Local",
             ["FileStorage:LocalRootPath"] = MediaRoot,
             ["FileStorage:PublicBaseUrl"] = "/api/media",

@@ -53,6 +53,8 @@ public static class SessionTestData
         return client.PostAsJsonAsync($"{Route}/{sessionId}/answers", new { questionId, answer = new { optionId }, timeTakenMilliseconds }, CancellationToken);
     }
 
+    public static Task<HttpResponseMessage> FinishAsync(HttpClient client, Guid sessionId) => client.PostAsync($"{Route}/{sessionId}/finish", null, CancellationToken);
+
     public static async Task EditQuestionContentAsync(ApiFactory factory, Guid questionId, QuestionContent content)
     {
         using var scope = factory.Services.CreateScope();

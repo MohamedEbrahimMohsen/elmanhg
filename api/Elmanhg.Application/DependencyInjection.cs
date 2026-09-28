@@ -25,6 +25,8 @@ public static class DependencyInjection
         services.AddOptions<SessionsOptions>().BindConfiguration(SessionsOptions.SectionName).ValidateDataAnnotations()
             .Validate(x => x.MinQuizSize <= x.DefaultQuizSize && x.DefaultQuizSize <= x.MaxQuizSize, "Sessions:MinQuizSize <= DefaultQuizSize <= MaxQuizSize is required.")
             .ValidateOnStart();
+        services.AddOptions<MasteryOptions>().BindConfiguration(MasteryOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddSingleton(Random.Shared);
         return services;
     }
 }
