@@ -9,6 +9,7 @@ using Core.OTP;
 using Core.Utilities;
 using DotNetEnv;
 using Elmanhg.Api.Authorization;
+using Elmanhg.Api.FileStorage;
 using Elmanhg.Api.RateLimiting;
 using Elmanhg.Application;
 using Elmanhg.Application.Auth.SeedAdmin;
@@ -90,6 +91,8 @@ app.UseCoreLocalization(builder.Configuration);
 app.UseMiddleware<CoreRequestLoggingMiddleware>();
 
 app.UseHttpsRedirection();
+
+app.UseLocalFileStorage();
 
 app.UseAuthorization();
 

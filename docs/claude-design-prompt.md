@@ -148,7 +148,7 @@ Every route below exists in `prototype/app.js`. Match its behaviour one to one. 
 
 **Admin**
 - `#/admin` dashboard: KPI cards (students, DAU, MAU, subscribers by plan, MRR, content counts by status and type, servable total, solve rate, success rate, validation backlog and median decision time, Ask a Teacher open and breached, payments and revenue) and the charts, filterable by subject and 7 / 14 / 30 days.
-- `#/admin/content` subject, unit, lesson tree with reorder, publish, unpublish, archive; `#/admin/lesson/:id` editor (explanation, objectives list, summary, video URL).
+- `#/admin/content` subject, unit, lesson tree with reorder, publish, unpublish, archive; `#/admin/lesson/:id` editor: name, rich-text explanation and summary (image upload, inline and block LaTeX), ordered objectives list, optional video URL, and a live student-view preview.
 - `#/admin/questions` list with status filter; `#/admin/question/:id` and `#/admin/question/new/:lessonId` editor per type with live student preview and "جرّب الإجابة" running the real grader; edit and resubmit for rejected; editing content of an approved question returns it to pending and bumps the version.
 - `#/admin/blueprints` per-unit blueprint editor with shortfall validation.
 - `#/admin/users` students (progress, suspend, grant plan), teachers (assign subjects), admins. `#/admin/student/:id` progress view.

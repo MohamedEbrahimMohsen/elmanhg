@@ -52,8 +52,13 @@ public class CurriculumUnit : AuditEntity, IAuditedEntity
         UpdationDate = DateTimeOffset.UtcNow;
     }
 
-    public void Delete(Guid deletedBy)
+    public void Delete(bool hasLessons, Guid deletedBy)
     {
+        if (hasLessons)
+        {
+            throw new BusinessRuleViolationCoreException(ErrorCodes.UnitHasLessons);
+        }
+
         SoftDelete();
         UpdatedBy = deletedBy;
         UpdationDate = DateTimeOffset.UtcNow;

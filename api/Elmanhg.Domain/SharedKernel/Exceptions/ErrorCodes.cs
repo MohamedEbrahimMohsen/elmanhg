@@ -11,4 +11,6 @@ public static class ErrorCodes
     // CONTENT
     public const string SubjectHasUnits = "SUBJECT_HAS_UNITS";
     public const string ContentOrderInvalid = "CONTENT_ORDER_INVALID";
+    public const string UnitHasLessons = "UNIT_HAS_LESSONS";
+    public const string LessonObjectiveUnknown = "LESSON_OBJECTIVE_UNKNOWN";
 }

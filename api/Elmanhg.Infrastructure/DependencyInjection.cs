@@ -1,8 +1,14 @@
 using Core.OTP.Sms;
+using Elmanhg.Application.Shared.RichText;
+using Elmanhg.Application.Shared.Storage;
+using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.Units;
+using Elmanhg.Infrastructure.Lessons;
+using Elmanhg.Infrastructure.RichText;
 using Elmanhg.Infrastructure.Sms;
+using Elmanhg.Infrastructure.Storage;
 using Elmanhg.Infrastructure.Subjects;
 using Elmanhg.Infrastructure.Teachers;
 using Elmanhg.Infrastructure.Units;
@@ -22,9 +28,18 @@ public static class DependencyInjection
             SmsProvider.Fake => serviceProvider.GetRequiredService<FakeSmsSender>(),
             _ => throw new InvalidOperationException("Unsupported Sms:Provider."),
         });
+        services.AddOptions<FileStorageOptions>().BindConfiguration(FileStorageOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddScoped<LocalDiskFileStorage>();
+        services.AddScoped<IFileStorage>(serviceProvider => serviceProvider.GetRequiredService<IOptions<FileStorageOptions>>().Value.Provider switch
+        {
+            FileStorageProvider.Local => serviceProvider.GetRequiredService<LocalDiskFileStorage>(),
+            _ => throw new InvalidOperationException("Unsupported FileStorage:Provider."),
+        });
+        services.AddSingleton<IRichTextSanitizer, RichTextSanitizer>();
         services.AddScoped<ISubjectRepository, SubjectRepository>();
         services.AddScoped<ITeacherSubjectRepository, TeacherSubjectRepository>();
         services.AddScoped<ICurriculumUnitRepository, CurriculumUnitRepository>();
+        services.AddScoped<ILessonRepository, LessonRepository>();
         return services;
     }
 }

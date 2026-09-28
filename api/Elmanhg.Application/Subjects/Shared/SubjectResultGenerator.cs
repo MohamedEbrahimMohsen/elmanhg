@@ -11,10 +11,10 @@ public static class SubjectResultGenerator
         return new SubjectResult(subject.Id, subject.Name, subject.Order, unitCount);
     }
 
-    public static SubjectDetailResult GenerateDetail(Subject subject, List<CurriculumUnit> units)
+    public static SubjectDetailResult GenerateDetail(Subject subject, List<CurriculumUnit> units, Dictionary<Guid, int> lessonCounts)
     {
         var unitResults = units
-            .Select(UnitResultGenerator.Generate)
+            .Select(x => UnitResultGenerator.Generate(x, lessonCounts.GetValueOrDefault(x.Id)))
             .ToList();
 
         return new SubjectDetailResult(subject.Id, subject.Name, subject.Order, unitResults);

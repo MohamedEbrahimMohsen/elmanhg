@@ -2,7 +2,7 @@ import i18next from 'i18next';
 import ICU from 'i18next-icu';
 import { initReactI18next } from 'react-i18next';
 import { auditLocales } from '@/features/audit';
-import { contentLocales } from '@/features/content';
+import { contentLocales } from '@/features/content/locales';
 import { sessionLocales } from '@/features/session';
 import { shellLocales } from '@/features/shell';
 import { numberLocale } from '@/shared/lib/format';

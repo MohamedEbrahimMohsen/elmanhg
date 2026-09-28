@@ -113,6 +113,23 @@
   <data name="UNIT_NAME_REQUIRED" xml:space="preserve"><value>اكتب اسم الوحدة.</value></data>
   <data name="UNIT_NAME_TOO_LONG" xml:space="preserve"><value>اسم الوحدة طويل جدا.</value></data>
   <data name="UNIT_POSITION_INVALID" xml:space="preserve"><value>الترتيب يجب ان يكون 1 او اكثر.</value></data>
+  <data name="LESSON_NOT_FOUND" xml:space="preserve"><value>الدرس غير موجود.</value></data>
+  <data name="LESSON_ID_REQUIRED" xml:space="preserve"><value>اختر الدرس.</value></data>
+  <data name="LESSON_NAME_REQUIRED" xml:space="preserve"><value>اكتب اسم الدرس.</value></data>
+  <data name="LESSON_NAME_TOO_LONG" xml:space="preserve"><value>اسم الدرس طويل جدا.</value></data>
+  <data name="LESSON_EXPLANATION_TOO_LONG" xml:space="preserve"><value>الشرح طويل جدا.</value></data>
+  <data name="LESSON_SUMMARY_TOO_LONG" xml:space="preserve"><value>الملخص طويل جدا.</value></data>
+  <data name="LESSON_VIDEO_URL_INVALID" xml:space="preserve"><value>اكتب رابط فيديو يبدا بـ http:// او https://.</value></data>
+  <data name="LESSON_VIDEO_URL_TOO_LONG" xml:space="preserve"><value>رابط الفيديو طويل جدا.</value></data>
+  <data name="LESSON_OBJECTIVES_TOO_MANY" xml:space="preserve"><value>عدد اهداف الدرس اكبر من المسموح.</value></data>
+  <data name="LESSON_OBJECTIVE_TEXT_REQUIRED" xml:space="preserve"><value>كل هدف يحتاج الى نص.</value></data>
+  <data name="LESSON_OBJECTIVE_TEXT_TOO_LONG" xml:space="preserve"><value>احد الاهداف طويل جدا.</value></data>
+  <data name="LESSON_OBJECTIVE_DUPLICATE" xml:space="preserve"><value>يوجد هدف مكرر.</value></data>
+  <data name="LESSON_OBJECTIVE_UNKNOWN" xml:space="preserve"><value>احد الاهداف لم يعد موجودا. اعد تحميل الدرس وحاول مرة اخرى.</value></data>
+  <data name="LESSON_IMAGE_REQUIRED" xml:space="preserve"><value>اختر صورة.</value></data>
+  <data name="LESSON_IMAGE_TYPE_INVALID" xml:space="preserve"><value>استخدم صورة PNG او JPEG او WebP او GIF.</value></data>
+  <data name="LESSON_IMAGE_TOO_LARGE" xml:space="preserve"><value>الصورة كبيرة جدا.</value></data>
+  <data name="UNIT_HAS_LESSONS" xml:space="preserve"><value>لا يمكن حذف الوحدة لانها تحتوي على دروس.</value></data>
   <data name="CONTENT_ORDER_INVALID" xml:space="preserve"><value>الترتيب يجب ان يكون 1 او اكثر.</value></data>
   <data name="USER_NOT_TEACHER" xml:space="preserve"><value>يمكن اسناد المواد الى المعلمين فقط.</value></data>
   <data name="AUDIT_LOG_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة يجب ان يكون 1 او اكثر.</value></data>

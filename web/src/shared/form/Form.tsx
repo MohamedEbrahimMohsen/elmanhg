@@ -32,6 +32,7 @@ export function Form<TValues extends FieldValues, TTransformed extends FieldValu
         noValidate
         className={cn('flex flex-col gap-3', className)}
         onSubmit={(event) => {
+          event.stopPropagation();
           void form.handleSubmit(submit)(event);
         }}
       >

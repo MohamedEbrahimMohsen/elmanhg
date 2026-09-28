@@ -59,17 +59,20 @@ An array with one element per changed audited entity. Property keys are camelCas
 | UpdateUnit | `Unit.Update` | Unit | command |
 | ReorderUnit | `Unit.Reorder` | Unit | command (the diff lists every sibling whose `Order` changed) |
 | DeleteUnit | `Unit.Delete` | Unit | command |
+| CreateLesson | `Lesson.Create` | Lesson | result |
+| UpdateLesson | `Lesson.Update` | Lesson | command (the diff lists the Lesson fields and every `LessonObjective` created, modified or deleted) |
+| UploadLessonImage | `Lesson.UploadImage` | Lesson | command (no diff: only a file is written) |
 
-Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`.
+Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`.
 
-Validation commands (E3) and later content commands (lessons, questions) join this table when they are built.
+Validation commands (E3) and question commands join this table when they are built.
 
 ## Not audited (deliberate)
 
 - **Reads** (queries), including the audit log itself.
 - **Auth**: login, register, OTP, logout. A separate security-log concern.
 - **Noise**: access-token refresh.
-- **Uploads**: audit the decision (approve, reject), not the file.
+- **Evidence uploads** (Ask a Teacher images and voice): audit the decision, not the file. Lesson content images are the exception: they change content (PRD §17 rule 13), so `UploadLessonImage` is audited as `Lesson.UploadImage` with no diff.
 - **PII entities**: `User` is never marked `IAuditedEntity`, so password hashes and phone numbers never reach a diff.
 
 ## Add a new audited command

@@ -2,16 +2,19 @@ using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Units.DeleteUnit;
+using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Units;
 using FluentAssertions;
 using NSubstitute;
+using DomainErrorCodes = Elmanhg.Domain.SharedKernel.Exceptions.ErrorCodes;
 
 namespace Elmanhg.Tests.Application.Features.Units.DeleteUnit;
 
 public sealed class DeleteUnitHandlerTests
 {
     private readonly ICurriculumUnitRepository _unitRepository = Substitute.For<ICurriculumUnitRepository>();
+    private readonly ILessonRepository _lessonRepository = Substitute.For<ILessonRepository>();
     private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
     private readonly Guid _currentUserId = Guid.NewGuid();
     private readonly CurriculumUnit _unit = CurriculumUnit.Create(Subject.Create("Physics", 1, Guid.NewGuid()), "Mechanics", 1, Guid.NewGuid());
@@ -21,7 +24,7 @@ public sealed class DeleteUnitHandlerTests
     {
         _currentUserService.UserId.Returns(_currentUserId);
         _unitRepository.GetByIdAsync(_unit.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<CurriculumUnit>, IQueryable<CurriculumUnit>>?>(), Arg.Any<bool>()).Returns(_unit);
-        _handler = new DeleteUnitHandler(_unitRepository, _currentUserService);
+        _handler = new DeleteUnitHandler(_unitRepository, _lessonRepository, _currentUserService);
     }
 
     [Fact]
@@ -49,6 +52,18 @@ public sealed class DeleteUnitHandlerTests
         var act = () => _handler.Handle(new DeleteUnitCommand(Guid.NewGuid(), _unit.Id), TestContext.Current.CancellationToken);
 
         (await act.Should().ThrowAsync<NotFoundCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.UnitNotFound);
+        _unit.IsDeleted.Should().BeFalse();
+        await _unitRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_UnitHasLessons_ThrowsUnitHasLessons()
+    {
+        _lessonRepository.AnyInUnitAsync(_unit.Id, Arg.Any<CancellationToken>()).Returns(true);
+
+        var act = () => _handler.Handle(new DeleteUnitCommand(_unit.SubjectId, _unit.Id), TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<BusinessRuleViolationCoreException>()).Which.ErrorCode.Should().Be(DomainErrorCodes.UnitHasLessons);
         _unit.IsDeleted.Should().BeFalse();
         await _unitRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }

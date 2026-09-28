@@ -20,7 +20,7 @@ public sealed class AppDbContextTests(ApiFactory factory)
         var applied = await context.Database.GetAppliedMigrationsAsync(TestContext.Current.CancellationToken);
 
         pending.Should().BeEmpty();
-        applied.Should().SatisfyRespectively(first => first.Should().EndWith("_InitialCreate"), second => second.Should().EndWith("_AddUserProfileFields"), third => third.Should().EndWith("_AddTeacherSubjectScoping"), fourth => fourth.Should().EndWith("_AddAuditLogDiffAndAppendOnly"), fifth => fifth.Should().EndWith("_AddSubjectOrderAndUnits"));
+        applied.Should().SatisfyRespectively(first => first.Should().EndWith("_InitialCreate"), second => second.Should().EndWith("_AddUserProfileFields"), third => third.Should().EndWith("_AddTeacherSubjectScoping"), fourth => fourth.Should().EndWith("_AddAuditLogDiffAndAppendOnly"), fifth => fifth.Should().EndWith("_AddSubjectOrderAndUnits"), sixth => sixth.Should().EndWith("_AddLessons"));
     }
 
     [Fact]

@@ -175,6 +175,25 @@ public sealed class UnitsEndpointTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task Delete_UnitWithLessons_Returns400UnitHasLessonsAndAuditsFailure()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var subjectId = await SeedSubjectAsync();
+        var unitId = await ContentTestData.SeedUnitAsync(factory, subjectId, "Mechanics", 1, cancellationToken);
+        await ContentTestData.SeedLessonAsync(factory, unitId, "Newton's laws", 1, [], cancellationToken);
+        using var admin = await AdminClientAsync();
+
+        using var response = await admin.DeleteAsync($"{Route(subjectId)}/{unitId}", cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await ReadCodeAsync(response)).Should().Be("UNIT_HAS_LESSONS");
+        (await ReadUnitAsync(unitId)).IsDeleted.Should().BeFalse();
+        var audit = await ContentTestData.ReadAuditAsync(factory, "Unit.Delete", unitId, cancellationToken);
+        audit.Outcome.Should().Be("Failure");
+        audit.ErrorCode.Should().Be("UNIT_HAS_LESSONS");
+    }
+
+    [Fact]
     public async Task Delete_UnknownUnit_Returns404UnitNotFound()
     {
         var subjectId = await SeedSubjectAsync();

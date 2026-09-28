@@ -3,7 +3,9 @@
     "name": "المنهج"
   },
   "validation": {
-    "required": "هذا الحقل مطلوب."
+    "required": "هذا الحقل مطلوب.",
+    "url": "اكتب رابطًا يبدأ بـ http:// أو https://.",
+    "fileRequired": "اختر ملفًا."
   },
   "errors": {
     "UNHANDLED_EXCEPTION": "حدث خطأ غير متوقع. حاول مرة أخرى.",
@@ -46,7 +48,23 @@
     "UNIT_NOT_FOUND": "الوحدة غير موجودة.",
     "UNIT_NAME_REQUIRED": "اكتب اسم الوحدة.",
     "UNIT_NAME_TOO_LONG": "اسم الوحدة طويل جدا.",
-    "UNIT_POSITION_INVALID": "الترتيب يجب ان يكون 1 او اكثر."
+    "UNIT_POSITION_INVALID": "الترتيب يجب ان يكون 1 او اكثر.",
+    "LESSON_NOT_FOUND": "الدرس غير موجود.",
+    "LESSON_NAME_REQUIRED": "اكتب اسم الدرس.",
+    "LESSON_NAME_TOO_LONG": "اسم الدرس طويل جدا.",
+    "LESSON_EXPLANATION_TOO_LONG": "الشرح طويل جدا.",
+    "LESSON_SUMMARY_TOO_LONG": "الملخص طويل جدا.",
+    "LESSON_VIDEO_URL_INVALID": "اكتب رابط فيديو يبدا بـ http:// او https://.",
+    "LESSON_VIDEO_URL_TOO_LONG": "رابط الفيديو طويل جدا.",
+    "LESSON_OBJECTIVES_TOO_MANY": "عدد اهداف الدرس اكبر من المسموح.",
+    "LESSON_OBJECTIVE_TEXT_REQUIRED": "كل هدف يحتاج الى نص.",
+    "LESSON_OBJECTIVE_TEXT_TOO_LONG": "احد الاهداف طويل جدا.",
+    "LESSON_OBJECTIVE_DUPLICATE": "يوجد هدف مكرر.",
+    "LESSON_OBJECTIVE_UNKNOWN": "احد الاهداف لم يعد موجودا. اعد تحميل الدرس وحاول مرة اخرى.",
+    "LESSON_IMAGE_REQUIRED": "اختر صورة.",
+    "LESSON_IMAGE_TYPE_INVALID": "استخدم صورة PNG او JPEG او WebP او GIF.",
+    "LESSON_IMAGE_TOO_LARGE": "الصورة كبيرة جدا.",
+    "UNIT_HAS_LESSONS": "لا يمكن حذف الوحدة لانها تحتوي على دروس."
   },
   "error": {
     "title": "حدث خطأ"

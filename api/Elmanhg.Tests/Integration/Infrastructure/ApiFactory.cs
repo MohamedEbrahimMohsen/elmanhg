@@ -26,6 +26,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     public RecordingSmsSender Sms { get; } = new();
 
+    public string MediaRoot { get; } = Path.Combine(Path.GetTempPath(), "elmanhg-tests-media", Guid.NewGuid().ToString("N"));
+
     public async ValueTask InitializeAsync()
     {
         await _database.StartAsync();
@@ -48,6 +50,16 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["AuditLogs:FilterMaxLength"] = "256",
             ["Content:SubjectNameMaxLength"] = "100",
             ["Content:UnitNameMaxLength"] = "100",
+            ["Content:LessonNameMaxLength"] = "100",
+            ["Content:LessonExplanationMaxLength"] = "100000",
+            ["Content:LessonSummaryMaxLength"] = "20000",
+            ["Content:LessonObjectiveMaxLength"] = "300",
+            ["Content:LessonObjectivesMaxCount"] = "20",
+            ["Content:LessonVideoUrlMaxLength"] = "2048",
+            ["Content:LessonImageMaxSizeInMb"] = "5",
+            ["FileStorage:Provider"] = "Local",
+            ["FileStorage:LocalRootPath"] = MediaRoot,
+            ["FileStorage:PublicBaseUrl"] = "/api/media",
             ["CoreOtp:Secret"] = TestOtpSecret,
             ["Sms:Provider"] = "Fake",
             ["Auth:DisplayNameMaxLength"] = "100",
@@ -82,6 +94,11 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     public new async ValueTask DisposeAsync()
     {
         await _database.DisposeAsync();
+        if (Directory.Exists(MediaRoot))
+        {
+            Directory.Delete(MediaRoot, recursive: true);
+        }
+
         await base.DisposeAsync();
     }
 }

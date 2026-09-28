@@ -1,4 +1,5 @@
 using Core.Auditing.Entities;
+using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Units;
 using Elmanhg.Infrastructure.Data.Context;
@@ -29,6 +30,30 @@ public static class ContentTestData
         context.Units.Add(unit);
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return unit.Id;
+    }
+
+    public static async Task<Guid> SeedLessonAsync(ApiFactory factory, Guid unitId, string name, int order, IReadOnlyList<string> objectiveTexts, CancellationToken cancellationToken)
+    {
+        using var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var unit = await context.Units.SingleAsync(x => x.Id == unitId, cancellationToken).ConfigureAwait(false);
+        var creator = Guid.NewGuid();
+        var lesson = Lesson.Create(unit, name, order, creator);
+        if (objectiveTexts.Count > 0)
+        {
+            lesson.Update(name, string.Empty, string.Empty, null, objectiveTexts.Select(x => new LessonObjectiveContent(null, x)).ToList(), creator);
+        }
+
+        context.Lessons.Add(lesson);
+        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return lesson.Id;
+    }
+
+    public static async Task<Lesson> ReadLessonAsync(ApiFactory factory, Guid lessonId, CancellationToken cancellationToken)
+    {
+        using var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        return await context.Lessons.IgnoreQueryFilters().Include(x => x.Objectives).AsNoTracking().SingleAsync(x => x.Id == lessonId, cancellationToken).ConfigureAwait(false);
     }
 
     public static async Task<int> ReadOrderAsync(ApiFactory factory, Guid subjectOrUnitId, CancellationToken cancellationToken)

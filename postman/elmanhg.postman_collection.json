@@ -12,7 +12,8 @@
     { "key": "otpCode", "value": "" },
     { "key": "teacherId", "value": "" },
     { "key": "subjectId", "value": "" },
-    { "key": "unitId", "value": "" }
+    { "key": "unitId", "value": "" },
+    { "key": "lessonId", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -617,6 +618,148 @@
               "raw": "{{baseUrl}}/api/subjects/{{subjectId}}/units/{{unitId}}",
               "host": ["{{baseUrl}}"],
               "path": ["api", "subjects", "{{subjectId}}", "units", "{{unitId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Lessons",
+      "description": "Admin only (Content.Manage). Set unitId (or run Create unit) and sign in as an admin first. Create lesson stores lessonId; lessons are created as Draft. Update lesson replaces the whole objectives list: send an existing objective id to keep it, a null id to add one, and leave one out to remove it. Explanation and summary are sanitised HTML (docs/rich-text.md). Upload lesson image returns the public /api/media URL to use in an img tag.",
+      "item": [
+        {
+          "name": "Get lessons",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons?unitId={{unitId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons"],
+              "query": [{ "key": "unitId", "value": "{{unitId}}" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/{{lessonId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons", "{{lessonId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"lessonId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unitId\": \"{{unitId}}\",\n  \"name\": \"Newton's laws\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/{{lessonId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons", "{{lessonId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Newton's laws\",\n  \"explanation\": \"<p>A force changes motion: <span data-type=\\\"inline-math\\\" data-latex=\\\"F=ma\\\"></span></p>\",\n  \"summary\": \"<p>Forces cause acceleration.</p>\",\n  \"videoUrl\": \"https://example.com/video\",\n  \"objectives\": [\n    { \"id\": null, \"text\": \"State the first law\" },\n    { \"id\": null, \"text\": \"Apply F = ma\" }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload lesson image",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/{{lessonId}}/images",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons", "{{lessonId}}", "images"]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "file", "type": "file", "src": "" }]
             }
           },
           "response": []

@@ -10,6 +10,7 @@ export interface TextFieldProps<TValues extends FieldValues> {
   type?: 'text' | 'email' | 'tel' | 'password' | 'date';
   autoComplete?: string;
   description?: string;
+  dir?: 'ltr';
 }
 
 export function TextField<TValues extends FieldValues>({
@@ -18,6 +19,7 @@ export function TextField<TValues extends FieldValues>({
   type,
   autoComplete,
   description,
+  dir,
 }: TextFieldProps<TValues>) {
   const { t } = useTranslation();
   const {
@@ -39,6 +41,7 @@ export function TextField<TValues extends FieldValues>({
       <Input
         id={id}
         type={type}
+        dir={dir}
         autoComplete={autoComplete}
         name={fieldName}
         value={typeof value === 'string' ? value : ''}

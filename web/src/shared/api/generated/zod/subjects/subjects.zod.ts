@@ -33,6 +33,7 @@ export const GetSubjectParams = zod.object({
 
 export const getSubjectResponseOrderRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const getSubjectResponseUnitsItemOrderRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getSubjectResponseUnitsItemLessonCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 
 
 export const GetSubjectResponse = zod.object({
@@ -43,7 +44,8 @@ export const GetSubjectResponse = zod.object({
   "id": zod.uuid(),
   "subjectId": zod.uuid(),
   "name": zod.string(),
-  "order": zod.union([zod.int(),zod.stringFormat('int32', getSubjectResponseUnitsItemOrderRegExpTwo)])
+  "order": zod.union([zod.int(),zod.stringFormat('int32', getSubjectResponseUnitsItemOrderRegExpTwo)]),
+  "lessonCount": zod.union([zod.int(),zod.stringFormat('int32', getSubjectResponseUnitsItemLessonCountRegExpTwo)])
 }))
 })
 

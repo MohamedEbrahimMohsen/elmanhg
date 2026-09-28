@@ -11,4 +11,6 @@ export interface UnitResult {
   name: string;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   order: number | string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  lessonCount: number | string;
 }
