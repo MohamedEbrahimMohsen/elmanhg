@@ -112,6 +112,15 @@ public static class ErrorCodes
     public const string ReviewSessionNotFound = "REVIEW_SESSION_NOT_FOUND";
     public const string ReviewSessionIdRequired = "REVIEW_SESSION_ID_REQUIRED";
 
+    // SESSIONS
+    public const string SessionNotFound = "SESSION_NOT_FOUND";
+    public const string SessionIdRequired = "SESSION_ID_REQUIRED";
+    public const string SessionQuestionCountInvalid = "SESSION_QUESTION_COUNT_INVALID";
+    public const string SessionQuestionNotFound = "SESSION_QUESTION_NOT_FOUND";
+    public const string SessionAlreadyInProgress = "SESSION_ALREADY_IN_PROGRESS";
+    public const string AttemptAnswerTooLong = "ATTEMPT_ANSWER_TOO_LONG";
+    public const string AttemptTimeTakenInvalid = "ATTEMPT_TIME_TAKEN_INVALID";
+
     // QUESTION IMPORTS
     public const string QuestionImportFileRequired = "QUESTION_IMPORT_FILE_REQUIRED";
     public const string QuestionImportFileTypeInvalid = "QUESTION_IMPORT_FILE_TYPE_INVALID";

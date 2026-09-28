@@ -18,7 +18,9 @@
     { "key": "importBatchId", "value": "" },
     { "key": "reviewSessionId", "value": "" },
     { "key": "rejectQuestionId", "value": "" },
-    { "key": "bulkQuestionId", "value": "" }
+    { "key": "bulkQuestionId", "value": "" },
+    { "key": "sessionId", "value": "" },
+    { "key": "sessionQuestionId", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -1525,6 +1527,121 @@
               "mode": "raw",
               "raw": "{\n  \"reviewSessionId\": \"{{reviewSessionId}}\",\n  \"questionIds\": [\"{{bulkQuestionId}}\"]\n}",
               "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sessions",
+      "description": "Sign in as a Student (or an Admin for test mode). `lessonId` must be a Published lesson with approved questions.",
+      "item": [
+        {
+          "name": "Start quiz session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set(\"sessionId\", json.id);",
+                  "pm.collectionVariables.set(\"sessionQuestionId\", json.items[0].questionId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/quiz",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sessions", "quiz"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lessonId\": \"{{lessonId}}\",\n  \"questionCount\": 5\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/{{sessionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sessions", "{{sessionId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit answer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/{{sessionId}}/answers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sessions", "{{sessionId}}", "answers"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionId\": \"{{sessionQuestionId}}\",\n  \"answer\": { \"optionId\": \"b\" },\n  \"timeTakenMilliseconds\": 12000\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Finish session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/{{sessionId}}/finish",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sessions", "{{sessionId}}", "finish"]
             }
           },
           "response": []

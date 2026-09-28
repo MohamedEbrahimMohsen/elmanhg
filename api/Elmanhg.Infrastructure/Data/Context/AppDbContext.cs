@@ -6,12 +6,14 @@ using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.ReviewSessions;
+using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.Units;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using DomainErrorCodes = Elmanhg.Domain.SharedKernel.Exceptions.ErrorCodes;
 
 namespace Elmanhg.Infrastructure.Data.Context;
 
@@ -21,6 +23,9 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     private const int EnumColumnMaxLength = 50;
     // A SHA-256 digest is 32 bytes, 64 lower-case hex characters; a schema invariant.
     private const int Sha256HexLength = 64;
+
+    public const string InProgressSessionIndex = "IX_Sessions_InProgressScope";
+    public const string AttemptPerQuestionIndex = "IX_Attempts_SessionId_QuestionId";
 
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<TeacherSubject> TeacherSubjects { get; set; }
@@ -33,6 +38,9 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public DbSet<QuestionDecision> QuestionDecisions { get; set; }
     public DbSet<ReviewSession> ReviewSessions { get; set; }
     public DbSet<ReviewSessionOpening> ReviewSessionOpenings { get; set; }
+    public DbSet<Session> Sessions { get; set; }
+    public DbSet<SessionItem> SessionItems { get; set; }
+    public DbSet<Attempt> Attempts { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
@@ -44,6 +52,14 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         {
             // Two confirms of one import batch id passed the replay check together; the loser surfaces as the batch conflict, which the import pipeline resolves.
             throw new ConflictCoreException(ErrorCodes.QuestionImportBatchConflict, innerException: exception);
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: InProgressSessionIndex })
+        {
+            throw new ConflictCoreException(ErrorCodes.SessionAlreadyInProgress, innerException: exception);
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: AttemptPerQuestionIndex })
+        {
+            throw new ConflictCoreException(DomainErrorCodes.SessionQuestionAlreadyAnswered, innerException: exception);
         }
     }
 
@@ -57,6 +73,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         ConfigureQuestions(modelBuilder);
         ConfigureQuestionImportBatches(modelBuilder);
         ConfigureReviewSessions(modelBuilder);
+        ConfigureSessions(modelBuilder);
         ConfigureTeacherSubjects(modelBuilder);
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
@@ -169,6 +186,42 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         });
     }
 
+    private static void ConfigureSessions(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Session>(builder =>
+        {
+            builder.Property(x => x.Kind).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.Scope).IsRequired().HasColumnType("jsonb");
+            builder.Property(x => x.ScopeKey).IsRequired();
+            builder.Property(x => x.ScorePercent).HasPrecision(5, 2);
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasMany(x => x.Items).WithOne().HasForeignKey(x => x.SessionId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasMany(x => x.Attempts).WithOne().HasForeignKey(x => x.SessionId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.StudentId, x.StartedAt });
+            builder.HasIndex(x => new { x.StudentId, x.Kind, x.ScopeKey }).IsUnique().HasFilter("\"SubmittedAt\" IS NULL AND \"IsDeleted\" = false").HasDatabaseName(InProgressSessionIndex);
+        });
+        modelBuilder.Entity<SessionItem>(builder =>
+        {
+            builder.Property(x => x.Id).ValueGeneratedNever();
+            builder.HasOne<Question>().WithMany().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.SessionId, x.Position }).IsUnique();
+            builder.HasIndex(x => new { x.SessionId, x.QuestionId }).IsUnique();
+        });
+        modelBuilder.Entity<Attempt>(builder =>
+        {
+            builder.Property(x => x.Id).ValueGeneratedNever();
+            builder.Property(x => x.Answer).IsRequired().HasColumnType("jsonb");
+            builder.Property(x => x.Grade).HasColumnType("jsonb");
+            builder.Property(x => x.GradedBy).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.Score).HasPrecision(9, 2);
+            builder.Property(x => x.NormalisedScore).HasPrecision(5, 4);
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Question>().WithMany().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.StudentId, x.QuestionId, x.CreatedAt });
+            builder.HasIndex(x => new { x.SessionId, x.QuestionId }).IsUnique().HasDatabaseName(AttemptPerQuestionIndex);
+        });
+    }
+
     private static void ConfigureTeacherSubjects(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TeacherSubject>(builder =>
@@ -193,5 +246,8 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         modelBuilder.Entity<QuestionDecision>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<ReviewSession>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<ReviewSessionOpening>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<Session>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<SessionItem>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<Attempt>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

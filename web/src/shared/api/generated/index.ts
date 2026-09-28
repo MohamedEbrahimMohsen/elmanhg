@@ -3,6 +3,7 @@ export * from './auth/auth';
 export * from './lessons/lessons';
 export * from './question-imports/question-imports';
 export * from './questions/questions';
+export * from './sessions/sessions';
 export * from './subjects/subjects';
 export * from './teachers/teachers';
 export * from './units/units';

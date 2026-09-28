@@ -1,4 +1,5 @@
 using Core.DDD.Entities;
+using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Questions.Schemas;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -14,6 +15,14 @@ public class QuestionRevision : Entity
     public DateTimeOffset EditedAt { get; private set; }
 
     private QuestionRevision(Guid id) : base(id) { }
+
+    public QuestionRevisionSnapshot ReadSnapshot() => JsonSerializer.Deserialize<QuestionRevisionSnapshot>(Snapshot, QuestionJson.SerializerOptions) ?? throw new InvalidOperationException("Question revision snapshot is not readable.");
+
+    public QuestionGrade Grade(JsonElement answer)
+    {
+        var snapshot = ReadSnapshot();
+        return QuestionGrader.Grade(snapshot.Type, snapshot.GradingSpec?.ToJsonString() ?? "{}", snapshot.MaxScore, answer);
+    }
 
     internal static QuestionRevision Create(Question question, Guid editedBy)
     {
