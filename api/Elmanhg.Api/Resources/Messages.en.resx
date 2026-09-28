@@ -104,6 +104,16 @@
   <data name="TEACHER_SUBJECT_NOT_ASSIGNED" xml:space="preserve"><value>This subject is not assigned to the teacher.</value></data>
   <data name="TEACHER_ID_REQUIRED" xml:space="preserve"><value>Choose a teacher.</value></data>
   <data name="SUBJECT_ID_REQUIRED" xml:space="preserve"><value>Choose a subject.</value></data>
+  <data name="SUBJECT_NAME_REQUIRED" xml:space="preserve"><value>Enter the subject name.</value></data>
+  <data name="SUBJECT_NAME_TOO_LONG" xml:space="preserve"><value>Subject name is too long.</value></data>
+  <data name="SUBJECT_POSITION_INVALID" xml:space="preserve"><value>Position must be 1 or more.</value></data>
+  <data name="SUBJECT_HAS_UNITS" xml:space="preserve"><value>This subject has units. Delete its units first.</value></data>
+  <data name="UNIT_NOT_FOUND" xml:space="preserve"><value>Unit not found.</value></data>
+  <data name="UNIT_ID_REQUIRED" xml:space="preserve"><value>Choose a unit.</value></data>
+  <data name="UNIT_NAME_REQUIRED" xml:space="preserve"><value>Enter the unit name.</value></data>
+  <data name="UNIT_NAME_TOO_LONG" xml:space="preserve"><value>Unit name is too long.</value></data>
+  <data name="UNIT_POSITION_INVALID" xml:space="preserve"><value>Position must be 1 or more.</value></data>
+  <data name="CONTENT_ORDER_INVALID" xml:space="preserve"><value>Order must be 1 or more.</value></data>
   <data name="USER_NOT_TEACHER" xml:space="preserve"><value>Subjects can only be assigned to teachers.</value></data>
   <data name="AUDIT_LOG_PAGE_NUMBER_INVALID" xml:space="preserve"><value>Page number must be 1 or more.</value></data>
   <data name="AUDIT_LOG_PAGE_SIZE_INVALID" xml:space="preserve"><value>Page size is out of the allowed range.</value></data>

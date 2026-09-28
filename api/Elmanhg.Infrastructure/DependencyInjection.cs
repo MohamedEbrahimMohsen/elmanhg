@@ -1,9 +1,11 @@
 using Core.OTP.Sms;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Teachers;
+using Elmanhg.Domain.Units;
 using Elmanhg.Infrastructure.Sms;
 using Elmanhg.Infrastructure.Subjects;
 using Elmanhg.Infrastructure.Teachers;
+using Elmanhg.Infrastructure.Units;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -22,6 +24,7 @@ public static class DependencyInjection
         });
         services.AddScoped<ISubjectRepository, SubjectRepository>();
         services.AddScoped<ITeacherSubjectRepository, TeacherSubjectRepository>();
+        services.AddScoped<ICurriculumUnitRepository, CurriculumUnitRepository>();
         return services;
     }
 }

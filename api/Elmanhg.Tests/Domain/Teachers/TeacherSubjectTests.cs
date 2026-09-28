@@ -9,7 +9,7 @@ namespace Elmanhg.Tests.Domain.Teachers;
 
 public sealed class TeacherSubjectTests
 {
-    private readonly Subject _subject = Subject.Create("Physics", Guid.NewGuid());
+    private readonly Subject _subject = Subject.Create("Physics", 1, Guid.NewGuid());
 
     [Fact]
     public void Create_TeacherAndSubject_LinksBoth()

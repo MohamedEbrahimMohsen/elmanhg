@@ -1,7 +1,8 @@
 using Core.Auditing;
-using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Infrastructure.Data.Context;
+using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Integration.Auth;
 using Elmanhg.Tests.Integration.Authorization;
 using Elmanhg.Tests.Integration.Infrastructure;
 using FluentAssertions;
@@ -55,7 +56,7 @@ public sealed class AuditChangeCaptureTests(ApiFactory factory)
     {
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        context.Subjects.Add(Subject.Create("Chemistry", Guid.NewGuid()));
+        context.Otps.Add(new OtpBuilder().ForPhone(AuthTestClient.NewPhoneNumber()).Build());
 
         await context.SaveChangesAsync(TestContext.Current.CancellationToken);
 

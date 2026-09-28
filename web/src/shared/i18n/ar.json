@@ -37,7 +37,16 @@
     "AUDIT_LOG_PAGE_NUMBER_INVALID": "رقم الصفحة يجب ان يكون 1 او اكثر.",
     "AUDIT_LOG_PAGE_SIZE_INVALID": "حجم الصفحة خارج النطاق المسموح.",
     "AUDIT_LOG_FILTER_TOO_LONG": "نص التصفية طويل جدا.",
-    "AUDIT_LOG_DATE_RANGE_INVALID": "يجب ان يكون تاريخ النهاية بعد تاريخ البداية."
+    "AUDIT_LOG_DATE_RANGE_INVALID": "يجب ان يكون تاريخ النهاية بعد تاريخ البداية.",
+    "SUBJECT_NAME_REQUIRED": "اكتب اسم المادة.",
+    "SUBJECT_NAME_TOO_LONG": "اسم المادة طويل جدا.",
+    "SUBJECT_POSITION_INVALID": "الترتيب يجب ان يكون 1 او اكثر.",
+    "SUBJECT_HAS_UNITS": "لا يمكن حذف المادة لانها تحتوي على وحدات. احذف الوحدات اولا.",
+    "SUBJECT_NOT_FOUND": "المادة غير موجودة.",
+    "UNIT_NOT_FOUND": "الوحدة غير موجودة.",
+    "UNIT_NAME_REQUIRED": "اكتب اسم الوحدة.",
+    "UNIT_NAME_TOO_LONG": "اسم الوحدة طويل جدا.",
+    "UNIT_POSITION_INVALID": "الترتيب يجب ان يكون 1 او اكثر."
   },
   "error": {
     "title": "حدث خطأ"

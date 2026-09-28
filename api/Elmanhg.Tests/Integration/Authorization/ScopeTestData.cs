@@ -28,7 +28,7 @@ public static class ScopeTestData
     {
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var subject = Subject.Create(name, Guid.NewGuid());
+        var subject = Subject.Create(name, 1, Guid.NewGuid());
         context.Subjects.Add(subject);
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return subject.Id;

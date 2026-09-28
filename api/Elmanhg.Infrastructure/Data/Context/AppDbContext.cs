@@ -3,6 +3,7 @@ using Core.EntityFrameworkCore.Context;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Teachers;
+using Elmanhg.Domain.Units;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,12 +16,14 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
 
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<TeacherSubject> TeacherSubjects { get; set; }
+    public DbSet<CurriculumUnit> Units { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         ConfigureUsers(modelBuilder);
         ConfigureSubjects(modelBuilder);
+        ConfigureUnits(modelBuilder);
         ConfigureTeacherSubjects(modelBuilder);
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
@@ -40,6 +43,16 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         modelBuilder.Entity<Subject>(builder => builder.Property(x => x.Name).IsRequired());
     }
 
+    private static void ConfigureUnits(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<CurriculumUnit>(builder =>
+        {
+            builder.Property(x => x.Name).IsRequired();
+            builder.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.SubjectId, x.Order });
+        });
+    }
+
     private static void ConfigureTeacherSubjects(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TeacherSubject>(builder =>
@@ -55,5 +68,6 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         modelBuilder.Entity<User>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<Subject>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<TeacherSubject>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<CurriculumUnit>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

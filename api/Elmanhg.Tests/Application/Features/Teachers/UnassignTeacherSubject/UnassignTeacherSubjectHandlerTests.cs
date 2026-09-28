@@ -27,7 +27,7 @@ public sealed class UnassignTeacherSubjectHandlerTests
     [Fact]
     public async Task Handle_Assigned_SoftDeletesAndSaves()
     {
-        var teacherSubject = TeacherSubject.Create(User.CreateTeacher("Teacher", "teacher@elmanhg.test"), Subject.Create("Physics", Guid.NewGuid()), Guid.NewGuid());
+        var teacherSubject = TeacherSubject.Create(User.CreateTeacher("Teacher", "teacher@elmanhg.test"), Subject.Create("Physics", 1, Guid.NewGuid()), Guid.NewGuid());
         ArrangeLookup(teacherSubject);
 
         await _handler.Handle(new UnassignTeacherSubjectCommand(teacherSubject.TeacherId, teacherSubject.SubjectId), TestContext.Current.CancellationToken);

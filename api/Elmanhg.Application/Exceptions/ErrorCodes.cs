@@ -33,6 +33,16 @@ public static class ErrorCodes
     public const string TeacherSubjectNotAssigned = "TEACHER_SUBJECT_NOT_ASSIGNED";
     public const string TeacherIdRequired = "TEACHER_ID_REQUIRED";
     public const string SubjectIdRequired = "SUBJECT_ID_REQUIRED";
+    public const string SubjectNameRequired = "SUBJECT_NAME_REQUIRED";
+    public const string SubjectNameTooLong = "SUBJECT_NAME_TOO_LONG";
+    public const string SubjectPositionInvalid = "SUBJECT_POSITION_INVALID";
+
+    // UNITS
+    public const string UnitNotFound = "UNIT_NOT_FOUND";
+    public const string UnitIdRequired = "UNIT_ID_REQUIRED";
+    public const string UnitNameRequired = "UNIT_NAME_REQUIRED";
+    public const string UnitNameTooLong = "UNIT_NAME_TOO_LONG";
+    public const string UnitPositionInvalid = "UNIT_POSITION_INVALID";
 
     // AUDIT LOGS
     public const string AuditLogPageNumberInvalid = "AUDIT_LOG_PAGE_NUMBER_INVALID";
