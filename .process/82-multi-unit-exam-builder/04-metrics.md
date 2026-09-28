@@ -6,3 +6,4 @@ Branch: `feature/82-multi-unit-exam-builder` (base `main`)
 |---|-------|-------|-------|---------|----------|----------|--------|-----------|---------|
 | 1 | Plan | feature-planner | opus-5.5 medium | 22:55 | 23:13 | 18m 12s | 258,536 | 82 | plan written |
 | 2 | Implement | feature-implementer | opus-5.5 medium | 23:13 | 23:48 | 34m 57s | 369,542 | 175 | done, api 1879/1879, web 632/632 |
+| 3 | Review r1 | feature-reviewer | opus-5.5 medium | 23:48 | 23:55 | 7m 5s | 212,044 | 76 | CHANGES_REQUESTED (doc row), fixed by orchestrator |
