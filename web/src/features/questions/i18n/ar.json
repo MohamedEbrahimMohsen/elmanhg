@@ -162,7 +162,9 @@
     "false": "خطأ",
     "blank": "الفراغ {number}",
     "blankMarker": "({number})",
-    "yourAnswer": "إجابتك"
+    "yourAnswer": "إجابتك",
+    "correctOption": "الإجابة الصحيحة",
+    "wrongOption": "إجابتك، خاطئة"
   },
   "import": {
     "title": "استيراد أسئلة",

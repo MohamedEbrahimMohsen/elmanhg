@@ -162,7 +162,9 @@
     "false": "False",
     "blank": "Blank {number}",
     "blankMarker": "({number})",
-    "yourAnswer": "Your answer"
+    "yourAnswer": "Your answer",
+    "correctOption": "Correct answer",
+    "wrongOption": "Your answer, wrong"
   },
   "import": {
     "title": "Import questions",

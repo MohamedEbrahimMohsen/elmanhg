@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { RichTextViewer } from '@/features/content';
-import { fillStemHtml, type QuestionAnswer, type StudentQuestion } from '../api/studentQuestion';
+import { fillStemHtml, type ChoiceReview, type QuestionAnswer, type StudentQuestion } from '../api/studentQuestion';
 import { ChoiceAnswerInputs } from './ChoiceAnswerInputs';
 import { TextAnswerInputs } from './TextAnswerInputs';
 
@@ -9,9 +9,10 @@ export interface QuestionViewProps {
   answer: QuestionAnswer;
   onAnswerChange: (answer: QuestionAnswer) => void;
   disabled?: boolean;
+  review?: ChoiceReview | undefined;
 }
 
-export function QuestionView({ question, answer, onAnswerChange, disabled }: QuestionViewProps) {
+export function QuestionView({ question, answer, onAnswerChange, disabled, review }: QuestionViewProps) {
   const { t } = useTranslation('questions');
   const stem =
     question.type === 'Fill'
@@ -21,7 +22,13 @@ export function QuestionView({ question, answer, onAnswerChange, disabled }: Que
     question.type === 'Fill' || question.type === 'Short' ? (
       <TextAnswerInputs question={question} answer={answer} onAnswerChange={onAnswerChange} disabled={disabled} />
     ) : (
-      <ChoiceAnswerInputs question={question} answer={answer} onAnswerChange={onAnswerChange} disabled={disabled} />
+      <ChoiceAnswerInputs
+        question={question}
+        answer={answer}
+        onAnswerChange={onAnswerChange}
+        disabled={disabled}
+        review={review}
+      />
     );
 
   return (

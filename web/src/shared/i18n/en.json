@@ -141,7 +141,17 @@
     "QUESTION_IMPORT_COLUMN_DUPLICATE": "The column \"{column}\" appears more than once.",
     "QUESTION_IMPORT_CELL_INVALID": "The value in column \"{column}\" is not valid.",
     "QUESTION_IMPORT_OBJECTIVE_INVALID": "The objective number is not one of this lesson's objectives.",
-    "SPREADSHEET_UNREADABLE": "The file could not be read as an Excel spreadsheet."
+    "SPREADSHEET_UNREADABLE": "The file could not be read as an Excel spreadsheet.",
+    "SESSION_NOT_FOUND": "Session not found.",
+    "SESSION_QUESTION_COUNT_INVALID": "The number of questions is out of the allowed range.",
+    "SESSION_QUESTION_NOT_FOUND": "This question is not part of the session.",
+    "SESSION_ALREADY_IN_PROGRESS": "A session for this lesson is already in progress. Try again to resume it.",
+    "ATTEMPT_ANSWER_TOO_LONG": "The answer is too long.",
+    "SESSION_NO_SERVABLE_QUESTIONS": "This lesson has no questions available yet.",
+    "SESSION_QUESTION_NOT_SERVABLE": "A question cannot be served right now.",
+    "SESSION_ALREADY_SUBMITTED": "This session has already ended.",
+    "SESSION_QUESTION_ALREADY_ANSWERED": "You have already answered this question.",
+    "SESSION_MODIFIED_CONCURRENTLY": "This session was changed by another request. Please try again."
   },
   "error": {
     "title": "Something went wrong"

@@ -1,13 +1,16 @@
 import { useId, type ReactNode } from 'react';
+import { CircleCheck, CircleX } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { RichTextViewer } from '@/features/content';
-import type { QuestionAnswer, StudentQuestion } from '../api/studentQuestion';
+import { cn } from '@/shared/lib/utils';
+import type { ChoiceReview, QuestionAnswer, StudentQuestion } from '../api/studentQuestion';
 
 export interface ChoiceAnswerInputsProps {
   question: StudentQuestion;
   answer: QuestionAnswer;
   onAnswerChange: (answer: QuestionAnswer) => void;
   disabled?: boolean | undefined;
+  review?: ChoiceReview | undefined;
 }
 
 interface ChoiceItem {
@@ -17,7 +20,13 @@ interface ChoiceItem {
   onSelect: (checked: boolean) => void;
 }
 
-export function ChoiceAnswerInputs({ question, answer, onAnswerChange, disabled }: ChoiceAnswerInputsProps) {
+const stateClasses = {
+  none: 'border-border-strong bg-surface hover:bg-soft has-checked:border-text has-checked:bg-soft',
+  correct: 'border-success bg-success-soft',
+  wrong: 'border-danger bg-danger-soft',
+} as const;
+
+export function ChoiceAnswerInputs({ question, answer, onAnswerChange, disabled, review }: ChoiceAnswerInputsProps) {
   const { t } = useTranslation('questions');
   const name = useId();
   const multiple = question.type === 'Multi';
@@ -48,23 +57,48 @@ export function ChoiceAnswerInputs({ question, answer, onAnswerChange, disabled 
   return (
     <fieldset className="flex flex-col gap-2.5" disabled={disabled}>
       <legend className="sr-only">{t('view.answerLegend')}</legend>
-      {items.map((item) => (
-        <label
-          key={item.key}
-          className="flex min-h-12 cursor-pointer items-center gap-2.5 rounded-md border border-border-strong bg-surface px-3.5 py-3 text-ui hover:bg-soft has-checked:border-text has-checked:bg-soft"
-        >
-          <input
-            type={multiple ? 'checkbox' : 'radio'}
-            name={name}
-            checked={item.checked}
-            onChange={(event) => {
-              item.onSelect(event.target.checked);
-            }}
-            className="size-4.5 accent-text"
-          />
-          {item.label}
-        </label>
-      ))}
+      {items.map((item) => {
+        const state =
+          review === undefined
+            ? 'none'
+            : review.correctKeys.includes(item.key)
+              ? 'correct'
+              : item.checked
+                ? 'wrong'
+                : 'none';
+        return (
+          <label
+            key={item.key}
+            className={cn(
+              'flex min-h-12 cursor-pointer items-center gap-2.5 rounded-md border px-3.5 py-3 text-ui',
+              stateClasses[state],
+            )}
+          >
+            <input
+              type={multiple ? 'checkbox' : 'radio'}
+              name={name}
+              checked={item.checked}
+              onChange={(event) => {
+                item.onSelect(event.target.checked);
+              }}
+              className="size-4.5 accent-text"
+            />
+            {item.label}
+            {state === 'correct' ? (
+              <>
+                <CircleCheck aria-hidden className="ms-auto size-5 text-success" />
+                <span className="sr-only">{t('view.correctOption')}</span>
+              </>
+            ) : null}
+            {state === 'wrong' ? (
+              <>
+                <CircleX aria-hidden className="ms-auto size-5 text-danger" />
+                <span className="sr-only">{t('view.wrongOption')}</span>
+              </>
+            ) : null}
+          </label>
+        );
+      })}
     </fieldset>
   );
 }

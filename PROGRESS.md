@@ -1,12 +1,13 @@
 # Elmanhg — autopilot progress
 
-Last updated: 2026-09-28, cloud session, after story #74 merged (main at `05a8501`).
-The laptop run stopped after #64. A Claude Code cloud session continued from #65 (see "Running in a cloud
-session" below). The next story to run is the first row of "Remaining stories".
+Last updated: 2026-09-28, cloud session, after story #76 merged. The session stopped here on the dev's
+instruction, at a clean point (no open PR, no branch in flight, main green).
+**Next story: #77 [E5.S4] Mastery calculation and headline counter**, the first row of "Remaining stories".
+The laptop run did #54–#64; the cloud session did #65–#76 (see "Running in a cloud session" and "Hand-off" below).
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (17 of 59)
+## Finished stories (19 of 59)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -27,18 +28,18 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 15 | #71 [E4.S2] Graders for mcq, multi-select, true/false | #161 | 1 | rate-limited (treated as none) | #162 |
 | 16 | #72 [E4.S3] Graders for fill-in-the-blank and short answer | #163 | 2 | 1 comment, fixed (doc) | #164 |
 | 17 | #74 [E5.S1] Attempt log and session model | #165 | 2 | 3 comments, fixed (race fix) | #166 |
+| 18 | #75 [E5.S2] Adaptive question selection | #167 | 1 | rate-limited (treated as none) | #168 |
+| 19 | #76 [E5.S3] Quiz screen with immediate feedback | #169 | 2 | 1 comment, fixed | #170 |
 
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (42), in run order
+## Remaining stories (40), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
 | Order | Issue | Story |
 |---|---|---|
-| 9 | #75 | [E5.S2] Adaptive question selection |
-| 10 | #76 | [E5.S3] Quiz screen with immediate feedback |
 | 11 | #77 | [E5.S4] Mastery calculation and headline counter |
 | 12 | #78 | [E5.S5] Progress page |
 | 13 | #80 | [E6.S1] Exam blueprint authoring |
@@ -116,7 +117,8 @@ The flow is `.claude/commands/feature.md`. Every stage is a fresh subagent: `fea
 - **Servable rule (#67):** `ServableQuestionSpecification` in Domain (Approved AND lesson Published AND not retired) is the only definition. Every serving read (quiz, exam, counts) must use it; admin reads stay unfiltered. Retirement is final (`QUESTION_RETIRED`), pending #155. `GET /api/questions/servable-count` is anonymous and cached (`questions:servable-count`, 60 s TTL). It is invalidated by question and lesson domain events, which are published before commit.
 - **Graders already exist (from #65):** the Arabic answer normaliser and deterministic graders for all five v1 types live in `api/Elmanhg.Domain/Questions/Grading/`, with `POST /api/questions/grade-draft`. #70–#72 extend them rather than create them: #70 added 8 per-question normalisation toggles (`normalization` object in the grading spec; a missing value means on) and the always-on Unicode steps. #71 added structured `GradeFeedback` (Domain), localised in Application via `ILocalizer`, and returned as `feedback`. #72 did the same for Fill and Short and made numeric tolerance overflow-safe. `QuestionGrader.Grade` is the single entry point for grading; attempts (#74) must reuse it. Leftovers are in #151 and #160. `Question.Reject` and `Resubmit` exist; #68 adds the teacher approve/reject commands and UI.
 - **Validation (#68):** `Approve`/`Reject` take the reviewed version, and a mismatch returns 409 `QUESTION_VERSION_CHANGED`. There is no concurrency token yet (#158). `QuestionDecision` is the append-only approve/reject history, and `Question.SubmittedAt` drives queue age. Bulk approve requires a server-side `ReviewSession` with a `ReviewSessionOpening` per question at its current version.
-- **Sessions (#74):** `Session` owns `SessionItem`s (the question plus the version served, fixed at start) and append-only `Attempt`s (a DB trigger, like the audit log). `docs/sessions.md` is the contract. Answers are graded against the served `QuestionRevision`. The session has an xmin row version, so a concurrent finish vs answer returns 409 `SESSION_MODIFIED_CONCURRENTLY`. Timestamps are truncated to microseconds in the aggregate. Start resumes the open session for the same lesson. Question selection is random until #75.
+- **Sessions (#74):** `Session` owns `SessionItem`s (the question plus the version served, fixed at start) and append-only `Attempt`s (a DB trigger, like the audit log). `docs/sessions.md` is the contract. Answers are graded against the served `QuestionRevision`. The session has an xmin row version, so a concurrent finish vs answer returns 409 `SESSION_MODIFIED_CONCURRENTLY`. Timestamps are truncated to microseconds in the aggregate. Start resumes the open session for the same lesson. Selection (#75) is `QuestionSelector` in Domain, a pure function with an injected `Random`, using PRD §7.2 buckets. Correct means normalised ≥ `Mastery:CorrectThreshold` (0.8, `MasteryOptions`).
+- **Quiz UI (#76):** `web/src/features/quiz/`. The start response seeds the TanStack cache (no refetch, and "Next" makes no request). Resume opens at the server position. `QuestionView` (from #65) takes an optional correct/wrong marking. "اسأل المساعد" is disabled until E8 (#91) wires it. The practice route has no UI link until #85 adds the lesson tabs.
 - **Question content** is jsonb, one schema per type, documented in `docs/question-schemas.md`. A content edit on an Approved question sends it back to Pending, bumps the version, and saves a `QuestionRevision`.
 - **Web:**
   - Every visual value comes from `.claude/design-system.md` tokens (Glass, light only).
@@ -146,6 +148,32 @@ per-story `feature/<n>-<slug>` branches, PRs, and squash-merge on green CI.
 - **Spreadsheet import (#66):** ClosedXML reads `.xlsx` through `ISpreadsheetReader`/`Writer` in Infrastructure. Row validation reuses `QuestionFieldsValidator`. Idempotency uses a `QuestionImportBatch` keyed by the client batch id plus a file SHA-256. `docs/question-import.md` holds the template contract.
 - **#135** (mobile tab bar: 3 items + "المزيد") was confirmed by the dev on 2026-09-28 and closed.
 
+## Hand-off (cloud session, 2026-09-28)
+
+How the next agent resumes, in a cloud session or on the laptop:
+1. **Toolchain.** Cloud: run `bash scripts/cloud-setup.sh`. Laptop: the usual setup. Check that `git status` is clean on `main`.
+2. **Morabh.** Cloud: clone read-only to `/home/user/apis` (the dev approved read-only access). Laptop: `D:\...\Morabh\repos\apis`.
+3. **Start** with `python3 scripts/pipeline_orch.py start 77`, then follow `.claude/commands/feature.md`, stage by stage, with a fresh subagent per stage.
+4. **Per-story rhythm used from #65 on.** The next session should keep it:
+   1. Update `PROGRESS.md` (add the previous story's row, remove the story from "Remaining", bump the counts) on the new story's branch, so it ships with that PR.
+   2. Plan, then auto-approve it: append a line to `00-acceptance.md`.
+   3. Implement, then review. For CHANGES_REQUESTED: fresh rework, then a fresh round-2 review.
+   4. `pipeline_orch.py pr <n>`, then open the PR (MCP), subscribe to its activity, and set a check-in about 20 min out.
+   5. CodeRabbit:
+      - Skip or rate-limit counts as no comments (dev rule).
+      - Real comments: save them to `05`, then fresh triage (`06`), fresh fix (`07`), fresh verify (`08`).
+      - Then push, reply to each thread and resolve it. At most 2 cycles.
+   6. When CI is green: `pipeline_orch.py merge <n> <pr>` (pushes the metrics), then squash-merge with `expectedHeadSha`, then `pipeline_orch.py sync`.
+   7. Delete the remote branch and the trigger, and unsubscribe.
+   8. Open one `deferred` issue with the non-blocking notes, and tick the story's checklist (the PR's `Closes #n` closes it).
+5. **Agent prompts** name the known traps. Keep them:
+   - The `\u` escape trap.
+   - CI parity: no `appsettings.json`.
+   - One plain command per Bash call. Chained scripts stalled the auto-mode classifier.
+   - Mutation-check new tests: break the code on purpose, confirm the test fails, restore it.
+6. **Metrics rows** come from each subagent's usage notification (duration_ms, tokens, tool uses).
+7. **A classifier outage** (seen once, during #76) blocks Agent and Bash calls. Reads still work. Retry later; never work around it.
+
 ## Gotchas
 
 - **CodeRabbit (free plan):**
@@ -163,4 +191,4 @@ per-story `feature/<n>-<slug>` branches, PRs, and squash-merge on green CI.
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166 · `dev-decision`: #155 (#135 confirmed and closed).
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170 · `dev-decision`: #155 (#135 confirmed and closed).
