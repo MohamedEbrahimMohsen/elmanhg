@@ -9,3 +9,4 @@ Branch: `feature/61-lesson-authoring-with-explanation-objectives-and` (base `mai
 | 3 | Review r1 | feature-reviewer | Opus 5.5 | 04:39 | 04:46 | 7m 49s | 225,295 | 48 | CHANGES_REQUESTED (2: editor in main chunk, untested branches) |
 | 4 | Rework r2 | feature-implementer | Opus 5.5 | 04:41 | 04:46 | 5m 28s | 57,472 | 32 | entry chunk 1217 kB to 445 kB, +5 tests, timeout 3000 ms |
 | 5 | Review r2 | feature-reviewer | Opus 5.5 | 04:44 | 04:46 | 1m 58s | 40,378 | 12 | APPROVED |
+| 6 | CodeRabbit | orchestrator | n/a | 04:47 | 04:47 | 0m 0s | n/a | n/a | skipped by CodeRabbit: too many files (166) |
