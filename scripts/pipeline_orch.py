@@ -172,6 +172,10 @@ def poll(n, prn, timeout=900):
                 out.append(f"## PC{i} — review body\n\n{r['body']}\n")
             (p / "05-coderabbit-comments.md").write_text("\n".join(out), encoding="utf-8")
             print(f"ACTIONABLE={len(items)}"); return
+        if not skipped and not botr and not botrc:
+            chk = run("gh", "pr", "checks", str(prn), "--repo", REPO, check=False).stdout or ""
+            if re.search(r"^CodeRabbit\s+pass\s+\S+\s+Review completed", chk, re.M):
+                skipped = "review completed with no comments"
         if skipped:
             (p / "05-coderabbit-comments.md").write_text(f"# CodeRabbit comments — PR #{prn}\n\nNo review: CodeRabbit posted \"{skipped}\" ({now()}). Nothing to triage.\n", encoding="utf-8")
             print(f"ACTIONABLE=0 SKIPPED={skipped}"); return
