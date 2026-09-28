@@ -9,3 +9,4 @@ Branch: `feature/64-question-aggregate-with-typed-body-and-grading-s` (base `mai
 | 3 | Review r1 | feature-reviewer | Opus 5.5 | 06:12 | 06:19 | 6m 38s | 190,289 | 39 | CHANGES_REQUESTED (1: undefined enum values) |
 | 4 | Rework r2 | feature-implementer | Opus 5.5 | 06:18 | 06:19 | 1m 0s | 26,235 | 11 | enum guard + 2 tests, 665/665 |
 | 5 | Review r2 | feature-reviewer | Opus 5.5 | 06:18 | 06:19 | 0m 44s | 27,445 | 11 | APPROVED |
+| 6 | CodeRabbit | orchestrator | n/a | 06:20 | 06:20 | 0m 0s | n/a | n/a | skipped by CodeRabbit: too many files (119) |
