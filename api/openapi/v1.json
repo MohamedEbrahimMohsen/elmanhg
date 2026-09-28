@@ -559,6 +559,386 @@
         }
       }
     },
+    "/api/validation-queue/review-sessions": {
+      "post": {
+        "tags": [
+          "ValidationQueue"
+        ],
+        "operationId": "StartReviewSession",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewSessionResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewSessionResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewSessionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/validation-queue/filters": {
+      "get": {
+        "tags": [
+          "ValidationQueue"
+        ],
+        "operationId": "GetValidationQueueFilters",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationQueueFiltersResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationQueueFiltersResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationQueueFiltersResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/validation-queue": {
+      "get": {
+        "tags": [
+          "ValidationQueue"
+        ],
+        "operationId": "GetValidationQueue",
+        "parameters": [
+          {
+            "name": "unitId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lessonId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/QuestionType"
+            }
+          },
+          {
+            "name": "difficulty",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/QuestionDifficulty"
+            }
+          },
+          {
+            "name": "minAgeDays",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "reviewSessionId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfValidationQueueItemResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfValidationQueueItemResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfValidationQueueItemResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/validation-queue/questions/{questionId}": {
+      "get": {
+        "tags": [
+          "ValidationQueue"
+        ],
+        "operationId": "GetValidationQuestion",
+        "parameters": [
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationQuestionDetailResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationQuestionDetailResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationQuestionDetailResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/validation-queue/review-sessions/{reviewSessionId}/openings/{questionId}": {
+      "post": {
+        "tags": [
+          "ValidationQueue"
+        ],
+        "operationId": "RecordQuestionOpening",
+        "parameters": [
+          {
+            "name": "reviewSessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/validation-queue/questions/{questionId}/approve": {
+      "post": {
+        "tags": [
+          "ValidationQueue"
+        ],
+        "operationId": "ApproveQuestion",
+        "parameters": [
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveQuestionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveQuestionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveQuestionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/validation-queue/questions/{questionId}/reject": {
+      "post": {
+        "tags": [
+          "ValidationQueue"
+        ],
+        "operationId": "RejectQuestion",
+        "parameters": [
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectQuestionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectQuestionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectQuestionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/validation-queue/bulk-approve": {
+      "post": {
+        "tags": [
+          "ValidationQueue"
+        ],
+        "operationId": "BulkApproveQuestions",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkApproveQuestionsRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkApproveQuestionsRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkApproveQuestionsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkApproveQuestionsResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkApproveQuestionsResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkApproveQuestionsResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/question-imports/template": {
       "get": {
         "tags": [
@@ -1947,6 +2327,34 @@
   },
   "components": {
     "schemas": {
+      "ApproveQuestionRequest": {
+        "required": [
+          "version",
+          "difficulty"
+        ],
+        "type": "object",
+        "properties": {
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "difficulty": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/QuestionDifficulty"
+              }
+            ]
+          }
+        }
+      },
       "AuditLogResult": {
         "required": [
           "id",
@@ -2073,6 +2481,45 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "BulkApproveQuestionsRequest": {
+        "required": [
+          "reviewSessionId",
+          "questionIds"
+        ],
+        "type": "object",
+        "properties": {
+          "reviewSessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "questionIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "BulkApproveQuestionsResult": {
+        "required": [
+          "approvedCount"
+        ],
+        "type": "object",
+        "properties": {
+          "approvedCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -2687,6 +3134,104 @@
           }
         }
       },
+      "PageDataOfValidationQueueItemResult": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationQueueItemResult"
+            }
+          },
+          "pageNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalItems": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "QuestionDecisionResult": {
+        "required": [
+          "version",
+          "outcome",
+          "reason",
+          "difficulty",
+          "difficultyChangedFrom",
+          "decidedBy",
+          "decidedByName",
+          "decidedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "difficulty": {
+            "type": "string"
+          },
+          "difficultyChangedFrom": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "decidedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decidedByName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "QuestionDetailResult": {
         "required": [
           "id",
@@ -3010,6 +3555,27 @@
           }
         }
       },
+      "QuestionRevisionEntryResult": {
+        "required": [
+          "version",
+          "editedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "editedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "QuestionType": {
         "enum": [
           "Mcq",
@@ -3058,6 +3624,47 @@
           },
           "displayName": {
             "type": "string"
+          }
+        }
+      },
+      "RejectQuestionRequest": {
+        "required": [
+          "version",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "ReviewSessionResult": {
+        "required": [
+          "reviewSessionId",
+          "expiresAt"
+        ],
+        "type": "object",
+        "properties": {
+          "reviewSessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -3407,6 +4014,302 @@
           }
         }
       },
+      "ValidationLessonOption": {
+        "required": [
+          "id",
+          "unitId",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ValidationQuestionDetailResult": {
+        "required": [
+          "id",
+          "subjectId",
+          "subjectName",
+          "unitId",
+          "unitName",
+          "lessonId",
+          "lessonName",
+          "lessonState",
+          "type",
+          "stem",
+          "body",
+          "gradingSpec",
+          "explanation",
+          "difficulty",
+          "objectiveId",
+          "objectiveText",
+          "tags",
+          "maxScore",
+          "version",
+          "validationStatus",
+          "rejectionReason",
+          "submittedAt",
+          "retiredAt",
+          "revisions",
+          "decisions"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitName": {
+            "type": "string"
+          },
+          "lessonId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lessonName": {
+            "type": "string"
+          },
+          "lessonState": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "stem": {
+            "type": "string"
+          },
+          "body": {
+            "$ref": "#/components/schemas/JsonElement"
+          },
+          "gradingSpec": {
+            "$ref": "#/components/schemas/JsonElement"
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "difficulty": {
+            "type": "string"
+          },
+          "objectiveId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "objectiveText": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "maxScore": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "validationStatus": {
+            "type": "string"
+          },
+          "rejectionReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "retiredAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "revisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionRevisionEntryResult"
+            }
+          },
+          "decisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionDecisionResult"
+            }
+          }
+        }
+      },
+      "ValidationQueueFiltersResult": {
+        "required": [
+          "subjects",
+          "units",
+          "lessons"
+        ],
+        "type": "object",
+        "properties": {
+          "subjects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationSubjectOption"
+            }
+          },
+          "units": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationUnitOption"
+            }
+          },
+          "lessons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationLessonOption"
+            }
+          }
+        }
+      },
+      "ValidationQueueItemResult": {
+        "required": [
+          "id",
+          "subjectId",
+          "unitId",
+          "unitName",
+          "lessonId",
+          "lessonName",
+          "type",
+          "stem",
+          "difficulty",
+          "version",
+          "submittedAt",
+          "openedInSession"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitName": {
+            "type": "string"
+          },
+          "lessonId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lessonName": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "stem": {
+            "type": "string"
+          },
+          "difficulty": {
+            "type": "string"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "openedInSession": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ValidationSubjectOption": {
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ValidationUnitOption": {
+        "required": [
+          "id",
+          "subjectId",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "VerifyOTPCommand": {
         "required": [
           "code",
@@ -3437,6 +4340,9 @@
     },
     {
       "name": "Subjects"
+    },
+    {
+      "name": "ValidationQueue"
     },
     {
       "name": "QuestionImports"

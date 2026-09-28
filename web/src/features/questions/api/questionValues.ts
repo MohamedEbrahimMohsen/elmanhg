@@ -101,7 +101,12 @@ function readQuestionContent(type: QuestionValues['type'], body: JsonElement, sp
   }
 }
 
-export function toQuestionValues(detail: QuestionDetailResult): QuestionValues {
+export type QuestionContentSource = Pick<
+  QuestionDetailResult,
+  'type' | 'stem' | 'explanation' | 'difficulty' | 'objectiveId' | 'tags' | 'maxScore' | 'body' | 'gradingSpec'
+>;
+
+export function toQuestionValues(detail: QuestionContentSource): QuestionValues {
   const values: QuestionValues = {
     ...emptyQuestionValues(toQuestionType(detail.type)),
     stem: detail.stem,

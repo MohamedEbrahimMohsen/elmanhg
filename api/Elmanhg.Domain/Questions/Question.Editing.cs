@@ -28,6 +28,7 @@ public partial class Question
         {
             ApplyContent(content);
             Version += 1;
+            SubmittedAt = DateTimeOffset.UtcNow;
             if (ValidationStatus == QuestionValidationStatus.Approved)
             {
                 ValidationStatus = QuestionValidationStatus.Pending;
@@ -56,6 +57,7 @@ public partial class Question
         RejectionReason = null;
         ValidatedBy = null;
         ValidatedAt = null;
+        SubmittedAt = DateTimeOffset.UtcNow;
         UpdatedBy = resubmittedBy;
         UpdationDate = DateTimeOffset.UtcNow;
     }

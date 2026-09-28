@@ -27,7 +27,9 @@ public partial class Question : AuditEntity, IAuditedEntity
     public string? RejectionReason { get; private set; }
     public Guid? ImportBatchId { get; private set; }
     public DateTimeOffset? RetiredAt { get; private set; }
+    public DateTimeOffset SubmittedAt { get; private set; }
     public List<QuestionRevision> Revisions { get; private set; } = [];
+    public List<QuestionDecision> Decisions { get; private set; } = [];
 
     public QuestionContent CurrentContent => new(Stem, Body, GradingSpec, Explanation, MaxScore);
     public bool IsRetired => RetiredAt is not null;
@@ -45,6 +47,7 @@ public partial class Question : AuditEntity, IAuditedEntity
             Type = type,
             Version = 1,
             ValidationStatus = QuestionValidationStatus.Pending,
+            SubmittedAt = DateTimeOffset.UtcNow,
         };
         question.ApplyContent(content);
         question.ApplyMetadata(metadata);

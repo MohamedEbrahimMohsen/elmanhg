@@ -6,3 +6,4 @@ export * from './questions/questions';
 export * from './subjects/subjects';
 export * from './teachers/teachers';
 export * from './units/units';
+export * from './validation-queue/validation-queue';

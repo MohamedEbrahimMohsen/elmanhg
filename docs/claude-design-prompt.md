@@ -141,7 +141,7 @@ Every route below exists in `prototype/app.js`. Match its behaviour one to one. 
 - Free plan: 10 quiz questions per day counter, paywall modal after; 5 assistant messages per day; first lesson per unit only.
 
 **Teacher**
-- `#/teacher` validation queue scoped to assigned subjects, filters (unit, lesson, type, difficulty), stats strip. `#/teacher/q/:id` question detail with version, revision and rejection history; Approve, Reject with required reason, change difficulty then approve. No edit of content.
+- `#/teacher` validation queue scoped to assigned subjects, oldest first, filters (unit, lesson, type, difficulty, age: waiting at least 1 / 3 / 7 days), stats strip. Items opened in this review session carry an "opened" badge and a checkbox; the teacher can select them and bulk-approve after a confirm dialog (unopened items cannot be selected). `#/teacher/q/:id` records the opening for the session and shows the question as the student sees it with the answer key ticked, the explanation, the grading spec (JSON), the version, and the revision and decision (rejection) history; Approve, Reject with required reason, change difficulty then approve. No edit of content.
 - `#/teacher/inbox` Ask a Teacher threads for assigned subjects with SLA badges; `#/teacher/thread/:id` claim, reply by text or simulated voice (transcript textarea plus fake audio bar).
 - `#/teacher/stats` personal stats card.
 - A physics teacher must never see math content, even by direct URL.

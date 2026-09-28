@@ -5,3 +5,6 @@ export { QuestionView } from './components/QuestionView';
 export { questionListSearchSchema, type QuestionListSearch } from './schemas/questionListSearchSchema';
 export { emptyAnswer, type QuestionAnswer, type StudentQuestion } from './api/studentQuestion';
 export { QuestionImportPage } from './pages/QuestionImportPage';
+export { ValidationQueuePage } from './pages/ValidationQueuePage';
+export { ValidationQuestionPage } from './pages/ValidationQuestionPage';
+export { validationQueueSearchSchema } from './schemas/validationQueueSearchSchema';

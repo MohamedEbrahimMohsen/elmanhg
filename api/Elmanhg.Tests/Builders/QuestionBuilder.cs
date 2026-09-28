@@ -62,12 +62,12 @@ public sealed class QuestionBuilder
         var question = Question.Create(Lesson, Unit, QuestionType.Mcq, McqContent(), _metadata ?? new QuestionMetadata(QuestionDifficulty.Medium, null, []), Guid.NewGuid());
         if (_approved)
         {
-            question.Approve(TeacherSubject.Create(Teacher, Subject, Guid.NewGuid()));
+            question.Approve(TeacherSubject.Create(Teacher, Subject, Guid.NewGuid()), question.Version);
         }
 
         if (_rejectionReason is not null)
         {
-            question.Reject(TeacherSubject.Create(Teacher, Subject, Guid.NewGuid()), _rejectionReason);
+            question.Reject(TeacherSubject.Create(Teacher, Subject, Guid.NewGuid()), question.Version, _rejectionReason);
         }
 
         if (_retired)

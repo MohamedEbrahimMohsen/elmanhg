@@ -101,6 +101,16 @@ public static class ErrorCodes
     public const string QuestionFilterTooLong = "QUESTION_FILTER_TOO_LONG";
     public const string QuestionVersionFilterInvalid = "QUESTION_VERSION_FILTER_INVALID";
     public const string QuestionStatusInvalid = "QUESTION_STATUS_INVALID";
+    public const string QuestionVersionInvalid = "QUESTION_VERSION_INVALID";
+    public const string QuestionRejectionReasonTooLong = "QUESTION_REJECTION_REASON_TOO_LONG";
+    public const string QuestionAgeFilterInvalid = "QUESTION_AGE_FILTER_INVALID";
+    public const string QuestionIdsRequired = "QUESTION_IDS_REQUIRED";
+    public const string QuestionIdsTooMany = "QUESTION_IDS_TOO_MANY";
+    public const string QuestionIdsDuplicate = "QUESTION_IDS_DUPLICATE";
+
+    // REVIEW SESSIONS
+    public const string ReviewSessionNotFound = "REVIEW_SESSION_NOT_FOUND";
+    public const string ReviewSessionIdRequired = "REVIEW_SESSION_ID_REQUIRED";
 
     // QUESTION IMPORTS
     public const string QuestionImportFileRequired = "QUESTION_IMPORT_FILE_REQUIRED";

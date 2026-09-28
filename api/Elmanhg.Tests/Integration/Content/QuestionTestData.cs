@@ -22,7 +22,7 @@ public static class QuestionTestData
         var question = Question.Create(lesson, unit, QuestionType.Mcq, QuestionBuilder.McqContent(), new QuestionMetadata(QuestionDifficulty.Medium, null, []), creator);
         if (approved)
         {
-            question.Approve(TeacherSubject.Create(User.CreateTeacher("Teacher", $"{Guid.NewGuid():N}@example.com"), subject, creator));
+            question.Approve(TeacherSubject.Create(User.CreateTeacher("Teacher", $"{Guid.NewGuid():N}@example.com"), subject, creator), question.Version);
         }
 
         context.Questions.Add(question);
@@ -39,7 +39,7 @@ public static class QuestionTestData
         var subject = await context.Subjects.AsNoTracking().SingleAsync(x => x.Id == unit.SubjectId, cancellationToken).ConfigureAwait(false);
         var creator = Guid.NewGuid();
         var question = Question.Create(lesson, unit, QuestionType.Mcq, QuestionBuilder.McqContent(), new QuestionMetadata(QuestionDifficulty.Medium, null, []), creator);
-        question.Approve(TeacherSubject.Create(User.CreateTeacher("Teacher", $"{Guid.NewGuid():N}@example.com"), subject, creator));
+        question.Approve(TeacherSubject.Create(User.CreateTeacher("Teacher", $"{Guid.NewGuid():N}@example.com"), subject, creator), question.Version);
         question.Retire(creator);
 
         context.Questions.Add(question);
@@ -56,7 +56,7 @@ public static class QuestionTestData
         var subject = await context.Subjects.AsNoTracking().SingleAsync(x => x.Id == unit.SubjectId, cancellationToken).ConfigureAwait(false);
         var creator = Guid.NewGuid();
         var question = Question.Create(lesson, unit, QuestionType.Mcq, QuestionBuilder.McqContent(), new QuestionMetadata(QuestionDifficulty.Medium, null, []), creator);
-        question.Reject(TeacherSubject.Create(teacher, subject, creator), reason);
+        question.Reject(TeacherSubject.Create(teacher, subject, creator), question.Version, reason);
 
         context.Questions.Add(question);
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -67,6 +67,13 @@ public static class QuestionTestData
     {
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        return await context.Questions.Include(x => x.Revisions).AsNoTracking().SingleAsync(x => x.Id == questionId, cancellationToken).ConfigureAwait(false);
+        return await context.Questions.Include(x => x.Revisions).Include(x => x.Decisions).AsNoTracking().SingleAsync(x => x.Id == questionId, cancellationToken).ConfigureAwait(false);
+    }
+
+    public static async Task SetSubmittedAtAsync(ApiFactory factory, Guid questionId, DateTimeOffset submittedAt, CancellationToken cancellationToken)
+    {
+        using var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await context.Database.ExecuteSqlAsync($"UPDATE \"Questions\" SET \"SubmittedAt\" = {submittedAt} WHERE \"Id\" = {questionId}", cancellationToken).ConfigureAwait(false);
     }
 }

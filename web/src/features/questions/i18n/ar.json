@@ -192,5 +192,89 @@
     "toast": {
       "imported": "تم استيراد الأسئلة."
     }
+  },
+  "validation": {
+    "queue": {
+      "title": "قائمة المراجعة",
+      "subjects": "موادك: {subjects}",
+      "loading": "جارٍ تحميل قائمة المراجعة",
+      "errorTitle": "تعذر تحميل قائمة المراجعة",
+      "listLabel": "أسئلة بانتظار المراجعة",
+      "select": "تحديد: {stem}",
+      "openToSelect": "افتح السؤال أولاً لتحديده",
+      "opened": "مفتوح",
+      "age": "ينتظر {age}",
+      "selectedCount": "{count, plural, =0 {لم يتم تحديد أسئلة} one {تم تحديد سؤال واحد} two {تم تحديد سؤالين} few {تم تحديد {formattedCount} أسئلة} many {تم تحديد {formattedCount} سؤالًا} other {تم تحديد {formattedCount} سؤال}}",
+      "bulkApprove": "اعتماد المحدد",
+      "confirmTitle": "اعتماد الأسئلة المحددة؟",
+      "confirmBody": "{count, plural, one {سيتم اعتماد سؤال واحد} two {سيتم اعتماد سؤالين} few {سيتم اعتماد {formattedCount} أسئلة} many {سيتم اعتماد {formattedCount} سؤالًا} other {سيتم اعتماد {formattedCount} سؤال}} ويمكن عرضها على الطلاب بعد نشر دروسها.",
+      "confirm": "اعتماد",
+      "cancel": "إلغاء",
+      "bulkApproved": "{count, plural, one {تم اعتماد سؤال واحد.} two {تم اعتماد سؤالين.} few {تم اعتماد {formattedCount} أسئلة.} many {تم اعتماد {formattedCount} سؤالًا.} other {تم اعتماد {formattedCount} سؤال.}}",
+      "empty": {
+        "noData": "لا توجد أسئلة بانتظار المراجعة.",
+        "noResults": "لا توجد أسئلة تطابق هذه الفلاتر."
+      }
+    },
+    "filters": {
+      "unit": "الوحدة",
+      "lesson": "الدرس",
+      "type": "النوع",
+      "difficulty": "الصعوبة",
+      "age": "ينتظر منذ",
+      "ageOption": "{count, plural, one {يوم واحد} two {يومين} few {{formattedCount} أيام} many {{formattedCount} يومًا} other {{formattedCount} يوم}}",
+      "all": "الكل",
+      "apply": "تطبيق الفلاتر",
+      "clear": "مسح الفلاتر"
+    },
+    "detail": {
+      "title": "مراجعة السؤال",
+      "breadcrumb": "مسار التنقل",
+      "queueLink": "قائمة المراجعة",
+      "loading": "جارٍ تحميل السؤال",
+      "errorTitle": "تعذر تحميل السؤال",
+      "lessonState": "حالة الدرس: {state}",
+      "lessonStates": {
+        "Draft": "مسودة",
+        "Published": "منشور",
+        "Archived": "مؤرشف"
+      },
+      "objective": "الهدف: {objective}",
+      "noObjective": "بدون هدف",
+      "difficulty": "الصعوبة: {difficulty}",
+      "maxScore": "الدرجة: {score}",
+      "tags": "الوسوم: {tags}",
+      "retired": "متقاعد",
+      "previousRejection": "سبب الرفض السابق: {reason}",
+      "preview": "معاينة كما يراها الطالب",
+      "explanation": "الشرح",
+      "gradingSpec": "مواصفات التصحيح (JSON)"
+    },
+    "decision": {
+      "title": "القرار",
+      "difficulty": "الصعوبة",
+      "approve": "اعتماد",
+      "reason": "سبب الرفض",
+      "reject": "رفض",
+      "noEditNote": "لا يمكن للمعلّم تعديل نص السؤال أو الخيارات أو الإجابة. إذا كان هناك خطأ ارفض مع ذكر السبب.",
+      "approved": "تم اعتماد السؤال.",
+      "rejected": "تم رفض السؤال."
+    },
+    "history": {
+      "title": "سجل الإصدارات والقرارات",
+      "caption": "سجل الإصدارات والقرارات",
+      "date": "التاريخ",
+      "by": "بواسطة",
+      "action": "الإجراء",
+      "details": "التفاصيل",
+      "kind": {
+        "revision": "حفظ إصدار",
+        "approved": "اعتماد",
+        "rejected": "رفض"
+      },
+      "versionValue": "v{version}",
+      "noActor": "—",
+      "difficultyChanged": "تغيّرت الصعوبة من {from} إلى {to}"
+    }
   }
 }

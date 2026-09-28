@@ -257,7 +257,8 @@ The headline counter is shown on Home as "متبقّي لك X سؤال من 100,
 - Question view: full stem, body, grading spec, explanation, admin's chosen difficulty, question version, and prior rejection history.
 - Actions: **Approve**, **Reject (reason required)**, **Change difficulty then Approve**.
 - A teacher cannot edit stem/options/answers. If it is wrong, reject with a reason. (Keeps authorship with Admin and the audit trail clean.)
-- Bulk approve is allowed only after opening each question at least once in the session (prevents blind approval).
+- Bulk approve is allowed only for questions opened in the current review session. The server records each opening against the question's current version, and a session lasts until reload, sign-out or `ReviewSessionLifetimeMinutes`. An edit after opening voids it.
+- Approve and reject name the version the teacher reviewed; a newer version is refused (`QUESTION_VERSION_CHANGED`). Age = time since the current version entered review.
 
 ### 8.2 Ask a Teacher inbox (§12)
 

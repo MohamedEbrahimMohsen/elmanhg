@@ -30,6 +30,7 @@ export default defineConfig({
         operations: {
           GetAuditLogs: { zod: { generate: { query: false } } },
           GetQuestions: { zod: { generate: { query: false } } },
+          GetValidationQueue: { zod: { generate: { query: false } } },
         },
       },
     },

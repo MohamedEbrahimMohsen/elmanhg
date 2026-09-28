@@ -1,8 +1,11 @@
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
+using Elmanhg.Infrastructure.Data.Context;
 using Elmanhg.Tests.Integration.Authorization;
 using Elmanhg.Tests.Integration.Infrastructure;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -108,11 +111,62 @@ public sealed class ServableQuestionCountEndpointTests(ApiFactory factory)
         (await ReadCountAsync(admin)).Should().Be(baseline - 1);
     }
 
+    [Fact]
+    public async Task Get_AfterTeacherApproves_CountsIt()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var (subjectId, lessonId) = await SeedAssignedLessonAsync(LessonState.Published);
+        var questionId = await QuestionTestData.SeedQuestionAsync(factory, lessonId, approved: false, cancellationToken);
+        using var teacher = await TeacherClientAsync(subjectId);
+        var baseline = await ReadCountAsync(teacher);
+
+        using var response = await teacher.PostAsJsonAsync($"/api/validation-queue/questions/{questionId}/approve", new { version = 1 }, cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        (await ReadCountAsync(teacher)).Should().Be(baseline + 1);
+    }
+
+    [Fact]
+    public async Task Get_AfterTeacherRejects_RefreshesCachedCount()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var draftLessonId = await SeedLessonAsync(LessonState.Draft);
+        await QuestionTestData.SeedQuestionAsync(factory, draftLessonId, approved: true, cancellationToken);
+        var (subjectId, lessonId) = await SeedAssignedLessonAsync(LessonState.Published);
+        var questionId = await QuestionTestData.SeedQuestionAsync(factory, lessonId, approved: false, cancellationToken);
+        using var teacher = await TeacherClientAsync(subjectId);
+        var baseline = await ReadCountAsync(teacher);
+        using (var scope = factory.Services.CreateScope())
+        {
+            await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.ExecuteSqlAsync($"UPDATE \"Lessons\" SET \"State\" = 'Published' WHERE \"Id\" = {draftLessonId}", cancellationToken);
+        }
+
+        using var response = await teacher.PostAsJsonAsync($"/api/validation-queue/questions/{questionId}/reject", new { version = 1, reason = "Wrong unit" }, cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        (await ReadCountAsync(teacher)).Should().Be(baseline + 1);
+    }
+
     private async Task<Guid> SeedLessonAsync(LessonState state)
     {
         var subjectId = await ContentTestData.SeedSubjectAsync(factory, "Physics", 1, TestContext.Current.CancellationToken).ConfigureAwait(false);
         var unitId = await ContentTestData.SeedUnitAsync(factory, subjectId, "Mechanics", 1, TestContext.Current.CancellationToken).ConfigureAwait(false);
         return await ContentTestData.SeedLessonInStateAsync(factory, unitId, "Newton's laws", 1, state, TestContext.Current.CancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<(Guid SubjectId, Guid LessonId)> SeedAssignedLessonAsync(LessonState state)
+    {
+        var subjectId = await ContentTestData.SeedSubjectAsync(factory, "Physics", 1, TestContext.Current.CancellationToken).ConfigureAwait(false);
+        var unitId = await ContentTestData.SeedUnitAsync(factory, subjectId, "Mechanics", 1, TestContext.Current.CancellationToken).ConfigureAwait(false);
+        var lessonId = await ContentTestData.SeedLessonInStateAsync(factory, unitId, "Newton's laws", 1, state, TestContext.Current.CancellationToken).ConfigureAwait(false);
+        return (subjectId, lessonId);
+    }
+
+    private async Task<HttpClient> TeacherClientAsync(Guid subjectId)
+    {
+        var teacher = await ScopeTestData.SeedTeacherAsync(factory, TestContext.Current.CancellationToken).ConfigureAwait(false);
+        await ScopeTestData.AssignAsync(factory, teacher.Id, subjectId, TestContext.Current.CancellationToken).ConfigureAwait(false);
+        return await ScopeTestData.SignedInClientAsync(factory, teacher, TestContext.Current.CancellationToken).ConfigureAwait(false);
     }
 
     private async Task<HttpClient> AdminClientAsync()

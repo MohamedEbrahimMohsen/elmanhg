@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { PlaceholderPage } from '@/features/shell';
+import { ValidationQueuePage, validationQueueSearchSchema } from '@/features/questions';
 
 export const Route = createFileRoute('/teacher/')({
-  component: () => <PlaceholderPage titleKey="nav.teacher.queue" />,
+  validateSearch: validationQueueSearchSchema,
+  component: ValidationQueuePage,
 });

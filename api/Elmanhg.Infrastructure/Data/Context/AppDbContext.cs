@@ -5,6 +5,7 @@ using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
+using Elmanhg.Domain.ReviewSessions;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.Units;
@@ -29,6 +30,9 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public DbSet<Question> Questions { get; set; }
     public DbSet<QuestionRevision> QuestionRevisions { get; set; }
     public DbSet<QuestionImportBatch> QuestionImportBatches { get; set; }
+    public DbSet<QuestionDecision> QuestionDecisions { get; set; }
+    public DbSet<ReviewSession> ReviewSessions { get; set; }
+    public DbSet<ReviewSessionOpening> ReviewSessionOpenings { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
@@ -52,6 +56,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         ConfigureLessons(modelBuilder);
         ConfigureQuestions(modelBuilder);
         ConfigureQuestionImportBatches(modelBuilder);
+        ConfigureReviewSessions(modelBuilder);
         ConfigureTeacherSubjects(modelBuilder);
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
@@ -117,6 +122,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
             builder.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<LessonObjective>().WithMany().HasForeignKey(x => x.ObjectiveId).OnDelete(DeleteBehavior.Restrict);
             builder.HasMany(x => x.Revisions).WithOne().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasMany(x => x.Decisions).WithOne().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<QuestionImportBatch>().WithMany().HasForeignKey(x => x.ImportBatchId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.LessonId, x.ValidationStatus });
             builder.HasIndex(x => new { x.SubjectId, x.ValidationStatus });
@@ -127,6 +133,14 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
             builder.Property(x => x.Snapshot).IsRequired().HasColumnType("jsonb");
             builder.HasIndex(x => new { x.QuestionId, x.Version }).IsUnique();
         });
+        modelBuilder.Entity<QuestionDecision>(builder =>
+        {
+            builder.Property(x => x.Id).ValueGeneratedNever();
+            builder.Property(x => x.Outcome).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.Difficulty).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.DifficultyChangedFrom).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.HasIndex(x => new { x.QuestionId, x.DecidedAt });
+        });
     }
 
     private static void ConfigureQuestionImportBatches(ModelBuilder modelBuilder)
@@ -136,6 +150,22 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
             builder.Property(x => x.Id).ValueGeneratedNever();
             builder.Property(x => x.FileHash).IsRequired().HasMaxLength(Sha256HexLength);
             builder.HasOne<Lesson>().WithMany().HasForeignKey(x => x.LessonId).OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureReviewSessions(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ReviewSession>(builder =>
+        {
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.TeacherId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasMany(x => x.Openings).WithOne().HasForeignKey(x => x.ReviewSessionId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => x.TeacherId);
+        });
+        modelBuilder.Entity<ReviewSessionOpening>(builder =>
+        {
+            builder.Property(x => x.Id).ValueGeneratedNever();
+            builder.HasOne<Question>().WithMany().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.ReviewSessionId, x.QuestionId });
         });
     }
 
@@ -160,5 +190,8 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         modelBuilder.Entity<Question>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<QuestionRevision>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<QuestionImportBatch>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<QuestionDecision>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<ReviewSession>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<ReviewSessionOpening>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

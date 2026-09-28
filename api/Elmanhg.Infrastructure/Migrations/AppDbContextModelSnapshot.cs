@@ -595,6 +595,9 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<Guid>("SubjectId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset>("SubmittedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.PrimitiveCollection<List<string>>("Tags")
                         .IsRequired()
                         .HasColumnType("text[]");
@@ -635,6 +638,53 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.HasIndex("SubjectId", "ValidationStatus");
 
                     b.ToTable("Questions");
+                });
+
+            modelBuilder.Entity("Elmanhg.Domain.Questions.QuestionDecision", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("DecidedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DecidedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Difficulty")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("DifficultyChangedFrom")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId", "DecidedAt");
+
+                    b.ToTable("QuestionDecisions");
                 });
 
             modelBuilder.Entity("Elmanhg.Domain.Questions.QuestionImportBatch", b =>
@@ -711,6 +761,75 @@ namespace Elmanhg.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("QuestionRevisions");
+                });
+
+            modelBuilder.Entity("Elmanhg.Domain.ReviewSessions.ReviewSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("TeacherId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("ReviewSessions");
+                });
+
+            modelBuilder.Entity("Elmanhg.Domain.ReviewSessions.ReviewSessionOpening", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("OpenedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("QuestionVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ReviewSessionId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("ReviewSessionId", "QuestionId");
+
+                    b.ToTable("ReviewSessionOpenings");
                 });
 
             modelBuilder.Entity("Elmanhg.Domain.Subjects.Subject", b =>
@@ -1087,6 +1206,15 @@ namespace Elmanhg.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Elmanhg.Domain.Questions.QuestionDecision", b =>
+                {
+                    b.HasOne("Elmanhg.Domain.Questions.Question", null)
+                        .WithMany("Decisions")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Elmanhg.Domain.Questions.QuestionImportBatch", b =>
                 {
                     b.HasOne("Elmanhg.Domain.Lessons.Lesson", null)
@@ -1101,6 +1229,30 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.HasOne("Elmanhg.Domain.Questions.Question", null)
                         .WithMany("Revisions")
                         .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Elmanhg.Domain.ReviewSessions.ReviewSession", b =>
+                {
+                    b.HasOne("Elmanhg.Domain.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Elmanhg.Domain.ReviewSessions.ReviewSessionOpening", b =>
+                {
+                    b.HasOne("Elmanhg.Domain.Questions.Question", null)
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Elmanhg.Domain.ReviewSessions.ReviewSession", null)
+                        .WithMany("Openings")
+                        .HasForeignKey("ReviewSessionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -1187,7 +1339,14 @@ namespace Elmanhg.Infrastructure.Migrations
 
             modelBuilder.Entity("Elmanhg.Domain.Questions.Question", b =>
                 {
+                    b.Navigation("Decisions");
+
                     b.Navigation("Revisions");
+                });
+
+            modelBuilder.Entity("Elmanhg.Domain.ReviewSessions.ReviewSession", b =>
+                {
+                    b.Navigation("Openings");
                 });
 #pragma warning restore 612, 618
         }
