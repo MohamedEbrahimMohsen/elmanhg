@@ -53,10 +53,35 @@ Items are chosen and written when the session starts and never change afterwards
 1. **Start or resume** — `POST /api/sessions/quiz { lessonId, questionCount? }`.
    - The lesson must be Published; otherwise 404 `LESSON_NOT_FOUND` (student reads see Published lessons only).
    - If the student already has an open quiz session for that lesson, it is returned as is and `questionCount` is ignored (a refresh resumes, PRD §14).
-   - Otherwise up to `questionCount` (default `Sessions:DefaultQuizSize`) questions are drawn at random from the lesson's **servable** questions (`ServableQuestionSpecification`, #67). The domain re-checks each question with `ServableQuestionSpecification.IsSatisfiedBy`. A lesson with fewer servable questions gives a shorter quiz; none gives 400 `SESSION_NO_SERVABLE_QUESTIONS`. Adaptive selection (#75) replaces the random draw without changing this model.
+   - Otherwise up to `questionCount` (default `Sessions:DefaultQuizSize`) questions are chosen by adaptive selection (see Selection) from the lesson's **servable** questions (`ServableQuestionSpecification`, #67). The domain re-checks each question with `ServableQuestionSpecification.IsSatisfiedBy`. A lesson with fewer servable questions gives a shorter quiz; none gives 400 `SESSION_NO_SERVABLE_QUESTIONS`.
 2. **Answer** — `POST /api/sessions/{id}/answers { questionId, answer, timeTakenMilliseconds? }`. One answer per question, graded at once and saved immediately. There is no draft state for quizzes.
 3. **Finish** — `POST /api/sessions/{id}/finish`. Allowed at any time, including mid-quiz. Nothing finishes a session automatically.
 4. **Read** — `GET /api/sessions/{id}` returns the items, the saved attempts and `currentPosition`: the lowest unanswered position, or null when every item is answered or the session is finished.
+
+## Selection
+
+Selection implements PRD §7.2 when a new quiz starts. It never runs on resume. It is the pure domain function `QuestionSelector.Select`, fed by two queries: the ids of the lesson's servable questions, and one grouped attempt summary per question for the calling student.
+
+An attempt counts as **correct** when its `NormalisedScore` is at or above `Mastery:CorrectThreshold` (0.8, PRD §7.3). Anything below is **wrong**, so a partial credit of 0.5 is wrong. The display outcome (`Correct`/`Partial`/`Incorrect`) is not used.
+
+Every candidate falls into exactly one bucket, and the buckets are served in this order:
+
+| Bucket | Rule | Order within the bucket |
+|---|---|---|
+| 1. Unseen | The student has no attempt on the question. | Random. |
+| 2. Last wrong | The student's latest attempt is wrong (this includes never correct). | Oldest latest attempt first; ties are random. |
+| 3. Correct once | The latest attempt is correct and the student has exactly one correct attempt. | Random. |
+| 4. Rest | The latest attempt is correct and the student has two or more correct attempts. | Weighted random, favouring the least recently seen: ranked by latest attempt, the oldest has weight *n* and the newest weight 1. |
+
+For example, a history of correct, wrong, correct is Rest; wrong, correct is Correct once; correct, correct, wrong is Last wrong.
+
+- **History that counts.** Every attempt by the student on the question counts: attempts on older question versions (mastery is per question, so a typo fix does not reset history), attempts in unfinished sessions (an attempt is final once saved), and test-mode attempts.
+- **Latest attempt.** "The latest attempt is correct" is read as "the latest correct attempt is the latest attempt", so the summary stays one `GROUP BY` over `IX_Attempts_StudentId_QuestionId_CreatedAt`. If a wrong and a correct attempt on one question ever shared the same microsecond, the question counts as correct; this needs two sessions answering the same question at once and is not otherwise handled.
+- **Item order.** Positions follow the priority order: position 1 is the first unseen question, and so on. There is no final shuffle, so finishing mid-quiz still covers the most useful questions.
+- **No repeats.** A question appears at most once per session: the selector de-duplicates, `Session.StartQuiz` rejects duplicates (`SESSION_QUESTION_DUPLICATE`), and the unique index `IX_SessionItems_SessionId_QuestionId` backs both. Items are fixed at start.
+- **Small pool.** The quiz has `min(questionCount, servable questions)` items. No servable question gives 400 `SESSION_NO_SERVABLE_QUESTIONS`.
+- **Races.** A chosen question that is soft-deleted before it loads is skipped, giving a shorter quiz. One that is retired or unapproved in between makes the start fail with 400 `SESSION_QUESTION_NOT_SERVABLE`; a retry selects again.
+- **Randomness.** The only random source is the injected `System.Random` (`Random.Shared` in the app, seeded in tests). Candidates are sorted by id before any randomness, so the result depends only on the candidates, the history and the seed.
 
 ## Grading against the served version
 
@@ -112,7 +137,7 @@ This is the audit-log pattern from `docs/audit-log.md`. `Attempt` has no mutatin
 
 ## Test mode
 
-When the caller is an Admin, the session gets `IsTestMode = true`. It otherwise behaves the same and still writes attempts. Mastery (#77) and training-data export (E12) exclude test-mode sessions.
+When the caller is an Admin, the session gets `IsTestMode = true`. It otherwise behaves the same and still writes attempts. Mastery (#77) and training-data export (E12) exclude test-mode sessions. Test-mode attempts still count toward that admin's own question selection.
 
 Session commands are not audited (`docs/audit-log.md`, "Not audited"): the attempts are their own log.
 
@@ -124,6 +149,7 @@ Session commands are not audited (`docs/audit-log.md`, "Not audited"): the attem
 | `Sessions:MinQuizSize` | 5 | Smallest allowed `questionCount`. |
 | `Sessions:MaxQuizSize` | 20 | Largest allowed `questionCount`. The UI offers 5, 10 and 20. |
 | `Sessions:AnswerMaxLength` | 4000 | Maximum raw length of an answer's JSON. |
+| `Mastery:CorrectThreshold` | 0.8 | Normalised score at or above which an attempt counts as correct (PRD §7.3); used by selection and, later, mastery. |
 
 The app fails to start unless `MinQuizSize <= DefaultQuizSize <= MaxQuizSize`.
 

@@ -146,6 +146,62 @@ public sealed class StartQuizSessionEndpointTests(ApiFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
+    [Fact]
+    public async Task Post_AfterFinishedQuiz_ServesUnseenThenLastWrongOldestFirst()
+    {
+        var (lessonId, questionIds) = await SeedServableLessonAsync(factory, 6);
+        var (_, client) = await SignedInStudentAsync(factory);
+        var first = await StartQuizAsync(client, lessonId, 5);
+        var firstId = first.GetProperty("id").GetGuid();
+        var served = ServedQuestionIds(first);
+        for (var index = 0; index < served.Count; index++)
+        {
+            using var answer = await AnswerAsync(client, firstId, served[index], index == 0 ? "b" : "a");
+            answer.StatusCode.Should().Be(HttpStatusCode.OK);
+        }
+
+        using var finish = await FinishAsync(client, firstId);
+        finish.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var second = await StartQuizAsync(client, lessonId, 5);
+
+        var unseen = questionIds.Except(served).Single();
+        var secondServed = ServedQuestionIds(second);
+        secondServed.Should().Equal([unseen, .. served.Skip(1)]);
+        secondServed.Should().NotContain(served[0]).And.OnlyHaveUniqueItems();
+        second.GetProperty("id").GetGuid().Should().NotBe(firstId);
+    }
+
+    [Fact]
+    public async Task Post_AfterFinishedQuiz_SmallPoolServesWholePoolOnce()
+    {
+        var (lessonId, questionIds) = await SeedServableLessonAsync(factory, 2);
+        var (_, client) = await SignedInStudentAsync(factory);
+        var first = await StartQuizAsync(client, lessonId, 5);
+        var firstId = first.GetProperty("id").GetGuid();
+        foreach (var questionId in ServedQuestionIds(first))
+        {
+            using var answer = await AnswerAsync(client, firstId, questionId, "a");
+            answer.StatusCode.Should().Be(HttpStatusCode.OK);
+        }
+
+        using var finish = await FinishAsync(client, firstId);
+        finish.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var second = await StartQuizAsync(client, lessonId, 5);
+
+        ServedQuestionIds(second).Should().HaveCount(2).And.OnlyHaveUniqueItems().And.BeEquivalentTo(questionIds);
+    }
+
+    private static List<Guid> ServedQuestionIds(JsonElement body)
+    {
+        return body.GetProperty("items")
+            .EnumerateArray()
+            .OrderBy(x => x.GetProperty("position").GetInt32())
+            .Select(x => x.GetProperty("questionId").GetGuid())
+            .ToList();
+    }
+
     private static async Task<string?> ReadCodeAsync(HttpResponseMessage response)
     {
         var body = await response.Content.ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken).ConfigureAwait(false);

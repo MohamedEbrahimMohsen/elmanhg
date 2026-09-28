@@ -41,6 +41,18 @@ public sealed class ServableQuestionSpecificationPersistenceTests(ApiFactory fac
         result.Should().Equal(new Dictionary<Guid, int> { [seed.PublishedLessonId] = 1 });
     }
 
+    [Fact]
+    public async Task GetServableIdsInLessonAsync_MixedStates_ReturnsOnlyServableInLesson()
+    {
+        var seed = await SeedAsync();
+        using var scope = factory.Services.CreateScope();
+        var questionRepository = scope.ServiceProvider.GetRequiredService<IQuestionRepository>();
+
+        var result = await questionRepository.GetServableIdsInLessonAsync(seed.PublishedLessonId, TestContext.Current.CancellationToken);
+
+        result.Should().Equal(seed.ServableQuestionId);
+    }
+
     private async Task<(Guid PublishedLessonId, Guid DraftLessonId, Guid ArchivedLessonId, Guid ServableQuestionId)> SeedAsync()
     {
         var cancellationToken = TestContext.Current.CancellationToken;

@@ -42,14 +42,12 @@ public class QuestionRepository(AppDbContext context) : Repository<Question>(con
             .ConfigureAwait(false);
     }
 
-    public async Task<List<Question>> GetRandomServableInLessonAsync(Guid lessonId, int count, CancellationToken cancellationToken)
+    public async Task<List<Guid>> GetServableIdsInLessonAsync(Guid lessonId, CancellationToken cancellationToken)
     {
         return await _dbSet
             .WhereServable(_context.Set<Lesson>())
             .Where(x => x.LessonId == lessonId)
-            .OrderBy(x => EF.Functions.Random())
-            .Take(count)
-            .AsNoTracking()
+            .Select(x => x.Id)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
     }
