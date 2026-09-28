@@ -1,8 +1,8 @@
 # Elmanhg — autopilot progress
 
 Last updated: 2026-09-28, cloud session, after story #66 merged (main at `7f1fda4`).
-The laptop run stopped here because the dev asked it to. A Claude Code cloud session resumes at **#65**
-(see "Running in a cloud session" below).
+The laptop run stopped after #64. A Claude Code cloud session continued from #65 (see "Running in a cloud
+session" below). The next story to run is the first row of "Remaining stories".
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
