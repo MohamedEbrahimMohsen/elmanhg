@@ -1,0 +1,25 @@
+{
+  "home": {
+    "greeting": "Hello, {name}",
+    "loading": "Loading your progress…",
+    "errorTitle": "Could not load your progress."
+  },
+  "headline": {
+    "label": "Your question counter",
+    "remaining": "{remaining, number} of {total, number} questions left for you",
+    "meta": "Seen {seen, number} · Mastered {mastered, number} · Streak: {streak, plural, one {# day} other {# days}}"
+  },
+  "nextLesson": {
+    "label": "Suggested next lesson",
+    "mastery": "Mastery {percent, number}%",
+    "barLabel": "{name} mastery",
+    "train": "Train now"
+  },
+  "subjects": {
+    "title": "Your subjects",
+    "mastery": "{percent, number}% mastered",
+    "available": "{count, plural, one {# question available} other {# questions available}}",
+    "barLabel": "{name} mastery",
+    "empty": "No subjects yet."
+  }
+}

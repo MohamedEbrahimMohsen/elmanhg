@@ -247,7 +247,7 @@
             "QuestionMastery materialised table updated on every attempt: correct on two most recent attempts at 0.8 threshold",
             "Lesson, unit and subject mastery percentage queries weighted by question count",
             "Headline counter query: servable total minus mastered, plus seen count",
-            "Recalculation job when questions are retired or lessons unpublished",
+            "Mastery follows retirement and unpublishing live: aggregates join the servable rule at read time, so no recalculation job is needed",
             "Home page widgets: counter, subject cards with mastery, next recommended lesson, streak"
           ]
         },

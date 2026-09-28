@@ -3,10 +3,14 @@ using Core.Identity.Tokens.CurrentUser;
 using Core.Localization;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Sessions.SubmitAnswer;
+using Elmanhg.Application.Shared.Options;
+using Elmanhg.Domain.Mastery;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
+using Elmanhg.Tests.Application.Features.Mastery;
 using Elmanhg.Tests.Builders;
 using FluentAssertions;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using DomainErrorCodes = Elmanhg.Domain.SharedKernel.Exceptions.ErrorCodes;
 
@@ -16,6 +20,7 @@ public sealed class SubmitAnswerHandlerTests
 {
     private readonly ISessionRepository _sessionRepository = Substitute.For<ISessionRepository>();
     private readonly IQuestionRepository _questionRepository = Substitute.For<IQuestionRepository>();
+    private readonly IQuestionMasteryRepository _questionMasteryRepository = Substitute.For<IQuestionMasteryRepository>();
     private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
     private readonly SessionBuilder _builder = new();
     private readonly List<Question> _questions;
@@ -29,7 +34,7 @@ public sealed class SubmitAnswerHandlerTests
         _session = Session.StartQuiz(_builder.StudentId, _builder.Questions.Lesson, _questions, isTestMode: false);
         SessionRepositoryStub.StubFind(_sessionRepository, _session);
         _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(_questions[0].Revisions);
-        _handler = new SubmitAnswerHandler(_sessionRepository, _questionRepository, _currentUserService, Substitute.For<ILocalizer>());
+        _handler = new SubmitAnswerHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, Options.Create(new MasteryOptions()), _currentUserService, Substitute.For<ILocalizer>());
     }
 
     private Guid QuestionId => _questions[0].Id;
@@ -68,6 +73,53 @@ public sealed class SubmitAnswerHandlerTests
 
         second.Attempt!.Id.Should().Be(first.Attempt!.Id);
         _session.Attempts.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public async Task Handle_FirstAnswer_StartsQuestionMastery()
+    {
+        var result = await _handler.Handle(Command(SessionBuilder.AnswerB), TestContext.Current.CancellationToken);
+
+        await _questionMasteryRepository.Received(1).AddAsync(Arg.Is<QuestionMastery>(m => m.StudentId == _builder.StudentId && m.QuestionId == QuestionId && m.LatestAttemptId == result.Attempt!.Id && !m.IsMastered), Arg.Any<CancellationToken>());
+        await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_SecondCorrectAnswer_MarksExistingMasteryMastered()
+    {
+        var row = QuestionMastery.Start(_builder.StudentId, QuestionId, new MasteryAttempt(Guid.NewGuid(), 1m, DateTimeOffset.UtcNow.AddDays(-1)));
+        QuestionMasteryRepositoryStub.StubFind(_questionMasteryRepository, row);
+
+        var result = await _handler.Handle(Command(SessionBuilder.AnswerB), TestContext.Current.CancellationToken);
+
+        row.IsMastered.Should().BeTrue();
+        row.LatestAttemptId.Should().Be(result.Attempt!.Id);
+        await _questionMasteryRepository.DidNotReceive().AddAsync(Arg.Any<QuestionMastery>(), Arg.Any<CancellationToken>());
+        await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_ReplayedAnswer_DoesNotRecordMasteryAgain()
+    {
+        var first = await _handler.Handle(Command(SessionBuilder.AnswerB), TestContext.Current.CancellationToken);
+
+        var second = await _handler.Handle(Command(SessionBuilder.AnswerB), TestContext.Current.CancellationToken);
+
+        second.Attempt!.Id.Should().Be(first.Attempt!.Id);
+        await _questionMasteryRepository.Received(1).AddAsync(Arg.Any<QuestionMastery>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_TestModeSession_DoesNotRecordMastery()
+    {
+        var testSession = Session.StartQuiz(_builder.StudentId, _builder.Questions.Lesson, _questions, isTestMode: true);
+        SessionRepositoryStub.StubFind(_sessionRepository, testSession);
+
+        await _handler.Handle(Command(SessionBuilder.AnswerB) with { SessionId = testSession.Id }, TestContext.Current.CancellationToken);
+
+        testSession.Attempts.Should().ContainSingle();
+        await _questionMasteryRepository.DidNotReceive().AddAsync(Arg.Any<QuestionMastery>(), Arg.Any<CancellationToken>());
+        await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

@@ -535,6 +535,76 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.ToTable("LessonObjectives");
                 });
 
+            modelBuilder.Entity("Elmanhg.Domain.Mastery.QuestionMastery", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsMastered")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("LatestAttemptId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("LatestAttemptedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("LatestNormalisedScore")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)");
+
+                    b.Property<Guid?>("PreviousAttemptId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("PreviousAttemptedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal?>("PreviousNormalisedScore")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)");
+
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("StudentId", "QuestionId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_QuestionMasteries_StudentId_QuestionId");
+
+                    b.ToTable("QuestionMasteries");
+                });
+
             modelBuilder.Entity("Elmanhg.Domain.Questions.Question", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1352,6 +1422,21 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.HasOne("Elmanhg.Domain.Lessons.Lesson", null)
                         .WithMany("Objectives")
                         .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Elmanhg.Domain.Mastery.QuestionMastery", b =>
+                {
+                    b.HasOne("Elmanhg.Domain.Questions.Question", null)
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Elmanhg.Domain.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

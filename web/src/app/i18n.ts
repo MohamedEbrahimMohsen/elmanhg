@@ -3,6 +3,7 @@ import ICU from 'i18next-icu';
 import { initReactI18next } from 'react-i18next';
 import { auditLocales } from '@/features/audit';
 import { contentLocales } from '@/features/content/locales';
+import { masteryLocales } from '@/features/mastery/locales';
 import { questionsLocales } from '@/features/questions/locales';
 import { quizLocales } from '@/features/quiz/locales';
 import { sessionLocales } from '@/features/session';
@@ -28,6 +29,7 @@ const resources = {
     content: contentLocales.ar,
     questions: questionsLocales.ar,
     quiz: quizLocales.ar,
+    mastery: masteryLocales.ar,
   },
   en: {
     common: commonEn,
@@ -37,6 +39,7 @@ const resources = {
     content: contentLocales.en,
     questions: questionsLocales.en,
     quiz: quizLocales.en,
+    mastery: masteryLocales.en,
   },
 };
 
@@ -59,7 +62,7 @@ export function initI18n(lng: Language = defaultLanguage): void {
       lng,
       fallbackLng: defaultLanguage,
       supportedLngs: [...supportedLanguages],
-      ns: ['common', 'session', 'shell', 'audit', 'content', 'questions', 'quiz'],
+      ns: ['common', 'session', 'shell', 'audit', 'content', 'questions', 'quiz', 'mastery'],
       defaultNS: 'common',
       resources,
       initAsync: false,

@@ -446,7 +446,7 @@ SessionItem(id, session_id, position, question_id, question_version, max_score) 
 Attempt(id, session_id, student_id, question_id, question_version,
         answer_json, score, normalised_score, graded_by[Auto|AI|Teacher],
         grade_json?, time_taken_ms, created_at)  -- append-only
-QuestionMastery(student_id, question_id, mastered bool, last_two_json, updated_at)  -- materialised
+QuestionMastery(student_id, question_id, mastered bool, latest_attempt_id, latest_normalised_score, latest_attempted_at, previous_attempt_id?, previous_normalised_score?, previous_attempted_at?, updated_at)  -- materialised from the two most recent attempts (docs/mastery.md)
 
 Subscription(id, student_id, plan, status, current_period_end, paymob_ref)
 Payment(id, subscription_id, amount, currency, status, paymob_txn_id, raw_webhook_json, created_at)

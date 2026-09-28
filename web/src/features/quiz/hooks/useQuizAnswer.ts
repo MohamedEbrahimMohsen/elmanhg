@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { invalidateMastery } from '@/features/mastery';
 import { emptyAnswer, toAnswerPayload, type QuestionAnswer, type StudentQuestion } from '@/features/questions';
 import type { SessionItemResult, SessionResult } from '@/shared/api/generated/model';
 import { getGetSessionQueryKey, useSubmitSessionAnswer } from '@/shared/api/generated/sessions/sessions';
@@ -30,6 +31,7 @@ export function useQuizAnswer(sessionId: string, item: SessionItemResult, questi
         queryClient.setQueryData<SessionResult>(key, (old) =>
           old === undefined ? old : mergeAnsweredItem(old, answered),
         );
+        void invalidateMastery(queryClient);
       },
       onError: async (error) => {
         const code = error instanceof ApiError ? error.code : unhandledErrorCode;

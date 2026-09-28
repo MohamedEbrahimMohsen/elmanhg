@@ -26,6 +26,10 @@ public static class DependencyInjection
             .Validate(x => x.MinQuizSize <= x.DefaultQuizSize && x.DefaultQuizSize <= x.MaxQuizSize, "Sessions:MinQuizSize <= DefaultQuizSize <= MaxQuizSize is required.")
             .ValidateOnStart();
         services.AddOptions<MasteryOptions>().BindConfiguration(MasteryOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<ProgressOptions>().BindConfiguration(ProgressOptions.SectionName).ValidateDataAnnotations()
+            .Validate(x => TimeZoneInfo.TryFindSystemTimeZoneById(x.StreakTimeZone, out _), "Progress:StreakTimeZone must be a known IANA time zone id.")
+            .ValidateOnStart();
+        services.AddSingleton(TimeProvider.System);
         services.AddSingleton(Random.Shared);
         return services;
     }

@@ -1,0 +1,25 @@
+{
+  "home": {
+    "greeting": "أهلًا {name}",
+    "loading": "جارٍ تحميل تقدّمك…",
+    "errorTitle": "تعذّر تحميل تقدّمك."
+  },
+  "headline": {
+    "label": "عدّاد أسئلتك",
+    "remaining": "متبقّي لك {remaining, number} سؤال من {total, number}",
+    "meta": "شاهدت {seen, number} سؤالًا · أتقنت {mastered, number} · سلسلة الأيام: {streak, number} يوم"
+  },
+  "nextLesson": {
+    "label": "الدرس التالي المقترح",
+    "mastery": "إتقان {percent, number}٪",
+    "barLabel": "إتقان {name}",
+    "train": "درّب الآن"
+  },
+  "subjects": {
+    "title": "موادك",
+    "mastery": "إتقان {percent, number}٪",
+    "available": "{count, number} سؤال متاح",
+    "barLabel": "إتقان {name}",
+    "empty": "لا توجد مواد بعد."
+  }
+}

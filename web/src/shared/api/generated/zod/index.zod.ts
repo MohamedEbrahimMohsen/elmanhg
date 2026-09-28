@@ -1,6 +1,7 @@
 export * from './audit-logs/audit-logs.zod';
 export * from './auth/auth.zod';
 export * from './lessons/lessons.zod';
+export * from './mastery/mastery.zod';
 export * from './question-imports/question-imports.zod';
 export * from './questions/questions.zod';
 export * from './sessions/sessions.zod';
