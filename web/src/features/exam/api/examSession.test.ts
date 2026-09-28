@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { examItem, openExam } from '@/test/examFixtures';
-import { isCountdownUrgent, remainingMilliseconds, sortedExamItems, splitCountdown, unitIdOf } from './examSession';
+import { examItem, multiExam, openExam } from '@/test/examFixtures';
+import {
+  examUnitNames,
+  isCountdownUrgent,
+  isMultiUnitExam,
+  remainingMilliseconds,
+  sortedExamItems,
+  splitCountdown,
+  unitIdOf,
+} from './examSession';
 
 describe('examSession', () => {
   it('sorts items by position', () => {
@@ -30,5 +38,13 @@ describe('examSession', () => {
   it('returns the first unit id or null', () => {
     expect(unitIdOf(openExam([]))).toBe('34343434-3434-4343-8343-343434343434');
     expect(unitIdOf(openExam([], { units: [] }))).toBeNull();
+  });
+
+  it('joins the unit names and recognises a multi-unit exam', () => {
+    const multi = multiExam([]);
+
+    expect(examUnitNames(multi)).toBe('Mechanics + Waves');
+    expect(isMultiUnitExam(multi)).toBe(true);
+    expect(isMultiUnitExam(openExam([]))).toBe(false);
   });
 });

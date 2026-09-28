@@ -2,7 +2,7 @@ import { screen } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getGetExamSessionMockHandler } from '@/shared/api/generated/exams/exams.msw';
-import { examItem, examSessionId, openExam, submittedExam } from '@/test/examFixtures';
+import { examItem, examSecondUnitId, examSessionId, examUnitId, openExam, submittedExam } from '@/test/examFixtures';
 import { server } from '@/test/msw/server';
 import { renderApp } from '@/test/renderWithProviders';
 import { testSessions } from '@/test/sessions';
@@ -83,5 +83,16 @@ describe('ExamPage', () => {
 
     expect(await screen.findByRole('heading', { name: 'امتحان: Mechanics' })).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('dir', 'rtl');
+  });
+
+  it('titles a multi-unit exam with every unit name', async () => {
+    const units = [
+      { unitId: examUnitId, name: 'Mechanics' },
+      { unitId: examSecondUnitId, name: 'Waves' },
+    ];
+    server.use(getGetExamSessionMockHandler(openExam([examItem(1)], { kind: 'MultiUnitExam', units })));
+    openExamPage();
+
+    expect(await screen.findByRole('heading', { name: 'Multi-unit exam: Mechanics + Waves' })).toBeInTheDocument();
   });
 });

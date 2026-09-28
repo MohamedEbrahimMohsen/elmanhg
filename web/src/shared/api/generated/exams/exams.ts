@@ -30,7 +30,11 @@ import type {
 import type {
   ExamAnswerSavedResult,
   ExamSessionResult,
+  MultiUnitExamOverviewResult,
+  MultiUnitExamPreviewResult,
+  PreviewMultiUnitExamParams,
   SaveExamAnswerRequest,
+  StartMultiUnitExamRequest,
   UnitExamOverviewResult
 } from '../model';
 
@@ -269,7 +273,409 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getStartUnitExamMutationOptions(options), queryClient);
     }
-    export const getGetExamSessionUrl = (sessionId: string,) => {
+    export const getGetMultiUnitExamOverviewUrl = (subjectId: string,) => {
+
+
+
+
+  return `/api/exams/subjects/${subjectId}/multi-unit`
+}
+
+export const getMultiUnitExamOverview = async (subjectId: string, options?: Parameters<typeof http>[1]): Promise<MultiUnitExamOverviewResult> => {
+
+  return http<MultiUnitExamOverviewResult>(getGetMultiUnitExamOverviewUrl(subjectId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMultiUnitExamOverviewQueryKey = (subjectId: string,) => {
+    return [
+    `/api/exams/subjects/${subjectId}/multi-unit`
+    ] as const;
+    }
+
+
+export const getGetMultiUnitExamOverviewQueryOptions = <TData = Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError = unknown>(subjectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMultiUnitExamOverviewQueryKey(subjectId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMultiUnitExamOverview>>> = ({ signal }) => getMultiUnitExamOverview(subjectId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: subjectId !== null && subjectId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMultiUnitExamOverviewQueryResult = NonNullable<Awaited<ReturnType<typeof getMultiUnitExamOverview>>>
+export type GetMultiUnitExamOverviewQueryError = unknown
+
+
+export function useGetMultiUnitExamOverview<TData = Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError = unknown>(
+ subjectId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMultiUnitExamOverview>>,
+          TError,
+          Awaited<ReturnType<typeof getMultiUnitExamOverview>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMultiUnitExamOverview<TData = Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError = unknown>(
+ subjectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMultiUnitExamOverview>>,
+          TError,
+          Awaited<ReturnType<typeof getMultiUnitExamOverview>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMultiUnitExamOverview<TData = Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError = unknown>(
+ subjectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetMultiUnitExamOverview<TData = Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError = unknown>(
+ subjectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMultiUnitExamOverviewQueryOptions(subjectId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetMultiUnitExamOverviewSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError = unknown>(subjectId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMultiUnitExamOverviewQueryKey(subjectId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMultiUnitExamOverview>>> = ({ signal }) => getMultiUnitExamOverview(subjectId, { signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetMultiUnitExamOverviewSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getMultiUnitExamOverview>>>
+export type GetMultiUnitExamOverviewSuspenseQueryError = unknown
+
+
+export function useGetMultiUnitExamOverviewSuspense<TData = Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError = unknown>(
+ subjectId: string, options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMultiUnitExamOverviewSuspense<TData = Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError = unknown>(
+ subjectId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMultiUnitExamOverviewSuspense<TData = Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError = unknown>(
+ subjectId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetMultiUnitExamOverviewSuspense<TData = Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError = unknown>(
+ subjectId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMultiUnitExamOverview>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMultiUnitExamOverviewSuspenseQueryOptions(subjectId,options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getStartMultiUnitExamUrl = (subjectId: string,) => {
+
+
+
+
+  return `/api/exams/subjects/${subjectId}/multi-unit`
+}
+
+export const startMultiUnitExam = async (subjectId: string,
+    startMultiUnitExamRequest: StartMultiUnitExamRequest, options?: Parameters<typeof http>[1]): Promise<ExamSessionResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return http<ExamSessionResult>(getStartMultiUnitExamUrl(subjectId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(startMultiUnitExamRequest)
+  }
+);}
+
+
+
+
+
+export const getStartMultiUnitExamMutationKey = () => ['startMultiUnitExam'] as const;
+
+export const getStartMultiUnitExamMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startMultiUnitExam>>, TError,StartMultiUnitExamMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof startMultiUnitExam>>, TError,StartMultiUnitExamMutationVariables, TContext> => {
+
+const mutationKey = getStartMultiUnitExamMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof startMultiUnitExam>>, StartMultiUnitExamMutationVariables> = (props) => {
+          const {subjectId,data} = props ?? {};
+
+          return  startMultiUnitExam(subjectId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StartMultiUnitExamMutationResult = NonNullable<Awaited<ReturnType<typeof startMultiUnitExam>>>
+    export type StartMultiUnitExamMutationBody = StartMultiUnitExamRequest
+    export type StartMultiUnitExamMutationError = unknown
+    export type StartMultiUnitExamMutationVariables = {subjectId: string;data: StartMultiUnitExamRequest}
+
+    export const useStartMultiUnitExam = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startMultiUnitExam>>, TError,StartMultiUnitExamMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof startMultiUnitExam>>,
+        TError,
+        StartMultiUnitExamMutationVariables,
+        TContext
+      > => {
+      return useMutation(getStartMultiUnitExamMutationOptions(options), queryClient);
+    }
+    export const getPreviewMultiUnitExamUrl = (subjectId: string,
+    params?: PreviewMultiUnitExamParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    const explodeParameters = ["unitIds"];
+
+    if (Array.isArray(value) && explodeParameters.includes(key)) {
+      value.forEach((v) => {
+        normalizedParams.append(key, v === null ? 'null' : String(v));
+      });
+      return;
+    }
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/exams/subjects/${subjectId}/multi-unit/preview?${stringifiedParams}` : `/api/exams/subjects/${subjectId}/multi-unit/preview`
+}
+
+export const previewMultiUnitExam = async (subjectId: string,
+    params?: PreviewMultiUnitExamParams, options?: Parameters<typeof http>[1]): Promise<MultiUnitExamPreviewResult> => {
+
+  return http<MultiUnitExamPreviewResult>(getPreviewMultiUnitExamUrl(subjectId,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPreviewMultiUnitExamQueryKey = (subjectId: string,
+    params?: PreviewMultiUnitExamParams,) => {
+    return [
+    `/api/exams/subjects/${subjectId}/multi-unit/preview`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getPreviewMultiUnitExamQueryOptions = <TData = Awaited<ReturnType<typeof previewMultiUnitExam>>, TError = unknown>(subjectId: string,
+    params?: PreviewMultiUnitExamParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof previewMultiUnitExam>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPreviewMultiUnitExamQueryKey(subjectId,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof previewMultiUnitExam>>> = ({ signal }) => previewMultiUnitExam(subjectId,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: subjectId !== null && subjectId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof previewMultiUnitExam>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type PreviewMultiUnitExamQueryResult = NonNullable<Awaited<ReturnType<typeof previewMultiUnitExam>>>
+export type PreviewMultiUnitExamQueryError = unknown
+
+
+export function usePreviewMultiUnitExam<TData = Awaited<ReturnType<typeof previewMultiUnitExam>>, TError = unknown>(
+ subjectId: string,
+    params: undefined |  PreviewMultiUnitExamParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof previewMultiUnitExam>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof previewMultiUnitExam>>,
+          TError,
+          Awaited<ReturnType<typeof previewMultiUnitExam>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePreviewMultiUnitExam<TData = Awaited<ReturnType<typeof previewMultiUnitExam>>, TError = unknown>(
+ subjectId: string,
+    params?: PreviewMultiUnitExamParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof previewMultiUnitExam>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof previewMultiUnitExam>>,
+          TError,
+          Awaited<ReturnType<typeof previewMultiUnitExam>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePreviewMultiUnitExam<TData = Awaited<ReturnType<typeof previewMultiUnitExam>>, TError = unknown>(
+ subjectId: string,
+    params?: PreviewMultiUnitExamParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof previewMultiUnitExam>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function usePreviewMultiUnitExam<TData = Awaited<ReturnType<typeof previewMultiUnitExam>>, TError = unknown>(
+ subjectId: string,
+    params?: PreviewMultiUnitExamParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof previewMultiUnitExam>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getPreviewMultiUnitExamQueryOptions(subjectId,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getPreviewMultiUnitExamSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof previewMultiUnitExam>>, TError = unknown>(subjectId: string,
+    params?: PreviewMultiUnitExamParams, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof previewMultiUnitExam>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPreviewMultiUnitExamQueryKey(subjectId,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof previewMultiUnitExam>>> = ({ signal }) => previewMultiUnitExam(subjectId,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof previewMultiUnitExam>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type PreviewMultiUnitExamSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof previewMultiUnitExam>>>
+export type PreviewMultiUnitExamSuspenseQueryError = unknown
+
+
+export function usePreviewMultiUnitExamSuspense<TData = Awaited<ReturnType<typeof previewMultiUnitExam>>, TError = unknown>(
+ subjectId: string,
+    params: undefined |  PreviewMultiUnitExamParams, options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof previewMultiUnitExam>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePreviewMultiUnitExamSuspense<TData = Awaited<ReturnType<typeof previewMultiUnitExam>>, TError = unknown>(
+ subjectId: string,
+    params?: PreviewMultiUnitExamParams, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof previewMultiUnitExam>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePreviewMultiUnitExamSuspense<TData = Awaited<ReturnType<typeof previewMultiUnitExam>>, TError = unknown>(
+ subjectId: string,
+    params?: PreviewMultiUnitExamParams, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof previewMultiUnitExam>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function usePreviewMultiUnitExamSuspense<TData = Awaited<ReturnType<typeof previewMultiUnitExam>>, TError = unknown>(
+ subjectId: string,
+    params?: PreviewMultiUnitExamParams, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof previewMultiUnitExam>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getPreviewMultiUnitExamSuspenseQueryOptions(subjectId,params,options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetExamSessionUrl = (sessionId: string,) => {
 
 
 

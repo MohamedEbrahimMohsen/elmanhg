@@ -37,6 +37,23 @@ public static class ExamBreakdown
             .ToList();
     }
 
+    public static List<ExamUnitShare> ByUnit(IEnumerable<ExamShare> lessonShares, IReadOnlyDictionary<Guid, Guid> unitIdByLessonId, IReadOnlyList<Guid> unitOrder)
+    {
+        return lessonShares
+            .Where(x => unitIdByLessonId.ContainsKey(x.LessonId))
+            .GroupBy(x => unitIdByLessonId[x.LessonId])
+            .Select(x => new ExamUnitShare(x.Key, x.Sum(share => share.QuestionCount), x.Sum(share => share.CorrectCount), x.Sum(share => share.Score), x.Sum(share => share.MaxScore)))
+            .OrderBy(x => UnitPosition(unitOrder, x.UnitId))
+            .ThenBy(x => x.UnitId)
+            .ToList();
+    }
+
+    private static int UnitPosition(IReadOnlyList<Guid> unitOrder, Guid unitId)
+    {
+        var index = unitOrder.ToList().IndexOf(unitId);
+        return index < 0 ? int.MaxValue : index;
+    }
+
     private static List<Row> Rows(Session session, IReadOnlyCollection<ExamItemPlacement> placements)
     {
         var placementsByQuestion = placements

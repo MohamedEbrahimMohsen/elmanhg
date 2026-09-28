@@ -1,5 +1,6 @@
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Sessions.Exams;
+using Elmanhg.Domain.Units;
 
 namespace Elmanhg.Application.Exams.Shared;
 
@@ -17,6 +18,13 @@ public static class ExamBreakdownResultGenerator
         return shares
             .Select(x => Objective(x, lessons.FirstOrDefault(lesson => lesson.Id == x.LessonId)))
             .OfType<ExamObjectiveResult>()
+            .ToList();
+    }
+
+    public static List<ExamUnitBreakdownResult> Units(IEnumerable<ExamUnitShare> shares, IReadOnlyCollection<CurriculumUnit> units)
+    {
+        return shares
+            .Select(x => new ExamUnitBreakdownResult(x.UnitId, units.FirstOrDefault(unit => unit.Id == x.UnitId)?.Name, x.QuestionCount, x.CorrectCount, x.Score, x.MaxScore, x.ScorePercent))
             .ToList();
     }
 

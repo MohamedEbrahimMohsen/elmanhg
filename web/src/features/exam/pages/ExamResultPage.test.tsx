@@ -1,10 +1,27 @@
 import { screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import type { ExamSessionResult } from '@/shared/api/generated/model';
-import { getGetExamSessionMockHandler } from '@/shared/api/generated/exams/exams.msw';
+import {
+  getGetExamSessionMockHandler,
+  getGetMultiUnitExamOverviewMockHandler,
+  getPreviewMultiUnitExamMockHandler,
+} from '@/shared/api/generated/exams/exams.msw';
+import { getGetSubjectsMockHandler } from '@/shared/api/generated/subjects/subjects.msw';
 import { axe } from '@/test/axe';
-import { examItem, examLessonId, examSessionId, examUnitId, openExam, submittedExam } from '@/test/examFixtures';
+import {
+  examItem,
+  examLessonId,
+  examSessionId,
+  examSubjectId,
+  examUnitId,
+  multiExam,
+  multiOverview,
+  multiPreview,
+  openExam,
+  submittedExam,
+} from '@/test/examFixtures';
 import { server } from '@/test/msw/server';
 import { renderApp } from '@/test/renderWithProviders';
 import { testSessions } from '@/test/sessions';
@@ -104,5 +121,30 @@ describe('ExamResultPage', () => {
     await screen.findByText('80 / 100');
 
     expect((await axe(container)).violations).toEqual([]);
+  });
+
+  it('shows the per-unit breakdown for a multi-unit exam', async () => {
+    openResult(multiExam([examItem(1), examItem(2)]));
+
+    expect(await screen.findByRole('heading', { name: 'By unit' })).toBeInTheDocument();
+    expect(within(screen.getByRole('row', { name: /Mechanics/ })).getByText('100%')).toBeInTheDocument();
+    expect(within(screen.getByRole('row', { name: /Waves/ })).getByText('0%')).toBeInTheDocument();
+  });
+
+  it('retakes a multi-unit exam in the builder with the same units and size', async () => {
+    server.use(
+      getGetSubjectsMockHandler([{ id: examSubjectId, name: 'Physics', order: 1, unitCount: 2 }]),
+      getGetMultiUnitExamOverviewMockHandler(multiOverview()),
+      getPreviewMultiUnitExamMockHandler(multiPreview()),
+    );
+    const user = userEvent.setup();
+    const { router } = openResult(multiExam(Array.from({ length: 20 }, (_, index) => examItem(index + 1))));
+    await router.loadRouteChunk(router.routesById['/student/multi-exam']);
+
+    await user.click(await screen.findByRole('link', { name: 'Retake exam' }));
+
+    expect(await screen.findByRole('checkbox', { name: 'Mechanics' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Waves' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: '20 questions' })).toBeChecked();
   });
 });

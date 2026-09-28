@@ -27,8 +27,8 @@ public sealed class GetSessionHistoryHandler(ISessionRepository sessionRepositor
             .Distinct()
             .ToList();
         var unitIds = page.Items
-            .Where(x => x.Kind == SessionKind.UnitExam)
-            .Select(x => UnitExamScope.FromJson(x.Scope).UnitId)
+            .Where(x => x.IsExam)
+            .SelectMany(x => x.GetExamUnitIds())
             .Distinct()
             .ToList();
         List<Lesson> lessons = lessonIds.Count == 0 ? [] : await lessonRepository.FindAsync(x => lessonIds.Contains(x.Id), cancellationToken, asNoTracking: true).ConfigureAwait(false);

@@ -1,6 +1,7 @@
 import type { ExamItemResult, ExamSessionResult } from '@/shared/api/generated/model';
 
 export const examAutoSaveDelayMilliseconds = 800;
+export const multiUnitExamKind = 'MultiUnitExam';
 // design prompt §2.4: the countdown turns red in the last two minutes
 export const urgentCountdownMilliseconds = 120_000;
 
@@ -32,4 +33,15 @@ export function isCountdownUrgent(milliseconds: number): boolean {
 
 export function unitIdOf(session: ExamSessionResult): string | null {
   return session.units[0]?.unitId ?? null;
+}
+
+export function isMultiUnitExam(session: ExamSessionResult): boolean {
+  return session.kind === multiUnitExamKind;
+}
+
+export function examUnitNames(session: ExamSessionResult): string {
+  return session.units
+    .map((unit) => unit.name)
+    .filter((name): name is string => name !== null)
+    .join(' + ');
 }

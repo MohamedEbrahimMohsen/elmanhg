@@ -21,6 +21,7 @@
   },
   "exam": {
     "title": "Exam: {unit}",
+    "multiTitle": "Multi-unit exam: {unit}",
     "loading": "Loading the exam…",
     "errorTitle": "Could not load the exam.",
     "timeLeft": "Time left {minutes}:{seconds}",
@@ -40,6 +41,7 @@
   },
   "result": {
     "title": "Result: {unit}",
+    "multiTitle": "Multi-unit exam result: {unit}",
     "loading": "Loading the result…",
     "errorTitle": "Could not load the result.",
     "score": "{score, number} / 100",
@@ -60,6 +62,30 @@
     "unanswered": "You did not answer this question.",
     "correctAnswer": "The correct answer",
     "retake": "Retake exam",
-    "progress": "My progress"
+    "progress": "My progress",
+    "byUnit": "By unit",
+    "unit": "Unit",
+    "unitCorrectHeader": "Correct",
+    "unitCorrect": "{correct, number} of {total, number}",
+    "unknownUnit": "Not available"
+  },
+  "multi": {
+    "title": "Multi-unit exam",
+    "subject": "Subject",
+    "loading": "Loading units…",
+    "errorTitle": "Couldn't load the units.",
+    "subjectsErrorTitle": "Couldn't load the subjects.",
+    "noSubjects": "No subjects yet.",
+    "noUnits": "This subject has no units yet.",
+    "units": "Choose two or more units:",
+    "available": "({count, number} questions available)",
+    "noBlueprint": "This unit has no exam",
+    "size": "Number of questions",
+    "sizeOption": "{size, number} questions",
+    "chooseTwo": "Choose at least two units.",
+    "previewTitle": "Merged blueprint (proportional)",
+    "previewLoading": "Working out the exam…",
+    "unitShares": "Questions from each unit",
+    "unitShare": "{unit}: {count, number} questions"
   }
 }

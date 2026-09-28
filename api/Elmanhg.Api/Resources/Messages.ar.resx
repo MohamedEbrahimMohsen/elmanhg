@@ -270,4 +270,8 @@
   <data name="EXAM_SHORTFALL" xml:space="preserve"><value>لا يمكن انشاء الامتحان: عدد الاسئلة المتاحة غير كاف: {types}</value></data>
   <data name="EXAM_ALREADY_IN_PROGRESS" xml:space="preserve"><value>لديك امتحان جار بالفعل. اكمله اولا.</value></data>
   <data name="UNIT_EXAM_NO_BLUEPRINT" xml:space="preserve"><value>لا يوجد امتحان لهذه الوحدة بعد.</value></data>
+  <data name="MULTI_UNIT_EXAM_UNITS_TOO_FEW" xml:space="preserve"><value>اختر وحدتين على الاقل من نفس المادة.</value></data>
+  <data name="MULTI_UNIT_EXAM_UNIT_DUPLICATE" xml:space="preserve"><value>تم اختيار وحدة اكثر من مرة.</value></data>
+  <data name="MULTI_UNIT_EXAM_SIZE_INVALID" xml:space="preserve"><value>عدد الاسئلة يجب ان يكون 20 او 40 او 60.</value></data>
+  <data name="MULTI_UNIT_EXAM_NO_BLUEPRINT" xml:space="preserve"><value>لا يوجد امتحان لبعض الوحدات المختارة: {units}</value></data>
 </root>

@@ -2,6 +2,7 @@ using Elmanhg.Domain.Lessons;
 using Elmanhg.Tests.Integration.Auth;
 using Elmanhg.Tests.Integration.Authorization;
 using Elmanhg.Tests.Integration.Content;
+using Elmanhg.Tests.Integration.Exams;
 using Elmanhg.Tests.Integration.Infrastructure;
 using Elmanhg.Tests.Integration.Mastery;
 using FluentAssertions;
@@ -98,6 +99,20 @@ public sealed class SessionHistoryEndpointTests(ApiFactory factory)
         (exam.GetProperty("id").GetGuid(), exam.GetProperty("kind").GetString(), exam.GetProperty("unitId").GetGuid(), exam.GetProperty("scopeName").GetString(), exam.GetProperty("scorePercent").GetDecimal())
             .Should().Be((examId, "UnitExam", unitId, "Optics", 75m));
         quizzes.GetProperty("items").EnumerateArray().Should().ContainSingle().Which.GetProperty("kind").GetString().Should().Be("Quiz");
+    }
+
+    [Fact]
+    public async Task Get_MultiUnitExam_ShowsJoinedUnitNames()
+    {
+        var (subjectId, unitIds, _) = await MultiUnitExamTestData.SeedMultiUnitSubjectAsync(factory, [10, 10]);
+        var (_, client) = await SignedInStudentAsync(factory);
+        using var started = await MultiUnitExamTestData.StartMultiAsync(client, subjectId, unitIds, 20);
+        started.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var body = await GetJsonAsync(client, $"{SessionsPath}?kind=Exam");
+
+        var exam = body.GetProperty("items").EnumerateArray().Should().ContainSingle().Subject;
+        (exam.GetProperty("kind").GetString(), exam.GetProperty("scopeName").GetString()).Should().Be(("MultiUnitExam", "Mechanics + Waves"));
     }
 
     [Fact]

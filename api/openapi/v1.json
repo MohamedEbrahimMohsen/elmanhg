@@ -2332,6 +2332,170 @@
         }
       }
     },
+    "/api/exams/subjects/{subjectId}/multi-unit": {
+      "get": {
+        "tags": [
+          "Exams"
+        ],
+        "operationId": "GetMultiUnitExamOverview",
+        "parameters": [
+          {
+            "name": "subjectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MultiUnitExamOverviewResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MultiUnitExamOverviewResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MultiUnitExamOverviewResult"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Exams"
+        ],
+        "operationId": "StartMultiUnitExam",
+        "parameters": [
+          {
+            "name": "subjectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartMultiUnitExamRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartMultiUnitExamRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartMultiUnitExamRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamSessionResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamSessionResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamSessionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exams/subjects/{subjectId}/multi-unit/preview": {
+      "get": {
+        "tags": [
+          "Exams"
+        ],
+        "operationId": "PreviewMultiUnitExam",
+        "parameters": [
+          {
+            "name": "subjectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "unitIds",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MultiUnitExamPreviewResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MultiUnitExamPreviewResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MultiUnitExamPreviewResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/exams/{sessionId}": {
       "get": {
         "tags": [
@@ -4016,6 +4180,7 @@
           "id",
           "kind",
           "isTestMode",
+          "subjectId",
           "subjectName",
           "units",
           "startedAt",
@@ -4029,6 +4194,7 @@
           "elapsedMilliseconds",
           "items",
           "lessons",
+          "unitBreakdown",
           "weakestObjectives"
         ],
         "type": "object",
@@ -4042,6 +4208,13 @@
           },
           "isTestMode": {
             "type": "boolean"
+          },
+          "subjectId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           },
           "subjectName": {
             "type": [
@@ -4129,6 +4302,12 @@
               "$ref": "#/components/schemas/ExamLessonResult"
             }
           },
+          "unitBreakdown": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExamUnitBreakdownResult"
+            }
+          },
           "weakestObjectives": {
             "type": "array",
             "items": {
@@ -4210,6 +4389,70 @@
               "string"
             ],
             "format": "int32"
+          }
+        }
+      },
+      "ExamUnitBreakdownResult": {
+        "required": [
+          "unitId",
+          "name",
+          "questionCount",
+          "correctCount",
+          "score",
+          "maxScore",
+          "scorePercent"
+        ],
+        "type": "object",
+        "properties": {
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "questionCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "correctCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "score": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "maxScore": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "scorePercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
           }
         }
       },
@@ -4755,6 +4998,150 @@
             "items": {
               "$ref": "#/components/schemas/SubjectMasteryResult"
             }
+          }
+        }
+      },
+      "MultiUnitExamOverviewResult": {
+        "required": [
+          "subjectId",
+          "subjectName",
+          "units",
+          "sizes",
+          "inProgressExam"
+        ],
+        "type": "object",
+        "properties": {
+          "subjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "units": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MultiUnitExamUnitOptionResult"
+            }
+          },
+          "sizes": {
+            "type": "array",
+            "items": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          "inProgressExam": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/InProgressExamResult"
+              }
+            ]
+          }
+        }
+      },
+      "MultiUnitExamPreviewResult": {
+        "required": [
+          "subjectId",
+          "size",
+          "blueprint",
+          "isAvailable",
+          "units"
+        ],
+        "type": "object",
+        "properties": {
+          "subjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "size": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "blueprint": {
+            "$ref": "#/components/schemas/ExamBlueprintSummaryResult"
+          },
+          "isAvailable": {
+            "type": "boolean"
+          },
+          "units": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MultiUnitExamUnitShareResult"
+            }
+          }
+        }
+      },
+      "MultiUnitExamUnitOptionResult": {
+        "required": [
+          "unitId",
+          "name",
+          "hasBlueprint",
+          "isSubjectDefault",
+          "servableCount"
+        ],
+        "type": "object",
+        "properties": {
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "hasBlueprint": {
+            "type": "boolean"
+          },
+          "isSubjectDefault": {
+            "type": "boolean"
+          },
+          "servableCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "MultiUnitExamUnitShareResult": {
+        "required": [
+          "unitId",
+          "name",
+          "questionCount",
+          "isSubjectDefault"
+        ],
+        "type": "object",
+        "properties": {
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "questionCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "isSubjectDefault": {
+            "type": "boolean"
           }
         }
       },
@@ -5707,6 +6094,33 @@
             "items": {
               "$ref": "#/components/schemas/SessionItemResult"
             }
+          }
+        }
+      },
+      "StartMultiUnitExamRequest": {
+        "required": [
+          "unitIds",
+          "size"
+        ],
+        "type": "object",
+        "properties": {
+          "unitIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "size": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },

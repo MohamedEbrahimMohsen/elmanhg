@@ -55,7 +55,7 @@ Unit exams (#81) implement steps 1–3; the full exam contract is `docs/exams.md
 1. A unit exam uses the unit's blueprint; otherwise the subject default; otherwise the unit has no exam (`ExamBlueprintResolution.ForUnit`; start returns 400 `UNIT_EXAM_NO_BLUEPRINT`).
 2. The exam start re-runs `ExamBlueprintShortfall.Find` against the unit's current servable pool, because questions can be retired after the blueprint was saved (`ExamBlueprint.EnsureServable`; a shortfall returns 400 `EXAM_SHORTFALL` with context `types`, for example `"Mcq 1/2"`).
 3. The session copies the time limit and the pass mark at start, so a later blueprint edit never changes a started exam.
-4. A multi-unit exam (#82) merges the units' `GetTypeCounts()` proportionally, using `QuestionCount` as the denominator.
+4. A multi-unit exam (#82) resolves each selected unit as in step 1, then merges the units' `GetTypeCounts()` proportionally, using the summed `QuestionCount` as the denominator. The merge, the time limit and the pass mark rules are in [`docs/exams.md#multi-unit-exams`](exams.md#multi-unit-exams).
 
 ## Orphans
 

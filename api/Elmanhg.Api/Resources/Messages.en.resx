@@ -270,4 +270,8 @@
   <data name="EXAM_SHORTFALL" xml:space="preserve"><value>The exam cannot be created: not enough questions are available: {types}</value></data>
   <data name="EXAM_ALREADY_IN_PROGRESS" xml:space="preserve"><value>You already have an exam in progress. Finish it first.</value></data>
   <data name="UNIT_EXAM_NO_BLUEPRINT" xml:space="preserve"><value>This unit has no exam yet.</value></data>
+  <data name="MULTI_UNIT_EXAM_UNITS_TOO_FEW" xml:space="preserve"><value>Choose at least two units of the same subject.</value></data>
+  <data name="MULTI_UNIT_EXAM_UNIT_DUPLICATE" xml:space="preserve"><value>A unit was chosen more than once.</value></data>
+  <data name="MULTI_UNIT_EXAM_SIZE_INVALID" xml:space="preserve"><value>The number of questions must be 20, 40 or 60.</value></data>
+  <data name="MULTI_UNIT_EXAM_NO_BLUEPRINT" xml:space="preserve"><value>Some chosen units have no exam: {units}</value></data>
 </root>

@@ -141,6 +141,10 @@ public static class ErrorCodes
     // EXAMS
     public const string ExamAlreadyInProgress = "EXAM_ALREADY_IN_PROGRESS";
     public const string UnitExamNoBlueprint = "UNIT_EXAM_NO_BLUEPRINT";
+    public const string MultiUnitExamUnitsTooFew = "MULTI_UNIT_EXAM_UNITS_TOO_FEW";
+    public const string MultiUnitExamUnitDuplicate = "MULTI_UNIT_EXAM_UNIT_DUPLICATE";
+    public const string MultiUnitExamSizeInvalid = "MULTI_UNIT_EXAM_SIZE_INVALID";
+    public const string MultiUnitExamNoBlueprint = "MULTI_UNIT_EXAM_NO_BLUEPRINT";
 
     // QUESTION IMPORTS
     public const string QuestionImportFileRequired = "QUESTION_IMPORT_FILE_REQUIRED";

@@ -34,7 +34,7 @@ Both lists use the product's single mastery definition (`docs/mastery.md`), not 
 - All of the student's sessions outside test mode, open and finished, newest `StartedAt` first (then id descending).
 - Filter `kind`: absent = all, `Quiz` = quizzes, `Exam` = unit and multi-unit exams. The filter and page live in the URL (`?kind=Exam&page=2`).
 - Paged with `PageData`: `pageSize` defaults to 20 and may not exceed `Progress:HistoryMaxPageSize` (50).
-- **Scope name.** A quiz shows its lesson's name, looked up across all lesson states, so an archived lesson keeps its name. A unit exam shows its unit's name. A multi-unit exam, or a deleted lesson or unit, has no name, and the page shows "غير متاح".
+- **Scope name.** A quiz shows its lesson's name, looked up across all lesson states, so an archived lesson keeps its name. A unit exam shows its unit's name. A multi-unit exam shows its unit names joined by « + »; a deleted lesson, or an exam whose units are all deleted, has no name and shows «غير متاح».
 - **Links.** A finished quiz links "عرض" to `/student/quiz-result/{id}`. An open quiz links "متابعة" to `/student/quiz/{id}`. A finished exam links "عرض" to `/student/exam-result/{id}`; an open exam links "متابعة" to `/student/exam/{id}`.
 - An open session shows "جارٍ" instead of a score.
 
