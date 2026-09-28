@@ -1,0 +1,45 @@
+{
+  "page": {
+    "title": "Content tree",
+    "loading": "Loading subjects"
+  },
+  "error": {
+    "title": "Could not load the content tree"
+  },
+  "subjects": {
+    "listLabel": "Subjects",
+    "nameLabel": "Subject name",
+    "add": "Add subject",
+    "empty": "No subjects yet. Add the first subject.",
+    "unitCount": "{count, plural, one {# unit} other {# units}}",
+    "showUnits": "Show units",
+    "hideUnits": "Hide units",
+    "created": "Subject added.",
+    "renamed": "Subject renamed.",
+    "moved": "Subject moved.",
+    "deleted": "Subject deleted."
+  },
+  "units": {
+    "listLabel": "Units of {name}",
+    "loading": "Loading units",
+    "errorTitle": "Could not load units",
+    "nameLabel": "Unit name",
+    "add": "Add unit",
+    "empty": "No units in this subject yet.",
+    "created": "Unit added.",
+    "renamed": "Unit renamed.",
+    "moved": "Unit moved.",
+    "deleted": "Unit deleted."
+  },
+  "actions": {
+    "moveUp": "Move {name} up",
+    "moveDown": "Move {name} down",
+    "rename": "Rename",
+    "newName": "New name",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirmDelete": "Delete {name}?",
+    "confirm": "Yes, delete"
+  }
+}

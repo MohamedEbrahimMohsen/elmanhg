@@ -46,6 +46,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["CoreJwt:Key"] = TestJwtKey,
             ["AuditLogs:MaxPageSize"] = "100",
             ["AuditLogs:FilterMaxLength"] = "256",
+            ["Content:SubjectNameMaxLength"] = "100",
+            ["Content:UnitNameMaxLength"] = "100",
             ["CoreOtp:Secret"] = TestOtpSecret,
             ["Sms:Provider"] = "Fake",
             ["Auth:DisplayNameMaxLength"] = "100",

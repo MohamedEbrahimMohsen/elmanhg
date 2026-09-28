@@ -104,6 +104,16 @@
   <data name="TEACHER_SUBJECT_NOT_ASSIGNED" xml:space="preserve"><value>هذه المادة غير مسندة الى المعلم.</value></data>
   <data name="TEACHER_ID_REQUIRED" xml:space="preserve"><value>اختر المعلم.</value></data>
   <data name="SUBJECT_ID_REQUIRED" xml:space="preserve"><value>اختر المادة.</value></data>
+  <data name="SUBJECT_NAME_REQUIRED" xml:space="preserve"><value>اكتب اسم المادة.</value></data>
+  <data name="SUBJECT_NAME_TOO_LONG" xml:space="preserve"><value>اسم المادة طويل جدا.</value></data>
+  <data name="SUBJECT_POSITION_INVALID" xml:space="preserve"><value>الترتيب يجب ان يكون 1 او اكثر.</value></data>
+  <data name="SUBJECT_HAS_UNITS" xml:space="preserve"><value>لا يمكن حذف المادة لانها تحتوي على وحدات. احذف الوحدات اولا.</value></data>
+  <data name="UNIT_NOT_FOUND" xml:space="preserve"><value>الوحدة غير موجودة.</value></data>
+  <data name="UNIT_ID_REQUIRED" xml:space="preserve"><value>اختر الوحدة.</value></data>
+  <data name="UNIT_NAME_REQUIRED" xml:space="preserve"><value>اكتب اسم الوحدة.</value></data>
+  <data name="UNIT_NAME_TOO_LONG" xml:space="preserve"><value>اسم الوحدة طويل جدا.</value></data>
+  <data name="UNIT_POSITION_INVALID" xml:space="preserve"><value>الترتيب يجب ان يكون 1 او اكثر.</value></data>
+  <data name="CONTENT_ORDER_INVALID" xml:space="preserve"><value>الترتيب يجب ان يكون 1 او اكثر.</value></data>
   <data name="USER_NOT_TEACHER" xml:space="preserve"><value>يمكن اسناد المواد الى المعلمين فقط.</value></data>
   <data name="AUDIT_LOG_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة يجب ان يكون 1 او اكثر.</value></data>
   <data name="AUDIT_LOG_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة خارج النطاق المسموح.</value></data>

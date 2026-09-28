@@ -20,7 +20,7 @@ public sealed class AssignTeacherSubjectHandlerTests
     private readonly ITeacherSubjectRepository _teacherSubjectRepository = Substitute.For<ITeacherSubjectRepository>();
     private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
     private readonly User _teacher = User.CreateTeacher("Teacher", "teacher@elmanhg.test");
-    private readonly Subject _subject = Subject.Create("Physics", Guid.NewGuid());
+    private readonly Subject _subject = Subject.Create("Physics", 1, Guid.NewGuid());
     private readonly AssignTeacherSubjectHandler _handler;
 
     public AssignTeacherSubjectHandlerTests()

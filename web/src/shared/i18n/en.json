@@ -37,7 +37,16 @@
     "AUDIT_LOG_PAGE_NUMBER_INVALID": "Page number must be 1 or more.",
     "AUDIT_LOG_PAGE_SIZE_INVALID": "Page size is out of the allowed range.",
     "AUDIT_LOG_FILTER_TOO_LONG": "Filter text is too long.",
-    "AUDIT_LOG_DATE_RANGE_INVALID": "The end date must be after the start date."
+    "AUDIT_LOG_DATE_RANGE_INVALID": "The end date must be after the start date.",
+    "SUBJECT_NAME_REQUIRED": "Enter the subject name.",
+    "SUBJECT_NAME_TOO_LONG": "Subject name is too long.",
+    "SUBJECT_POSITION_INVALID": "Position must be 1 or more.",
+    "SUBJECT_HAS_UNITS": "This subject has units. Delete its units first.",
+    "SUBJECT_NOT_FOUND": "Subject not found.",
+    "UNIT_NOT_FOUND": "Unit not found.",
+    "UNIT_NAME_REQUIRED": "Enter the unit name.",
+    "UNIT_NAME_TOO_LONG": "Unit name is too long.",
+    "UNIT_POSITION_INVALID": "Position must be 1 or more."
   },
   "error": {
     "title": "Something went wrong"

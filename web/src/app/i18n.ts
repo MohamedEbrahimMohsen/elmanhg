@@ -2,6 +2,7 @@ import i18next from 'i18next';
 import ICU from 'i18next-icu';
 import { initReactI18next } from 'react-i18next';
 import { auditLocales } from '@/features/audit';
+import { contentLocales } from '@/features/content';
 import { sessionLocales } from '@/features/session';
 import { shellLocales } from '@/features/shell';
 import { numberLocale } from '@/shared/lib/format';
@@ -17,8 +18,20 @@ export const defaultLanguage: Language = 'ar';
 export const i18n = i18next.createInstance();
 
 const resources = {
-  ar: { common: commonAr, session: sessionLocales.ar, shell: shellLocales.ar, audit: auditLocales.ar },
-  en: { common: commonEn, session: sessionLocales.en, shell: shellLocales.en, audit: auditLocales.en },
+  ar: {
+    common: commonAr,
+    session: sessionLocales.ar,
+    shell: shellLocales.ar,
+    audit: auditLocales.ar,
+    content: contentLocales.ar,
+  },
+  en: {
+    common: commonEn,
+    session: sessionLocales.en,
+    shell: shellLocales.en,
+    audit: auditLocales.en,
+    content: contentLocales.en,
+  },
 };
 
 export function applyDocumentLanguage(): void {
@@ -40,7 +53,7 @@ export function initI18n(lng: Language = defaultLanguage): void {
       lng,
       fallbackLng: defaultLanguage,
       supportedLngs: [...supportedLanguages],
-      ns: ['common', 'session', 'shell', 'audit'],
+      ns: ['common', 'session', 'shell', 'audit', 'content'],
       defaultNS: 'common',
       resources,
       initAsync: false,

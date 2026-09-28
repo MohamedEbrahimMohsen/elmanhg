@@ -52,10 +52,11 @@ async function parse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     throw await toApiError(response);
   }
-  if (response.status === 204) {
+  const body = await response.text();
+  if (body === '') {
     return undefined as T;
   }
-  return (await response.json()) as T;
+  return JSON.parse(body) as T;
 }
 
 export async function http<T>(url: string, init: RequestInit = {}): Promise<T> {

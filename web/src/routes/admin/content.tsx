@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { PlaceholderPage } from '@/features/shell';
+import { ContentPage } from '@/features/content';
 
 export const Route = createFileRoute('/admin/content')({
-  component: () => <PlaceholderPage titleKey="nav.admin.content" />,
+  component: ContentPage,
 });

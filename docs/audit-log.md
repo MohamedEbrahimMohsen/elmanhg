@@ -51,10 +51,18 @@ An array with one element per changed audited entity. Property keys are camelCas
 |---|---|---|---|
 | AssignTeacherSubject | `Teacher.AssignSubject` | Teacher | command |
 | UnassignTeacherSubject | `Teacher.UnassignSubject` | Teacher | command |
+| CreateSubject | `Subject.Create` | Subject | result |
+| UpdateSubject | `Subject.Update` | Subject | command |
+| ReorderSubject | `Subject.Reorder` | Subject | command (the diff lists every sibling whose `Order` changed) |
+| DeleteSubject | `Subject.Delete` | Subject | command |
+| CreateUnit | `Unit.Create` | Unit | result |
+| UpdateUnit | `Unit.Update` | Unit | command |
+| ReorderUnit | `Unit.Reorder` | Unit | command (the diff lists every sibling whose `Order` changed) |
+| DeleteUnit | `Unit.Delete` | Unit | command |
 
-Audited entities (`IAuditedEntity`): `TeacherSubject`.
+Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`.
 
-Content and validation commands (E2/E3) join this table when they are built.
+Validation commands (E3) and later content commands (lessons, questions) join this table when they are built.
 
 ## Not audited (deliberate)
 
