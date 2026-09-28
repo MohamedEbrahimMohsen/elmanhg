@@ -1,3 +1,4 @@
+using Elmanhg.Application.Questions.Shared;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
@@ -12,6 +13,7 @@ public sealed class QuestionBuilder
 {
     private QuestionMetadata? _metadata;
     private bool _approved;
+    private string? _rejectionReason;
 
     public QuestionBuilder()
     {
@@ -25,6 +27,8 @@ public sealed class QuestionBuilder
     public CurriculumUnit Unit { get; }
 
     public Lesson Lesson { get; }
+
+    public User Teacher { get; } = User.CreateTeacher("Teacher", "teacher@example.com");
 
     public Guid ObjectiveId => Lesson.Objectives[0].Id;
 
@@ -40,12 +44,23 @@ public sealed class QuestionBuilder
         return this;
     }
 
+    public QuestionBuilder Rejected(string reason)
+    {
+        _rejectionReason = reason;
+        return this;
+    }
+
     public Question Build()
     {
         var question = Question.Create(Lesson, Unit, QuestionType.Mcq, McqContent(), _metadata ?? new QuestionMetadata(QuestionDifficulty.Medium, null, []), Guid.NewGuid());
         if (_approved)
         {
-            question.Approve(TeacherSubject.Create(User.CreateTeacher("Teacher", "teacher@example.com"), Subject, Guid.NewGuid()));
+            question.Approve(TeacherSubject.Create(Teacher, Subject, Guid.NewGuid()));
+        }
+
+        if (_rejectionReason is not null)
+        {
+            question.Reject(TeacherSubject.Create(Teacher, Subject, Guid.NewGuid()), _rejectionReason);
         }
 
         return question;
@@ -54,6 +69,11 @@ public sealed class QuestionBuilder
     public static QuestionContent McqContent()
     {
         return new QuestionContent("<p>2 + 2 = ?</p>", """{"options":[{"id":"a","text":"3"},{"id":"b","text":"4"}]}""", """{"correctOptionId":"b"}""", "<p>Add the numbers.</p>", 1);
+    }
+
+    public static QuestionFields McqFields(string stem = "<p>2 + 2 = ?</p>")
+    {
+        return new QuestionFields(QuestionType.Mcq, stem, Json("""{"options":[{"id":"a","text":"3"},{"id":"b","text":"4"}]}"""), Json("""{"correctOptionId":"b"}"""), "<p>Add the numbers.</p>", QuestionDifficulty.Medium, null, [], 1);
     }
 
     public static JsonElement Json(string json)

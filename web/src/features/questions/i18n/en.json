@@ -1,0 +1,155 @@
+{
+  "types": {
+    "Mcq": "Multiple choice",
+    "Multi": "Multiple answers",
+    "TrueFalse": "True or false",
+    "Fill": "Fill in the blank",
+    "Short": "Short answer"
+  },
+  "statuses": {
+    "Pending": "Pending review",
+    "Approved": "Approved",
+    "Rejected": "Rejected"
+  },
+  "difficulties": {
+    "Easy": "Easy",
+    "Medium": "Medium",
+    "Hard": "Hard"
+  },
+  "list": {
+    "title": "Question bank",
+    "count": "{count, plural, one {# question} other {# questions}}",
+    "loading": "Loading questions",
+    "errorTitle": "Could not load the questions",
+    "hint": "To add a question, open its lesson from the content tree.",
+    "lessonFilter": "Showing one lesson's questions.",
+    "newInLesson": "New question in this lesson",
+    "empty": {
+      "noData": "No questions yet.",
+      "noResults": "No questions match these filters."
+    },
+    "table": {
+      "caption": "Questions",
+      "question": "Question",
+      "lesson": "Lesson",
+      "type": "Type",
+      "status": "Status",
+      "version": "Version",
+      "teacher": "Teacher",
+      "rejectionReason": "Rejection reason",
+      "actions": "Actions",
+      "versionValue": "v{version}",
+      "noTeacher": "—",
+      "edit": "Edit",
+      "editAndResubmit": "Edit and resubmit"
+    },
+    "filters": {
+      "status": "Status",
+      "type": "Type",
+      "subject": "Subject",
+      "teacher": "Teacher",
+      "minVersion": "Version at least",
+      "rejectionReason": "Rejection reason contains",
+      "all": "All",
+      "apply": "Apply filters",
+      "clear": "Clear filters",
+      "errors": {
+        "minVersion": "Enter a whole number of 1 or more.",
+        "rejectionReasonTooLong": "The search text is too long."
+      }
+    }
+  },
+  "editor": {
+    "newTitle": "New question",
+    "editTitle": "Edit question",
+    "breadcrumb": "Breadcrumb",
+    "questionsLink": "Questions",
+    "loading": "Loading question",
+    "errorTitle": "Could not load the question",
+    "lessonErrorTitle": "Could not load the lesson",
+    "approvedWarning": "Editing the text, options, answer, explanation or points returns this question to pending review and bumps its version. Changing only difficulty, objective or tags keeps it approved.",
+    "rejectionReason": "Rejection reason: {reason}",
+    "versionBadge": "v{version}",
+    "save": "Save",
+    "create": "Create question",
+    "resubmit": "Save and resubmit for review",
+    "created": "Question created.",
+    "saved": "Question saved.",
+    "resubmitted": "Question resubmitted for review.",
+    "fields": {
+      "type": "Type",
+      "typeLocked": "The type of a question cannot change.",
+      "stem": "Question text",
+      "stemFillHint": "Type [[1]] where blank 1 goes, [[2]] for blank 2, and so on.",
+      "explanation": "Explanation (shown after answering)",
+      "difficulty": "Difficulty",
+      "objective": "Objective",
+      "noObjective": "No objective",
+      "maxScore": "Points",
+      "tags": "Tags",
+      "tagsHint": "Separate tags with commas."
+    },
+    "options": {
+      "legend": "Options",
+      "option": "Option {number}",
+      "correct": "Option {number} is correct",
+      "add": "Add option",
+      "remove": "Remove option {number}",
+      "partialCredit": "Give partial credit"
+    },
+    "trueFalse": {
+      "answer": "Correct answer",
+      "choose": "Choose",
+      "true": "True",
+      "false": "False"
+    },
+    "blanks": {
+      "legend": "Blanks",
+      "accepted": "Accepted answers for blank {number} (one per line)",
+      "add": "Add blank",
+      "remove": "Remove blank {number}",
+      "unify": "Treat letter variants (أ إ آ، ة ه، ى ي) as the same"
+    },
+    "short": {
+      "answerKind": "Answer type",
+      "numeric": "Number",
+      "text": "Text",
+      "value": "Correct value",
+      "tolerance": "Tolerance",
+      "toleranceMode": "Tolerance type",
+      "absolute": "± absolute",
+      "percent": "± percent",
+      "accepted": "Accepted answers (one per line)"
+    },
+    "errors": {
+      "maxScore": "Enter whole points from 1 to 100.",
+      "optionsCount": "Add at least two options.",
+      "correctOption": "Mark exactly one correct answer.",
+      "correctOptions": "Mark at least one correct answer.",
+      "trueFalseAnswer": "Choose the correct answer.",
+      "blanksCount": "Add at least one blank.",
+      "acceptedAnswers": "Add at least one accepted answer.",
+      "blankPlaceholder": "Place each blank's [[id]] exactly once in the question text.",
+      "number": "Enter a number.",
+      "tolerance": "Enter a tolerance of 0 or more."
+    }
+  },
+  "preview": {
+    "title": "Student preview",
+    "tryAnswer": "Try the answer",
+    "grading": "Grading…",
+    "correct": "Correct",
+    "partial": "Partially correct",
+    "incorrect": "Incorrect",
+    "score": "Score {score} / {maxScore}",
+    "gradeFailed": "This draft cannot be graded yet."
+  },
+  "view": {
+    "answerLegend": "Your answer",
+    "true": "True",
+    "false": "False",
+    "blank": "Blank {number}",
+    "blankMarker": "({number})",
+    "yourAnswer": "Your answer"
+  }
+}

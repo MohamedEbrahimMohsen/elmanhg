@@ -1,0 +1,70 @@
+import { useId, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import { RichTextViewer } from '@/features/content';
+import type { QuestionAnswer, StudentQuestion } from '../api/studentQuestion';
+
+export interface ChoiceAnswerInputsProps {
+  question: StudentQuestion;
+  answer: QuestionAnswer;
+  onAnswerChange: (answer: QuestionAnswer) => void;
+  disabled?: boolean | undefined;
+}
+
+interface ChoiceItem {
+  key: string;
+  label: ReactNode;
+  checked: boolean;
+  onSelect: (checked: boolean) => void;
+}
+
+export function ChoiceAnswerInputs({ question, answer, onAnswerChange, disabled }: ChoiceAnswerInputsProps) {
+  const { t } = useTranslation('questions');
+  const name = useId();
+  const multiple = question.type === 'Multi';
+  const items: ChoiceItem[] =
+    question.type === 'TrueFalse'
+      ? [true, false].map((value) => ({
+          key: String(value),
+          label: value ? t('view.true') : t('view.false'),
+          checked: answer.trueFalse === value,
+          onSelect: () => {
+            onAnswerChange({ ...answer, trueFalse: value });
+          },
+        }))
+      : question.options.map((option) => ({
+          key: option.id,
+          label: <RichTextViewer html={option.text} />,
+          checked: answer.optionIds.includes(option.id),
+          onSelect: (checked) => {
+            const optionIds = multiple
+              ? checked
+                ? [...answer.optionIds, option.id]
+                : answer.optionIds.filter((id) => id !== option.id)
+              : [option.id];
+            onAnswerChange({ ...answer, optionIds });
+          },
+        }));
+
+  return (
+    <fieldset className="flex flex-col gap-2.5" disabled={disabled}>
+      <legend className="sr-only">{t('view.answerLegend')}</legend>
+      {items.map((item) => (
+        <label
+          key={item.key}
+          className="flex min-h-12 cursor-pointer items-center gap-2.5 rounded-md border border-border-strong bg-surface px-3.5 py-3 text-ui hover:bg-soft has-checked:border-text has-checked:bg-soft"
+        >
+          <input
+            type={multiple ? 'checkbox' : 'radio'}
+            name={name}
+            checked={item.checked}
+            onChange={(event) => {
+              item.onSelect(event.target.checked);
+            }}
+            className="size-4.5 accent-text"
+          />
+          {item.label}
+        </label>
+      ))}
+    </fieldset>
+  );
+}

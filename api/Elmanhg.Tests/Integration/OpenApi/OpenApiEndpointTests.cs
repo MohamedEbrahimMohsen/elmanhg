@@ -31,4 +31,18 @@ public sealed class OpenApiEndpointTests(ApiFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.Content.Headers.ContentType!.MediaType.Should().Be("text/html");
     }
+
+    [Fact]
+    public async Task Get_OpenApiDocument_DescribesQuestionEnumsAsStrings()
+    {
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync("/openapi/v1.json", TestContext.Current.CancellationToken);
+
+        await using var body = await response.Content.ReadAsStreamAsync(TestContext.Current.CancellationToken);
+        using var document = await JsonDocument.ParseAsync(body, cancellationToken: TestContext.Current.CancellationToken);
+        var schemas = document.RootElement.GetProperty("components").GetProperty("schemas");
+        schemas.GetProperty("QuestionType").GetProperty("enum").EnumerateArray().Select(x => x.GetString()).Should().Equal("Mcq", "Multi", "TrueFalse", "Fill", "Short");
+        schemas.GetProperty("QuestionValidationStatus").GetProperty("enum").EnumerateArray().Select(x => x.GetString()).Should().Contain("Rejected");
+    }
 }

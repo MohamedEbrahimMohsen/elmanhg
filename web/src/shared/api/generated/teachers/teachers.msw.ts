@@ -17,12 +17,27 @@ import type {
 } from 'msw';
 
 import type {
+  TeacherResult,
   TeacherSubjectResult
 } from '../model';
 
 
+export const getGetTeachersResponseMock = (): TeacherResult[] => (faker.helpers.arrayElement([Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 10, max: 20}})})), Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 10, max: 20}})})), Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 10, max: 20}})}))]))
+
 export const getAssignTeacherSubjectResponseMock = (overrideResponse: Partial<Extract<TeacherSubjectResult, object>> = {}): TeacherSubjectResult => (faker.helpers.arrayElement([{teacherId: faker.string.uuid(), subjectId: faker.string.uuid(), assignedAt: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse}, {teacherId: faker.string.uuid(), subjectId: faker.string.uuid(), assignedAt: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse}, {teacherId: faker.string.uuid(), subjectId: faker.string.uuid(), assignedAt: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse}]))
 
+
+export const getGetTeachersMockHandler = (overrideResponse?: TeacherResult[] | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TeacherResult[]> | TeacherResult[]), options?: RequestHandlerOptions) => {
+  return http.get('*/api/teachers', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetTeachersResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 
 export const getAssignTeacherSubjectMockHandler = (overrideResponse?: TeacherSubjectResult | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<TeacherSubjectResult> | TeacherSubjectResult), options?: RequestHandlerOptions) => {
   return http.post('*/api/teachers/:teacherId/subjects/:subjectId', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
@@ -46,6 +61,7 @@ export const getUnassignTeacherSubjectMockHandler = (overrideResponse?: void | (
   }, options)
 }
 export const getTeachersMock = () => [
+  getGetTeachersMockHandler(),
   getAssignTeacherSubjectMockHandler(),
   getUnassignTeacherSubjectMockHandler()
 ]

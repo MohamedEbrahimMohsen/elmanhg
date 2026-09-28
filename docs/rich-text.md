@@ -48,6 +48,7 @@ The editor produces these shapes with `@tiptap/extension-mathematics`, which als
 - Key: `lessons/{lessonId}/{random guid}{lower-case extension}`. Files are public-read by an unguessable key.
 - Storage: `IFileStorage`, selected by `FileStorage:Provider`. The `Local` provider writes under `FileStorage:LocalRootPath` (relative paths resolve against the API content root) and the API serves it at `FileStorage:PublicBaseUrl` (`/api/media`) with `X-Content-Type-Options: nosniff`. An S3-compatible adapter is pending.
 - Every upload is audited as `Lesson.UploadImage` (see `docs/audit-log.md`). Images that are uploaded but never referenced are not cleaned up yet.
+- The question editor uploads stem and explanation images through the same endpoint, using the question's lesson. Choice option text uses the compact editor, which has no image tool.
 
 ## Changing the format
 

@@ -1,4 +1,5 @@
 using Elmanhg.Application.Teachers.AssignTeacherSubject;
+using Elmanhg.Application.Teachers.GetTeachers;
 using Elmanhg.Application.Teachers.Shared;
 using Elmanhg.Application.Teachers.UnassignTeacherSubject;
 using Elmanhg.Domain.SharedKernel;
@@ -13,6 +14,15 @@ namespace Elmanhg.Api.Controllers.Teachers;
 [Authorize]
 public class TeachersController(IMediator mediator) : ControllerBase
 {
+    [HttpGet(Name = "GetTeachers")]
+    [Authorize(Policy = DefaultCodes.UsersManage)]
+    [ProducesResponseType<List<TeacherResult>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetTeachers(CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetTeachersQuery(), cancellationToken);
+        return Ok(result);
+    }
+
     [HttpPost("{teacherId:guid}/subjects/{subjectId:guid}", Name = "AssignTeacherSubject")]
     [Authorize(Policy = DefaultCodes.UsersManage)]
     [ProducesResponseType<TeacherSubjectResult>(StatusCodes.Status200OK)]

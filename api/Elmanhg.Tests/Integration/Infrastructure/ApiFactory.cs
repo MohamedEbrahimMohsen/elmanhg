@@ -69,6 +69,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Content:QuestionTagsMaxCount"] = "10",
             ["Content:QuestionTagMaxLength"] = "50",
             ["Content:QuestionMaxScoreMax"] = "100",
+            ["Content:QuestionListMaxPageSize"] = "100",
+            ["Content:QuestionFilterMaxLength"] = "200",
             ["FileStorage:Provider"] = "Local",
             ["FileStorage:LocalRootPath"] = MediaRoot,
             ["FileStorage:PublicBaseUrl"] = "/api/media",

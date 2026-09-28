@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using System.Reflection;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -45,7 +46,17 @@ if (isBuildTimeOpenApiGeneration)
 #endregion
 
 builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
-builder.Services.AddOpenApi();
+builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+// Nullable enum use sites already carry null through oneOf; a null member inside the named component would make null a legal value everywhere.
+builder.Services.AddOpenApi(options => options.AddSchemaTransformer((schema, _, _) =>
+{
+    if (schema.Enum is { Count: > 0 } members)
+    {
+        schema.Enum = [.. members.Where(x => x is not null && x.GetValueKind() != JsonValueKind.Null)];
+    }
+
+    return Task.CompletedTask;
+}));
 
 #region IDENTITY
 builder.Services.AddCoreIdentity<User, Guid, Role, AppDbContext>(configuration: builder.Configuration, dbContextOptions: options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnectionString"), npgsql => npgsql.EnableRetryOnFailure()), identityOptions: options => builder.Configuration.GetSection(nameof(IdentityOptions)).Bind(options));

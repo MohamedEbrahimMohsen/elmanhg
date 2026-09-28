@@ -40,4 +40,20 @@ public partial class Question
         UpdatedBy = updatedBy;
         UpdationDate = DateTimeOffset.UtcNow;
     }
+
+    public void Resubmit(QuestionType type, QuestionContent content, QuestionMetadata metadata, Lesson lesson, Guid resubmittedBy)
+    {
+        if (ValidationStatus != QuestionValidationStatus.Rejected)
+        {
+            throw new BusinessRuleViolationCoreException(ErrorCodes.QuestionNotRejected);
+        }
+
+        Update(type, content, metadata, lesson, resubmittedBy);
+        ValidationStatus = QuestionValidationStatus.Pending;
+        RejectionReason = null;
+        ValidatedBy = null;
+        ValidatedAt = null;
+        UpdatedBy = resubmittedBy;
+        UpdationDate = DateTimeOffset.UtcNow;
+    }
 }

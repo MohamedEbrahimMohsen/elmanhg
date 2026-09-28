@@ -122,7 +122,9 @@
       "description": "Image description",
       "insert": "Upload and insert",
       "uploaded": "Image inserted."
-    }
+    },
+    "newQuestion": "New question",
+    "viewQuestions": "Lesson questions"
   },
   "actions": {
     "moveUp": "Move {name} up",

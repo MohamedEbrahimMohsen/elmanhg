@@ -62,4 +62,10 @@ public sealed class ContentOptions
 
     [Range(1, int.MaxValue)]
     public int QuestionMaxScoreMax { get; set; }
+
+    [Range(1, int.MaxValue)]
+    public int QuestionListMaxPageSize { get; set; }
+
+    [Range(1, int.MaxValue)]
+    public int QuestionFilterMaxLength { get; set; }
 }

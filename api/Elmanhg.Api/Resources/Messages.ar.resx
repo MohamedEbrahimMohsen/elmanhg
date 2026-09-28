@@ -171,6 +171,14 @@
   <data name="QUESTION_TYPE_IMMUTABLE" xml:space="preserve"><value>لا يمكن تغيير نوع السؤال. انشئ سؤالا جديدا بدلا من ذلك.</value></data>
   <data name="QUESTION_NOT_PENDING" xml:space="preserve"><value>لا يمكن اعتماد الا سؤال قيد المراجعة.</value></data>
   <data name="QUESTION_VALIDATOR_NOT_ASSIGNED" xml:space="preserve"><value>لا يعتمد اسئلة هذه المادة الا معلم مكلف بها.</value></data>
+  <data name="QUESTION_NOT_REJECTED" xml:space="preserve"><value>لا يمكن اعادة ارسال الا سؤال مرفوض.</value></data>
+  <data name="QUESTION_REJECTION_REASON_REQUIRED" xml:space="preserve"><value>اكتب سبب رفض السؤال.</value></data>
+  <data name="QUESTION_ANSWER_INVALID" xml:space="preserve"><value>الاجابة لا تطابق نوع السؤال.</value></data>
+  <data name="QUESTION_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة يجب ان يكون 1 او اكثر.</value></data>
+  <data name="QUESTION_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة خارج النطاق المسموح.</value></data>
+  <data name="QUESTION_FILTER_TOO_LONG" xml:space="preserve"><value>نص البحث طويل جدا.</value></data>
+  <data name="QUESTION_VERSION_FILTER_INVALID" xml:space="preserve"><value>الاصدار يجب ان يكون 1 او اكثر.</value></data>
+  <data name="QUESTION_STATUS_INVALID" xml:space="preserve"><value>اختر قيد المراجعة او معتمد او مرفوض.</value></data>
   <data name="LESSON_HAS_QUESTIONS" xml:space="preserve"><value>لا يمكن حذف الدرس لانه يحتوي على اسئلة.</value></data>
   <data name="UNIT_HAS_LESSONS" xml:space="preserve"><value>لا يمكن حذف الوحدة لانها تحتوي على دروس.</value></data>
   <data name="CONTENT_ORDER_INVALID" xml:space="preserve"><value>الترتيب يجب ان يكون 1 او اكثر.</value></data>

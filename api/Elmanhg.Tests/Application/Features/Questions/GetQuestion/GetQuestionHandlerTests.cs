@@ -33,6 +33,18 @@ public sealed class GetQuestionHandlerTests
     }
 
     [Fact]
+    public async Task Handle_RejectedQuestion_ReturnsRejectionReason()
+    {
+        var question = new QuestionBuilder().Rejected("Wrong unit").Build();
+        _questionRepository.GetByIdAsync(question.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Question>, IQueryable<Question>>?>(), Arg.Any<bool>()).Returns(question);
+
+        var result = await _handler.Handle(new GetQuestionQuery(question.Id), TestContext.Current.CancellationToken);
+
+        result.RejectionReason.Should().Be("Wrong unit");
+        result.ValidationStatus.Should().Be("Rejected");
+    }
+
+    [Fact]
     public async Task Handle_QuestionNotFound_ThrowsQuestionNotFound()
     {
         var act = () => _handler.Handle(new GetQuestionQuery(Guid.NewGuid()), TestContext.Current.CancellationToken);

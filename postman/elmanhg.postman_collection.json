@@ -289,6 +289,31 @@
       "description": "Admin only (Users.Manage). Set teacherId and subjectId, and sign in as an admin first so accessToken is set.",
       "item": [
         {
+          "name": "List teachers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns an array\", function () { pm.expect(Array.isArray(pm.response.json())).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teachers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "teachers"]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Assign subject",
           "event": [
             {
@@ -894,7 +919,7 @@
     },
     {
       "name": "Questions",
-      "description": "Admin only (Content.Manage). Set unitId (or run Create unit) and sign in as an admin first. Create lesson for questions stores lessonId; Create question stores questionId. Every question is created Pending at version 1; no request carries a status. Body and gradingSpec shapes per type: docs/question-schemas.md. A content edit (stem, body, grading spec, explanation, max score) bumps the version and returns an Approved question to Pending; difficulty, objective and tag edits do not. The type cannot change.",
+      "description": "Admin only (Content.Manage). Set unitId (or run Create unit) and sign in as an admin first. Create lesson for questions stores lessonId; Create question stores questionId. Every question is created Pending at version 1; no request carries a status. Body and gradingSpec shapes per type: docs/question-schemas.md. A content edit (stem, body, grading spec, explanation, max score) bumps the version and returns an Approved question to Pending; difficulty, objective and tag edits do not. The type cannot change. Resubmit question only works on a Rejected question: it applies the edit and returns the question to Pending. The sample question is Pending, so that request expects 400 QUESTION_NOT_REJECTED.",
       "item": [
         {
           "name": "Create lesson for questions",
@@ -1001,6 +1026,96 @@
               "raw": "{{baseUrl}}/api/questions/{{questionId}}",
               "host": ["{{baseUrl}}"],
               "path": ["api", "questions", "{{questionId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"Mcq\",\n  \"stem\": \"<p>3 + 1 = ?</p>\",\n  \"body\": { \"options\": [{ \"id\": \"a\", \"text\": \"3\" }, { \"id\": \"b\", \"text\": \"4\" }] },\n  \"gradingSpec\": { \"correctOptionId\": \"b\" },\n  \"explanation\": \"<p>Add the numbers.</p>\",\n  \"difficulty\": \"Easy\",\n  \"objectiveId\": null,\n  \"tags\": [\"arithmetic\"],\n  \"maxScore\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List questions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"lists the lesson questions\", function () { pm.expect(pm.response.json().items.length).to.be.at.least(1); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/questions?lessonId={{lessonId}}&pageNumber=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "questions"],
+              "query": [
+                { "key": "lessonId", "value": "{{lessonId}}" },
+                { "key": "pageNumber", "value": "1" },
+                { "key": "pageSize", "value": "20" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Grade question draft",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"grades the answer as correct\", function () { pm.expect(pm.response.json().outcome).to.eql(\"Correct\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/questions/grade-draft",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "questions", "grade-draft"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"Mcq\",\n  \"stem\": \"<p>2 + 2 = ?</p>\",\n  \"body\": { \"options\": [{ \"id\": \"a\", \"text\": \"3\" }, { \"id\": \"b\", \"text\": \"4\" }] },\n  \"gradingSpec\": { \"correctOptionId\": \"b\" },\n  \"explanation\": \"<p>Add the numbers.</p>\",\n  \"difficulty\": \"Easy\",\n  \"objectiveId\": null,\n  \"tags\": [\"arithmetic\"],\n  \"maxScore\": 1,\n  \"answer\": { \"optionId\": \"b\" }\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Resubmit question",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"only a rejected question can be resubmitted\", function () { pm.expect(pm.response.json().code).to.eql(\"QUESTION_NOT_REJECTED\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/questions/{{questionId}}/resubmit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "questions", "{{questionId}}", "resubmit"]
             },
             "body": {
               "mode": "raw",

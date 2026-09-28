@@ -1,11 +1,13 @@
 using Core.OTP.Sms;
 using Elmanhg.Application.Shared.RichText;
 using Elmanhg.Application.Shared.Storage;
+using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.Units;
+using Elmanhg.Infrastructure.Identity;
 using Elmanhg.Infrastructure.Lessons;
 using Elmanhg.Infrastructure.Questions;
 using Elmanhg.Infrastructure.RichText;
@@ -38,6 +40,7 @@ public static class DependencyInjection
             _ => throw new InvalidOperationException("Unsupported FileStorage:Provider."),
         });
         services.AddSingleton<IRichTextSanitizer, RichTextSanitizer>();
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ISubjectRepository, SubjectRepository>();
         services.AddScoped<ITeacherSubjectRepository, TeacherSubjectRepository>();
         services.AddScoped<ICurriculumUnitRepository, CurriculumUnitRepository>();

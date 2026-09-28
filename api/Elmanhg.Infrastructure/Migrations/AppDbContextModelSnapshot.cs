@@ -579,6 +579,9 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<Guid?>("ObjectiveId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("text");
+
                     b.Property<string>("Stem")
                         .IsRequired()
                         .HasColumnType("text");

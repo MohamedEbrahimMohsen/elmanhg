@@ -5,4 +5,13 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type QuestionType = number;
+export type QuestionType = typeof QuestionType[keyof typeof QuestionType];
+
+
+export const QuestionType = {
+  Mcq: 'Mcq',
+  Multi: 'Multi',
+  TrueFalse: 'TrueFalse',
+  Fill: 'Fill',
+  Short: 'Short',
+} as const;

@@ -24,6 +24,7 @@ public partial class Question : AuditEntity, IAuditedEntity
     public QuestionValidationStatus ValidationStatus { get; private set; }
     public Guid? ValidatedBy { get; private set; }
     public DateTimeOffset? ValidatedAt { get; private set; }
+    public string? RejectionReason { get; private set; }
     public List<QuestionRevision> Revisions { get; private set; } = [];
 
     public QuestionContent CurrentContent => new(Stem, Body, GradingSpec, Explanation, MaxScore);

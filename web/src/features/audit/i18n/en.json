@@ -39,11 +39,5 @@
   },
   "error": {
     "title": "Could not load the audit log"
-  },
-  "pagination": {
-    "label": "Pagination",
-    "previous": "Previous page",
-    "next": "Next page",
-    "status": "Page {page} of {total}"
   }
 }

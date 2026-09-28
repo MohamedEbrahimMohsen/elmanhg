@@ -1,6 +1,6 @@
 # Question schemas
 
-The storage contract for a question's `Body` and `GradingSpec` (PRD §5.4, §6). The schema records (`Elmanhg.Domain.Questions.Schemas`), the per-type rules (`Elmanhg.Application.Questions.Shared.*QuestionRules`), this document and the web question editor change together.
+The storage contract for a question's `Body` and `GradingSpec` (PRD §5.4, §6). The schema records (`Elmanhg.Domain.Questions.Schemas`), the per-type rules (`Elmanhg.Application.Questions.Shared.*QuestionRules`), the graders (`Elmanhg.Domain.Questions.Grading`), this document and the web question editor change together.
 
 ## Types
 
@@ -122,7 +122,7 @@ A request whose `body` or `gradingSpec` breaks a rule gets `422` with the code b
 
 - **Content** is the stem, body, grading spec, explanation and max score. **Metadata** is difficulty, objective link and tags. The type never changes: changing it returns `400 QUESTION_TYPE_IMMUTABLE`.
 - A question is created at version 1 with a revision snapshot of version 1.
-- Every content edit, in any status, increments `version` and appends a `QuestionRevision` holding the snapshot of the new version. A content edit on an Approved question also returns it to Pending and clears `validatedBy` and `validatedAt`. A Rejected question stays Rejected on edit; resubmission is its own flow.
+- Every content edit, in any status, increments `version` and appends a `QuestionRevision` holding the snapshot of the new version. A content edit on an Approved question also returns it to Pending and clears `validatedBy` and `validatedAt`. A Rejected question stays Rejected on a plain edit (`PUT /api/questions/{id}`); `PUT /api/questions/{id}/resubmit` applies the same edit and returns it to Pending (see Validation status).
 - A metadata-only edit changes neither the status nor the version, and adds no revision. An edit that changes nothing is a no-op.
 - The snapshot (`QuestionRevisionSnapshot`) is jsonb: `{"type","stem","body","gradingSpec","explanation","maxScore"}`, so an attempt's `question_version` always resolves to an exact snapshot.
 - There is no concurrency token yet. An approval must name the version the teacher reviewed, so an edit made while the teacher was reviewing cannot be approved unseen.
@@ -131,6 +131,56 @@ A request whose `body` or `gradingSpec` breaks a rule gets `422` with the code b
 
 - Every question is created Pending. No request, command or endpoint carries a status.
 - The only way to Approved is `Question.Approve(TeacherSubject)`: it needs a live teacher assignment for the question's subject (`QUESTION_VALIDATOR_NOT_ASSIGNED`) and a Pending question (`QUESTION_NOT_PENDING`). A `TeacherSubject` can only be created for a teacher, so an admin cannot approve (PRD §16, §17 rule 3).
+- The only way to Rejected is `Question.Reject(TeacherSubject, reason)`. It checks the same two rules as approval, in the same order (`QUESTION_NOT_PENDING`, then `QUESTION_VALIDATOR_NOT_ASSIGNED`), and then needs a non-blank reason (`QUESTION_REJECTION_REASON_REQUIRED`). It stores the trimmed reason in `rejectionReason`, and `validatedBy`/`validatedAt` record the teacher who decided.
+- `PUT /api/questions/{id}/resubmit` (`Question.Resubmit`) needs a Rejected question (`400 QUESTION_NOT_REJECTED` otherwise). It applies the edit exactly like `PUT /api/questions/{id}` (a content change bumps the version and adds a revision; the type still cannot change), then returns the question to Pending and clears `rejectionReason`, `validatedBy` and `validatedAt`. It does not require a content change. The audit entry `Question.Resubmit` keeps the cleared reason in its diff.
+
+## Answer shapes
+
+A student's answer (and the `answer` of `POST /api/questions/grade-draft`) is a JSON object per type. A missing field means "no answer" and scores 0. An answer that is not a JSON object, or does not read as the type's shape (for example a number where a string is expected), gets `422 QUESTION_ANSWER_INVALID`.
+
+**Mcq**
+
+```json
+{"optionId":"b"}
+```
+
+**Multi**
+
+```json
+{"optionIds":["a","c"]}
+```
+
+**TrueFalse**
+
+```json
+{"value":true}
+```
+
+**Fill**
+
+```json
+{"blanks":[{"id":"1","text":"20"}]}
+```
+
+**Short** (numeric and text alike: the student types a string)
+
+```json
+{"text":"9.8"}
+```
+
+## Grading
+
+The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of the stored grading spec, the max score and the answer. `POST /api/questions/grade-draft` (admin, `Content.Manage`) validates an unsaved draft with the same rules as create and update, canonicalises it, and grades the `answer` with the same graders; it saves nothing and is not audited. Attempts reuse the same graders.
+
+- **Mcq, TrueFalse**: exact match (1 or 0).
+- **Multi**: without `partialCredit`, 1 when the selected set equals the correct set, else 0. With it, `max(0, (right − wrong) / |correct|)`; an unknown id counts as wrong and a repeated id counts once.
+- **Fill**: `hits / blanks`. A blank hits when its normalised answer equals any of its normalised accepted answers.
+- **Short numeric** (the spec has `value`): the answer is parsed as a number and is correct when `|answer − value| ≤ tolerance` (`absolute`) or `≤ |value| × tolerance / 100` (`percent`).
+- **Short text**: the normalised answer must equal one of the normalised accepted answers.
+- An answer that normalises to empty never matches.
+- **Normalisation** (PRD §6.2): strip tashkeel (U+064B–U+065F, U+0670, U+06D6–U+06ED) and tatweel (U+0640); map Arabic-Indic (U+0660–U+0669) and Extended Arabic-Indic (U+06F0–U+06F9) digits to ASCII; when `unifyLetterVariants` is on, map أ إ آ ٱ to ا, ة to ه and ى to ي; collapse whitespace, trim, and lower-case. Numeric answers are normalised with the letter rule off.
+- **Numeric parsing**: after normalisation, `٫` (U+066B) and `,` become `.`, and `−` (U+2212) becomes `-`; the rest must be a plain decimal number (invariant culture). Anything else, such as a trailing unit, does not parse and scores 0.
+- **Result**: the normalised score is in [0, 1]. The outcome is `Correct` (≥ 1), `Partial` (> 0) or `Incorrect`. `score = round(normalised × maxScore, 2)` and `normalisedScore = round(normalised, 4)`, both rounding half away from zero.
 
 ## Changing a schema
 

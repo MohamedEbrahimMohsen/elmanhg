@@ -2,14 +2,14 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui/button';
 
-export interface AuditLogPaginationProps {
+export interface PaginationProps {
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
 }
 
-export function AuditLogPagination({ page, totalPages, onPageChange }: AuditLogPaginationProps) {
-  const { t } = useTranslation('audit');
+export function Pagination({ page, totalPages, onPageChange }: PaginationProps) {
+  const { t } = useTranslation();
 
   return (
     <nav aria-label={t('pagination.label')} className="flex items-center justify-between gap-3">

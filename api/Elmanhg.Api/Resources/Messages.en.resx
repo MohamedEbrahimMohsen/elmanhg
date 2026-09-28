@@ -171,6 +171,14 @@
   <data name="QUESTION_TYPE_IMMUTABLE" xml:space="preserve"><value>A question's type cannot be changed. Create a new question instead.</value></data>
   <data name="QUESTION_NOT_PENDING" xml:space="preserve"><value>Only a pending question can be approved.</value></data>
   <data name="QUESTION_VALIDATOR_NOT_ASSIGNED" xml:space="preserve"><value>Only a teacher assigned to this subject can approve its questions.</value></data>
+  <data name="QUESTION_NOT_REJECTED" xml:space="preserve"><value>Only a rejected question can be resubmitted.</value></data>
+  <data name="QUESTION_REJECTION_REASON_REQUIRED" xml:space="preserve"><value>Enter the reason for rejecting this question.</value></data>
+  <data name="QUESTION_ANSWER_INVALID" xml:space="preserve"><value>The answer does not match the question type.</value></data>
+  <data name="QUESTION_PAGE_NUMBER_INVALID" xml:space="preserve"><value>The page number must be 1 or more.</value></data>
+  <data name="QUESTION_PAGE_SIZE_INVALID" xml:space="preserve"><value>The page size is outside the allowed range.</value></data>
+  <data name="QUESTION_FILTER_TOO_LONG" xml:space="preserve"><value>The search text is too long.</value></data>
+  <data name="QUESTION_VERSION_FILTER_INVALID" xml:space="preserve"><value>The version must be 1 or more.</value></data>
+  <data name="QUESTION_STATUS_INVALID" xml:space="preserve"><value>Choose pending, approved or rejected.</value></data>
   <data name="LESSON_HAS_QUESTIONS" xml:space="preserve"><value>This lesson has questions and cannot be deleted.</value></data>
   <data name="UNIT_HAS_LESSONS" xml:space="preserve"><value>This unit has lessons and cannot be deleted.</value></data>
   <data name="CONTENT_ORDER_INVALID" xml:space="preserve"><value>Order must be 1 or more.</value></data>
