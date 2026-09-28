@@ -32,4 +32,15 @@ public class SessionRepository(AppDbContext context) : Repository<Session>(conte
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
     }
+
+    public async Task<List<UnitExamBestScore>> GetBestUnitExamScoresAsync(Guid studentId, CancellationToken cancellationToken)
+    {
+        return await _dbSet
+            .Where(x => x.StudentId == studentId && x.Kind == SessionKind.UnitExam && !x.IsTestMode && x.SubmittedAt != null && x.ScorePercent != null)
+            .GroupBy(x => x.ScopeKey)
+            .Select(x => new UnitExamBestScore(x.Key, x.Max(session => session.ScorePercent) ?? 0m))
+            .AsNoTracking()
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
 }

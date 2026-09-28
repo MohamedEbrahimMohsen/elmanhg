@@ -14,7 +14,7 @@ All three tables map one to one to PRD §15. Names follow constitution §3 (no a
 | `StudentId` | `student_id` | FK `Users`, restrict |
 | `Kind` | `kind` | `Quiz`, `UnitExam`, `MultiUnitExam`. Only `Quiz` can be started today. |
 | `Scope` | `scope_json` | jsonb. A quiz stores `{"lessonId":"<guid>"}`. |
-| `ScopeKey` | `scope_key` | Canonical string used for resume and uniqueness. A quiz uses `lesson:<guid>`; exams will add `unit:<guid>` and so on. |
+| `ScopeKey` | `scope_key` | Canonical string used for resume and uniqueness. A quiz uses `lesson:<guid>`; exams use `unit:<guid>` through `UnitExamScope` (Domain), already read by progress best scores (#78). |
 | `IsTestMode` | `is_test_mode` | True when an Admin runs the quiz. |
 | `StartedAt` | `started_at` | |
 | `LastActivityAt` | `last_activity_at` | Set at start, on resume, on each attempt and on finish. |
@@ -161,6 +161,8 @@ The app fails to start unless `MinQuizSize <= DefaultQuizSize <= MaxQuizSize`.
 | GET | `/api/sessions/{sessionId}` | — | 200 `SessionResult` |
 | POST | `/api/sessions/{sessionId}/answers` | `{ questionId, answer, timeTakenMilliseconds? }` | 200 `SessionItemResult` |
 | POST | `/api/sessions/{sessionId}/finish` | — | 200 `SessionResult` |
+
+History: `GET /api/progress/sessions` (`docs/progress.md`).
 
 `SessionResult { id, kind, scope, isTestMode, startedAt, submittedAt?, scorePercent?, timeTakenMilliseconds, currentPosition?, items[] }`
 `SessionItemResult { position, questionId, questionVersion, type, stem, body, maxScore, attempt?, correctAnswer?, explanation? }`

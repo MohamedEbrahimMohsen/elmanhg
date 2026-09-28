@@ -151,7 +151,10 @@
     "SESSION_QUESTION_NOT_SERVABLE": "لا يمكن عرض احد الاسئلة حاليا.",
     "SESSION_ALREADY_SUBMITTED": "انتهت هذه الجلسة بالفعل.",
     "SESSION_QUESTION_ALREADY_ANSWERED": "لقد اجبت عن هذا السؤال بالفعل.",
-    "SESSION_MODIFIED_CONCURRENTLY": "تم تعديل هذه الجلسة بواسطة طلب آخر. حاول مرة أخرى."
+    "SESSION_MODIFIED_CONCURRENTLY": "تم تعديل هذه الجلسة بواسطة طلب آخر. حاول مرة أخرى.",
+    "SESSION_HISTORY_PAGE_NUMBER_INVALID": "رقم الصفحة يجب أن يكون ١ أو أكثر.",
+    "SESSION_HISTORY_PAGE_SIZE_INVALID": "حجم الصفحة خارج النطاق المسموح.",
+    "SESSION_HISTORY_KIND_INVALID": "نوع الجلسة غير صالح."
   },
   "error": {
     "title": "حدث خطأ"

@@ -15,4 +15,15 @@ describe('invalidateMastery', () => {
     expect(client.getQueryState(['/api/mastery/subjects/x'])?.isInvalidated).toBe(true);
     expect(client.getQueryState(['/api/sessions/s'])?.isInvalidated).toBe(false);
   });
+
+  it('marks progress queries stale too', async () => {
+    const client = createTestQueryClient();
+    client.setQueryData(['/api/progress/weak-spots'], { lessons: [], objectives: [] });
+    client.setQueryData(['/api/sessions/s'], { id: 's' });
+
+    await invalidateMastery(client);
+
+    expect(client.getQueryState(['/api/progress/weak-spots'])?.isInvalidated).toBe(true);
+    expect(client.getQueryState(['/api/sessions/s'])?.isInvalidated).toBe(false);
+  });
 });

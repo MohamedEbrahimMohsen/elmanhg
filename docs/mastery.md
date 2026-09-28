@@ -1,6 +1,6 @@
 # Mastery and the headline counter
 
-Mastery tells a student how much of the platform they have really learned. It is built from the attempt log (`docs/sessions.md`) and feeds the student home page, and later browsing (#85), progress (#78) and exam selection (E6).
+Mastery tells a student how much of the platform they have really learned. It is built from the attempt log (`docs/sessions.md`) and feeds the student home page, and later browsing (#85), [progress (#78)](progress.md) and exam selection (E6).
 
 ## Definitions
 
@@ -111,6 +111,8 @@ The subject detail lists every unit (order, then creation date) and its Publishe
 ## Access
 
 Both endpoints require `Progress.ViewOwn` (PRD §16), which only Students hold. Admin views of a student's progress come in #106.
+
+The progress endpoints (`docs/progress.md`) use the same policy.
 
 ## Student home (web)
 

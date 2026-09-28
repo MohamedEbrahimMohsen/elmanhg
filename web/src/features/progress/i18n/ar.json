@@ -1,0 +1,64 @@
+{
+  "page": {
+    "title": "تقدّمي"
+  },
+  "summary": {
+    "loading": "جارٍ تحميل ملخّصك…",
+    "errorTitle": "تعذّر تحميل ملخّصك."
+  },
+  "subjects": {
+    "title": "المواد",
+    "loading": "جارٍ تحميل تقدّم المواد…",
+    "errorTitle": "تعذّر تحميل تقدّم المواد.",
+    "empty": "لا توجد مواد بعد.",
+    "mastery": "إتقان {percent, number}٪",
+    "barLabel": "إتقان {name}",
+    "unitsCaption": "وحدات {name}",
+    "unit": "الوحدة",
+    "unitMastery": "الإتقان",
+    "bestExam": "أفضل امتحان",
+    "unitMasteryValue": "{percent, number}٪",
+    "bestExamValue": "{score, number}٪",
+    "noExam": "—"
+  },
+  "weakSpots": {
+    "title": "نقاط الضعف",
+    "loading": "جارٍ تحميل نقاط الضعف…",
+    "errorTitle": "تعذّر تحميل نقاط الضعف.",
+    "empty": "لا توجد بيانات بعد. تدرّب على درس لتظهر نقاط ضعفك.",
+    "lessons": "أضعف الدروس",
+    "objectives": "أضعف الأهداف",
+    "mastery": "إتقان {percent, number}٪",
+    "barLabel": "إتقان {name}",
+    "objectiveLesson": "{lesson} · {subject}",
+    "train": "درّب الآن"
+  },
+  "history": {
+    "title": "سجل الجلسات",
+    "loading": "جارٍ تحميل جلساتك…",
+    "errorTitle": "تعذّر تحميل جلساتك.",
+    "filterLabel": "النوع",
+    "all": "الكل",
+    "quizzes": "تدريبات",
+    "exams": "امتحانات",
+    "caption": "جلساتك، الأحدث أولًا",
+    "date": "التاريخ",
+    "kind": "النوع",
+    "scope": "النطاق",
+    "score": "الدرجة",
+    "actions": "إجراءات",
+    "kindQuiz": "تدريب",
+    "kindUnitExam": "امتحان وحدة",
+    "kindMultiUnitExam": "متعدد الوحدات",
+    "inProgress": "جارٍ",
+    "scoreValue": "{score, number}٪",
+    "unknownScope": "غير متاح",
+    "view": "عرض",
+    "continue": "متابعة",
+    "empty": {
+      "noData": "لا توجد جلسات بعد.",
+      "noResults": "لا توجد جلسات من هذا النوع.",
+      "clear": "عرض الكل"
+    }
+  }
+}

@@ -1703,6 +1703,92 @@
       ]
     },
     {
+      "name": "Progress",
+      "description": "Sign in as a Student. Practise in the Sessions folder first to see progress. kind is Quiz or Exam; remove it for all sessions.",
+      "item": [
+        {
+          "name": "Get subject progress",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns a list\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/progress/subjects",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "progress", "subjects"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get weak spots",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns lessons and objectives\", function () { pm.expect(pm.response.json().lessons).to.be.an(\"array\"); pm.expect(pm.response.json().objectives).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/progress/weak-spots",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "progress", "weak-spots"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get session history",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns a page\", function () { pm.expect(pm.response.json().items).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/progress/sessions?kind=Quiz&pageNumber=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "progress", "sessions"],
+              "query": [
+                { "key": "kind", "value": "Quiz" },
+                { "key": "pageNumber", "value": "1" },
+                { "key": "pageSize", "value": "20" }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "AuditLogs",
       "description": "Admin only (AuditLog.View). Sign in as an admin first so accessToken is set. Enable actor, resourceType, from or to to filter; from is inclusive, to is exclusive, both ISO 8601 with offset.",
       "item": [
