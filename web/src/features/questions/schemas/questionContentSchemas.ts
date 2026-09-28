@@ -13,11 +13,22 @@ export const multiSpecSchema = z.object({
 
 export const trueFalseSpecSchema = z.object({ correctAnswer: z.boolean() });
 
+export const normalizationSchema = z.object({
+  stripTashkeel: z.boolean().optional(),
+  stripTatweel: z.boolean().optional(),
+  unifyAlef: z.boolean().optional(),
+  unifyTaaMarbuta: z.boolean().optional(),
+  unifyAlefMaqsura: z.boolean().optional(),
+  convertDigits: z.boolean().optional(),
+  collapseWhitespace: z.boolean().optional(),
+  foldCase: z.boolean().optional(),
+});
+
 export const fillBodySchema = z.object({ blanks: z.array(z.object({ id: z.string() })) });
 
 export const fillSpecSchema = z.object({
   blanks: z.array(z.object({ id: z.string(), acceptedAnswers: z.array(z.string()) })),
-  unifyLetterVariants: z.boolean().optional(),
+  normalization: normalizationSchema.optional(),
 });
 
 export const shortBodySchema = z.object({ answerKind: z.enum(['numeric', 'text']) });
@@ -30,5 +41,5 @@ export const shortNumericSpecSchema = z.object({
 
 export const shortTextSpecSchema = z.object({
   acceptedAnswers: z.array(z.string()),
-  unifyLetterVariants: z.boolean().optional(),
+  normalization: normalizationSchema.optional(),
 });

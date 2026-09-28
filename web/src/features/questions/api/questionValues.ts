@@ -5,8 +5,23 @@ import type {
   UpdateQuestionRequest,
 } from '@/shared/api/generated/model';
 import type { QuestionValues } from '../schemas/questionEditorSchema';
-import { optionIdAlphabet, toQuestionDifficulty, toQuestionType } from './questionOptions';
+import { type NormalizationRule, optionIdAlphabet, toQuestionDifficulty, toQuestionType } from './questionOptions';
 import * as contentSchemas from '../schemas/questionContentSchemas';
+
+function readNormalization(
+  stored: Partial<Record<NormalizationRule, boolean | undefined>> | undefined,
+): QuestionValues['normalization'] {
+  return {
+    stripTashkeel: stored?.stripTashkeel ?? true,
+    stripTatweel: stored?.stripTatweel ?? true,
+    unifyAlef: stored?.unifyAlef ?? true,
+    unifyTaaMarbuta: stored?.unifyTaaMarbuta ?? true,
+    unifyAlefMaqsura: stored?.unifyAlefMaqsura ?? true,
+    convertDigits: stored?.convertDigits ?? true,
+    collapseWhitespace: stored?.collapseWhitespace ?? true,
+    foldCase: stored?.foldCase ?? true,
+  };
+}
 
 export function emptyQuestionValues(type: QuestionType): QuestionValues {
   return {
@@ -21,7 +36,7 @@ export function emptyQuestionValues(type: QuestionType): QuestionValues {
     partialCredit: false,
     trueFalseAnswer: '',
     blanks: [{ id: '1', acceptedAnswers: '' }],
-    unifyLetterVariants: true,
+    normalization: readNormalization(undefined),
     answerKind: 'numeric',
     numericValue: '',
     tolerance: '0',
@@ -56,7 +71,7 @@ function readFill(body: JsonElement, spec: JsonElement): ContentValues {
   const accepted = (id: string) => parsedSpec.data?.blanks.find((blank) => blank.id === id)?.acceptedAnswers ?? [];
   return {
     blanks: parsedBody.data.blanks.map((blank) => ({ id: blank.id, acceptedAnswers: accepted(blank.id).join('\n') })),
-    unifyLetterVariants: parsedSpec.data?.unifyLetterVariants ?? true,
+    normalization: readNormalization(parsedSpec.data?.normalization),
   };
 }
 
@@ -79,7 +94,7 @@ function readShort(body: JsonElement, spec: JsonElement): ContentValues {
     ...(text.success
       ? {
           acceptedAnswers: text.data.acceptedAnswers.join('\n'),
-          unifyLetterVariants: text.data.unifyLetterVariants ?? true,
+          normalization: readNormalization(text.data.normalization),
         }
       : {}),
   };
@@ -134,7 +149,7 @@ function toContent(values: QuestionValues): Pick<UpdateQuestionRequest, 'body' |
         body: { blanks: values.blanks.map((blank) => ({ id: blank.id })) },
         gradingSpec: {
           blanks: values.blanks.map((blank) => ({ id: blank.id, acceptedAnswers: splitLines(blank.acceptedAnswers) })),
-          unifyLetterVariants: values.unifyLetterVariants,
+          normalization: values.normalization,
         },
       };
     case 'Short':
@@ -151,7 +166,7 @@ function toContent(values: QuestionValues): Pick<UpdateQuestionRequest, 'body' |
             body: { answerKind: 'text' },
             gradingSpec: {
               acceptedAnswers: splitLines(values.acceptedAnswers),
-              unifyLetterVariants: values.unifyLetterVariants,
+              normalization: values.normalization,
             },
           };
   }

@@ -68,6 +68,29 @@ public sealed class QuestionGradeDraftEndpointTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task Post_FillWithTaaMarbutaRuleOff_GradesVariantIncorrect()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var admin = await AdminClientAsync();
+
+        using var response = await admin.PostAsJsonAsync(Route, Draft("Fill", "<p>[[1]]</p>", """{"blanks":[{"id":"1"}]}""", """{"blanks":[{"id":"1","acceptedAnswers":["القاهرة"]}],"normalization":{"unifyTaaMarbuta":false}}""", """{"blanks":[{"id":"1","text":"القاهره"}]}"""), cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        (await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken)).GetProperty("outcome").GetString().Should().Be("Incorrect");
+    }
+
+    [Fact]
+    public async Task Post_NormalizationNotAnObject_Returns422QuestionGradingSpecInvalid()
+    {
+        using var admin = await AdminClientAsync();
+
+        using var response = await admin.PostAsJsonAsync(Route, Draft("Fill", "<p>[[1]]</p>", """{"blanks":[{"id":"1"}]}""", """{"blanks":[{"id":"1","acceptedAnswers":["20"]}],"normalization":"off"}""", """{"blanks":[{"id":"1","text":"20"}]}"""), TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await ReadCodeAsync(response)).Should().Contain("QUESTION_GRADING_SPEC_INVALID");
+    }
+
+    [Fact]
     public async Task Post_Teacher_Returns403()
     {
         var cancellationToken = TestContext.Current.CancellationToken;

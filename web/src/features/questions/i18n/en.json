@@ -108,8 +108,19 @@
       "legend": "Blanks",
       "accepted": "Accepted answers for blank {number} (one per line)",
       "add": "Add blank",
-      "remove": "Remove blank {number}",
-      "unify": "Treat letter variants (أ إ آ، ة ه، ى ي) as the same"
+      "remove": "Remove blank {number}"
+    },
+    "normalization": {
+      "legend": "Answer normalisation",
+      "hint": "Applied to the student's answer and to every accepted answer before they are compared.",
+      "stripTashkeel": "Ignore diacritics (tashkeel)",
+      "stripTatweel": "Ignore tatweel (ـ)",
+      "unifyAlef": "Treat أ إ آ ٱ as ا",
+      "unifyTaaMarbuta": "Treat ة as ه",
+      "unifyAlefMaqsura": "Treat ى as ي",
+      "convertDigits": "Treat Arabic digits (٠–٩) as 0–9",
+      "collapseWhitespace": "Ignore extra spaces",
+      "foldCase": "Ignore Latin letter case"
     },
     "short": {
       "answerKind": "Answer type",

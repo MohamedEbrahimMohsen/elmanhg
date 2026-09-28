@@ -36,7 +36,7 @@ public static class QuestionImportBodies
             .Where(x => x.Answers.Count > 0)
             .ToList();
         var body = new FillBody(blanks.Select(x => new FillBlank(x.Id)).ToList());
-        var spec = new FillGradingSpec(blanks.Select(x => new FillBlankAnswers(x.Id, x.Answers)).ToList(), cells.Boolean(UnifyLetterVariants) ?? true);
+        var spec = new FillGradingSpec(blanks.Select(x => new FillBlankAnswers(x.Id, x.Answers)).ToList(), LetterVariants(cells.Boolean(UnifyLetterVariants) ?? true));
         return (ToJson(body), ToJson(spec));
     }
 
@@ -46,11 +46,13 @@ public static class QuestionImportBodies
         var spec = kind switch
         {
             ShortAnswerKind.Numeric => new ShortGradingSpec(cells.Decimal(Value), cells.Decimal(Tolerance) ?? 0, cells.Enum<ToleranceModeKind>(QuestionImportColumns.ToleranceMode) ?? ToleranceModeKind.Absolute, null, null),
-            ShortAnswerKind.Text => new ShortGradingSpec(null, null, null, cells.List(AcceptedAnswers), cells.Boolean(UnifyLetterVariants) ?? true),
+            ShortAnswerKind.Text => new ShortGradingSpec(null, null, null, cells.List(AcceptedAnswers), LetterVariants(cells.Boolean(UnifyLetterVariants) ?? true)),
             _ => new ShortGradingSpec(null, null, null, null, null),
         };
         return (ToJson(new ShortBody(kind)), ToJson(spec));
     }
+
+    private static AnswerNormalization LetterVariants(bool unify) => new(UnifyAlef: unify, UnifyTaaMarbuta: unify, UnifyAlefMaqsura: unify);
 
     private static JsonElement ToJson<T>(T value) => JsonSerializer.SerializeToElement(value, QuestionJson.SerializerOptions);
 }

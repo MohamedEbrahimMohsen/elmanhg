@@ -227,7 +227,7 @@
   <data name="QUESTION_IMPORT_HELP_PARTIAL_CREDIT" xml:space="preserve"><value>true to give partial credit; false or empty for all or nothing.</value></data>
   <data name="QUESTION_IMPORT_HELP_CORRECT_ANSWER" xml:space="preserve"><value>true or false.</value></data>
   <data name="QUESTION_IMPORT_HELP_BLANK" xml:space="preserve"><value>Accepted answers for the blank with the same number, separated by |.</value></data>
-  <data name="QUESTION_IMPORT_HELP_UNIFY_LETTER_VARIANTS" xml:space="preserve"><value>true or empty to treat أ إ آ ا, ة ه and ى ي as the same letter; false to keep them different.</value></data>
+  <data name="QUESTION_IMPORT_HELP_UNIFY_LETTER_VARIANTS" xml:space="preserve"><value>true or empty to treat أ إ آ ٱ as ا, ة as ه and ى as ي; false to keep them different. The other normalisation rules stay on; change them in the question editor.</value></data>
   <data name="QUESTION_IMPORT_HELP_ANSWER_KIND" xml:space="preserve"><value>numeric for a number answer, text for a word answer.</value></data>
   <data name="QUESTION_IMPORT_HELP_VALUE" xml:space="preserve"><value>Numeric answers: the correct number.</value></data>
   <data name="QUESTION_IMPORT_HELP_TOLERANCE" xml:space="preserve"><value>Numeric answers: allowed difference, 0 or more. Empty means 0.</value></data>

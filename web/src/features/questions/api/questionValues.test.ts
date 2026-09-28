@@ -31,6 +31,17 @@ const detail = (overrides: Partial<QuestionDetailResult>): QuestionDetailResult 
   ...overrides,
 });
 
+const allRulesOn = {
+  stripTashkeel: true,
+  stripTatweel: true,
+  unifyAlef: true,
+  unifyTaaMarbuta: true,
+  unifyAlefMaqsura: true,
+  convertDigits: true,
+  collapseWhitespace: true,
+  foldCase: true,
+};
+
 const choiceBody = {
   options: [
     { id: 'a', text: '<p>Force</p>' },
@@ -69,7 +80,7 @@ const requestCases: [string, Partial<QuestionValues>, object, object][] = [
     'Fill',
     { type: 'Fill', blanks: [{ id: '1', acceptedAnswers: '20\n٢٠' }] },
     { blanks: [{ id: '1' }] },
-    { blanks: [{ id: '1', acceptedAnswers: ['20', '٢٠'] }], unifyLetterVariants: true },
+    { blanks: [{ id: '1', acceptedAnswers: ['20', '٢٠'] }], normalization: allRulesOn },
   ],
   [
     'Short',
@@ -92,13 +103,13 @@ const roundTripCases: QuestionDetailResult[] = [
         { id: '1', acceptedAnswers: ['a'] },
         { id: '2', acceptedAnswers: ['b', 'c'] },
       ],
-      unifyLetterVariants: false,
+      normalization: { ...allRulesOn, unifyAlef: false },
     },
   }),
   detail({
     type: 'Short',
     body: { answerKind: 'text' },
-    gradingSpec: { acceptedAnswers: ['ماء'], unifyLetterVariants: true },
+    gradingSpec: { acceptedAnswers: ['ماء'], normalization: allRulesOn },
   }),
 ];
 
@@ -141,6 +152,30 @@ describe('questionValues', () => {
 
     expect(values.options).toHaveLength(4);
     expect(values.options.every((option) => option.text === '')).toBe(true);
+  });
+
+  it('turns every normalisation rule on for a new question', () => {
+    expect(emptyQuestionValues('Fill').normalization).toEqual(allRulesOn);
+  });
+
+  it('turns missing normalisation rules on when reading a stored spec', () => {
+    const values = toQuestionValues(
+      detail({
+        type: 'Fill',
+        body: { blanks: [{ id: '1' }] },
+        gradingSpec: { blanks: [{ id: '1', acceptedAnswers: ['20'] }], normalization: { foldCase: false } },
+      }),
+    );
+
+    expect(values.normalization).toEqual({ ...allRulesOn, foldCase: false });
+  });
+
+  it('turns every rule on when a stored spec has no normalisation', () => {
+    const values = toQuestionValues(
+      detail({ type: 'Short', body: { answerKind: 'text' }, gradingSpec: { acceptedAnswers: ['ماء'] } }),
+    );
+
+    expect(values.normalization).toEqual(allRulesOn);
   });
 
   it('picks the next free option and blank ids', () => {

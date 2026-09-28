@@ -2,7 +2,7 @@ import { useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { TextField } from '@/shared/form/TextField';
 import type { QuestionValues } from '../schemas/questionEditorSchema';
-import { CheckboxField } from './CheckboxField';
+import { NormalizationRulesField } from './NormalizationRulesField';
 import { SelectField } from './SelectField';
 import { TextAreaField } from './TextAreaField';
 
@@ -36,7 +36,7 @@ export function ShortAnswerFields() {
       ) : (
         <>
           <TextAreaField<QuestionValues> name="acceptedAnswers" label={t('editor.short.accepted')} />
-          <CheckboxField<QuestionValues> name="unifyLetterVariants" label={t('editor.blanks.unify')} />
+          <NormalizationRulesField />
         </>
       )}
     </div>

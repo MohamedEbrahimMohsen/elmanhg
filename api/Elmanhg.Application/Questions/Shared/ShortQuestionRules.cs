@@ -48,7 +48,7 @@ public static class ShortQuestionRules
         var spec = QuestionSchemaReader.Read<ShortGradingSpec>(gradingSpec);
         var normalizedSpec = kind == ShortAnswerKind.Numeric
             ? new ShortGradingSpec(spec.Value, spec.Tolerance, spec.ToleranceMode, null, null)
-            : new ShortGradingSpec(null, null, null, QuestionSchemaReader.TrimAnswers(spec.AcceptedAnswers), spec.UnifyLetterVariants ?? true);
+            : new ShortGradingSpec(null, null, null, QuestionSchemaReader.TrimAnswers(spec.AcceptedAnswers), spec.Normalization ?? AnswerNormalization.Default);
         return (QuestionSchemaReader.Serialize(new ShortBody(kind)), QuestionSchemaReader.Serialize(normalizedSpec));
     }
 }

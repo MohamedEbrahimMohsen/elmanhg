@@ -8,6 +8,7 @@ using Elmanhg.Tests.Builders;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using System.Text.Json;
 
 namespace Elmanhg.Tests.Application.Features.Questions.Shared.Import;
 
@@ -61,7 +62,7 @@ public sealed class QuestionImportParserTests
         fields.Body.GetProperty("blanks").EnumerateArray().Select(x => x.GetProperty("id").GetString()).Should().Equal("1");
         var answers = fields.GradingSpec.GetProperty("blanks")[0];
         answers.GetProperty("acceptedAnswers").EnumerateArray().Select(x => x.GetString()).Should().Equal("20", "٢٠");
-        fields.GradingSpec.GetProperty("unifyLetterVariants").GetBoolean().Should().BeTrue();
+        fields.GradingSpec.GetProperty("normalization").GetProperty("unifyAlef").GetBoolean().Should().BeTrue();
     }
 
     [Fact]
@@ -81,6 +82,22 @@ public sealed class QuestionImportParserTests
         var parse = await ParseAsync(Sheet("Short", ["stem", "answer_kind", "accepted_answers", "difficulty"], ["H2O is?", "text", "ماء", "easy"]));
 
         parse.Rows.Single().Fields.GradingSpec.GetProperty("acceptedAnswers").EnumerateArray().Select(x => x.GetString()).Should().Equal("ماء");
+    }
+
+    [Fact]
+    public async Task ParseAsync_FillRowUnifyFalse_TurnsOffOnlyLetterRules()
+    {
+        var parse = await ParseAsync(Sheet("Fill", ["stem", "blank_1", "unify_letter_variants", "difficulty"], ["v = [[1]] m/s", "20", "false", "easy"]));
+
+        AssertOnlyLetterRulesOff(parse.Rows.Single().Fields.GradingSpec.GetProperty("normalization"));
+    }
+
+    [Fact]
+    public async Task ParseAsync_TextShortRowUnifyFalse_TurnsOffOnlyLetterRules()
+    {
+        var parse = await ParseAsync(Sheet("Short", ["stem", "answer_kind", "accepted_answers", "unify_letter_variants", "difficulty"], ["H2O is?", "text", "ماء", "false", "easy"]));
+
+        AssertOnlyLetterRulesOff(parse.Rows.Single().Fields.GradingSpec.GetProperty("normalization"));
     }
 
     [Fact]
@@ -184,6 +201,15 @@ public sealed class QuestionImportParserTests
         var parse = await ParseAsync(Sheet("Mcq", [.. McqHeaders, "tags"], ["2 + 2 = ?", "3", "4", "b", "medium", $"{tooLong}|{tooLong}x"]));
 
         parse.Errors.Where(x => x.Code == ErrorCodes.QuestionTagTooLong).Should().ContainSingle().Which.Row.Should().Be(2);
+    }
+
+    private static void AssertOnlyLetterRulesOff(JsonElement normalization)
+    {
+        normalization.GetProperty("unifyAlef").GetBoolean().Should().BeFalse();
+        normalization.GetProperty("unifyTaaMarbuta").GetBoolean().Should().BeFalse();
+        normalization.GetProperty("unifyAlefMaqsura").GetBoolean().Should().BeFalse();
+        normalization.GetProperty("stripTashkeel").GetBoolean().Should().BeTrue();
+        normalization.GetProperty("foldCase").GetBoolean().Should().BeTrue();
     }
 
     private Task<QuestionImportParse> ParseAsync(params SpreadsheetSheet[] sheets)

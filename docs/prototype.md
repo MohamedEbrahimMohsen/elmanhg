@@ -39,7 +39,7 @@ All state is saved in `localStorage` under the key `elmanhg.v1`. Click **إعا�
 10. **Admin**:
     - Dashboard cards are computed live and can be filtered by subject and period.
     - Content tree supports CRUD, reordering with ▲▼, and publish/unpublish/archive. Publish "التكامل المحدد" and watch the servable total rise.
-    - Question editor has a live preview and a **جرّب الإجابة** box that runs the real grader. Editing the stem, options or answer of an approved question sends it back to *pending* with version +1. Changing only the difficulty keeps it approved. Rejected questions get **تعديل وإعادة إرسال**.
+    - Question editor has a live preview and a **جرّب الإجابة** box that runs the real grader. Editing the stem, options or answer of an approved question sends it back to *pending* with version +1. Changing only the difficulty keeps it approved. Rejected questions get **تعديل وإعادة إرسال**. Fill-in and text short answers have per-rule answer-normalisation checkboxes, all on by default.
     - Blueprint editor refuses to save when there is a shortfall.
     - Users page: suspend students, grant plans, assign subjects to teachers. The last active admin cannot be deactivated.
     - Audit log.

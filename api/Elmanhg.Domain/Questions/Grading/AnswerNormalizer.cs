@@ -1,49 +1,36 @@
+using Elmanhg.Domain.Questions.Schemas;
 using System.Text;
 
 namespace Elmanhg.Domain.Questions.Grading;
 
 public static class AnswerNormalizer
 {
-    // PRD §6.2 character classes; Unicode code points are fixed invariants.
-    private const char Tatweel = 'ـ';
-    private const char FathatanFirst = 'ً';
-    private const char DiacriticLast = 'ٟ';
-    private const char SuperscriptAlef = 'ٰ';
-    private const char QuranicMarkFirst = 'ۖ';
-    private const char QuranicMarkLast = 'ۭ';
-    private const char ArabicIndicZero = '٠';
-    private const char ArabicIndicNine = '٩';
-    private const char ExtendedZero = '۰';
-    private const char ExtendedNine = '۹';
-    private const char Alef = 'ا';
-    private const char AlefHamzaAbove = 'أ';
-    private const char AlefHamzaBelow = 'إ';
-    private const char AlefMadda = 'آ';
-    private const char AlefWasla = 'ٱ';
-    private const char TaaMarbuta = 'ة';
-    private const char Haa = 'ه';
-    private const char AlefMaqsura = 'ى';
-    private const char Yaa = 'ي';
-
-    public static string Normalize(string? text, bool unifyLetterVariants)
+    public static string Normalize(string? text, AnswerNormalization rules)
     {
         if (string.IsNullOrEmpty(text))
         {
             return string.Empty;
         }
 
-        var builder = new StringBuilder(text.Length);
+        var composed = DropBeforeComposition(text).Normalize(NormalizationForm.FormC);
+        var builder = new StringBuilder(composed.Length);
         var pendingSpace = false;
-        foreach (var character in text)
+        foreach (var character in composed)
         {
-            if (IsDiacritic(character) || character == Tatweel)
+            if (IsDropped(character, rules))
             {
                 continue;
             }
 
             if (char.IsWhiteSpace(character))
             {
-                pendingSpace = builder.Length > 0;
+                if (rules.CollapseWhitespace)
+                {
+                    pendingSpace = builder.Length > 0;
+                    continue;
+                }
+
+                builder.Append(character);
                 continue;
             }
 
@@ -53,27 +40,40 @@ public static class AnswerNormalizer
                 pendingSpace = false;
             }
 
-            builder.Append(char.ToLowerInvariant(Map(character, unifyLetterVariants)));
+            var mapped = ArabicCharacters.Map(character, rules);
+            builder.Append(rules.FoldCase ? char.ToLowerInvariant(mapped) : mapped);
+        }
+
+        return builder.ToString().Trim();
+    }
+
+    private static bool IsDropped(char character, AnswerNormalization rules) => (rules.StripTashkeel && ArabicCharacters.IsTashkeel(character)) || (rules.StripTatweel && character == ArabicCharacters.Tatweel);
+
+    // string.Normalize throws on a lone surrogate and on U+FFFE; a pasted answer must never fail grading.
+    // Invisible controls go before NFC so they cannot keep a letter apart from its combining mark.
+    private static string DropBeforeComposition(string text)
+    {
+        if (!text.Any(character => char.IsSurrogate(character) || IsDroppedBeforeComposition(character)))
+        {
+            return text;
+        }
+
+        var builder = new StringBuilder(text.Length);
+        for (var index = 0; index < text.Length; index++)
+        {
+            if (char.IsHighSurrogate(text[index]) && index + 1 < text.Length && char.IsLowSurrogate(text[index + 1]))
+            {
+                builder.Append(text[index]).Append(text[index + 1]);
+                index++;
+            }
+            else if (!char.IsSurrogate(text[index]) && !IsDroppedBeforeComposition(text[index]))
+            {
+                builder.Append(text[index]);
+            }
         }
 
         return builder.ToString();
     }
 
-    private static bool IsDiacritic(char character)
-    {
-        return character is (>= FathatanFirst and <= DiacriticLast) or SuperscriptAlef or (>= QuranicMarkFirst and <= QuranicMarkLast);
-    }
-
-    private static char Map(char character, bool unifyLetterVariants)
-    {
-        return character switch
-        {
-            >= ArabicIndicZero and <= ArabicIndicNine => (char)('0' + (character - ArabicIndicZero)),
-            >= ExtendedZero and <= ExtendedNine => (char)('0' + (character - ExtendedZero)),
-            AlefHamzaAbove or AlefHamzaBelow or AlefMadda or AlefWasla when unifyLetterVariants => Alef,
-            TaaMarbuta when unifyLetterVariants => Haa,
-            AlefMaqsura when unifyLetterVariants => Yaa,
-            _ => character,
-        };
-    }
+    private static bool IsDroppedBeforeComposition(char character) => character == ArabicCharacters.ByteSwappedBom || ArabicCharacters.IsInvisibleControl(character);
 }

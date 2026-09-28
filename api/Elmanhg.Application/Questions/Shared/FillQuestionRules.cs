@@ -46,7 +46,7 @@ public static class FillQuestionRules
         var answers = blanks
             .Select(b => new FillBlankAnswers(b.Id, QuestionSchemaReader.TrimAnswers(spec.Blanks!.Single(a => a.Id == b.Id).AcceptedAnswers)))
             .ToList();
-        return (QuestionSchemaReader.Serialize(normalizedBody), QuestionSchemaReader.Serialize(new FillGradingSpec(answers, spec.UnifyLetterVariants)));
+        return (QuestionSchemaReader.Serialize(normalizedBody), QuestionSchemaReader.Serialize(new FillGradingSpec(answers, spec.Normalization ?? AnswerNormalization.Default)));
     }
 
     private static int CountOccurrences(string text, string value)

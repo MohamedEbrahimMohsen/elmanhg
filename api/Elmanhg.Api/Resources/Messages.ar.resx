@@ -227,7 +227,7 @@
   <data name="QUESTION_IMPORT_HELP_PARTIAL_CREDIT" xml:space="preserve"><value>true لمنح درجة جزئية، و false او فارغ للدرجة كاملة او صفر.</value></data>
   <data name="QUESTION_IMPORT_HELP_CORRECT_ANSWER" xml:space="preserve"><value>true (صح) او false (خطأ).</value></data>
   <data name="QUESTION_IMPORT_HELP_BLANK" xml:space="preserve"><value>الاجابات المقبولة للفراغ الذي يحمل نفس الرقم، مفصولة بالرمز |.</value></data>
-  <data name="QUESTION_IMPORT_HELP_UNIFY_LETTER_VARIANTS" xml:space="preserve"><value>true او فارغ لاعتبار أ إ آ ا و ة ه و ى ي حرفا واحدا، و false للتفريق بينها.</value></data>
+  <data name="QUESTION_IMPORT_HELP_UNIFY_LETTER_VARIANTS" xml:space="preserve"><value>true او فارغ لاعتبار أ إ آ ٱ مثل ا، و ة مثل ه، و ى مثل ي؛ و false للتفريق بينها. تبقى قواعد التطبيع الأخرى مفعّلة، ويمكن تغييرها من محرر السؤال.</value></data>
   <data name="QUESTION_IMPORT_HELP_ANSWER_KIND" xml:space="preserve"><value>numeric لاجابة رقمية، و text لاجابة نصية.</value></data>
   <data name="QUESTION_IMPORT_HELP_VALUE" xml:space="preserve"><value>للاجابة الرقمية: الرقم الصحيح.</value></data>
   <data name="QUESTION_IMPORT_HELP_TOLERANCE" xml:space="preserve"><value>للاجابة الرقمية: الفرق المسموح، 0 او اكثر. الخانة الفارغة تعني 0.</value></data>

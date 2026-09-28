@@ -175,11 +175,13 @@ Answer shapes and the exact grading rules (normalisation, numeric parsing, round
 
 ### 6.2 Answer normalisation (Arabic)
 
-Applied to fill-in and short-text answers before comparison:
-- Strip tashkeel (diacritics) and tatweel.
-- Unify أ إ آ → ا; ة → ه; ى → ي (configurable per question, default on).
-- Trim and collapse whitespace; case-fold Latin characters.
-- Convert Arabic-Indic digits to ASCII digits.
+Applied to fill-in and short-text answers before comparison.
+
+Each rule can be switched off per question; all are on by default: strip tashkeel; strip tatweel; unify أ إ آ ٱ → ا; ة → ه; ى → ي; convert Arabic-Indic digits to ASCII; collapse whitespace; case-fold Latin characters.
+
+Always applied: removal of invisible bidi and zero-width marks, Unicode NFC, ، → `,`, ی → ي, and trimming.
+
+Numeric answers ignore the per-question rules and must be a plain decimal (`docs/question-schemas.md`).
 
 ---
 

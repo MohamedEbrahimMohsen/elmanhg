@@ -72,6 +72,25 @@ const request = {
   maxScore: 1,
 };
 
+const allRulesOn = {
+  stripTashkeel: true,
+  stripTatweel: true,
+  unifyAlef: true,
+  unifyTaaMarbuta: true,
+  unifyAlefMaqsura: true,
+  convertDigits: true,
+  collapseWhitespace: true,
+  foldCase: true,
+};
+
+const fillQuestion = () =>
+  question({
+    type: 'Fill',
+    stem: '<p>v = [[1]] m/s</p>',
+    body: { blanks: [{ id: '1' }] },
+    gradingSpec: { blanks: [{ id: '1', acceptedAnswers: ['20'] }], normalization: { ...allRulesOn, unifyAlef: false } },
+  });
+
 const openEditor = (lng: 'en' | 'ar' = 'en') =>
   renderApp(`/admin/question/${questionId}`, { session: testSessions.admin, lng });
 
@@ -227,5 +246,55 @@ describe('QuestionEditorPage', () => {
 
     expect(await screen.findByRole('heading', { name: 'تحرير سؤال' })).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('dir', 'rtl');
+  });
+
+  it('shows the stored normalisation rules and saves a changed rule', async () => {
+    server.use(getGetQuestionMockHandler(fillQuestion()));
+    const user = userEvent.setup();
+    openEditor();
+
+    expect(await screen.findByRole('checkbox', { name: 'Treat أ إ آ ٱ as ا' })).not.toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Ignore diacritics (tashkeel)' })).toBeChecked();
+    await user.click(screen.getByRole('checkbox', { name: 'Ignore Latin letter case' }));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect((await screen.findAllByText('Question saved.')).length).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(bodies).toHaveLength(1);
+    });
+    expect((bodies[0] as { gradingSpec: unknown }).gradingSpec).toEqual({
+      blanks: [{ id: '1', acceptedAnswers: ['20'] }],
+      normalization: { ...allRulesOn, unifyAlef: false, foldCase: false },
+    });
+  });
+
+  it('shows the normalisation rules only for a text short answer', async () => {
+    server.use(
+      getGetQuestionMockHandler(
+        question({
+          type: 'Short',
+          stem: '<p>g = ?</p>',
+          body: { answerKind: 'numeric' },
+          gradingSpec: { value: 9.8, tolerance: 0.1, toleranceMode: 'absolute' },
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    openEditor();
+
+    const answerType = await screen.findByLabelText('Answer type');
+    expect(screen.queryByRole('group', { name: 'Answer normalisation' })).not.toBeInTheDocument();
+    await user.selectOptions(answerType, 'Text');
+
+    const group = await screen.findByRole('group', { name: 'Answer normalisation' });
+    expect(within(group).getAllByRole('checkbox')).toHaveLength(8);
+  });
+
+  it('labels the normalisation rules in Arabic', async () => {
+    server.use(getGetQuestionMockHandler(fillQuestion()));
+    openEditor('ar');
+
+    expect(await screen.findByRole('group', { name: 'تطبيع الإجابة' })).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'تجاهل التشكيل' })).toBeInTheDocument();
   });
 });

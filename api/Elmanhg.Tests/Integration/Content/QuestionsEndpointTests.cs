@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using static Elmanhg.Tests.Builders.QuestionBuilder;
 
 namespace Elmanhg.Tests.Integration.Content;
@@ -54,6 +55,24 @@ public sealed class QuestionsEndpointTests(ApiFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var id = (await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken)).GetProperty("id").GetGuid();
         (await QuestionTestData.ReadQuestionAsync(factory, id, cancellationToken)).Type.Should().Be(Enum.Parse<QuestionType>(type));
+    }
+
+    [Fact]
+    public async Task Post_FillWithPartialNormalization_StoresEveryRule()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var (_, lessonId) = await SeedLessonAsync();
+        using var admin = await AdminClientAsync();
+        var expected = JsonNode.Parse("""{"stripTashkeel":true,"stripTatweel":true,"unifyAlef":false,"unifyTaaMarbuta":true,"unifyAlefMaqsura":true,"convertDigits":true,"collapseWhitespace":true,"foldCase":true}""");
+
+        using var response = await admin.PostAsJsonAsync(Route, new { lessonId, type = "Fill", stem = "<p>v = [[1]] m/s</p>", body = Json("""{"blanks":[{"id":"1"}]}"""), gradingSpec = Json("""{"blanks":[{"id":"1","acceptedAnswers":["20"]}],"normalization":{"unifyAlef":false}}"""), difficulty = "Easy", tags = Array.Empty<string>(), maxScore = 1 }, cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var id = (await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken)).GetProperty("id").GetGuid();
+        var question = await QuestionTestData.ReadQuestionAsync(factory, id, cancellationToken);
+        JsonNode.DeepEquals(JsonNode.Parse(question.GradingSpec)!["normalization"], expected).Should().BeTrue();
+        var snapshot = JsonNode.Parse(question.Revisions.Single(x => x.Version == 1).Snapshot)!;
+        JsonNode.DeepEquals(snapshot["gradingSpec"], JsonNode.Parse(question.GradingSpec)).Should().BeTrue();
     }
 
     [Fact]
