@@ -869,6 +869,36 @@
         }
       }
     },
+    "/api/questions/servable-count": {
+      "get": {
+        "tags": [
+          "Questions"
+        ],
+        "operationId": "GetServableQuestionCount",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServableQuestionCountResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServableQuestionCountResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServableQuestionCountResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/questions/{questionId}": {
       "get": {
         "tags": [
@@ -989,6 +1019,30 @@
           },
           "required": true
         },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/questions/{questionId}/retire": {
+      "post": {
+        "tags": [
+          "Questions"
+        ],
+        "operationId": "RetireQuestion",
+        "parameters": [
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -2475,7 +2529,8 @@
           "name",
           "order",
           "state",
-          "questionCount"
+          "questionCount",
+          "servableQuestionCount"
         ],
         "type": "object",
         "properties": {
@@ -2502,6 +2557,14 @@
             "type": "string"
           },
           "questionCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "servableQuestionCount": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": [
               "integer",
@@ -2640,7 +2703,8 @@
           "maxScore",
           "version",
           "validationStatus",
-          "rejectionReason"
+          "rejectionReason",
+          "retiredAt"
         ],
         "type": "object",
         "properties": {
@@ -2711,6 +2775,13 @@
               "null",
               "string"
             ]
+          },
+          "retiredAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
           }
         }
       },
@@ -2863,7 +2934,9 @@
           "validatedBy",
           "teacherName",
           "rejectionReason",
-          "updatedAt"
+          "updatedAt",
+          "retiredAt",
+          "isServable"
         ],
         "type": "object",
         "properties": {
@@ -2924,6 +2997,16 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "retiredAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "isServable": {
+            "type": "boolean"
           }
         }
       },
@@ -2975,6 +3058,22 @@
           },
           "displayName": {
             "type": "string"
+          }
+        }
+      },
+      "ServableQuestionCountResult": {
+        "required": [
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "count": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },

@@ -585,6 +585,9 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<string>("RejectionReason")
                         .HasColumnType("text");
 
+                    b.Property<DateTimeOffset?>("RetiredAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Stem")
                         .IsRequired()
                         .HasColumnType("text");

@@ -54,6 +54,45 @@ public sealed class GetQuestionsHandlerTests
         item.ValidatedBy.Should().BeNull();
     }
 
+    [Fact]
+    public async Task Handle_ApprovedInPublishedLesson_IsServable()
+    {
+        _builder.Lesson.Publish(Guid.NewGuid());
+        ReturnsPage(_builder.Approved().Build());
+
+        var page = await _handler.Handle(new GetQuestionsQuery(null, null, null, null, null, null, null), TestContext.Current.CancellationToken);
+
+        var item = page.Items.Should().ContainSingle().Subject;
+        item.IsServable.Should().BeTrue();
+        item.RetiredAt.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Handle_PendingQuestion_IsListedAndNotServable()
+    {
+        _builder.Lesson.Publish(Guid.NewGuid());
+        ReturnsPage(_builder.Build());
+
+        var page = await _handler.Handle(new GetQuestionsQuery(null, null, null, null, null, null, null), TestContext.Current.CancellationToken);
+
+        var item = page.Items.Should().ContainSingle().Subject;
+        item.IsServable.Should().BeFalse();
+        item.ValidationStatus.Should().Be("Pending");
+    }
+
+    [Fact]
+    public async Task Handle_RetiredQuestion_IsListedWithRetiredAtAndNotServable()
+    {
+        _builder.Lesson.Publish(Guid.NewGuid());
+        ReturnsPage(_builder.Approved().Retired().Build());
+
+        var page = await _handler.Handle(new GetQuestionsQuery(null, null, null, null, null, null, null), TestContext.Current.CancellationToken);
+
+        var item = page.Items.Should().ContainSingle().Subject;
+        item.RetiredAt.Should().NotBeNull();
+        item.IsServable.Should().BeFalse();
+    }
+
     private void ReturnsPage(Question question)
     {
         _questionRepository.FindPaginatedAsync(1, 20, Arg.Any<CancellationToken>(), Arg.Any<Expression<Func<Question, bool>>?>(), Arg.Any<Func<IQueryable<Question>, IQueryable<Question>>?>(), Arg.Any<Func<IQueryable<Question>, IOrderedQueryable<Question>>?>(), true)

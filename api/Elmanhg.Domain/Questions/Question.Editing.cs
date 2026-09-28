@@ -8,6 +8,7 @@ public partial class Question
 {
     public void Update(QuestionType type, QuestionContent content, QuestionMetadata metadata, Lesson lesson, Guid updatedBy)
     {
+        EnsureNotRetired();
         if (type != Type)
         {
             throw new BusinessRuleViolationCoreException(ErrorCodes.QuestionTypeImmutable);
@@ -32,6 +33,7 @@ public partial class Question
                 ValidationStatus = QuestionValidationStatus.Pending;
                 ValidatedBy = null;
                 ValidatedAt = null;
+                RaiseDomainEvent(new QuestionReturnedToPending(Id, LessonId));
             }
 
             Revisions.Add(QuestionRevision.Create(this, updatedBy));
@@ -43,6 +45,7 @@ public partial class Question
 
     public void Resubmit(QuestionType type, QuestionContent content, QuestionMetadata metadata, Lesson lesson, Guid resubmittedBy)
     {
+        EnsureNotRetired();
         if (ValidationStatus != QuestionValidationStatus.Rejected)
         {
             throw new BusinessRuleViolationCoreException(ErrorCodes.QuestionNotRejected);

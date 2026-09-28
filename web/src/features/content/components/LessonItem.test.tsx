@@ -25,9 +25,25 @@ const physics: SubjectDetailResult = {
 };
 
 const lessons: LessonResult[] = [
-  { id: 'l1', unitId: 'u1', name: "Newton's laws", order: 1, state: 'Draft', questionCount: 2 },
-  { id: 'l2', unitId: 'u1', name: 'Momentum', order: 2, state: 'Published', questionCount: 0 },
-  { id: 'l3', unitId: 'u1', name: 'Energy', order: 3, state: 'Archived', questionCount: 1 },
+  {
+    id: 'l1',
+    unitId: 'u1',
+    name: "Newton's laws",
+    order: 1,
+    state: 'Draft',
+    questionCount: 2,
+    servableQuestionCount: 0,
+  },
+  {
+    id: 'l2',
+    unitId: 'u1',
+    name: 'Momentum',
+    order: 2,
+    state: 'Published',
+    questionCount: 0,
+    servableQuestionCount: 0,
+  },
+  { id: 'l3', unitId: 'u1', name: 'Energy', order: 3, state: 'Archived', questionCount: 1, servableQuestionCount: 0 },
 ];
 
 const openTree = async (user: ReturnType<typeof userEvent.setup>, lng: 'en' | 'ar' = 'en') => {

@@ -58,6 +58,7 @@ describe('NewQuestionPage', () => {
         version: 1,
         validationStatus: 'Pending',
         rejectionReason: null,
+        retiredAt: null,
       }),
     );
   });

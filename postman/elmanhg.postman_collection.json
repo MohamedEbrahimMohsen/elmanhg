@@ -1127,6 +1127,56 @@
           "response": []
         },
         {
+          "name": "Get servable question count",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns a non-negative count\", function () { pm.expect(pm.response.json().count).to.be.at.least(0); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/questions/servable-count",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "questions", "servable-count"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Retire question",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/questions/{{questionId}}/retire",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "questions", "{{questionId}}", "retire"]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Download question import template",
           "event": [
             {

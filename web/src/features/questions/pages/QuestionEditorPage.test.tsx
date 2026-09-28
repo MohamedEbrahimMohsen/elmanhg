@@ -51,6 +51,7 @@ const question = (overrides: Partial<QuestionDetailResult> = {}): QuestionDetail
   version: 3,
   validationStatus: 'Approved',
   rejectionReason: null,
+  retiredAt: null,
   ...overrides,
 });
 

@@ -173,6 +173,8 @@
   <data name="QUESTION_VALIDATOR_NOT_ASSIGNED" xml:space="preserve"><value>Only a teacher assigned to this subject can approve its questions.</value></data>
   <data name="QUESTION_NOT_REJECTED" xml:space="preserve"><value>Only a rejected question can be resubmitted.</value></data>
   <data name="QUESTION_REJECTION_REASON_REQUIRED" xml:space="preserve"><value>Enter the reason for rejecting this question.</value></data>
+  <data name="QUESTION_ALREADY_RETIRED" xml:space="preserve"><value>This question is already retired.</value></data>
+  <data name="QUESTION_RETIRED" xml:space="preserve"><value>A retired question cannot be edited or validated.</value></data>
   <data name="QUESTION_ANSWER_INVALID" xml:space="preserve"><value>The answer does not match the question type.</value></data>
   <data name="QUESTION_PAGE_NUMBER_INVALID" xml:space="preserve"><value>The page number must be 1 or more.</value></data>
   <data name="QUESTION_PAGE_SIZE_INVALID" xml:space="preserve"><value>The page size is outside the allowed range.</value></data>

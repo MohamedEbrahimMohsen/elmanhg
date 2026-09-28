@@ -173,6 +173,8 @@
   <data name="QUESTION_VALIDATOR_NOT_ASSIGNED" xml:space="preserve"><value>لا يعتمد اسئلة هذه المادة الا معلم مكلف بها.</value></data>
   <data name="QUESTION_NOT_REJECTED" xml:space="preserve"><value>لا يمكن اعادة ارسال الا سؤال مرفوض.</value></data>
   <data name="QUESTION_REJECTION_REASON_REQUIRED" xml:space="preserve"><value>اكتب سبب رفض السؤال.</value></data>
+  <data name="QUESTION_ALREADY_RETIRED" xml:space="preserve"><value>هذا السؤال متقاعد بالفعل.</value></data>
+  <data name="QUESTION_RETIRED" xml:space="preserve"><value>لا يمكن تعديل سؤال متقاعد او اعتماده.</value></data>
   <data name="QUESTION_ANSWER_INVALID" xml:space="preserve"><value>الاجابة لا تطابق نوع السؤال.</value></data>
   <data name="QUESTION_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة يجب ان يكون 1 او اكثر.</value></data>
   <data name="QUESTION_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة خارج النطاق المسموح.</value></data>

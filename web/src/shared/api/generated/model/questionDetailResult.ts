@@ -26,4 +26,6 @@ export interface QuestionDetailResult {
   validationStatus: string;
   /** @nullable */
   rejectionReason: string | null;
+  /** @nullable */
+  retiredAt: string | null;
 }

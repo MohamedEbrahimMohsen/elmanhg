@@ -48,12 +48,21 @@ export const GetQuestionsResponse = zod.object({
   "validatedBy": zod.uuid().nullable(),
   "teacherName": zod.string().nullable(),
   "rejectionReason": zod.string().nullable(),
-  "updatedAt": zod.iso.datetime({"offset":true})
+  "updatedAt": zod.iso.datetime({"offset":true}),
+  "retiredAt": zod.iso.datetime({"offset":true}).nullable(),
+  "isServable": zod.boolean()
 })).optional(),
   "pageNumber": zod.union([zod.int(),zod.stringFormat('int64', getQuestionsResponsePageNumberRegExpTwo)]).optional(),
   "pageSize": zod.union([zod.int(),zod.stringFormat('int64', getQuestionsResponsePageSizeRegExpTwo)]).optional(),
   "totalItems": zod.union([zod.int(),zod.stringFormat('int64', getQuestionsResponseTotalItemsRegExpTwo)]).optional(),
   "totalPages": zod.union([zod.int(),zod.stringFormat('int64', getQuestionsResponseTotalPagesRegExpTwo)]).optional()
+})
+
+export const getServableQuestionCountResponseCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const GetServableQuestionCountResponse = zod.object({
+  "count": zod.union([zod.int(),zod.stringFormat('int32', getServableQuestionCountResponseCountRegExpTwo)])
 })
 
 export const GetQuestionParams = zod.object({
@@ -79,7 +88,8 @@ export const GetQuestionResponse = zod.object({
   "maxScore": zod.union([zod.int(),zod.stringFormat('int32', getQuestionResponseMaxScoreRegExpTwo)]),
   "version": zod.union([zod.int(),zod.stringFormat('int32', getQuestionResponseVersionRegExpTwo)]),
   "validationStatus": zod.string(),
-  "rejectionReason": zod.string().nullable()
+  "rejectionReason": zod.string().nullable(),
+  "retiredAt": zod.iso.datetime({"offset":true}).nullable()
 })
 
 export const UpdateQuestionParams = zod.object({
@@ -123,6 +133,12 @@ export const ResubmitQuestionBody = zod.object({
 })
 
 export const ResubmitQuestionResponse = zod.unknown()
+
+export const RetireQuestionParams = zod.object({
+  "questionId": zod.uuid()
+})
+
+export const RetireQuestionResponse = zod.unknown()
 
 export const gradeQuestionDraftBodyMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 

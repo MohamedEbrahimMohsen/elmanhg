@@ -27,4 +27,6 @@ public static class ErrorCodes
     public const string QuestionValidatorNotAssigned = "QUESTION_VALIDATOR_NOT_ASSIGNED";
     public const string QuestionNotRejected = "QUESTION_NOT_REJECTED";
     public const string QuestionRejectionReasonRequired = "QUESTION_REJECTION_REASON_REQUIRED";
+    public const string QuestionAlreadyRetired = "QUESTION_ALREADY_RETIRED";
+    public const string QuestionRetired = "QUESTION_RETIRED";
 }

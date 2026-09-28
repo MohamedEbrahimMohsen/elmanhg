@@ -29,6 +29,8 @@ const item = (overrides: Partial<QuestionListItemResult> = {}): QuestionListItem
   teacherName: 'Mona Adel',
   rejectionReason: 'Wrong unit',
   updatedAt: '2026-09-20T10:00:00Z',
+  retiredAt: null,
+  isServable: false,
   ...overrides,
 });
 

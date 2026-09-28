@@ -23,4 +23,7 @@ export interface QuestionListItemResult {
   /** @nullable */
   rejectionReason: string | null;
   updatedAt: string;
+  /** @nullable */
+  retiredAt: string | null;
+  isServable: boolean;
 }

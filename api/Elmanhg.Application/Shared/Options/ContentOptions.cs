@@ -74,4 +74,7 @@ public sealed class ContentOptions
 
     [Range(1, int.MaxValue)]
     public int QuestionImportMaxFileSizeInMb { get; set; }
+
+    [Range(1, 3600)]
+    public int ServableCountCacheSeconds { get; set; } = 60;
 }

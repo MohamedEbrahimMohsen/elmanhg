@@ -14,6 +14,7 @@ public sealed class QuestionBuilder
     private QuestionMetadata? _metadata;
     private bool _approved;
     private string? _rejectionReason;
+    private bool _retired;
 
     public QuestionBuilder()
     {
@@ -50,6 +51,12 @@ public sealed class QuestionBuilder
         return this;
     }
 
+    public QuestionBuilder Retired()
+    {
+        _retired = true;
+        return this;
+    }
+
     public Question Build()
     {
         var question = Question.Create(Lesson, Unit, QuestionType.Mcq, McqContent(), _metadata ?? new QuestionMetadata(QuestionDifficulty.Medium, null, []), Guid.NewGuid());
@@ -61,6 +68,11 @@ public sealed class QuestionBuilder
         if (_rejectionReason is not null)
         {
             question.Reject(TeacherSubject.Create(Teacher, Subject, Guid.NewGuid()), _rejectionReason);
+        }
+
+        if (_retired)
+        {
+            question.Retire(Guid.NewGuid());
         }
 
         return question;
