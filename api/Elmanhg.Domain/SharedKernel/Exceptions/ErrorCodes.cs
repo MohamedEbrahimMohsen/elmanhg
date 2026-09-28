@@ -41,4 +41,8 @@ public static class ErrorCodes
     public const string SessionQuestionDuplicate = "SESSION_QUESTION_DUPLICATE";
     public const string SessionAlreadySubmitted = "SESSION_ALREADY_SUBMITTED";
     public const string SessionQuestionAlreadyAnswered = "SESSION_QUESTION_ALREADY_ANSWERED";
+
+    // EXAM BLUEPRINTS
+    public const string ExamBlueprintShortfall = "EXAM_BLUEPRINT_SHORTFALL";
+    public const string ExamBlueprintDefaultNotDeletable = "EXAM_BLUEPRINT_DEFAULT_NOT_DELETABLE";
 }

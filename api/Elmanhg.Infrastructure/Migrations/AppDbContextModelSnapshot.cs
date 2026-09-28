@@ -311,6 +311,67 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.ToTable("Otps");
                 });
 
+            modelBuilder.Entity("Elmanhg.Domain.ExamBlueprints.ExamBlueprint", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DifficultyMix")
+                        .HasColumnType("jsonb");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("PassMark")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuestionCount")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("SubjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("TimeLimitMinutes")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TypeCounts")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid?>("UnitId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubjectId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ExamBlueprints_SubjectDefault")
+                        .HasFilter("\"UnitId\" IS NULL AND \"IsDeleted\" = false");
+
+                    b.HasIndex("UnitId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ExamBlueprints_UnitId")
+                        .HasFilter("\"UnitId\" IS NOT NULL AND \"IsDeleted\" = false");
+
+                    b.ToTable("ExamBlueprints");
+                });
+
             modelBuilder.Entity("Elmanhg.Domain.Identity.Role", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1406,6 +1467,20 @@ namespace Elmanhg.Infrastructure.Migrations
 
                     b.Navigation("Title")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Elmanhg.Domain.ExamBlueprints.ExamBlueprint", b =>
+                {
+                    b.HasOne("Elmanhg.Domain.Subjects.Subject", null)
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Elmanhg.Domain.Units.CurriculumUnit", null)
+                        .WithMany()
+                        .HasForeignKey("UnitId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Elmanhg.Domain.Lessons.Lesson", b =>

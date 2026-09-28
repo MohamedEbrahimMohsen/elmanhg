@@ -154,7 +154,20 @@
     "SESSION_MODIFIED_CONCURRENTLY": "تم تعديل هذه الجلسة بواسطة طلب آخر. حاول مرة أخرى.",
     "SESSION_HISTORY_PAGE_NUMBER_INVALID": "رقم الصفحة يجب أن يكون ١ أو أكثر.",
     "SESSION_HISTORY_PAGE_SIZE_INVALID": "حجم الصفحة خارج النطاق المسموح.",
-    "SESSION_HISTORY_KIND_INVALID": "نوع الجلسة غير صالح."
+    "SESSION_HISTORY_KIND_INVALID": "نوع الجلسة غير صالح.",
+    "EXAM_BLUEPRINT_SHORTFALL": "لم يتم الحفظ — عدد الأسئلة المتاحة غير كاف لبعض الأنواع.",
+    "EXAM_BLUEPRINT_DEFAULT_NOT_DELETABLE": "لا يمكن حذف النموذج الافتراضي للمادة.",
+    "EXAM_BLUEPRINT_NOT_FOUND": "نموذج الامتحان غير موجود.",
+    "EXAM_BLUEPRINT_ID_REQUIRED": "اختر نموذج الامتحان.",
+    "EXAM_BLUEPRINT_EMPTY": "يجب تحديد سؤال واحد على الأقل.",
+    "EXAM_BLUEPRINT_TOO_LARGE": "عدد أسئلة النموذج أكبر من الحد المسموح.",
+    "EXAM_BLUEPRINT_TYPE_DUPLICATE": "كل نوع يظهر مرة واحدة فقط.",
+    "EXAM_BLUEPRINT_TYPE_COUNT_REQUIRED": "كل صف في أعداد الأنواع مطلوب.",
+    "EXAM_BLUEPRINT_COUNT_INVALID": "عدد الأسئلة غير صالح.",
+    "EXAM_BLUEPRINT_DIFFICULTY_MIX_INVALID": "نسب الصعوبة يجب أن تكون بين 0 و100 ومجموعها 100.",
+    "EXAM_BLUEPRINT_TIME_LIMIT_INVALID": "زمن الامتحان غير صالح.",
+    "EXAM_BLUEPRINT_PASS_MARK_INVALID": "درجة النجاح يجب أن تكون بين 1 و100.",
+    "EXAM_BLUEPRINT_MODIFIED_CONCURRENTLY": "تم تعديل النموذج في نفس الوقت. أعد المحاولة."
   },
   "error": {
     "title": "حدث خطأ"

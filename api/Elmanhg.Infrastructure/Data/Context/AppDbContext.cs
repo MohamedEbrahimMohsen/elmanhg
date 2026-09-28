@@ -2,6 +2,7 @@ using Core.Auditing;
 using Core.EntityFrameworkCore.Context;
 using Core.Errors;
 using Elmanhg.Application.Exceptions;
+using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
@@ -28,6 +29,8 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public const string InProgressSessionIndex = "IX_Sessions_InProgressScope";
     public const string AttemptPerQuestionIndex = "IX_Attempts_SessionId_QuestionId";
     public const string QuestionMasteryPerStudentIndex = "IX_QuestionMasteries_StudentId_QuestionId";
+    public const string SubjectDefaultBlueprintIndex = "IX_ExamBlueprints_SubjectDefault";
+    public const string UnitBlueprintIndex = "IX_ExamBlueprints_UnitId";
 
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<TeacherSubject> TeacherSubjects { get; set; }
@@ -44,6 +47,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public DbSet<SessionItem> SessionItems { get; set; }
     public DbSet<Attempt> Attempts { get; set; }
     public DbSet<QuestionMastery> QuestionMasteries { get; set; }
+    public DbSet<ExamBlueprint> ExamBlueprints { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
@@ -72,6 +76,10 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         {
             throw new ConflictCoreException(ErrorCodes.SessionModifiedConcurrently, innerException: exception);
         }
+        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: SubjectDefaultBlueprintIndex or UnitBlueprintIndex })
+        {
+            throw new ConflictCoreException(ErrorCodes.ExamBlueprintModifiedConcurrently, innerException: exception);
+        }
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -86,6 +94,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         ConfigureReviewSessions(modelBuilder);
         ConfigureSessions(modelBuilder);
         ConfigureQuestionMastery(modelBuilder);
+        ConfigureExamBlueprints(modelBuilder);
         ConfigureTeacherSubjects(modelBuilder);
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
@@ -248,6 +257,19 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         });
     }
 
+    private static void ConfigureExamBlueprints(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ExamBlueprint>(builder =>
+        {
+            builder.Property(x => x.TypeCounts).IsRequired().HasColumnType("jsonb");
+            builder.Property(x => x.DifficultyMix).HasColumnType("jsonb");
+            builder.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<CurriculumUnit>().WithMany().HasForeignKey(x => x.UnitId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => x.SubjectId).IsUnique().HasFilter("\"UnitId\" IS NULL AND \"IsDeleted\" = false").HasDatabaseName(SubjectDefaultBlueprintIndex);
+            builder.HasIndex(x => x.UnitId).IsUnique().HasFilter("\"UnitId\" IS NOT NULL AND \"IsDeleted\" = false").HasDatabaseName(UnitBlueprintIndex);
+        });
+    }
+
     private static void ConfigureTeacherSubjects(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TeacherSubject>(builder =>
@@ -276,5 +298,6 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         modelBuilder.Entity<SessionItem>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<Attempt>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<QuestionMastery>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<ExamBlueprint>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

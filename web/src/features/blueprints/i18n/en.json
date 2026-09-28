@@ -1,0 +1,55 @@
+{
+  "page": {
+    "title": "Exam blueprints",
+    "intro": "A blueprint cannot be saved if any type lacks enough servable questions.",
+    "subject": "Subject",
+    "loading": "Loading exam blueprints",
+    "errorTitle": "Could not load exam blueprints",
+    "subjectsErrorTitle": "Could not load subjects",
+    "noSubjects": "No subjects yet. Add one from the content page.",
+    "goToContent": "Content",
+    "noUnits": "This subject has no units yet."
+  },
+  "editor": {
+    "defaultTitle": "Subject default blueprint",
+    "defaultUnsaved": "No default blueprint saved yet.",
+    "unitTitle": "Unit: {name}",
+    "type": "Type",
+    "required": "Required",
+    "available": "Available",
+    "total": "Total",
+    "countFor": "Required count — {type}",
+    "number": "{value, number}",
+    "timeLimit": "Time limit (minutes)",
+    "timeLimitHint": "Leave empty for no time limit",
+    "passMark": "Pass mark",
+    "mixToggle": "Difficulty mix (optional)",
+    "mixEasy": "Easy %",
+    "mixMedium": "Medium %",
+    "mixHard": "Hard %",
+    "currentShortfall": "Current shortfall:",
+    "unitShortfall": "Current shortfall in this unit:",
+    "shortfallLine": "{type}: required {required, number}, available {available, number} ({missing, number} short)",
+    "save": "Save",
+    "cancel": "Cancel",
+    "usesDefault": "Uses the subject default.",
+    "noDefaultForUnit": "The subject has no default blueprint, so this unit has no exam.",
+    "createForUnit": "Create a unit blueprint",
+    "revert": "Use the subject default",
+    "confirmRevert": "Remove this unit's blueprint? The unit will use the subject default.",
+    "confirm": "Confirm",
+    "errors": {
+      "countInvalid": "Invalid count",
+      "empty": "Choose at least one question",
+      "tooLarge": "More than 100 questions",
+      "timeLimitInvalid": "Invalid time limit",
+      "passMarkInvalid": "Pass mark must be 1–100",
+      "percentInvalid": "Invalid percentage",
+      "mixSum": "Percentages must add up to 100"
+    }
+  },
+  "toasts": {
+    "saved": "Blueprint saved",
+    "deleted": "Unit blueprint removed"
+  }
+}

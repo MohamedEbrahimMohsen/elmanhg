@@ -125,6 +125,19 @@ public static class ErrorCodes
     public const string AttemptAnswerTooLong = "ATTEMPT_ANSWER_TOO_LONG";
     public const string AttemptTimeTakenInvalid = "ATTEMPT_TIME_TAKEN_INVALID";
 
+    // EXAM BLUEPRINTS
+    public const string ExamBlueprintNotFound = "EXAM_BLUEPRINT_NOT_FOUND";
+    public const string ExamBlueprintIdRequired = "EXAM_BLUEPRINT_ID_REQUIRED";
+    public const string ExamBlueprintEmpty = "EXAM_BLUEPRINT_EMPTY";
+    public const string ExamBlueprintTooLarge = "EXAM_BLUEPRINT_TOO_LARGE";
+    public const string ExamBlueprintTypeDuplicate = "EXAM_BLUEPRINT_TYPE_DUPLICATE";
+    public const string ExamBlueprintTypeCountRequired = "EXAM_BLUEPRINT_TYPE_COUNT_REQUIRED";
+    public const string ExamBlueprintCountInvalid = "EXAM_BLUEPRINT_COUNT_INVALID";
+    public const string ExamBlueprintDifficultyMixInvalid = "EXAM_BLUEPRINT_DIFFICULTY_MIX_INVALID";
+    public const string ExamBlueprintTimeLimitInvalid = "EXAM_BLUEPRINT_TIME_LIMIT_INVALID";
+    public const string ExamBlueprintPassMarkInvalid = "EXAM_BLUEPRINT_PASS_MARK_INVALID";
+    public const string ExamBlueprintModifiedConcurrently = "EXAM_BLUEPRINT_MODIFIED_CONCURRENTLY";
+
     // QUESTION IMPORTS
     public const string QuestionImportFileRequired = "QUESTION_IMPORT_FILE_REQUIRED";
     public const string QuestionImportFileTypeInvalid = "QUESTION_IMPORT_FILE_TYPE_INVALID";

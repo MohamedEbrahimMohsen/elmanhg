@@ -154,7 +154,20 @@
     "SESSION_MODIFIED_CONCURRENTLY": "This session was changed by another request. Please try again.",
     "SESSION_HISTORY_PAGE_NUMBER_INVALID": "The page number must be 1 or more.",
     "SESSION_HISTORY_PAGE_SIZE_INVALID": "The page size is out of the allowed range.",
-    "SESSION_HISTORY_KIND_INVALID": "The session type filter is not valid."
+    "SESSION_HISTORY_KIND_INVALID": "The session type filter is not valid.",
+    "EXAM_BLUEPRINT_SHORTFALL": "Not saved: some types do not have enough servable questions.",
+    "EXAM_BLUEPRINT_DEFAULT_NOT_DELETABLE": "The subject's default blueprint cannot be removed.",
+    "EXAM_BLUEPRINT_NOT_FOUND": "Exam blueprint not found.",
+    "EXAM_BLUEPRINT_ID_REQUIRED": "Choose an exam blueprint.",
+    "EXAM_BLUEPRINT_EMPTY": "Choose at least one question.",
+    "EXAM_BLUEPRINT_TOO_LARGE": "The blueprint has more questions than allowed.",
+    "EXAM_BLUEPRINT_TYPE_DUPLICATE": "Each question type can appear only once.",
+    "EXAM_BLUEPRINT_TYPE_COUNT_REQUIRED": "Every type count entry is required.",
+    "EXAM_BLUEPRINT_COUNT_INVALID": "The question count is not valid.",
+    "EXAM_BLUEPRINT_DIFFICULTY_MIX_INVALID": "Difficulty percentages must be 0–100 and add up to 100.",
+    "EXAM_BLUEPRINT_TIME_LIMIT_INVALID": "The time limit is not valid.",
+    "EXAM_BLUEPRINT_PASS_MARK_INVALID": "The pass mark must be between 1 and 100.",
+    "EXAM_BLUEPRINT_MODIFIED_CONCURRENTLY": "The blueprint was changed at the same time. Try again."
   },
   "error": {
     "title": "Something went wrong"

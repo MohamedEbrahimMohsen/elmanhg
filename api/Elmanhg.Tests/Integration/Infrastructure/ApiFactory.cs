@@ -91,6 +91,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Progress:WeakLessonCount"] = "4",
             ["Progress:WeakObjectiveCount"] = "3",
             ["Progress:HistoryMaxPageSize"] = "50",
+            ["ExamBlueprints:MaxQuestionCount"] = "100",
+            ["ExamBlueprints:MaxTimeLimitMinutes"] = "300",
             ["FileStorage:Provider"] = "Local",
             ["FileStorage:LocalRootPath"] = MediaRoot,
             ["FileStorage:PublicBaseUrl"] = "/api/media",

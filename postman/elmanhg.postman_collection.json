@@ -20,7 +20,9 @@
     { "key": "rejectQuestionId", "value": "" },
     { "key": "bulkQuestionId", "value": "" },
     { "key": "sessionId", "value": "" },
-    { "key": "sessionQuestionId", "value": "" }
+    { "key": "sessionQuestionId", "value": "" },
+    { "key": "blueprintSubjectId", "value": "" },
+    { "key": "blueprintUnitId", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -1782,6 +1784,182 @@
                 { "key": "pageNumber", "value": "1" },
                 { "key": "pageSize", "value": "20" }
               ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "ExamBlueprints",
+      "description": "Admin only (Blueprints.Manage). Sign in as an admin first so accessToken is set. The requests create a fresh subject and unit (blueprintSubjectId, blueprintUnitId) with no servable questions, so both saves are refused with EXAM_BLUEPRINT_SHORTFALL. A save is an upsert; only a unit blueprint can be deleted.",
+      "item": [
+        {
+          "name": "Create subject for blueprints",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"blueprintSubjectId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/subjects",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subjects"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Blueprint subject\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create unit for blueprints",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"blueprintUnitId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/subjects/{{blueprintSubjectId}}/units",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subjects", "{{blueprintSubjectId}}", "units"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Blueprint unit\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get subject exam blueprints",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"lists one unit\", function () { pm.expect(pm.response.json().units.length).to.eql(1); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exam-blueprints/subjects/{{blueprintSubjectId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exam-blueprints", "subjects", "{{blueprintSubjectId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Save subject exam blueprint (shortfall)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"code is EXAM_BLUEPRINT_SHORTFALL\", function () { pm.expect(pm.response.json().code).to.eql(\"EXAM_BLUEPRINT_SHORTFALL\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/exam-blueprints/subjects/{{blueprintSubjectId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exam-blueprints", "subjects", "{{blueprintSubjectId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"typeCounts\": [{ \"type\": \"Mcq\", \"count\": 1 }],\n  \"timeLimitMinutes\": 45,\n  \"passMark\": 50\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Save unit exam blueprint (shortfall)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"code is EXAM_BLUEPRINT_SHORTFALL\", function () { pm.expect(pm.response.json().code).to.eql(\"EXAM_BLUEPRINT_SHORTFALL\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/exam-blueprints/units/{{blueprintUnitId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exam-blueprints", "units", "{{blueprintUnitId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"typeCounts\": [{ \"type\": \"Mcq\", \"count\": 1 }],\n  \"timeLimitMinutes\": 45,\n  \"passMark\": 50\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete exam blueprint (unknown)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"code is EXAM_BLUEPRINT_NOT_FOUND\", function () { pm.expect(pm.response.json().code).to.eql(\"EXAM_BLUEPRINT_NOT_FOUND\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exam-blueprints/00000000-0000-0000-0000-000000000001",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exam-blueprints", "00000000-0000-0000-0000-000000000001"]
             }
           },
           "response": []
