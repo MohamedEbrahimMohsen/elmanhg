@@ -16,6 +16,10 @@ export interface QuestionAnswer {
   text: string;
 }
 
+export interface ChoiceReview {
+  correctKeys: readonly string[];
+}
+
 export function emptyAnswer(): QuestionAnswer {
   return { optionIds: [], trueFalse: null, blanks: {}, text: '' };
 }

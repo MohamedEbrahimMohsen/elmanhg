@@ -184,3 +184,13 @@ The app fails to start unless `MinQuizSize <= DefaultQuizSize <= MaxQuizSize`.
 | `SESSION_QUESTION_ALREADY_ANSWERED` | 409 | A different answer for an answered question, or a concurrent first answer. |
 | `SESSION_MODIFIED_CONCURRENTLY` | 409 | A concurrent answer, finish or resume changed the session first; retry. |
 | `LESSON_ID_REQUIRED`, `LESSON_NOT_FOUND`, `QUESTION_ID_REQUIRED`, `QUESTION_NOT_FOUND`, `QUESTION_ANSWER_INVALID`, `USER_NOT_AUTHENTICATED` | 422 / 404 / 422 / 404 / 422 / 401 | Reused codes. |
+
+## Student screens (web)
+
+- Routes: `/student/lesson/{lessonId}/practice` (choose 5, 10 or 20; start or resume), `/student/quiz/{sessionId}` (one question at a time), `/student/quiz-result/{sessionId}` (score out of 100, time, review of answered questions). A finished session opens the result; an open one opens the quiz.
+- Every item arrives with the start (or `GET`) response, so moving to the next question makes no request. The start response is written straight into the query cache, and the images of the next question are preloaded.
+- A refresh opens the lowest unanswered position (`currentPosition`); when every item is answered but the quiz is not finished, it shows the last item and "عرض النتيجة".
+- The correct answer and explanation shown after "تحقّق" come from the submit-answer response (see What is revealed).
+- The client reports `timeTakenMilliseconds` from the moment the question was shown to "تحقّق".
+- "تدريب جديد" starts the smallest of 5/10/20 that is at least the number of questions served.
+- "اسأل المساعد" is shown disabled with "متاح قريبًا" until the AI Avatar (E8) ships.

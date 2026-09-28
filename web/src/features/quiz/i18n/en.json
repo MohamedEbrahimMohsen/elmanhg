@@ -1,0 +1,51 @@
+{
+  "practice": {
+    "title": "Practice",
+    "choose": "How many questions?",
+    "size": "{count, plural, one {# question} other {# questions}}",
+    "resumeHint": "If you have an unfinished practice in this lesson, you will continue where you stopped.",
+    "empty": "This lesson has no practice questions yet."
+  },
+  "session": {
+    "title": "Practice",
+    "loading": "Loading the practice…",
+    "errorTitle": "Could not load the practice.",
+    "counter": "Question {position, number} of {total, number}",
+    "check": "Check",
+    "checking": "Checking…",
+    "finish": "End practice",
+    "next": "Next",
+    "showResult": "See result",
+    "answerRequired": "Answer the question first."
+  },
+  "feedback": {
+    "label": "Answer feedback",
+    "correct": "Correct answer",
+    "partial": "Partially correct",
+    "incorrect": "Wrong answer",
+    "score": "Score {score} / {maxScore}",
+    "correctAnswer": "The correct answer",
+    "explanation": "Explanation",
+    "true": "True",
+    "false": "False",
+    "blank": "Blank {number, number}:",
+    "tolerance": "{value} (± {tolerance})",
+    "tolerancePercent": "{value} (± {tolerance}%)"
+  },
+  "avatar": {
+    "ask": "Ask the assistant",
+    "soon": "The AI assistant is coming soon."
+  },
+  "result": {
+    "title": "Practice result",
+    "loading": "Loading the result…",
+    "errorTitle": "Could not load the result.",
+    "score": "{score, number} / 100",
+    "answered": "Answered {answered, number} of {total, number}",
+    "time": "Time: {minutes, number} min {seconds, number} s",
+    "review": "Question review",
+    "reviewItem": "Question {position, number}",
+    "none": "You did not answer any question in this practice.",
+    "newPractice": "New practice"
+  }
+}

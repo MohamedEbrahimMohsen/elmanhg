@@ -1,12 +1,12 @@
 # Elmanhg — autopilot progress
 
-Last updated: 2026-09-28, cloud session, after story #74 merged (main at `05a8501`).
+Last updated: 2026-09-28, cloud session, after story #75 merged (main at `781a1e2`).
 The laptop run stopped after #64. A Claude Code cloud session continued from #65 (see "Running in a cloud
 session" below). The next story to run is the first row of "Remaining stories".
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (17 of 59)
+## Finished stories (18 of 59)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -27,17 +27,17 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 15 | #71 [E4.S2] Graders for mcq, multi-select, true/false | #161 | 1 | rate-limited (treated as none) | #162 |
 | 16 | #72 [E4.S3] Graders for fill-in-the-blank and short answer | #163 | 2 | 1 comment, fixed (doc) | #164 |
 | 17 | #74 [E5.S1] Attempt log and session model | #165 | 2 | 3 comments, fixed (race fix) | #166 |
+| 18 | #75 [E5.S2] Adaptive question selection | #167 | 1 | rate-limited (treated as none) | #168 |
 
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (42), in run order
+## Remaining stories (41), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
 | Order | Issue | Story |
 |---|---|---|
-| 9 | #75 | [E5.S2] Adaptive question selection |
 | 10 | #76 | [E5.S3] Quiz screen with immediate feedback |
 | 11 | #77 | [E5.S4] Mastery calculation and headline counter |
 | 12 | #78 | [E5.S5] Progress page |
@@ -116,7 +116,7 @@ The flow is `.claude/commands/feature.md`. Every stage is a fresh subagent: `fea
 - **Servable rule (#67):** `ServableQuestionSpecification` in Domain (Approved AND lesson Published AND not retired) is the only definition. Every serving read (quiz, exam, counts) must use it; admin reads stay unfiltered. Retirement is final (`QUESTION_RETIRED`), pending #155. `GET /api/questions/servable-count` is anonymous and cached (`questions:servable-count`, 60 s TTL). It is invalidated by question and lesson domain events, which are published before commit.
 - **Graders already exist (from #65):** the Arabic answer normaliser and deterministic graders for all five v1 types live in `api/Elmanhg.Domain/Questions/Grading/`, with `POST /api/questions/grade-draft`. #70–#72 extend them rather than create them: #70 added 8 per-question normalisation toggles (`normalization` object in the grading spec; a missing value means on) and the always-on Unicode steps. #71 added structured `GradeFeedback` (Domain), localised in Application via `ILocalizer`, and returned as `feedback`. #72 did the same for Fill and Short and made numeric tolerance overflow-safe. `QuestionGrader.Grade` is the single entry point for grading; attempts (#74) must reuse it. Leftovers are in #151 and #160. `Question.Reject` and `Resubmit` exist; #68 adds the teacher approve/reject commands and UI.
 - **Validation (#68):** `Approve`/`Reject` take the reviewed version, and a mismatch returns 409 `QUESTION_VERSION_CHANGED`. There is no concurrency token yet (#158). `QuestionDecision` is the append-only approve/reject history, and `Question.SubmittedAt` drives queue age. Bulk approve requires a server-side `ReviewSession` with a `ReviewSessionOpening` per question at its current version.
-- **Sessions (#74):** `Session` owns `SessionItem`s (the question plus the version served, fixed at start) and append-only `Attempt`s (a DB trigger, like the audit log). `docs/sessions.md` is the contract. Answers are graded against the served `QuestionRevision`. The session has an xmin row version, so a concurrent finish vs answer returns 409 `SESSION_MODIFIED_CONCURRENTLY`. Timestamps are truncated to microseconds in the aggregate. Start resumes the open session for the same lesson. Question selection is random until #75.
+- **Sessions (#74):** `Session` owns `SessionItem`s (the question plus the version served, fixed at start) and append-only `Attempt`s (a DB trigger, like the audit log). `docs/sessions.md` is the contract. Answers are graded against the served `QuestionRevision`. The session has an xmin row version, so a concurrent finish vs answer returns 409 `SESSION_MODIFIED_CONCURRENTLY`. Timestamps are truncated to microseconds in the aggregate. Start resumes the open session for the same lesson. Selection (#75) is `QuestionSelector` in Domain, a pure function with an injected `Random`, using PRD §7.2 buckets. Correct means normalised ≥ `Mastery:CorrectThreshold` (0.8, `MasteryOptions`).
 - **Question content** is jsonb, one schema per type, documented in `docs/question-schemas.md`. A content edit on an Approved question sends it back to Pending, bumps the version, and saves a `QuestionRevision`.
 - **Web:**
   - Every visual value comes from `.claude/design-system.md` tokens (Glass, light only).
@@ -163,4 +163,4 @@ per-story `feature/<n>-<slug>` branches, PRs, and squash-merge on green CI.
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166 · `dev-decision`: #155 (#135 confirmed and closed).
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168 · `dev-decision`: #155 (#135 confirmed and closed).

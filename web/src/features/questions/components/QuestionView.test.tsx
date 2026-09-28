@@ -100,6 +100,50 @@ describe('QuestionView', () => {
     expect(screen.getByText('خطأ')).toBeInTheDocument();
   });
 
+  it('marks the correct option and the wrong chosen option when reviewed', () => {
+    renderWithProviders(
+      <QuestionView
+        question={question({})}
+        answer={{ ...emptyAnswer(), optionIds: ['a'] }}
+        onAnswerChange={() => undefined}
+        disabled
+        review={{ correctKeys: ['b'] }}
+      />,
+    );
+
+    expect(screen.getByRole('radio', { name: /4.*Correct answer/ })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /3.*Your answer, wrong/ })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: '5' })).toBeInTheDocument();
+  });
+
+  it('marks the correct value of a true or false question when reviewed', () => {
+    renderWithProviders(
+      <QuestionView
+        question={question({ type: 'TrueFalse', options: [] })}
+        answer={{ ...emptyAnswer(), trueFalse: false }}
+        onAnswerChange={() => undefined}
+        disabled
+        review={{ correctKeys: ['true'] }}
+      />,
+    );
+
+    expect(screen.getByRole('radio', { name: /True.*Correct answer/ })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /False.*Your answer, wrong/ })).toBeInTheDocument();
+  });
+
+  it('shows no review marks without a review', () => {
+    renderWithProviders(
+      <QuestionView
+        question={question({})}
+        answer={{ ...emptyAnswer(), optionIds: ['a'] }}
+        onAnswerChange={() => undefined}
+      />,
+    );
+
+    expect(screen.queryByText('Correct answer')).not.toBeInTheDocument();
+    expect(screen.queryByText('Your answer, wrong')).not.toBeInTheDocument();
+  });
+
   it('has no axe violations', async () => {
     const { container } = renderView(question({}));
 
