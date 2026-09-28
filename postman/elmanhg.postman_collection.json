@@ -789,30 +789,6 @@
           "response": []
         },
         {
-          "name": "Unpublish lesson",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/lessons/{{lessonId}}/unpublish",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "lessons", "{{lessonId}}", "unpublish"]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "Archive lesson",
           "event": [
             {
@@ -832,6 +808,30 @@
               "raw": "{{baseUrl}}/api/lessons/{{lessonId}}/archive",
               "host": ["{{baseUrl}}"],
               "path": ["api", "lessons", "{{lessonId}}", "archive"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unpublish lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/{{lessonId}}/unpublish",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons", "{{lessonId}}", "unpublish"]
             }
           },
           "response": []
