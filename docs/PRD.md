@@ -245,7 +245,8 @@ The headline counter is shown on Home as "متبقّي لك X سؤال من 100,
 
 ### 7.6 Progress page
 
-- Per subject: mastery %, unit exam best scores, streak (consecutive days with ≥ 1 quiz).
+- Summary: headline counter and day streak (student-wide, shown once: consecutive days with ≥ 1 non-test quiz attempt, `docs/mastery.md`).
+- Per subject: mastery %, unit exam best scores.
 - Weak spots: lowest-mastery lessons and objectives, with a "درّب الآن" shortcut.
 - History: all quiz and exam sessions, filterable.
 

@@ -119,6 +119,9 @@ public static class ErrorCodes
     public const string SessionQuestionNotFound = "SESSION_QUESTION_NOT_FOUND";
     public const string SessionAlreadyInProgress = "SESSION_ALREADY_IN_PROGRESS";
     public const string SessionModifiedConcurrently = "SESSION_MODIFIED_CONCURRENTLY";
+    public const string SessionHistoryPageNumberInvalid = "SESSION_HISTORY_PAGE_NUMBER_INVALID";
+    public const string SessionHistoryPageSizeInvalid = "SESSION_HISTORY_PAGE_SIZE_INVALID";
+    public const string SessionHistoryKindInvalid = "SESSION_HISTORY_KIND_INVALID";
     public const string AttemptAnswerTooLong = "ATTEMPT_ANSWER_TOO_LONG";
     public const string AttemptTimeTakenInvalid = "ATTEMPT_TIME_TAKEN_INVALID";
 

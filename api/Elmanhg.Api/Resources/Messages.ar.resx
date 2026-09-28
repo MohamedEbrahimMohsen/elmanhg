@@ -250,4 +250,7 @@
   <data name="SESSION_ALREADY_SUBMITTED" xml:space="preserve"><value>انتهت هذه الجلسة بالفعل.</value></data>
   <data name="SESSION_QUESTION_ALREADY_ANSWERED" xml:space="preserve"><value>لقد اجبت عن هذا السؤال بالفعل.</value></data>
   <data name="SESSION_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>تم تعديل هذه الجلسة بواسطة طلب آخر. حاول مرة أخرى.</value></data>
+  <data name="SESSION_HISTORY_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة يجب ان يكون 1 او اكثر.</value></data>
+  <data name="SESSION_HISTORY_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة خارج النطاق المسموح.</value></data>
+  <data name="SESSION_HISTORY_KIND_INVALID" xml:space="preserve"><value>نوع الجلسة غير صالح.</value></data>
 </root>

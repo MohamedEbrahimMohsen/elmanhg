@@ -1,0 +1,64 @@
+{
+  "page": {
+    "title": "My progress"
+  },
+  "summary": {
+    "loading": "Loading your summary…",
+    "errorTitle": "Could not load your summary."
+  },
+  "subjects": {
+    "title": "Subjects",
+    "loading": "Loading subject progress…",
+    "errorTitle": "Could not load subject progress.",
+    "empty": "No subjects yet.",
+    "mastery": "{percent, number}% mastered",
+    "barLabel": "{name} mastery",
+    "unitsCaption": "{name} units",
+    "unit": "Unit",
+    "unitMastery": "Mastery",
+    "bestExam": "Best exam",
+    "unitMasteryValue": "{percent, number}%",
+    "bestExamValue": "{score, number}%",
+    "noExam": "—"
+  },
+  "weakSpots": {
+    "title": "Weak spots",
+    "loading": "Loading weak spots…",
+    "errorTitle": "Could not load weak spots.",
+    "empty": "No data yet. Practise a lesson to find your weak spots.",
+    "lessons": "Weakest lessons",
+    "objectives": "Weakest objectives",
+    "mastery": "Mastery {percent, number}%",
+    "barLabel": "{name} mastery",
+    "objectiveLesson": "{lesson} · {subject}",
+    "train": "Train now"
+  },
+  "history": {
+    "title": "Session history",
+    "loading": "Loading your sessions…",
+    "errorTitle": "Could not load your sessions.",
+    "filterLabel": "Type",
+    "all": "All",
+    "quizzes": "Quizzes",
+    "exams": "Exams",
+    "caption": "Your sessions, newest first",
+    "date": "Date",
+    "kind": "Type",
+    "scope": "Scope",
+    "score": "Score",
+    "actions": "Actions",
+    "kindQuiz": "Quiz",
+    "kindUnitExam": "Unit exam",
+    "kindMultiUnitExam": "Multi-unit exam",
+    "inProgress": "In progress",
+    "scoreValue": "{score, number}%",
+    "unknownScope": "Unavailable",
+    "view": "View",
+    "continue": "Continue",
+    "empty": {
+      "noData": "No sessions yet.",
+      "noResults": "No sessions of this type.",
+      "clear": "Show all"
+    }
+  }
+}

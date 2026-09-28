@@ -134,7 +134,7 @@ Every route below exists in `prototype/app.js`. Match its behaviour one to one. 
 - `#/student/quiz/:sessionId` One question at a time, question counter, type and difficulty chips, option list, "تحقّق", immediate feedback with explanation and "اسأل المساعد", "التالي", "إنهاء التدريب". `#/student/quiz-result/:id` score, time, per-question review.
 - `#/student/exam-start/:unitId` blueprint summary, time limit, best score, attempts list. `#/student/exam/:sessionId` sticky timer, all questions, auto-save, no feedback until submit, resume on refresh. `#/student/exam-result/:id` score, pass or fail, per-lesson breakdown, weakest objectives, retake.
 - `#/student/multi-exam` unit multi-select within a subject, size 10 / 20, start.
-- `#/student/progress` per subject mastery, exam best scores, weak lessons with "درّب الآن", session history.
+- `#/student/progress` per subject mastery with a unit table (mastery, best unit-exam score), weak lessons and weak objectives with "درّب الآن", session history filterable by all / quizzes / exams, paged.
 - `#/student/ask` threads list; `#/student/ask-new` and `#/student/ask-new/:context` compose with auto-attached context; `#/student/thread/:id` thread view with one follow-up and 1 to 5 rating.
 - `#/student/subscription` Aurora gradient header, current plan, plan cards, payment log, simulated Paymob modal with success and failure.
 - Assistant panel available on every student screen; refuses to reveal answers while an exam is in progress.

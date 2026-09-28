@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { PlaceholderPage } from '@/features/shell';
+import { ProgressPage, progressSearchSchema } from '@/features/progress';
 
 export const Route = createFileRoute('/student/progress')({
-  component: () => <PlaceholderPage titleKey="nav.student.progress" />,
+  validateSearch: progressSearchSchema,
+  component: ProgressPage,
 });

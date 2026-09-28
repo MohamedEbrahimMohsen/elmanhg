@@ -29,6 +29,26 @@ public sealed class ProgressOptionsTests
         act.Should().Throw<OptionsValidationException>();
     }
 
+    [Fact]
+    public void AddApplication_DefaultProgressOptions_UseWeakSpotAndHistoryDefaults()
+    {
+        using var provider = BuildProvider([]);
+
+        var options = provider.GetRequiredService<IOptions<ProgressOptions>>().Value;
+
+        (options.WeakLessonCount, options.WeakObjectiveCount, options.HistoryMaxPageSize).Should().Be((4, 3, 50));
+    }
+
+    [Fact]
+    public void AddApplication_WeakLessonCountZero_ThrowsOptionsValidationException()
+    {
+        using var provider = BuildProvider(new Dictionary<string, string?> { ["Progress:WeakLessonCount"] = "0" });
+
+        var act = () => provider.GetRequiredService<IOptions<ProgressOptions>>().Value;
+
+        act.Should().Throw<OptionsValidationException>();
+    }
+
     private static ServiceProvider BuildProvider(Dictionary<string, string?> settings)
     {
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(settings).Build();
