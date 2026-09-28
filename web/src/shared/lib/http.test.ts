@@ -56,6 +56,24 @@ describe('http', () => {
     await expect(http('/api/probe')).resolves.toBeUndefined();
   });
 
+  it('returns a Blob for a non-JSON response', async () => {
+    const bytes = new Uint8Array([0x50, 0x4b, 0x03, 0x04, 0x14]);
+    server.use(
+      mswHttp.get(
+        '*/api/probe',
+        () =>
+          new HttpResponse(bytes, {
+            headers: { 'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
+          }),
+      ),
+    );
+
+    const result = await http<Blob>('/api/probe');
+
+    expect(result).toBeInstanceOf(Blob);
+    expect(result.size).toBe(bytes.length);
+  });
+
   it('rethrows an abort without wrapping it', async () => {
     server.use(mswHttp.get('*/api/probe', () => HttpResponse.json({ value: 1 })));
     const controller = new AbortController();

@@ -1,5 +1,6 @@
 using Core.OTP.Sms;
 using Elmanhg.Application.Shared.RichText;
+using Elmanhg.Application.Shared.Spreadsheets;
 using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
@@ -12,6 +13,7 @@ using Elmanhg.Infrastructure.Lessons;
 using Elmanhg.Infrastructure.Questions;
 using Elmanhg.Infrastructure.RichText;
 using Elmanhg.Infrastructure.Sms;
+using Elmanhg.Infrastructure.Spreadsheets;
 using Elmanhg.Infrastructure.Storage;
 using Elmanhg.Infrastructure.Subjects;
 using Elmanhg.Infrastructure.Teachers;
@@ -40,12 +42,15 @@ public static class DependencyInjection
             _ => throw new InvalidOperationException("Unsupported FileStorage:Provider."),
         });
         services.AddSingleton<IRichTextSanitizer, RichTextSanitizer>();
+        services.AddSingleton<ISpreadsheetReader, ClosedXmlSpreadsheetReader>();
+        services.AddSingleton<ISpreadsheetWriter, ClosedXmlSpreadsheetWriter>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ISubjectRepository, SubjectRepository>();
         services.AddScoped<ITeacherSubjectRepository, TeacherSubjectRepository>();
         services.AddScoped<ICurriculumUnitRepository, CurriculumUnitRepository>();
         services.AddScoped<ILessonRepository, LessonRepository>();
         services.AddScoped<IQuestionRepository, QuestionRepository>();
+        services.AddScoped<IQuestionImportBatchRepository, QuestionImportBatchRepository>();
         return services;
     }
 }

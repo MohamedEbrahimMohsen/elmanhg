@@ -230,6 +230,15 @@ describe('LessonEditorPage', () => {
     );
   });
 
+  it('links to the question import page', async () => {
+    openEditor();
+
+    expect(await screen.findByRole('link', { name: 'Import questions' })).toHaveAttribute(
+      'href',
+      '/admin/question/import/l1',
+    );
+  });
+
   it('renders right-to-left in Arabic', async () => {
     openEditor('ar');
 

@@ -60,6 +60,11 @@ export function QuestionListPage() {
               {t('list.newInLesson')}
             </Link>
           </Button>
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/admin/question/import/$lessonId" params={{ lessonId: search.lessonId }}>
+              {t('list.importInLesson')}
+            </Link>
+          </Button>
         </div>
       ) : null}
       <QuestionListFilters

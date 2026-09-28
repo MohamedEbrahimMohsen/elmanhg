@@ -115,7 +115,20 @@
     "QUESTION_PAGE_SIZE_INVALID": "حجم الصفحة خارج النطاق المسموح.",
     "QUESTION_FILTER_TOO_LONG": "نص البحث طويل جدا.",
     "QUESTION_VERSION_FILTER_INVALID": "الاصدار يجب ان يكون 1 او اكثر.",
-    "QUESTION_STATUS_INVALID": "اختر قيد المراجعة او معتمد او مرفوض."
+    "QUESTION_STATUS_INVALID": "اختر قيد المراجعة او معتمد او مرفوض.",
+    "QUESTION_IMPORT_FILE_REQUIRED": "اختر ملف جدول بيانات.",
+    "QUESTION_IMPORT_FILE_TYPE_INVALID": "ارفع ملف إكسل (.xlsx).",
+    "QUESTION_IMPORT_FILE_TOO_LARGE": "حجم الملف كبير جدًا.",
+    "QUESTION_IMPORT_BATCH_ID_REQUIRED": "معرّف دفعة الاستيراد مفقود. افحص الملف مرة أخرى.",
+    "QUESTION_IMPORT_EMPTY": "الملف لا يحتوي على أسئلة. املأ صفًا واحدًا على الأقل تحت أسماء الأعمدة.",
+    "QUESTION_IMPORT_TOO_MANY_ROWS": "الملف يحتوي على أسئلة كثيرة جدًا. قسّمه إلى ملفات أصغر.",
+    "QUESTION_IMPORT_HAS_ERRORS": "الملف به مشكلات. افحصه مرة أخرى وصحّحها قبل الاستيراد.",
+    "QUESTION_IMPORT_BATCH_CONFLICT": "عملية الاستيراد هذه استُخدمت لملف مختلف. افحص الملف مرة أخرى.",
+    "QUESTION_IMPORT_COLUMN_UNKNOWN": "العمود \"{column}\" غير معروف. استخدم أسماء الأعمدة من القالب.",
+    "QUESTION_IMPORT_COLUMN_DUPLICATE": "العمود \"{column}\" مكرر.",
+    "QUESTION_IMPORT_CELL_INVALID": "القيمة في العمود \"{column}\" غير صحيحة.",
+    "QUESTION_IMPORT_OBJECTIVE_INVALID": "رقم الهدف ليس من أهداف هذا الدرس.",
+    "SPREADSHEET_UNREADABLE": "تعذّرت قراءة الملف كجدول إكسل."
   },
   "error": {
     "title": "حدث خطأ"

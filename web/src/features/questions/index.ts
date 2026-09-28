@@ -4,3 +4,4 @@ export { NewQuestionPage } from './pages/NewQuestionPage';
 export { QuestionView } from './components/QuestionView';
 export { questionListSearchSchema, type QuestionListSearch } from './schemas/questionListSearchSchema';
 export { emptyAnswer, type QuestionAnswer, type StudentQuestion } from './api/studentQuestion';
+export { QuestionImportPage } from './pages/QuestionImportPage';

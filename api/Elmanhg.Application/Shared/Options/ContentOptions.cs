@@ -68,4 +68,10 @@ public sealed class ContentOptions
 
     [Range(1, int.MaxValue)]
     public int QuestionFilterMaxLength { get; set; }
+
+    [Range(1, int.MaxValue)]
+    public int QuestionImportMaxRows { get; set; }
+
+    [Range(1, int.MaxValue)]
+    public int QuestionImportMaxFileSizeInMb { get; set; }
 }
