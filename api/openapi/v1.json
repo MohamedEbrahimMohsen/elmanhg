@@ -520,6 +520,139 @@
         }
       }
     },
+    "/api/questions": {
+      "post": {
+        "tags": [
+          "Questions"
+        ],
+        "operationId": "CreateQuestion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQuestionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQuestionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQuestionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateQuestionResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateQuestionResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateQuestionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/questions/{questionId}": {
+      "get": {
+        "tags": [
+          "Questions"
+        ],
+        "operationId": "GetQuestion",
+        "parameters": [
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionDetailResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionDetailResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionDetailResult"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Questions"
+        ],
+        "operationId": "UpdateQuestion",
+        "parameters": [
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateQuestionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateQuestionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateQuestionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/lessons": {
       "get": {
         "tags": [
@@ -1524,6 +1657,102 @@
           }
         }
       },
+      "CreateQuestionRequest": {
+        "required": [
+          "lessonId",
+          "type",
+          "stem",
+          "body",
+          "gradingSpec",
+          "explanation",
+          "difficulty",
+          "objectiveId",
+          "tags",
+          "maxScore"
+        ],
+        "type": "object",
+        "properties": {
+          "lessonId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/QuestionType"
+              }
+            ]
+          },
+          "stem": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "body": {
+            "$ref": "#/components/schemas/JsonElement"
+          },
+          "gradingSpec": {
+            "$ref": "#/components/schemas/JsonElement"
+          },
+          "explanation": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "difficulty": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/QuestionDifficulty"
+              }
+            ]
+          },
+          "objectiveId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "tags": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "maxScore": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "CreateQuestionResult": {
+        "required": [
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
       "CreateSubjectResult": {
         "required": [
           "id"
@@ -1621,6 +1850,7 @@
         "type": "string",
         "format": "binary"
       },
+      "JsonElement": { },
       "LessonDetailResult": {
         "required": [
           "id",
@@ -1743,7 +1973,8 @@
           "unitId",
           "name",
           "order",
-          "state"
+          "state",
+          "questionCount"
         ],
         "type": "object",
         "properties": {
@@ -1768,6 +1999,14 @@
           },
           "state": {
             "type": "string"
+          },
+          "questionCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -1840,6 +2079,95 @@
             "format": "int64"
           }
         }
+      },
+      "QuestionDetailResult": {
+        "required": [
+          "id",
+          "lessonId",
+          "subjectId",
+          "type",
+          "stem",
+          "body",
+          "gradingSpec",
+          "explanation",
+          "difficulty",
+          "objectiveId",
+          "tags",
+          "maxScore",
+          "version",
+          "validationStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lessonId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string"
+          },
+          "stem": {
+            "type": "string"
+          },
+          "body": {
+            "$ref": "#/components/schemas/JsonElement"
+          },
+          "gradingSpec": {
+            "$ref": "#/components/schemas/JsonElement"
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "difficulty": {
+            "type": "string"
+          },
+          "objectiveId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "maxScore": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "validationStatus": {
+            "type": "string"
+          }
+        }
+      },
+      "QuestionDifficulty": {
+        "type": "integer"
+      },
+      "QuestionType": {
+        "type": "integer"
       },
       "RegisterWithEmailCommand": {
         "required": [
@@ -2096,6 +2424,85 @@
           }
         }
       },
+      "UpdateQuestionRequest": {
+        "required": [
+          "type",
+          "stem",
+          "body",
+          "gradingSpec",
+          "explanation",
+          "difficulty",
+          "objectiveId",
+          "tags",
+          "maxScore"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/QuestionType"
+              }
+            ]
+          },
+          "stem": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "body": {
+            "$ref": "#/components/schemas/JsonElement"
+          },
+          "gradingSpec": {
+            "$ref": "#/components/schemas/JsonElement"
+          },
+          "explanation": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "difficulty": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/QuestionDifficulty"
+              }
+            ]
+          },
+          "objectiveId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "tags": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "maxScore": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "UploadLessonImageResult": {
         "required": [
           "url"
@@ -2137,6 +2544,9 @@
     },
     {
       "name": "Subjects"
+    },
+    {
+      "name": "Questions"
     },
     {
       "name": "Lessons"

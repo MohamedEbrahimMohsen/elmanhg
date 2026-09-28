@@ -31,6 +31,7 @@ export function LessonItem({ lesson, isFirst, isLast, position }: LessonItemProp
         </Link>
         <LessonStateBadge state={lesson.state} />
       </div>
+      <p className="text-caption text-text-muted">{t('lessons.questionCount', { count: lesson.questionCount })}</p>
       <div className="flex flex-wrap items-center gap-2">
         <Button
           size="sm"

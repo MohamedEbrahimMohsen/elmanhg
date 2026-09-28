@@ -135,6 +135,43 @@
   <data name="LESSON_IMAGE_REQUIRED" xml:space="preserve"><value>اختر صورة.</value></data>
   <data name="LESSON_IMAGE_TYPE_INVALID" xml:space="preserve"><value>استخدم صورة PNG او JPEG او WebP او GIF.</value></data>
   <data name="LESSON_IMAGE_TOO_LARGE" xml:space="preserve"><value>الصورة كبيرة جدا.</value></data>
+  <data name="QUESTION_NOT_FOUND" xml:space="preserve"><value>السؤال غير موجود.</value></data>
+  <data name="QUESTION_ID_REQUIRED" xml:space="preserve"><value>اختر السؤال.</value></data>
+  <data name="QUESTION_TYPE_REQUIRED" xml:space="preserve"><value>اختر نوع السؤال.</value></data>
+  <data name="QUESTION_TYPE_INVALID" xml:space="preserve"><value>نوع السؤال غير مدعوم.</value></data>
+  <data name="QUESTION_STEM_REQUIRED" xml:space="preserve"><value>اكتب نص السؤال.</value></data>
+  <data name="QUESTION_STEM_TOO_LONG" xml:space="preserve"><value>نص السؤال طويل جدا.</value></data>
+  <data name="QUESTION_EXPLANATION_TOO_LONG" xml:space="preserve"><value>الشرح طويل جدا.</value></data>
+  <data name="QUESTION_DIFFICULTY_REQUIRED" xml:space="preserve"><value>اختر مستوى الصعوبة.</value></data>
+  <data name="QUESTION_DIFFICULTY_INVALID" xml:space="preserve"><value>اختر سهل او متوسط او صعب.</value></data>
+  <data name="QUESTION_MAX_SCORE_REQUIRED" xml:space="preserve"><value>اكتب درجة السؤال.</value></data>
+  <data name="QUESTION_MAX_SCORE_INVALID" xml:space="preserve"><value>الدرجة خارج النطاق المسموح.</value></data>
+  <data name="QUESTION_TAGS_TOO_MANY" xml:space="preserve"><value>عدد وسوم السؤال اكبر من المسموح.</value></data>
+  <data name="QUESTION_TAG_REQUIRED" xml:space="preserve"><value>لا يمكن ان يكون الوسم فارغا.</value></data>
+  <data name="QUESTION_TAG_TOO_LONG" xml:space="preserve"><value>احد الوسوم طويل جدا.</value></data>
+  <data name="QUESTION_BODY_INVALID" xml:space="preserve"><value>محتوى السؤال لا يطابق نوعه.</value></data>
+  <data name="QUESTION_GRADING_SPEC_INVALID" xml:space="preserve"><value>مفتاح الاجابة لا يطابق نوع السؤال.</value></data>
+  <data name="QUESTION_OPTIONS_COUNT_INVALID" xml:space="preserve"><value>اضف خيارين على الاقل وبما لا يتجاوز العدد المسموح.</value></data>
+  <data name="QUESTION_OPTION_ID_INVALID" xml:space="preserve"><value>احد الخيارات له معرف غير صالح.</value></data>
+  <data name="QUESTION_OPTION_ID_DUPLICATE" xml:space="preserve"><value>يوجد خياران بنفس المعرف.</value></data>
+  <data name="QUESTION_OPTION_TEXT_REQUIRED" xml:space="preserve"><value>كل خيار يحتاج الى نص.</value></data>
+  <data name="QUESTION_OPTION_TEXT_TOO_LONG" xml:space="preserve"><value>احد الخيارات طويل جدا.</value></data>
+  <data name="QUESTION_CORRECT_OPTION_INVALID" xml:space="preserve"><value>حدد الاجابة الصحيحة من بين الخيارات.</value></data>
+  <data name="QUESTION_CORRECT_ANSWER_REQUIRED" xml:space="preserve"><value>حدد ما اذا كانت العبارة صحيحة ام خاطئة.</value></data>
+  <data name="QUESTION_BLANKS_COUNT_INVALID" xml:space="preserve"><value>اضف فراغا واحدا على الاقل وبما لا يتجاوز العدد المسموح.</value></data>
+  <data name="QUESTION_BLANK_ID_INVALID" xml:space="preserve"><value>احد الفراغات له معرف غير صالح.</value></data>
+  <data name="QUESTION_BLANK_ID_DUPLICATE" xml:space="preserve"><value>يوجد فراغان بنفس المعرف.</value></data>
+  <data name="QUESTION_BLANK_PLACEHOLDER_MISSING" xml:space="preserve"><value>ضع كل فراغ مرة واحدة فقط في نص السؤال.</value></data>
+  <data name="QUESTION_BLANK_ANSWERS_MISMATCH" xml:space="preserve"><value>اكتب الاجابات المقبولة لكل فراغ ولهذه الفراغات فقط.</value></data>
+  <data name="QUESTION_ACCEPTED_ANSWERS_INVALID" xml:space="preserve"><value>الاجابات المقبولة ناقصة او فارغة او طويلة جدا او كثيرة جدا.</value></data>
+  <data name="QUESTION_ANSWER_KIND_REQUIRED" xml:space="preserve"><value>اختر اجابة رقمية او نصية.</value></data>
+  <data name="QUESTION_NUMERIC_VALUE_REQUIRED" xml:space="preserve"><value>اكتب الرقم الصحيح.</value></data>
+  <data name="QUESTION_TOLERANCE_INVALID" xml:space="preserve"><value>اكتب هامش خطا صفرا او اكثر واختر قيمة مطلقة او نسبة مئوية.</value></data>
+  <data name="QUESTION_OBJECTIVE_NOT_IN_LESSON" xml:space="preserve"><value>هذا الهدف لا ينتمي الى درس السؤال.</value></data>
+  <data name="QUESTION_TYPE_IMMUTABLE" xml:space="preserve"><value>لا يمكن تغيير نوع السؤال. انشئ سؤالا جديدا بدلا من ذلك.</value></data>
+  <data name="QUESTION_NOT_PENDING" xml:space="preserve"><value>لا يمكن اعتماد الا سؤال قيد المراجعة.</value></data>
+  <data name="QUESTION_VALIDATOR_NOT_ASSIGNED" xml:space="preserve"><value>لا يعتمد اسئلة هذه المادة الا معلم مكلف بها.</value></data>
+  <data name="LESSON_HAS_QUESTIONS" xml:space="preserve"><value>لا يمكن حذف الدرس لانه يحتوي على اسئلة.</value></data>
   <data name="UNIT_HAS_LESSONS" xml:space="preserve"><value>لا يمكن حذف الوحدة لانها تحتوي على دروس.</value></data>
   <data name="CONTENT_ORDER_INVALID" xml:space="preserve"><value>الترتيب يجب ان يكون 1 او اكثر.</value></data>
   <data name="USER_NOT_TEACHER" xml:space="preserve"><value>يمكن اسناد المواد الى المعلمين فقط.</value></data>

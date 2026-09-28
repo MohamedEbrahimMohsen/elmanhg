@@ -13,7 +13,8 @@
     { "key": "teacherId", "value": "" },
     { "key": "subjectId", "value": "" },
     { "key": "unitId", "value": "" },
-    { "key": "lessonId", "value": "" }
+    { "key": "lessonId", "value": "" },
+    { "key": "questionId", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -626,7 +627,7 @@
     },
     {
       "name": "Lessons",
-      "description": "Admin only (Content.Manage). Set unitId (or run Create unit) and sign in as an admin first. Create lesson stores lessonId; lessons are created as Draft. Update lesson replaces the whole objectives list: send an existing objective id to keep it, a null id to add one, and leave one out to remove it. Explanation and summary are sanitised HTML (docs/rich-text.md). Upload lesson image returns the public /api/media URL to use in an img tag. Publish, unpublish and archive need Lessons.Publish (Admin). Allowed moves: Draft→Published, Archived→Published, Published/Archived→Draft, Published→Archived. A published lesson cannot be deleted.",
+      "description": "Admin only (Content.Manage). Set unitId (or run Create unit) and sign in as an admin first. Create lesson stores lessonId; lessons are created as Draft. Update lesson replaces the whole objectives list: send an existing objective id to keep it, a null id to add one, and leave one out to remove it. Explanation and summary are sanitised HTML (docs/rich-text.md). Upload lesson image returns the public /api/media URL to use in an img tag. Publish, unpublish and archive need Lessons.Publish (Admin). Allowed moves: Draft→Published, Archived→Published, Published/Archived→Draft, Published→Archived. A published lesson cannot be deleted, and neither can a lesson that has questions.",
       "item": [
         {
           "name": "Get lessons",
@@ -885,6 +886,126 @@
               "raw": "{{baseUrl}}/api/lessons/{{lessonId}}",
               "host": ["{{baseUrl}}"],
               "path": ["api", "lessons", "{{lessonId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Questions",
+      "description": "Admin only (Content.Manage). Set unitId (or run Create unit) and sign in as an admin first. Create lesson for questions stores lessonId; Create question stores questionId. Every question is created Pending at version 1; no request carries a status. Body and gradingSpec shapes per type: docs/question-schemas.md. A content edit (stem, body, grading spec, explanation, max score) bumps the version and returns an Approved question to Pending; difficulty, objective and tag edits do not. The type cannot change.",
+      "item": [
+        {
+          "name": "Create lesson for questions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"lessonId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unitId\": \"{{unitId}}\",\n  \"name\": \"Question bank\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create question",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"questionId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/questions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "questions"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lessonId\": \"{{lessonId}}\",\n  \"type\": \"Mcq\",\n  \"stem\": \"<p>2 + 2 = ?</p>\",\n  \"body\": { \"options\": [{ \"id\": \"a\", \"text\": \"3\" }, { \"id\": \"b\", \"text\": \"4\" }] },\n  \"gradingSpec\": { \"correctOptionId\": \"b\" },\n  \"explanation\": \"<p>Add the numbers.</p>\",\n  \"difficulty\": \"Easy\",\n  \"objectiveId\": null,\n  \"tags\": [\"arithmetic\"],\n  \"maxScore\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get question",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"is pending at version 1\", function () { const body = pm.response.json(); pm.expect(body.validationStatus).to.eql(\"Pending\"); pm.expect(body.version).to.eql(1); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/questions/{{questionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "questions", "{{questionId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update question",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/questions/{{questionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "questions", "{{questionId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"Mcq\",\n  \"stem\": \"<p>3 + 1 = ?</p>\",\n  \"body\": { \"options\": [{ \"id\": \"a\", \"text\": \"3\" }, { \"id\": \"b\", \"text\": \"4\" }] },\n  \"gradingSpec\": { \"correctOptionId\": \"b\" },\n  \"explanation\": \"<p>Add the numbers.</p>\",\n  \"difficulty\": \"Easy\",\n  \"objectiveId\": null,\n  \"tags\": [\"arithmetic\"],\n  \"maxScore\": 1\n}",
+              "options": { "raw": { "language": "json" } }
             }
           },
           "response": []

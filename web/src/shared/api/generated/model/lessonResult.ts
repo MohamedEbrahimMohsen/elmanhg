@@ -12,4 +12,6 @@ export interface LessonResult {
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   order: number | string;
   state: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  questionCount: number | string;
 }

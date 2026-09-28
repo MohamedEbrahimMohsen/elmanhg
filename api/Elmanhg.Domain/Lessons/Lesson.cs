@@ -89,11 +89,16 @@ public partial class Lesson : AuditEntity, IAuditedEntity
         UpdationDate = DateTimeOffset.UtcNow;
     }
 
-    public void Delete(Guid deletedBy)
+    public void Delete(bool hasQuestions, Guid deletedBy)
     {
         if (State == LessonState.Published)
         {
             throw new BusinessRuleViolationCoreException(ErrorCodes.LessonIsPublished);
+        }
+
+        if (hasQuestions)
+        {
+            throw new BusinessRuleViolationCoreException(ErrorCodes.LessonHasQuestions);
         }
 
         foreach (var objective in Objectives)

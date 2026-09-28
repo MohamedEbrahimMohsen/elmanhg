@@ -175,7 +175,7 @@ public sealed class LessonLifecycleTests
         var lesson = NewLesson();
         lesson.Update("Newton's laws", string.Empty, string.Empty, null, [new LessonObjectiveContent(null, "First"), new LessonObjectiveContent(null, "Second")], _createdBy);
 
-        lesson.Delete(_actor);
+        lesson.Delete(false, _actor);
 
         lesson.IsDeleted.Should().BeTrue();
         lesson.UpdatedBy.Should().Be(_actor);
@@ -189,7 +189,7 @@ public sealed class LessonLifecycleTests
         lesson.Publish(_createdBy);
         lesson.Archive(_createdBy);
 
-        lesson.Delete(_actor);
+        lesson.Delete(false, _actor);
 
         lesson.IsDeleted.Should().BeTrue();
     }
@@ -200,9 +200,20 @@ public sealed class LessonLifecycleTests
         var lesson = NewLesson();
         lesson.Publish(_createdBy);
 
-        var act = () => lesson.Delete(_actor);
+        var act = () => lesson.Delete(false, _actor);
 
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.LessonIsPublished);
+        lesson.IsDeleted.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Delete_HasQuestions_ThrowsLessonHasQuestions()
+    {
+        var lesson = NewLesson();
+
+        var act = () => lesson.Delete(true, _actor);
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.LessonHasQuestions);
         lesson.IsDeleted.Should().BeFalse();
     }
 

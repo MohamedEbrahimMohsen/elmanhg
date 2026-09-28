@@ -2,11 +2,12 @@ using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Lessons;
+using Elmanhg.Domain.Questions;
 using MediatR;
 
 namespace Elmanhg.Application.Lessons.DeleteLesson;
 
-public sealed class DeleteLessonHandler(ILessonRepository lessonRepository, ICurrentUserService currentUserService) : IRequestHandler<DeleteLessonCommand>
+public sealed class DeleteLessonHandler(ILessonRepository lessonRepository, IQuestionRepository questionRepository, ICurrentUserService currentUserService) : IRequestHandler<DeleteLessonCommand>
 {
     public async Task Handle(DeleteLessonCommand request, CancellationToken cancellationToken)
     {
@@ -21,7 +22,8 @@ public sealed class DeleteLessonHandler(ILessonRepository lessonRepository, ICur
             throw new NotFoundCoreException(ErrorCodes.LessonNotFound);
         }
 
-        lesson.Delete(currentUserService.UserId.Value);
+        var hasQuestions = await questionRepository.AnyInLessonAsync(lesson.Id, cancellationToken).ConfigureAwait(false);
+        lesson.Delete(hasQuestions, currentUserService.UserId.Value);
 
         await lessonRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }

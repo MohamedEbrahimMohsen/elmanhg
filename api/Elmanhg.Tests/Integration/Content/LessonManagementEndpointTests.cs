@@ -101,6 +101,21 @@ public sealed class LessonManagementEndpointTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task Delete_LessonWithQuestions_Returns400LessonHasQuestions()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var lessonId = await SeedLessonAsync(LessonState.Draft);
+        await QuestionTestData.SeedQuestionAsync(factory, lessonId, approved: false, cancellationToken);
+        using var admin = await AdminClientAsync();
+
+        using var response = await admin.DeleteAsync($"{Route}/{lessonId}", cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await ReadCodeAsync(response)).Should().Be("LESSON_HAS_QUESTIONS");
+        (await ContentTestData.ReadLessonAsync(factory, lessonId, cancellationToken)).IsDeleted.Should().BeFalse();
+    }
+
+    [Fact]
     public async Task Delete_UnknownLesson_Returns404LessonNotFound()
     {
         using var admin = await AdminClientAsync();

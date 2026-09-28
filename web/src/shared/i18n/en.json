@@ -70,6 +70,7 @@
     "LESSON_ALREADY_ARCHIVED": "This lesson is already archived.",
     "LESSON_NOT_PUBLISHED": "Only a published lesson can be archived. Delete a draft instead.",
     "LESSON_IS_PUBLISHED": "Move this lesson to draft or archive it before deleting it.",
+    "LESSON_HAS_QUESTIONS": "This lesson has questions and cannot be deleted.",
     "LESSON_POSITION_INVALID": "Position must be 1 or more."
   },
   "error": {

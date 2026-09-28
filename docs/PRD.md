@@ -113,7 +113,7 @@ Subject (e.g. Physics)
 
 Only Admin publishes. Teachers do not publish lessons; they validate questions.
 
-Transitions: **Publish** Draft or Archived → Published (sets `published_at`). **Unpublish** Published or Archived → Draft. **Archive** Published → Archived. A draft is deleted, not archived. A published lesson cannot be deleted; move it to draft or archive it first. Entering or leaving Published raises `LessonPublished`, `LessonUnpublished` or `LessonArchived`; servable and mastery recalculation subscribe to these. Every lesson read that a Student or Teacher can reach returns Published lessons only.
+Transitions: **Publish** Draft or Archived → Published (sets `published_at`). **Unpublish** Published or Archived → Draft. **Archive** Published → Archived. A draft is deleted, not archived. A published lesson cannot be deleted; move it to draft or archive it first. A lesson that has questions cannot be deleted. Entering or leaving Published raises `LessonPublished`, `LessonUnpublished` or `LessonArchived`; servable and mastery recalculation subscribe to these. Every lesson read that a Student or Teacher can reach returns Published lessons only.
 
 ### 5.3 Question states
 
@@ -125,7 +125,7 @@ Transitions: **Publish** Draft or Archived → Published (sets `published_at`). 
 Rules:
 - A question is created as Pending. Only a Teacher assigned to the question's subject can Approve or Reject.
 - Rejection requires a reason. Admin sees the reason and may edit and resubmit.
-- **Any edit to an Approved question's content (stem, options, correct answer, grading spec) resets it to Pending.** Edits to tags/difficulty alone do not.
+- **Any edit to an Approved question's content resets it to Pending.** Content is the stem, body (options, blanks), grading spec, explanation and max score. Edits to difficulty, objective link or tags alone change neither the status nor the version. Every content edit, in any status, increments `version` and writes a `QuestionRevision` snapshot of the new version; version 1 is snapshotted at creation. The type of a question never changes.
 - Approved questions on an unpublished lesson wait silently; the moment the lesson is Published they become servable with no further action.
 - Retiring a question removes it from future quizzes but preserves all historical attempts.
 
@@ -162,6 +162,8 @@ Every answer produces a **score in [0, max_score]** and a **normalised score in 
 | Essay | v2 | Rich text | LLM grader with rubric (criteria + weights) and model answer. Returns score per criterion + justification. | Yes |
 | Math with steps | v2 | Ordered list of steps (LaTeX/text) + final answer | Final answer: CAS equivalence check (SymPy). Steps: LLM against model solution, per-step credit. | Yes |
 | Science drag-and-drop | v2 | Map of item → drop zone | Deterministic: each item's zone vs correct zone; optional order constraints | Per item |
+
+Per-type `body` and `grading_spec` JSON shapes: `docs/question-schemas.md`.
 
 ### 6.1 AI grading rules (v2)
 
@@ -426,7 +428,7 @@ Lesson(id, unit_id, name, order, state[Draft|Published|Archived],
        explanation, summary, video_url?, published_at)
 LessonObjective(id, lesson_id, text, order)
 
-Question(id, lesson_id, subject_id, type, stem, difficulty, objective_id?,
+Question(id, lesson_id, subject_id, type, stem, difficulty, objective_id?, tags[],
          body_json, grading_spec_json, explanation, max_score, version,
          validation_status, validated_by?, validated_at?, rejection_reason?,
          retired_at?)

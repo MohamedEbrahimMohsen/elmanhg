@@ -51,7 +51,8 @@
     "published": "تم نشر الدرس.",
     "unpublished": "تمت إعادة الدرس إلى مسودة.",
     "archived": "تمت أرشفة الدرس.",
-    "deleted": "تم حذف الدرس."
+    "deleted": "تم حذف الدرس.",
+    "questionCount": "{count, plural, zero {لا أسئلة} one {سؤال واحد} two {سؤالان} few {# أسئلة} many {# سؤالًا} other {# سؤال}}"
   },
   "lessonActions": {
     "label": "إجراءات {name}",

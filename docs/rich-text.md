@@ -1,10 +1,10 @@
 # Rich text format
 
-The storage and rendering contract for lesson rich text (`Lesson.Explanation` and `Lesson.Summary`). The sanitiser allow-list (`RichTextSanitizer`), the editor extensions (`RichTextEditor`) and this document change together.
+The storage and rendering contract for lesson rich text (`Lesson.Explanation` and `Lesson.Summary`) and question rich text (`Question.Stem`, `Question.Explanation` and each choice option `text` inside `Question.Body`). The sanitiser allow-list (`RichTextSanitizer`), the editor extensions (`RichTextEditor`) and this document change together.
 
 ## Storage
 
-Lesson explanation and summary are stored as **sanitised HTML** in the `text` columns `Lessons.Explanation` and `Lessons.Summary`. The HTML is the TipTap `editor.getHTML()` output of the admin lesson editor, sanitised on the server before it is saved. An empty field is stored as an empty string.
+Lesson explanation and summary are stored as **sanitised HTML** in the `text` columns `Lessons.Explanation` and `Lessons.Summary`. The HTML is the TipTap `editor.getHTML()` output of the admin lesson editor, sanitised on the server before it is saved. An empty field is stored as an empty string. Question stem and explanation are stored in `text` columns, and choice option text inside the `jsonb` body, all sanitised the same way.
 
 ## Allowed markup
 

@@ -2,10 +2,12 @@ using Core.OTP.Sms;
 using Elmanhg.Application.Shared.RichText;
 using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.Lessons;
+using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.Units;
 using Elmanhg.Infrastructure.Lessons;
+using Elmanhg.Infrastructure.Questions;
 using Elmanhg.Infrastructure.RichText;
 using Elmanhg.Infrastructure.Sms;
 using Elmanhg.Infrastructure.Storage;
@@ -40,6 +42,7 @@ public static class DependencyInjection
         services.AddScoped<ITeacherSubjectRepository, TeacherSubjectRepository>();
         services.AddScoped<ICurriculumUnitRepository, CurriculumUnitRepository>();
         services.AddScoped<ILessonRepository, LessonRepository>();
+        services.AddScoped<IQuestionRepository, QuestionRepository>();
         return services;
     }
 }

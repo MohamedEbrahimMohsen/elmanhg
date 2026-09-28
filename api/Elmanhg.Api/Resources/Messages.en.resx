@@ -135,6 +135,43 @@
   <data name="LESSON_IMAGE_REQUIRED" xml:space="preserve"><value>Choose an image.</value></data>
   <data name="LESSON_IMAGE_TYPE_INVALID" xml:space="preserve"><value>Use a PNG, JPEG, WebP or GIF image.</value></data>
   <data name="LESSON_IMAGE_TOO_LARGE" xml:space="preserve"><value>The image is too large.</value></data>
+  <data name="QUESTION_NOT_FOUND" xml:space="preserve"><value>Question not found.</value></data>
+  <data name="QUESTION_ID_REQUIRED" xml:space="preserve"><value>Choose a question.</value></data>
+  <data name="QUESTION_TYPE_REQUIRED" xml:space="preserve"><value>Choose the question type.</value></data>
+  <data name="QUESTION_TYPE_INVALID" xml:space="preserve"><value>This question type is not supported.</value></data>
+  <data name="QUESTION_STEM_REQUIRED" xml:space="preserve"><value>Enter the question text.</value></data>
+  <data name="QUESTION_STEM_TOO_LONG" xml:space="preserve"><value>The question text is too long.</value></data>
+  <data name="QUESTION_EXPLANATION_TOO_LONG" xml:space="preserve"><value>The explanation is too long.</value></data>
+  <data name="QUESTION_DIFFICULTY_REQUIRED" xml:space="preserve"><value>Choose the difficulty.</value></data>
+  <data name="QUESTION_DIFFICULTY_INVALID" xml:space="preserve"><value>Choose easy, medium or hard.</value></data>
+  <data name="QUESTION_MAX_SCORE_REQUIRED" xml:space="preserve"><value>Enter the question's points.</value></data>
+  <data name="QUESTION_MAX_SCORE_INVALID" xml:space="preserve"><value>The points are outside the allowed range.</value></data>
+  <data name="QUESTION_TAGS_TOO_MANY" xml:space="preserve"><value>This question has too many tags.</value></data>
+  <data name="QUESTION_TAG_REQUIRED" xml:space="preserve"><value>A tag cannot be empty.</value></data>
+  <data name="QUESTION_TAG_TOO_LONG" xml:space="preserve"><value>A tag is too long.</value></data>
+  <data name="QUESTION_BODY_INVALID" xml:space="preserve"><value>The question content does not match its type.</value></data>
+  <data name="QUESTION_GRADING_SPEC_INVALID" xml:space="preserve"><value>The answer key does not match the question type.</value></data>
+  <data name="QUESTION_OPTIONS_COUNT_INVALID" xml:space="preserve"><value>Add at least two options, within the allowed number.</value></data>
+  <data name="QUESTION_OPTION_ID_INVALID" xml:space="preserve"><value>An option has an invalid id.</value></data>
+  <data name="QUESTION_OPTION_ID_DUPLICATE" xml:space="preserve"><value>Two options share the same id.</value></data>
+  <data name="QUESTION_OPTION_TEXT_REQUIRED" xml:space="preserve"><value>Every option needs text.</value></data>
+  <data name="QUESTION_OPTION_TEXT_TOO_LONG" xml:space="preserve"><value>An option is too long.</value></data>
+  <data name="QUESTION_CORRECT_OPTION_INVALID" xml:space="preserve"><value>Mark the correct answer among the options.</value></data>
+  <data name="QUESTION_CORRECT_ANSWER_REQUIRED" xml:space="preserve"><value>Choose whether the statement is true or false.</value></data>
+  <data name="QUESTION_BLANKS_COUNT_INVALID" xml:space="preserve"><value>Add at least one blank, within the allowed number.</value></data>
+  <data name="QUESTION_BLANK_ID_INVALID" xml:space="preserve"><value>A blank has an invalid id.</value></data>
+  <data name="QUESTION_BLANK_ID_DUPLICATE" xml:space="preserve"><value>Two blanks share the same id.</value></data>
+  <data name="QUESTION_BLANK_PLACEHOLDER_MISSING" xml:space="preserve"><value>Place each blank exactly once in the question text.</value></data>
+  <data name="QUESTION_BLANK_ANSWERS_MISMATCH" xml:space="preserve"><value>Give accepted answers for every blank, and only for those blanks.</value></data>
+  <data name="QUESTION_ACCEPTED_ANSWERS_INVALID" xml:space="preserve"><value>Accepted answers are missing, empty, too long or too many.</value></data>
+  <data name="QUESTION_ANSWER_KIND_REQUIRED" xml:space="preserve"><value>Choose a numeric or a text answer.</value></data>
+  <data name="QUESTION_NUMERIC_VALUE_REQUIRED" xml:space="preserve"><value>Enter the correct number.</value></data>
+  <data name="QUESTION_TOLERANCE_INVALID" xml:space="preserve"><value>Enter a tolerance of zero or more and choose absolute or percent.</value></data>
+  <data name="QUESTION_OBJECTIVE_NOT_IN_LESSON" xml:space="preserve"><value>This objective does not belong to the question's lesson.</value></data>
+  <data name="QUESTION_TYPE_IMMUTABLE" xml:space="preserve"><value>A question's type cannot be changed. Create a new question instead.</value></data>
+  <data name="QUESTION_NOT_PENDING" xml:space="preserve"><value>Only a pending question can be approved.</value></data>
+  <data name="QUESTION_VALIDATOR_NOT_ASSIGNED" xml:space="preserve"><value>Only a teacher assigned to this subject can approve its questions.</value></data>
+  <data name="LESSON_HAS_QUESTIONS" xml:space="preserve"><value>This lesson has questions and cannot be deleted.</value></data>
   <data name="UNIT_HAS_LESSONS" xml:space="preserve"><value>This unit has lessons and cannot be deleted.</value></data>
   <data name="CONTENT_ORDER_INVALID" xml:space="preserve"><value>Order must be 1 or more.</value></data>
   <data name="USER_NOT_TEACHER" xml:space="preserve"><value>Subjects can only be assigned to teachers.</value></data>

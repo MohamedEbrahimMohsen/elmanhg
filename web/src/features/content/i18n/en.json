@@ -51,7 +51,8 @@
     "published": "Lesson published.",
     "unpublished": "Lesson moved to draft.",
     "archived": "Lesson archived.",
-    "deleted": "Lesson deleted."
+    "deleted": "Lesson deleted.",
+    "questionCount": "{count, plural, one {# question} other {# questions}}"
   },
   "lessonActions": {
     "label": "Actions for {name}",
