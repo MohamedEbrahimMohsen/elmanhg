@@ -172,7 +172,7 @@ per-story `feature/<n>-<slug>` branches, PRs, and squash-merge on green CI.
 How the next agent resumes, in a cloud session or on the laptop:
 1. **Toolchain.** Cloud: run `bash scripts/cloud-setup.sh`. Laptop: the usual setup. Check that `git status` is clean on `main`.
 2. **Morabh.** Cloud: clone read-only to `/home/user/apis` (the dev approved read-only access). Laptop: `D:\...\Morabh\repos\apis`.
-3. **Start** with `python3 scripts/pipeline_orch.py start 77`, then follow `.claude/commands/feature.md`, stage by stage, with a fresh subagent per stage.
+3. **Start** with `python scripts/pipeline_orch.py start <n>` (n = the "Next story" at the top), then follow `.claude/commands/feature.md`, stage by stage, with a fresh subagent per stage.
 4. **Per-story rhythm used from #65 on.** The next session should keep it:
    1. Update `PROGRESS.md` (add the previous story's row, remove the story from "Remaining", bump the counts) on the new story's branch, so it ships with that PR.
    2. Plan, then auto-approve it: append a line to `00-acceptance.md`.

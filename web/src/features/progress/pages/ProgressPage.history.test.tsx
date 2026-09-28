@@ -147,6 +147,19 @@ describe('ProgressPage history', () => {
     expect(await rowNamed('Momentum')).toBeInTheDocument();
   });
 
+  it('returns to the first page when the URL page is past the last page', async () => {
+    stubHistory((request) =>
+      searchParam(request, 'pageNumber') === '5'
+        ? sessionHistoryPage([], { pageNumber: 5, totalPages: 2, totalItems: 4 })
+        : sessionHistoryPage(undefined, { totalPages: 2, totalItems: 4 }),
+    );
+    const { router } = openHistory('/student/progress?page=5');
+
+    expect(await historyRows()).toHaveLength(3);
+    expect(router.state.location.search).toMatchObject({ page: 1 });
+    expect(screen.queryByText('No sessions yet.')).toBeNull();
+  });
+
   it('shows the history error and retries', async () => {
     stubHistory(() => sessionHistoryPage());
     server.use(

@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useEffect, useEffectEvent, useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ContentErrorState, ContentListSkeleton } from '@/features/content';
 import { Pagination } from '@/shared/components/Pagination';
@@ -13,9 +13,22 @@ export function SessionHistorySection() {
   const headingId = useId();
   const { search, setKind, setPage, clearFilter } = useProgressSearch();
   const { data, error, isPending, isError, refetch } = useSessionHistory(search);
+  const items = data?.items ?? [];
+  const totalPages = Number(data?.totalPages ?? 0);
+  const pageNumber = Number(data?.pageNumber ?? 1);
+  const pageOutOfRange = !isPending && !isError && items.length === 0 && totalPages > 0 && pageNumber > totalPages;
+  const resetPage = useEffectEvent(() => {
+    setPage(1);
+  });
+
+  useEffect(() => {
+    if (pageOutOfRange) {
+      resetPage();
+    }
+  }, [pageOutOfRange]);
 
   const renderContent = () => {
-    if (isPending) {
+    if (isPending || pageOutOfRange) {
       return <ContentListSkeleton label={t('history.loading')} />;
     }
     if (isError) {
@@ -29,17 +42,13 @@ export function SessionHistorySection() {
         />
       );
     }
-    const items = data.items ?? [];
     if (items.length === 0) {
       return <SessionHistoryEmptyState variant={search.kind ? 'no-results' : 'no-data'} onClear={clearFilter} />;
     }
-    const totalPages = Number(data.totalPages ?? 0);
     return (
       <>
         <SessionHistoryTable items={items} />
-        {totalPages > 1 ? (
-          <Pagination page={Number(data.pageNumber ?? 1)} totalPages={totalPages} onPageChange={setPage} />
-        ) : null}
+        {totalPages > 1 ? <Pagination page={pageNumber} totalPages={totalPages} onPageChange={setPage} /> : null}
       </>
     );
   };
