@@ -21,6 +21,7 @@ public static class DependencyInjection
         services.AddOptions<AdminSeedOptions>().BindConfiguration(AdminSeedOptions.SectionName);
         services.AddOptions<AuditLogsOptions>().BindConfiguration(AuditLogsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<ContentOptions>().BindConfiguration(ContentOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<QuestionValidationOptions>().BindConfiguration(QuestionValidationOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         return services;
     }
 }

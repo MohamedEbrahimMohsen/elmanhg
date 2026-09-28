@@ -29,4 +29,9 @@ public static class ErrorCodes
     public const string QuestionRejectionReasonRequired = "QUESTION_REJECTION_REASON_REQUIRED";
     public const string QuestionAlreadyRetired = "QUESTION_ALREADY_RETIRED";
     public const string QuestionRetired = "QUESTION_RETIRED";
+    public const string QuestionVersionChanged = "QUESTION_VERSION_CHANGED";
+
+    // REVIEW SESSIONS
+    public const string QuestionNotOpenedInSession = "QUESTION_NOT_OPENED_IN_SESSION";
+    public const string ReviewSessionExpired = "REVIEW_SESSION_EXPIRED";
 }

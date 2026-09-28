@@ -53,9 +53,9 @@ public sealed class GetQuestionsFilterTests
     public void Build_TeacherId_MatchesQuestionsThatTeacherDecided()
     {
         var approved = _builder.Build();
-        approved.Approve(TeacherSubject.Create(_builder.Teacher, _builder.Subject, Guid.NewGuid()));
+        approved.Approve(TeacherSubject.Create(_builder.Teacher, _builder.Subject, Guid.NewGuid()), approved.Version);
         var rejected = _builder.Build();
-        rejected.Reject(TeacherSubject.Create(_builder.Teacher, _builder.Subject, Guid.NewGuid()), "Wrong unit");
+        rejected.Reject(TeacherSubject.Create(_builder.Teacher, _builder.Subject, Guid.NewGuid()), rejected.Version, "Wrong unit");
         var matches = GetQuestionsFilter.Build(Query() with { TeacherId = _builder.Teacher.Id }).Compile();
 
         matches(approved).Should().BeTrue();

@@ -26,6 +26,13 @@ export const questionFilterMaxLength = 200;
 
 export const questionListPageSize = 20;
 
+// mirrors QuestionValidation:RejectionReasonMaxLength
+export const rejectionReasonMaxLength = 1000;
+
+export const validationAgeFilters = [1, 3, 7] as const;
+
+export const validationQueuePageSize = 20;
+
 export const optionIdAlphabet = 'abcdefghij';
 
 function isOneOf<T extends string>(values: readonly T[], value: string): value is T {

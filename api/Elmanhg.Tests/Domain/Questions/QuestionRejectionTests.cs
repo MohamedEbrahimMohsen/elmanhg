@@ -18,7 +18,7 @@ public sealed class QuestionRejectionTests
     {
         var question = _builder.Build();
 
-        question.Reject(Assignment(), "  Wrong unit  ");
+        question.Reject(Assignment(), question.Version, "  Wrong unit  ");
 
         question.ValidationStatus.Should().Be(QuestionValidationStatus.Rejected);
         question.RejectionReason.Should().Be("Wrong unit");
@@ -34,7 +34,7 @@ public sealed class QuestionRejectionTests
     {
         var question = _builder.Build();
 
-        var act = () => question.Reject(Assignment(), reason);
+        var act = () => question.Reject(Assignment(), question.Version, reason);
 
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.QuestionRejectionReasonRequired);
         question.ValidationStatus.Should().Be(QuestionValidationStatus.Pending);
@@ -45,7 +45,7 @@ public sealed class QuestionRejectionTests
     {
         var question = _builder.Approved().Build();
 
-        var act = () => question.Reject(Assignment(), "Wrong unit");
+        var act = () => question.Reject(Assignment(), question.Version, "Wrong unit");
 
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.QuestionNotPending);
     }
@@ -56,7 +56,7 @@ public sealed class QuestionRejectionTests
         var question = _builder.Build();
         var assignment = TeacherSubject.Create(_builder.Teacher, Subject.Create("Chemistry", 2, Guid.NewGuid()), Guid.NewGuid());
 
-        var act = () => question.Reject(assignment, "Wrong unit");
+        var act = () => question.Reject(assignment, question.Version, "Wrong unit");
 
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.QuestionValidatorNotAssigned);
         question.ValidationStatus.Should().Be(QuestionValidationStatus.Pending);
@@ -141,9 +141,34 @@ public sealed class QuestionRejectionTests
         var question = _builder.Rejected("Wrong unit").Build();
         question.Resubmit(QuestionType.Mcq, QuestionBuilder.McqContent() with { Stem = "<p>3 + 3 = ?</p>" }, Metadata(), _builder.Lesson, _editor);
 
-        question.Approve(Assignment());
+        question.Approve(Assignment(), question.Version);
 
         question.ValidationStatus.Should().Be(QuestionValidationStatus.Approved);
+    }
+
+    [Fact]
+    public void Reject_WithReason_AppendsRejectedDecisionWithTrimmedReason()
+    {
+        var question = _builder.Build();
+
+        question.Reject(Assignment(), question.Version, "  Wrong unit  ");
+
+        var decision = question.Decisions.Should().ContainSingle().Subject;
+        decision.Outcome.Should().Be(QuestionDecisionOutcome.Rejected);
+        decision.Reason.Should().Be("Wrong unit");
+        decision.DifficultyChangedFrom.Should().BeNull();
+    }
+
+    [Fact]
+    public void Reject_StaleVersion_ThrowsQuestionVersionChanged()
+    {
+        var question = _builder.Build();
+
+        var act = () => question.Reject(Assignment(), question.Version + 1, "Wrong unit");
+
+        act.Should().Throw<ConflictCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.QuestionVersionChanged);
+        question.ValidationStatus.Should().Be(QuestionValidationStatus.Pending);
+        question.Decisions.Should().BeEmpty();
     }
 
     private TeacherSubject Assignment()

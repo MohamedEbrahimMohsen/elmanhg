@@ -34,6 +34,7 @@ import { Route as TeacherInboxRouteImport } from './routes/teacher/inbox'
 import { Route as TeacherStatsRouteImport } from './routes/teacher/stats'
 import { Route as AdminLessonLessonIdRouteImport } from './routes/admin/lesson.$lessonId'
 import { Route as AdminQuestionQuestionIdRouteImport } from './routes/admin/question.$questionId'
+import { Route as TeacherQQuestionIdRouteImport } from './routes/teacher/q.$questionId'
 import { Route as AdminQuestionImportLessonIdRouteImport } from './routes/admin/question.import.$lessonId'
 import { Route as AdminQuestionNewLessonIdRouteImport } from './routes/admin/question.new.$lessonId'
 
@@ -162,6 +163,11 @@ const AdminQuestionQuestionIdRoute = AdminQuestionQuestionIdRouteImport.update({
   path: '/question/$questionId',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const TeacherQQuestionIdRoute = TeacherQQuestionIdRouteImport.update({
+  id: '/q/$questionId',
+  path: '/q/$questionId',
+  getParentRoute: () => TeacherRouteRoute,
+} as any)
 const AdminQuestionImportLessonIdRoute =
   AdminQuestionImportLessonIdRouteImport.update({
     id: '/question/import/$lessonId',
@@ -201,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/teacher/': typeof TeacherIndexRoute
   '/admin/lesson/$lessonId': typeof AdminLessonLessonIdRoute
   '/admin/question/$questionId': typeof AdminQuestionQuestionIdRoute
+  '/teacher/q/$questionId': typeof TeacherQQuestionIdRoute
   '/admin/question/import/$lessonId': typeof AdminQuestionImportLessonIdRoute
   '/admin/question/new/$lessonId': typeof AdminQuestionNewLessonIdRoute
 }
@@ -227,6 +234,7 @@ export interface FileRoutesByTo {
   '/teacher': typeof TeacherIndexRoute
   '/admin/lesson/$lessonId': typeof AdminLessonLessonIdRoute
   '/admin/question/$questionId': typeof AdminQuestionQuestionIdRoute
+  '/teacher/q/$questionId': typeof TeacherQQuestionIdRoute
   '/admin/question/import/$lessonId': typeof AdminQuestionImportLessonIdRoute
   '/admin/question/new/$lessonId': typeof AdminQuestionNewLessonIdRoute
 }
@@ -257,6 +265,7 @@ export interface FileRoutesById {
   '/teacher/': typeof TeacherIndexRoute
   '/admin/lesson/$lessonId': typeof AdminLessonLessonIdRoute
   '/admin/question/$questionId': typeof AdminQuestionQuestionIdRoute
+  '/teacher/q/$questionId': typeof TeacherQQuestionIdRoute
   '/admin/question/import/$lessonId': typeof AdminQuestionImportLessonIdRoute
   '/admin/question/new/$lessonId': typeof AdminQuestionNewLessonIdRoute
 }
@@ -288,6 +297,7 @@ export interface FileRouteTypes {
     | '/teacher/'
     | '/admin/lesson/$lessonId'
     | '/admin/question/$questionId'
+    | '/teacher/q/$questionId'
     | '/admin/question/import/$lessonId'
     | '/admin/question/new/$lessonId'
   fileRoutesByTo: FileRoutesByTo
@@ -314,6 +324,7 @@ export interface FileRouteTypes {
     | '/teacher'
     | '/admin/lesson/$lessonId'
     | '/admin/question/$questionId'
+    | '/teacher/q/$questionId'
     | '/admin/question/import/$lessonId'
     | '/admin/question/new/$lessonId'
   id:
@@ -343,6 +354,7 @@ export interface FileRouteTypes {
     | '/teacher/'
     | '/admin/lesson/$lessonId'
     | '/admin/question/$questionId'
+    | '/teacher/q/$questionId'
     | '/admin/question/import/$lessonId'
     | '/admin/question/new/$lessonId'
   fileRoutesById: FileRoutesById
@@ -533,6 +545,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminQuestionQuestionIdRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/teacher/q/$questionId': {
+      id: '/teacher/q/$questionId'
+      path: '/q/$questionId'
+      fullPath: '/teacher/q/$questionId'
+      preLoaderRoute: typeof TeacherQQuestionIdRouteImport
+      parentRoute: typeof TeacherRouteRoute
+    }
     '/admin/question/import/$lessonId': {
       id: '/admin/question/import/$lessonId'
       path: '/question/import/$lessonId'
@@ -610,12 +629,14 @@ interface TeacherRouteRouteChildren {
   TeacherInboxRoute: typeof TeacherInboxRoute
   TeacherStatsRoute: typeof TeacherStatsRoute
   TeacherIndexRoute: typeof TeacherIndexRoute
+  TeacherQQuestionIdRoute: typeof TeacherQQuestionIdRoute
 }
 
 const TeacherRouteRouteChildren: TeacherRouteRouteChildren = {
   TeacherInboxRoute: TeacherInboxRoute,
   TeacherStatsRoute: TeacherStatsRoute,
   TeacherIndexRoute: TeacherIndexRoute,
+  TeacherQQuestionIdRoute: TeacherQQuestionIdRoute,
 }
 
 const TeacherRouteRouteWithChildren = TeacherRouteRoute._addFileChildren(

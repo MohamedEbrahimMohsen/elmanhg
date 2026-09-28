@@ -86,7 +86,7 @@ public sealed class QuestionRetirementTests
     {
         var question = _builder.Retired().Build();
 
-        var act = () => question.Approve(Assignment());
+        var act = () => question.Approve(Assignment(), question.Version);
 
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.QuestionRetired);
         question.ValidationStatus.Should().Be(QuestionValidationStatus.Pending);
@@ -97,7 +97,7 @@ public sealed class QuestionRetirementTests
     {
         var question = _builder.Retired().Build();
 
-        var act = () => question.Reject(Assignment(), "Wrong unit");
+        var act = () => question.Reject(Assignment(), question.Version, "Wrong unit");
 
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.QuestionRetired);
         question.RejectionReason.Should().BeNull();

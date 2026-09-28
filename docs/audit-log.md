@@ -72,10 +72,13 @@ An array with one element per changed audited entity. Property keys are camelCas
 | ResubmitQuestion | `Question.Resubmit` | Question | command (the diff shows `validationStatus`, `rejectionReason`, `validatedBy`, `validatedAt`, and the content fields and `version` when the content changed) |
 | RetireQuestion | `Question.Retire` | Question | command (the diff shows `retiredAt`) |
 | ImportQuestions | `Question.Import` | QuestionImportBatch | command (the diff lists the new QuestionImportBatch and every created Question; a replay writes a row with no diff) |
+| ApproveQuestion | `Question.Approve` | Question | command (the diff shows `validationStatus`, `validatedBy`, `validatedAt`, and `difficulty` when the teacher changed it) |
+| RejectQuestion | `Question.Reject` | Question | command (the diff shows `validationStatus`, `rejectionReason`, `validatedBy`, `validatedAt`) |
+| BulkApproveQuestions | `Question.BulkApprove` | ReviewSession | command (the diff lists every approved Question) |
 
 Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`.
 
-Validation commands (E3) join this table when they are built. `QuestionRevision` rows are an append-only history and are not diffed.
+`QuestionRevision` and `QuestionDecision` rows are an append-only history and are not diffed.
 
 ## Not audited (deliberate)
 
@@ -83,6 +86,7 @@ Validation commands (E3) join this table when they are built. `QuestionRevision`
 - **Auth**: login, register, OTP, logout. A separate security-log concern.
 - **Noise**: access-token refresh.
 - **Evidence uploads** (Ask a Teacher images and voice): audit the decision, not the file. Lesson content images are the exception: they change content (PRD §17 rule 13), so `UploadLessonImage` is audited as `Lesson.UploadImage` with no diff.
+- **Review sessions and openings** (`StartReviewSession`, `RecordQuestionOpening`): a reading aid that gates bulk approval, not a content or validation change. `ReviewSession` and `ReviewSessionOpening` are not `IAuditedEntity`; the approvals they enable are audited.
 - **PII entities**: `User` is never marked `IAuditedEntity`, so password hashes and phone numbers never reach a diff.
 
 ## Add a new audited command

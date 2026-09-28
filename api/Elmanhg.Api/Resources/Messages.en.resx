@@ -175,6 +175,17 @@
   <data name="QUESTION_REJECTION_REASON_REQUIRED" xml:space="preserve"><value>Enter the reason for rejecting this question.</value></data>
   <data name="QUESTION_ALREADY_RETIRED" xml:space="preserve"><value>This question is already retired.</value></data>
   <data name="QUESTION_RETIRED" xml:space="preserve"><value>A retired question cannot be edited or validated.</value></data>
+  <data name="QUESTION_VERSION_CHANGED" xml:space="preserve"><value>This question changed after you opened it. Review the new version, then decide.</value></data>
+  <data name="QUESTION_NOT_OPENED_IN_SESSION" xml:space="preserve"><value>Open each question in this review session before approving it in bulk.</value></data>
+  <data name="REVIEW_SESSION_EXPIRED" xml:space="preserve"><value>Your review session has ended. Open the questions again.</value></data>
+  <data name="REVIEW_SESSION_NOT_FOUND" xml:space="preserve"><value>Review session not found.</value></data>
+  <data name="REVIEW_SESSION_ID_REQUIRED" xml:space="preserve"><value>A review session is required.</value></data>
+  <data name="QUESTION_IDS_REQUIRED" xml:space="preserve"><value>Choose at least one question.</value></data>
+  <data name="QUESTION_IDS_TOO_MANY" xml:space="preserve"><value>Too many questions selected.</value></data>
+  <data name="QUESTION_IDS_DUPLICATE" xml:space="preserve"><value>A question is selected more than once.</value></data>
+  <data name="QUESTION_VERSION_INVALID" xml:space="preserve"><value>The question version is not valid.</value></data>
+  <data name="QUESTION_REJECTION_REASON_TOO_LONG" xml:space="preserve"><value>The rejection reason is too long.</value></data>
+  <data name="QUESTION_AGE_FILTER_INVALID" xml:space="preserve"><value>The waiting-time filter is not valid.</value></data>
   <data name="QUESTION_ANSWER_INVALID" xml:space="preserve"><value>The answer does not match the question type.</value></data>
   <data name="QUESTION_PAGE_NUMBER_INVALID" xml:space="preserve"><value>The page number must be 1 or more.</value></data>
   <data name="QUESTION_PAGE_SIZE_INVALID" xml:space="preserve"><value>The page size is outside the allowed range.</value></data>

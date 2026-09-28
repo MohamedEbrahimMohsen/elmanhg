@@ -15,7 +15,7 @@ public sealed class QuestionServabilityEventsTests
     {
         var question = _builder.Build();
 
-        question.Approve(Assignment());
+        question.Approve(Assignment(), question.Version);
 
         question.GetDomainEvents().Should().Equal(new QuestionApproved(question.Id, question.LessonId));
     }
@@ -25,7 +25,7 @@ public sealed class QuestionServabilityEventsTests
     {
         var question = _builder.Build();
 
-        question.Reject(Assignment(), "Wrong unit");
+        question.Reject(Assignment(), question.Version, "Wrong unit");
 
         question.GetDomainEvents().Should().Equal(new QuestionRejected(question.Id, question.LessonId));
     }

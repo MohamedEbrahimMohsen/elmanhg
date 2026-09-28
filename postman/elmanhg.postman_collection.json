@@ -15,7 +15,10 @@
     { "key": "unitId", "value": "" },
     { "key": "lessonId", "value": "" },
     { "key": "questionId", "value": "" },
-    { "key": "importBatchId", "value": "" }
+    { "key": "importBatchId", "value": "" },
+    { "key": "reviewSessionId", "value": "" },
+    { "key": "rejectQuestionId", "value": "" },
+    { "key": "bulkQuestionId", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -1268,6 +1271,260 @@
                 { "key": "batchId", "value": "{{importBatchId}}", "type": "text" },
                 { "key": "file", "type": "file", "src": "" }
               ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "QuestionValidation",
+      "description": "Teacher only (Questions.Validate). Sign in as a teacher assigned to the subject so accessToken is set. Get validation queue fills questionId, rejectQuestionId and bulkQuestionId from the first three pending questions; the version in approve and reject must be the version you reviewed.",
+      "item": [
+        {
+          "name": "Start review session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"reviewSessionId\", pm.response.json().reviewSessionId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/validation-queue/review-sessions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "validation-queue", "review-sessions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get validation queue filters",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/validation-queue/filters",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "validation-queue", "filters"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get validation queue",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const items = pm.response.json().items || [];",
+                  "if (items.length > 0) { pm.collectionVariables.set(\"questionId\", items[0].id); }",
+                  "if (items.length > 1) { pm.collectionVariables.set(\"rejectQuestionId\", items[1].id); }",
+                  "if (items.length > 2) { pm.collectionVariables.set(\"bulkQuestionId\", items[2].id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/validation-queue?reviewSessionId={{reviewSessionId}}&pageNumber=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "validation-queue"],
+              "query": [
+                { "key": "reviewSessionId", "value": "{{reviewSessionId}}" },
+                { "key": "unitId", "value": "", "disabled": true },
+                { "key": "lessonId", "value": "", "disabled": true },
+                { "key": "type", "value": "Mcq", "disabled": true },
+                { "key": "difficulty", "value": "Medium", "disabled": true },
+                { "key": "minAgeDays", "value": "7", "disabled": true },
+                { "key": "pageNumber", "value": "1" },
+                { "key": "pageSize", "value": "20" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get validation question",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/validation-queue/questions/{{questionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "validation-queue", "questions", "{{questionId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Record question opening",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/validation-queue/review-sessions/{{reviewSessionId}}/openings/{{questionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "validation-queue", "review-sessions", "{{reviewSessionId}}", "openings", "{{questionId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve question",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/validation-queue/questions/{{questionId}}/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "validation-queue", "questions", "{{questionId}}", "approve"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"version\": 1,\n  \"difficulty\": \"Hard\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reject question",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/validation-queue/questions/{{rejectQuestionId}}/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "validation-queue", "questions", "{{rejectQuestionId}}", "reject"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"version\": 1,\n  \"reason\": \"The answer key is wrong.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Record opening for bulk approve",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/validation-queue/review-sessions/{{reviewSessionId}}/openings/{{bulkQuestionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "validation-queue", "review-sessions", "{{reviewSessionId}}", "openings", "{{bulkQuestionId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Bulk approve questions",
+          "description": "Only questions opened in this review session at their current version can be bulk-approved; the previous request opens bulkQuestionId.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"approved count\", function () { pm.expect(pm.response.json().approvedCount).to.eql(1); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/validation-queue/bulk-approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "validation-queue", "bulk-approve"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reviewSessionId\": \"{{reviewSessionId}}\",\n  \"questionIds\": [\"{{bulkQuestionId}}\"]\n}",
+              "options": { "raw": { "language": "json" } }
             }
           },
           "response": []

@@ -192,5 +192,89 @@
     "toast": {
       "imported": "Questions imported."
     }
+  },
+  "validation": {
+    "queue": {
+      "title": "Review queue",
+      "subjects": "Your subjects: {subjects}",
+      "loading": "Loading the review queue",
+      "errorTitle": "Could not load the review queue",
+      "listLabel": "Questions waiting for review",
+      "select": "Select: {stem}",
+      "openToSelect": "Open the question first to select it",
+      "opened": "Opened",
+      "age": "Waiting {age}",
+      "selectedCount": "{count, plural, =0 {No questions selected} one {{formattedCount} question selected} other {{formattedCount} questions selected}}",
+      "bulkApprove": "Approve selected",
+      "confirmTitle": "Approve the selected questions?",
+      "confirmBody": "{count, plural, one {{formattedCount} question} other {{formattedCount} questions}} will be approved and can be served to students once their lesson is published.",
+      "confirm": "Approve",
+      "cancel": "Cancel",
+      "bulkApproved": "{count, plural, one {{formattedCount} question approved.} other {{formattedCount} questions approved.}}",
+      "empty": {
+        "noData": "No questions are waiting for review.",
+        "noResults": "No questions match these filters."
+      }
+    },
+    "filters": {
+      "unit": "Unit",
+      "lesson": "Lesson",
+      "type": "Type",
+      "difficulty": "Difficulty",
+      "age": "Waiting at least",
+      "ageOption": "{count, plural, one {{formattedCount} day} other {{formattedCount} days}}",
+      "all": "All",
+      "apply": "Apply filters",
+      "clear": "Clear filters"
+    },
+    "detail": {
+      "title": "Review question",
+      "breadcrumb": "Breadcrumb",
+      "queueLink": "Review queue",
+      "loading": "Loading the question",
+      "errorTitle": "Could not load the question",
+      "lessonState": "Lesson state: {state}",
+      "lessonStates": {
+        "Draft": "Draft",
+        "Published": "Published",
+        "Archived": "Archived"
+      },
+      "objective": "Objective: {objective}",
+      "noObjective": "No objective",
+      "difficulty": "Difficulty: {difficulty}",
+      "maxScore": "Max score: {score}",
+      "tags": "Tags: {tags}",
+      "retired": "Retired",
+      "previousRejection": "Previous rejection reason: {reason}",
+      "preview": "Preview as the student sees it",
+      "explanation": "Explanation",
+      "gradingSpec": "Grading spec (JSON)"
+    },
+    "decision": {
+      "title": "Decision",
+      "difficulty": "Difficulty",
+      "approve": "Approve",
+      "reason": "Rejection reason",
+      "reject": "Reject",
+      "noEditNote": "Teachers cannot edit the question text, options or answer. If something is wrong, reject it and give the reason.",
+      "approved": "Question approved.",
+      "rejected": "Question rejected."
+    },
+    "history": {
+      "title": "Versions and decisions",
+      "caption": "Version and decision history",
+      "date": "Date",
+      "by": "By",
+      "action": "Action",
+      "details": "Details",
+      "kind": {
+        "revision": "Version saved",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "versionValue": "v{version}",
+      "noActor": "—",
+      "difficultyChanged": "Difficulty changed from {from} to {to}"
+    }
   }
 }

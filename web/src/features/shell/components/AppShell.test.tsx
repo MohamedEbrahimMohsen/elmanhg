@@ -1,7 +1,8 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { getValidationQueueMock } from '@/shared/api/generated/validation-queue/validation-queue.msw';
 import { axe } from '@/test/axe';
 import { server } from '@/test/msw/server';
 import { renderApp } from '@/test/renderWithProviders';
@@ -13,6 +14,10 @@ const linkNames = (nav: HTMLElement) =>
     .map((link) => link.textContent);
 
 describe('AppShell', () => {
+  beforeEach(() => {
+    server.use(...getValidationQueueMock());
+  });
+
   it('shows every student destination in the top tabs', async () => {
     renderApp('/student', { session: testSessions.student });
 

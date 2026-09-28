@@ -175,6 +175,17 @@
   <data name="QUESTION_REJECTION_REASON_REQUIRED" xml:space="preserve"><value>اكتب سبب رفض السؤال.</value></data>
   <data name="QUESTION_ALREADY_RETIRED" xml:space="preserve"><value>هذا السؤال متقاعد بالفعل.</value></data>
   <data name="QUESTION_RETIRED" xml:space="preserve"><value>لا يمكن تعديل سؤال متقاعد او اعتماده.</value></data>
+  <data name="QUESTION_VERSION_CHANGED" xml:space="preserve"><value>تم تعديل هذا السؤال بعد فتحه. راجع الاصدار الجديد ثم قرر.</value></data>
+  <data name="QUESTION_NOT_OPENED_IN_SESSION" xml:space="preserve"><value>لا يمكن اعتماد سؤال جماعيا الا بعد فتحه في جلسة المراجعة الحالية.</value></data>
+  <data name="REVIEW_SESSION_EXPIRED" xml:space="preserve"><value>انتهت جلسة المراجعة. افتح الاسئلة مرة اخرى.</value></data>
+  <data name="REVIEW_SESSION_NOT_FOUND" xml:space="preserve"><value>جلسة المراجعة غير موجودة.</value></data>
+  <data name="REVIEW_SESSION_ID_REQUIRED" xml:space="preserve"><value>جلسة المراجعة مطلوبة.</value></data>
+  <data name="QUESTION_IDS_REQUIRED" xml:space="preserve"><value>اختر سؤالا واحدا على الاقل.</value></data>
+  <data name="QUESTION_IDS_TOO_MANY" xml:space="preserve"><value>عدد الاسئلة المختارة اكبر من المسموح.</value></data>
+  <data name="QUESTION_IDS_DUPLICATE" xml:space="preserve"><value>تكرر سؤال في الاختيار.</value></data>
+  <data name="QUESTION_VERSION_INVALID" xml:space="preserve"><value>اصدار السؤال غير صالح.</value></data>
+  <data name="QUESTION_REJECTION_REASON_TOO_LONG" xml:space="preserve"><value>سبب الرفض طويل جدا.</value></data>
+  <data name="QUESTION_AGE_FILTER_INVALID" xml:space="preserve"><value>مدة الانتظار غير صالحة.</value></data>
   <data name="QUESTION_ANSWER_INVALID" xml:space="preserve"><value>الاجابة لا تطابق نوع السؤال.</value></data>
   <data name="QUESTION_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة يجب ان يكون 1 او اكثر.</value></data>
   <data name="QUESTION_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة خارج النطاق المسموح.</value></data>
