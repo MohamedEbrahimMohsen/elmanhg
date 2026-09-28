@@ -179,7 +179,7 @@ Applied to fill-in and short-text answers before comparison.
 
 Each rule can be switched off per question; all are on by default: strip tashkeel; strip tatweel; unify أ إ آ ٱ → ا; ة → ه; ى → ي; convert Arabic-Indic digits to ASCII; collapse whitespace; case-fold Latin characters.
 
-Always applied: Unicode NFC, removal of invisible bidi and zero-width marks, ، → `,`, ی → ي, and trimming.
+Always applied: removal of invisible bidi and zero-width marks, Unicode NFC, ، → `,`, ی → ي, and trimming.
 
 Numeric answers ignore the per-question rules and must be a plain decimal (`docs/question-schemas.md`).
 

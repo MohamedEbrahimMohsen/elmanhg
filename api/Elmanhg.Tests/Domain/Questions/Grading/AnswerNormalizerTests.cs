@@ -162,4 +162,35 @@ public sealed class AnswerNormalizerTests
 
         AnswerNormalizer.Normalize(" Aـَ٢‏ ", rules).Should().Be("Aـَ٢");
     }
+
+    [Theory]
+    [InlineData("\u0627\u200C\u0654", "\u0623")]
+    [InlineData("\u0627\u200F\u0654", "\u0623")]
+    [InlineData("\u0627\u2060\u0653", "\u0622")]
+    [InlineData("\u0648\uFEFF\u0654", "\u0624")]
+    public void Normalize_InvisibleControlBetweenLetterAndMark_Composes(string text, string expected)
+    {
+        AnswerNormalizer.Normalize(text, new AnswerNormalization(StripTashkeel: false, UnifyAlef: false)).Should().Be(expected);
+    }
+
+    [Fact]
+    public void Normalize_InvisibleControlBetweenLetterAndMark_ComposesWithUnifyAlefOff()
+    {
+        AnswerNormalizer.Normalize("\u0627\u200C\u0654", new AnswerNormalization(UnifyAlef: false)).Should().Be("\u0623");
+    }
+
+    [Theory]
+    [InlineData("\u0627\u200C\u0654")]
+    [InlineData("\u0627\u200F\u0654")]
+    [InlineData("\u0627\u2060\u0653")]
+    [InlineData("\u0648\uFEFF\u0654")]
+    [InlineData("\u0645\u200F\u0627\u0621")]
+    [InlineData("  A\u0640\u064E\u0662\u200F ")]
+    public void Normalize_IsIdempotent(string text)
+    {
+        var rules = new AnswerNormalization(StripTashkeel: false, UnifyAlef: false);
+        var once = AnswerNormalizer.Normalize(text, rules);
+
+        AnswerNormalizer.Normalize(once, rules).Should().Be(once);
+    }
 }

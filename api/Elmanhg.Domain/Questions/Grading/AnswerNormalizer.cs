@@ -12,7 +12,7 @@ public static class AnswerNormalizer
             return string.Empty;
         }
 
-        var composed = DropUnnormalizable(text).Normalize(NormalizationForm.FormC);
+        var composed = DropBeforeComposition(text).Normalize(NormalizationForm.FormC);
         var builder = new StringBuilder(composed.Length);
         var pendingSpace = false;
         foreach (var character in composed)
@@ -47,12 +47,13 @@ public static class AnswerNormalizer
         return builder.ToString().Trim();
     }
 
-    private static bool IsDropped(char character, AnswerNormalization rules) => ArabicCharacters.IsInvisibleControl(character) || (rules.StripTashkeel && ArabicCharacters.IsTashkeel(character)) || (rules.StripTatweel && character == ArabicCharacters.Tatweel);
+    private static bool IsDropped(char character, AnswerNormalization rules) => (rules.StripTashkeel && ArabicCharacters.IsTashkeel(character)) || (rules.StripTatweel && character == ArabicCharacters.Tatweel);
 
     // string.Normalize throws on a lone surrogate and on U+FFFE; a pasted answer must never fail grading.
-    private static string DropUnnormalizable(string text)
+    // Invisible controls go before NFC so they cannot keep a letter apart from its combining mark.
+    private static string DropBeforeComposition(string text)
     {
-        if (!text.Any(character => char.IsSurrogate(character) || character == ArabicCharacters.ByteSwappedBom))
+        if (!text.Any(character => char.IsSurrogate(character) || IsDroppedBeforeComposition(character)))
         {
             return text;
         }
@@ -65,7 +66,7 @@ public static class AnswerNormalizer
                 builder.Append(text[index]).Append(text[index + 1]);
                 index++;
             }
-            else if (!char.IsSurrogate(text[index]) && text[index] != ArabicCharacters.ByteSwappedBom)
+            else if (!char.IsSurrogate(text[index]) && !IsDroppedBeforeComposition(text[index]))
             {
                 builder.Append(text[index]);
             }
@@ -73,4 +74,6 @@ public static class AnswerNormalizer
 
         return builder.ToString();
     }
+
+    private static bool IsDroppedBeforeComposition(char character) => character == ArabicCharacters.ByteSwappedBom || ArabicCharacters.IsInvisibleControl(character);
 }

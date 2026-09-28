@@ -144,6 +144,14 @@ public sealed class TextGraderTests
         TextGrader.GradeShort(spec, new ShortAnswer("Newton")).Should().Be(0m);
     }
 
+    [Fact]
+    public void GradeShort_InvisibleControlInsideHamza_MatchesComposedAccepted()
+    {
+        var spec = new ShortGradingSpec(null, null, null, ["\u0623"], new AnswerNormalization(UnifyAlef: false));
+
+        TextGrader.GradeShort(spec, new ShortAnswer("\u0627\u200C\u0654")).Should().Be(1m);
+    }
+
     private static FillGradingSpec TwoBlanks()
     {
         return new FillGradingSpec([new FillBlankAnswers("1", ["20"]), new FillBlankAnswers("2", ["5", "five"])]);
