@@ -9,3 +9,5 @@ Branch: `feature/66-bulk-question-import-from-spreadsheet` (base `main`)
 | 3 | Review r1 | feature-reviewer | Opus 5.5 | 06:14 | 06:21 | 6m 51s | 193,926 | 44 | CHANGES_REQUESTED (1: unbounded used-range walk hangs on tiny far-cell file) |
 | 4 | Rework r2 | feature-implementer | Opus 5.5 | 06:21 | 06:30 | 8m 32s | 64,917 | 26 | bounded reader (rows/cols/type sheets) + 3 tests; api 878/878, web 344/344 |
 | 5 | Review r2 (stalled) | feature-reviewer | Opus 5.5 | 06:30 | 06:34 | 4m 49s | 50,222 | 21 | incomplete: far-cell fix confirmed, CI re-run blocked by safety-check stalls; re-dispatched |
+| 6 | Review r2 | feature-reviewer | Opus 5.5 | 06:35 | 06:41 | 6m 14s | 45,778 | 28 | APPROVED (non-blocking: large sparse files take minutes to load under the 5 MB cap) |
+| 7 | CodeRabbit | orchestrator | n/a | n/a | n/a | n/a | skipped by CodeRabbit: too many files (115) |
