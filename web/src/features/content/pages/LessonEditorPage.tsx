@@ -68,6 +68,11 @@ export function LessonEditorPage({ lessonId }: LessonEditorPageProps) {
               {t('lessonEditor.newQuestion')}
             </Link>
           </Button>
+          <Button asChild variant="secondary" size="sm">
+            <Link to="/admin/question/import/$lessonId" params={{ lessonId: data.id }}>
+              {t('lessonEditor.importQuestions')}
+            </Link>
+          </Button>
           <Button asChild variant="ghost" size="sm">
             <Link to="/admin/questions" search={{ lessonId: data.id }}>
               {t('lessonEditor.viewQuestions')}

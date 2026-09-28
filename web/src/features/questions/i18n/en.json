@@ -24,6 +24,7 @@
     "hint": "To add a question, open its lesson from the content tree.",
     "lessonFilter": "Showing one lesson's questions.",
     "newInLesson": "New question in this lesson",
+    "importInLesson": "Import questions into this lesson",
     "empty": {
       "noData": "No questions yet.",
       "noResults": "No questions match these filters."
@@ -151,5 +152,45 @@
     "blank": "Blank {number}",
     "blankMarker": "({number})",
     "yourAnswer": "Your answer"
+  },
+  "import": {
+    "title": "Import questions",
+    "breadcrumb": "Breadcrumb",
+    "loading": "Loading lesson",
+    "lessonErrorTitle": "Could not load the lesson",
+    "intro": "Add many questions to this lesson at once from a spreadsheet. Every imported question starts as pending review.",
+    "template": {
+      "title": "1. Download the template",
+      "description": "The template has one sheet per question type and an Instructions sheet that explains every column.",
+      "download": "Download template"
+    },
+    "form": {
+      "title": "2. Check your file",
+      "file": "Spreadsheet file (.xlsx)",
+      "hint": "Nothing is saved until you confirm the import.",
+      "check": "Check file"
+    },
+    "report": {
+      "title": "Check result",
+      "summary": "{total, plural, one {# row} other {# rows}} found · {valid, plural, one {# ready} other {# ready}} · {errors, plural, one {# problem} other {# problems}}",
+      "types": "Ready by type",
+      "errorsCaption": "Problems to fix",
+      "sheet": "Sheet",
+      "row": "Row",
+      "column": "Column",
+      "problem": "Problem",
+      "noColumn": "—",
+      "fixAndRetry": "Fix these problems in your file, then check it again. Nothing was imported.",
+      "pendingNote": "Imported questions stay pending review until a teacher approves them.",
+      "confirm": "{count, plural, one {Import # question} other {Import # questions}}"
+    },
+    "success": {
+      "title": "{count, plural, one {# question imported} other {# questions imported}} as pending review.",
+      "viewQuestions": "View the lesson's questions",
+      "another": "Import another file"
+    },
+    "toast": {
+      "imported": "Questions imported."
+    }
   }
 }

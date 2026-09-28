@@ -187,4 +187,37 @@
   <data name="AUDIT_LOG_PAGE_SIZE_INVALID" xml:space="preserve"><value>Page size is out of the allowed range.</value></data>
   <data name="AUDIT_LOG_FILTER_TOO_LONG" xml:space="preserve"><value>Filter text is too long.</value></data>
   <data name="AUDIT_LOG_DATE_RANGE_INVALID" xml:space="preserve"><value>The end date must be after the start date.</value></data>
+  <data name="QUESTION_IMPORT_FILE_REQUIRED" xml:space="preserve"><value>Choose a spreadsheet file.</value></data>
+  <data name="QUESTION_IMPORT_FILE_TYPE_INVALID" xml:space="preserve"><value>Upload an Excel file (.xlsx).</value></data>
+  <data name="QUESTION_IMPORT_FILE_TOO_LARGE" xml:space="preserve"><value>The file is too large.</value></data>
+  <data name="QUESTION_IMPORT_BATCH_ID_REQUIRED" xml:space="preserve"><value>The import batch id is missing.</value></data>
+  <data name="QUESTION_IMPORT_EMPTY" xml:space="preserve"><value>The file has no questions. Fill at least one row under the column names.</value></data>
+  <data name="QUESTION_IMPORT_TOO_MANY_ROWS" xml:space="preserve"><value>The file has more than {max} questions. Split it into smaller files.</value></data>
+  <data name="QUESTION_IMPORT_HAS_ERRORS" xml:space="preserve"><value>The file has {count} problems. Check it again and fix them before importing.</value></data>
+  <data name="QUESTION_IMPORT_BATCH_CONFLICT" xml:space="preserve"><value>This import was already used for a different file. Check the file again to start a new import.</value></data>
+  <data name="QUESTION_IMPORT_COLUMN_UNKNOWN" xml:space="preserve"><value>Unknown column "{column}". Use the column names from the template.</value></data>
+  <data name="QUESTION_IMPORT_COLUMN_DUPLICATE" xml:space="preserve"><value>The column "{column}" appears more than once.</value></data>
+  <data name="QUESTION_IMPORT_CELL_INVALID" xml:space="preserve"><value>The value in column "{column}" is not valid.</value></data>
+  <data name="QUESTION_IMPORT_OBJECTIVE_INVALID" xml:space="preserve"><value>The objective number is not one of this lesson's objectives.</value></data>
+  <data name="SPREADSHEET_UNREADABLE" xml:space="preserve"><value>The file could not be read as an Excel spreadsheet.</value></data>
+  <data name="QUESTION_IMPORT_HELP_INTRO" xml:space="preserve"><value>One sheet per question type (Mcq, Multi, TrueFalse, Fill, Short). Keep the column names in row 1; each row below is one question and is imported as pending review. Separate list values with |. Write math between $ signs, for example $F = ma$. Leave unused columns and sheets empty.</value></data>
+  <data name="QUESTION_IMPORT_HELP_STEM" xml:space="preserve"><value>Question text. Each line becomes a paragraph.</value></data>
+  <data name="QUESTION_IMPORT_HELP_STEM_FILL" xml:space="preserve"><value>Question text with each blank written as [[1]], [[2]] and so on, matching the blank columns.</value></data>
+  <data name="QUESTION_IMPORT_HELP_EXPLANATION" xml:space="preserve"><value>Optional explanation shown after answering.</value></data>
+  <data name="QUESTION_IMPORT_HELP_DIFFICULTY" xml:space="preserve"><value>easy, medium or hard.</value></data>
+  <data name="QUESTION_IMPORT_HELP_MAX_SCORE" xml:space="preserve"><value>Points, a whole number from 1. Empty means 1.</value></data>
+  <data name="QUESTION_IMPORT_HELP_OBJECTIVE" xml:space="preserve"><value>Optional objective number in the lesson (1 is the first objective).</value></data>
+  <data name="QUESTION_IMPORT_HELP_TAGS" xml:space="preserve"><value>Optional tags separated by |.</value></data>
+  <data name="QUESTION_IMPORT_HELP_OPTION" xml:space="preserve"><value>Option text. Fill at least two options.</value></data>
+  <data name="QUESTION_IMPORT_HELP_CORRECT_MCQ" xml:space="preserve"><value>The letter of the correct option, for example b.</value></data>
+  <data name="QUESTION_IMPORT_HELP_CORRECT_MULTI" xml:space="preserve"><value>The letters of every correct option separated by |, for example a|c.</value></data>
+  <data name="QUESTION_IMPORT_HELP_PARTIAL_CREDIT" xml:space="preserve"><value>true to give partial credit; false or empty for all or nothing.</value></data>
+  <data name="QUESTION_IMPORT_HELP_CORRECT_ANSWER" xml:space="preserve"><value>true or false.</value></data>
+  <data name="QUESTION_IMPORT_HELP_BLANK" xml:space="preserve"><value>Accepted answers for the blank with the same number, separated by |.</value></data>
+  <data name="QUESTION_IMPORT_HELP_UNIFY_LETTER_VARIANTS" xml:space="preserve"><value>true or empty to treat أ إ آ ا, ة ه and ى ي as the same letter; false to keep them different.</value></data>
+  <data name="QUESTION_IMPORT_HELP_ANSWER_KIND" xml:space="preserve"><value>numeric for a number answer, text for a word answer.</value></data>
+  <data name="QUESTION_IMPORT_HELP_VALUE" xml:space="preserve"><value>Numeric answers: the correct number.</value></data>
+  <data name="QUESTION_IMPORT_HELP_TOLERANCE" xml:space="preserve"><value>Numeric answers: allowed difference, 0 or more. Empty means 0.</value></data>
+  <data name="QUESTION_IMPORT_HELP_TOLERANCE_MODE" xml:space="preserve"><value>Numeric answers: absolute (plus or minus the tolerance) or percent (plus or minus that percent of the value). Empty means absolute.</value></data>
+  <data name="QUESTION_IMPORT_HELP_ACCEPTED_ANSWERS" xml:space="preserve"><value>Text answers: accepted answers separated by |.</value></data>
 </root>

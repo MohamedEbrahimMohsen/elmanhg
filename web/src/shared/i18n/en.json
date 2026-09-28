@@ -115,7 +115,20 @@
     "QUESTION_PAGE_SIZE_INVALID": "The page size is outside the allowed range.",
     "QUESTION_FILTER_TOO_LONG": "The search text is too long.",
     "QUESTION_VERSION_FILTER_INVALID": "The version must be 1 or more.",
-    "QUESTION_STATUS_INVALID": "Choose pending, approved or rejected."
+    "QUESTION_STATUS_INVALID": "Choose pending, approved or rejected.",
+    "QUESTION_IMPORT_FILE_REQUIRED": "Choose a spreadsheet file.",
+    "QUESTION_IMPORT_FILE_TYPE_INVALID": "Upload an Excel file (.xlsx).",
+    "QUESTION_IMPORT_FILE_TOO_LARGE": "The file is too large.",
+    "QUESTION_IMPORT_BATCH_ID_REQUIRED": "The import batch id is missing. Check the file again.",
+    "QUESTION_IMPORT_EMPTY": "The file has no questions. Fill at least one row under the column names.",
+    "QUESTION_IMPORT_TOO_MANY_ROWS": "The file has too many questions. Split it into smaller files.",
+    "QUESTION_IMPORT_HAS_ERRORS": "The file has problems. Check it again and fix them before importing.",
+    "QUESTION_IMPORT_BATCH_CONFLICT": "This import was already used for a different file. Check the file again.",
+    "QUESTION_IMPORT_COLUMN_UNKNOWN": "Unknown column \"{column}\". Use the column names from the template.",
+    "QUESTION_IMPORT_COLUMN_DUPLICATE": "The column \"{column}\" appears more than once.",
+    "QUESTION_IMPORT_CELL_INVALID": "The value in column \"{column}\" is not valid.",
+    "QUESTION_IMPORT_OBJECTIVE_INVALID": "The objective number is not one of this lesson's objectives.",
+    "SPREADSHEET_UNREADABLE": "The file could not be read as an Excel spreadsheet."
   },
   "error": {
     "title": "Something went wrong"

@@ -14,7 +14,8 @@
     { "key": "subjectId", "value": "" },
     { "key": "unitId", "value": "" },
     { "key": "lessonId", "value": "" },
-    { "key": "questionId", "value": "" }
+    { "key": "questionId", "value": "" },
+    { "key": "importBatchId", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -919,7 +920,7 @@
     },
     {
       "name": "Questions",
-      "description": "Admin only (Content.Manage). Set unitId (or run Create unit) and sign in as an admin first. Create lesson for questions stores lessonId; Create question stores questionId. Every question is created Pending at version 1; no request carries a status. Body and gradingSpec shapes per type: docs/question-schemas.md. A content edit (stem, body, grading spec, explanation, max score) bumps the version and returns an Approved question to Pending; difficulty, objective and tag edits do not. The type cannot change. Resubmit question only works on a Rejected question: it applies the edit and returns the question to Pending. The sample question is Pending, so that request expects 400 QUESTION_NOT_REJECTED.",
+      "description": "Admin only (Content.Manage). Set unitId (or run Create unit) and sign in as an admin first. Create lesson for questions stores lessonId; Create question stores questionId. Every question is created Pending at version 1; no request carries a status. Body and gradingSpec shapes per type: docs/question-schemas.md. A content edit (stem, body, grading spec, explanation, max score) bumps the version and returns an Approved question to Pending; difficulty, objective and tag edits do not. The type cannot change. Resubmit question only works on a Rejected question: it applies the edit and returns the question to Pending. The sample question is Pending, so that request expects 400 QUESTION_NOT_REJECTED. The question import requests need a filled .xlsx from Download question import template chosen in the file field: Preview checks it and saves nothing (it also sets a fresh importBatchId); Import questions creates every row as Pending in one go, and re-sending the same batch id and file replays the first result (docs/question-import.md).",
       "item": [
         {
           "name": "Create lesson for questions",
@@ -1121,6 +1122,102 @@
               "mode": "raw",
               "raw": "{\n  \"type\": \"Mcq\",\n  \"stem\": \"<p>3 + 1 = ?</p>\",\n  \"body\": { \"options\": [{ \"id\": \"a\", \"text\": \"3\" }, { \"id\": \"b\", \"text\": \"4\" }] },\n  \"gradingSpec\": { \"correctOptionId\": \"b\" },\n  \"explanation\": \"<p>Add the numbers.</p>\",\n  \"difficulty\": \"Easy\",\n  \"objectiveId\": null,\n  \"tags\": [\"arithmetic\"],\n  \"maxScore\": 1\n}",
               "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download question import template",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/question-imports/template",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "question-imports", "template"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Preview question import",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"importBatchId\", pm.variables.replaceIn(\"{{$guid}}\"));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/question-imports/preview",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "question-imports", "preview"]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "lessonId", "value": "{{lessonId}}", "type": "text" },
+                { "key": "file", "type": "file", "src": "" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Import questions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/question-imports",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "question-imports"]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "lessonId", "value": "{{lessonId}}", "type": "text" },
+                { "key": "batchId", "value": "{{importBatchId}}", "type": "text" },
+                { "key": "file", "type": "file", "src": "" }
+              ]
             }
           },
           "response": []

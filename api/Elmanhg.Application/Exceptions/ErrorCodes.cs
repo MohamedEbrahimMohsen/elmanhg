@@ -102,6 +102,23 @@ public static class ErrorCodes
     public const string QuestionVersionFilterInvalid = "QUESTION_VERSION_FILTER_INVALID";
     public const string QuestionStatusInvalid = "QUESTION_STATUS_INVALID";
 
+    // QUESTION IMPORTS
+    public const string QuestionImportFileRequired = "QUESTION_IMPORT_FILE_REQUIRED";
+    public const string QuestionImportFileTypeInvalid = "QUESTION_IMPORT_FILE_TYPE_INVALID";
+    public const string QuestionImportFileTooLarge = "QUESTION_IMPORT_FILE_TOO_LARGE";
+    public const string QuestionImportBatchIdRequired = "QUESTION_IMPORT_BATCH_ID_REQUIRED";
+    public const string QuestionImportEmpty = "QUESTION_IMPORT_EMPTY";
+    public const string QuestionImportTooManyRows = "QUESTION_IMPORT_TOO_MANY_ROWS";
+    public const string QuestionImportHasErrors = "QUESTION_IMPORT_HAS_ERRORS";
+    public const string QuestionImportBatchConflict = "QUESTION_IMPORT_BATCH_CONFLICT";
+    public const string QuestionImportColumnUnknown = "QUESTION_IMPORT_COLUMN_UNKNOWN";
+    public const string QuestionImportColumnDuplicate = "QUESTION_IMPORT_COLUMN_DUPLICATE";
+    public const string QuestionImportCellInvalid = "QUESTION_IMPORT_CELL_INVALID";
+    public const string QuestionImportObjectiveInvalid = "QUESTION_IMPORT_OBJECTIVE_INVALID";
+
+    // SPREADSHEETS
+    public const string SpreadsheetUnreadable = "SPREADSHEET_UNREADABLE";
+
     // AUDIT LOGS
     public const string AuditLogPageNumberInvalid = "AUDIT_LOG_PAGE_NUMBER_INVALID";
     public const string AuditLogPageSizeInvalid = "AUDIT_LOG_PAGE_SIZE_INVALID";

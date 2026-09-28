@@ -25,6 +25,7 @@ public partial class Question : AuditEntity, IAuditedEntity
     public Guid? ValidatedBy { get; private set; }
     public DateTimeOffset? ValidatedAt { get; private set; }
     public string? RejectionReason { get; private set; }
+    public Guid? ImportBatchId { get; private set; }
     public List<QuestionRevision> Revisions { get; private set; } = [];
 
     public QuestionContent CurrentContent => new(Stem, Body, GradingSpec, Explanation, MaxScore);

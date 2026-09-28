@@ -184,4 +184,4 @@ The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of
 
 ## Changing a schema
 
-A new field or rule changes the schema record, its rules, this document and the web editor in the same change. Rows already stored in the old shape need a data migration that rewrites them to the new canonical shape.
+A new field or rule changes the schema record, its rules, this document and the web editor in the same change. The spreadsheet import (`docs/question-import.md`) builds the same shapes from columns; a schema change updates its columns, parser and template in the same change. Rows already stored in the old shape need a data migration that rewrites them to the new canonical shape.

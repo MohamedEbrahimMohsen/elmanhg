@@ -559,6 +559,153 @@
         }
       }
     },
+    "/api/question-imports/template": {
+      "get": {
+        "tags": [
+          "QuestionImports"
+        ],
+        "operationId": "GetQuestionImportTemplate",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stream"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/question-imports/preview": {
+      "post": {
+        "tags": [
+          "QuestionImports"
+        ],
+        "operationId": "PreviewQuestionImport",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "lessonId": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "file": {
+                        "$ref": "#/components/schemas/IFormFile"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionImportPreviewResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionImportPreviewResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionImportPreviewResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/question-imports": {
+      "post": {
+        "tags": [
+          "QuestionImports"
+        ],
+        "operationId": "ImportQuestions",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "lessonId": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "batchId": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "file": {
+                        "$ref": "#/components/schemas/IFormFile"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportQuestionsResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportQuestionsResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportQuestionsResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/questions": {
       "post": {
         "tags": [
@@ -2179,6 +2326,31 @@
         "type": "string",
         "format": "binary"
       },
+      "ImportQuestionsResult": {
+        "required": [
+          "batchId",
+          "createdCount",
+          "replayed"
+        ],
+        "type": "object",
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "replayed": {
+            "type": "boolean"
+          }
+        }
+      },
       "JsonElement": { },
       "LessonDetailResult": {
         "required": [
@@ -2587,6 +2759,96 @@
           }
         }
       },
+      "QuestionImportPreviewResult": {
+        "required": [
+          "totalRows",
+          "validRows",
+          "types",
+          "errors"
+        ],
+        "type": "object",
+        "properties": {
+          "totalRows": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "validRows": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "types": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionImportTypeCount"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionImportRowError"
+            }
+          }
+        }
+      },
+      "QuestionImportRowError": {
+        "required": [
+          "sheet",
+          "row",
+          "column",
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string"
+          },
+          "row": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "column": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "QuestionImportTypeCount": {
+        "required": [
+          "type",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/QuestionType"
+          },
+          "count": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "QuestionListItemResult": {
         "required": [
           "id",
@@ -2715,6 +2977,10 @@
             "type": "string"
           }
         }
+      },
+      "Stream": {
+        "type": "string",
+        "format": "binary"
       },
       "SubjectDetailResult": {
         "required": [
@@ -3072,6 +3338,9 @@
     },
     {
       "name": "Subjects"
+    },
+    {
+      "name": "QuestionImports"
     },
     {
       "name": "Questions"

@@ -1,5 +1,7 @@
 using Core.Auditing;
 using Core.EntityFrameworkCore.Context;
+using Core.Errors;
+using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
@@ -8,6 +10,7 @@ using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.Units;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Elmanhg.Infrastructure.Data.Context;
 
@@ -15,6 +18,8 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
 {
     // Enum names are short identifiers; the column width is a schema invariant, not a tunable.
     private const int EnumColumnMaxLength = 50;
+    // A SHA-256 digest is 32 bytes, 64 lower-case hex characters; a schema invariant.
+    private const int Sha256HexLength = 64;
 
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<TeacherSubject> TeacherSubjects { get; set; }
@@ -23,6 +28,20 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public DbSet<LessonObjective> LessonObjectives { get; set; }
     public DbSet<Question> Questions { get; set; }
     public DbSet<QuestionRevision> QuestionRevisions { get; set; }
+    public DbSet<QuestionImportBatch> QuestionImportBatches { get; set; }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await base.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, TableName: nameof(QuestionImportBatches) })
+        {
+            // Two confirms of one import batch id passed the replay check together; the loser surfaces as the batch conflict, which the import pipeline resolves.
+            throw new ConflictCoreException(ErrorCodes.QuestionImportBatchConflict, innerException: exception);
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,6 +51,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         ConfigureUnits(modelBuilder);
         ConfigureLessons(modelBuilder);
         ConfigureQuestions(modelBuilder);
+        ConfigureQuestionImportBatches(modelBuilder);
         ConfigureTeacherSubjects(modelBuilder);
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
@@ -97,6 +117,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
             builder.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<LessonObjective>().WithMany().HasForeignKey(x => x.ObjectiveId).OnDelete(DeleteBehavior.Restrict);
             builder.HasMany(x => x.Revisions).WithOne().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<QuestionImportBatch>().WithMany().HasForeignKey(x => x.ImportBatchId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.LessonId, x.ValidationStatus });
             builder.HasIndex(x => new { x.SubjectId, x.ValidationStatus });
         });
@@ -105,6 +126,16 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
             builder.Property(x => x.Id).ValueGeneratedNever();
             builder.Property(x => x.Snapshot).IsRequired().HasColumnType("jsonb");
             builder.HasIndex(x => new { x.QuestionId, x.Version }).IsUnique();
+        });
+    }
+
+    private static void ConfigureQuestionImportBatches(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<QuestionImportBatch>(builder =>
+        {
+            builder.Property(x => x.Id).ValueGeneratedNever();
+            builder.Property(x => x.FileHash).IsRequired().HasMaxLength(Sha256HexLength);
+            builder.HasOne<Lesson>().WithMany().HasForeignKey(x => x.LessonId).OnDelete(DeleteBehavior.Restrict);
         });
     }
 
@@ -128,5 +159,6 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         modelBuilder.Entity<LessonObjective>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<Question>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<QuestionRevision>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<QuestionImportBatch>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

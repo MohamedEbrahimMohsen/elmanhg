@@ -52,6 +52,10 @@ async function parse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     throw await toApiError(response);
   }
+  const contentType = response.headers.get('Content-Type') ?? '';
+  if (contentType !== '' && !contentType.includes('json')) {
+    return (await response.blob()) as T;
+  }
   const body = await response.text();
   if (body === '') {
     return undefined as T;

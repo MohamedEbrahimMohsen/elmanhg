@@ -1,12 +1,12 @@
 # Elmanhg — autopilot progress
 
-Last updated: 2026-09-28, after story #64 merged (main at `ef8af53`).
+Last updated: 2026-09-28, cloud session, after story #65 merged (main at `d4429a1`).
 The laptop run stopped here because the dev asked it to. A Claude Code cloud session resumes at **#65**
 (see "Running in a cloud session" below).
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (9 of 59)
+## Finished stories (10 of 59)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -19,17 +19,17 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 7 | #61 [E2.S2] Lesson authoring | #143 | 2 | skipped (too many files) | #144 |
 | 8 | #62 [E2.S3] Lesson lifecycle (+ lesson reorder and delete) | #145 | 1 | 1 comment, fixed | #146 |
 | 9 | #64 [E3.S1] Question aggregate with typed body and grading spec | #147 | 2 | skipped (too many files) | #148 |
+| 10 | #65 [E3.S2] Admin question editor, live preview, test grader | #150 | 2 | skipped (too many files) | #151 |
 
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (50), in run order
+## Remaining stories (49), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
 | Order | Issue | Story |
 |---|---|---|
-| 1 | #65 | [E3.S2] Admin question editor with live preview and test grader |
 | 2 | #66 | [E3.S3] Bulk question import from spreadsheet |
 | 3 | #67 | [E3.S4] Servable rule |
 | 4 | #68 | [E3.S5] Teacher validation queue |
@@ -113,6 +113,7 @@ The flow is `.claude/commands/feature.md`. Every stage is a fresh subagent: `fea
   - Admins can never approve questions; approval only happens through `Question.Approve(TeacherSubject)`.
 - **Auditing:** mark commands `IAuditableCommand` and entities `IAuditedEntity`. The audit table is append-only, enforced by a database trigger. Details are in `docs/audit-log.md`.
 - **Student-facing lesson reads return Published lessons only** (PRD §5.2). The servable rule for questions is story #67.
+- **Graders already exist (from #65):** the Arabic answer normaliser and deterministic graders for all five v1 types live in `api/Elmanhg.Domain/Questions/Grading/`, with `POST /api/questions/grade-draft`. #70–#72 extend them rather than create them: #70 adds per-rule toggles and the Egyptian spelling corpus, and #71/#72 add feedback text. Edge cases are in #151. `Question.Reject` and `Resubmit` exist; #68 adds the teacher approve/reject commands and UI.
 - **Question content** is jsonb, one schema per type, documented in `docs/question-schemas.md`. A content edit on an Approved question sends it back to Pending, bumps the version, and saves a `QuestionRevision`.
 - **Web:**
   - Every visual value comes from `.claude/design-system.md` tokens (Glass, light only).
@@ -155,4 +156,4 @@ per-story `feature/<n>-<slug>` branches, PRs, and squash-merge on green CI.
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148 · `dev-decision`: none open (#135 confirmed and closed).
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151 · `dev-decision`: none open (#135 confirmed and closed).

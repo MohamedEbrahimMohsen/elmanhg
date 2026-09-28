@@ -187,4 +187,37 @@
   <data name="AUDIT_LOG_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة خارج النطاق المسموح.</value></data>
   <data name="AUDIT_LOG_FILTER_TOO_LONG" xml:space="preserve"><value>نص التصفية طويل جدا.</value></data>
   <data name="AUDIT_LOG_DATE_RANGE_INVALID" xml:space="preserve"><value>يجب ان يكون تاريخ النهاية بعد تاريخ البداية.</value></data>
+  <data name="QUESTION_IMPORT_FILE_REQUIRED" xml:space="preserve"><value>اختر ملف جدول بيانات.</value></data>
+  <data name="QUESTION_IMPORT_FILE_TYPE_INVALID" xml:space="preserve"><value>ارفع ملف اكسل (.xlsx).</value></data>
+  <data name="QUESTION_IMPORT_FILE_TOO_LARGE" xml:space="preserve"><value>حجم الملف كبير جدا.</value></data>
+  <data name="QUESTION_IMPORT_BATCH_ID_REQUIRED" xml:space="preserve"><value>معرف دفعة الاستيراد مفقود.</value></data>
+  <data name="QUESTION_IMPORT_EMPTY" xml:space="preserve"><value>الملف لا يحتوي على اسئلة. املأ صفا واحدا على الاقل تحت اسماء الاعمدة.</value></data>
+  <data name="QUESTION_IMPORT_TOO_MANY_ROWS" xml:space="preserve"><value>الملف يحتوي على اكثر من {max} سؤال. قسمه الى ملفات اصغر.</value></data>
+  <data name="QUESTION_IMPORT_HAS_ERRORS" xml:space="preserve"><value>الملف يحتوي على {count} مشكلة. افحصه مرة اخرى وصحح المشاكل قبل الاستيراد.</value></data>
+  <data name="QUESTION_IMPORT_BATCH_CONFLICT" xml:space="preserve"><value>تم استخدام عملية الاستيراد هذه لملف مختلف. افحص الملف مرة اخرى لبدء استيراد جديد.</value></data>
+  <data name="QUESTION_IMPORT_COLUMN_UNKNOWN" xml:space="preserve"><value>العمود "{column}" غير معروف. استخدم اسماء الاعمدة من القالب.</value></data>
+  <data name="QUESTION_IMPORT_COLUMN_DUPLICATE" xml:space="preserve"><value>العمود "{column}" مكرر.</value></data>
+  <data name="QUESTION_IMPORT_CELL_INVALID" xml:space="preserve"><value>القيمة في العمود "{column}" غير صحيحة.</value></data>
+  <data name="QUESTION_IMPORT_OBJECTIVE_INVALID" xml:space="preserve"><value>رقم الهدف ليس من اهداف هذا الدرس.</value></data>
+  <data name="SPREADSHEET_UNREADABLE" xml:space="preserve"><value>تعذر قراءة الملف كجدول اكسل.</value></data>
+  <data name="QUESTION_IMPORT_HELP_INTRO" xml:space="preserve"><value>ورقة لكل نوع سؤال (Mcq و Multi و TrueFalse و Fill و Short). لا تغير اسماء الاعمدة في الصف الاول، وكل صف بعده سؤال واحد يستورد قيد المراجعة. افصل بين عناصر القائمة بالرمز |. اكتب المعادلات بين علامتي $ مثل $F = ma$. اترك الاعمدة والاوراق غير المستخدمة فارغة.</value></data>
+  <data name="QUESTION_IMPORT_HELP_STEM" xml:space="preserve"><value>نص السؤال. كل سطر يصبح فقرة.</value></data>
+  <data name="QUESTION_IMPORT_HELP_STEM_FILL" xml:space="preserve"><value>نص السؤال مع كتابة كل فراغ بالشكل [[1]] و [[2]] بما يطابق اعمدة الفراغات.</value></data>
+  <data name="QUESTION_IMPORT_HELP_EXPLANATION" xml:space="preserve"><value>شرح اختياري يظهر بعد الاجابة.</value></data>
+  <data name="QUESTION_IMPORT_HELP_DIFFICULTY" xml:space="preserve"><value>easy او medium او hard (سهل او متوسط او صعب).</value></data>
+  <data name="QUESTION_IMPORT_HELP_MAX_SCORE" xml:space="preserve"><value>الدرجة، عدد صحيح من 1. الخانة الفارغة تعني 1.</value></data>
+  <data name="QUESTION_IMPORT_HELP_OBJECTIVE" xml:space="preserve"><value>رقم الهدف في الدرس، اختياري (1 هو الهدف الاول).</value></data>
+  <data name="QUESTION_IMPORT_HELP_TAGS" xml:space="preserve"><value>وسوم اختيارية مفصولة بالرمز |.</value></data>
+  <data name="QUESTION_IMPORT_HELP_OPTION" xml:space="preserve"><value>نص الاختيار. املأ اختيارين على الاقل.</value></data>
+  <data name="QUESTION_IMPORT_HELP_CORRECT_MCQ" xml:space="preserve"><value>حرف الاختيار الصحيح، مثل b.</value></data>
+  <data name="QUESTION_IMPORT_HELP_CORRECT_MULTI" xml:space="preserve"><value>حروف كل الاختيارات الصحيحة مفصولة بالرمز |، مثل a|c.</value></data>
+  <data name="QUESTION_IMPORT_HELP_PARTIAL_CREDIT" xml:space="preserve"><value>true لمنح درجة جزئية، و false او فارغ للدرجة كاملة او صفر.</value></data>
+  <data name="QUESTION_IMPORT_HELP_CORRECT_ANSWER" xml:space="preserve"><value>true (صح) او false (خطأ).</value></data>
+  <data name="QUESTION_IMPORT_HELP_BLANK" xml:space="preserve"><value>الاجابات المقبولة للفراغ الذي يحمل نفس الرقم، مفصولة بالرمز |.</value></data>
+  <data name="QUESTION_IMPORT_HELP_UNIFY_LETTER_VARIANTS" xml:space="preserve"><value>true او فارغ لاعتبار أ إ آ ا و ة ه و ى ي حرفا واحدا، و false للتفريق بينها.</value></data>
+  <data name="QUESTION_IMPORT_HELP_ANSWER_KIND" xml:space="preserve"><value>numeric لاجابة رقمية، و text لاجابة نصية.</value></data>
+  <data name="QUESTION_IMPORT_HELP_VALUE" xml:space="preserve"><value>للاجابة الرقمية: الرقم الصحيح.</value></data>
+  <data name="QUESTION_IMPORT_HELP_TOLERANCE" xml:space="preserve"><value>للاجابة الرقمية: الفرق المسموح، 0 او اكثر. الخانة الفارغة تعني 0.</value></data>
+  <data name="QUESTION_IMPORT_HELP_TOLERANCE_MODE" xml:space="preserve"><value>للاجابة الرقمية: absolute (زائد او ناقص الفرق) او percent (زائد او ناقص نسبة مئوية من القيمة). الخانة الفارغة تعني absolute.</value></data>
+  <data name="QUESTION_IMPORT_HELP_ACCEPTED_ANSWERS" xml:space="preserve"><value>للاجابة النصية: الاجابات المقبولة مفصولة بالرمز |.</value></data>
 </root>

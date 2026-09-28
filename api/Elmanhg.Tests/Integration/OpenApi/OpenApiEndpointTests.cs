@@ -45,4 +45,23 @@ public sealed class OpenApiEndpointTests(ApiFactory factory)
         schemas.GetProperty("QuestionType").GetProperty("enum").EnumerateArray().Select(x => x.GetString()).Should().Equal("Mcq", "Multi", "TrueFalse", "Fill", "Short");
         schemas.GetProperty("QuestionValidationStatus").GetProperty("enum").EnumerateArray().Select(x => x.GetString()).Should().Contain("Rejected");
     }
+
+    [Fact]
+    public async Task Get_OpenApiDocument_DescribesImportTemplateAsBinary()
+    {
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync("/openapi/v1.json", TestContext.Current.CancellationToken);
+
+        await using var body = await response.Content.ReadAsStreamAsync(TestContext.Current.CancellationToken);
+        using var document = await JsonDocument.ParseAsync(body, cancellationToken: TestContext.Current.CancellationToken);
+        var schema = document.RootElement.GetProperty("paths").GetProperty("/api/question-imports/template").GetProperty("get").GetProperty("responses").GetProperty("200").GetProperty("content").GetProperty("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").GetProperty("schema");
+        if (schema.TryGetProperty("$ref", out var reference))
+        {
+            schema = document.RootElement.GetProperty("components").GetProperty("schemas").GetProperty(reference.GetString()!.Split('/')[^1]);
+        }
+
+        schema.GetProperty("type").GetString().Should().Be("string");
+        schema.GetProperty("format").GetString().Should().Be("binary");
+    }
 }

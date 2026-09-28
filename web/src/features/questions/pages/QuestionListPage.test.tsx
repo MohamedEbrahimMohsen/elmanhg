@@ -168,6 +168,15 @@ describe('QuestionListPage', () => {
     expect(requests.at(-1)?.searchParams.get('lessonId')).toBe(lessonId);
   });
 
+  it('links to the question import for the filtered lesson', async () => {
+    openList(`/admin/questions?lessonId=${lessonId}`);
+
+    expect(await screen.findByRole('link', { name: 'Import questions into this lesson' })).toHaveAttribute(
+      'href',
+      `/admin/question/import/${lessonId}`,
+    );
+  });
+
   it('moves to the next page', async () => {
     server.use(
       getGetQuestionsMockHandler(({ request }) => {
