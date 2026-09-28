@@ -122,7 +122,9 @@
       "description": "وصف الصورة",
       "insert": "رفع وإدراج",
       "uploaded": "تم إدراج الصورة."
-    }
+    },
+    "newQuestion": "سؤال جديد",
+    "viewQuestions": "أسئلة الدرس"
   },
   "actions": {
     "moveUp": "نقل {name} لأعلى",

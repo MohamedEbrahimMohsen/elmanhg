@@ -8,6 +8,35 @@ public partial class Question
 {
     public void Approve(TeacherSubject assignment)
     {
+        EnsureValidatorCanDecide(assignment);
+
+        var now = DateTimeOffset.UtcNow;
+        ValidationStatus = QuestionValidationStatus.Approved;
+        ValidatedBy = assignment.TeacherId;
+        ValidatedAt = now;
+        UpdatedBy = assignment.TeacherId;
+        UpdationDate = now;
+    }
+
+    public void Reject(TeacherSubject assignment, string reason)
+    {
+        EnsureValidatorCanDecide(assignment);
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            throw new BusinessRuleViolationCoreException(ErrorCodes.QuestionRejectionReasonRequired);
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        ValidationStatus = QuestionValidationStatus.Rejected;
+        RejectionReason = reason.Trim();
+        ValidatedBy = assignment.TeacherId;
+        ValidatedAt = now;
+        UpdatedBy = assignment.TeacherId;
+        UpdationDate = now;
+    }
+
+    private void EnsureValidatorCanDecide(TeacherSubject assignment)
+    {
         if (ValidationStatus != QuestionValidationStatus.Pending)
         {
             throw new BusinessRuleViolationCoreException(ErrorCodes.QuestionNotPending);
@@ -17,12 +46,5 @@ public partial class Question
         {
             throw new BusinessRuleViolationCoreException(ErrorCodes.QuestionValidatorNotAssigned);
         }
-
-        var now = DateTimeOffset.UtcNow;
-        ValidationStatus = QuestionValidationStatus.Approved;
-        ValidatedBy = assignment.TeacherId;
-        ValidatedAt = now;
-        UpdatedBy = assignment.TeacherId;
-        UpdationDate = now;
     }
 }

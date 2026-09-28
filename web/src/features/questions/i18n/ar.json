@@ -1,0 +1,155 @@
+{
+  "types": {
+    "Mcq": "اختيار من متعدد",
+    "Multi": "اختيار متعدد الإجابات",
+    "TrueFalse": "صح أو خطأ",
+    "Fill": "أكمل الفراغ",
+    "Short": "إجابة قصيرة"
+  },
+  "statuses": {
+    "Pending": "قيد المراجعة",
+    "Approved": "معتمد",
+    "Rejected": "مرفوض"
+  },
+  "difficulties": {
+    "Easy": "سهل",
+    "Medium": "متوسط",
+    "Hard": "صعب"
+  },
+  "list": {
+    "title": "بنك الأسئلة",
+    "count": "{count, plural, zero {لا أسئلة} one {سؤال واحد} two {سؤالان} few {# أسئلة} many {# سؤالًا} other {# سؤال}}",
+    "loading": "جارٍ تحميل الأسئلة",
+    "errorTitle": "تعذر تحميل الأسئلة",
+    "hint": "لإضافة سؤال افتح الدرس من شجرة المحتوى.",
+    "lessonFilter": "تعرض أسئلة درس واحد.",
+    "newInLesson": "سؤال جديد في هذا الدرس",
+    "empty": {
+      "noData": "لا توجد أسئلة بعد.",
+      "noResults": "لا توجد أسئلة تطابق هذه الفلاتر."
+    },
+    "table": {
+      "caption": "الأسئلة",
+      "question": "السؤال",
+      "lesson": "الدرس",
+      "type": "النوع",
+      "status": "الحالة",
+      "version": "الإصدار",
+      "teacher": "المعلّم",
+      "rejectionReason": "سبب الرفض",
+      "actions": "الإجراءات",
+      "versionValue": "v{version}",
+      "noTeacher": "—",
+      "edit": "تعديل",
+      "editAndResubmit": "تعديل وإعادة إرسال"
+    },
+    "filters": {
+      "status": "الحالة",
+      "type": "النوع",
+      "subject": "المادة",
+      "teacher": "المعلّم",
+      "minVersion": "الإصدار على الأقل",
+      "rejectionReason": "سبب الرفض يحتوي على",
+      "all": "الكل",
+      "apply": "تطبيق الفلاتر",
+      "clear": "مسح الفلاتر",
+      "errors": {
+        "minVersion": "اكتب رقمًا صحيحًا 1 أو أكثر.",
+        "rejectionReasonTooLong": "نص البحث طويل جدًا."
+      }
+    }
+  },
+  "editor": {
+    "newTitle": "سؤال جديد",
+    "editTitle": "تحرير سؤال",
+    "breadcrumb": "مسار التنقل",
+    "questionsLink": "الأسئلة",
+    "loading": "جارٍ تحميل السؤال",
+    "errorTitle": "تعذر تحميل السؤال",
+    "lessonErrorTitle": "تعذر تحميل الدرس",
+    "approvedWarning": "تعديل نص السؤال أو الخيارات أو الإجابة أو الشرح أو الدرجة يعيده إلى \"قيد المراجعة\" ويزيد الإصدار. تعديل الصعوبة أو الهدف أو الوسوم فقط لا يغيّر الحالة.",
+    "rejectionReason": "سبب الرفض: {reason}",
+    "versionBadge": "v{version}",
+    "save": "حفظ",
+    "create": "إنشاء السؤال",
+    "resubmit": "حفظ وإعادة الإرسال للمراجعة",
+    "created": "تم إنشاء السؤال.",
+    "saved": "تم حفظ السؤال.",
+    "resubmitted": "أعيد إرسال السؤال للمراجعة.",
+    "fields": {
+      "type": "النوع",
+      "typeLocked": "لا يمكن تغيير نوع السؤال.",
+      "stem": "نص السؤال",
+      "stemFillHint": "اكتب [[1]] مكان الفراغ الأول و[[2]] مكان الثاني وهكذا.",
+      "explanation": "الشرح (يظهر بعد الإجابة)",
+      "difficulty": "الصعوبة",
+      "objective": "الهدف",
+      "noObjective": "بدون هدف",
+      "maxScore": "الدرجة",
+      "tags": "الوسوم",
+      "tagsHint": "افصل الوسوم بفواصل."
+    },
+    "options": {
+      "legend": "الخيارات",
+      "option": "الخيار {number}",
+      "correct": "الخيار {number} صحيح",
+      "add": "إضافة خيار",
+      "remove": "حذف الخيار {number}",
+      "partialCredit": "احتساب درجة جزئية"
+    },
+    "trueFalse": {
+      "answer": "الإجابة الصحيحة",
+      "choose": "اختر",
+      "true": "صح",
+      "false": "خطأ"
+    },
+    "blanks": {
+      "legend": "الفراغات",
+      "accepted": "الإجابات المقبولة للفراغ {number} (إجابة في كل سطر)",
+      "add": "إضافة فراغ",
+      "remove": "حذف الفراغ {number}",
+      "unify": "اعتبار صور الحروف (أ إ آ، ة ه، ى ي) واحدة"
+    },
+    "short": {
+      "answerKind": "نوع الإجابة",
+      "numeric": "رقمية",
+      "text": "نصية",
+      "value": "القيمة الصحيحة",
+      "tolerance": "السماحية",
+      "toleranceMode": "نوع السماحية",
+      "absolute": "± مطلق",
+      "percent": "± نسبة مئوية",
+      "accepted": "الإجابات المقبولة (إجابة في كل سطر)"
+    },
+    "errors": {
+      "maxScore": "اكتب درجة صحيحة من 1 إلى 100.",
+      "optionsCount": "أضف خيارين على الأقل.",
+      "correctOption": "حدد إجابة صحيحة واحدة فقط.",
+      "correctOptions": "حدد إجابة صحيحة واحدة على الأقل.",
+      "trueFalseAnswer": "اختر الإجابة الصحيحة.",
+      "blanksCount": "أضف فراغًا واحدًا على الأقل.",
+      "acceptedAnswers": "أضف إجابة مقبولة واحدة على الأقل.",
+      "blankPlaceholder": "ضع [[id]] لكل فراغ مرة واحدة فقط في نص السؤال.",
+      "number": "اكتب رقمًا.",
+      "tolerance": "اكتب سماحية 0 أو أكثر."
+    }
+  },
+  "preview": {
+    "title": "معاينة الطالب",
+    "tryAnswer": "جرّب الإجابة",
+    "grading": "جارٍ التصحيح…",
+    "correct": "إجابة صحيحة",
+    "partial": "إجابة صحيحة جزئيًا",
+    "incorrect": "إجابة خاطئة",
+    "score": "الدرجة {score} / {maxScore}",
+    "gradeFailed": "لا يمكن تصحيح هذه المسودة بعد."
+  },
+  "view": {
+    "answerLegend": "إجابتك",
+    "true": "صح",
+    "false": "خطأ",
+    "blank": "الفراغ {number}",
+    "blankMarker": "({number})",
+    "yourAnswer": "إجابتك"
+  }
+}

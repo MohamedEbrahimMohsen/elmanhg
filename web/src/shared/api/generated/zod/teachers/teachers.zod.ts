@@ -7,6 +7,12 @@
 import * as zod from 'zod';
 
 
+export const GetTeachersResponseItem = zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+})
+export const GetTeachersResponse = zod.array(GetTeachersResponseItem)
+
 export const AssignTeacherSubjectParams = zod.object({
   "teacherId": zod.uuid(),
   "subjectId": zod.uuid()

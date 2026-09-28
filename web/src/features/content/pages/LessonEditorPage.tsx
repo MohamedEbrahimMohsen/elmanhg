@@ -1,6 +1,7 @@
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useGetLesson } from '@/shared/api/generated/lessons/lessons';
+import { Button } from '@/shared/ui/button';
 import { ContentErrorState } from '../components/ContentErrorState';
 import { ContentListSkeleton } from '../components/ContentListSkeleton';
 import { LessonActions } from '../components/LessonActions';
@@ -60,6 +61,20 @@ export function LessonEditorPage({ lessonId }: LessonEditorPageProps) {
           />
         ) : null}
       </div>
+      {data ? (
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="secondary" size="sm">
+            <Link to="/admin/question/new/$lessonId" params={{ lessonId: data.id }}>
+              {t('lessonEditor.newQuestion')}
+            </Link>
+          </Button>
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/admin/questions" search={{ lessonId: data.id }}>
+              {t('lessonEditor.viewQuestions')}
+            </Link>
+          </Button>
+        </div>
+      ) : null}
       {renderEditor()}
     </section>
   );

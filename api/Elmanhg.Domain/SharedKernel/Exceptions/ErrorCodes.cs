@@ -25,4 +25,6 @@ public static class ErrorCodes
     public const string QuestionTypeImmutable = "QUESTION_TYPE_IMMUTABLE";
     public const string QuestionNotPending = "QUESTION_NOT_PENDING";
     public const string QuestionValidatorNotAssigned = "QUESTION_VALIDATOR_NOT_ASSIGNED";
+    public const string QuestionNotRejected = "QUESTION_NOT_REJECTED";
+    public const string QuestionRejectionReasonRequired = "QUESTION_REJECTION_REASON_REQUIRED";
 }

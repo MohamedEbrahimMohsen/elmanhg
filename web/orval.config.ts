@@ -26,7 +26,12 @@ export default defineConfig({
       mode: 'tags-split',
       target: 'src/shared/api/generated/zod',
       fileExtension: '.zod.ts',
-      override: { operations: { GetAuditLogs: { zod: { generate: { query: false } } } } },
+      override: {
+        operations: {
+          GetAuditLogs: { zod: { generate: { query: false } } },
+          GetQuestions: { zod: { generate: { query: false } } },
+        },
+      },
     },
   },
 });

@@ -5,4 +5,11 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type QuestionDifficulty = number;
+export type QuestionDifficulty = typeof QuestionDifficulty[keyof typeof QuestionDifficulty];
+
+
+export const QuestionDifficulty = {
+  Easy: 'Easy',
+  Medium: 'Medium',
+  Hard: 'Hard',
+} as const;

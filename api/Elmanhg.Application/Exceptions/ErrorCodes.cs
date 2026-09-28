@@ -95,6 +95,12 @@ public static class ErrorCodes
     public const string QuestionAnswerKindRequired = "QUESTION_ANSWER_KIND_REQUIRED";
     public const string QuestionNumericValueRequired = "QUESTION_NUMERIC_VALUE_REQUIRED";
     public const string QuestionToleranceInvalid = "QUESTION_TOLERANCE_INVALID";
+    public const string QuestionAnswerInvalid = "QUESTION_ANSWER_INVALID";
+    public const string QuestionPageNumberInvalid = "QUESTION_PAGE_NUMBER_INVALID";
+    public const string QuestionPageSizeInvalid = "QUESTION_PAGE_SIZE_INVALID";
+    public const string QuestionFilterTooLong = "QUESTION_FILTER_TOO_LONG";
+    public const string QuestionVersionFilterInvalid = "QUESTION_VERSION_FILTER_INVALID";
+    public const string QuestionStatusInvalid = "QUESTION_STATUS_INVALID";
 
     // AUDIT LOGS
     public const string AuditLogPageNumberInvalid = "AUDIT_LOG_PAGE_NUMBER_INVALID";

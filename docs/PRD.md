@@ -124,7 +124,7 @@ Transitions: **Publish** Draft or Archived → Published (sets `published_at`). 
 
 Rules:
 - A question is created as Pending. Only a Teacher assigned to the question's subject can Approve or Reject.
-- Rejection requires a reason. Admin sees the reason and may edit and resubmit.
+- Rejection requires a reason. Admin sees the reason and may edit and resubmit: resubmitting applies the edit (a content change still bumps the version), returns the question to Pending and clears the rejection reason.
 - **Any edit to an Approved question's content resets it to Pending.** Content is the stem, body (options, blanks), grading spec, explanation and max score. Edits to difficulty, objective link or tags alone change neither the status nor the version. Every content edit, in any status, increments `version` and writes a `QuestionRevision` snapshot of the new version; version 1 is snapshotted at creation. The type of a question never changes.
 - Approved questions on an unpublished lesson wait silently; the moment the lesson is Published they become servable with no further action.
 - Retiring a question removes it from future quizzes but preserves all historical attempts.
@@ -164,6 +164,7 @@ Every answer produces a **score in [0, max_score]** and a **normalised score in 
 | Science drag-and-drop | v2 | Map of item → drop zone | Deterministic: each item's zone vs correct zone; optional order constraints | Per item |
 
 Per-type `body` and `grading_spec` JSON shapes: `docs/question-schemas.md`.
+Answer shapes and the exact grading rules (normalisation, numeric parsing, rounding) are in the same document.
 
 ### 6.1 AI grading rules (v2)
 

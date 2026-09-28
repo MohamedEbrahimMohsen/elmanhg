@@ -220,6 +220,16 @@ describe('LessonEditorPage', () => {
     expect((await findPreview()).getAllByRole('math', { hidden: true })).toHaveLength(1);
   });
 
+  it('links to a new question and to the lesson questions', async () => {
+    openEditor();
+
+    expect(await screen.findByRole('link', { name: 'New question' })).toHaveAttribute('href', '/admin/question/new/l1');
+    expect(screen.getByRole('link', { name: 'Lesson questions' })).toHaveAttribute(
+      'href',
+      '/admin/questions?lessonId=l1',
+    );
+  });
+
   it('renders right-to-left in Arabic', async () => {
     openEditor('ar');
 

@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next';
+import { Pagination } from '@/shared/components/Pagination';
 import { ApiError, unhandledErrorCode } from '@/shared/lib/apiError';
 import { Button } from '@/shared/ui/button';
 import { hasActiveFilters } from '../api/auditLogParams';
 import { AuditLogEmptyState } from '../components/AuditLogEmptyState';
 import { AuditLogFilters } from '../components/AuditLogFilters';
-import { AuditLogPagination } from '../components/AuditLogPagination';
 import { AuditLogTable } from '../components/AuditLogTable';
 import { AuditLogTableSkeleton } from '../components/AuditLogTableSkeleton';
 import { useAuditLogs } from '../hooks/useAuditLogs';
@@ -50,7 +50,7 @@ export function AuditLogPage() {
       <>
         <AuditLogTable items={data.items} />
         {data.totalPages > 1 ? (
-          <AuditLogPagination page={data.pageNumber} totalPages={data.totalPages} onPageChange={setPage} />
+          <Pagination page={data.pageNumber} totalPages={data.totalPages} onPageChange={setPage} />
         ) : null}
       </>
     );

@@ -12,12 +12,12 @@ export const createQuestionBodyMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*
 
 export const CreateQuestionBody = zod.object({
   "lessonId": zod.uuid(),
-  "type": zod.union([zod.null(),zod.int()]),
+  "type": zod.union([zod.null(),zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short'])]),
   "stem": zod.string().nullable(),
   "body": zod.unknown(),
   "gradingSpec": zod.unknown(),
   "explanation": zod.string().nullable(),
-  "difficulty": zod.union([zod.null(),zod.int()]),
+  "difficulty": zod.union([zod.null(),zod.enum(['Easy', 'Medium', 'Hard'])]),
   "objectiveId": zod.uuid().nullable(),
   "tags": zod.array(zod.string()).nullable(),
   "maxScore": zod.union([zod.int(),zod.stringFormat('int32', createQuestionBodyMaxScoreRegExpTwo)]).nullable()
@@ -25,6 +25,35 @@ export const CreateQuestionBody = zod.object({
 
 export const CreateQuestionResponse = zod.object({
   "id": zod.uuid()
+})
+
+export const getQuestionsResponseItemsItemVersionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getQuestionsResponsePageNumberRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getQuestionsResponsePageSizeRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getQuestionsResponseTotalItemsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getQuestionsResponseTotalPagesRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const GetQuestionsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.uuid(),
+  "lessonId": zod.uuid(),
+  "lessonName": zod.string(),
+  "subjectId": zod.uuid(),
+  "type": zod.string(),
+  "stem": zod.string(),
+  "difficulty": zod.string(),
+  "version": zod.union([zod.int(),zod.stringFormat('int32', getQuestionsResponseItemsItemVersionRegExpTwo)]),
+  "validationStatus": zod.string(),
+  "validatedBy": zod.uuid().nullable(),
+  "teacherName": zod.string().nullable(),
+  "rejectionReason": zod.string().nullable(),
+  "updatedAt": zod.iso.datetime({"offset":true})
+})).optional(),
+  "pageNumber": zod.union([zod.int(),zod.stringFormat('int64', getQuestionsResponsePageNumberRegExpTwo)]).optional(),
+  "pageSize": zod.union([zod.int(),zod.stringFormat('int64', getQuestionsResponsePageSizeRegExpTwo)]).optional(),
+  "totalItems": zod.union([zod.int(),zod.stringFormat('int64', getQuestionsResponseTotalItemsRegExpTwo)]).optional(),
+  "totalPages": zod.union([zod.int(),zod.stringFormat('int64', getQuestionsResponseTotalPagesRegExpTwo)]).optional()
 })
 
 export const GetQuestionParams = zod.object({
@@ -49,7 +78,8 @@ export const GetQuestionResponse = zod.object({
   "tags": zod.array(zod.string()),
   "maxScore": zod.union([zod.int(),zod.stringFormat('int32', getQuestionResponseMaxScoreRegExpTwo)]),
   "version": zod.union([zod.int(),zod.stringFormat('int32', getQuestionResponseVersionRegExpTwo)]),
-  "validationStatus": zod.string()
+  "validationStatus": zod.string(),
+  "rejectionReason": zod.string().nullable()
 })
 
 export const UpdateQuestionParams = zod.object({
@@ -60,16 +90,65 @@ export const updateQuestionBodyMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*
 
 
 export const UpdateQuestionBody = zod.object({
-  "type": zod.union([zod.null(),zod.int()]),
+  "type": zod.union([zod.null(),zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short'])]),
   "stem": zod.string().nullable(),
   "body": zod.unknown(),
   "gradingSpec": zod.unknown(),
   "explanation": zod.string().nullable(),
-  "difficulty": zod.union([zod.null(),zod.int()]),
+  "difficulty": zod.union([zod.null(),zod.enum(['Easy', 'Medium', 'Hard'])]),
   "objectiveId": zod.uuid().nullable(),
   "tags": zod.array(zod.string()).nullable(),
   "maxScore": zod.union([zod.int(),zod.stringFormat('int32', updateQuestionBodyMaxScoreRegExpTwo)]).nullable()
 })
 
 export const UpdateQuestionResponse = zod.unknown()
+
+export const ResubmitQuestionParams = zod.object({
+  "questionId": zod.uuid()
+})
+
+export const resubmitQuestionBodyMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const ResubmitQuestionBody = zod.object({
+  "type": zod.union([zod.null(),zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short'])]),
+  "stem": zod.string().nullable(),
+  "body": zod.unknown(),
+  "gradingSpec": zod.unknown(),
+  "explanation": zod.string().nullable(),
+  "difficulty": zod.union([zod.null(),zod.enum(['Easy', 'Medium', 'Hard'])]),
+  "objectiveId": zod.uuid().nullable(),
+  "tags": zod.array(zod.string()).nullable(),
+  "maxScore": zod.union([zod.int(),zod.stringFormat('int32', resubmitQuestionBodyMaxScoreRegExpTwo)]).nullable()
+})
+
+export const ResubmitQuestionResponse = zod.unknown()
+
+export const gradeQuestionDraftBodyMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const GradeQuestionDraftBody = zod.object({
+  "type": zod.union([zod.null(),zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short'])]),
+  "stem": zod.string().nullable(),
+  "body": zod.unknown(),
+  "gradingSpec": zod.unknown(),
+  "explanation": zod.string().nullable(),
+  "difficulty": zod.union([zod.null(),zod.enum(['Easy', 'Medium', 'Hard'])]),
+  "objectiveId": zod.uuid().nullable(),
+  "tags": zod.array(zod.string()).nullable(),
+  "maxScore": zod.union([zod.int(),zod.stringFormat('int32', gradeQuestionDraftBodyMaxScoreRegExpTwo)]).nullable(),
+  "answer": zod.unknown()
+})
+
+export const gradeQuestionDraftResponseScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const gradeQuestionDraftResponseNormalisedScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const gradeQuestionDraftResponseMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const GradeQuestionDraftResponse = zod.object({
+  "score": zod.union([zod.number(),zod.stringFormat('double', gradeQuestionDraftResponseScoreRegExpTwo)]),
+  "normalisedScore": zod.union([zod.number(),zod.stringFormat('double', gradeQuestionDraftResponseNormalisedScoreRegExpTwo)]),
+  "outcome": zod.string(),
+  "maxScore": zod.union([zod.int(),zod.stringFormat('int32', gradeQuestionDraftResponseMaxScoreRegExpTwo)])
+})
 

@@ -69,6 +69,7 @@ An array with one element per changed audited entity. Property keys are camelCas
 | DeleteLesson | `Lesson.Delete` | Lesson | command (the diff lists the lesson and every objective soft-deleted with it) |
 | CreateQuestion | `Question.Create` | Question | result |
 | UpdateQuestion | `Question.Update` | Question | command (the diff lists the changed Question fields; a content edit shows `version`, and `validationStatus` when it resets) |
+| ResubmitQuestion | `Question.Resubmit` | Question | command (the diff shows `validationStatus`, `rejectionReason`, `validatedBy`, `validatedAt`, and the content fields and `version` when the content changed) |
 
 Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`.
 

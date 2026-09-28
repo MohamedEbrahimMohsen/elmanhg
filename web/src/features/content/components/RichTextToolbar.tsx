@@ -9,7 +9,7 @@ export interface RichTextToolbarProps {
   editor: Editor;
   fieldLabel: string;
   onOpenFormula: () => void;
-  onOpenImage: () => void;
+  onOpenImage?: (() => void) | undefined;
 }
 
 interface ToolProps {
@@ -77,9 +77,11 @@ export function RichTextToolbar({ editor, fieldLabel, onOpenFormula, onOpenImage
       <Tool label={t('lessonEditor.toolbar.formula')} onClick={onOpenFormula}>
         <Sigma aria-hidden className="size-4" />
       </Tool>
-      <Tool label={t('lessonEditor.toolbar.image')} onClick={onOpenImage}>
-        <ImagePlus aria-hidden className="size-4" />
-      </Tool>
+      {onOpenImage ? (
+        <Tool label={t('lessonEditor.toolbar.image')} onClick={onOpenImage}>
+          <ImagePlus aria-hidden className="size-4" />
+        </Tool>
+      ) : null}
     </div>
   );
 }

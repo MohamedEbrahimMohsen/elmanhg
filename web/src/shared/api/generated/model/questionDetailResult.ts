@@ -24,4 +24,6 @@ export interface QuestionDetailResult {
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   version: number | string;
   validationStatus: string;
+  /** @nullable */
+  rejectionReason: string | null;
 }

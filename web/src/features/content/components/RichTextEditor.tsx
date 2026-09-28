@@ -5,6 +5,7 @@ import { Mathematics } from '@tiptap/extension-mathematics';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import { useTranslation } from 'react-i18next';
+import { cn } from '@/shared/lib/utils';
 import { Dialog, DialogContent } from '@/shared/ui/dialog';
 import { FormulaInsertForm } from './FormulaInsertForm';
 import { ImageInsertForm } from './ImageInsertForm';
@@ -18,7 +19,8 @@ export interface RichTextEditorProps {
   describedBy?: string | undefined;
   invalid: boolean;
   fieldLabel: string;
-  onUploadImage: (file: File) => Promise<string>;
+  onUploadImage?: ((file: File) => Promise<string>) | undefined;
+  compact?: boolean | undefined;
 }
 
 type OpenDialog = 'formula' | 'image' | null;
@@ -32,6 +34,7 @@ export function RichTextEditor({
   invalid,
   fieldLabel,
   onUploadImage,
+  compact,
 }: RichTextEditorProps) {
   const { t } = useTranslation('content');
   const [dialog, setDialog] = useState<OpenDialog>(null);
@@ -50,8 +53,10 @@ export function RichTextEditor({
           'aria-labelledby': labelledBy,
           ...(describedBy ? { 'aria-describedby': describedBy } : {}),
           'aria-invalid': String(invalid),
-          class:
-            'rich-text min-h-36 rounded-sm border border-border-strong bg-surface px-3 py-2.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden aria-invalid:border-danger',
+          class: cn(
+            'rich-text rounded-sm border border-border-strong bg-surface px-3 py-2.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden aria-invalid:border-danger',
+            compact ? 'min-h-11' : 'min-h-36',
+          ),
         },
       },
       onUpdate: ({ editor: current }) => {
@@ -80,9 +85,13 @@ export function RichTextEditor({
         onOpenFormula={() => {
           setDialog('formula');
         }}
-        onOpenImage={() => {
-          setDialog('image');
-        }}
+        onOpenImage={
+          onUploadImage
+            ? () => {
+                setDialog('image');
+              }
+            : undefined
+        }
       />
       <EditorContent editor={editor} />
       <Dialog open={dialog === 'formula'} onOpenChange={onOpenChange}>
@@ -100,18 +109,20 @@ export function RichTextEditor({
           />
         </DialogContent>
       </Dialog>
-      <Dialog open={dialog === 'image'} onOpenChange={onOpenChange}>
-        <DialogContent title={t('lessonEditor.image.title')}>
-          <ImageInsertForm
-            onUpload={onUploadImage}
-            onInsert={(src, alt) => {
-              editor.chain().focus().setImage({ src, alt }).run();
-              closeDialog();
-            }}
-            onCancel={closeDialog}
-          />
-        </DialogContent>
-      </Dialog>
+      {onUploadImage ? (
+        <Dialog open={dialog === 'image'} onOpenChange={onOpenChange}>
+          <DialogContent title={t('lessonEditor.image.title')}>
+            <ImageInsertForm
+              onUpload={onUploadImage}
+              onInsert={(src, alt) => {
+                editor.chain().focus().setImage({ src, alt }).run();
+                closeDialog();
+              }}
+              onCancel={closeDialog}
+            />
+          </DialogContent>
+        </Dialog>
+      ) : null}
     </div>
   );
 }
