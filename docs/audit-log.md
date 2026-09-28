@@ -62,6 +62,11 @@ An array with one element per changed audited entity. Property keys are camelCas
 | CreateLesson | `Lesson.Create` | Lesson | result |
 | UpdateLesson | `Lesson.Update` | Lesson | command (the diff lists the Lesson fields and every `LessonObjective` created, modified or deleted) |
 | UploadLessonImage | `Lesson.UploadImage` | Lesson | command (no diff: only a file is written) |
+| PublishLesson | `Lesson.Publish` | Lesson | command |
+| UnpublishLesson | `Lesson.Unpublish` | Lesson | command |
+| ArchiveLesson | `Lesson.Archive` | Lesson | command |
+| ReorderLesson | `Lesson.Reorder` | Lesson | command (the diff lists every sibling whose `Order` changed) |
+| DeleteLesson | `Lesson.Delete` | Lesson | command (the diff lists the lesson and every objective soft-deleted with it) |
 
 Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`.
 

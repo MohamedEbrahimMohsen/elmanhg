@@ -20,6 +20,7 @@ export * from './iFormFile';
 export * from './lessonDetailResult';
 export * from './lessonObjectiveRequest';
 export * from './lessonObjectiveResult';
+export * from './lessonPositionRequest';
 export * from './lessonResult';
 export * from './loginWithEmailCommand';
 export * from './loginWithPhoneCommand';

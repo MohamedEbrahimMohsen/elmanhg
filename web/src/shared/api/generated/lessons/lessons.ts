@@ -32,6 +32,7 @@ import type {
   CreateLessonResult,
   GetLessonsParams,
   LessonDetailResult,
+  LessonPositionRequest,
   LessonResult,
   UpdateLessonRequest,
   UploadLessonImageBody,
@@ -521,6 +522,356 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getUpdateLessonMutationOptions(options), queryClient);
+    }
+    export const getDeleteLessonUrl = (lessonId: string,) => {
+
+
+
+
+  return `/api/lessons/${lessonId}`
+}
+
+export const deleteLesson = async (lessonId: string, options?: Parameters<typeof http>[1]): Promise<void> => {
+
+  return http<void>(getDeleteLessonUrl(lessonId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteLessonMutationKey = () => ['deleteLesson'] as const;
+
+export const getDeleteLessonMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLesson>>, TError,DeleteLessonMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteLesson>>, TError,DeleteLessonMutationVariables, TContext> => {
+
+const mutationKey = getDeleteLessonMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteLesson>>, DeleteLessonMutationVariables> = (props) => {
+          const {lessonId} = props ?? {};
+
+          return  deleteLesson(lessonId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteLessonMutationResult = NonNullable<Awaited<ReturnType<typeof deleteLesson>>>
+
+    export type DeleteLessonMutationError = unknown
+    export type DeleteLessonMutationVariables = {lessonId: string}
+
+    export const useDeleteLesson = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLesson>>, TError,DeleteLessonMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteLesson>>,
+        TError,
+        DeleteLessonMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteLessonMutationOptions(options), queryClient);
+    }
+    export const getPublishLessonUrl = (lessonId: string,) => {
+
+
+
+
+  return `/api/lessons/${lessonId}/publish`
+}
+
+export const publishLesson = async (lessonId: string, options?: Parameters<typeof http>[1]): Promise<void> => {
+
+  return http<void>(getPublishLessonUrl(lessonId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPublishLessonMutationKey = () => ['publishLesson'] as const;
+
+export const getPublishLessonMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishLesson>>, TError,PublishLessonMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof publishLesson>>, TError,PublishLessonMutationVariables, TContext> => {
+
+const mutationKey = getPublishLessonMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publishLesson>>, PublishLessonMutationVariables> = (props) => {
+          const {lessonId} = props ?? {};
+
+          return  publishLesson(lessonId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PublishLessonMutationResult = NonNullable<Awaited<ReturnType<typeof publishLesson>>>
+
+    export type PublishLessonMutationError = unknown
+    export type PublishLessonMutationVariables = {lessonId: string}
+
+    export const usePublishLesson = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishLesson>>, TError,PublishLessonMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof publishLesson>>,
+        TError,
+        PublishLessonMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPublishLessonMutationOptions(options), queryClient);
+    }
+    export const getUnpublishLessonUrl = (lessonId: string,) => {
+
+
+
+
+  return `/api/lessons/${lessonId}/unpublish`
+}
+
+export const unpublishLesson = async (lessonId: string, options?: Parameters<typeof http>[1]): Promise<void> => {
+
+  return http<void>(getUnpublishLessonUrl(lessonId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getUnpublishLessonMutationKey = () => ['unpublishLesson'] as const;
+
+export const getUnpublishLessonMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unpublishLesson>>, TError,UnpublishLessonMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof unpublishLesson>>, TError,UnpublishLessonMutationVariables, TContext> => {
+
+const mutationKey = getUnpublishLessonMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unpublishLesson>>, UnpublishLessonMutationVariables> = (props) => {
+          const {lessonId} = props ?? {};
+
+          return  unpublishLesson(lessonId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnpublishLessonMutationResult = NonNullable<Awaited<ReturnType<typeof unpublishLesson>>>
+
+    export type UnpublishLessonMutationError = unknown
+    export type UnpublishLessonMutationVariables = {lessonId: string}
+
+    export const useUnpublishLesson = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unpublishLesson>>, TError,UnpublishLessonMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof unpublishLesson>>,
+        TError,
+        UnpublishLessonMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUnpublishLessonMutationOptions(options), queryClient);
+    }
+    export const getArchiveLessonUrl = (lessonId: string,) => {
+
+
+
+
+  return `/api/lessons/${lessonId}/archive`
+}
+
+export const archiveLesson = async (lessonId: string, options?: Parameters<typeof http>[1]): Promise<void> => {
+
+  return http<void>(getArchiveLessonUrl(lessonId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getArchiveLessonMutationKey = () => ['archiveLesson'] as const;
+
+export const getArchiveLessonMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof archiveLesson>>, TError,ArchiveLessonMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof archiveLesson>>, TError,ArchiveLessonMutationVariables, TContext> => {
+
+const mutationKey = getArchiveLessonMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof archiveLesson>>, ArchiveLessonMutationVariables> = (props) => {
+          const {lessonId} = props ?? {};
+
+          return  archiveLesson(lessonId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ArchiveLessonMutationResult = NonNullable<Awaited<ReturnType<typeof archiveLesson>>>
+
+    export type ArchiveLessonMutationError = unknown
+    export type ArchiveLessonMutationVariables = {lessonId: string}
+
+    export const useArchiveLesson = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof archiveLesson>>, TError,ArchiveLessonMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof archiveLesson>>,
+        TError,
+        ArchiveLessonMutationVariables,
+        TContext
+      > => {
+      return useMutation(getArchiveLessonMutationOptions(options), queryClient);
+    }
+    export const getReorderLessonUrl = (lessonId: string,) => {
+
+
+
+
+  return `/api/lessons/${lessonId}/position`
+}
+
+export const reorderLesson = async (lessonId: string,
+    lessonPositionRequest: LessonPositionRequest, options?: Parameters<typeof http>[1]): Promise<void> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return http<void>(getReorderLessonUrl(lessonId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(lessonPositionRequest)
+  }
+);}
+
+
+
+
+
+export const getReorderLessonMutationKey = () => ['reorderLesson'] as const;
+
+export const getReorderLessonMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reorderLesson>>, TError,ReorderLessonMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof reorderLesson>>, TError,ReorderLessonMutationVariables, TContext> => {
+
+const mutationKey = getReorderLessonMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reorderLesson>>, ReorderLessonMutationVariables> = (props) => {
+          const {lessonId,data} = props ?? {};
+
+          return  reorderLesson(lessonId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReorderLessonMutationResult = NonNullable<Awaited<ReturnType<typeof reorderLesson>>>
+    export type ReorderLessonMutationBody = LessonPositionRequest
+    export type ReorderLessonMutationError = unknown
+    export type ReorderLessonMutationVariables = {lessonId: string;data: LessonPositionRequest}
+
+    export const useReorderLesson = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reorderLesson>>, TError,ReorderLessonMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof reorderLesson>>,
+        TError,
+        ReorderLessonMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReorderLessonMutationOptions(options), queryClient);
     }
     export const getUploadLessonImageUrl = (lessonId: string,) => {
 

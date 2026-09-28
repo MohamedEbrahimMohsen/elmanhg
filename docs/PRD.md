@@ -113,6 +113,8 @@ Subject (e.g. Physics)
 
 Only Admin publishes. Teachers do not publish lessons; they validate questions.
 
+Transitions: **Publish** Draft or Archived → Published (sets `published_at`). **Unpublish** Published or Archived → Draft. **Archive** Published → Archived. A draft is deleted, not archived. A published lesson cannot be deleted; move it to draft or archive it first. Entering or leaving Published raises `LessonPublished`, `LessonUnpublished` or `LessonArchived`; servable and mastery recalculation subscribe to these. Every lesson read that a Student or Teacher can reach returns Published lessons only.
+
 ### 5.3 Question states
 
 | Field | Values |

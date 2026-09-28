@@ -64,7 +64,13 @@
     "LESSON_IMAGE_REQUIRED": "اختر صورة.",
     "LESSON_IMAGE_TYPE_INVALID": "استخدم صورة PNG او JPEG او WebP او GIF.",
     "LESSON_IMAGE_TOO_LARGE": "الصورة كبيرة جدا.",
-    "UNIT_HAS_LESSONS": "لا يمكن حذف الوحدة لانها تحتوي على دروس."
+    "UNIT_HAS_LESSONS": "لا يمكن حذف الوحدة لانها تحتوي على دروس.",
+    "LESSON_ALREADY_PUBLISHED": "هذا الدرس منشور بالفعل.",
+    "LESSON_ALREADY_DRAFT": "هذا الدرس مسودة بالفعل.",
+    "LESSON_ALREADY_ARCHIVED": "هذا الدرس مؤرشف بالفعل.",
+    "LESSON_NOT_PUBLISHED": "يمكن ارشفة الدرس المنشور فقط. احذف المسودة بدلا من ذلك.",
+    "LESSON_IS_PUBLISHED": "اعد الدرس الى مسودة او ارشفه قبل حذفه.",
+    "LESSON_POSITION_INVALID": "الترتيب يجب ان يكون 1 او اكثر."
   },
   "error": {
     "title": "حدث خطأ"

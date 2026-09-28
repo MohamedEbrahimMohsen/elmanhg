@@ -73,6 +73,43 @@ export const UpdateLessonBody = zod.object({
 
 export const UpdateLessonResponse = zod.unknown()
 
+export const DeleteLessonParams = zod.object({
+  "lessonId": zod.uuid()
+})
+
+export const DeleteLessonResponse = zod.unknown()
+
+export const PublishLessonParams = zod.object({
+  "lessonId": zod.uuid()
+})
+
+export const PublishLessonResponse = zod.unknown()
+
+export const UnpublishLessonParams = zod.object({
+  "lessonId": zod.uuid()
+})
+
+export const UnpublishLessonResponse = zod.unknown()
+
+export const ArchiveLessonParams = zod.object({
+  "lessonId": zod.uuid()
+})
+
+export const ArchiveLessonResponse = zod.unknown()
+
+export const ReorderLessonParams = zod.object({
+  "lessonId": zod.uuid()
+})
+
+export const reorderLessonBodyPositionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const ReorderLessonBody = zod.object({
+  "position": zod.union([zod.int(),zod.stringFormat('int32', reorderLessonBodyPositionRegExpTwo)])
+})
+
+export const ReorderLessonResponse = zod.unknown()
+
 export const UploadLessonImageParams = zod.object({
   "lessonId": zod.uuid()
 })

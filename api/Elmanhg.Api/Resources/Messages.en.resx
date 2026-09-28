@@ -126,6 +126,12 @@
   <data name="LESSON_OBJECTIVE_TEXT_TOO_LONG" xml:space="preserve"><value>An objective is too long.</value></data>
   <data name="LESSON_OBJECTIVE_DUPLICATE" xml:space="preserve"><value>An objective appears more than once.</value></data>
   <data name="LESSON_OBJECTIVE_UNKNOWN" xml:space="preserve"><value>An objective no longer exists. Reload the lesson and try again.</value></data>
+  <data name="LESSON_ALREADY_PUBLISHED" xml:space="preserve"><value>This lesson is already published.</value></data>
+  <data name="LESSON_ALREADY_DRAFT" xml:space="preserve"><value>This lesson is already a draft.</value></data>
+  <data name="LESSON_ALREADY_ARCHIVED" xml:space="preserve"><value>This lesson is already archived.</value></data>
+  <data name="LESSON_NOT_PUBLISHED" xml:space="preserve"><value>Only a published lesson can be archived. Delete a draft instead.</value></data>
+  <data name="LESSON_IS_PUBLISHED" xml:space="preserve"><value>Move this lesson to draft or archive it before deleting it.</value></data>
+  <data name="LESSON_POSITION_INVALID" xml:space="preserve"><value>Position must be 1 or more.</value></data>
   <data name="LESSON_IMAGE_REQUIRED" xml:space="preserve"><value>Choose an image.</value></data>
   <data name="LESSON_IMAGE_TYPE_INVALID" xml:space="preserve"><value>Use a PNG, JPEG, WebP or GIF image.</value></data>
   <data name="LESSON_IMAGE_TOO_LARGE" xml:space="preserve"><value>The image is too large.</value></data>

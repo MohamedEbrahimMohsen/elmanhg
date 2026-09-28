@@ -626,7 +626,7 @@
     },
     {
       "name": "Lessons",
-      "description": "Admin only (Content.Manage). Set unitId (or run Create unit) and sign in as an admin first. Create lesson stores lessonId; lessons are created as Draft. Update lesson replaces the whole objectives list: send an existing objective id to keep it, a null id to add one, and leave one out to remove it. Explanation and summary are sanitised HTML (docs/rich-text.md). Upload lesson image returns the public /api/media URL to use in an img tag.",
+      "description": "Admin only (Content.Manage). Set unitId (or run Create unit) and sign in as an admin first. Create lesson stores lessonId; lessons are created as Draft. Update lesson replaces the whole objectives list: send an existing objective id to keep it, a null id to add one, and leave one out to remove it. Explanation and summary are sanitised HTML (docs/rich-text.md). Upload lesson image returns the public /api/media URL to use in an img tag. Publish, unpublish and archive need Lessons.Publish (Admin). Allowed moves: Draft→Published, Archived→Published, Published/Archived→Draft, Published→Archived. A published lesson cannot be deleted.",
       "item": [
         {
           "name": "Get lessons",
@@ -760,6 +760,131 @@
             "body": {
               "mode": "formdata",
               "formdata": [{ "key": "file", "type": "file", "src": "" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Publish lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/{{lessonId}}/publish",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons", "{{lessonId}}", "publish"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Archive lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/{{lessonId}}/archive",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons", "{{lessonId}}", "archive"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unpublish lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/{{lessonId}}/unpublish",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons", "{{lessonId}}", "unpublish"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reorder lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/{{lessonId}}/position",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons", "{{lessonId}}", "position"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"position\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/{{lessonId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons", "{{lessonId}}"]
             }
           },
           "response": []

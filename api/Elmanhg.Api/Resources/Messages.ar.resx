@@ -126,6 +126,12 @@
   <data name="LESSON_OBJECTIVE_TEXT_TOO_LONG" xml:space="preserve"><value>احد الاهداف طويل جدا.</value></data>
   <data name="LESSON_OBJECTIVE_DUPLICATE" xml:space="preserve"><value>يوجد هدف مكرر.</value></data>
   <data name="LESSON_OBJECTIVE_UNKNOWN" xml:space="preserve"><value>احد الاهداف لم يعد موجودا. اعد تحميل الدرس وحاول مرة اخرى.</value></data>
+  <data name="LESSON_ALREADY_PUBLISHED" xml:space="preserve"><value>هذا الدرس منشور بالفعل.</value></data>
+  <data name="LESSON_ALREADY_DRAFT" xml:space="preserve"><value>هذا الدرس مسودة بالفعل.</value></data>
+  <data name="LESSON_ALREADY_ARCHIVED" xml:space="preserve"><value>هذا الدرس مؤرشف بالفعل.</value></data>
+  <data name="LESSON_NOT_PUBLISHED" xml:space="preserve"><value>يمكن ارشفة الدرس المنشور فقط. احذف المسودة بدلا من ذلك.</value></data>
+  <data name="LESSON_IS_PUBLISHED" xml:space="preserve"><value>اعد الدرس الى مسودة او ارشفه قبل حذفه.</value></data>
+  <data name="LESSON_POSITION_INVALID" xml:space="preserve"><value>الترتيب يجب ان يكون 1 او اكثر.</value></data>
   <data name="LESSON_IMAGE_REQUIRED" xml:space="preserve"><value>اختر صورة.</value></data>
   <data name="LESSON_IMAGE_TYPE_INVALID" xml:space="preserve"><value>استخدم صورة PNG او JPEG او WebP او GIF.</value></data>
   <data name="LESSON_IMAGE_TOO_LARGE" xml:space="preserve"><value>الصورة كبيرة جدا.</value></data>

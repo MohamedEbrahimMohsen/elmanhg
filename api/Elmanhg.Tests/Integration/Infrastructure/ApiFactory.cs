@@ -26,6 +26,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     public RecordingSmsSender Sms { get; } = new();
 
+    public LessonEventLog LessonEvents { get; } = new();
+
     public string MediaRoot { get; } = Path.Combine(Path.GetTempPath(), "elmanhg-tests-media", Guid.NewGuid().ToString("N"));
 
     public async ValueTask InitializeAsync()
@@ -86,6 +88,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         {
             services.RemoveAll<ISmsSender>();
             services.AddSingleton<ISmsSender>(Sms);
+            services.AddSingleton(LessonEvents);
             services.AddControllers().AddApplicationPart(typeof(ApiFactory).Assembly);
             services.AddMediatR(configuration => configuration.RegisterServicesFromAssembly(typeof(ApiFactory).Assembly));
         });

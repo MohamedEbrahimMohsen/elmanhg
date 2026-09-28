@@ -46,6 +46,30 @@
       "Draft": "Draft",
       "Published": "Published",
       "Archived": "Archived"
+    },
+    "moved": "Lesson moved.",
+    "published": "Lesson published.",
+    "unpublished": "Lesson moved to draft.",
+    "archived": "Lesson archived.",
+    "deleted": "Lesson deleted."
+  },
+  "lessonActions": {
+    "label": "Actions for {name}",
+    "publish": "Publish",
+    "unpublish": "Move to draft",
+    "archive": "Archive",
+    "delete": "Delete",
+    "confirm": {
+      "publish": "Publish {name}? Students will see it.",
+      "unpublish": "Move {name} to draft? Students will not see it.",
+      "archive": "Archive {name}? Students will not see it.",
+      "delete": "Delete {name}?"
+    },
+    "confirmButton": {
+      "publish": "Yes, publish",
+      "unpublish": "Yes, move to draft",
+      "archive": "Yes, archive",
+      "delete": "Yes, delete"
     }
   },
   "lessonEditor": {

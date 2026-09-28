@@ -23,10 +23,10 @@ public class LessonRepository(AppDbContext context) : Repository<Lesson>(context
         return await _dbSet.AnyAsync(x => x.UnitId == unitId, cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task<Dictionary<Guid, int>> CountByUnitAsync(IReadOnlyCollection<Guid> unitIds, CancellationToken cancellationToken)
+    public async Task<Dictionary<Guid, int>> CountByUnitAsync(IReadOnlyCollection<Guid> unitIds, bool publishedOnly, CancellationToken cancellationToken)
     {
         return await _dbSet
-            .Where(x => unitIds.Contains(x.UnitId))
+            .Where(x => unitIds.Contains(x.UnitId) && (!publishedOnly || x.State == LessonState.Published))
             .GroupBy(x => x.UnitId)
             .Select(x => new { x.Key, Count = x.Count() })
             .ToDictionaryAsync(x => x.Key, x => x.Count, cancellationToken)
