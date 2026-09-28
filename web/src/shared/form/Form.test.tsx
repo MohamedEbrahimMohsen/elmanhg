@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useForm } from 'react-hook-form';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import { ApiError } from '@/shared/lib/apiError';
 import { axe } from '@/test/axe';
@@ -45,6 +46,17 @@ function TestForm({ onSubmit = () => Promise.resolve(), serverErrorFields = {} }
       <SubmitButton>Save</SubmitButton>
       {saved ? <p>Saved</p> : null}
     </Form>
+  );
+}
+
+function PortalForm({ onSubmit }: { onSubmit: () => void }) {
+  const form = useForm<TestValues>({ defaultValues: { name: 'Ahmed', email: 'ahmed@example.com' } });
+
+  return createPortal(
+    <Form form={form} onSubmit={onSubmit}>
+      <SubmitButton>Insert</SubmitButton>
+    </Form>,
+    document.body,
   );
 }
 
@@ -132,6 +144,26 @@ describe('Form base components', () => {
     await fillAndSave(user);
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Something went wrong. Please try again.');
+  });
+
+  it('does not submit an enclosing form', async () => {
+    const user = userEvent.setup();
+    const inner = vi.fn();
+    const outer = vi.fn((event: { preventDefault: () => void }) => {
+      event.preventDefault();
+    });
+    renderWithProviders(
+      <form aria-label="Outer" onSubmit={outer}>
+        <PortalForm onSubmit={inner} />
+      </form>,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Insert' }));
+
+    await waitFor(() => {
+      expect(inner).toHaveBeenCalledTimes(1);
+    });
+    expect(outer).not.toHaveBeenCalled();
   });
 
   it('has no axe violations', async () => {

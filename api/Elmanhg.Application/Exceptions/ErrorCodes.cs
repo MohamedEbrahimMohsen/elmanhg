@@ -44,6 +44,23 @@ public static class ErrorCodes
     public const string UnitNameTooLong = "UNIT_NAME_TOO_LONG";
     public const string UnitPositionInvalid = "UNIT_POSITION_INVALID";
 
+    // LESSONS
+    public const string LessonNotFound = "LESSON_NOT_FOUND";
+    public const string LessonIdRequired = "LESSON_ID_REQUIRED";
+    public const string LessonNameRequired = "LESSON_NAME_REQUIRED";
+    public const string LessonNameTooLong = "LESSON_NAME_TOO_LONG";
+    public const string LessonExplanationTooLong = "LESSON_EXPLANATION_TOO_LONG";
+    public const string LessonSummaryTooLong = "LESSON_SUMMARY_TOO_LONG";
+    public const string LessonVideoUrlInvalid = "LESSON_VIDEO_URL_INVALID";
+    public const string LessonVideoUrlTooLong = "LESSON_VIDEO_URL_TOO_LONG";
+    public const string LessonObjectivesTooMany = "LESSON_OBJECTIVES_TOO_MANY";
+    public const string LessonObjectiveTextRequired = "LESSON_OBJECTIVE_TEXT_REQUIRED";
+    public const string LessonObjectiveTextTooLong = "LESSON_OBJECTIVE_TEXT_TOO_LONG";
+    public const string LessonObjectiveDuplicate = "LESSON_OBJECTIVE_DUPLICATE";
+    public const string LessonImageRequired = "LESSON_IMAGE_REQUIRED";
+    public const string LessonImageTypeInvalid = "LESSON_IMAGE_TYPE_INVALID";
+    public const string LessonImageTooLarge = "LESSON_IMAGE_TOO_LARGE";
+
     // AUDIT LOGS
     public const string AuditLogPageNumberInvalid = "AUDIT_LOG_PAGE_NUMBER_INVALID";
     public const string AuditLogPageSizeInvalid = "AUDIT_LOG_PAGE_SIZE_INVALID";

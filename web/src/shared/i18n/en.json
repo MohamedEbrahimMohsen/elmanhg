@@ -3,7 +3,9 @@
     "name": "Elmanhg"
   },
   "validation": {
-    "required": "This field is required."
+    "required": "This field is required.",
+    "url": "Enter a link that starts with http:// or https://.",
+    "fileRequired": "Choose a file."
   },
   "errors": {
     "UNHANDLED_EXCEPTION": "Something went wrong. Please try again.",
@@ -46,7 +48,23 @@
     "UNIT_NOT_FOUND": "Unit not found.",
     "UNIT_NAME_REQUIRED": "Enter the unit name.",
     "UNIT_NAME_TOO_LONG": "Unit name is too long.",
-    "UNIT_POSITION_INVALID": "Position must be 1 or more."
+    "UNIT_POSITION_INVALID": "Position must be 1 or more.",
+    "LESSON_NOT_FOUND": "Lesson not found.",
+    "LESSON_NAME_REQUIRED": "Enter the lesson name.",
+    "LESSON_NAME_TOO_LONG": "Lesson name is too long.",
+    "LESSON_EXPLANATION_TOO_LONG": "The explanation is too long.",
+    "LESSON_SUMMARY_TOO_LONG": "The summary is too long.",
+    "LESSON_VIDEO_URL_INVALID": "Enter a video link that starts with http:// or https://.",
+    "LESSON_VIDEO_URL_TOO_LONG": "The video link is too long.",
+    "LESSON_OBJECTIVES_TOO_MANY": "This lesson has too many objectives.",
+    "LESSON_OBJECTIVE_TEXT_REQUIRED": "Every objective needs text.",
+    "LESSON_OBJECTIVE_TEXT_TOO_LONG": "An objective is too long.",
+    "LESSON_OBJECTIVE_DUPLICATE": "An objective appears more than once.",
+    "LESSON_OBJECTIVE_UNKNOWN": "An objective no longer exists. Reload the lesson and try again.",
+    "LESSON_IMAGE_REQUIRED": "Choose an image.",
+    "LESSON_IMAGE_TYPE_INVALID": "Use a PNG, JPEG, WebP or GIF image.",
+    "LESSON_IMAGE_TOO_LARGE": "The image is too large.",
+    "UNIT_HAS_LESSONS": "This unit has lessons and cannot be deleted."
   },
   "error": {
     "title": "Something went wrong"

@@ -29,7 +29,75 @@
     "created": "Unit added.",
     "renamed": "Unit renamed.",
     "moved": "Unit moved.",
-    "deleted": "Unit deleted."
+    "deleted": "Unit deleted.",
+    "lessonCount": "{count, plural, one {# lesson} other {# lessons}}",
+    "showLessons": "Show lessons",
+    "hideLessons": "Hide lessons"
+  },
+  "lessons": {
+    "listLabel": "Lessons of {name}",
+    "loading": "Loading lessons",
+    "errorTitle": "Could not load lessons",
+    "empty": "No lessons in this unit yet.",
+    "nameLabel": "Lesson name",
+    "add": "Add lesson",
+    "created": "Lesson added.",
+    "state": {
+      "Draft": "Draft",
+      "Published": "Published",
+      "Archived": "Archived"
+    }
+  },
+  "lessonEditor": {
+    "title": "Edit lesson",
+    "breadcrumb": "Breadcrumb",
+    "contentLink": "Content",
+    "loading": "Loading lesson",
+    "errorTitle": "Could not load the lesson",
+    "save": "Save",
+    "saved": "Lesson saved.",
+    "fields": {
+      "name": "Name",
+      "explanation": "Explanation",
+      "objectives": "Objectives",
+      "summary": "Summary",
+      "videoUrl": "Video link (optional)"
+    },
+    "objectives": {
+      "itemLabel": "Objective {number}",
+      "add": "Add objective",
+      "moveUp": "Move objective {number} up",
+      "moveDown": "Move objective {number} down",
+      "remove": "Remove objective {number}",
+      "empty": "No objectives yet."
+    },
+    "preview": {
+      "title": "Preview",
+      "video": "Watch the video"
+    },
+    "toolbar": {
+      "label": "{field} formatting",
+      "bold": "Bold",
+      "italic": "Italic",
+      "heading": "Heading",
+      "bulletList": "Bulleted list",
+      "orderedList": "Numbered list",
+      "formula": "Insert formula",
+      "image": "Insert image"
+    },
+    "formula": {
+      "title": "Insert formula",
+      "latex": "LaTeX",
+      "block": "Show on its own line",
+      "insert": "Insert"
+    },
+    "image": {
+      "title": "Insert image",
+      "file": "Image file",
+      "description": "Image description",
+      "insert": "Upload and insert",
+      "uploaded": "Image inserted."
+    }
   },
   "actions": {
     "moveUp": "Move {name} up",

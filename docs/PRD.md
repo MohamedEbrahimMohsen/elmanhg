@@ -421,7 +421,7 @@ TeacherSubject(teacher_id, subject_id)
 Subject(id, name, order, default_blueprint_id?)
 Unit(id, subject_id, name, order, blueprint_id?)
 Lesson(id, unit_id, name, order, state[Draft|Published|Archived],
-       explanation, summary, published_at)
+       explanation, summary, video_url?, published_at)
 LessonObjective(id, lesson_id, text, order)
 
 Question(id, lesson_id, subject_id, type, stem, difficulty, objective_id?,

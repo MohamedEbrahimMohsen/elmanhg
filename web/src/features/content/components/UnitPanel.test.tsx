@@ -22,8 +22,8 @@ const detail = (units: SubjectDetailResult['units']): SubjectDetailResult => ({
   units,
 });
 
-const mechanics = { id: 'u1', subjectId: 's1', name: 'Mechanics', order: 1 };
-const waves = { id: 'u2', subjectId: 's1', name: 'Waves', order: 2 };
+const mechanics = { id: 'u1', subjectId: 's1', name: 'Mechanics', order: 1, lessonCount: 0 };
+const waves = { id: 'u2', subjectId: 's1', name: 'Waves', order: 2, lessonCount: 0 };
 
 const expandPhysics = async (user: ReturnType<typeof userEvent.setup>) => {
   const toggle = await screen.findByRole('button', { name: 'Show units' });

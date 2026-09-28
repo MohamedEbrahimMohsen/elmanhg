@@ -113,6 +113,23 @@
   <data name="UNIT_NAME_REQUIRED" xml:space="preserve"><value>Enter the unit name.</value></data>
   <data name="UNIT_NAME_TOO_LONG" xml:space="preserve"><value>Unit name is too long.</value></data>
   <data name="UNIT_POSITION_INVALID" xml:space="preserve"><value>Position must be 1 or more.</value></data>
+  <data name="LESSON_NOT_FOUND" xml:space="preserve"><value>Lesson not found.</value></data>
+  <data name="LESSON_ID_REQUIRED" xml:space="preserve"><value>Choose a lesson.</value></data>
+  <data name="LESSON_NAME_REQUIRED" xml:space="preserve"><value>Enter the lesson name.</value></data>
+  <data name="LESSON_NAME_TOO_LONG" xml:space="preserve"><value>Lesson name is too long.</value></data>
+  <data name="LESSON_EXPLANATION_TOO_LONG" xml:space="preserve"><value>The explanation is too long.</value></data>
+  <data name="LESSON_SUMMARY_TOO_LONG" xml:space="preserve"><value>The summary is too long.</value></data>
+  <data name="LESSON_VIDEO_URL_INVALID" xml:space="preserve"><value>Enter a video link that starts with http:// or https://.</value></data>
+  <data name="LESSON_VIDEO_URL_TOO_LONG" xml:space="preserve"><value>The video link is too long.</value></data>
+  <data name="LESSON_OBJECTIVES_TOO_MANY" xml:space="preserve"><value>This lesson has too many objectives.</value></data>
+  <data name="LESSON_OBJECTIVE_TEXT_REQUIRED" xml:space="preserve"><value>Every objective needs text.</value></data>
+  <data name="LESSON_OBJECTIVE_TEXT_TOO_LONG" xml:space="preserve"><value>An objective is too long.</value></data>
+  <data name="LESSON_OBJECTIVE_DUPLICATE" xml:space="preserve"><value>An objective appears more than once.</value></data>
+  <data name="LESSON_OBJECTIVE_UNKNOWN" xml:space="preserve"><value>An objective no longer exists. Reload the lesson and try again.</value></data>
+  <data name="LESSON_IMAGE_REQUIRED" xml:space="preserve"><value>Choose an image.</value></data>
+  <data name="LESSON_IMAGE_TYPE_INVALID" xml:space="preserve"><value>Use a PNG, JPEG, WebP or GIF image.</value></data>
+  <data name="LESSON_IMAGE_TOO_LARGE" xml:space="preserve"><value>The image is too large.</value></data>
+  <data name="UNIT_HAS_LESSONS" xml:space="preserve"><value>This unit has lessons and cannot be deleted.</value></data>
   <data name="CONTENT_ORDER_INVALID" xml:space="preserve"><value>Order must be 1 or more.</value></data>
   <data name="USER_NOT_TEACHER" xml:space="preserve"><value>Subjects can only be assigned to teachers.</value></data>
   <data name="AUDIT_LOG_PAGE_NUMBER_INVALID" xml:space="preserve"><value>Page number must be 1 or more.</value></data>

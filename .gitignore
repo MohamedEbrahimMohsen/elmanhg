@@ -23,6 +23,7 @@ TestResults/
 /api/Elmanhg.Api/appsettings.json
 /api/Elmanhg.Api/appsettings.Development.json
 /api/Elmanhg.Api/appsettings.Production.json
+/api/Elmanhg.Api/App_Data/
 [Ll]ogs/
 artifacts/
 

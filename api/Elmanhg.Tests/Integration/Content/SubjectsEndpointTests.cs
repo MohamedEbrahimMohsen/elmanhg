@@ -75,6 +75,25 @@ public sealed class SubjectsEndpointTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task GetById_Admin_ReturnsUnitLessonCounts()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var subjectId = await SeedSubjectAsync();
+        var withLessons = await ContentTestData.SeedUnitAsync(factory, subjectId, "Mechanics", 1, cancellationToken);
+        var withoutLessons = await ContentTestData.SeedUnitAsync(factory, subjectId, "Waves", 2, cancellationToken);
+        await ContentTestData.SeedLessonAsync(factory, withLessons, "Newton's laws", 1, [], cancellationToken);
+        await ContentTestData.SeedLessonAsync(factory, withLessons, "Momentum", 2, [], cancellationToken);
+        using var admin = await AdminClientAsync();
+
+        using var response = await admin.GetAsync($"{Route}/{subjectId}", cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var units = (await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken)).GetProperty("units").EnumerateArray().ToList();
+        units.Single(x => x.GetProperty("id").GetGuid() == withLessons).GetProperty("lessonCount").GetInt32().Should().Be(2);
+        units.Single(x => x.GetProperty("id").GetGuid() == withoutLessons).GetProperty("lessonCount").GetInt32().Should().Be(0);
+    }
+
+    [Fact]
     public async Task GetById_UnknownSubject_Returns404SubjectNotFound()
     {
         using var admin = await AdminClientAsync();

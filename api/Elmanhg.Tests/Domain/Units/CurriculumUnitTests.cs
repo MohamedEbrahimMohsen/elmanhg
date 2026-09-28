@@ -78,14 +78,25 @@ public sealed class CurriculumUnitTests
     }
 
     [Fact]
-    public void Delete_Always_SoftDeletesAndSetsUpdater()
+    public void Delete_NoLessons_SoftDeletesAndSetsUpdater()
     {
         var unit = CurriculumUnit.Create(_subject, "Mechanics", 1, _createdBy);
         var deletedBy = Guid.NewGuid();
 
-        unit.Delete(deletedBy);
+        unit.Delete(false, deletedBy);
 
         unit.IsDeleted.Should().BeTrue();
         unit.UpdatedBy.Should().Be(deletedBy);
+    }
+
+    [Fact]
+    public void Delete_HasLessons_ThrowsUnitHasLessons()
+    {
+        var unit = CurriculumUnit.Create(_subject, "Mechanics", 1, _createdBy);
+
+        var act = () => unit.Delete(true, Guid.NewGuid());
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.UnitHasLessons);
+        unit.IsDeleted.Should().BeFalse();
     }
 }

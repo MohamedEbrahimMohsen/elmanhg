@@ -29,7 +29,75 @@
     "created": "تمت إضافة الوحدة.",
     "renamed": "تمت إعادة تسمية الوحدة.",
     "moved": "تم نقل الوحدة.",
-    "deleted": "تم حذف الوحدة."
+    "deleted": "تم حذف الوحدة.",
+    "lessonCount": "{count, plural, zero {لا دروس} one {درس واحد} two {درسان} few {# دروس} many {# درسًا} other {# درس}}",
+    "showLessons": "عرض الدروس",
+    "hideLessons": "إخفاء الدروس"
+  },
+  "lessons": {
+    "listLabel": "دروس {name}",
+    "loading": "جارٍ تحميل الدروس",
+    "errorTitle": "تعذّر تحميل الدروس",
+    "empty": "لا توجد دروس في هذه الوحدة بعد.",
+    "nameLabel": "اسم الدرس",
+    "add": "إضافة درس",
+    "created": "تمت إضافة الدرس.",
+    "state": {
+      "Draft": "مسودة",
+      "Published": "منشور",
+      "Archived": "مؤرشف"
+    }
+  },
+  "lessonEditor": {
+    "title": "تحرير الدرس",
+    "breadcrumb": "مسار التنقل",
+    "contentLink": "المحتوى",
+    "loading": "جارٍ تحميل الدرس",
+    "errorTitle": "تعذّر تحميل الدرس",
+    "save": "حفظ",
+    "saved": "تم حفظ الدرس.",
+    "fields": {
+      "name": "الاسم",
+      "explanation": "الشرح",
+      "objectives": "الأهداف",
+      "summary": "الملخص",
+      "videoUrl": "رابط فيديو (اختياري)"
+    },
+    "objectives": {
+      "itemLabel": "الهدف {number}",
+      "add": "إضافة هدف",
+      "moveUp": "نقل الهدف {number} لأعلى",
+      "moveDown": "نقل الهدف {number} لأسفل",
+      "remove": "حذف الهدف {number}",
+      "empty": "لا توجد أهداف بعد."
+    },
+    "preview": {
+      "title": "معاينة",
+      "video": "شاهد الفيديو"
+    },
+    "toolbar": {
+      "label": "تنسيق {field}",
+      "bold": "عريض",
+      "italic": "مائل",
+      "heading": "عنوان",
+      "bulletList": "قائمة نقطية",
+      "orderedList": "قائمة مرقمة",
+      "formula": "إدراج معادلة",
+      "image": "إدراج صورة"
+    },
+    "formula": {
+      "title": "إدراج معادلة",
+      "latex": "صيغة LaTeX",
+      "block": "عرض في سطر مستقل",
+      "insert": "إدراج"
+    },
+    "image": {
+      "title": "إدراج صورة",
+      "file": "ملف الصورة",
+      "description": "وصف الصورة",
+      "insert": "رفع وإدراج",
+      "uploaded": "تم إدراج الصورة."
+    }
   },
   "actions": {
     "moveUp": "نقل {name} لأعلى",
