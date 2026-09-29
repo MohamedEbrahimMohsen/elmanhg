@@ -20,6 +20,7 @@ using Elmanhg.Domain.SharedKernel;
 using Elmanhg.Infrastructure;
 using Elmanhg.Infrastructure.Data.Context;
 using MediatR;
+using Pgvector.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -61,7 +62,7 @@ builder.Services.AddOpenApi(options => options.AddSchemaTransformer((schema, _, 
 }));
 
 #region IDENTITY
-builder.Services.AddCoreIdentity<User, Guid, Role, AppDbContext>(configuration: builder.Configuration, dbContextOptions: options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnectionString"), npgsql => npgsql.EnableRetryOnFailure()), identityOptions: options => builder.Configuration.GetSection(nameof(IdentityOptions)).Bind(options));
+builder.Services.AddCoreIdentity<User, Guid, Role, AppDbContext>(configuration: builder.Configuration, dbContextOptions: options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnectionString"), npgsql => npgsql.EnableRetryOnFailure().UseVector()), identityOptions: options => builder.Configuration.GetSection(nameof(IdentityOptions)).Bind(options));
 builder.Services.AddAuthorizationBuilder().AddPolicy(DefaultCodes.AuthenticatedUser, policy => policy.RequireAuthenticatedUser()).AddPermissionMatrixPolicies();
 #endregion
 
@@ -79,6 +80,7 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 builder.Services.AddHostedService<ExpiredExamSubmissionWorker>();
 builder.Services.AddHostedService<SubscriptionLapseWorker>();
+builder.Services.AddHostedService<LessonContentIndexWorker>();
 builder.Services.AddAuthRateLimiting();
 #endregion
 

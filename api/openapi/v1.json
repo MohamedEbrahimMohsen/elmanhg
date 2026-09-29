@@ -3538,6 +3538,80 @@
         }
       }
     },
+    "/api/lessons/{lessonId}/content-chunks/search": {
+      "post": {
+        "tags": [
+          "ContentRetrieval"
+        ],
+        "operationId": "SearchLessonContent",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchLessonContentRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchLessonContentRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchLessonContentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonContentSearchResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonContentSearchResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonContentSearchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content-index/rebuild": {
+      "post": {
+        "tags": [
+          "ContentRetrieval"
+        ],
+        "operationId": "RebuildContentIndex",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/browse/subjects/{subjectId}": {
       "get": {
         "tags": [
@@ -6009,6 +6083,98 @@
         }
       },
       "JsonElement": { },
+      "LessonContentMatchResult": {
+        "required": [
+          "chunkId",
+          "section",
+          "sectionTitle",
+          "position",
+          "questionId",
+          "reference",
+          "content",
+          "score"
+        ],
+        "type": "object",
+        "properties": {
+          "chunkId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "section": {
+            "$ref": "#/components/schemas/LessonContentSection"
+          },
+          "sectionTitle": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "position": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "questionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "score": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "LessonContentSearchResult": {
+        "required": [
+          "lessonId",
+          "indexedAt",
+          "matches"
+        ],
+        "type": "object",
+        "properties": {
+          "lessonId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "indexedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "matches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LessonContentMatchResult"
+            }
+          }
+        }
+      },
+      "LessonContentSection": {
+        "enum": [
+          "Explanation",
+          "Objectives",
+          "Summary",
+          "QuestionExplanation"
+        ]
+      },
       "LessonDetailResult": {
         "required": [
           "id",
@@ -7477,6 +7643,34 @@
         "properties": {
           "answer": {
             "$ref": "#/components/schemas/JsonElement"
+          }
+        }
+      },
+      "SearchLessonContentRequest": {
+        "required": [
+          "query",
+          "top",
+          "includeQuestionExplanations"
+        ],
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "top": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "includeQuestionExplanations": {
+            "type": [
+              "null",
+              "boolean"
+            ]
           }
         }
       },
@@ -9671,6 +9865,9 @@
     },
     {
       "name": "ExamBlueprints"
+    },
+    {
+      "name": "ContentRetrieval"
     },
     {
       "name": "Browse"

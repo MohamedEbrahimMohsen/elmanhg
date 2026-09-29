@@ -54,9 +54,12 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("Subscriptions:LapseSweepEnabled", "false");
         // Pins the offline assistant even when the developer's environment switches the API to the Python service.
         builder.UseSetting("AiService:Provider", "Fake");
+        // The index sweep would race tests that reindex through the mediator and assert exact chunk and index state.
+        builder.UseSetting("ContentRetrieval:IndexSweepEnabled", "false");
         builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
-            ["ConnectionStrings:DbConnectionString"] = _database.GetConnectionString(),
+            // UseVector() makes EF build an NpgsqlDataSource, whose connection string drops the password unless it is persisted; tests that open raw connections read it back through DbContext.
+            ["ConnectionStrings:DbConnectionString"] = $"{_database.GetConnectionString()};Persist Security Info=true",
             ["CoreJwt:Issuer"] = "Elmanhg.Tests",
             ["CoreJwt:Audience"] = "Elmanhg.Tests",
             ["CoreJwt:Key"] = TestJwtKey,
@@ -130,6 +133,13 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Subscriptions:AdminPaymentLogMaxPageSize"] = "100",
             ["Subscriptions:RefundReasonMaxLength"] = "500",
             ["Subscriptions:PaymentLogReferenceMaxLength"] = "100",
+            ["ContentRetrieval:IndexSweepIntervalSeconds"] = "30",
+            ["ContentRetrieval:IndexSweepBatchSize"] = "20",
+            ["ContentRetrieval:ChunkMaxCharacters"] = "1500",
+            ["ContentRetrieval:EmbeddingBatchSize"] = "32",
+            ["ContentRetrieval:DefaultTopK"] = "5",
+            ["ContentRetrieval:MaxTopK"] = "20",
+            ["ContentRetrieval:QueryMaxLength"] = "2000",
             ["Payments:Provider"] = "Fake",
             ["Payments:FakeCheckoutPath"] = "/student/fake-checkout",
             ["Payments:AllowFakePayments"] = "true",

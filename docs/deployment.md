@@ -38,10 +38,10 @@ Three files sit next to `docker-compose.prod.yml` on the host. None is committed
 | File | Read by | Holds |
 |---|---|---|
 | `.env` | Docker Compose (interpolation) | image registry and tag, site address, ports, network subnet, environment names, Postgres credentials, the env-file paths |
-| `api.env` | the `api` and `migrate` containers | every API `Section__Key`: JWT, OTP, admin seed, OTP delivery, payments, AI client |
+| `api.env` | the `api` and `migrate` containers | every API `Section__Key`: JWT, OTP, admin seed, OTP delivery, payments, AI client, content retrieval |
 | `ai.env` | the `ai` container | every `ELMANHG_AI_*` |
 
-The API never sees the AI provider key, and the AI service never sees the JWT key.
+The API never sees the AI provider keys (Anthropic, OpenAI), and the AI service never sees the JWT key.
 
 Precedence inside the API container, highest first:
 1. Compose `environment:` (computed values: connection string, trusted proxy network, AI base URL, file storage).
@@ -140,6 +140,21 @@ A story that adds an options section holding a secret or a per-host value must a
 | `AiService__AttemptTimeoutSeconds` / `AiService__TotalTimeoutSeconds` | `45` / `50` | |
 | `AiService__BaseUrl` | set by compose | `http://ai:8000` |
 
+### Content retrieval (`api.env`, [docs/content-retrieval.md](content-retrieval.md))
+
+None is a secret; the baked defaults suit staging and production. Validated at startup, so a value out of range stops the API.
+
+| Variable | Default | Notes |
+|---|---|---|
+| `ContentRetrieval__IndexSweepEnabled` | `true` | the background sweep that embeds Published lessons through the `ai` service |
+| `ContentRetrieval__IndexSweepIntervalSeconds` / `ContentRetrieval__IndexSweepBatchSize` | `30` / `20` | 5 to 86400 / 1 to 500 |
+| `ContentRetrieval__ChunkMaxCharacters` | `1500` | 200 to 6000 |
+| `ContentRetrieval__EmbeddingBatchSize` | `32` | 1 to 64; at most `ELMANHG_AI_EMBEDDING_MAX_TEXTS` |
+| `ContentRetrieval__DefaultTopK` / `ContentRetrieval__MaxTopK` | `5` / `20` | 1 to 50; the default must not exceed the max |
+| `ContentRetrieval__QueryMaxLength` | `2000` | 1 to 4000 |
+
+The sweep calls the embeddings endpoint, so with `AiService__Provider=Http` the `ai` profile must be on (`COMPOSE_PROFILES=ai`); otherwise failed lessons are logged as warnings and retried by later sweeps.
+
 ### AI service (`ai.env`, [docs/ai-service.md](ai-service.md))
 
 | Variable | Default | Notes |
@@ -153,7 +168,15 @@ A story that adds an options section holding a secret or a per-host value must a
 | `ELMANHG_AI_CHAT_MAX_TOKENS` / `_MAX_HISTORY_MESSAGES` / `_MAX_MESSAGE_CHARS` / `_MAX_CONTEXT_CHARS` | `1024` / `20` / `4000` / `60000` | |
 | `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` / `ELMANHG_AI_MODEL_MAX_RETRIES` | `20` / `1` | |
 | `ELMANHG_AI_MODEL_INPUT_USD_PER_MILLION_TOKENS` / `_OUTPUT_USD_PER_MILLION_TOKENS` | `3` / `15` | cost logging only |
+| `ELMANHG_AI_EMBEDDING_PROVIDER` | `fake` | `openai` to go live |
+| `ELMANHG_AI_OPENAI_API_KEY` | unset | secret; required for `openai` |
+| `ELMANHG_AI_EMBEDDING_MODEL` | `text-embedding-3-small` | |
+| `ELMANHG_AI_EMBEDDING_DIMENSIONS` | `1536` | keep `1536`: it is the width of the API's `vector(1536)` column |
+| `ELMANHG_AI_EMBEDDING_MAX_TEXTS` / `ELMANHG_AI_EMBEDDING_MAX_TEXT_CHARS` | `64` / `8000` | per call / per text |
+| `ELMANHG_AI_EMBEDDING_USD_PER_MILLION_TOKENS` | `0.02` | cost logging only |
 | `ELMANHG_AI_ENV` | set by compose | from `.env` |
+
+Switching the embedding provider or model (for example `fake` to `openai`) needs a re-index: after `up -d`, call `POST /api/content-index/rebuild` as an admin (Postman, `ContentRetrieval` folder). Until each lesson is re-embedded by the sweep, its search returns no matches, because old-model chunks are never compared with a new-model query ([docs/content-retrieval.md](content-retrieval.md), Rebuild).
 
 ### Set by compose (do not put these in `api.env`)
 
@@ -200,7 +223,7 @@ Each GitHub Environment (`staging`, `production`) holds these secrets:
 | `DEPLOY_HOST` | host name or IP |
 | `DEPLOY_USER` | the deploy user, a member of the `docker` group |
 | `DEPLOY_SSH_KEY` | private key of a key pair authorised for that user |
-| `DEPLOY_KNOWN_HOSTS` | output of `ssh-keyscan <host>` |
+| `DEPLOY_KNOWN_HOSTS` | output of `ssh-keyscan <host>`, **after** you compare its fingerprint (`ssh-keygen -lf <file>`) with the one the host shows on its own console (`ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub`). A plain keyscan trusts whatever answers on the first try. |
 | `DEPLOY_PATH` | `/opt/elmanhg` |
 
 Give `production` a required reviewer, so every production deploy waits for approval.

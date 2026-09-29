@@ -65,6 +65,18 @@ public class QuestionRepository(AppDbContext context) : Repository<Question>(con
             .ConfigureAwait(false);
     }
 
+    public async Task<List<Question>> GetServableInLessonAsync(Guid lessonId, CancellationToken cancellationToken)
+    {
+        return await _dbSet
+            .WhereServable(_context.Set<Lesson>())
+            .Where(x => x.LessonId == lessonId)
+            .OrderBy(x => x.CreationDate)
+            .ThenBy(x => x.Id)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
     public async Task<List<ExamCandidate>> GetServableExamCandidatesAsync(IReadOnlyCollection<Guid> unitIds, CancellationToken cancellationToken)
     {
         return await _dbSet

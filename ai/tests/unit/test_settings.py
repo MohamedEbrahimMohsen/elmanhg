@@ -76,3 +76,26 @@ def test_settings_reads_prefixed_environment_variables(monkeypatch: pytest.Monke
 
     assert settings.service_token.get_secret_value() == VALID_TOKEN
     assert settings.chat_model == "claude-haiku-4-5"
+
+
+def test_settings_defaults_select_fake_embeddings_1536() -> None:
+    settings = Settings(service_token=SecretStr(VALID_TOKEN))
+
+    assert settings.embedding_provider == "fake"
+    assert settings.embedding_model == "text-embedding-3-small"
+    assert settings.embedding_dimensions == 1536
+    assert settings.embedding_max_texts == 64
+
+
+def test_settings_openai_without_api_key_raises_validation_error() -> None:
+    with pytest.raises(ValidationError) as error:
+        Settings(service_token=SecretStr(VALID_TOKEN), embedding_provider="openai")
+
+    assert "openai_api_key is required" in str(error.value)
+
+
+def test_settings_embedding_dimensions_above_2000_raises_validation_error() -> None:
+    with pytest.raises(ValidationError) as error:
+        Settings(service_token=SecretStr(VALID_TOKEN), embedding_dimensions=2001)
+
+    assert error.value.errors()[0]["loc"] == ("embedding_dimensions",)

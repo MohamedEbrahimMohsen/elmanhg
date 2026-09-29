@@ -51,3 +51,29 @@ Non-blocking item done: web (Caddy) as non-root. `web/Dockerfile` creates `caddy
 - `compose run --rm migrate` also starts `postgres` if it is not running. It may recreate `postgres` when its config changed, for example on the first deploy after this digest pin. That is a short database restart that the old API's retry strategy absorbs. It does not replace `api` or `web`.
 - `deploy.sh` itself was not run against a failing migration. The ordering guarantee comes from `set -e` plus `run` never touching `api` or `web`. The smoke test exercises the same `compose run --rm migrate` command.
 - Caddy as non-root needs the default Docker capability set (NET_BIND_SERVICE). A host that runs with `--cap-drop ALL` or `no-new-privileges` would need that capability added back.
+
+## Main merge
+
+`git merge origin/main` brought in #90 (lesson content retrieval: pgvector, `LessonContentIndexWorker`, OpenAI embeddings through the ai service). Conflicts in `.env.example` and `README.md` were already resolved by the orchestrator.
+
+### Files modified
+| Path | Change |
+|---|---|
+| `docs/deployment.md` | §3: `api.env` holds content retrieval; the API never sees the Anthropic or OpenAI key. §4: new "Content retrieval (`api.env`)" table with every `ContentRetrieval__*` key, its default and range, plus a note that with `AiService__Provider=Http` the sweep needs the `ai` profile. The AI service table gains `ELMANHG_AI_EMBEDDING_PROVIDER`, `ELMANHG_AI_OPENAI_API_KEY`, `_EMBEDDING_MODEL`, `_EMBEDDING_DIMENSIONS`, `_EMBEDDING_MAX_TEXTS`, `_EMBEDDING_MAX_TEXT_CHARS` and `_EMBEDDING_USD_PER_MILLION_TOKENS`, followed by a note that switching the embedding provider or model needs `POST /api/content-index/rebuild`. |
+| `deploy/ai.env.example` | embedding block: `ELMANHG_AI_EMBEDDING_PROVIDER=fake`, then the key, model, dimensions, limits and price commented out, with the rebuild note |
+| `deploy/api.env.example` | commented `ContentRetrieval__*` block with the defaults |
+
+Checked without changing anything: the prod compose `postgres` is `pgvector/pgvector:pg17` (pinned by digest), so `CREATE EXTENSION vector` from `AddLessonContentIndex` works. `POSTGRES_USER` is the image's superuser. `--MigrateAndExit` returns before `app.Run`, so the new hosted worker never starts in the `migrate` container.
+
+### Deviations
+None.
+
+### Build & test
+- `dotnet build api/`: 0 errors (9 existing warnings in core-libraries).
+- `dotnet test api/ -c Release`, run with `api/Elmanhg.Api/appsettings.json` moved aside and restored afterwards: `total: 2728, failed: 0, succeeded: 2728, skipped: 0`.
+- ai checks: uv is not installed on this machine, so I used the main checkout's `ai/.venv` Python with `PYTHONPATH=<worktree>/ai/src`. I confirmed that `elmanhg_ai` resolves to the worktree. `pytest`: `97 passed`. `ruff check`: `All checks passed!`. `mypy`: `Success: no issues found in 50 source files`.
+- Smoke: `SMOKE_PROJECT_NAME=elmanhg-smoke-112m SMOKE_HTTP_PORT=8192 SMOKE_HTTPS_PORT=8543 SMOKE_DOCKER_SUBNET=172.30.212.0/24 bash deploy/smoke-test.sh` exited 0. It printed "Applying 0 pending migrations" on the second migrate, "Restore drill passed: 25 migrations in elmanhg_restore_drill" (24 + `AddLessonContentIndex`, so the pgvector extension restores too) and "Smoke test passed". Afterwards no containers or volumes named `elmanhg-smoke-112m` remained.
+
+### Notes for review
+- The unstaged `docs/deployment.md` §7 `DEPLOY_KNOWN_HOSTS` fingerprint wording was already in the working tree before this pass. I left it as it was, and it is committed with the merge.
+- The untracked `.process/112-hosting-and-environments/05-coderabbit-comments.md` and `06-coderabbit-triage.md` are staged with the merge, as instructed ("stage everything").

@@ -205,6 +205,7 @@ source = { editable = "." }
 dependencies = [
     { name = "anthropic" },
     { name = "fastapi" },
+    { name = "httpx2" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "structlog" },
@@ -213,7 +214,6 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "httpx2" },
     { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
@@ -225,6 +225,7 @@ dev = [
 requires-dist = [
     { name = "anthropic", specifier = "==1.7.0" },
     { name = "fastapi", specifier = "==0.141.1" },
+    { name = "httpx2", specifier = "==2.13.0" },
     { name = "pydantic", specifier = "==2.13.5" },
     { name = "pydantic-settings", specifier = "==2.15.0" },
     { name = "structlog", specifier = "==26.1.0" },
@@ -233,7 +234,6 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "httpx2", specifier = "==2.13.0" },
     { name = "mypy", specifier = "==2.3.1" },
     { name = "pytest", specifier = "==9.1.1" },
     { name = "pytest-asyncio", specifier = "==1.4.0" },

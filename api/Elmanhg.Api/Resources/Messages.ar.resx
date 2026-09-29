@@ -331,4 +331,8 @@
   <data name="FUNNEL_EVENT_TYPE_INVALID" xml:space="preserve"><value>نوع الحدث غير صالح.</value></data>
   <data name="USER_NOT_STUDENT" xml:space="preserve"><value>هذا الاجراء للطلاب فقط.</value></data>
   <data name="AI_SERVICE_UNAVAILABLE" xml:space="preserve"><value>المساعد غير متاح الآن. حاول مرة أخرى بعد قليل.</value></data>
+  <data name="CONTENT_SEARCH_QUERY_REQUIRED" xml:space="preserve"><value>اكتب نص البحث.</value></data>
+  <data name="CONTENT_SEARCH_QUERY_TOO_LONG" xml:space="preserve"><value>نص البحث أطول من المسموح.</value></data>
+  <data name="CONTENT_SEARCH_TOP_INVALID" xml:space="preserve"><value>عدد النتائج المطلوبة غير صالح.</value></data>
+  <data name="CONTENT_EMBEDDING_DIMENSIONS_INVALID" xml:space="preserve"><value>أبعاد التمثيل الرقمي للمحتوى غير متوافقة.</value></data>
 </root>
