@@ -116,3 +116,12 @@ groups:
         annotations:
           summary: 'A payment notification was flagged for review in the last hour.'
           runbook: docs/observability.md#alerts
+  - name: elmanhg-ask-teacher
+    rules:
+      - alert: AskTeacherSlaBreached
+        expr: 'sum ((increase(elmanhg_ask_teacher_sla_events_total{elmanhg_kind="Breach"}[15m]) unless (elmanhg_ask_teacher_sla_events_total{elmanhg_kind="Breach"} unless elmanhg_ask_teacher_sla_events_total{elmanhg_kind="Breach"} offset 15m)) or (elmanhg_ask_teacher_sla_events_total{elmanhg_kind="Breach"} unless elmanhg_ask_teacher_sla_events_total{elmanhg_kind="Breach"} offset 15m)) > 0'
+        labels:
+          severity: warning
+        annotations:
+          summary: 'An Ask a Teacher question passed its reply deadline without a reply.'
+          runbook: docs/observability.md#alerts

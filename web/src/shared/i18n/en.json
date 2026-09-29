@@ -245,7 +245,11 @@
     "TEACHER_VOICE_AUDIO_NOT_FOUND": "The recording file was not found.",
     "TEACHER_VOICE_DRAFT_NOT_READY": "The recording is still being transcribed.",
     "TEACHER_VOICE_DRAFT_ALREADY_SENT": "This recording was already sent.",
-    "TEACHER_VOICE_DRAFT_NOT_PENDING": "This recording is not waiting for transcription."
+    "TEACHER_VOICE_DRAFT_NOT_PENDING": "This recording is not waiting for transcription.",
+    "TEACHER_THREAD_FOLLOW_UP_NOT_ALLOWED": "You can't send a follow-up on this question now.",
+    "TEACHER_THREAD_NOT_ANSWERED": "The teacher has not answered this question yet.",
+    "TEACHER_THREAD_ALREADY_RATED": "You have already rated this answer.",
+    "TEACHER_THREAD_RATING_INVALID": "Choose a rating from 1 to 5."
   },
   "error": {
     "title": "Something went wrong"

@@ -1,6 +1,7 @@
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
+using Elmanhg.Application.Shared.Realtime;
 using Elmanhg.Application.TeacherInbox.Shared;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.TeacherThreads;
@@ -11,7 +12,7 @@ using System.Security.Claims;
 
 namespace Elmanhg.Application.TeacherInbox.ReplyToTeacherThread;
 
-public sealed class ReplyToTeacherThreadHandler(ITeacherThreadRepository teacherThreadRepository, ITeacherSubjectRepository teacherSubjectRepository, IUserRepository userRepository, TimeProvider timeProvider, ICurrentUserService currentUserService) : IRequestHandler<ReplyToTeacherThreadCommand, TeacherInboxThreadResult>
+public sealed class ReplyToTeacherThreadHandler(ITeacherThreadRepository teacherThreadRepository, ITeacherSubjectRepository teacherSubjectRepository, IUserRepository userRepository, TimeProvider timeProvider, ICurrentUserService currentUserService, ITeacherThreadNotifier teacherThreadNotifier) : IRequestHandler<ReplyToTeacherThreadCommand, TeacherInboxThreadResult>
 {
     public async Task<TeacherInboxThreadResult> Handle(ReplyToTeacherThreadCommand request, CancellationToken cancellationToken)
     {
@@ -28,6 +29,7 @@ public sealed class ReplyToTeacherThreadHandler(ITeacherThreadRepository teacher
         thread.Reply(userId, request.Text ?? string.Empty, now);
 
         await teacherThreadRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await teacherThreadNotifier.NotifyReplyAsync(thread.StudentId, thread.Id, cancellationToken).ConfigureAwait(false);
 
         var names = await TeacherInboxNames.LoadAsync(userRepository, [thread], cancellationToken).ConfigureAwait(false);
         return TeacherInboxResultGenerator.GenerateThread(thread, names, userId, now);

@@ -58,6 +58,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("ContentRetrieval:IndexSweepEnabled", "false");
         // The sweep would race tests that transcribe through the mediator.
         builder.UseSetting("AskTeacher:TranscriptionSweepEnabled", "false");
+        // The sweep would race tests that record SLA events through the mediator.
+        builder.UseSetting("AskTeacher:SlaSweepEnabled", "false");
         builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
             // UseVector() makes EF build an NpgsqlDataSource, whose connection string drops the password unless it is persisted; tests that open raw connections read it back through DbContext.

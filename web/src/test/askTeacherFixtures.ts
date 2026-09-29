@@ -1,6 +1,8 @@
 import type {
   PageDataOfTeacherThreadSummaryResult,
   SubjectMasteryDetailResult,
+  TeacherInboxReminderResult,
+  TeacherMessageResult,
   TeacherThreadContextResult,
   TeacherThreadResult,
   TeacherThreadSummaryResult,
@@ -75,6 +77,45 @@ export function teacherThread(overrides?: Partial<TeacherThreadResult>): Teacher
       },
     ],
     hasUnreadReply: false,
+    rating: null,
+    closedAt: null,
+    canFollowUp: false,
+    canRate: false,
+    ...overrides,
+  };
+}
+
+export const teacherTextReply: TeacherMessageResult = {
+  id: 'f5f5f5f5-f5f5-4f5f-8f5f-f5f5f5f5f5f5',
+  isFromStudent: false,
+  kind: 'Text',
+  text: 'Force equals mass times acceleration.',
+  imageUrl: null,
+  createdAt: '2026-10-01T09:00:00Z',
+  audioUrl: null,
+  audioDurationSeconds: null,
+};
+
+export function answeredThread(overrides?: Partial<TeacherThreadResult>): TeacherThreadResult {
+  return teacherThread({
+    status: 'Answered',
+    canFollowUp: true,
+    canRate: true,
+    messages: [...teacherThread().messages, teacherTextReply],
+    ...overrides,
+  });
+}
+
+export function reminder(overrides?: Partial<TeacherInboxReminderResult>): TeacherInboxReminderResult {
+  return {
+    threadId,
+    subjectName: 'Physics',
+    lessonName: "Newton's laws",
+    questionText: 'Why is F = ma?',
+    kind: 'FirstReminder',
+    isClaimedByMe: false,
+    isOverdue: false,
+    slaDueAt: '2026-10-02T07:00:00Z',
     ...overrides,
   };
 }
@@ -84,6 +125,8 @@ export const voiceReplyUrl = '/api/media/teacher-threads/voice01.webm';
 export function voiceAnsweredThread(): TeacherThreadResult {
   return teacherThread({
     status: 'Answered',
+    canFollowUp: true,
+    canRate: true,
     messages: [
       ...teacherThread().messages,
       {
