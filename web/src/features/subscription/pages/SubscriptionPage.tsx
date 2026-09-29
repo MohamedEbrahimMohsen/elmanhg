@@ -6,11 +6,13 @@ import { CurrentPlanCard } from '../components/CurrentPlanCard';
 import { PaymentHistorySection } from '../components/PaymentHistorySection';
 import { PlanCardGrid } from '../components/PlanCardGrid';
 import { SubscribeHeader } from '../components/SubscribeHeader';
+import { useCheckout } from '../hooks/useCheckout';
 
 export function SubscriptionPage() {
   const { t } = useTranslation('subscription');
   const catalogue = useGetPlanCatalogue();
   const entitlement = useGetMyEntitlement();
+  const checkout = useCheckout();
 
   const renderPlans = () => {
     if (catalogue.isError || entitlement.isError) {
@@ -31,7 +33,17 @@ export function SubscriptionPage() {
     return (
       <>
         <CurrentPlanCard entitlement={entitlement.data} />
-        <PlanCardGrid catalogue={catalogue.data} entitlement={entitlement.data} />
+        {checkout.isPending ? (
+          <p role="status" className="text-caption text-text-muted">
+            {t('checkout.redirecting')}
+          </p>
+        ) : null}
+        <PlanCardGrid
+          catalogue={catalogue.data}
+          entitlement={entitlement.data}
+          onCheckout={checkout.start}
+          isCheckoutPending={checkout.isPending}
+        />
       </>
     );
   };

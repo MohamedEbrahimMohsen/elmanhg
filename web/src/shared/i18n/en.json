@@ -180,7 +180,18 @@
     "OTP_CHANNEL_UNAVAILABLE": "Sign-in codes can't be sent right now. Try again later.",
     "OTP_DELIVERY_FAILED": "We couldn't deliver your code. Try again in a moment.",
     "EMAIL_NOT_REGISTERED": "No account uses this email. Create an account first.",
-    "EMAIL_CODE_SIGN_IN_NOT_ALLOWED": "This account signs in with a password."
+    "EMAIL_CODE_SIGN_IN_NOT_ALLOWED": "This account signs in with a password.",
+    "CHECKOUT_PLAN_ALREADY_ACTIVE": "This plan is already active.",
+    "CHECKOUT_REQUIRES_BASE": "Ask a Teacher requires an active Base plan.",
+    "CHECKOUT_PLAN_REQUIRED": "Choose a plan.",
+    "CHECKOUT_PLAN_INVALID": "Unknown plan.",
+    "CHECKOUT_PERIOD_REQUIRED": "Choose a billing period.",
+    "CHECKOUT_PERIOD_INVALID": "Unknown billing period.",
+    "CHECKOUT_PERIOD_UNAVAILABLE": "This billing period is not available for this plan.",
+    "PAYMENT_NOT_FOUND": "Payment not found.",
+    "PAYMENT_GATEWAY_UNAVAILABLE": "The payment service is unavailable. Try again in a moment.",
+    "FAKE_CHECKOUT_UNAVAILABLE": "Simulated checkout is not available.",
+    "PAYMENT_NOT_PENDING": "This payment has already been processed."
   },
   "error": {
     "title": "Something went wrong"

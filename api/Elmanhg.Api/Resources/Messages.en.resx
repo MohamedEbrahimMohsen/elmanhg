@@ -287,4 +287,14 @@
   <data name="PAYMENT_NOT_PENDING" xml:space="preserve"><value>This payment has already been processed.</value></data>
   <data name="PAYMENT_HISTORY_PAGE_NUMBER_INVALID" xml:space="preserve"><value>The page number must be 1 or more.</value></data>
   <data name="PAYMENT_HISTORY_PAGE_SIZE_INVALID" xml:space="preserve"><value>The page size is not valid.</value></data>
+  <data name="CHECKOUT_PLAN_ALREADY_ACTIVE" xml:space="preserve"><value>This plan is already active.</value></data>
+  <data name="CHECKOUT_REQUIRES_BASE" xml:space="preserve"><value>Ask a Teacher requires an active Base plan.</value></data>
+  <data name="CHECKOUT_PLAN_REQUIRED" xml:space="preserve"><value>Choose a plan.</value></data>
+  <data name="CHECKOUT_PLAN_INVALID" xml:space="preserve"><value>Unknown plan.</value></data>
+  <data name="CHECKOUT_PERIOD_REQUIRED" xml:space="preserve"><value>Choose a billing period.</value></data>
+  <data name="CHECKOUT_PERIOD_INVALID" xml:space="preserve"><value>Unknown billing period.</value></data>
+  <data name="CHECKOUT_PERIOD_UNAVAILABLE" xml:space="preserve"><value>This billing period is not available for this plan.</value></data>
+  <data name="PAYMENT_NOT_FOUND" xml:space="preserve"><value>Payment not found.</value></data>
+  <data name="PAYMENT_GATEWAY_UNAVAILABLE" xml:space="preserve"><value>The payment service is unavailable. Try again in a moment.</value></data>
+  <data name="FAKE_CHECKOUT_UNAVAILABLE" xml:space="preserve"><value>Simulated checkout is not available.</value></data>
 </root>

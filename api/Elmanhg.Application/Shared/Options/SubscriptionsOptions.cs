@@ -43,4 +43,11 @@ public sealed class SubscriptionsOptions
     public int PaymentHistoryMaxPageSize { get; set; } = 50;
 
     public TimeSpan GracePeriod => TimeSpan.FromDays(GracePeriodDays);
+
+    public PlanPriceOptions? PriceFor(SubscriptionPlan plan, BillingPeriod period) => plan switch
+    {
+        SubscriptionPlan.Base => BasePrices.GetValueOrDefault(period),
+        SubscriptionPlan.AskTeacher when period == BillingPeriod.Monthly => new PlanPriceOptions { Months = AskTeacherPeriodMonths, AmountMinor = AskTeacherMonthlyPriceMinor },
+        _ => null,
+    };
 }

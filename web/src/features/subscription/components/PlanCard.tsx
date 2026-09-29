@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { type ReactNode, useId } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export interface PlanCardProps {
@@ -6,9 +6,10 @@ export interface PlanCardProps {
   priceLines: string[];
   features: string[];
   isActive: boolean;
+  actions?: ReactNode;
 }
 
-export function PlanCard({ title, priceLines, features, isActive }: PlanCardProps) {
+export function PlanCard({ title, priceLines, features, isActive, actions }: PlanCardProps) {
   const { t } = useTranslation('subscription');
   const headingId = useId();
 
@@ -37,6 +38,7 @@ export function PlanCard({ title, priceLines, features, isActive }: PlanCardProp
           <li key={feature}>{feature}</li>
         ))}
       </ul>
+      {actions ? <div className="mt-auto flex flex-col gap-2">{actions}</div> : null}
     </article>
   );
 }

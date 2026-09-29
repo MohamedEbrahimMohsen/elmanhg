@@ -65,6 +65,46 @@ public sealed class SubscriptionsOptionsTests
         (options.BasePrices[BillingPeriod.Termly].Months, options.BasePrices[BillingPeriod.Termly].AmountMinor).Should().Be((4, 69900L));
     }
 
+    [Fact]
+    public void PriceFor_BaseConfiguredPeriod_ReturnsConfiguredPrice()
+    {
+        var options = new SubscriptionsOptions { BasePrices = { [BillingPeriod.Monthly] = new() { Months = 1, AmountMinor = 19900 }, [BillingPeriod.Termly] = new() { Months = 4, AmountMinor = 69900 } } };
+
+        var price = options.PriceFor(SubscriptionPlan.Base, BillingPeriod.Termly);
+
+        (price!.Months, price.AmountMinor).Should().Be((4, 69900L));
+    }
+
+    [Fact]
+    public void PriceFor_BasePeriodNotConfigured_ReturnsNull()
+    {
+        var options = new SubscriptionsOptions { BasePrices = { [BillingPeriod.Monthly] = new() { Months = 1, AmountMinor = 19900 } } };
+
+        var price = options.PriceFor(SubscriptionPlan.Base, BillingPeriod.Yearly);
+
+        price.Should().BeNull();
+    }
+
+    [Fact]
+    public void PriceFor_AskTeacherMonthly_ReturnsOneMonthAtAddOnPrice()
+    {
+        var options = new SubscriptionsOptions { AskTeacherMonthlyPriceMinor = 9900 };
+
+        var price = options.PriceFor(SubscriptionPlan.AskTeacher, BillingPeriod.Monthly);
+
+        (price!.Months, price.AmountMinor).Should().Be((1, 9900L));
+    }
+
+    [Fact]
+    public void PriceFor_AskTeacherTermly_ReturnsNull()
+    {
+        var options = new SubscriptionsOptions { AskTeacherMonthlyPriceMinor = 9900 };
+
+        var price = options.PriceFor(SubscriptionPlan.AskTeacher, BillingPeriod.Termly);
+
+        price.Should().BeNull();
+    }
+
     private static Dictionary<string, string?> WithPrices(Dictionary<string, string?> overrides)
     {
         var settings = new Dictionary<string, string?>

@@ -1,14 +1,24 @@
 import { useTranslation } from 'react-i18next';
-import type { EntitlementResult, PlanCatalogueResult, PlanPriceResult } from '@/shared/api/generated/model';
+import type {
+  BillingPeriod,
+  EntitlementResult,
+  PlanCatalogueResult,
+  PlanPriceResult,
+  SubscriptionPlan,
+} from '@/shared/api/generated/model';
 import { formatMoney } from '@/shared/lib/format';
+import { AskTeacherCheckoutAction } from './AskTeacherCheckoutAction';
+import { BaseCheckoutActions } from './BaseCheckoutActions';
 import { PlanCard } from './PlanCard';
 
 export interface PlanCardGridProps {
   catalogue: PlanCatalogueResult;
   entitlement: EntitlementResult;
+  onCheckout: (plan: SubscriptionPlan, period: BillingPeriod) => void;
+  isCheckoutPending: boolean;
 }
 
-export function PlanCardGrid({ catalogue, entitlement }: PlanCardGridProps) {
+export function PlanCardGrid({ catalogue, entitlement, onCheckout, isCheckoutPending }: PlanCardGridProps) {
   const { t, i18n } = useTranslation('subscription');
   const { free, base, askTeacher } = catalogue;
   const priceLines = (prices: PlanPriceResult[]) =>
@@ -41,6 +51,17 @@ export function PlanCardGrid({ catalogue, entitlement }: PlanCardGridProps) {
           t('features.base.avatar', { count: Number(base.dailyAvatarMessages) }),
         ]}
         isActive={entitlement.tier === 'Base'}
+        actions={
+          entitlement.tier === 'Base' ? null : (
+            <BaseCheckoutActions
+              prices={base.prices}
+              disabled={isCheckoutPending}
+              onCheckout={(period) => {
+                onCheckout('Base', period);
+              }}
+            />
+          )
+        }
       />
       <PlanCard
         title={t('plan.AskTeacher')}
@@ -51,6 +72,17 @@ export function PlanCardGrid({ catalogue, entitlement }: PlanCardGridProps) {
           t('features.askTeacher.sla', { hours: Number(askTeacher.replySlaHours) }),
         ]}
         isActive={entitlement.hasAskTeacher}
+        actions={
+          entitlement.hasAskTeacher ? null : (
+            <AskTeacherCheckoutAction
+              hasBase={entitlement.tier === 'Base'}
+              disabled={isCheckoutPending}
+              onCheckout={() => {
+                onCheckout('AskTeacher', 'Monthly');
+              }}
+            />
+          )
+        }
       />
     </div>
   );

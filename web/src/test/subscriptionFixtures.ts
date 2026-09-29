@@ -1,4 +1,5 @@
 import type {
+  CheckoutResult,
   EntitlementResult,
   PageDataOfPaymentResult,
   PaymentResult,
@@ -10,6 +11,7 @@ import type {
 export const baseSubscriptionId = 'b1b1b1b1-b1b1-4b1b-8b1b-b1b1b1b1b1b1';
 export const askTeacherSubscriptionId = 'a2a2a2a2-a2a2-4a2a-8a2a-a2a2a2a2a2a2';
 export const paymentId = 'c3c3c3c3-c3c3-4c3c-8c3c-c3c3c3c3c3c3';
+export const checkoutPaymentId = 'd4d4d4d4-d4d4-4d4d-8d4d-d4d4d4d4d4d4';
 
 export function planCatalogue(): PlanCatalogueResult {
   return {
@@ -94,4 +96,8 @@ export function paymentsPage(
   { pageNumber = 1, totalPages = 1 }: { pageNumber?: number; totalPages?: number } = {},
 ): PageDataOfPaymentResult {
   return { items, pageNumber, pageSize: 10, totalItems: items.length, totalPages };
+}
+
+export function checkoutResult(redirectUrl = '/student/fake-checkout/' + checkoutPaymentId): CheckoutResult {
+  return { paymentId: checkoutPaymentId, redirectUrl, amount: { amountMinor: 19900, currency: 'EGP' } };
 }

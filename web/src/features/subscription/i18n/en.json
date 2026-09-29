@@ -63,5 +63,47 @@
     "status": "Status",
     "Succeeded": "Successful",
     "Failed": "Failed"
+  },
+  "period": {
+    "Monthly": "Monthly",
+    "Termly": "Term",
+    "Yearly": "Yearly"
+  },
+  "checkout": {
+    "subscribe": {
+      "Monthly": "Subscribe monthly",
+      "Termly": "Subscribe for a term",
+      "Yearly": "Subscribe yearly"
+    },
+    "subscribeAskTeacher": "Subscribe",
+    "requiresBaseHint": "Subscribe to Base first",
+    "redirecting": "Redirecting to payment…"
+  },
+  "fakeCheckout": {
+    "title": "Paymob checkout (simulation)",
+    "summary": "Plan: {plan} · {period} — Amount: {amount}",
+    "card": "Card number: •••• •••• •••• •••• or mobile wallet",
+    "note": "In the real system the client never activates the plan; Paymob sends a signed (HMAC) webhook to the server.",
+    "succeed": "Payment succeeds",
+    "fail": "Payment fails",
+    "cancel": "Cancel",
+    "loading": "Loading payment…",
+    "errorTitle": "Could not load the payment."
+  },
+  "checkoutResult": {
+    "loading": "Loading payment…",
+    "errorTitle": "Could not load the payment.",
+    "pendingTitle": "Confirming your payment…",
+    "pendingBody": "Waiting for Paymob to confirm. Keep this page open.",
+    "slowTitle": "Confirmation has not arrived yet",
+    "slowBody": "Your plan activates as soon as Paymob confirms the payment. Check again or come back later.",
+    "checkAgain": "Check again",
+    "back": "Back to subscription",
+    "succeededTitle": "Payment successful",
+    "succeededBody": "Your {plan} plan is active.",
+    "failedTitle": "Payment failed",
+    "failedBody": "Your plan was not activated.",
+    "done": "Done",
+    "tryAgain": "Try again"
   }
 }

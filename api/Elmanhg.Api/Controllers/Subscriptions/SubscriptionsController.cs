@@ -1,6 +1,9 @@
 using Core.DDD.Models;
+using Elmanhg.Application.Subscriptions.CompleteFakePayment;
 using Elmanhg.Application.Subscriptions.GetMyEntitlement;
+using Elmanhg.Application.Subscriptions.GetMyPayment;
 using Elmanhg.Application.Subscriptions.GetMyPayments;
+using Elmanhg.Application.Subscriptions.StartCheckout;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.SharedKernel;
 using MediatR;
@@ -29,6 +32,33 @@ public class SubscriptionsController(IMediator mediator) : ControllerBase
     public async Task<ActionResult> GetMyPayments([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
     {
         var result = await mediator.Send(new GetMyPaymentsQuery(pageNumber, pageSize), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("checkout", Name = "StartCheckout")]
+    [Authorize(Policy = DefaultCodes.SubscriptionManage)]
+    [ProducesResponseType<CheckoutResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> StartCheckout([FromBody] StartCheckoutCommand command, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("payments/{paymentId:guid}", Name = "GetMyPayment")]
+    [Authorize(Policy = DefaultCodes.SubscriptionManage)]
+    [ProducesResponseType<PaymentResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetMyPayment(Guid paymentId, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetMyPaymentQuery(paymentId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("payments/{paymentId:guid}/fake-completion", Name = "CompleteFakePayment")]
+    [Authorize(Policy = DefaultCodes.SubscriptionManage)]
+    [ProducesResponseType<PaymentResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> CompleteFakePayment(Guid paymentId, [FromBody] CompleteFakePaymentRequest request, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new CompleteFakePaymentCommand(paymentId, request.Succeeded), cancellationToken);
         return Ok(result);
     }
 }

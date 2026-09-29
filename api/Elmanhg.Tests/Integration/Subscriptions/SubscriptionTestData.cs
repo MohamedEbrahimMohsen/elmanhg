@@ -12,6 +12,7 @@ public static class SubscriptionTestData
     public const string PlansRoute = "/api/plans";
     public const string SubscriptionsRoute = "/api/subscriptions";
     public const string Currency = "EGP";
+    public const string FakeCheckoutPath = "/student/fake-checkout";
 
     public static async Task SeedSubscriptionAsync(ApiFactory factory, Subscription subscription, CancellationToken cancellationToken)
     {
@@ -40,6 +41,13 @@ public static class SubscriptionTestData
     }
 
     public static Task SeedPendingPaymentAsync(ApiFactory factory, Guid studentId, CancellationToken cancellationToken) => SavePaymentAsync(factory, NewPayment(studentId, 19900), cancellationToken);
+
+    public static async Task<Payment> SeedPendingPaymentAsync(ApiFactory factory, Guid studentId, SubscriptionPlan plan, BillingPeriod period, long amountMinor, CancellationToken cancellationToken)
+    {
+        var payment = Payment.Create(studentId, plan, period, new Money(amountMinor, Currency));
+        await SavePaymentAsync(factory, payment, cancellationToken).ConfigureAwait(false);
+        return payment;
+    }
 
     public static Payment NewPayment(Guid studentId, long amountMinor) => Payment.Create(studentId, SubscriptionPlan.Base, BillingPeriod.Monthly, new Money(amountMinor, Currency));
 

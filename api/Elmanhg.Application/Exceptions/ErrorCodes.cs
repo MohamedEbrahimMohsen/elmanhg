@@ -176,6 +176,14 @@ public static class ErrorCodes
     // SUBSCRIPTIONS
     public const string PaymentHistoryPageNumberInvalid = "PAYMENT_HISTORY_PAGE_NUMBER_INVALID";
     public const string PaymentHistoryPageSizeInvalid = "PAYMENT_HISTORY_PAGE_SIZE_INVALID";
+    public const string CheckoutPlanRequired = "CHECKOUT_PLAN_REQUIRED";
+    public const string CheckoutPlanInvalid = "CHECKOUT_PLAN_INVALID";
+    public const string CheckoutPeriodRequired = "CHECKOUT_PERIOD_REQUIRED";
+    public const string CheckoutPeriodInvalid = "CHECKOUT_PERIOD_INVALID";
+    public const string CheckoutPeriodUnavailable = "CHECKOUT_PERIOD_UNAVAILABLE";
+    public const string PaymentNotFound = "PAYMENT_NOT_FOUND";
+    public const string PaymentGatewayUnavailable = "PAYMENT_GATEWAY_UNAVAILABLE";
+    public const string FakeCheckoutUnavailable = "FAKE_CHECKOUT_UNAVAILABLE";
 
     // PLATFORM
     public const string TooManyRequests = "TOO_MANY_REQUESTS";

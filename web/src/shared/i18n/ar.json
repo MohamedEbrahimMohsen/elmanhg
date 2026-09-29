@@ -180,7 +180,18 @@
     "OTP_CHANNEL_UNAVAILABLE": "تعذر إرسال رمز الدخول الآن. حاول مرة أخرى لاحقًا.",
     "OTP_DELIVERY_FAILED": "تعذر توصيل الرمز. حاول مرة أخرى بعد قليل.",
     "EMAIL_NOT_REGISTERED": "لا يوجد حساب بهذا البريد الإلكتروني. أنشئ حسابًا أولًا.",
-    "EMAIL_CODE_SIGN_IN_NOT_ALLOWED": "هذا الحساب يسجل الدخول بكلمة المرور."
+    "EMAIL_CODE_SIGN_IN_NOT_ALLOWED": "هذا الحساب يسجل الدخول بكلمة المرور.",
+    "CHECKOUT_PLAN_ALREADY_ACTIVE": "هذه الباقة مفعّلة بالفعل.",
+    "CHECKOUT_REQUIRES_BASE": "اسأل معلّم يتطلب الباقة الأساسية.",
+    "CHECKOUT_PLAN_REQUIRED": "اختر الباقة.",
+    "CHECKOUT_PLAN_INVALID": "الباقة غير معروفة.",
+    "CHECKOUT_PERIOD_REQUIRED": "اختر مدة الاشتراك.",
+    "CHECKOUT_PERIOD_INVALID": "مدة الاشتراك غير معروفة.",
+    "CHECKOUT_PERIOD_UNAVAILABLE": "مدة الاشتراك هذه غير متاحة لهذه الباقة.",
+    "PAYMENT_NOT_FOUND": "لم يتم العثور على عملية الدفع.",
+    "PAYMENT_GATEWAY_UNAVAILABLE": "تعذّر الاتصال ببوابة الدفع. حاول مرة أخرى بعد قليل.",
+    "FAKE_CHECKOUT_UNAVAILABLE": "الدفع التجريبي غير متاح.",
+    "PAYMENT_NOT_PENDING": "تمت معالجة هذا الدفع بالفعل."
   },
   "error": {
     "title": "حدث خطأ"
