@@ -53,6 +53,15 @@ public sealed class SubscriptionsOptions
     [Range(1, 1000)]
     public int LapseSweepBatchSize { get; set; } = 100;
 
+    [Range(1, 100)]
+    public int AdminPaymentLogMaxPageSize { get; set; } = 100;
+
+    [Range(1, 2000)]
+    public int RefundReasonMaxLength { get; set; } = 500;
+
+    [Range(1, 100)]
+    public int PaymentLogReferenceMaxLength { get; set; } = 100;
+
     public TimeSpan GracePeriod => TimeSpan.FromDays(GracePeriodDays);
 
     public TimeSpan RenewalWindow => TimeSpan.FromDays(RenewalWindowDays);

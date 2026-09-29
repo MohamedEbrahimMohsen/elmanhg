@@ -59,4 +59,7 @@ public static class ErrorCodes
     public const string PaymentNotPending = "PAYMENT_NOT_PENDING";
     public const string CheckoutPlanAlreadyActive = "CHECKOUT_PLAN_ALREADY_ACTIVE";
     public const string CheckoutRequiresBase = "CHECKOUT_REQUIRES_BASE";
+    public const string PaymentAlreadyRefunded = "PAYMENT_ALREADY_REFUNDED";
+    public const string PaymentNotRefundable = "PAYMENT_NOT_REFUNDABLE";
+    public const string PaymentReviewNotOpen = "PAYMENT_REVIEW_NOT_OPEN";
 }

@@ -2118,6 +2118,227 @@
         }
       }
     },
+    "/api/payments": {
+      "get": {
+        "tags": [
+          "Payments"
+        ],
+        "operationId": "GetPaymentLog",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/PaymentStatus"
+            }
+          },
+          {
+            "name": "plan",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/SubscriptionPlan"
+            }
+          },
+          {
+            "name": "studentId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "reference",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "needsReview",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfAdminPaymentResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfAdminPaymentResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfAdminPaymentResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payments/{paymentId}/refund": {
+      "post": {
+        "tags": [
+          "Payments"
+        ],
+        "operationId": "RefundPayment",
+        "parameters": [
+          {
+            "name": "paymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundPaymentRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundPaymentRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundPaymentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPaymentResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPaymentResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPaymentResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payments/{paymentId}/review-resolution": {
+      "post": {
+        "tags": [
+          "Payments"
+        ],
+        "operationId": "ResolvePaymentReview",
+        "parameters": [
+          {
+            "name": "paymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPaymentResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPaymentResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPaymentResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/mastery/overview": {
       "get": {
         "tags": [
@@ -3749,6 +3970,136 @@
   },
   "components": {
     "schemas": {
+      "AdminPaymentResult": {
+        "required": [
+          "id",
+          "studentId",
+          "studentName",
+          "studentContact",
+          "plan",
+          "period",
+          "periodMonths",
+          "amount",
+          "status",
+          "paymobTransactionId",
+          "subscriptionId",
+          "createdAt",
+          "completedAt",
+          "reviewReason",
+          "needsReview",
+          "reviewResolvedAt",
+          "refundedAt",
+          "refundReason",
+          "refundTransactionId",
+          "canRefund"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "studentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "studentName": {
+            "type": "string"
+          },
+          "studentContact": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "plan": {
+            "$ref": "#/components/schemas/SubscriptionPlan"
+          },
+          "period": {
+            "$ref": "#/components/schemas/BillingPeriod"
+          },
+          "periodMonths": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PaymentStatus"
+          },
+          "paymobTransactionId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "subscriptionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "reviewReason": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PaymentReviewReason"
+              }
+            ]
+          },
+          "needsReview": {
+            "type": "boolean"
+          },
+          "reviewResolvedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "refundedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "refundReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "refundTransactionId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "canRefund": {
+            "type": "boolean"
+          }
+        }
+      },
       "ApproveQuestionRequest": {
         "required": [
           "version",
@@ -5919,6 +6270,49 @@
           "Email"
         ]
       },
+      "PageDataOfAdminPaymentResult": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminPaymentResult"
+            }
+          },
+          "pageNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalItems": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
       "PageDataOfAuditLogResult": {
         "type": "object",
         "properties": {
@@ -6175,11 +6569,18 @@
           }
         }
       },
+      "PaymentReviewReason": {
+        "enum": [
+          "AskTeacherWithoutBase",
+          "PartialRefundAtProvider"
+        ]
+      },
       "PaymentStatus": {
         "enum": [
           "Pending",
           "Succeeded",
-          "Failed"
+          "Failed",
+          "Refunded"
         ]
       },
       "PlanCatalogueResult": {
@@ -6652,6 +7053,20 @@
           "Approved",
           "Rejected"
         ]
+      },
+      "RefundPaymentRequest": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
       },
       "RegisterWithEmailCommand": {
         "required": [
@@ -8409,6 +8824,9 @@
     },
     {
       "name": "Progress"
+    },
+    {
+      "name": "Payments"
     },
     {
       "name": "Mastery"

@@ -24,6 +24,9 @@ The plan catalogue lives in configuration, section `Subscriptions` (`Subscriptio
 | `LapseSweepEnabled` | `true` | Runs the lapse sweep (`SubscriptionLapseWorker`). Off in the integration test host. |
 | `LapseSweepIntervalSeconds` | `300` | Seconds between sweeps (5–86400). |
 | `LapseSweepBatchSize` | `100` | Subscriptions lapsed per sweep batch (1–1000). |
+| `AdminPaymentLogMaxPageSize` | `100` | Largest page size of the admin payment log (1–100). |
+| `RefundReasonMaxLength` | `500` | Longest refund reason an admin can enter (1–2000). |
+| `PaymentLogReferenceMaxLength` | `100` | Longest `reference` filter of the admin payment log (1–100). |
 
 Placeholder prices ship in `appsettings.example.json` (and the test host): Base 19900 / 69900 / 179900 (199 / 699 / 1,799 EGP for 1 / 4 / 12 months) and Ask a Teacher 9900 (99 EGP a month). Final prices are still open (PRD §19 Q1); copy the section into your local `appsettings.json` and change the numbers.
 
@@ -59,24 +62,25 @@ Access is derived at read time from status and dates. It is never stored.
 - **Free** has no subscription row: a student with no entitled Base is Free.
 - **Ask a Teacher requires Base**: the add-on counts only while an entitled Base exists (`HasAskTeacher`). Checkout (#100) refuses to sell it alone; the read-time rule also covers Base lapsing while the add-on is still paid.
 - A lapse takes effect on time without waiting for a status sweep: an Active row past its end plus grace (for example after a lost webhook) already reads as Free.
-- **Cancel keeps paid time.** A Cancelled subscription keeps access until `CurrentPeriodEnd` and then lapses. PRD §17 rule 12 lets only Paymob webhooks change entitlement, so a cancel must not revoke time already paid for. The prototype revokes access at once; the prototype is a simulation and the PRD wins.
+- **Cancel keeps paid time.** A Cancelled subscription keeps access until `CurrentPeriodEnd` and then lapses. PRD §17 rule 12 lets only Paymob-verified events (webhooks, or Paymob's response to an admin refund) change entitlement, so a cancel must not revoke time already paid for. The prototype revokes access at once; the prototype is a simulation and the PRD wins.
 
 The resolved entitlement (`EntitlementResult`) carries the limits: Free gets the Free quotas and `canTakeExams: false`; Base gets unlimited quizzes and open lessons (`null`), the Base Avatar limit and exams. `monthlyAskTeacherQuestionLimit` is the Ask a Teacher quota when the add-on counts, else 0.
 
 ## Payments
 
-A `Payment` records one checkout: student, plan, period, amount snapshot, period-length snapshot, status and completion time. States are `Pending`, `Succeeded` and `Failed`. `MarkFailed` only accepts a Pending payment; `MarkSucceeded` accepts Pending **or Failed** (one Paymob order can carry a declined attempt and then an approved one, and captured money always wins); both refuse otherwise with `PAYMENT_NOT_PENDING`. `Payment.Create(studentId, plan, period, periodMonths, amount)` rejects a non-positive amount or a currency that is not three upper-case letters (`PAYMENT_AMOUNT_INVALID`) and months < 1 (`SUBSCRIPTION_PERIOD_INVALID`).
+A `Payment` records one checkout: student, plan, period, amount snapshot, period-length snapshot, status and completion time. States are `Pending`, `Succeeded`, `Failed` and `Refunded`. `MarkFailed` only accepts a Pending payment; `MarkSucceeded` accepts Pending **or Failed** (one Paymob order can carry a declined attempt and then an approved one, and captured money always wins); both refuse otherwise with `PAYMENT_NOT_PENDING`, so a Refunded payment can never be settled again. `MarkRefunded(refundTransactionId, refundedAt, refundedBy?, reason?, idempotencyKey?)` is the only way into Refunded; it calls `EnsureRefundable()`, which refuses a Refunded payment with `PAYMENT_ALREADY_REFUNDED` and anything that is not a Succeeded payment with a Paymob transaction id with `PAYMENT_NOT_REFUNDABLE`. `Payment.Create(studentId, plan, period, periodMonths, amount)` rejects a non-positive amount or a currency that is not three upper-case letters (`PAYMENT_AMOUNT_INVALID`) and months < 1 (`SUBSCRIPTION_PERIOD_INVALID`).
 
 - `PeriodMonths` is snapshotted at checkout, like the amount. Settlement never reads the price configuration, so a configuration change can never make a paid webhook unsettleable. The #101 migration backfilled existing rows (Monthly 1, Termly 4, Yearly 12).
 - `ProviderOrderId` is the Paymob order id (`intention_order_id` of the Intention response), stored before the first save when the gateway returns one (the fake returns none). It has a non-unique index filtered to non-null values (`IX_Payments_ProviderOrderId`).
-- `ReviewReason` (`AskTeacherWithoutBase`) flags a settled payment for an admin decision (#102).
+- `ReviewReason` (`AskTeacherWithoutBase`, `PartialRefundAtProvider`) flags a payment for an admin decision. `NeedsReview` (computed, not stored) is `ReviewReason != null && ReviewResolvedAt == null`. `ResolveReview(resolvedBy, resolvedAt)` closes an open review (`ReviewResolvedAt`, `ReviewResolvedBy`; otherwise 400 `PAYMENT_REVIEW_NOT_OPEN`); a refund closes it too, and `FlagForReview` reopens it (clears the resolution).
+- Refund fields: `RefundedAt`, `RefundedBy` (the admin; null for a Paymob callback), `RefundReason` (text), `RefundTransactionId` (Paymob's refund transaction; unique filtered index `IX_Payments_RefundTransactionId`, a hit returns 409 `PAYMENT_TRANSACTION_ALREADY_RECORDED`) and `RefundIdempotencyKey`.
 - `Payment` carries an `xmin` concurrency token (`Version`): a concurrent write returns 409 `PAYMENT_MODIFIED_CONCURRENTLY`.
 
 - `Payment.Id` is the Paymob `merchant_order_id`; no separate order column is needed.
 - `SubscriptionId` is set on success. A first purchase has no subscription yet while the payment is Pending.
 - `PaymobTransactionId` has a unique index filtered to non-null values (`IX_Payments_PaymobTransactionId`). It is the webhook idempotency key; a unique-index hit returns 409 `PAYMENT_TRANSACTION_ALREADY_RECORDED`.
 - The raw webhook body is kept in full as jsonb (`RawWebhook`) as dispute evidence. It carries billing PII, so it is excluded from audit diffs (the `Core:AuditExcluded` annotation, `docs/audit-log.md`).
-- The student payment log lists **completed** payments only (Succeeded and Failed), newest first. A Pending payment is an abandoned or in-flight checkout and is not shown.
+- The student payment log lists **completed** payments only (Succeeded, Failed and Refunded), newest first; a Refunded payment shows a neutral "Refunded" badge, and the checkout result page shows "This payment was refunded". A Pending payment is an abandoned or in-flight checkout and is not shown.
 
 ## Checkout
 
@@ -96,16 +100,45 @@ Paymob's signed transaction callback is the thing that changes entitlement in pr
 
 | Callback | Outcome (200 body `{ paymentId, outcome }`) |
 |---|---|
-| Not a transaction (e.g. `TOKEN`), or `pending`, refunded, voided or a child transaction | `Ignored`, no change (a non-transaction is not verified) |
-| A transaction id already recorded on a payment | `Duplicate`, no change |
+| Not a transaction (e.g. `TOKEN`), `pending`, or classified `Other` (see below) | `Ignored`, no change (a non-transaction is not verified) |
+| A charge whose transaction id is already recorded on a payment | `Duplicate`, no change |
 | Success for a Pending or Failed payment | `Succeeded`: settles through `PaymentSettlement.Succeed` |
 | Failure for a Pending payment | `MarkedFailed` |
-| Failure for a payment that is no longer Pending, or a new success for an already Succeeded payment | `OutOfOrder`, no change |
+| Failure for a payment that is no longer Pending, or a new success for an already Succeeded or Refunded payment | `OutOfOrder`, no change |
+| Reversal that failed or is pending | `Ignored`, no change |
+| Reversal whose id is already a `RefundTransactionId`, or a reversal for a Refunded payment | `Duplicate`, no change |
+| Reversal for a Pending payment | 409 `PAYMENT_NOT_SETTLED` (Paymob retries after the charge settles) |
+| Reversal for a Failed payment | `OutOfOrder`, no change |
+| Reversal amount ≤ 0 or above the payment amount, other currency, or other provider order | 400 `PAYMENT_NOTIFICATION_MISMATCH` |
+| Partial reversal (less than the payment amount) of a Succeeded payment | `FlaggedForReview`: `ReviewReason = PartialRefundAtProvider`, no entitlement change |
+| Full reversal of a Succeeded payment | `Refunded`: `PaymentRefundSettlement.Apply` (see Refunds), `RefundedBy` null |
 
-- **Idempotency** is keyed by the Paymob transaction id. Concurrent deliveries of one callback race on the `xmin` tokens of Payment and Subscription: the loser gets 409, Paymob retries, and the retry is a `Duplicate`.
+- **Classification uses signed fields only.** `has_parent_transaction` true and `is_capture` false → `Reversal` (a refund or void child); `has_parent_transaction` true and `is_capture` true → `Other`; no parent but `is_refunded` or `is_voided` true → `Other` (the parent update; the child carries the reversal); otherwise `Charge`. All four fields are in the HMAC field set. The unsigned `is_refund` / `is_void` flags are never read, so they cannot be forged onto a replayed signed body.
+- **Idempotency** is keyed by the Paymob transaction id (charges) and the refund transaction id (reversals). Concurrent deliveries of one callback race on the `xmin` tokens of Payment and Subscription: the loser gets 409, Paymob retries, and the retry is a `Duplicate`.
 - **Ordering.** A success always wins over an earlier decline (Failed → Succeeded); a decline after a success is ignored.
 - **Times.** `CompletedAt` and a new subscription's start are the server receipt time, not Paymob's `created_at`, so a delayed callback never shortens paid time.
-- **Known limit.** Two *different* payments for the same plan that settle within the same few milliseconds can both start a subscription (two overlapping rows). It needs two card forms completed at the same instant; admin review is #102.
+- **Known limit.** Two *different* payments for the same plan that settle within the same few milliseconds can both start a subscription (two overlapping rows). It needs two card forms completed at the same instant. There is no automatic detection yet (it needs a per-student settlement lock); an admin can find the pair in the payment log and refund one (follow-up issue).
+
+## Refunds
+
+An admin refunds a Succeeded payment from the payment log: `POST /api/payments/{paymentId}/refund { reason }` with an `Idempotency-Key` header (policy `Payments.Manage`, Admin only). Audited as `Payment.Refund`; the diff shows the status, the refund fields, the review resolution and the subscription's new end and status.
+
+- **Full amount only.** The request carries no amount; a partial refund made in the Paymob dashboard arrives as a callback and is flagged for review (see Webhook).
+- **Reason required**, trimmed, at most `RefundReasonMaxLength` (500) characters; stored as text and shown in the log. Missing → 422 `PAYMENT_REFUND_REASON_REQUIRED`, too long → 422 `PAYMENT_REFUND_REASON_TOO_LONG`.
+- **Effect on entitlement.** `PaymentRefundSettlement.Apply(payment, subscription?, refundTransactionId, refundedAt, refundedBy?, reason?, idempotencyKey?)` marks the payment Refunded and calls `Subscription.RevokePaidPeriod(payment.PeriodMonths, refundedAt)` on the payment's subscription. The end moves back by the payment's months; if the new end is at or before now, the subscription becomes Expired at `now` (no grace after a refund). Refunding a first purchase or a duplicate subscription ends access; refunding a renewal returns the student to the previously paid end. An already Expired subscription is untouched; a Cancelled one with time left is shortened and stays Cancelled. The month clamp of `AddMonths` (#191) can cost up to 3 days. The routine is shared with the webhook and touches no repository.
+- **When it takes effect.** On Paymob's synchronous success response to the refund call (server to server, authenticated with our secret key), in the same save as the local record. The signed refund callback that follows is a `Duplicate`.
+- **Idempotency.** The `Idempotency-Key` header (a non-empty UUID; missing → 422 `PAYMENT_REFUND_IDEMPOTENCY_KEY_REQUIRED`) is stored as `RefundIdempotencyKey`. The same key on an already Refunded payment replays the current result (200, no gateway call, no save); a different key → 400 `PAYMENT_ALREADY_REFUNDED`. There is no idempotency table and no in-progress 409: concurrent calls with the same key race on `xmin` (409 `PAYMENT_MODIFIED_CONCURRENTLY`) and Paymob refuses a second full refund.
+- **Refusals.** A Pending or Failed payment → 400 `PAYMENT_NOT_REFUNDABLE`; unknown id → 404 `PAYMENT_NOT_FOUND`.
+- **Provider outcomes.** Transport error, timeout, 5xx or 429 → 503 `PAYMENT_GATEWAY_UNAVAILABLE`; another 4xx, `success` not true or `pending` true → 400 `PAYMENT_REFUND_DECLINED`. Nothing is saved in either case. A pending refund that completes later arrives as a signed child callback and is applied then. The adapter is in `docs/paymob.md` §9; the fake returns `fake-refund-{paymentId:N}` and is locked in Production (503).
+
+## Admin payment log
+
+`GET /api/payments` (policy `Payments.Manage`) is the admin transaction log; the web page is `/admin/payments`.
+
+- **Contents.** Every payment, Pending included, newest first (`CreationDate` desc, then `Id` desc), with offset paging `pageNumber` / `pageSize` (max `AdminPaymentLogMaxPageSize`, 100). Each item is an `AdminPaymentResult`: the payment fields, `studentName` (`DisplayName`) and `studentContact` (email, else phone), the review state (`reviewReason`, `needsReview`, `reviewResolvedAt`), the refund fields and `canRefund`.
+- **Filters.** `status`, `plan`, `needsReview` (default false), `studentId`, `reference` (exact match on the payment id, Paymob transaction id, refund transaction id or provider order id; at most `PaymentLogReferenceMaxLength`), `from` (inclusive) and `to` (exclusive) on the creation time. Invalid values → 422 `PAYMENT_LOG_*`.
+- **Review queue.** The log with `needsReview=true`: payments whose review is open. An admin closes a review by refunding or with "Keep payment": `POST /api/payments/{paymentId}/review-resolution` (audited `Payment.ResolveReview`; 400 `PAYMENT_REVIEW_NOT_OPEN` when none is open).
+- **Student names** are batch-loaded for the page with one user query (no cross-aggregate join).
 
 ## Lapse sweep
 
@@ -128,7 +161,10 @@ Entitlement stays read-time, so the sweep is status bookkeeping for the UI and d
 | GET | `/api/subscriptions/payments/{paymentId}` | `Subscription.Manage` (Student) | `PaymentResult` (Pending included); `404 PAYMENT_NOT_FOUND` |
 | POST | `/api/subscriptions/payments/{paymentId}/fake-completion` | `Subscription.Manage` (Student) | `PaymentResult`; `400 PAYMENT_NOT_PENDING`; `404 PAYMENT_NOT_FOUND` / `FAKE_CHECKOUT_UNAVAILABLE`; `409` concurrency |
 | POST | `/api/subscriptions/{subscriptionId}/cancel` | `Subscription.Manage` (Student) | `EntitlementResult`; `400 SUBSCRIPTION_ENDED`; `404 SUBSCRIPTION_NOT_FOUND`; `409 SUBSCRIPTION_MODIFIED_CONCURRENTLY` |
-| POST | `/api/payments/paymob/webhook?hmac=` | anonymous (HMAC), not in OpenAPI | `PaymentNotificationResult`; `401 PAYMOB_WEBHOOK_SIGNATURE_INVALID`; `400 PAYMOB_WEBHOOK_PAYLOAD_INVALID` / `PAYMENT_NOTIFICATION_MISMATCH`; `404 PAYMENT_NOT_FOUND`; `409` concurrency or `PAYMENT_TRANSACTION_ALREADY_RECORDED` |
+| GET | `/api/payments?status&plan&needsReview&studentId&reference&from&to&pageNumber&pageSize` | `Payments.Manage` (Admin) | `PageData<AdminPaymentResult>`; `422 PAYMENT_LOG_*` |
+| POST | `/api/payments/{paymentId}/refund` + header `Idempotency-Key` | `Payments.Manage` (Admin) | `AdminPaymentResult`; `400 PAYMENT_ALREADY_REFUNDED` / `PAYMENT_NOT_REFUNDABLE` / `PAYMENT_REFUND_DECLINED`; `404 PAYMENT_NOT_FOUND`; `409` concurrency; `422` validation; `503 PAYMENT_GATEWAY_UNAVAILABLE` |
+| POST | `/api/payments/{paymentId}/review-resolution` | `Payments.Manage` (Admin) | `AdminPaymentResult`; `400 PAYMENT_REVIEW_NOT_OPEN`; `404 PAYMENT_NOT_FOUND`; `409` concurrency |
+| POST | `/api/payments/paymob/webhook?hmac=` | anonymous (HMAC), not in OpenAPI | `PaymentNotificationResult`; `401 PAYMOB_WEBHOOK_SIGNATURE_INVALID`; `400 PAYMOB_WEBHOOK_PAYLOAD_INVALID` / `PAYMENT_NOTIFICATION_MISMATCH`; `404 PAYMENT_NOT_FOUND`; `409` concurrency, `PAYMENT_TRANSACTION_ALREADY_RECORDED` or `PAYMENT_NOT_SETTLED` |
 
 Enum values travel as PascalCase strings. The web page `/student/subscription` shows the subscribe header, the current plan, the Free / Base / Ask a Teacher plan cards and the paged payment log (hidden when empty). Each Base plan card has one subscribe button per configured period ("Subscribe monthly", "Subscribe for a term", "Subscribe yearly"); the Ask a Teacher card has one subscribe button, disabled with a visible hint while the student has no Base. An active plan shows its Active badge and no button until its renewal window opens (`canRenew`), then one Renew button per period ("Renew monthly", "Renew for a term", "Renew yearly"; "Renew" for Ask a Teacher). The Free card has none. Every subscribe or renew button is disabled while a checkout is starting. Each Active or PastDue line of the current-plan card has a Danger "Cancel" button that opens a confirm dialog ("You keep access until {date}"); confirming cancels, updates the card from the response and shows a toast. An Active plan past its period end (`inGracePeriod`) reads "period ended, available until {entitledUntil}".
 
@@ -137,5 +173,5 @@ Enum values travel as PascalCase strings. The web page `/student/subscription` s
 - **Gates (#87 free tier, #94 Ask a Teacher quota)** call `StudentEntitlementLoader.LoadAsync(subscriptionRepository, studentId, options, now, cancellationToken)`. It is the one definition of entitlement and limits.
 - **#100** (done): checkout, the Pending payment, the fake gateway and the result page (see Checkout).
 - **#101** (done): the webhook, renewal, the lapse sweep and the student cancel (see above).
-- **#102** adds `PaymentStatus.Refunded`, the refund and void callbacks (acknowledged and ignored today) and the admin payments page, which lists payments flagged with a `ReviewReason` and reviews the known overlap limit (see Webhook).
+- **#102** (done): `PaymentStatus.Refunded`, admin refunds, signed refund and void callbacks, and the admin payment log with its review queue (see Refunds and Admin payment log). Automatic detection of overlapping subscriptions (the known limit under Webhook) is a follow-up issue.
 - **#106** grants complimentary plans with `Subscription.Start(..., paymobReference: null, ...)`.

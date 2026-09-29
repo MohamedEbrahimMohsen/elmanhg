@@ -305,4 +305,19 @@
   <data name="PAYMENT_NOTIFICATION_MISMATCH" xml:space="preserve"><value>The payment notification does not match the payment.</value></data>
   <data name="PAYMOB_WEBHOOK_SIGNATURE_INVALID" xml:space="preserve"><value>The payment notification signature is not valid.</value></data>
   <data name="PAYMOB_WEBHOOK_PAYLOAD_INVALID" xml:space="preserve"><value>The payment notification is not valid.</value></data>
+  <data name="PAYMENT_ALREADY_REFUNDED" xml:space="preserve"><value>This payment has already been refunded.</value></data>
+  <data name="PAYMENT_NOT_REFUNDABLE" xml:space="preserve"><value>Only a successful payment can be refunded.</value></data>
+  <data name="PAYMENT_REVIEW_NOT_OPEN" xml:space="preserve"><value>This payment has no open review.</value></data>
+  <data name="PAYMENT_ID_REQUIRED" xml:space="preserve"><value>The payment id is required.</value></data>
+  <data name="PAYMENT_REFUND_REASON_REQUIRED" xml:space="preserve"><value>Enter a refund reason.</value></data>
+  <data name="PAYMENT_REFUND_REASON_TOO_LONG" xml:space="preserve"><value>The refund reason is too long.</value></data>
+  <data name="PAYMENT_REFUND_IDEMPOTENCY_KEY_REQUIRED" xml:space="preserve"><value>The Idempotency-Key header must be a non-empty UUID.</value></data>
+  <data name="PAYMENT_REFUND_DECLINED" xml:space="preserve"><value>Paymob declined the refund. Check the transaction in the Paymob dashboard.</value></data>
+  <data name="PAYMENT_NOT_SETTLED" xml:space="preserve"><value>The payment has not been settled yet.</value></data>
+  <data name="PAYMENT_LOG_PAGE_NUMBER_INVALID" xml:space="preserve"><value>The page number must be 1 or more.</value></data>
+  <data name="PAYMENT_LOG_PAGE_SIZE_INVALID" xml:space="preserve"><value>The page size is not valid.</value></data>
+  <data name="PAYMENT_LOG_STATUS_INVALID" xml:space="preserve"><value>Unknown payment status.</value></data>
+  <data name="PAYMENT_LOG_PLAN_INVALID" xml:space="preserve"><value>Unknown plan.</value></data>
+  <data name="PAYMENT_LOG_REFERENCE_TOO_LONG" xml:space="preserve"><value>The reference is too long.</value></data>
+  <data name="PAYMENT_LOG_DATE_RANGE_INVALID" xml:space="preserve"><value>The start must be before the end.</value></data>
 </root>

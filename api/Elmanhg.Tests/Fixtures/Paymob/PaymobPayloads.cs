@@ -10,6 +10,7 @@ public static class PaymobPayloads
     public const string Declined = "transaction-declined.json";
     public const string Pending = "transaction-pending.json";
     public const string Refunded = "transaction-refunded.json";
+    public const string RefundChild = "transaction-refund.json";
     public const string Token = "token.json";
 
     public static string Read(string fileName) => File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Fixtures", "Paymob", fileName));

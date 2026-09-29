@@ -1,6 +1,6 @@
 # Paymob checkout
 
-Students pay for Base and Ask a Teacher through Paymob's **unified checkout** (card and mobile wallet, PRD §11.2). The checkout rules (what can be bought, the Pending payment, the result page, settlement) are in `docs/subscriptions.md` → Checkout and Webhook. This page covers the payment gateway: configuration, the Paymob flow, the fake, the transaction webhook and going live.
+Students pay for Base and Ask a Teacher through Paymob's **unified checkout** (card and mobile wallet, PRD §11.2). The checkout rules (what can be bought, the Pending payment, the result page, settlement) are in `docs/subscriptions.md` → Checkout and Webhook. This page covers the payment gateway: configuration, the Paymob flow, the fake, the transaction webhook, refunds and going live. Admin refunds and the payment log are in `docs/subscriptions.md` → Refunds and Admin payment log.
 
 ## 1. Provider switch
 
@@ -9,7 +9,7 @@ Students pay for Base and Ask a Teacher through Paymob's **unified checkout** (c
 | Value | Adapter | Use |
 |---|---|---|
 | `Fake` (default) | `FakePaymentGateway` | Development, tests, CI and the build-time OpenAPI run. No keys needed. |
-| `Paymob` | `PaymobPaymentGateway` | Real payments through the Paymob Intention API. |
+| `Paymob` | `PaymobPaymentGateway` | Real payments through the Paymob Intention API, and admin refunds through the Paymob refund API (section 9). |
 
 `Fake` is the default in code, in `appsettings.example.json` and in the test host.
 
@@ -63,7 +63,11 @@ The adapter was built and tested against a stubbed HTTP handler only; no Paymob 
 - Whether `special_reference` comes back as `obj.order.merchant_order_id` in the transaction webhook. The webhook matches on it first and falls back to `ProviderOrderId`.
 - That the Intention response carries `intention_order_id`, and that it equals the webhook's `obj.order.id`.
 - The exact HMAC field formatting of the transaction callback (section 8): how a `null` value is concatenated, the case of booleans, and the exact `created_at` string. Send one test-mode payment and compare the computed digest with `hmac`.
-- The shape of refund and void callbacks (acknowledged and ignored today; #102 handles refunds).
+- The shape of refund and void callbacks: a child transaction with `has_parent_transaction` true, `is_capture` false and its own `id` and `amount_cents` (section 8). The fixture `transaction-refund.json` also carries `parent_transaction` and `is_refund`, which are not signed and not read.
+- That `POST api/acceptance/void_refund/refund` accepts `Authorization: Token <SecretKey>` (the secret key, not the legacy auth token).
+- That the refund body's `transaction_id` may be sent as a string (the stored `PaymobTransactionId`) and `amount_cents` as an integer.
+- That the refund response carries `id` (number or string), `success` and `pending` at the top level.
+- Whether a same-day card payment must be voided instead of refunded. Today there is no void call: Paymob's refusal shows as 400 `PAYMENT_REFUND_DECLINED` and the admin retries the next day.
 - Whether `billing_data.email` accepts `"NA"` for phone-only students.
 - The phone format Paymob expects: local `010…` (sent today) or `+20…`.
 - The query-parameter names `publicKey` and `clientSecret`, and the trailing slash on `/unifiedcheckout/`.
@@ -98,12 +102,41 @@ Paymob posts the transaction-processed callback to `POST /api/payments/paymob/we
 - The signature is read from the `hmac` query parameter; when that is absent, from a top-level `hmac` string in the body.
 - **Fail closed:** an empty `HmacSecret`, a missing signature or a mismatch is 401 `PAYMOB_WEBHOOK_SIGNATURE_INVALID`, nothing changes, and the audit log records a Failure row. The secret and the raw payload are never logged.
 
-**Ignored callbacks** (200 `Ignored`, no change): a `type` other than `TRANSACTION` (for example `TOKEN`, which uses another field set, so it is not verified); a verified transaction that is `pending`, or has any of `is_refunded`, `is_voided`, `is_refund`, `is_void`, `has_parent_transaction` true (refunds are #102).
+**Classification** (signed fields only; the comment in `PaymobNotificationReader.KindOf` states why): `has_parent_transaction` true and `is_capture` false → `Reversal` (a refund or void child transaction); `has_parent_transaction` true and `is_capture` true → `Other`; no parent but `is_refunded` or `is_voided` true → `Other` (the parent's update; the child carries the reversal); otherwise `Charge`. The unsigned `is_refund` / `is_void` flags are never read: they could be added to a replayed signed body.
+
+**Ignored callbacks** (200 `Ignored`, no change): a `type` other than `TRANSACTION` (for example `TOKEN`, which uses another field set, so it is not verified); a verified transaction that is `pending` or classified `Other`.
+
+**Reversals.** A signed `Reversal` is matched and bound like a charge (below), with its own amount: a full reversal of a Succeeded payment marks it Refunded and revokes the paid time (`PaymentRefundSettlement`, `docs/subscriptions.md` → Refunds), a partial one flags the payment `PartialRefundAtProvider` for review, a reversal of a Pending payment is 409 `PAYMENT_NOT_SETTLED` so Paymob retries after the charge settles, and a repeat is a `Duplicate` (keyed by `RefundTransactionId`). The full outcome table is in `docs/subscriptions.md` → Webhook.
 
 **Matching.** `obj.order.merchant_order_id` parsed as a Guid is the `Payment.Id` (the Intention `special_reference`). When it is missing or not a Guid, the payment whose `ProviderOrderId` equals `obj.order.id` is used. No match is 404 `PAYMENT_NOT_FOUND`, so Paymob retries and nothing is lost to a race with the checkout save.
 
 **Binding.** `merchant_order_id` is not in the signed field set, so a replayed signed body could point at another payment. The signed `amount_cents` and `currency` must equal the payment snapshot, and when the payment has a `ProviderOrderId` it must equal the signed `obj.order.id`. A mismatch is 400 `PAYMENT_NOTIFICATION_MISMATCH` (audited, nothing changes).
 
-**Status codes.** 200 with `{ paymentId, outcome }` (`Succeeded`, `MarkedFailed`, `Duplicate`, `Ignored`, `OutOfOrder`); 400 without a `code` for malformed JSON (MVC model binding rejects the body before the handler runs, like every `[FromBody]` endpoint); 400 `PAYMOB_WEBHOOK_PAYLOAD_INVALID` (no `obj`, or a signed transaction missing `id`, `success`, `pending`, `amount_cents`, `currency` or `order.id`) or `PAYMENT_NOTIFICATION_MISMATCH`; 401 signature; 404 unmatched; 409 on a concurrent write (`PAYMENT_MODIFIED_CONCURRENTLY`, `SUBSCRIPTION_MODIFIED_CONCURRENTLY`, `PAYMENT_TRANSACTION_ALREADY_RECORDED`), which Paymob retries as a `Duplicate`.
+**Status codes.** 200 with `{ paymentId, outcome }` (`Succeeded`, `MarkedFailed`, `Duplicate`, `Ignored`, `OutOfOrder`, `Refunded`, `FlaggedForReview`); 400 without a `code` for malformed JSON (MVC model binding rejects the body before the handler runs, like every `[FromBody]` endpoint); 400 `PAYMOB_WEBHOOK_PAYLOAD_INVALID` (no `obj`, or a signed transaction missing `id`, `success`, `pending`, `amount_cents`, `currency` or `order.id`) or `PAYMENT_NOTIFICATION_MISMATCH`; 401 signature; 404 unmatched; 409 on a concurrent write (`PAYMENT_MODIFIED_CONCURRENTLY`, `SUBSCRIPTION_MODIFIED_CONCURRENTLY`, `PAYMENT_TRANSACTION_ALREADY_RECORDED`), which Paymob retries as a `Duplicate`, or `PAYMENT_NOT_SETTLED` for a reversal that arrives before its charge.
 
 **The return URL never settles.** Paymob also redirects the browser to `/student/checkout-result/{paymentId}` with a query string that includes `success` and `hmac`. The page ignores it and only polls the server (PRD §17 rule 12).
+
+## 9. Refunds
+
+`IPaymentGateway.RefundAsync(PaymentRefundRequest(paymentId, providerTransactionId, amount))` refunds a settled payment in full. The admin flow around it (reason, idempotency key, revocation) is in `docs/subscriptions.md` → Refunds.
+
+**Request.** `POST {BaseUrl}/api/acceptance/void_refund/refund` with `Authorization: Token <SecretKey>`, `User-Agent: Elmanhg/1.0` and the body `{ "transaction_id": "<PaymobTransactionId>", "amount_cents": <AmountMinor> }`. The response fields read are `id` (number or string, stored as `RefundTransactionId`), `success` and `pending`; every other field is ignored.
+
+**Error mapping.**
+
+| Paymob answer | Result |
+|---|---|
+| Transport error, timeout, 5xx or 429 | 503 `PAYMENT_GATEWAY_UNAVAILABLE` (logged at Error) |
+| Another 4xx | 400 `PAYMENT_REFUND_DECLINED` (logged at Warning) |
+| 2xx with `success` false (with or without an `id`) | 400 `PAYMENT_REFUND_DECLINED`: Paymob did nothing |
+| 2xx with an unreadable body, or no `id` when `success` is not false | 503 `PAYMENT_GATEWAY_UNAVAILABLE` |
+| 2xx with an `id` and `success` missing, or `pending` true | 400 `PAYMENT_REFUND_DECLINED`; a pending refund that completes later arrives as a signed reversal callback |
+| 2xx with `success` true | the refund transaction id |
+
+Nothing is saved locally unless Paymob confirms the refund. Bodies and keys are never logged.
+
+**No retries.** The refund call is not idempotent at Paymob (no idempotency key is documented), so the typed client keeps `Retry.DisableForUnsafeHttpMethods()`: a POST is sent once. A timeout after Paymob processed the refund leaves the payment Succeeded locally; the signed reversal callback then marks it Refunded.
+
+**The fake.** With `Provider=Fake`, `RefundAsync` returns `fake-refund-{paymentId:N}` at once. In `Production` it refuses with 503 `PAYMENT_GATEWAY_UNAVAILABLE`, like fake checkout.
+
+**Void.** There is no separate void call; see section 5.

@@ -41,6 +41,8 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public const string OpenExamDeadlineIndex = "IX_Sessions_OpenExamDeadline";
     public const string PaymobTransactionIndex = "IX_Payments_PaymobTransactionId";
     public const string PaymentProviderOrderIndex = "IX_Payments_ProviderOrderId";
+    public const string PaymentRefundTransactionIndex = "IX_Payments_RefundTransactionId";
+    public const string PaymentOpenReviewIndex = "IX_Payments_OpenReview";
     public const string SubscriptionLapseIndex = "IX_Subscriptions_Status_CurrentPeriodEnd";
 
     public DbSet<Subject> Subjects { get; set; }
@@ -80,7 +82,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         {
             throw new ConflictCoreException(ErrorCodes.SubscriptionModifiedConcurrently, innerException: exception);
         }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: PaymobTransactionIndex })
+        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: PaymobTransactionIndex or PaymentRefundTransactionIndex })
         {
             throw new ConflictCoreException(ErrorCodes.PaymentTransactionAlreadyRecorded, innerException: exception);
         }
@@ -324,15 +326,21 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
             builder.Property(x => x.Currency).IsRequired().HasMaxLength(CurrencyCodeLength);
             builder.Property(x => x.PaymobTransactionId).HasMaxLength(PaymobReferenceMaxLength);
             builder.Property(x => x.ProviderOrderId).HasMaxLength(PaymobReferenceMaxLength);
+            builder.Property(x => x.RefundTransactionId).HasMaxLength(PaymobReferenceMaxLength);
             builder.Property(x => x.ReviewReason).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.RawWebhook).HasColumnType("jsonb").HasAnnotation(AuditChangeReader.ExcludedAnnotation, true);
             builder.Property(x => x.Version).IsRowVersion();
             builder.Ignore(x => x.Amount);
+            builder.Ignore(x => x.NeedsReview);
+            builder.Ignore(x => x.IsRefundable);
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Subscription>().WithMany().HasForeignKey(x => x.SubscriptionId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.StudentId, x.CreationDate });
             builder.HasIndex(x => x.PaymobTransactionId, PaymobTransactionIndex).IsUnique().HasFilter("\"PaymobTransactionId\" IS NOT NULL");
             builder.HasIndex(x => x.ProviderOrderId, PaymentProviderOrderIndex).HasFilter("\"ProviderOrderId\" IS NOT NULL");
+            builder.HasIndex(x => x.RefundTransactionId, PaymentRefundTransactionIndex).IsUnique().HasFilter("\"RefundTransactionId\" IS NOT NULL");
+            builder.HasIndex(x => x.CreationDate);
+            builder.HasIndex(x => x.CreationDate, PaymentOpenReviewIndex).HasFilter("\"ReviewReason\" IS NOT NULL AND \"ReviewResolvedAt\" IS NULL");
         });
     }
 

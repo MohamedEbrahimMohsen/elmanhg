@@ -5,4 +5,6 @@ public interface IPaymentGateway
     bool SupportsSimulatedCompletion { get; }
 
     Task<PaymentCheckout> StartCheckoutAsync(PaymentCheckoutRequest request, CancellationToken cancellationToken);
+
+    Task<PaymentRefund> RefundAsync(PaymentRefundRequest request, CancellationToken cancellationToken);
 }

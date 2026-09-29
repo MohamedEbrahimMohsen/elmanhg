@@ -1,3 +1,3 @@
 namespace Elmanhg.Domain.Subscriptions;
 
-public enum PaymentReviewReason { AskTeacherWithoutBase }
+public enum PaymentReviewReason { AskTeacherWithoutBase, PartialRefundAtProvider }

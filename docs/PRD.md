@@ -380,14 +380,14 @@ Prices, billing periods and quotas are configuration (`Subscriptions` section, s
 ### 11.2 Paymob integration
 
 - Card and mobile wallet via Paymob checkout. Checkout creates a pending payment and redirects to Paymob's unified checkout; the return page only reads the payment status and never activates a plan. A plan already held cannot be bought again until its renewal window opens, and Ask a Teacher needs an active Base. Configuration and go-live: `docs/paymob.md`.
-- Subscription state is driven **only by Paymob webhooks** (HMAC-verified). The client never sets entitlement.
+- Subscription state is driven **only by Paymob-verified events**: HMAC-verified webhooks, or Paymob's response to an admin refund. The client never sets entitlement.
 - States: Active · PastDue · Cancelled · Expired (Trialing is not used in v1). Access is derived from state and dates, never stored: Active and PastDue grant access until the end of the paid period plus the grace period; Cancelled grants access until the end of the paid period; Expired grants none. Ask a Teacher grants access only while Base does.
 - Grace period on failed renewal: 3 days, then downgrade to Free.
 - v1 has no automatic charge: the student renews by paying again from 7 days before the period end (configurable), and the new period continues from the old end.
 - A verified payment for a plan the student already holds extends it; an Ask a Teacher payment without Base is kept and flagged for admin review.
 - The student may cancel: access continues until the paid period ends.
 - A status sweep marks lapsed plans PastDue, then Expired.
-- Full transaction log for the admin dashboard; refunds initiated by admin, recorded locally, executed in Paymob.
+- Full transaction log with a needs-review queue for the admin; refunds are initiated by an admin (full amount, reason required), executed in Paymob, recorded locally, and remove the time the payment bought (the plan ends at once if nothing paid remains). Signed Paymob refund callbacks have the same effect; a partial refund made in Paymob is flagged for review. Details: `docs/subscriptions.md` → Refunds.
 
 ---
 
@@ -469,7 +469,7 @@ Attempt(id, session_id, student_id, question_id, question_version,
 QuestionMastery(student_id, question_id, mastered bool, latest_attempt_id, latest_normalised_score, latest_attempted_at, previous_attempt_id?, previous_normalised_score?, previous_attempted_at?, updated_at)  -- materialised from the two most recent attempts (docs/mastery.md)
 
 Subscription(id, student_id, plan[Base|AskTeacher], period[Monthly|Termly|Yearly], status[Active|PastDue|Cancelled|Expired], current_period_start, current_period_end, cancelled_at?, expired_at?, paymob_ref?)
-Payment(id, student_id, subscription_id?, plan, period, amount_minor, currency, status[Pending|Succeeded|Failed], paymob_txn_id?, raw_webhook_json?, completed_at?, created_at)  -- docs/subscriptions.md
+Payment(id, student_id, subscription_id?, plan, period, period_months, amount_minor, currency, status[Pending|Succeeded|Failed|Refunded], paymob_txn_id?, provider_order_id?, raw_webhook_json?, completed_at?, review_reason?, review_resolved_at?, review_resolved_by?, refunded_at?, refunded_by?, refund_reason?, refund_transaction_id?, refund_idempotency_key?, created_at)  -- docs/subscriptions.md
 
 TeacherThread(id, student_id, teacher_id?, subject_id, context_json, status,
               submitted_at, sla_due_at, closed_at, rating?)
@@ -501,6 +501,7 @@ AuditLog(id, actor_id, actor_name, actor_role, action, entity, entity_id, outcom
 | View any student's progress | – | – | ✓ |
 | Manage own subscription | ✓ | – | – |
 | Dashboards / finance | – | own stats only | ✓ |
+| Payment log and refunds | – | – | ✓ |
 | Manage users / teachers | – | – | ✓ |
 | View audit log | – | – | ✓ |
 | Export training data | – | – | ✓ |
@@ -522,7 +523,7 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 9. Exam retakes unlimited; best score displayed; all kept.
 10. Avatar never reveals answers during an in-progress exam.
 11. Ask a Teacher: 24h SLA from submission; one follow-up per thread; voice always transcribed; training record is text only.
-12. Subscription entitlement changes only via verified Paymob webhooks.
+12. Subscription entitlement changes only through Paymob-verified events: HMAC-verified webhooks, or Paymob's response to an admin refund. The client never sets entitlement.
 13. Every content change and validation decision is audit-logged.
 
 ---

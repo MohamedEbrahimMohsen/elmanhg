@@ -36,6 +36,28 @@ public sealed class PaymentPersistenceTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task SaveChanges_DuplicateRefundTransactionId_ThrowsTransactionAlreadyRecorded()
+    {
+        var student = await ScopeTestData.SeedStudentAsync(factory, CancellationToken);
+        var refundId = $"refund-{Guid.NewGuid():N}";
+        var subscription = new SubscriptionBuilder().ForStudent(student.Id).StartingAt(DateTimeOffset.UtcNow).Build();
+        await SubscriptionTestData.SeedSubscriptionAsync(factory, subscription, CancellationToken);
+        var first = SubscriptionTestData.NewPayment(student.Id, 19900);
+        first.MarkSucceeded(subscription.Id, $"txn-{Guid.NewGuid():N}", "{}", DateTimeOffset.UtcNow);
+        first.MarkRefunded(refundId, DateTimeOffset.UtcNow, null, null, null);
+        var second = SubscriptionTestData.NewPayment(student.Id, 19900);
+        second.MarkSucceeded(subscription.Id, $"txn-{Guid.NewGuid():N}", "{}", DateTimeOffset.UtcNow);
+        second.MarkRefunded(refundId, DateTimeOffset.UtcNow, null, null, null);
+        await SaveAsync(first);
+
+        var act = () => SaveAsync(second);
+
+        var exception = (await act.Should().ThrowAsync<ConflictCoreException>()).Which;
+        exception.ErrorCode.Should().Be(ErrorCodes.PaymentTransactionAlreadyRecorded);
+        exception.InnerException.Should().BeAssignableTo<DbUpdateException>().Which.InnerException.Should().BeOfType<PostgresException>().Which.ConstraintName.Should().Be(AppDbContext.PaymentRefundTransactionIndex);
+    }
+
+    [Fact]
     public async Task SaveChanges_StalePayment_ThrowsPaymentModifiedConcurrently()
     {
         var student = await ScopeTestData.SeedStudentAsync(factory, CancellationToken);

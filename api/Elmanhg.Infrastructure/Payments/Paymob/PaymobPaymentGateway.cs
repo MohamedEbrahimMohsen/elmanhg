@@ -11,7 +11,7 @@ using System.Text.Json;
 
 namespace Elmanhg.Infrastructure.Payments.Paymob;
 
-public sealed class PaymobPaymentGateway(HttpClient httpClient, IOptions<PaymentsOptions> paymentsOptions, ILogger<PaymobPaymentGateway> logger) : IPaymentGateway
+public sealed partial class PaymobPaymentGateway(HttpClient httpClient, IOptions<PaymentsOptions> paymentsOptions, ILogger<PaymobPaymentGateway> logger) : IPaymentGateway
 {
     private const string IntentionPath = "v1/intention/";
     private const string TokenScheme = "Token";

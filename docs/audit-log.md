@@ -81,9 +81,11 @@ An array with one element per changed audited entity. Property keys are camelCas
 | DeleteExamBlueprint | `ExamBlueprint.Delete` | ExamBlueprint | command |
 | StartCheckout | `Payment.StartCheckout` | Payment | result (the diff shows the new Pending Payment) |
 | CompleteFakePayment | `Payment.CompleteFake` | Payment | command (the diff shows the Payment status change and, on success, the new or renewed Subscription) |
-| ProcessPaymentNotification | `Payment.ProcessNotification` | Payment | result (system actor: the Paymob webhook is anonymous; the diff shows the Payment status and the new or renewed Subscription; an invalid signature leaves a Failure row with no resource id) |
+| ProcessPaymentNotification | `Payment.ProcessNotification` | Payment | result (system actor: the Paymob webhook is anonymous; the diff shows the Payment status and the new or renewed Subscription, or for a reversal the refund fields and the shortened or expired Subscription, or the review flag of a partial reversal; an invalid signature leaves a Failure row with no resource id) |
 | CancelSubscription | `Subscription.Cancel` | Subscription | command |
 | LapseSubscription | `Subscription.Lapse` | Subscription | command (system actor: the lapse sweep; the diff shows the status and `expiredAt`) |
+| RefundPayment | `Payment.Refund` | Payment | command (the diff shows the status, the refund fields, the review resolution, and the Subscription end/status) |
+| ResolvePaymentReview | `Payment.ResolveReview` | Payment | command |
 
 Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`, `ExamBlueprint`, `Subscription`, `Payment`.
 

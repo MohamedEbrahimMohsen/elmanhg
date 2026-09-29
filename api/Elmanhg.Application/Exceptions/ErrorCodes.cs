@@ -192,6 +192,18 @@ public static class ErrorCodes
     public const string PaymentNotificationMismatch = "PAYMENT_NOTIFICATION_MISMATCH";
     public const string PaymobWebhookSignatureInvalid = "PAYMOB_WEBHOOK_SIGNATURE_INVALID";
     public const string PaymobWebhookPayloadInvalid = "PAYMOB_WEBHOOK_PAYLOAD_INVALID";
+    public const string PaymentIdRequired = "PAYMENT_ID_REQUIRED";
+    public const string PaymentRefundReasonRequired = "PAYMENT_REFUND_REASON_REQUIRED";
+    public const string PaymentRefundReasonTooLong = "PAYMENT_REFUND_REASON_TOO_LONG";
+    public const string PaymentRefundIdempotencyKeyRequired = "PAYMENT_REFUND_IDEMPOTENCY_KEY_REQUIRED";
+    public const string PaymentRefundDeclined = "PAYMENT_REFUND_DECLINED";
+    public const string PaymentNotSettled = "PAYMENT_NOT_SETTLED";
+    public const string PaymentLogPageNumberInvalid = "PAYMENT_LOG_PAGE_NUMBER_INVALID";
+    public const string PaymentLogPageSizeInvalid = "PAYMENT_LOG_PAGE_SIZE_INVALID";
+    public const string PaymentLogStatusInvalid = "PAYMENT_LOG_STATUS_INVALID";
+    public const string PaymentLogPlanInvalid = "PAYMENT_LOG_PLAN_INVALID";
+    public const string PaymentLogReferenceTooLong = "PAYMENT_LOG_REFERENCE_TOO_LONG";
+    public const string PaymentLogDateRangeInvalid = "PAYMENT_LOG_DATE_RANGE_INVALID";
 
     // PLATFORM
     public const string TooManyRequests = "TOO_MANY_REQUESTS";

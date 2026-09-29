@@ -305,4 +305,19 @@
   <data name="PAYMENT_NOTIFICATION_MISMATCH" xml:space="preserve"><value>اشعار الدفع لا يطابق عملية الدفع.</value></data>
   <data name="PAYMOB_WEBHOOK_SIGNATURE_INVALID" xml:space="preserve"><value>توقيع اشعار الدفع غير صالح.</value></data>
   <data name="PAYMOB_WEBHOOK_PAYLOAD_INVALID" xml:space="preserve"><value>اشعار الدفع غير صالح.</value></data>
+  <data name="PAYMENT_ALREADY_REFUNDED" xml:space="preserve"><value>تم استرداد هذا الدفع بالفعل.</value></data>
+  <data name="PAYMENT_NOT_REFUNDABLE" xml:space="preserve"><value>لا يمكن استرداد الا دفع ناجح.</value></data>
+  <data name="PAYMENT_REVIEW_NOT_OPEN" xml:space="preserve"><value>لا توجد مراجعة مفتوحة لهذا الدفع.</value></data>
+  <data name="PAYMENT_ID_REQUIRED" xml:space="preserve"><value>معرف الدفع مطلوب.</value></data>
+  <data name="PAYMENT_REFUND_REASON_REQUIRED" xml:space="preserve"><value>اكتب سبب الاسترداد.</value></data>
+  <data name="PAYMENT_REFUND_REASON_TOO_LONG" xml:space="preserve"><value>سبب الاسترداد طويل جدا.</value></data>
+  <data name="PAYMENT_REFUND_IDEMPOTENCY_KEY_REQUIRED" xml:space="preserve"><value>ترويسة Idempotency-Key مطلوبة ويجب ان تكون UUID غير فارغ.</value></data>
+  <data name="PAYMENT_REFUND_DECLINED" xml:space="preserve"><value>رفضت Paymob الاسترداد. راجع المعاملة في لوحة Paymob.</value></data>
+  <data name="PAYMENT_NOT_SETTLED" xml:space="preserve"><value>لم تتم تسوية الدفع بعد.</value></data>
+  <data name="PAYMENT_LOG_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة يجب ان يكون 1 او اكثر.</value></data>
+  <data name="PAYMENT_LOG_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة غير صالح.</value></data>
+  <data name="PAYMENT_LOG_STATUS_INVALID" xml:space="preserve"><value>حالة الدفع غير معروفة.</value></data>
+  <data name="PAYMENT_LOG_PLAN_INVALID" xml:space="preserve"><value>الباقة غير معروفة.</value></data>
+  <data name="PAYMENT_LOG_REFERENCE_TOO_LONG" xml:space="preserve"><value>المرجع طويل جدا.</value></data>
+  <data name="PAYMENT_LOG_DATE_RANGE_INVALID" xml:space="preserve"><value>يجب ان تكون البداية قبل النهاية.</value></data>
 </root>

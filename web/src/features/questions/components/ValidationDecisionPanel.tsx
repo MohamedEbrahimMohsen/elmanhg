@@ -9,7 +9,7 @@ import { useQuestionDecision } from '../hooks/useQuestionDecision';
 import { approveQuestionSchema, type ApproveQuestionValues } from '../schemas/approveQuestionSchema';
 import { rejectQuestionSchema, type RejectQuestionValues } from '../schemas/rejectQuestionSchema';
 import { SelectField } from './SelectField';
-import { TextAreaField } from './TextAreaField';
+import { TextAreaField } from '@/shared/form/TextAreaField';
 
 export interface ValidationDecisionPanelProps {
   question: ValidationQuestionDetailResult;

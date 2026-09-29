@@ -6,6 +6,7 @@ import { blueprintsLocales } from '@/features/blueprints/locales';
 import { contentLocales } from '@/features/content/locales';
 import { examLocales } from '@/features/exam/locales';
 import { masteryLocales } from '@/features/mastery/locales';
+import { paymentsLocales } from '@/features/payments/locales';
 import { progressLocales } from '@/features/progress/locales';
 import { questionsLocales } from '@/features/questions/locales';
 import { quizLocales } from '@/features/quiz/locales';
@@ -38,6 +39,7 @@ const resources = {
     blueprints: blueprintsLocales.ar,
     exam: examLocales.ar,
     subscription: subscriptionLocales.ar,
+    payments: paymentsLocales.ar,
   },
   en: {
     common: commonEn,
@@ -52,6 +54,7 @@ const resources = {
     blueprints: blueprintsLocales.en,
     exam: examLocales.en,
     subscription: subscriptionLocales.en,
+    payments: paymentsLocales.en,
   },
 };
 
@@ -87,6 +90,7 @@ export function initI18n(lng: Language = defaultLanguage): void {
         'blueprints',
         'exam',
         'subscription',
+        'payments',
       ],
       defaultNS: 'common',
       resources,

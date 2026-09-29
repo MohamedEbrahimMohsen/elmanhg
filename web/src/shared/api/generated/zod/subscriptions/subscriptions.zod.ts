@@ -51,7 +51,7 @@ export const GetMyPaymentsResponse = zod.object({
   "amountMinor": zod.union([zod.int(),zod.stringFormat('int64', getMyPaymentsResponseItemsItemAmountAmountMinorRegExpTwo)]),
   "currency": zod.string()
 }),
-  "status": zod.enum(['Pending', 'Succeeded', 'Failed']),
+  "status": zod.enum(['Pending', 'Succeeded', 'Failed', 'Refunded']),
   "createdAt": zod.iso.datetime({"offset":true}),
   "completedAt": zod.iso.datetime({"offset":true}).nullable()
 })).optional(),
@@ -93,7 +93,7 @@ export const GetMyPaymentResponse = zod.object({
   "amountMinor": zod.union([zod.int(),zod.stringFormat('int64', getMyPaymentResponseAmountAmountMinorRegExpTwo)]),
   "currency": zod.string()
 }),
-  "status": zod.enum(['Pending', 'Succeeded', 'Failed']),
+  "status": zod.enum(['Pending', 'Succeeded', 'Failed', 'Refunded']),
   "createdAt": zod.iso.datetime({"offset":true}),
   "completedAt": zod.iso.datetime({"offset":true}).nullable()
 })
@@ -117,7 +117,7 @@ export const CompleteFakePaymentResponse = zod.object({
   "amountMinor": zod.union([zod.int(),zod.stringFormat('int64', completeFakePaymentResponseAmountAmountMinorRegExpTwo)]),
   "currency": zod.string()
 }),
-  "status": zod.enum(['Pending', 'Succeeded', 'Failed']),
+  "status": zod.enum(['Pending', 'Succeeded', 'Failed', 'Refunded']),
   "createdAt": zod.iso.datetime({"offset":true}),
   "completedAt": zod.iso.datetime({"offset":true}).nullable()
 })

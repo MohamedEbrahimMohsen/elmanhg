@@ -285,4 +285,67 @@ public sealed class SubscriptionTests
 
         (lapsed, subscription.Status, subscription.ExpiredAt).Should().Be((false, SubscriptionStatus.Expired, (DateTimeOffset?)MonthEnd));
     }
+
+    [Fact]
+    public void RevokePaidPeriod_RenewedActive_ShortensToPreviousEnd()
+    {
+        var subscription = new SubscriptionBuilder().Build();
+        subscription.Renew(BillingPeriod.Monthly, 1, null, MidPeriod, Grace);
+
+        var revoked = subscription.RevokePaidPeriod(1, MidPeriod);
+
+        (revoked, subscription.CurrentPeriodEnd, subscription.Status).Should().Be((true, MonthEnd, SubscriptionStatus.Active));
+    }
+
+    [Fact]
+    public void RevokePaidPeriod_FirstPeriod_ExpiresAtRevocation()
+    {
+        var subscription = new SubscriptionBuilder().Build();
+
+        var revoked = subscription.RevokePaidPeriod(1, MidPeriod);
+
+        (revoked, subscription.Status, subscription.ExpiredAt, subscription.CurrentPeriodEnd).Should().Be((true, SubscriptionStatus.Expired, (DateTimeOffset?)MidPeriod, MidPeriod));
+        subscription.CurrentPeriodStart.Should().BeOnOrBefore(subscription.CurrentPeriodEnd);
+    }
+
+    [Fact]
+    public void RevokePaidPeriod_ActiveInsideGrace_ExpiresWithoutGrace()
+    {
+        var subscription = new SubscriptionBuilder().Build();
+        var insideGrace = MonthEnd.AddDays(1);
+
+        subscription.RevokePaidPeriod(1, insideGrace);
+
+        (subscription.Status, subscription.IsEntitledAt(insideGrace, Grace)).Should().Be((SubscriptionStatus.Expired, false));
+    }
+
+    [Fact]
+    public void RevokePaidPeriod_CancelledWithTimeLeft_ShortensAndStaysCancelled()
+    {
+        var subscription = new SubscriptionBuilder().WithPeriod(BillingPeriod.Termly, 4).InStatus(SubscriptionStatus.Cancelled).Build();
+
+        var revoked = subscription.RevokePaidPeriod(1, MidPeriod);
+
+        (revoked, subscription.Status, subscription.CurrentPeriodEnd).Should().Be((true, SubscriptionStatus.Cancelled, Start.AddMonths(3)));
+    }
+
+    [Fact]
+    public void RevokePaidPeriod_Expired_ReturnsFalseAndKeepsDates()
+    {
+        var subscription = new SubscriptionBuilder().InStatus(SubscriptionStatus.Expired).Build();
+
+        var revoked = subscription.RevokePaidPeriod(1, MidPeriod);
+
+        (revoked, subscription.CurrentPeriodStart, subscription.CurrentPeriodEnd, subscription.ExpiredAt).Should().Be((false, Start, MonthEnd, (DateTimeOffset?)MonthEnd));
+    }
+
+    [Fact]
+    public void RevokePaidPeriod_PeriodMonthsBelowOne_ThrowsPeriodInvalid()
+    {
+        var subscription = new SubscriptionBuilder().Build();
+
+        var act = () => subscription.RevokePaidPeriod(0, MidPeriod);
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.SubscriptionPeriodInvalid);
+    }
 }

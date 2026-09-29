@@ -19,7 +19,10 @@ public sealed class PaymobNotificationReader(IOptions<PaymentsOptions> paymentsO
     private const string CurrencyProperty = "currency";
     private const string OrderProperty = "order";
     private const string MerchantOrderIdProperty = "merchant_order_id";
-    private static readonly string[] RefundOrVoidProperties = ["is_refunded", "is_voided", "is_refund", "is_void", "has_parent_transaction"];
+    private const string HasParentProperty = "has_parent_transaction";
+    private const string IsCaptureProperty = "is_capture";
+    private const string IsRefundedProperty = "is_refunded";
+    private const string IsVoidedProperty = "is_voided";
 
     public PaymentNotification? Read(string payload, string? signature)
     {
@@ -68,9 +71,19 @@ public sealed class PaymobNotificationReader(IOptions<PaymentsOptions> paymentsO
         var orderId = Identifier(order, IdProperty) ?? throw new BadRequestCoreException(ErrorCodes.PaymobWebhookPayloadInvalid);
         var amount = transaction.TryGetProperty(AmountProperty, out var amountValue) && amountValue.ValueKind == JsonValueKind.Number && amountValue.TryGetInt64(out var amountMinor) ? amountMinor : throw new BadRequestCoreException(ErrorCodes.PaymobWebhookPayloadInvalid);
         var currency = transaction.TryGetProperty(CurrencyProperty, out var currencyValue) && currencyValue.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(currencyValue.GetString()) ? currencyValue.GetString()! : throw new BadRequestCoreException(ErrorCodes.PaymobWebhookPayloadInvalid);
-        var isRefundOrVoid = RefundOrVoidProperties.Any(x => transaction.TryGetProperty(x, out var flag) && flag.ValueKind == JsonValueKind.True);
-        return new PaymentNotification(transactionId, Identifier(order, MerchantOrderIdProperty), orderId, Flag(transaction, SuccessProperty), Flag(transaction, PendingProperty), isRefundOrVoid, amount, currency);
+        return new PaymentNotification(transactionId, Identifier(order, MerchantOrderIdProperty), orderId, Flag(transaction, SuccessProperty), Flag(transaction, PendingProperty), KindOf(transaction), amount, currency);
     }
+
+    // Only HMAC-signed fields classify a callback; is_refund/is_void are unsigned.
+    private static PaymentNotificationKind KindOf(JsonElement transaction) => (OptionalFlag(transaction, HasParentProperty), OptionalFlag(transaction, IsCaptureProperty)) switch
+    {
+        (true, false) => PaymentNotificationKind.Reversal,
+        (true, true) => PaymentNotificationKind.Other,
+        _ when OptionalFlag(transaction, IsRefundedProperty) || OptionalFlag(transaction, IsVoidedProperty) => PaymentNotificationKind.Other,
+        _ => PaymentNotificationKind.Charge,
+    };
+
+    private static bool OptionalFlag(JsonElement element, string property) => element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.True;
 
     private static bool Flag(JsonElement element, string property)
     {

@@ -12,6 +12,12 @@ describe('can', () => {
     expect(can('teacher', 'usersManage')).toBe(false);
   });
 
+  it('grants an admin payment management and denies other roles', () => {
+    expect(can('admin', 'paymentsManage')).toBe(true);
+    expect(can('teacher', 'paymentsManage')).toBe(false);
+    expect(can('student', 'paymentsManage')).toBe(false);
+  });
+
   it('denies an admin question validation', () => {
     expect(can('admin', 'questionsValidate')).toBe(false);
   });

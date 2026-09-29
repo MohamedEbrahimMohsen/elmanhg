@@ -73,6 +73,14 @@ describe('CheckoutResultPage', () => {
     expect(screen.getByRole('link', { name: 'Try again' })).toBeInTheDocument();
   });
 
+  it('shows the refunded state for a refunded payment', async () => {
+    await openResult(() => 'Refunded');
+
+    expect(await screen.findByRole('heading', { name: 'This payment was refunded' })).toBeInTheDocument();
+    expect(screen.getByText('The amount was returned to you.')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Done' })).toHaveAttribute('href', '/student/subscription');
+  });
+
   it('polls a pending payment until it succeeds', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     let status: PaymentStatus = 'Pending';

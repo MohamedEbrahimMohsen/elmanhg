@@ -5,7 +5,7 @@ using Elmanhg.Domain.SharedKernel.Exceptions;
 
 namespace Elmanhg.Domain.Subscriptions;
 
-public class Payment : AuditEntity, IAuditedEntity
+public partial class Payment : AuditEntity, IAuditedEntity
 {
     public Guid StudentId { get; private set; }
     public Guid? SubscriptionId { get; private set; }
@@ -52,7 +52,7 @@ public class Payment : AuditEntity, IAuditedEntity
 
     public void MarkSucceeded(Guid subscriptionId, string paymobTransactionId, string rawWebhook, DateTimeOffset completedAt)
     {
-        if (Status == PaymentStatus.Succeeded)
+        if (Status is PaymentStatus.Succeeded or PaymentStatus.Refunded)
         {
             throw new BusinessRuleViolationCoreException(ErrorCodes.PaymentNotPending);
         }
@@ -85,6 +85,8 @@ public class Payment : AuditEntity, IAuditedEntity
     public void FlagForReview(PaymentReviewReason reason)
     {
         ReviewReason = reason;
+        ReviewResolvedAt = null;
+        ReviewResolvedBy = null;
         UpdationDate = DateTimeOffset.UtcNow;
     }
 
