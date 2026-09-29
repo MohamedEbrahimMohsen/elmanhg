@@ -3,12 +3,16 @@ using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Browse.GetStudentUnit;
 using Elmanhg.Application.Browse.Shared;
 using Elmanhg.Application.Exceptions;
+using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subjects;
+using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Domain.Units;
+using Elmanhg.Tests.Application.Features.Subscriptions;
 using FluentAssertions;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using System.Linq.Expressions;
 
@@ -16,11 +20,14 @@ namespace Elmanhg.Tests.Application.Features.Browse.GetStudentUnit;
 
 public sealed class GetStudentUnitHandlerTests
 {
+    private static readonly DateTimeOffset Now = new(2026, 10, 1, 12, 0, 0, TimeSpan.Zero);
     private readonly ICurriculumUnitRepository _unitRepository = Substitute.For<ICurriculumUnitRepository>();
     private readonly ISubjectRepository _subjectRepository = Substitute.For<ISubjectRepository>();
     private readonly ILessonRepository _lessonRepository = Substitute.For<ILessonRepository>();
     private readonly IQuestionMasteryRepository _questionMasteryRepository = Substitute.For<IQuestionMasteryRepository>();
     private readonly ISessionRepository _sessionRepository = Substitute.For<ISessionRepository>();
+    private readonly ISubscriptionRepository _subscriptionRepository = Substitute.For<ISubscriptionRepository>();
+    private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
     private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
     private readonly Guid _studentId = Guid.NewGuid();
     private readonly Subject _subject = Subject.Create("Physics", 1, Guid.NewGuid());
@@ -38,7 +45,9 @@ public sealed class GetStudentUnitHandlerTests
             .Returns(call => _lessons.Where(call.Arg<Expression<Func<Lesson, bool>>>().Compile()).ToList());
         _questionMasteryRepository.GetLessonCountsAsync(_studentId, _subject.Id, Arg.Any<CancellationToken>()).Returns([]);
         _sessionRepository.GetBestExamScoresAsync(_studentId, Arg.Any<CancellationToken>()).Returns([]);
-        _handler = new GetStudentUnitHandler(_unitRepository, _subjectRepository, _lessonRepository, _questionMasteryRepository, _sessionRepository, _currentUserService);
+        _timeProvider.GetUtcNow().Returns(Now);
+        SubscriptionRepositoryStub.Stub(_subscriptionRepository, SubscriptionRepositoryStub.EntitledBase(_studentId, Now));
+        _handler = new GetStudentUnitHandler(_unitRepository, _subjectRepository, _lessonRepository, _questionMasteryRepository, _sessionRepository, _subscriptionRepository, Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService);
     }
 
     [Fact]
@@ -82,7 +91,7 @@ public sealed class GetStudentUnitHandlerTests
 
         var result = await _handler.Handle(new GetStudentUnitQuery(_unit.Id), TestContext.Current.CancellationToken);
 
-        result.Lessons.Should().Equal(new StudentLessonSummaryResult(forces.Id, "Forces", 4, 2, 3, 50), new StudentLessonSummaryResult(energy.Id, "Energy", 0, 0, 0, 0));
+        result.Lessons.Should().Equal(new StudentLessonSummaryResult(forces.Id, "Forces", 4, 2, 3, 50, false), new StudentLessonSummaryResult(energy.Id, "Energy", 0, 0, 0, 0, false));
         (result.Id, result.Name, result.SubjectId, result.SubjectName).Should().Be((_unit.Id, "Mechanics", _subject.Id, "Physics"));
         (result.ServableCount, result.MasteredCount, result.SeenCount, result.MasteryPercent, result.BestExamScorePercent).Should().Be((10, 8, 9, 80, 72.4m));
     }

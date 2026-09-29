@@ -13,6 +13,7 @@ The plan catalogue lives in configuration, section `Subscriptions` (`Subscriptio
 | `FreeDailyQuizQuestions` | `10` | Free tier: quiz questions per day. |
 | `FreeDailyAvatarMessages` | `5` | Free tier: Avatar messages per day. |
 | `FreeOpenLessonsPerUnit` | `1` | Free tier: lessons open per unit (the first ones). |
+| `DailyQuotaTimeZone` | `Africa/Cairo` | IANA zone whose calendar day the Free daily quotas reset on. Validated at startup. |
 | `BaseDailyAvatarMessages` | `50` | Base: Avatar messages per day. |
 | `BasePrices:{Monthly,Termly,Yearly}:Months` | no default: must be set | Length of each Base period in months (1–36). |
 | `BasePrices:{Monthly,Termly,Yearly}:AmountMinor` | no default: must be set | Price of each Base period in minor units (> 0). At least one period is required. |
@@ -150,12 +151,26 @@ Entitlement stays read-time, so the sweep is status bookkeeping for the UI and d
 
 `POST /api/subscriptions/{subscriptionId}/cancel` (owner-scoped; another student's subscription is 404 `SUBSCRIPTION_NOT_FOUND`) cancels a subscription that is still entitled (Active, or PastDue within grace); otherwise 400 `SUBSCRIPTION_ENDED`. It keeps paid time (`EntitledUntil = CurrentPeriodEnd`), does not cascade to Ask a Teacher (the read-time "requires Base" rule covers that) and returns the fresh `EntitlementResult`. Audited as `Subscription.Cancel`. Buying the plan again inside the renewal window resumes it.
 
+## Free tier gates
+
+Every gate loads entitlement through `StudentEntitlementLoader.LoadAsync` before any write and throws 403 `ForbiddenCoreException` from `FreeTierGate` (`Application/Subscriptions/Shared`). A failed lookup throws and nothing is saved (fail closed). The limits come only from `SubscriptionsOptions` through `EntitlementResult`.
+
+- **What counts toward the daily quiz quota:** new `Attempt` rows in non-test `Quiz` sessions whose `CreatedAt` falls on today's date in `DailyQuotaTimeZone` (`ISessionRepository.CountQuizAttemptsOnDayAsync`, SQL `AT TIME ZONE`). A replayed identical answer creates no row and does not count. Exam answers do not count.
+- **Quiz start** (`POST /api/sessions/quiz`): a locked lesson returns `403 LESSON_LOCKED` (start and resume). A **new** session when used ≥ limit returns `403 QUIZ_DAILY_LIMIT_REACHED` (context `limit`). Resuming an open session is allowed; its answers are still gated. The size of a new session is not capped to the remaining quota.
+- **Answer submit** (`POST /api/sessions/{id}/answers`): only a new attempt is gated — the lesson lock (`LESSON_LOCKED`, which covers a quiz started while subscribed and continued after a lapse) and then the quota (`QUIZ_DAILY_LIMIT_REACHED`). A replay and any test-mode session are not gated.
+- **Lesson lock:** a Free student opens the first `FreeOpenLessonsPerUnit` Published lessons of each unit, ordered by `Order`, then `CreationDate`, then `Id` (`LessonAccess` in Domain). See `docs/browsing.md` → Free tier.
+- **Exams:** a new unit exam or multi-unit exam needs Base (`403 EXAM_REQUIRES_SUBSCRIPTION`), checked before the lesson-opened gate. Resume, save and submit are not gated. See `docs/exams.md`.
+- **Exempt:** Admins (role claim `Admin`, the same test that sets `IsTestMode`) on quiz start and exam start; any test-mode session on answer submit. Teachers cannot reach these endpoints (`Assessments.Take`). An unknown or missing role is gated.
+- **Known limit:** the quota is a soft limit. Two answers sent in parallel at 9/10 can both pass; there is no lock.
+- `GET /api/subscriptions/usage` returns today's count for the counters on Home, the practice tab and the quiz screen. The web opens a paywall dialog on each of the three codes; «اشترك» opens `/student/subscription`, «لاحقًا» closes it. A fake payment success refreshes the entitlement, usage, browse, mastery and exam views.
+
 ## API
 
 | Method | Route | Policy | Response |
 |---|---|---|---|
 | GET | `/api/plans` | anonymous | `PlanCatalogueResult`: `free` limits, `base` Avatar limit and prices ordered by months, `askTeacher` quota, SLA and its single monthly price |
 | GET | `/api/subscriptions/entitlement` | `Subscription.Manage` (Student) | `EntitlementResult`: `tier` (`Free`/`Base`), `hasAskTeacher`, `canTakeExams`, the limits (`null` = unlimited) and the entitled `subscriptions` with `entitledUntil`, `inGracePeriod` (Active or PastDue with `currentPeriodEnd` ≤ now) and `canRenew` (checkout would accept this plan now) |
+| GET | `/api/subscriptions/usage` | `Subscription.Manage` (Student) | `UsageResult`: `tier`, `hasAskTeacher`, `dailyQuizQuestionLimit` (`null` = unlimited), `quizQuestionsUsedToday`, `quizQuestionsRemainingToday` (`null` = unlimited, never below 0) and `dailyAvatarMessageLimit` |
 | GET | `/api/subscriptions/payments?pageNumber&pageSize` | `Subscription.Manage` (Student) | `PageData<PaymentResult>`; `422 PAYMENT_HISTORY_PAGE_NUMBER_INVALID` / `PAYMENT_HISTORY_PAGE_SIZE_INVALID` |
 | POST | `/api/subscriptions/checkout` | `Subscription.Manage` (Student) | `CheckoutResult`; `400 CHECKOUT_PLAN_ALREADY_ACTIVE` (held plan outside the renewal window) / `CHECKOUT_REQUIRES_BASE`; `422` validation; `503 PAYMENT_GATEWAY_UNAVAILABLE` |
 | GET | `/api/subscriptions/payments/{paymentId}` | `Subscription.Manage` (Student) | `PaymentResult` (Pending included); `404 PAYMENT_NOT_FOUND` |
@@ -170,7 +185,7 @@ Enum values travel as PascalCase strings. The web page `/student/subscription` s
 
 ## For later stories
 
-- **Gates (#87 free tier, #94 Ask a Teacher quota)** call `StudentEntitlementLoader.LoadAsync(subscriptionRepository, studentId, options, now, cancellationToken)`. It is the one definition of entitlement and limits.
+- **Gates** call `StudentEntitlementLoader.LoadAsync(subscriptionRepository, studentId, options, now, cancellationToken)`. It is the one definition of entitlement and limits. **#87** (done): the Free tier gates above. **#91** (Avatar) and **#94** (Ask a Teacher) add their counters to `UsageResult` and enforce their quotas through the same loader; `UsageResult.dailyAvatarMessageLimit` already exposes the Avatar limit.
 - **#100** (done): checkout, the Pending payment, the fake gateway and the result page (see Checkout).
 - **#101** (done): the webhook, renewal, the lapse sweep and the student cancel (see above).
 - **#102** (done): `PaymentStatus.Refunded`, admin refunds, signed refund and void callbacks, and the admin payment log with its review queue (see Refunds and Admin payment log). Automatic detection of overlapping subscriptions (the known limit under Webhook) is a follow-up issue.

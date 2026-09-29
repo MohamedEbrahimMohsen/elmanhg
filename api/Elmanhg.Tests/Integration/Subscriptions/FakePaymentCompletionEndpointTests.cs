@@ -32,7 +32,7 @@ public sealed class FakePaymentCompletionEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Post_Succeeded_ActivatesBase()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
         var payment = await SeedPendingAsync(student.Id);
 
         using var response = await client.PostAsJsonAsync(CompletionPath(payment.Id), new { succeeded = true }, CancellationToken);
@@ -50,7 +50,7 @@ public sealed class FakePaymentCompletionEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Post_Failed_MarksFailedAndStudentStaysFree()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
         var payment = await SeedPendingAsync(student.Id);
 
         using var response = await client.PostAsJsonAsync(CompletionPath(payment.Id), new { succeeded = false }, CancellationToken);
@@ -65,7 +65,7 @@ public sealed class FakePaymentCompletionEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Post_AlreadyCompleted_Returns400PaymentNotPending()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
         var payment = await SeedPendingAsync(student.Id);
         using var first = await client.PostAsJsonAsync(CompletionPath(payment.Id), new { succeeded = false }, CancellationToken);
 
@@ -78,7 +78,7 @@ public sealed class FakePaymentCompletionEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Post_SecondBaseCheckoutAfterFirstSucceeded_ExtendsExistingBase()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
         var first = await StartBaseCheckoutAsync(client);
         var second = await StartBaseCheckoutAsync(client);
         using var firstCompletion = await client.PostAsJsonAsync(CompletionPath(first), new { succeeded = true }, CancellationToken);
@@ -100,7 +100,7 @@ public sealed class FakePaymentCompletionEndpointTests(ApiFactory factory)
     {
         var other = await ScopeTestData.SeedStudentAsync(factory, CancellationToken);
         var payment = await SeedPendingAsync(other.Id);
-        var (_, client) = await SignedInStudentAsync(factory);
+        var (_, client) = await SignedInFreeStudentAsync(factory);
 
         using var response = await client.PostAsJsonAsync(CompletionPath(payment.Id), new { succeeded = true }, CancellationToken);
 

@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
+import { PaywallDialog, paywallReason } from '@/features/subscription';
 import type { UnitExamOverviewResult } from '@/shared/api/generated/model';
 import { Button } from '@/shared/ui/button';
 import { useStartExam } from '../hooks/useStartExam';
@@ -12,7 +13,7 @@ const warningClassName = 'flex flex-col items-start gap-2 rounded-lg border bord
 
 export function ExamStartActions({ overview }: ExamStartActionsProps) {
   const { t } = useTranslation('exam');
-  const { start, isPending, errorCode } = useStartExam(overview.unitId);
+  const { start, isPending, errorCode, reset } = useStartExam(overview.unitId);
   const inProgress = overview.inProgressExam;
 
   if (inProgress?.isThisUnit) {
@@ -69,11 +70,12 @@ export function ExamStartActions({ overview }: ExamStartActionsProps) {
       <Button variant="primary" disabled={isPending} onClick={start}>
         {t('start.start')}
       </Button>
-      {errorCode ? (
+      {errorCode && paywallReason(errorCode) === null ? (
         <p role="alert" className="text-caption text-danger">
           {t([`common:errors.${errorCode}`, 'common:errors.UNHANDLED_EXCEPTION'])}
         </p>
       ) : null}
+      <PaywallDialog reason={paywallReason(errorCode)} onClose={reset} />
     </div>
   );
 }

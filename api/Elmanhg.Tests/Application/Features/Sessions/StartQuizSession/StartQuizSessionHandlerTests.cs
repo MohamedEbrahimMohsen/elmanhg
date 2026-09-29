@@ -9,6 +9,8 @@ using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Sessions.Selection;
+using Elmanhg.Domain.Subscriptions;
+using Elmanhg.Tests.Application.Features.Subscriptions;
 using Elmanhg.Tests.Builders;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
@@ -26,6 +28,8 @@ public sealed class StartQuizSessionHandlerTests
     private readonly ISessionRepository _sessionRepository = Substitute.For<ISessionRepository>();
     private readonly ILessonRepository _lessonRepository = Substitute.For<ILessonRepository>();
     private readonly IQuestionRepository _questionRepository = Substitute.For<IQuestionRepository>();
+    private readonly ISubscriptionRepository _subscriptionRepository = Substitute.For<ISubscriptionRepository>();
+    private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
     private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
     private readonly SessionBuilder _builder = new();
     private readonly List<QuestionRevision> _revisions = [];
@@ -43,7 +47,9 @@ public sealed class StartQuizSessionHandlerTests
         StubFindQuestions(_ => true);
         _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(_revisions);
         SessionRepositoryStub.StubFind(_sessionRepository);
-        _handler = new StartQuizSessionHandler(_sessionRepository, _lessonRepository, _questionRepository, Options.Create(new SessionsOptions()), Options.Create(new MasteryOptions()), new Random(Seed), _currentUserService, Substitute.For<ILocalizer>());
+        _timeProvider.GetUtcNow().Returns(T0);
+        SubscriptionRepositoryStub.Stub(_subscriptionRepository, SubscriptionRepositoryStub.EntitledBase(_builder.StudentId, T0));
+        _handler = new StartQuizSessionHandler(_sessionRepository, _lessonRepository, _questionRepository, _subscriptionRepository, Options.Create(new SessionsOptions()), Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), new Random(Seed), _timeProvider, _currentUserService, Substitute.For<ILocalizer>());
     }
 
     private Guid LessonId => _builder.Questions.Lesson.Id;

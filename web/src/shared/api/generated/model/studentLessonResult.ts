@@ -29,4 +29,5 @@ export interface StudentLessonResult {
   masteryPercent: number | string;
   previousLesson: null | LessonLinkResult;
   nextLesson: null | LessonLinkResult;
+  isLocked: boolean;
 }

@@ -8,8 +8,10 @@ import {
   getGetExamAttemptsMockHandler,
   getGetUnitExamAttemptsMockHandler,
 } from '@/shared/api/generated/exams/exams.msw';
+import { getGetMyUsageMockHandler } from '@/shared/api/generated/subscriptions/subscriptions.msw';
 import { studentLesson } from '@/test/browseFixtures';
 import { noExamAttempts } from '@/test/examFixtures';
+import { baseUsage } from '@/test/subscriptionFixtures';
 
 export const server = setupServer(
   getGetExamAttemptsMockHandler(noExamAttempts()),
@@ -17,4 +19,5 @@ export const server = setupServer(
   getGetStudentLessonMockHandler(studentLesson()),
   getRecordLessonOpeningMockHandler(),
   getRecordFunnelEventMockHandler(),
+  getGetMyUsageMockHandler(baseUsage()),
 );

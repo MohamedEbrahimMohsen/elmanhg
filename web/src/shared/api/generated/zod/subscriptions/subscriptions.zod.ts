@@ -35,6 +35,21 @@ export const GetMyEntitlementResponse = zod.object({
 }))
 })
 
+export const getMyUsageResponseDailyQuizQuestionLimitRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMyUsageResponseQuizQuestionsUsedTodayRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMyUsageResponseQuizQuestionsRemainingTodayRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMyUsageResponseDailyAvatarMessageLimitRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const GetMyUsageResponse = zod.object({
+  "tier": zod.enum(['Free', 'Base']),
+  "hasAskTeacher": zod.boolean(),
+  "dailyQuizQuestionLimit": zod.union([zod.int(),zod.stringFormat('int32', getMyUsageResponseDailyQuizQuestionLimitRegExpTwo)]).nullable(),
+  "quizQuestionsUsedToday": zod.union([zod.int(),zod.stringFormat('int32', getMyUsageResponseQuizQuestionsUsedTodayRegExpTwo)]),
+  "quizQuestionsRemainingToday": zod.union([zod.int(),zod.stringFormat('int32', getMyUsageResponseQuizQuestionsRemainingTodayRegExpTwo)]).nullable(),
+  "dailyAvatarMessageLimit": zod.union([zod.int(),zod.stringFormat('int32', getMyUsageResponseDailyAvatarMessageLimitRegExpTwo)])
+})
+
 export const getMyPaymentsResponseItemsItemAmountAmountMinorRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const getMyPaymentsResponsePageNumberRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const getMyPaymentsResponsePageSizeRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');

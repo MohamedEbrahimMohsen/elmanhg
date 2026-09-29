@@ -73,7 +73,8 @@ export const GetStudentUnitResponse = zod.object({
   "servableCount": zod.union([zod.int(),zod.stringFormat('int32', getStudentUnitResponseLessonsItemServableCountRegExpTwo)]),
   "masteredCount": zod.union([zod.int(),zod.stringFormat('int32', getStudentUnitResponseLessonsItemMasteredCountRegExpTwo)]),
   "seenCount": zod.union([zod.int(),zod.stringFormat('int32', getStudentUnitResponseLessonsItemSeenCountRegExpTwo)]),
-  "masteryPercent": zod.union([zod.int(),zod.stringFormat('int32', getStudentUnitResponseLessonsItemMasteryPercentRegExpTwo)])
+  "masteryPercent": zod.union([zod.int(),zod.stringFormat('int32', getStudentUnitResponseLessonsItemMasteryPercentRegExpTwo)]),
+  "isLocked": zod.boolean()
 }))
 })
 
@@ -118,7 +119,8 @@ export const GetStudentLessonResponse = zod.object({
   "name": zod.string(),
   "unitId": zod.uuid(),
   "unitName": zod.string()
-})])
+})]),
+  "isLocked": zod.boolean()
 })
 
 export const RecordLessonOpeningParams = zod.object({

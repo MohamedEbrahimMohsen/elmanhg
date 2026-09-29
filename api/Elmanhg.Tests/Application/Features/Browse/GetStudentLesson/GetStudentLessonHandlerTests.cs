@@ -3,11 +3,15 @@ using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Browse.GetStudentLesson;
 using Elmanhg.Application.Browse.Shared;
 using Elmanhg.Application.Exceptions;
+using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
 using Elmanhg.Domain.Subjects;
+using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Domain.Units;
+using Elmanhg.Tests.Application.Features.Subscriptions;
 using FluentAssertions;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using System.Linq.Expressions;
 
@@ -15,10 +19,13 @@ namespace Elmanhg.Tests.Application.Features.Browse.GetStudentLesson;
 
 public sealed class GetStudentLessonHandlerTests
 {
+    private static readonly DateTimeOffset Now = new(2026, 10, 1, 12, 0, 0, TimeSpan.Zero);
     private readonly ILessonRepository _lessonRepository = Substitute.For<ILessonRepository>();
     private readonly ICurriculumUnitRepository _unitRepository = Substitute.For<ICurriculumUnitRepository>();
     private readonly ISubjectRepository _subjectRepository = Substitute.For<ISubjectRepository>();
     private readonly IQuestionMasteryRepository _questionMasteryRepository = Substitute.For<IQuestionMasteryRepository>();
+    private readonly ISubscriptionRepository _subscriptionRepository = Substitute.For<ISubscriptionRepository>();
+    private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
     private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
     private readonly Guid _studentId = Guid.NewGuid();
     private readonly Subject _subject = Subject.Create("Physics", 1, Guid.NewGuid());
@@ -42,7 +49,9 @@ public sealed class GetStudentLessonHandlerTests
             .Returns(call => _units.Where(call.Arg<Expression<Func<CurriculumUnit, bool>>>().Compile()).ToList());
         _subjectRepository.GetByIdAsync(_subject.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Subject>, IQueryable<Subject>>?>(), Arg.Any<bool>()).Returns(_subject);
         _questionMasteryRepository.GetLessonCountsAsync(_studentId, _subject.Id, Arg.Any<CancellationToken>()).Returns([]);
-        _handler = new GetStudentLessonHandler(_lessonRepository, _unitRepository, _subjectRepository, _questionMasteryRepository, _currentUserService);
+        _timeProvider.GetUtcNow().Returns(Now);
+        SubscriptionRepositoryStub.Stub(_subscriptionRepository, SubscriptionRepositoryStub.EntitledBase(_studentId, Now));
+        _handler = new GetStudentLessonHandler(_lessonRepository, _unitRepository, _subjectRepository, _questionMasteryRepository, _subscriptionRepository, Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService);
     }
 
     [Fact]

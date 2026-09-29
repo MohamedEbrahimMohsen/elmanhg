@@ -1608,7 +1608,7 @@
     },
     {
       "name": "Sessions",
-      "description": "Sign in as a Student (or an Admin for test mode). `lessonId` must be a Published lesson with approved questions.",
+      "description": "Sign in as a Student (or an Admin for test mode). `lessonId` must be a Published lesson with approved questions. A Free student (no Base subscription) can only use the first lesson of each unit (403 LESSON_LOCKED) and answer 10 new questions a day (403 QUIZ_DAILY_LIMIT_REACHED on start or answer); run the Subscriptions folder first for unlimited practice.",
       "item": [
         {
           "name": "Start quiz session",
@@ -1723,7 +1723,7 @@
     },
     {
       "name": "Exams",
-      "description": "Sign in as a Student (or an Admin for test mode). `unitId` must have an exam blueprint (its own or the subject default) and enough servable questions. One exam may be open at a time; answers are drafts until Submit exam. Multi-unit: set subjectId, unitId and secondUnitId (two units of that subject with blueprints and 20+ servable questions together).",
+      "description": "Sign in as a Student (or an Admin for test mode). `unitId` must have an exam blueprint (its own or the subject default) and enough servable questions. One exam may be open at a time; answers are drafts until Submit exam. Multi-unit: set subjectId, unitId and secondUnitId (two units of that subject with blueprints and 20+ servable questions together). Starting a new exam needs a Base subscription: a Free student gets 403 EXAM_REQUIRES_SUBSCRIPTION (run the Subscriptions folder first).",
       "item": [
         {
           "name": "Get unit exam overview",
@@ -2069,7 +2069,7 @@
     },
     {
       "name": "Browse",
-      "description": "Sign in as a Student. Published lessons only; draft or archived lessons return 404. Recording an opening is idempotent and feeds the optional unit-exam gate (Exams:RequireAllLessonsOpened).",
+      "description": "Sign in as a Student. Published lessons only; draft or archived lessons return 404. For a Free student every lesson after the first of its unit has isLocked true, and a locked lesson returns no explanation, summary, video or objectives. Recording an opening is idempotent and feeds the optional unit-exam gate (Exams:RequireAllLessonsOpened).",
       "item": [
         {
           "name": "Get student subject",
@@ -2341,7 +2341,7 @@
     },
     {
       "name": "Subscriptions",
-      "description": "The plan catalogue is public (no auth). Entitlement, payments and checkout need a Student sign-in (Subscription.Manage). Checkout creates a Pending payment. With the fake gateway (default) complete it via fake-completion; the Paymob webhook settles real payments. From 7 days before the period end the held plan can be bought again to renew it. Cancel keeps access until the paid period ends. A second run on the same student returns 400 CHECKOUT_PLAN_ALREADY_ACTIVE at checkout and 400 SUBSCRIPTION_ENDED at cancel.",
+      "description": "The plan catalogue is public (no auth). Entitlement, usage (today's Free quiz counter), payments and checkout need a Student sign-in (Subscription.Manage). Checkout creates a Pending payment. With the fake gateway (default) complete it via fake-completion; the Paymob webhook settles real payments. From 7 days before the period end the held plan can be bought again to renew it. Cancel keeps access until the paid period ends. A second run on the same student returns 400 CHECKOUT_PLAN_ALREADY_ACTIVE at checkout and 400 SUBSCRIPTION_ENDED at cancel.",
       "item": [
         {
           "name": "Get plan catalogue",
@@ -2390,6 +2390,31 @@
               "raw": "{{baseUrl}}/api/subscriptions/entitlement",
               "host": ["{{baseUrl}}"],
               "path": ["api", "subscriptions", "entitlement"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get my usage",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns today's quiz usage\", function () { pm.expect(pm.response.json()).to.have.property(\"quizQuestionsUsedToday\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/usage",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "usage"]
             }
           },
           "response": []

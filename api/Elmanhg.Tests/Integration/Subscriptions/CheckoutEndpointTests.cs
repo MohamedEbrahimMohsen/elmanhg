@@ -44,7 +44,7 @@ public sealed class CheckoutEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Post_BaseInsideRenewalWindow_ReturnsRedirect()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
         await SubscriptionTestData.SeedSubscriptionAsync(factory, new SubscriptionBuilder().ForStudent(student.Id).StartingAt(DateTimeOffset.UtcNow.AddMonths(-1).AddDays(3)).Build(), CancellationToken);
 
         using var response = await client.PostAsJsonAsync(CheckoutPath, new { plan = "Base", period = "Yearly" }, CancellationToken);
@@ -59,7 +59,7 @@ public sealed class CheckoutEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Post_FreeStudentBaseMonthly_ReturnsFakeRedirectAndStoresPendingPayment()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
 
         using var response = await client.PostAsJsonAsync(CheckoutPath, new { plan = "Base", period = "Monthly" }, CancellationToken);
 
@@ -76,7 +76,7 @@ public sealed class CheckoutEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Post_AskTeacherWithoutBase_Returns400CheckoutRequiresBase()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
 
         using var response = await client.PostAsJsonAsync(CheckoutPath, new { plan = "AskTeacher", period = "Monthly" }, CancellationToken);
 
@@ -89,7 +89,7 @@ public sealed class CheckoutEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Post_BaseAlreadyEntitled_Returns400PlanAlreadyActive()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
         await SubscriptionTestData.SeedSubscriptionAsync(factory, new SubscriptionBuilder().ForStudent(student.Id).StartingAt(DateTimeOffset.UtcNow.AddDays(-5)).Build(), CancellationToken);
 
         using var response = await client.PostAsJsonAsync(CheckoutPath, new { plan = "Base", period = "Monthly" }, CancellationToken);
@@ -101,7 +101,7 @@ public sealed class CheckoutEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Post_PlanMissing_Returns422WithCode()
     {
-        var (_, client) = await SignedInStudentAsync(factory);
+        var (_, client) = await SignedInFreeStudentAsync(factory);
 
         using var response = await client.PostAsJsonAsync(CheckoutPath, new { period = "Monthly" }, CancellationToken);
 

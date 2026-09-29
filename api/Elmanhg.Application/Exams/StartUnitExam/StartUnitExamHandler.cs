@@ -4,6 +4,7 @@ using Core.Localization;
 using Elmanhg.Application.Exams.Shared;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
@@ -12,6 +13,7 @@ using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Sessions.Exams;
 using Elmanhg.Domain.Subjects;
+using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Domain.Units;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +22,7 @@ using System.Security.Claims;
 
 namespace Elmanhg.Application.Exams.StartUnitExam;
 
-public sealed class StartUnitExamHandler(ISessionRepository sessionRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, ILessonRepository lessonRepository, ILessonOpeningRepository lessonOpeningRepository, IQuestionRepository questionRepository, IExamBlueprintRepository examBlueprintRepository, IQuestionMasteryRepository questionMasteryRepository, IOptions<ExamsOptions> examsOptions, IOptions<MasteryOptions> masteryOptions, Random random, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<StartUnitExamCommand, ExamSessionResult>
+public sealed class StartUnitExamHandler(ISessionRepository sessionRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, ILessonRepository lessonRepository, ILessonOpeningRepository lessonOpeningRepository, IQuestionRepository questionRepository, IExamBlueprintRepository examBlueprintRepository, IQuestionMasteryRepository questionMasteryRepository, ISubscriptionRepository subscriptionRepository, IOptions<ExamsOptions> examsOptions, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, Random random, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<StartUnitExamCommand, ExamSessionResult>
 {
     public async Task<ExamSessionResult> Handle(StartUnitExamCommand request, CancellationToken cancellationToken)
     {
@@ -67,6 +69,12 @@ public sealed class StartUnitExamHandler(ISessionRepository sessionRepository, I
     private async Task<Session> StartAsync(Guid userId, CurriculumUnit unit, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var isTestMode = currentUserService.GetClaim(ClaimTypes.Role) == nameof(UserRole.Admin);
+        if (!isTestMode)
+        {
+            var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, userId, subscriptionsOptions.Value, now, cancellationToken).ConfigureAwait(false);
+            FreeTierGate.EnsureCanTakeExams(entitlement);
+        }
+
         if (examsOptions.Value.RequireAllLessonsOpened && !isTestMode)
         {
             await ExamLessonGate.EnsureOpenedAsync(userId, [unit.Id], lessonRepository, lessonOpeningRepository, cancellationToken).ConfigureAwait(false);

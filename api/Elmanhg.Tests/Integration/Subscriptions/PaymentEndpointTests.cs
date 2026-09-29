@@ -27,7 +27,7 @@ public sealed class PaymentEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Get_OwnPendingPayment_Returns200WithPendingStatus()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
         var payment = await SubscriptionTestData.SeedPendingPaymentAsync(factory, student.Id, SubscriptionPlan.Base, BillingPeriod.Monthly, 19900, CancellationToken);
 
         using var response = await client.GetAsync(PaymentPath(payment.Id), CancellationToken);
@@ -42,7 +42,7 @@ public sealed class PaymentEndpointTests(ApiFactory factory)
     {
         var other = await ScopeTestData.SeedStudentAsync(factory, CancellationToken);
         var payment = await SubscriptionTestData.SeedPendingPaymentAsync(factory, other.Id, SubscriptionPlan.Base, BillingPeriod.Monthly, 19900, CancellationToken);
-        var (_, client) = await SignedInStudentAsync(factory);
+        var (_, client) = await SignedInFreeStudentAsync(factory);
 
         using var response = await client.GetAsync(PaymentPath(payment.Id), CancellationToken);
 

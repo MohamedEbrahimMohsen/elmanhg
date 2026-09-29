@@ -5,10 +5,13 @@ using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Sessions.SubmitAnswer;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.ExamBlueprints;
+using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
+using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Tests.Application.Features.Mastery;
+using Elmanhg.Tests.Application.Features.Subscriptions;
 using Elmanhg.Tests.Builders;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
@@ -19,9 +22,13 @@ namespace Elmanhg.Tests.Application.Features.Sessions.SubmitAnswer;
 
 public sealed class SubmitAnswerHandlerTests
 {
+    private static readonly DateTimeOffset T0 = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
     private readonly ISessionRepository _sessionRepository = Substitute.For<ISessionRepository>();
     private readonly IQuestionRepository _questionRepository = Substitute.For<IQuestionRepository>();
     private readonly IQuestionMasteryRepository _questionMasteryRepository = Substitute.For<IQuestionMasteryRepository>();
+    private readonly ILessonRepository _lessonRepository = Substitute.For<ILessonRepository>();
+    private readonly ISubscriptionRepository _subscriptionRepository = Substitute.For<ISubscriptionRepository>();
+    private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
     private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
     private readonly SessionBuilder _builder = new();
     private readonly List<Question> _questions;
@@ -35,7 +42,9 @@ public sealed class SubmitAnswerHandlerTests
         _session = Session.StartQuiz(_builder.StudentId, _builder.Questions.Lesson, _questions, isTestMode: false);
         SessionRepositoryStub.StubFind(_sessionRepository, _session);
         _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(_questions[0].Revisions);
-        _handler = new SubmitAnswerHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, Options.Create(new MasteryOptions()), _currentUserService, Substitute.For<ILocalizer>());
+        _timeProvider.GetUtcNow().Returns(T0);
+        SubscriptionRepositoryStub.Stub(_subscriptionRepository, SubscriptionRepositoryStub.EntitledBase(_builder.StudentId, T0));
+        _handler = new SubmitAnswerHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _lessonRepository, _subscriptionRepository, Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>());
     }
 
     private Guid QuestionId => _questions[0].Id;

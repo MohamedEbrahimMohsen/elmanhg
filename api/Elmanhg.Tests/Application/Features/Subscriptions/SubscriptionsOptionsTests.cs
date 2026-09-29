@@ -75,6 +75,16 @@ public sealed class SubscriptionsOptionsTests
     }
 
     [Fact]
+    public void AddApplication_DailyQuotaTimeZoneUnknown_ThrowsOptionsValidationException()
+    {
+        using var provider = BuildProvider(WithPrices(new Dictionary<string, string?> { ["Subscriptions:DailyQuotaTimeZone"] = "Mars/Olympus_Mons" }));
+
+        var act = () => provider.GetRequiredService<IOptions<SubscriptionsOptions>>().Value;
+
+        act.Should().Throw<OptionsValidationException>().Which.Failures.Should().Contain("Subscriptions:DailyQuotaTimeZone must be a known IANA time zone id.");
+    }
+
+    [Fact]
     public void AddApplication_ConfiguredPrices_ResolvesWithPrdDefaults()
     {
         using var provider = BuildProvider(WithPrices([]));

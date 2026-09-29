@@ -211,7 +211,10 @@
     "PAYMENT_LOG_REFERENCE_TOO_LONG": "The reference is too long.",
     "PAYMENT_LOG_DATE_RANGE_INVALID": "The start must be before the end.",
     "EXAM_LESSONS_NOT_OPENED": "Open every lesson in the unit before starting the exam.",
-    "LESSON_ALREADY_OPENED": "This lesson opening was already recorded."
+    "LESSON_ALREADY_OPENED": "This lesson opening was already recorded.",
+    "QUIZ_DAILY_LIMIT_REACHED": "You have reached the free plan's daily limit.",
+    "LESSON_LOCKED": "This lesson is for subscribers only.",
+    "EXAM_REQUIRES_SUBSCRIPTION": "Exams are included in the Base plan."
   },
   "error": {
     "title": "Something went wrong"

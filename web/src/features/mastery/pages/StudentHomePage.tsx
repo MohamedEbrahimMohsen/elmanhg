@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { ContentErrorState, ContentListSkeleton } from '@/features/content';
 import { useSession } from '@/features/session';
+import { PlanSummaryLine } from '@/features/subscription';
 import { useGetMasteryOverview } from '@/shared/api/generated/mastery/mastery';
 import { HeadlineCounterCard } from '../components/HeadlineCounterCard';
 import { HomeSubjects } from '../components/HomeSubjects';
@@ -43,6 +44,7 @@ export function StudentHomePage() {
     <section className="flex flex-col gap-4">
       {greeting}
       <HeadlineCounterCard headline={data.headline} streakDays={Number(data.streakDays)} />
+      <PlanSummaryLine />
       {data.nextLesson ? <NextLessonCard lesson={data.nextLesson} /> : null}
       <HomeSubjects subjects={data.subjects} />
     </section>

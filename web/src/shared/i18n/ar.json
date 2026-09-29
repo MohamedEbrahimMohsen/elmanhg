@@ -211,7 +211,10 @@
     "PAYMENT_LOG_REFERENCE_TOO_LONG": "المرجع طويل جدا.",
     "PAYMENT_LOG_DATE_RANGE_INVALID": "يجب ان تكون البداية قبل النهاية.",
     "EXAM_LESSONS_NOT_OPENED": "افتح كل دروس الوحدة قبل بدء الامتحان.",
-    "LESSON_ALREADY_OPENED": "تم تسجيل فتح هذا الدرس من قبل."
+    "LESSON_ALREADY_OPENED": "تم تسجيل فتح هذا الدرس من قبل.",
+    "QUIZ_DAILY_LIMIT_REACHED": "وصلت إلى الحد اليومي للباقة المجانية.",
+    "LESSON_LOCKED": "هذا الدرس متاح للمشتركين فقط.",
+    "EXAM_REQUIRES_SUBSCRIPTION": "الامتحانات متاحة في الباقة الأساسية."
   },
   "error": {
     "title": "حدث خطأ"

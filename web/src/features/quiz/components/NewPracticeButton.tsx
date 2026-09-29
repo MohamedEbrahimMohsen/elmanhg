@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { PaywallDialog, paywallReason } from '@/features/subscription';
 import { Button } from '@/shared/ui/button';
 import { nextQuizSize } from '../api/quizSession';
 import { useStartQuiz } from '../hooks/useStartQuiz';
@@ -10,7 +11,7 @@ export interface NewPracticeButtonProps {
 
 export function NewPracticeButton({ lessonId, servedCount }: NewPracticeButtonProps) {
   const { t } = useTranslation('quiz');
-  const { start, isPending, errorCode } = useStartQuiz(lessonId);
+  const { start, isPending, errorCode, reset } = useStartQuiz(lessonId);
 
   return (
     <div className="flex flex-col items-start gap-2">
@@ -22,11 +23,12 @@ export function NewPracticeButton({ lessonId, servedCount }: NewPracticeButtonPr
       >
         {t('result.newPractice')}
       </Button>
-      {errorCode ? (
+      {errorCode && paywallReason(errorCode) === null ? (
         <p role="alert" className="text-caption text-danger">
           {t([`common:errors.${errorCode}`, 'common:errors.UNHANDLED_EXCEPTION'])}
         </p>
       ) : null}
+      <PaywallDialog reason={paywallReason(errorCode)} onClose={reset} />
     </div>
   );
 }

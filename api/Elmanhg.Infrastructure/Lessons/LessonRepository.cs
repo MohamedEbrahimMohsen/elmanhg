@@ -32,4 +32,24 @@ public class LessonRepository(AppDbContext context) : Repository<Lesson>(context
             .ToDictionaryAsync(x => x.Key, x => x.Count, cancellationToken)
             .ConfigureAwait(false);
     }
+
+    public async Task<List<LessonPosition>> GetPublishedPositionsAsync(CancellationToken cancellationToken)
+    {
+        return await _dbSet
+            .Where(x => x.State == LessonState.Published)
+            .Select(x => new LessonPosition(x.Id, x.UnitId, x.Order, x.CreationDate))
+            .AsNoTracking()
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<List<LessonPosition>> GetPublishedSiblingPositionsAsync(Guid lessonId, CancellationToken cancellationToken)
+    {
+        return await _dbSet
+            .Where(x => x.State == LessonState.Published && _dbSet.Any(lesson => lesson.Id == lessonId && lesson.UnitId == x.UnitId))
+            .Select(x => new LessonPosition(x.Id, x.UnitId, x.Order, x.CreationDate))
+            .AsNoTracking()
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
 }

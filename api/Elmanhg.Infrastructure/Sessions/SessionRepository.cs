@@ -33,6 +33,23 @@ public class SessionRepository(AppDbContext context) : Repository<Session>(conte
             .ConfigureAwait(false);
     }
 
+    public async Task<int> CountQuizAttemptsOnDayAsync(Guid studentId, string timeZone, DateOnly day, CancellationToken cancellationToken)
+    {
+        var kind = nameof(SessionKind.Quiz);
+        // Any zone's local midnight is within 14 h of UTC midnight, so the day before is a safe index bound.
+        var lowerBound = new DateTimeOffset(day.AddDays(-1).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
+        return await _context.Database
+            .SqlQuery<int>($"""
+                SELECT COUNT(*)::int AS "Value"
+                FROM "Attempts" AS a
+                INNER JOIN "Sessions" AS s ON s."Id" = a."SessionId"
+                WHERE a."StudentId" = {studentId} AND a."CreatedAt" >= {lowerBound} AND a."IsDeleted" = false AND s."IsDeleted" = false AND s."IsTestMode" = false AND s."Kind" = {kind}
+                AND (a."CreatedAt" AT TIME ZONE {timeZone})::date = {day}
+                """)
+            .SingleAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
     public async Task<List<ExamBestScore>> GetBestExamScoresAsync(Guid studentId, CancellationToken cancellationToken)
     {
         return await _dbSet

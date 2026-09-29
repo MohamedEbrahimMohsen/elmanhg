@@ -4,11 +4,13 @@ using Core.Localization;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Sessions.Shared;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Sessions.Selection;
+using Elmanhg.Domain.Subscriptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -16,7 +18,7 @@ using System.Security.Claims;
 
 namespace Elmanhg.Application.Sessions.StartQuizSession;
 
-public sealed class StartQuizSessionHandler(ISessionRepository sessionRepository, ILessonRepository lessonRepository, IQuestionRepository questionRepository, IOptions<SessionsOptions> sessionsOptions, IOptions<MasteryOptions> masteryOptions, Random random, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<StartQuizSessionCommand, SessionResult>
+public sealed class StartQuizSessionHandler(ISessionRepository sessionRepository, ILessonRepository lessonRepository, IQuestionRepository questionRepository, ISubscriptionRepository subscriptionRepository, IOptions<SessionsOptions> sessionsOptions, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, Random random, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<StartQuizSessionCommand, SessionResult>
 {
     public async Task<SessionResult> Handle(StartQuizSessionCommand request, CancellationToken cancellationToken)
     {
@@ -32,6 +34,14 @@ public sealed class StartQuizSessionHandler(ISessionRepository sessionRepository
             throw new NotFoundCoreException(ErrorCodes.LessonNotFound);
         }
 
+        var now = timeProvider.GetUtcNow();
+        var isTestMode = currentUserService.GetClaim(ClaimTypes.Role) == nameof(UserRole.Admin);
+        var entitlement = isTestMode ? null : await StudentEntitlementLoader.LoadAsync(subscriptionRepository, userId, subscriptionsOptions.Value, now, cancellationToken).ConfigureAwait(false);
+        if (entitlement is not null)
+        {
+            await FreeTierGate.EnsureLessonOpenAsync(entitlement, lesson.Id, lessonRepository, cancellationToken).ConfigureAwait(false);
+        }
+
         var scopeKey = new QuizScope(lesson.Id).ToKey();
         var session = await sessionRepository.FirstOrDefaultAsync(x => x.StudentId == userId && x.Kind == SessionKind.Quiz && x.ScopeKey == scopeKey && x.SubmittedAt == null, cancellationToken, include: query => query.Include(x => x.Items).Include(x => x.Attempts).AsSplitQuery()).ConfigureAwait(false);
         if (session is not null)
@@ -40,8 +50,13 @@ public sealed class StartQuizSessionHandler(ISessionRepository sessionRepository
         }
         else
         {
+            if (entitlement is not null)
+            {
+                await FreeTierGate.EnsureQuizQuestionAvailableAsync(entitlement, userId, sessionRepository, subscriptionsOptions.Value, now, cancellationToken).ConfigureAwait(false);
+            }
+
             var questions = await SelectQuestionsAsync(userId, lesson.Id, request.QuestionCount ?? sessionsOptions.Value.DefaultQuizSize, cancellationToken).ConfigureAwait(false);
-            session = Session.StartQuiz(userId, lesson, questions, currentUserService.GetClaim(ClaimTypes.Role) == nameof(UserRole.Admin));
+            session = Session.StartQuiz(userId, lesson, questions, isTestMode);
             await sessionRepository.AddAsync(session, cancellationToken).ConfigureAwait(false);
         }
 

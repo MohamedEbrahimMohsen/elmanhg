@@ -68,7 +68,7 @@ The pair (`StudentId`, `QuestionId`) is unique (`IX_QuestionMasteries_StudentId_
 
 - Candidates: Published lessons with at least one servable question that are not fully mastered.
 - The lesson with the lowest mastered / servable ratio wins. Ties go to curriculum order: subject order, unit order, lesson order, then lesson id.
-- Null when no lesson qualifies. Free-tier locks are not applied yet (#87).
+- Null when no lesson qualifies. For a Free student, locked lessons are not candidates (`docs/browsing.md` → Free tier).
 
 ## Retirement and unpublishing
 

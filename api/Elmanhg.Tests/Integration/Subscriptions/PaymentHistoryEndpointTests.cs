@@ -40,7 +40,7 @@ public sealed class PaymentHistoryEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Get_StudentWithPayments_ReturnsOwnCompletedPaymentsNewestFirst()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
         var other = await ScopeTestData.SeedStudentAsync(factory, CancellationToken);
         var failed = await SubscriptionTestData.SeedCompletedPaymentAsync(factory, student.Id, succeeded: false, 19900, CancellationToken);
         var succeeded = await SubscriptionTestData.SeedCompletedPaymentAsync(factory, student.Id, succeeded: true, 69900, CancellationToken);
@@ -60,7 +60,7 @@ public sealed class PaymentHistoryEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Get_StudentWithRefundedPayment_ListsRefundedStatus()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
         var payment = await SubscriptionTestData.SeedCompletedPaymentAsync(factory, student.Id, succeeded: true, 19900, CancellationToken);
         using var admin = await PaymentsTestData.AdminClientAsync(factory, CancellationToken);
         using var refund = await admin.SendAsync(PaymentsTestData.RefundRequest(payment.Id, "Duplicate charge", Guid.NewGuid()), CancellationToken);
@@ -75,7 +75,7 @@ public sealed class PaymentHistoryEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Get_PageSizeAboveMax_Returns422WithCode()
     {
-        var (_, client) = await SignedInStudentAsync(factory);
+        var (_, client) = await SignedInFreeStudentAsync(factory);
 
         using var response = await client.GetAsync($"{PaymentsPath}?pageSize=51", CancellationToken);
 

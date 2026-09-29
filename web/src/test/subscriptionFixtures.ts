@@ -6,6 +6,7 @@ import type {
   PlanCatalogueResult,
   SubscriptionResult,
   SubscriptionStatus,
+  UsageResult,
 } from '@/shared/api/generated/model';
 
 export const baseSubscriptionId = 'b1b1b1b1-b1b1-4b1b-8b1b-b1b1b1b1b1b1';
@@ -115,4 +116,27 @@ export function paymentsPage(
 
 export function checkoutResult(redirectUrl = '/student/fake-checkout/' + checkoutPaymentId): CheckoutResult {
   return { paymentId: checkoutPaymentId, redirectUrl, amount: { amountMinor: 19900, currency: 'EGP' } };
+}
+
+export function freeUsage(overrides?: Partial<UsageResult>): UsageResult {
+  return {
+    tier: 'Free',
+    hasAskTeacher: false,
+    dailyQuizQuestionLimit: 10,
+    quizQuestionsUsedToday: 3,
+    quizQuestionsRemainingToday: 7,
+    dailyAvatarMessageLimit: 5,
+    ...overrides,
+  };
+}
+
+export function baseUsage(): UsageResult {
+  return {
+    tier: 'Base',
+    hasAskTeacher: false,
+    dailyQuizQuestionLimit: null,
+    quizQuestionsUsedToday: 0,
+    quizQuestionsRemainingToday: null,
+    dailyAvatarMessageLimit: 50,
+  };
 }

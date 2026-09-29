@@ -4,6 +4,7 @@ using Elmanhg.Application.Subscriptions.CompleteFakePayment;
 using Elmanhg.Application.Subscriptions.GetMyEntitlement;
 using Elmanhg.Application.Subscriptions.GetMyPayment;
 using Elmanhg.Application.Subscriptions.GetMyPayments;
+using Elmanhg.Application.Subscriptions.GetMyUsage;
 using Elmanhg.Application.Subscriptions.StartCheckout;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.SharedKernel;
@@ -24,6 +25,15 @@ public class SubscriptionsController(IMediator mediator) : ControllerBase
     public async Task<ActionResult> GetMyEntitlement(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetMyEntitlementQuery(), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("usage", Name = "GetMyUsage")]
+    [Authorize(Policy = DefaultCodes.SubscriptionManage)]
+    [ProducesResponseType<UsageResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetMyUsage(CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetMyUsageQuery(), cancellationToken);
         return Ok(result);
     }
 

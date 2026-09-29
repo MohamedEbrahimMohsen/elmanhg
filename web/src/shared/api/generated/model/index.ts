@@ -153,6 +153,7 @@ export * from './updateLessonRequest';
 export * from './updateQuestionRequest';
 export * from './uploadLessonImageBody';
 export * from './uploadLessonImageResult';
+export * from './usageResult';
 export * from './validationLessonOption';
 export * from './validationQuestionDetailResult';
 export * from './validationQueueFiltersResult';

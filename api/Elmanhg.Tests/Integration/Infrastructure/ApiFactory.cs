@@ -110,6 +110,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Subscriptions:FreeDailyQuizQuestions"] = "10",
             ["Subscriptions:FreeDailyAvatarMessages"] = "5",
             ["Subscriptions:FreeOpenLessonsPerUnit"] = "1",
+            ["Subscriptions:DailyQuotaTimeZone"] = "Africa/Cairo",
             ["Subscriptions:BaseDailyAvatarMessages"] = "50",
             ["Subscriptions:BasePrices:Monthly:Months"] = "1",
             ["Subscriptions:BasePrices:Monthly:AmountMinor"] = "19900",

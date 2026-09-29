@@ -28,8 +28,8 @@ Errors: 422 `SUBJECT_ID_REQUIRED` / `UNIT_ID_REQUIRED` / `LESSON_ID_REQUIRED` fo
 ## Result shapes
 
 - `StudentSubjectResult { id, name, servableCount, masteredCount, seenCount, masteryPercent, units[] }` with `StudentUnitSummaryResult { id, name, lessonCount, servableCount, masteredCount, seenCount, masteryPercent, bestExamScorePercent? }`.
-- `StudentUnitResult { id, name, subjectId, subjectName, servableCount, masteredCount, seenCount, masteryPercent, bestExamScorePercent?, lessons[] }` with `StudentLessonSummaryResult { id, name, servableCount, masteredCount, seenCount, masteryPercent }`.
-- `StudentLessonResult { id, name, unitId, unitName, subjectId, subjectName, explanation, summary, videoUrl?, objectives[] { id, text, order }, servableCount, masteredCount, seenCount, masteryPercent, previousLesson?, nextLesson? }` with `LessonLinkResult { id, name, unitId, unitName }`.
+- `StudentUnitResult { id, name, subjectId, subjectName, servableCount, masteredCount, seenCount, masteryPercent, bestExamScorePercent?, lessons[] }` with `StudentLessonSummaryResult { id, name, servableCount, masteredCount, seenCount, masteryPercent, isLocked }`.
+- `StudentLessonResult { id, name, unitId, unitName, subjectId, subjectName, explanation, summary, videoUrl?, objectives[] { id, text, order }, servableCount, masteredCount, seenCount, masteryPercent, previousLesson?, nextLesson?, isLocked }` with `LessonLinkResult { id, name, unitId, unitName }`.
 
 ## Lesson openings
 
@@ -58,4 +58,10 @@ Feature `web/src/features/browse/`.
 
 ## Free tier
 
-Free-tier locks arrive with #87. It will add `IsLocked` to `StudentLessonSummaryResult` and `StudentLessonResult`, a lock check to `GetStudentLessonHandler` and to starting a quiz, and a locked variant of the lesson card. Lessons are already returned in curriculum order, which the "first lesson per unit" rule reads.
+A Free student (no entitled Base) browses the whole tree but opens only the first `Subscriptions:FreeOpenLessonsPerUnit` (default 1) **Published** lessons of each unit, ordered by `Order`, then `CreationDate`, then `Id` (`LessonAccess.OpenLessonIds` in Domain; the same order as `LessonSequence`). Base has every lesson open; `0` opens none. Entitlement comes from `StudentEntitlementLoader` (`docs/subscriptions.md` → Free tier gates).
+
+- `GET /api/browse/units/{unitId}` flags each lesson with `isLocked`.
+- `GET /api/browse/lessons/{lessonId}` for a locked lesson returns 200 with `isLocked: true`. Name, breadcrumb ids and names, mastery counts and previous/next links stay; `explanation` and `summary` are `""`, `videoUrl` is `null` and `objectives` is `[]`. The content is the paid asset and never leaves the server for a locked lesson.
+- Starting or resuming a quiz on a locked lesson, or answering a new question in it, returns `403 LESSON_LOCKED` (`docs/sessions.md`).
+- `POST /api/browse/lessons/{lessonId}/openings` is unchanged: an opening grants nothing (exams need Base anyway).
+- Web: a locked lesson card shows the name without a link, the badge «مقفل - للمشتركين» and a «اشترك لفتح الدرس» link to `/student/subscription`. A locked lesson page shows the breadcrumbs, title, mastery line, a subscribers-only notice with «اشترك» and the previous/next links — no tabs and no content. The web posts no opening for a locked lesson.
