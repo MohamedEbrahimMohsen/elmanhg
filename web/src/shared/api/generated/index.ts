@@ -1,6 +1,7 @@
 export * from './analytics/analytics';
 export * from './audit-logs/audit-logs';
 export * from './auth/auth';
+export * from './avatar/avatar';
 export * from './browse/browse';
 export * from './content-retrieval/content-retrieval';
 export * from './exam-blueprints/exam-blueprints';

@@ -196,4 +196,15 @@ describe('LessonPage', () => {
 
     expect((await axe(container)).violations).toEqual([]);
   });
+
+  it('opens the assistant with this lesson as context', async () => {
+    const user = userEvent.setup();
+    openLesson();
+
+    await user.click(await screen.findByRole('button', { name: 'Ask the assistant about this lesson' }));
+
+    const panel = await screen.findByRole('dialog', { name: 'AI assistant' });
+    expect(within(panel).getByText('Context: Energy')).toBeInTheDocument();
+    expect(await within(panel).findByText(/I am your assistant for "Energy"/)).toBeInTheDocument();
+  });
 });

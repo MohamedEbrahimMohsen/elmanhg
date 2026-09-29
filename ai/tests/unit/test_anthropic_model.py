@@ -8,7 +8,7 @@ from pydantic import SecretStr
 
 from elmanhg_ai.clients.anthropic_model import AnthropicModelClient
 from elmanhg_ai.clients.fake_model import FakeModelClient
-from elmanhg_ai.clients.model import ModelMessage, ModelRequest, build_model_client
+from elmanhg_ai.clients.model import ModelMessage, ModelRequest, ModelSource, build_model_client
 from elmanhg_ai.core.errors import ErrorCode, ModelOutputInvalidError, ModelUnavailableError
 from elmanhg_ai.settings import Settings
 
@@ -135,3 +135,50 @@ async def test_build_model_client_anthropic_provider_returns_anthropic_client(
     assert isinstance(anthropic_client, AnthropicModelClient)
     assert isinstance(fake_client, FakeModelClient)
     await anthropic_client.aclose()
+
+
+async def test_anthropic_complete_with_sources_sends_search_result_blocks_before_turn(
+    anthropic_fixture: Callable[[str], str],
+) -> None:
+    captured: list[httpx2.Request] = []
+    model = client_for(respond_with(anthropic_fixture("message_success.json"), captured))
+    request = ModelRequest(
+        system=REQUEST.system,
+        messages=REQUEST.messages,
+        max_tokens=REQUEST.max_tokens,
+        sources=(
+            ModelSource(reference="explanation-1", title="الشرح — قانون أوم", content="V = I R"),
+        ),
+    )
+
+    await model.complete(request)
+
+    body = json.loads(captured[0].content)
+    assert body["messages"][:2] == [
+        {"role": "user", "content": "q1"},
+        {"role": "assistant", "content": "a1"},
+    ]
+    assert body["messages"][2] == {
+        "role": "user",
+        "content": [
+            {
+                "type": "search_result",
+                "source": "explanation-1",
+                "title": "الشرح — قانون أوم",
+                "content": [{"type": "text", "text": "V = I R"}],
+                "citations": {"enabled": True},
+            },
+            {"type": "text", "text": "q2"},
+        ],
+    }
+
+
+async def test_anthropic_complete_with_citations_maps_sources_in_order_distinct(
+    anthropic_fixture: Callable[[str], str],
+) -> None:
+    model = client_for(respond_with(anthropic_fixture("message_with_citations.json")))
+
+    reply = await model.complete(REQUEST)
+
+    assert reply.citations == ("explanation-2", "explanation-1")
+    assert reply.text == "1. المقاومة = فرق الجهد ÷ شدة التيار. 2. إذن R = 4 أوم."

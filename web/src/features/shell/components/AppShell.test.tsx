@@ -125,4 +125,17 @@ describe('AppShell', () => {
 
     expect((await axe(container)).violations).toEqual([]);
   });
+
+  it('shows the assistant button to students', async () => {
+    renderApp('/student', { session: testSessions.student });
+
+    expect(await screen.findByRole('button', { name: 'Assistant' })).toBeInTheDocument();
+  });
+
+  it('does not show the assistant button to teachers', async () => {
+    renderApp('/teacher', { session: testSessions.teacher });
+
+    await screen.findByRole('navigation', { name: 'Main navigation' });
+    expect(screen.queryByRole('button', { name: 'Assistant' })).not.toBeInTheDocument();
+  });
 });

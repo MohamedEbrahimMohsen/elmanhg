@@ -42,7 +42,19 @@ export function QuizResultPage({ sessionId }: QuizResultPageProps) {
       <QuizResultSummary session={data} />
       <h2 className="font-display text-h2 font-bold lg:text-h2-desktop">{t('result.review')}</h2>
       {reviewed.length > 0 ? (
-        reviewed.map(({ item, attempt }) => <QuizReviewItem key={item.questionId} item={item} attempt={attempt} />)
+        reviewed.map(({ item, attempt }) => (
+          <QuizReviewItem
+            key={item.questionId}
+            item={item}
+            attempt={attempt}
+            ask={{
+              entryPoint: 'QuizQuestion',
+              sessionId,
+              questionId: item.questionId,
+              title: t('avatar.questionTitle', { position: Number(item.position) }),
+            }}
+          />
+        ))
       ) : (
         <p className="text-ui text-text-muted">{t('result.none')}</p>
       )}

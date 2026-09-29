@@ -2,6 +2,7 @@ using Elmanhg.Application.Shared.RichText;
 using Elmanhg.Application.Shared.Spreadsheets;
 using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.Analytics;
+using Elmanhg.Domain.Avatar;
 using Elmanhg.Domain.ContentRetrieval;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Identity;
@@ -16,6 +17,7 @@ using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.Units;
 using Elmanhg.Infrastructure.AiService;
 using Elmanhg.Infrastructure.Analytics;
+using Elmanhg.Infrastructure.Avatar;
 using Elmanhg.Infrastructure.ContentRetrieval;
 using Elmanhg.Infrastructure.ExamBlueprints;
 using Elmanhg.Infrastructure.Hosting;
@@ -76,6 +78,7 @@ public static class DependencyInjection
         services.AddScoped<IFunnelEventRepository, FunnelEventRepository>();
         services.AddScoped<ILessonContentChunkRepository, LessonContentChunkRepository>();
         services.AddScoped<ILessonContentIndexRepository, LessonContentIndexRepository>();
+        services.AddScoped<IAvatarMessageUsageRepository, AvatarMessageUsageRepository>();
         return services;
     }
 }

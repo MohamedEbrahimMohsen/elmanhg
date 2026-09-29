@@ -40,7 +40,8 @@
     "confirmTitle": "تسليم الامتحان؟",
     "confirmUnanswered": "{count, plural, one {سؤال واحد بدون إجابة.} two {سؤالان بدون إجابة.} few {# أسئلة بدون إجابة.} other {# سؤال بدون إجابة.}}",
     "confirmSubmit": "تسليم",
-    "cancel": "إلغاء"
+    "cancel": "إلغاء",
+    "avatarContext": "امتحان جارٍ"
   },
   "result": {
     "title": "نتيجة: {unit}",
@@ -70,7 +71,8 @@
     "unit": "الوحدة",
     "unitCorrectHeader": "الإجابات الصحيحة",
     "unitCorrect": "{correct, number} من {total, number}",
-    "unknownUnit": "غير متاح"
+    "unknownUnit": "غير متاح",
+    "avatarTitle": "سؤال {position} — مراجعة الامتحان"
   },
   "multi": {
     "title": "امتحان متعدد الوحدات",

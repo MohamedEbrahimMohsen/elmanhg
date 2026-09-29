@@ -74,3 +74,37 @@ def test_context_bundle_global_without_lesson_accepted() -> None:
     bundle = ContextBundleIn.model_validate({"entryPoint": "global", "subjects": ["الفيزياء"]})
 
     assert bundle.lesson is None
+
+
+def _sources(*references: str) -> list[dict[str, str]]:
+    return [{"reference": r, "title": "الشرح", "content": f"نص {r}"} for r in references]
+
+
+def test_chat_in_sources_valid_payload_parses(chat_payload: PayloadBuilder) -> None:
+    chat = ChatIn.model_validate(chat_payload(sources=_sources("explanation-1", "summary-1")))
+
+    assert chat.sources[0].reference == "explanation-1"
+    assert [s.title for s in chat.sources] == ["الشرح", "الشرح"]
+
+
+def test_chat_in_duplicate_source_references_rejected(chat_payload: PayloadBuilder) -> None:
+    with pytest.raises(ValidationError) as error:
+        ChatIn.model_validate(chat_payload(sources=_sources("summary-1", "summary-1")))
+
+    assert "source references must be unique" in error.value.errors()[0]["msg"]
+
+
+def test_chat_in_source_reference_with_space_rejected(chat_payload: PayloadBuilder) -> None:
+    with pytest.raises(ValidationError) as error:
+        ChatIn.model_validate(chat_payload(sources=_sources("explanation 1")))
+
+    assert error.value.errors()[0]["loc"] == ("sources", 0, "reference")
+
+
+def test_chat_in_source_empty_content_rejected(chat_payload: PayloadBuilder) -> None:
+    sources = [{"reference": "summary-1", "title": "الملخص", "content": ""}]
+
+    with pytest.raises(ValidationError) as error:
+        ChatIn.model_validate(chat_payload(sources=sources))
+
+    assert error.value.errors()[0]["loc"] == ("sources", 0, "content")

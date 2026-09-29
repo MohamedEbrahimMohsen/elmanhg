@@ -2,6 +2,7 @@ import i18next from 'i18next';
 import ICU from 'i18next-icu';
 import { initReactI18next } from 'react-i18next';
 import { auditLocales } from '@/features/audit';
+import { avatarLocales } from '@/features/avatar/locales';
 import { blueprintsLocales } from '@/features/blueprints/locales';
 import { browseLocales } from '@/features/browse/locales';
 import { contentLocales } from '@/features/content/locales';
@@ -46,6 +47,7 @@ const resources = {
     browse: browseLocales.ar,
     landing: landingLocales.ar,
     onboarding: onboardingLocales.ar,
+    avatar: avatarLocales.ar,
   },
   en: {
     common: commonEn,
@@ -64,6 +66,7 @@ const resources = {
     browse: browseLocales.en,
     landing: landingLocales.en,
     onboarding: onboardingLocales.en,
+    avatar: avatarLocales.en,
   },
 };
 
@@ -103,6 +106,7 @@ export function initI18n(lng: Language = defaultLanguage): void {
         'browse',
         'landing',
         'onboarding',
+        'avatar',
       ],
       defaultNS: 'common',
       resources,

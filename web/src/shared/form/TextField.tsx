@@ -11,6 +11,7 @@ export interface TextFieldProps<TValues extends FieldValues> {
   autoComplete?: string;
   description?: string;
   dir?: 'ltr';
+  placeholder?: string;
 }
 
 export function TextField<TValues extends FieldValues>({
@@ -20,6 +21,7 @@ export function TextField<TValues extends FieldValues>({
   autoComplete,
   description,
   dir,
+  placeholder,
 }: TextFieldProps<TValues>) {
   const { t } = useTranslation();
   const {
@@ -43,6 +45,7 @@ export function TextField<TValues extends FieldValues>({
         type={type}
         dir={dir}
         autoComplete={autoComplete}
+        placeholder={placeholder}
         name={fieldName}
         value={typeof value === 'string' ? value : ''}
         onChange={onChange}

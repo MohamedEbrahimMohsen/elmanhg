@@ -71,7 +71,19 @@ export function QuizQuestionCard({
           {t('session.answerRequired')}
         </p>
       ) : null}
-      {attempt ? <FeedbackPanel item={item} attempt={attempt} question={question} /> : null}
+      {attempt ? (
+        <FeedbackPanel
+          item={item}
+          attempt={attempt}
+          question={question}
+          ask={{
+            entryPoint: 'QuizQuestion',
+            sessionId,
+            questionId: item.questionId,
+            title: t('avatar.questionTitle', { position }),
+          }}
+        />
+      ) : null}
       <QuizQuestionActions
         sessionId={sessionId}
         answered={attempt !== null}

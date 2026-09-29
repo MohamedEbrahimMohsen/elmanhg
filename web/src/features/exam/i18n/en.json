@@ -40,7 +40,8 @@
     "confirmTitle": "Submit the exam?",
     "confirmUnanswered": "{count, plural, one {# question has no answer.} other {# questions have no answer.}}",
     "confirmSubmit": "Submit",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "avatarContext": "Exam in progress"
   },
   "result": {
     "title": "Result: {unit}",
@@ -70,7 +71,8 @@
     "unit": "Unit",
     "unitCorrectHeader": "Correct",
     "unitCorrect": "{correct, number} of {total, number}",
-    "unknownUnit": "Not available"
+    "unknownUnit": "Not available",
+    "avatarTitle": "Question {position} — exam review"
   },
   "multi": {
     "title": "Multi-unit exam",

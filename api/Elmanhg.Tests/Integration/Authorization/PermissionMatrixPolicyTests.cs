@@ -23,6 +23,7 @@ public sealed class PermissionMatrixPolicyTests(ApiFactory factory)
         { "Progress.ViewOwn", "Student", true }, { "Progress.ViewOwn", "Teacher", false }, { "Progress.ViewOwn", "Admin", false },
         { "Progress.ViewAny", "Student", false }, { "Progress.ViewAny", "Teacher", false }, { "Progress.ViewAny", "Admin", true },
         { "Subscription.Manage", "Student", true }, { "Subscription.Manage", "Teacher", false }, { "Subscription.Manage", "Admin", false },
+        { "Avatar.Chat", "Student", true }, { "Avatar.Chat", "Teacher", false }, { "Avatar.Chat", "Admin", false },
         { "Payments.Manage", "Student", false }, { "Payments.Manage", "Teacher", false }, { "Payments.Manage", "Admin", true },
         { "Dashboards.View", "Student", false }, { "Dashboards.View", "Teacher", false }, { "Dashboards.View", "Admin", true },
         { "TeacherStats.ViewOwn", "Student", false }, { "TeacherStats.ViewOwn", "Teacher", true }, { "TeacherStats.ViewOwn", "Admin", false },

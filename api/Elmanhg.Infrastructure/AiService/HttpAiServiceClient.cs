@@ -33,7 +33,7 @@ public sealed class HttpAiServiceClient(HttpClient httpClient, IOptions<AiServic
             throw new ServiceUnavailableCoreException(ErrorCodes.AiServiceUnavailable);
         }
 
-        return reply;
+        return reply.Citations is null ? reply with { Citations = [] } : reply;
     }
 
     public async Task<AiEmbeddingResult> EmbedAsync(AiEmbeddingRequest request, CancellationToken cancellationToken)

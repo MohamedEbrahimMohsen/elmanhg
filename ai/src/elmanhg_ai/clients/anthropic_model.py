@@ -2,9 +2,14 @@ from typing import Final, Self
 
 import anthropic
 import structlog
-from anthropic.types import MessageParam, TextBlock
+from anthropic.types import (
+    CitationsSearchResultLocation,
+    MessageParam,
+    SearchResultBlockParam,
+    TextBlock,
+)
 
-from elmanhg_ai.clients.model import ModelReply, ModelRequest
+from elmanhg_ai.clients.model import ModelReply, ModelRequest, ModelSource
 from elmanhg_ai.core.errors import ModelOutputInvalidError, ModelUnavailableError
 from elmanhg_ai.settings import Settings
 
@@ -36,6 +41,15 @@ class AnthropicModelClient:
         messages: list[MessageParam] = [
             {"role": message.role, "content": message.content} for message in request.messages
         ]
+        if request.sources:
+            last = request.messages[-1]
+            messages[-1] = {
+                "role": last.role,
+                "content": [
+                    *(_search_result(source) for source in request.sources),
+                    {"type": "text", "text": last.content},
+                ],
+            }
         try:
             message = await self._client.messages.create(
                 model=self._model,
@@ -60,13 +74,33 @@ class AnthropicModelClient:
                 "model.output_invalid", model=message.model, stop_reason=message.stop_reason
             )
             raise ModelOutputInvalidError()
+        citations = tuple(
+            dict.fromkeys(
+                citation.source
+                for block in message.content
+                if isinstance(block, TextBlock)
+                for citation in block.citations or ()
+                if isinstance(citation, CitationsSearchResultLocation)
+            )
+        )
         return ModelReply(
             text=text,
             model=message.model,
             input_tokens=message.usage.input_tokens,
             output_tokens=message.usage.output_tokens,
             stop_reason=message.stop_reason,
+            citations=citations,
         )
 
     async def aclose(self) -> None:
         await self._client.close()
+
+
+def _search_result(source: ModelSource) -> SearchResultBlockParam:
+    return {
+        "type": "search_result",
+        "source": source.reference,
+        "title": source.title,
+        "content": [{"type": "text", "text": source.content}],
+        "citations": {"enabled": True},
+    }

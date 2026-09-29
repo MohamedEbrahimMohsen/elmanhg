@@ -15,10 +15,18 @@ class ModelMessage:
 
 
 @dataclass(frozen=True, slots=True)
+class ModelSource:
+    reference: str
+    title: str
+    content: str
+
+
+@dataclass(frozen=True, slots=True)
 class ModelRequest:
     system: str
     messages: tuple[ModelMessage, ...]
     max_tokens: int
+    sources: tuple[ModelSource, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -28,6 +36,7 @@ class ModelReply:
     input_tokens: int
     output_tokens: int
     stop_reason: str | None
+    citations: tuple[str, ...] = ()
 
 
 class ModelClient(Protocol):

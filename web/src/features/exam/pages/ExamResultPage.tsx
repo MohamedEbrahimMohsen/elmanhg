@@ -52,7 +52,7 @@ export function ExamResultPage({ sessionId }: ExamResultPageProps) {
       <ExamAttemptsSection query={attempts} currentSessionId={sessionId} />
       <h2 className="font-display text-h2 font-bold lg:text-h2-desktop">{t('result.review')}</h2>
       {sortedExamItems(data).map((item) => (
-        <ExamReviewItem key={item.questionId} item={item} />
+        <ExamReviewItem key={item.questionId} item={item} sessionId={sessionId} />
       ))}
       <div className="flex flex-wrap gap-3">
         {isMulti && data.subjectId !== null ? (

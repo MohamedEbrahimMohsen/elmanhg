@@ -67,10 +67,17 @@ class ChatMessageIn(ApiInModel):
     content: str = Field(min_length=1)
 
 
+class ChatSourceIn(ApiInModel):
+    reference: str = Field(min_length=1, max_length=200, pattern=r"^[a-z0-9-]+$")
+    title: str = Field(min_length=1, max_length=300)
+    content: str = Field(min_length=1)
+
+
 class ChatIn(ApiInModel):
     context: ContextBundleIn
     history: list[ChatMessageIn] = Field(default_factory=list)
     message: str = Field(min_length=1)
+    sources: list[ChatSourceIn] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _history_alternates(self) -> Self:
@@ -84,6 +91,13 @@ class ChatIn(ApiInModel):
             )
         return self
 
+    @model_validator(mode="after")
+    def _source_references_unique(self) -> Self:
+        references = [source.reference for source in self.sources]
+        if len(set(references)) != len(references):
+            raise ValueError("source references must be unique")
+        return self
+
 
 class ChatOut(ApiOutModel):
     reply: str
@@ -92,3 +106,4 @@ class ChatOut(ApiOutModel):
     input_tokens: int
     output_tokens: int
     stop_reason: str | None
+    citations: list[str]

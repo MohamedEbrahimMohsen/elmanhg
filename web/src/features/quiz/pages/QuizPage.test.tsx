@@ -2,12 +2,14 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { getSendAvatarMessageMockHandler } from '@/shared/api/generated/avatar/avatar.msw';
 import type { RecordFunnelEventRequest, SessionItemResult, SessionResult } from '@/shared/api/generated/model';
 import {
   getFinishSessionMockHandler,
   getGetSessionMockHandler,
   getSubmitSessionAnswerMockHandler,
 } from '@/shared/api/generated/sessions/sessions.msw';
+import { avatarReply } from '@/test/avatarFixtures';
 import { axe } from '@/test/axe';
 import { server } from '@/test/msw/server';
 import { answered, quizItem, quizSession, quizSessionId } from '@/test/quizFixtures';
@@ -116,7 +118,7 @@ describe('QuizPage', () => {
     expect(screen.getByRole('radio', { name: /4.*Correct answer/ })).toBeDisabled();
     expect(screen.getByRole('radio', { name: /3.*Your answer, wrong/ })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Next' })).toBeEnabled();
-    expect(screen.getByRole('button', { name: 'Ask the assistant' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Ask the assistant' })).toBeEnabled();
     expect(body).toMatchObject({ questionId: quizItem(1).questionId, answer: { optionId: 'a' } });
   });
 
@@ -296,5 +298,33 @@ describe('QuizPage', () => {
     await screen.findByRole('group', { name: 'Answer feedback' });
 
     expect((await axe(container)).violations).toEqual([]);
+  });
+
+  it('opens the assistant with the answered question as context', async () => {
+    useSubmit(item1Wrong());
+    let body: unknown;
+    server.use(
+      getSendAvatarMessageMockHandler(async ({ request }) => {
+        body = await request.json();
+        return avatarReply();
+      }),
+    );
+    const user = userEvent.setup();
+    openQuiz();
+
+    await user.click(await screen.findByRole('radio', { name: '3' }));
+    await user.click(screen.getByRole('button', { name: 'Check' }));
+    await user.click(await screen.findByRole('button', { name: 'Ask the assistant' }));
+    const panel = await screen.findByRole('dialog', { name: 'AI assistant' });
+    expect(within(panel).getByText('Context: Question 1')).toBeInTheDocument();
+    await user.type(await within(panel).findByRole('textbox', { name: 'Your question' }), 'Why is my answer wrong?');
+    await user.click(within(panel).getByRole('button', { name: 'Send' }));
+
+    expect(await within(panel).findByText(avatarReply().reply)).toBeInTheDocument();
+    expect(body).toMatchObject({
+      entryPoint: 'QuizQuestion',
+      sessionId: quizSessionId,
+      questionId: quizItem(1).questionId,
+    });
   });
 });

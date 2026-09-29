@@ -159,6 +159,7 @@ Every gate loads entitlement through `StudentEntitlementLoader.LoadAsync` before
 - **Quiz start** (`POST /api/sessions/quiz`): a locked lesson returns `403 LESSON_LOCKED` (start and resume). A **new** session when used ≥ limit returns `403 QUIZ_DAILY_LIMIT_REACHED` (context `limit`). Resuming an open session is allowed; its answers are still gated. The size of a new session is not capped to the remaining quota.
 - **Answer submit** (`POST /api/sessions/{id}/answers`): only a new attempt is gated — the lesson lock (`LESSON_LOCKED`, which covers a quiz started while subscribed and continued after a lapse) and then the quota (`QUIZ_DAILY_LIMIT_REACHED`). A replay and any test-mode session are not gated.
 - **Lesson lock:** a Free student opens the first `FreeOpenLessonsPerUnit` Published lessons of each unit, ordered by `Order`, then `CreationDate`, then `Id` (`LessonAccess` in Domain). See `docs/browsing.md` → Free tier.
+- **Avatar** (`POST /api/avatar/messages`): before the model is called, a student at the daily limit (Free 5, Base 50, counted on the `DailyQuotaTimeZone` day) gets `403 AVATAR_DAILY_LIMIT_REACHED` with context `limit`. A message counts only once the assistant has replied. See [avatar.md](avatar.md).
 - **Exams:** a new unit exam or multi-unit exam needs Base (`403 EXAM_REQUIRES_SUBSCRIPTION`), checked before the lesson-opened gate. Resume, save and submit are not gated. See `docs/exams.md`.
 - **Exempt:** Admins (role claim `Admin`, the same test that sets `IsTestMode`) on quiz start and exam start; any test-mode session on answer submit. Teachers cannot reach these endpoints (`Assessments.Take`). An unknown or missing role is gated.
 - **Known limit:** the quota is a soft limit. Two answers sent in parallel at 9/10 can both pass; there is no lock.
@@ -185,7 +186,7 @@ Enum values travel as PascalCase strings. The web page `/student/subscription` s
 
 ## For later stories
 
-- **Gates** call `StudentEntitlementLoader.LoadAsync(subscriptionRepository, studentId, options, now, cancellationToken)`. It is the one definition of entitlement and limits. **#87** (done): the Free tier gates above. **#91** (Avatar) and **#94** (Ask a Teacher) add their counters to `UsageResult` and enforce their quotas through the same loader; `UsageResult.dailyAvatarMessageLimit` already exposes the Avatar limit.
+- **Gates** call `StudentEntitlementLoader.LoadAsync(subscriptionRepository, studentId, options, now, cancellationToken)`. It is the one definition of entitlement and limits. **#87** (done): the Free tier gates above. **#91** (done) enforces the Avatar quota through the same loader, and its counters are served by `GET /api/avatar/status` ([avatar.md](avatar.md)); `UsageResult.dailyAvatarMessageLimit` still exposes the limit. **#94** (Ask a Teacher) adds its counters to `UsageResult` and enforces its quota through the same loader.
 - **#100** (done): checkout, the Pending payment, the fake gateway and the result page (see Checkout).
 - **#101** (done): the webhook, renewal, the lapse sweep and the student cancel (see above).
 - **#102** (done): `PaymentStatus.Refunded`, admin refunds, signed refund and void callbacks, and the admin payment log with its review queue (see Refunds and Admin payment log). Automatic detection of overlapping subscriptions (the known limit under Webhook) is a follow-up issue.

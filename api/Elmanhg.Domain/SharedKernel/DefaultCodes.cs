@@ -25,4 +25,5 @@ public static class DefaultCodes
     public const string UsersManage = "Users.Manage";
     public const string AuditLogView = "AuditLog.View";
     public const string TrainingDataExport = "TrainingData.Export";
+    public const string AvatarChat = "Avatar.Chat";
 }

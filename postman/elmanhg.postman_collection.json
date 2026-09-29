@@ -2648,6 +2648,94 @@
       ]
     },
     {
+      "name": "Avatar",
+      "description": "Student-only (Avatar.Chat). Status returns examInProgress, today's message counter (Free 5, Base 50) and the input limits. A message is refused with 403 AVATAR_EXAM_IN_PROGRESS while the student has an exam in progress, and 403 AVATAR_DAILY_LIMIT_REACHED at the daily limit. The lesson request needs a Published lesson in {{lessonId}} that is open for the student; Global needs no ids. See docs/avatar.md.",
+      "item": [
+        {
+          "name": "Get avatar status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/avatar/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "avatar", "status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send avatar message (lesson)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/avatar/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "avatar", "messages"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entryPoint\": \"Lesson\",\n  \"lessonId\": \"{{lessonId}}\",\n  \"history\": [],\n  \"message\": \"ما هو قانون أوم؟\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send avatar message (global)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/avatar/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "avatar", "messages"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entryPoint\": \"Global\",\n  \"history\": [],\n  \"message\": \"كيف أذاكر الفيزياء؟\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "PaymobWebhook",
       "description": "Server-to-server Paymob transaction callback (docs/paymob.md section 8). Anonymous: the HMAC query parameter is the authentication. An unsigned or wrongly signed callback is refused with 401 PAYMOB_WEBHOOK_SIGNATURE_INVALID and changes nothing.",
       "item": [

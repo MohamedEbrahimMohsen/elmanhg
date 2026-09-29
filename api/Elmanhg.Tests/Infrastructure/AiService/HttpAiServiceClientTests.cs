@@ -13,7 +13,7 @@ namespace Elmanhg.Tests.Infrastructure.AiService;
 
 public sealed class HttpAiServiceClientTests
 {
-    private const string ReplyBody = "{\"reply\":\"r\",\"model\":\"claude-sonnet-5\",\"promptVersion\":\"v1\",\"inputTokens\":10,\"outputTokens\":5,\"stopReason\":\"end_turn\"}";
+    private const string ReplyBody = "{\"reply\":\"r\",\"model\":\"claude-sonnet-5\",\"promptVersion\":\"v1\",\"inputTokens\":10,\"outputTokens\":5,\"stopReason\":\"end_turn\",\"citations\":[\"explanation-1\"]}";
 
     private const string EmbeddingsBody = "{\"model\":\"text-embedding-3-small\",\"dimensions\":2,\"embeddings\":[[0.6,0.8],[1.0,0.0]],\"inputTokens\":4}";
 
@@ -51,7 +51,35 @@ public sealed class HttpAiServiceClientTests
     {
         var reply = await ChatAsync();
 
-        reply.Should().Be(new AiChatReply("r", "claude-sonnet-5", "v1", 10, 5, "end_turn"));
+        reply.Reply.Should().Be("r");
+        reply.Model.Should().Be("claude-sonnet-5");
+        reply.PromptVersion.Should().Be("v1");
+        reply.InputTokens.Should().Be(10);
+        reply.OutputTokens.Should().Be(5);
+        reply.StopReason.Should().Be("end_turn");
+        reply.Citations.Should().Equal("explanation-1");
+    }
+
+    [Fact]
+    public async Task ChatAsync_WithSources_SendsSourcesArray()
+    {
+        await ChatAsync();
+
+        using var body = JsonDocument.Parse(_handler.LastBody!);
+        var source = body.RootElement.GetProperty("sources")[0];
+        source.GetProperty("reference").GetString().Should().Be("explanation-1");
+        source.GetProperty("title").GetString().Should().Be("الشرح — قانون أوم");
+        source.GetProperty("content").GetString().Should().Be("V = IR");
+    }
+
+    [Fact]
+    public async Task ChatAsync_ReplyWithoutCitations_ReturnsEmptyCitations()
+    {
+        _handler.ResponseBody = ReplyBody.Replace(",\"citations\":[\"explanation-1\"]", string.Empty, StringComparison.Ordinal);
+
+        var reply = await ChatAsync();
+
+        reply.Citations.Should().NotBeNull().And.BeEmpty();
     }
 
     [Fact]

@@ -37,6 +37,6 @@ public static class AiServiceTestSettings
             new AiLessonContext(Guid.Parse("2b3c4d5e-6f7a-4b2c-8d3e-4f5a6b7c8d9e"), "Ohm's law", "V = IR", ["Apply Ohm's law"], "R = V / I"),
             new AiQuestionContext(Guid.Parse("3c4d5e6f-7a8b-4c3d-9e4f-5a6b7c8d9e0f"), "Find R for 8 V and 2 A.", "2", "4", Explanation: null),
             []);
-        return new AiChatRequest(context, [new AiChatMessage(AiChatRole.User, "q1"), new AiChatMessage(AiChatRole.Assistant, "a1")], "why?");
+        return new AiChatRequest(context, [new AiChatMessage(AiChatRole.User, "q1"), new AiChatMessage(AiChatRole.Assistant, "a1")], "why?", Sources: [new AiChatSource("explanation-1", "الشرح — قانون أوم", "V = IR")]);
     }
 }
