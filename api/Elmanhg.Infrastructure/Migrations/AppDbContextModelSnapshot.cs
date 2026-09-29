@@ -355,6 +355,35 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.ToTable("FunnelEvents");
                 });
 
+            modelBuilder.Entity("Elmanhg.Domain.Avatar.AvatarMessageUsage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EntryPoint")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId", "CreatedAt");
+
+                    b.ToTable("AvatarMessageUsages");
+                });
+
             modelBuilder.Entity("Elmanhg.Domain.ContentRetrieval.LessonContentChunk", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1992,6 +2021,15 @@ namespace Elmanhg.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Elmanhg.Domain.Avatar.AvatarMessageUsage", b =>
+                {
+                    b.HasOne("Elmanhg.Domain.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Elmanhg.Domain.ContentRetrieval.LessonContentChunk", b =>

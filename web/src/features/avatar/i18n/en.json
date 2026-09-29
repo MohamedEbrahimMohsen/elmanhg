@@ -1,0 +1,52 @@
+{
+  "dock": {
+    "open": "Assistant"
+  },
+  "ask": {
+    "default": "Ask the assistant",
+    "lesson": "Ask the assistant about this lesson"
+  },
+  "panel": {
+    "title": "AI assistant",
+    "close": "Close",
+    "context": "Context: {title}",
+    "contextGlobal": "General",
+    "quota": "Today's messages: {used} / {limit}",
+    "loading": "Loading the assistant…",
+    "statusError": "The assistant could not load.",
+    "retry": "Retry",
+    "typing": "The assistant is typing…",
+    "messages": "Conversation"
+  },
+  "greeting": {
+    "lesson": "Hi! I am your assistant for \"{title}\". Ask me about any part of the explanation or the objectives.",
+    "question": "Ask me about this question, for example: why is my answer wrong?",
+    "global": "Hi! Open the lesson you need and press \"Ask the assistant about this lesson\", or ask me how to study your subjects."
+  },
+  "notice": {
+    "examInProgress": "I cannot help while an exam is in progress. Finish and submit your exam, then I will explain every question in detail.",
+    "dailyLimit": "You have used today's {limit} messages. Come back tomorrow.",
+    "dailyLimitFree": "You have reached the free plan's daily limit ({limit} messages). Subscribe to the Base plan for a higher limit.",
+    "subscribe": "Subscribe",
+    "unavailable": "The assistant is not available right now. Try again in a moment.",
+    "generic": "Your message could not be sent. Try again."
+  },
+  "composer": {
+    "label": "Your question",
+    "placeholder": "Type your question…",
+    "send": "Send",
+    "required": "Type a question first.",
+    "tooLong": "Your question is too long."
+  },
+  "citations": {
+    "label": "Sources",
+    "section": {
+      "Explanation": "Explanation",
+      "Objectives": "Objectives",
+      "Summary": "Summary",
+      "QuestionExplanation": "Question explanation"
+    }
+  },
+  "you": "You",
+  "assistant": "Assistant"
+}

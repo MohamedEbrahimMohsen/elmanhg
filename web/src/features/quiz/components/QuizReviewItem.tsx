@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { AvatarContextInput } from '@/features/avatar';
 import { QuestionView } from '@/features/questions';
 import type { AttemptResult, SessionItemResult } from '@/shared/api/generated/model';
 import { choiceReview } from '../api/correctAnswer';
@@ -9,9 +10,10 @@ import { FeedbackPanel } from './FeedbackPanel';
 export interface QuizReviewItemProps {
   item: SessionItemResult;
   attempt: AttemptResult;
+  ask: AvatarContextInput;
 }
 
-export function QuizReviewItem({ item, attempt }: QuizReviewItemProps) {
+export function QuizReviewItem({ item, attempt, ask }: QuizReviewItemProps) {
   const { t } = useTranslation('quiz');
   const headingId = useId();
   const question = toQuizQuestion(item);
@@ -36,7 +38,7 @@ export function QuizReviewItem({ item, attempt }: QuizReviewItemProps) {
         disabled
         review={choiceReview(question, item.correctAnswer)}
       />
-      <FeedbackPanel item={item} attempt={attempt} question={question} />
+      <FeedbackPanel item={item} attempt={attempt} question={question} ask={ask} />
     </article>
   );
 }

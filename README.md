@@ -16,6 +16,7 @@ Arabic-first exam-prep platform for Egyptian Thanaweya Amma students. Students d
 | [docs/paymob.md](docs/paymob.md) | Paymob checkout: configuration, the fake gateway and go-live steps |
 | [docs/ai-service.md](docs/ai-service.md) | AI service: contract, service auth, config, fakes, running it |
 | [docs/content-retrieval.md](docs/content-retrieval.md) | Lesson content retrieval: chunking, re-indexing, search, rebuild |
+| [docs/avatar.md](docs/avatar.md) | AI Avatar: entry points, context bundles, exam refusal, quota, citations, eval |
 | [docs/deployment.md](docs/deployment.md) | Hosting, environments, config and secrets, deploys, migrations, backups |
 
 ## Folders

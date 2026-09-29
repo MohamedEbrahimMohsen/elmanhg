@@ -238,6 +238,16 @@ public static class ErrorCodes
     public const string FunnelAnonymousIdRequired = "FUNNEL_ANONYMOUS_ID_REQUIRED";
     public const string FunnelEventTypeInvalid = "FUNNEL_EVENT_TYPE_INVALID";
 
+    // AVATAR
+    public const string AvatarExamInProgress = "AVATAR_EXAM_IN_PROGRESS";
+    public const string AvatarDailyLimitReached = "AVATAR_DAILY_LIMIT_REACHED";
+    public const string AvatarQuestionNotAnswered = "AVATAR_QUESTION_NOT_ANSWERED";
+    public const string AvatarEntryPointInvalid = "AVATAR_ENTRY_POINT_INVALID";
+    public const string AvatarMessageRequired = "AVATAR_MESSAGE_REQUIRED";
+    public const string AvatarMessageTooLong = "AVATAR_MESSAGE_TOO_LONG";
+    public const string AvatarHistoryTooLong = "AVATAR_HISTORY_TOO_LONG";
+    public const string AvatarHistoryInvalid = "AVATAR_HISTORY_INVALID";
+
     // AI SERVICE
     public const string AiServiceUnavailable = "AI_SERVICE_UNAVAILABLE";
 

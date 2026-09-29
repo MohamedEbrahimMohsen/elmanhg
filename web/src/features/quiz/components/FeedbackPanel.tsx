@@ -1,19 +1,20 @@
 import type { ReactNode } from 'react';
 import { CircleAlert, CircleCheck, CircleX } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { AskAvatarButton, type AvatarContextInput } from '@/features/avatar';
 import { RichTextViewer } from '@/features/content';
 import type { StudentQuestion } from '@/features/questions';
 import type { AttemptResult, SessionItemResult } from '@/shared/api/generated/model';
 import { formatNumber } from '@/shared/lib/format';
 import { cn } from '@/shared/lib/utils';
 import { describeCorrectAnswer } from '../api/correctAnswer';
-import { AskAvatarButton } from './AskAvatarButton';
 import { CorrectAnswer } from './CorrectAnswer';
 
 export interface FeedbackPanelProps {
   item: SessionItemResult;
   attempt: AttemptResult;
   question: StudentQuestion;
+  ask: AvatarContextInput;
   children?: ReactNode;
 }
 
@@ -37,7 +38,7 @@ function toVerdict(outcome: string): keyof typeof verdicts {
   return outcome === 'Correct' || outcome === 'Partial' ? outcome : 'Incorrect';
 }
 
-export function FeedbackPanel({ item, attempt, question, children }: FeedbackPanelProps) {
+export function FeedbackPanel({ item, attempt, question, ask, children }: FeedbackPanelProps) {
   const { t, i18n } = useTranslation('quiz');
   const lng = i18n.resolvedLanguage ?? i18n.language;
   const verdict = verdicts[toVerdict(attempt.outcome)];
@@ -81,7 +82,7 @@ export function FeedbackPanel({ item, attempt, question, children }: FeedbackPan
         </div>
       ) : null}
       <div className="flex flex-wrap items-start gap-2">
-        <AskAvatarButton />
+        <AskAvatarButton context={ask} />
         {children}
       </div>
     </div>

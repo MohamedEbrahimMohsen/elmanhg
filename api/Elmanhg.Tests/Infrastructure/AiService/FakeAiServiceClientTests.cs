@@ -28,6 +28,26 @@ public sealed class FakeAiServiceClientTests
     }
 
     [Fact]
+    public async Task ChatAsync_WithSources_CitesFirstSource()
+    {
+        _hostEnvironment.EnvironmentName.Returns(Environments.Development);
+
+        var reply = await new FakeAiServiceClient(_hostEnvironment).ChatAsync(AiServiceTestSettings.ChatRequest(), TestContext.Current.CancellationToken);
+
+        reply.Citations.Should().Equal("explanation-1");
+    }
+
+    [Fact]
+    public async Task ChatAsync_WithoutSources_ReturnsNoCitations()
+    {
+        _hostEnvironment.EnvironmentName.Returns(Environments.Development);
+
+        var reply = await new FakeAiServiceClient(_hostEnvironment).ChatAsync(AiServiceTestSettings.ChatRequest() with { Sources = [] }, TestContext.Current.CancellationToken);
+
+        reply.Citations.Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task ChatAsync_Production_ThrowsAiServiceUnavailable()
     {
         _hostEnvironment.EnvironmentName.Returns(Environments.Production);

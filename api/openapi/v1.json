@@ -4230,6 +4230,86 @@
         }
       }
     },
+    "/api/avatar/status": {
+      "get": {
+        "tags": [
+          "Avatar"
+        ],
+        "operationId": "GetAvatarStatus",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarStatusResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarStatusResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarStatusResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/avatar/messages": {
+      "post": {
+        "tags": [
+          "Avatar"
+        ],
+        "operationId": "SendAvatarMessage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendAvatarMessageCommand"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendAvatarMessageCommand"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendAvatarMessageCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarReplyResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarReplyResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarReplyResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/otp/send": {
       "post": {
         "tags": [
@@ -5167,6 +5247,183 @@
             "type": "boolean"
           }
         }
+      },
+      "AvatarCitationResult": {
+        "required": [
+          "reference",
+          "section",
+          "sectionTitle",
+          "lessonId",
+          "questionId"
+        ],
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "string"
+          },
+          "section": {
+            "$ref": "#/components/schemas/LessonContentSection"
+          },
+          "sectionTitle": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "lessonId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "questionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          }
+        }
+      },
+      "AvatarEntryPoint": {
+        "enum": [
+          "Lesson",
+          "QuizQuestion",
+          "ExamReview",
+          "Global"
+        ]
+      },
+      "AvatarReplyResult": {
+        "required": [
+          "reply",
+          "citations",
+          "dailyMessageLimit",
+          "messagesUsedToday",
+          "messagesRemainingToday",
+          "model",
+          "promptVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "reply": {
+            "type": "string"
+          },
+          "citations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvatarCitationResult"
+            }
+          },
+          "dailyMessageLimit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "messagesUsedToday": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "messagesRemainingToday": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "model": {
+            "type": "string"
+          },
+          "promptVersion": {
+            "type": "string"
+          }
+        }
+      },
+      "AvatarStatusResult": {
+        "required": [
+          "examInProgress",
+          "tier",
+          "dailyMessageLimit",
+          "messagesUsedToday",
+          "messagesRemainingToday",
+          "messageMaxLength",
+          "maxHistoryMessages"
+        ],
+        "type": "object",
+        "properties": {
+          "examInProgress": {
+            "type": "boolean"
+          },
+          "tier": {
+            "$ref": "#/components/schemas/PlanTier"
+          },
+          "dailyMessageLimit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "messagesUsedToday": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "messagesRemainingToday": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "messageMaxLength": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "maxHistoryMessages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "AvatarTurn": {
+        "required": [
+          "role",
+          "content"
+        ],
+        "type": "object",
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/AvatarTurnRole"
+          },
+          "content": {
+            "type": "string"
+          }
+        }
+      },
+      "AvatarTurnRole": {
+        "enum": [
+          "User",
+          "Assistant"
+        ]
       },
       "BasePlanResult": {
         "required": [
@@ -8245,6 +8502,52 @@
           }
         }
       },
+      "SendAvatarMessageCommand": {
+        "required": [
+          "entryPoint",
+          "lessonId",
+          "sessionId",
+          "questionId",
+          "history",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "entryPoint": {
+            "$ref": "#/components/schemas/AvatarEntryPoint"
+          },
+          "lessonId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "sessionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "questionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvatarTurn"
+            }
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
       "ServableQuestionCountResult": {
         "required": [
           "count"
@@ -10818,6 +11121,9 @@
     },
     {
       "name": "Browse"
+    },
+    {
+      "name": "Avatar"
     },
     {
       "name": "Auth"

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { AskAvatarButton } from '@/features/avatar';
 import type { ExamSessionResult } from '@/shared/api/generated/model';
 import { Button } from '@/shared/ui/button';
 import { examUnitNames, isMultiUnitExam, sortedExamItems } from '../api/examSession';
@@ -57,7 +58,8 @@ export function ExamRunner({ session, receivedAt }: ExamRunnerProps) {
           />
         ))}
       </div>
-      <div className="sticky bottom-0 flex justify-end rounded-md border border-border bg-surface p-3 shadow-1 lg:static">
+      <div className="sticky bottom-0 flex justify-end gap-3 rounded-md border border-border bg-surface p-3 shadow-1 lg:static">
+        <AskAvatarButton context={{ entryPoint: 'Global', title: t('exam.avatarContext') }} />
         <Button
           variant="primary"
           disabled={submitter.isPending}

@@ -4,6 +4,7 @@ using Core.EntityFrameworkCore.Context;
 using Core.Errors;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Analytics;
+using Elmanhg.Domain.Avatar;
 using Elmanhg.Domain.ContentRetrieval;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Identity;
@@ -73,6 +74,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public DbSet<FunnelEvent> FunnelEvents { get; set; }
     public DbSet<LessonContentChunk> LessonContentChunks { get; set; }
     public DbSet<LessonContentIndex> LessonContentIndexes { get; set; }
+    public DbSet<AvatarMessageUsage> AvatarMessageUsages { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
@@ -151,6 +153,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         ConfigureTeacherSubjects(modelBuilder);
         ConfigureFunnelEvents(modelBuilder);
         ConfigureContentRetrieval(modelBuilder);
+        ConfigureAvatar(modelBuilder);
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
 
@@ -450,6 +453,17 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         });
     }
 
+    private static void ConfigureAvatar(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AvatarMessageUsage>(builder =>
+        {
+            builder.Property(x => x.Id).ValueGeneratedNever();
+            builder.Property(x => x.EntryPoint).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.StudentId, x.CreatedAt });
+        });
+    }
+
     private static void ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>().HasQueryFilter(x => !x.IsDeleted);
@@ -477,5 +491,6 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         modelBuilder.Entity<FunnelEvent>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<LessonContentChunk>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<LessonContentIndex>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<AvatarMessageUsage>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

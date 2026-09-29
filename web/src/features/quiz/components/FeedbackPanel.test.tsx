@@ -1,7 +1,8 @@
 import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
+import { AvatarProvider } from '@/features/avatar';
 import type { SessionItemResult } from '@/shared/api/generated/model';
-import { answered, quizItem } from '@/test/quizFixtures';
+import { answered, quizItem, quizSessionId } from '@/test/quizFixtures';
 import { renderWithProviders } from '@/test/renderWithProviders';
 import { toQuizQuestion } from '../api/quizItem';
 import { FeedbackPanel } from './FeedbackPanel';
@@ -11,7 +12,16 @@ const renderPanel = (item: SessionItemResult) => {
   if (attempt === null) {
     throw new Error('The item has no attempt.');
   }
-  return renderWithProviders(<FeedbackPanel item={item} attempt={attempt} question={toQuizQuestion(item)} />);
+  return renderWithProviders(
+    <AvatarProvider>
+      <FeedbackPanel
+        item={item}
+        attempt={attempt}
+        question={toQuizQuestion(item)}
+        ask={{ entryPoint: 'QuizQuestion', sessionId: quizSessionId, questionId: item.questionId, title: 'Question 1' }}
+      />
+    </AvatarProvider>,
+  );
 };
 
 const shortItem = (spec: object) => ({
@@ -80,11 +90,11 @@ describe('FeedbackPanel', () => {
     expect(screen.queryByText('Explanation')).not.toBeInTheDocument();
   });
 
-  it('offers the assistant as coming soon', () => {
+  it('offers the assistant for this question', () => {
     renderPanel(answered(quizItem(1), 'Correct', { optionId: 'b' }));
 
     const button = screen.getByRole('button', { name: 'Ask the assistant' });
-    expect(button).toBeDisabled();
-    expect(button).toHaveAccessibleDescription('The AI assistant is coming soon.');
+    expect(button).toBeEnabled();
+    expect(button).not.toHaveAccessibleDescription();
   });
 });

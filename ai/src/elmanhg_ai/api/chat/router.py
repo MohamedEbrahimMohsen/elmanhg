@@ -29,4 +29,5 @@ async def create_chat_reply(
         input_tokens=result.input_tokens,
         output_tokens=result.output_tokens,
         stop_reason=result.stop_reason,
+        citations=list(result.citations),
     )

@@ -206,6 +206,13 @@
             "type": "string",
             "minLength": 1,
             "title": "Message"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ChatSourceIn"
+            },
+            "type": "array",
+            "title": "Sources"
           }
         },
         "additionalProperties": false,
@@ -267,6 +274,13 @@
               }
             ],
             "title": "Stopreason"
+          },
+          "citations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Citations"
           }
         },
         "type": "object",
@@ -276,7 +290,8 @@
           "promptVersion",
           "inputTokens",
           "outputTokens",
-          "stopReason"
+          "stopReason",
+          "citations"
         ],
         "title": "ChatOut"
       },
@@ -287,6 +302,36 @@
           "assistant"
         ],
         "title": "ChatRole"
+      },
+      "ChatSourceIn": {
+        "properties": {
+          "reference": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "pattern": "^[a-z0-9-]+$",
+            "title": "Reference"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Content"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reference",
+          "title",
+          "content"
+        ],
+        "title": "ChatSourceIn"
       },
       "ContextBundleIn": {
         "properties": {

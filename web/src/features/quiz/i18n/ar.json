@@ -32,8 +32,7 @@
     "tolerancePercent": "{value} (± {tolerance}٪)"
   },
   "avatar": {
-    "ask": "اسأل المساعد",
-    "soon": "المساعد الذكي متاح قريبًا."
+    "questionTitle": "سؤال {position}"
   },
   "result": {
     "title": "نتيجة التدريب",

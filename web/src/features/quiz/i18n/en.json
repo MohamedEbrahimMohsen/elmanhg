@@ -32,8 +32,7 @@
     "tolerancePercent": "{value} (± {tolerance}%)"
   },
   "avatar": {
-    "ask": "Ask the assistant",
-    "soon": "The AI assistant is coming soon."
+    "questionTitle": "Question {position}"
   },
   "result": {
     "title": "Practice result",

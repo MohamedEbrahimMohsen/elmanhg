@@ -1,12 +1,12 @@
 # Elmanhg — autopilot progress
 
-Last updated: laptop session, after story #90 merged (main at `bcb0c5b`).
+Last updated: laptop session, after story #95 merged (main at `7b0d212`).
 **Next story: #91 [E8.S3] Avatar chat with context bundles**, the first row of "Remaining stories".
 The laptop run did #54–#64; the cloud session did #65–#76 (see "Running in a cloud session" and "Hand-off" below).
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (35 of 60)
+## Finished stories (38 of 60)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -45,11 +45,14 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 33 | #87 [E7.S3] Free tier limits | #198 | 1 (+doc fix) | skipped (too many files) | #199 |
 | 34 | #89 [E8.S1] AI service skeleton (Python FastAPI) | #200 | 2 (+perf fix) | 7 comments: 6 fixed, 1 rejected | #201 |
 | 35 | #90 [E8.S2] Lesson content retrieval | #203 | 1 (+PRD fix) | skipped (too many files) | #204 |
+| 36 | #112 [E13.S1] Hosting and environments | #202 | 2 (+main merge) | 1 comment, fixed (SSH fingerprint) | #205 |
+| 37 | #94 [E9.S1] Thread creation with attached context and quota | #206 | 1 (+hardening) | skipped (too many files) | #207 |
+| 38 | #95 [E9.S2] Teacher inbox, claiming and text replies | #208 | 1 | skipped (too many files) | #209 |
 
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (25), in run order
+## Remaining stories (22), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
@@ -57,8 +60,6 @@ Stories run in dependency order, not issue order. E10 (payments) comes before E7
 |---|---|---|
 | 26 | #91 | [E8.S3] Avatar chat with context bundles |
 | 27 | #92 | [E8.S4] Conversation logging |
-| 28 | #94 | [E9.S1] Thread creation with attached context and quota |
-| 29 | #95 | [E9.S2] Teacher inbox, claiming and text replies |
 | 30 | #96 | [E9.S3] Voice replies with transcription |
 | 31 | #97 | [E9.S4] SLA timers, reminders and follow-up rules |
 | 32 | #104 | [E11.S1] Dashboard metrics queries |
@@ -67,7 +68,6 @@ Stories run in dependency order, not issue order. E10 (payments) comes before E7
 | 35 | #107 | [E11.S4] Teacher personal stats card |
 | 36 | #109 | [E12.S1] Append-only training records |
 | 37 | #110 | [E12.S2] JSONL export |
-| 38 | #112 | [E13.S1] Hosting and environments |
 | 39 | #113 | [E13.S2] Observability |
 | 40 | #114 | [E13.S3] Performance targets |
 | 41 | #115 | [E13.S4] Security hardening |
@@ -215,4 +215,4 @@ How the next agent resumes, in a cloud session or on the laptop:
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199, #201, #204 · `dev-decision`: none open (#135 and #155 confirmed and closed).
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199, #201, #204, #205, #207, #209 · `dev-decision`: none open (#135 and #155 confirmed and closed).

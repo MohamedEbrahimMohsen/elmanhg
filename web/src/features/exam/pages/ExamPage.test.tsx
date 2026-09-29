@@ -1,7 +1,10 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { getGetAvatarStatusMockHandler } from '@/shared/api/generated/avatar/avatar.msw';
 import { getGetExamSessionMockHandler } from '@/shared/api/generated/exams/exams.msw';
+import { avatarStatus } from '@/test/avatarFixtures';
 import { examItem, examSecondUnitId, examSessionId, examUnitId, openExam, submittedExam } from '@/test/examFixtures';
 import { server } from '@/test/msw/server';
 import { renderApp } from '@/test/renderWithProviders';
@@ -94,5 +97,21 @@ describe('ExamPage', () => {
     openExamPage();
 
     expect(await screen.findByRole('heading', { name: 'Multi-unit exam: Mechanics + Waves' })).toBeInTheDocument();
+  });
+
+  it('shows the exam refusal when the assistant is opened during the exam', async () => {
+    server.use(
+      getGetExamSessionMockHandler(openExam([examItem(1)])),
+      getGetAvatarStatusMockHandler(avatarStatus({ examInProgress: true })),
+    );
+    const user = userEvent.setup();
+    openExamPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Ask the assistant' }));
+
+    const panel = await screen.findByRole('dialog', { name: 'AI assistant' });
+    expect(within(panel).getByText('Context: Exam in progress')).toBeInTheDocument();
+    expect(await within(panel).findByText(/I cannot help while an exam is in progress/)).toBeInTheDocument();
+    expect(within(panel).getByRole('textbox', { name: 'Your question' })).toBeDisabled();
   });
 });
