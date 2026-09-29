@@ -174,9 +174,11 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | Variable | Default | Notes |
 |---|---|---|
 | `Avatar__MessageMaxLength` | `2000` | 1 to 4000; at most `ELMANHG_AI_CHAT_MAX_MESSAGE_CHARS` |
-| `Avatar__HistoryTurnMaxLength` | `4000` | 1 to 4000 |
+| `Avatar__HistoryTurnMaxLength` | `4000` | 1 to 4000; each stored turn is cut to this when sent back as history |
 | `Avatar__MaxHistoryMessages` | `10` | 0 to 20, even; at most `ELMANHG_AI_CHAT_MAX_HISTORY_MESSAGES` |
 | `Avatar__ContextFieldMaxLength` | `8000` | 500 to 8000; keeps the context bundle under `ELMANHG_AI_CHAT_MAX_CONTEXT_CHARS` |
+| `Avatar__AdminConversationsMaxPageSize` | `100` | 1 to 200 |
+| `Avatar__ConversationSearchMaxLength` | `200` | 1 to 500 |
 
 The daily message limits (Free 5, Base 50) are `Subscriptions__FreeDailyAvatarMessages` and `Subscriptions__BaseDailyAvatarMessages`.
 
@@ -207,7 +209,7 @@ Question photos are stored in the `api-media` volume under `teacher-threads/` an
 | `ELMANHG_AI_CHAT_MAX_SOURCES` / `ELMANHG_AI_CHAT_MAX_SOURCE_CHARS` | `20` / `8000` | retrieved lesson chunks per message / per chunk |
 | `ELMANHG_AI_CHAT_MAX_TOKENS` / `_MAX_HISTORY_MESSAGES` / `_MAX_MESSAGE_CHARS` / `_MAX_CONTEXT_CHARS` | `1024` / `20` / `4000` / `60000` | |
 | `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` / `ELMANHG_AI_MODEL_MAX_RETRIES` | `20` / `1` | |
-| `ELMANHG_AI_MODEL_INPUT_USD_PER_MILLION_TOKENS` / `_OUTPUT_USD_PER_MILLION_TOKENS` | `3` / `15` | cost logging only |
+| `ELMANHG_AI_MODEL_INPUT_USD_PER_MILLION_TOKENS` / `_OUTPUT_USD_PER_MILLION_TOKENS` | `3` / `15` | cost logging and the `costUsd` stored per reply |
 | `ELMANHG_AI_EMBEDDING_PROVIDER` | `fake` | `openai` to go live |
 | `ELMANHG_AI_OPENAI_API_KEY` | unset | secret; required for `openai` |
 | `ELMANHG_AI_EMBEDDING_MODEL` | `text-embedding-3-small` | |

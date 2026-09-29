@@ -1,0 +1,93 @@
+{
+  "page": {
+    "title": "Assistant conversations",
+    "intro": "Students' conversations with the AI assistant, most recent first. Each reply shows its model, prompt version, tokens, cost and the context sent.",
+    "loading": "Loading conversations"
+  },
+  "filters": {
+    "search": "Search",
+    "searchHint": "Text in the conversation or the student's name",
+    "entryPoint": "Entry point",
+    "allEntryPoints": "All",
+    "from": "From",
+    "to": "To",
+    "apply": "Apply",
+    "clear": "Clear filters",
+    "errors": {
+      "searchTooLong": "The search text is too long.",
+      "date": "Enter a valid date.",
+      "dateRange": "The end date must be on or after the start date."
+    }
+  },
+  "entryPoint": {
+    "Lesson": "Lesson",
+    "QuizQuestion": "Practice question",
+    "ExamReview": "Exam review",
+    "Global": "General"
+  },
+  "table": {
+    "caption": "Assistant conversations",
+    "lastMessage": "Last message",
+    "student": "Student",
+    "context": "Context",
+    "firstQuestion": "First question",
+    "messages": "Messages",
+    "actions": "Actions",
+    "open": "View",
+    "openLabel": "View {student}'s conversation"
+  },
+  "empty": {
+    "noData": "No conversations yet.",
+    "noResults": "No conversations match these filters."
+  },
+  "error": {
+    "title": "Could not load conversations"
+  },
+  "detail": {
+    "back": "Assistant conversations",
+    "title": "Assistant conversation",
+    "loading": "Loading the conversation",
+    "error": "Could not load the conversation",
+    "student": "Student",
+    "context": "Context",
+    "startedAt": "Started",
+    "lastMessageAt": "Last message",
+    "messages": "Messages",
+    "tokens": "Tokens: in {input} · out {output}",
+    "cost": "Cost",
+    "notPriced": "Not priced"
+  },
+  "message": {
+    "student": "Student",
+    "assistant": "Assistant",
+    "model": "Model",
+    "promptVersion": "Prompt version",
+    "tokens": "Tokens",
+    "cost": "Cost",
+    "stopReason": "Stop reason",
+    "history": "Earlier messages sent",
+    "sources": "Sources"
+  },
+  "section": {
+    "Explanation": "Explanation",
+    "Objectives": "Objectives",
+    "Summary": "Summary",
+    "QuestionExplanation": "Question explanation"
+  },
+  "context": {
+    "summary": "Context sent",
+    "subject": "Subject",
+    "unit": "Unit",
+    "lesson": "Lesson",
+    "objectives": "Objectives",
+    "explanation": "Explanation",
+    "summaryText": "Summary",
+    "question": "Question",
+    "studentAnswer": "Student's answer",
+    "correctAnswer": "Correct answer",
+    "questionExplanation": "Question explanation",
+    "subjects": "Subjects",
+    "sources": "Search results sent",
+    "none": "None"
+  }
+}

@@ -5,7 +5,16 @@
  * OpenAPI spec version: 1.0.0
  */
 
+export * from './adminAvatarConversationDetailResult';
+export * from './adminAvatarConversationResult';
+export * from './adminAvatarMessageResult';
 export * from './adminPaymentResult';
+export * from './aiChatEntryPoint';
+export * from './aiChatSource';
+export * from './aiContextBundle';
+export * from './aiContextReference';
+export * from './aiLessonContext';
+export * from './aiQuestionContext';
 export * from './approveQuestionRequest';
 export * from './askTeacherPlanResult';
 export * from './attemptResult';
@@ -14,10 +23,10 @@ export * from './authResult';
 export * from './authUserResult';
 export * from './avatarCitationResult';
 export * from './avatarEntryPoint';
+export * from './avatarMessageContext';
+export * from './avatarMessageRole';
 export * from './avatarReplyResult';
 export * from './avatarStatusResult';
-export * from './avatarTurn';
-export * from './avatarTurnRole';
 export * from './basePlanResult';
 export * from './billingPeriod';
 export * from './bulkApproveQuestionsRequest';
@@ -55,6 +64,7 @@ export * from './funnelEventType';
 export * from './generateOTPCommand';
 export * from './generateOTPResult';
 export * from './getAuditLogsParams';
+export * from './getAvatarConversationsParams';
 export * from './getLessonsParams';
 export * from './getMyPaymentsParams';
 export * from './getMyTeacherThreadsParams';
@@ -92,6 +102,7 @@ export * from './multiUnitExamUnitOptionResult';
 export * from './multiUnitExamUnitShareResult';
 export * from './nextLessonResult';
 export * from './otpChannel';
+export * from './pageDataOfAdminAvatarConversationResult';
 export * from './pageDataOfAdminPaymentResult';
 export * from './pageDataOfAuditLogResult';
 export * from './pageDataOfPaymentResult';

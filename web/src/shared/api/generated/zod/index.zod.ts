@@ -2,6 +2,7 @@ export * from './analytics/analytics.zod';
 export * from './audit-logs/audit-logs.zod';
 export * from './auth/auth.zod';
 export * from './avatar/avatar.zod';
+export * from './avatar-conversations/avatar-conversations.zod';
 export * from './browse/browse.zod';
 export * from './client-errors/client-errors.zod';
 export * from './content-retrieval/content-retrieval.zod';

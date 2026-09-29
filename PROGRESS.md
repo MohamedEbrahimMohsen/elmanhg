@@ -1,12 +1,12 @@
 # Elmanhg — autopilot progress
 
-Last updated: laptop session, after story #95 merged (main at `7b0d212`).
-**Next story: #91 [E8.S3] Avatar chat with context bundles**, the first row of "Remaining stories".
+Last updated: laptop session, after story #113 merged (main at `07a3e4b`).
+**Next story: #92 [E8.S4] Conversation logging**, the first row of "Remaining stories".
 The laptop run did #54–#64; the cloud session did #65–#76 (see "Running in a cloud session" and "Hand-off" below).
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (38 of 60)
+## Finished stories (40 of 60)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -48,17 +48,18 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 36 | #112 [E13.S1] Hosting and environments | #202 | 2 (+main merge) | 1 comment, fixed (SSH fingerprint) | #205 |
 | 37 | #94 [E9.S1] Thread creation with attached context and quota | #206 | 1 (+hardening) | skipped (too many files) | #207 |
 | 38 | #95 [E9.S2] Teacher inbox, claiming and text replies | #208 | 1 | skipped (too many files) | #209 |
+| 39 | #91 [E8.S3] Avatar chat with context bundles | #210 | 2 (+main merge) | skipped (too many files) | #211 |
+| 40 | #113 [E13.S2] Observability | #212 | 3 (+main merge) | skipped (too many files) | #213 |
 
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (22), in run order
+## Remaining stories (20), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
 | Order | Issue | Story |
 |---|---|---|
-| 26 | #91 | [E8.S3] Avatar chat with context bundles |
 | 27 | #92 | [E8.S4] Conversation logging |
 | 30 | #96 | [E9.S3] Voice replies with transcription |
 | 31 | #97 | [E9.S4] SLA timers, reminders and follow-up rules |
@@ -68,7 +69,6 @@ Stories run in dependency order, not issue order. E10 (payments) comes before E7
 | 35 | #107 | [E11.S4] Teacher personal stats card |
 | 36 | #109 | [E12.S1] Append-only training records |
 | 37 | #110 | [E12.S2] JSONL export |
-| 39 | #113 | [E13.S2] Observability |
 | 40 | #114 | [E13.S3] Performance targets |
 | 41 | #115 | [E13.S4] Security hardening |
 | 42 | #117 | [E14.S1] Essay question authoring with rubric (v2) |
@@ -215,4 +215,4 @@ How the next agent resumes, in a cloud session or on the laptop:
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199, #201, #204, #205, #207, #209 · `dev-decision`: none open (#135 and #155 confirmed and closed).
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199, #201, #204, #205, #207, #209, #211, #213 · `dev-decision`: none open (#135 and #155 confirmed and closed).

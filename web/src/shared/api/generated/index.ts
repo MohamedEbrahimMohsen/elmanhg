@@ -2,6 +2,7 @@ export * from './analytics/analytics';
 export * from './audit-logs/audit-logs';
 export * from './auth/auth';
 export * from './avatar/avatar';
+export * from './avatar-conversations/avatar-conversations';
 export * from './browse/browse';
 export * from './client-errors/client-errors';
 export * from './content-retrieval/content-retrieval';

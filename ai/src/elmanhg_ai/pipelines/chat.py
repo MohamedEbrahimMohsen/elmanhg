@@ -3,6 +3,7 @@ import re
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass
+from decimal import Decimal
 from typing import Any, Final, Literal
 
 import structlog
@@ -51,6 +52,7 @@ class ChatResult:
     input_tokens: int
     output_tokens: int
     stop_reason: str | None
+    cost_usd: Decimal
     citations: tuple[str, ...] = ()
 
 
@@ -147,6 +149,7 @@ async def run(
     latency_ms = round((time.perf_counter() - started) * 1000)
     known = {s.reference for s in chat.sources}
     citations = tuple(dict.fromkeys(c for c in reply.citations if c in known))
+    cost = estimate_cost_usd(reply.input_tokens, reply.output_tokens, settings)
     logger.info(
         "chat.completed",
         pipeline=PIPELINE_NAME,
@@ -155,7 +158,7 @@ async def run(
         tokens_in=reply.input_tokens,
         tokens_out=reply.output_tokens,
         latency_ms=latency_ms,
-        cost_usd=float(estimate_cost_usd(reply.input_tokens, reply.output_tokens, settings)),
+        cost_usd=float(cost),
         stop_reason=reply.stop_reason,
         sources=len(sources),
         citations=len(citations),
@@ -167,5 +170,6 @@ async def run(
         input_tokens=reply.input_tokens,
         output_tokens=reply.output_tokens,
         stop_reason=reply.stop_reason,
+        cost_usd=cost,
         citations=citations,
     )

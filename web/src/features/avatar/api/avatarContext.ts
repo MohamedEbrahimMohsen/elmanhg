@@ -1,4 +1,4 @@
-import type { AvatarEntryPoint, AvatarTurn, SendAvatarMessageCommand } from '@/shared/api/generated/model';
+import type { AvatarEntryPoint, SendAvatarMessageCommand } from '@/shared/api/generated/model';
 
 export interface AvatarContextInput {
   entryPoint: AvatarEntryPoint;
@@ -12,13 +12,9 @@ export function contextKey(context: AvatarContextInput): string {
   return [context.entryPoint, context.lessonId ?? '', context.sessionId ?? '', context.questionId ?? ''].join('|');
 }
 
-export function historyFor(turns: AvatarTurn[], max: number): AvatarTurn[] {
-  return max === 0 ? [] : turns.slice(-max);
-}
-
 export function toSendRequest(
   context: AvatarContextInput,
-  history: AvatarTurn[],
+  conversationId: string | null,
   message: string,
 ): SendAvatarMessageCommand {
   return {
@@ -26,7 +22,7 @@ export function toSendRequest(
     lessonId: context.lessonId ?? null,
     sessionId: context.sessionId ?? null,
     questionId: context.questionId ?? null,
-    history,
+    conversationId,
     message: message.trim(),
   };
 }

@@ -30,7 +30,9 @@
     { "key": "checkoutPaymentId", "value": "" },
     { "key": "baseSubscriptionId", "value": "" },
     { "key": "teacherThreadId", "value": "" },
-    { "key": "inboxThreadId", "value": "" }
+    { "key": "inboxThreadId", "value": "" },
+    { "key": "avatarConversationId", "value": "" },
+    { "key": "adminAvatarConversationId", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -2651,7 +2653,7 @@
     },
     {
       "name": "Avatar",
-      "description": "Student-only (Avatar.Chat). Status returns examInProgress, today's message counter (Free 5, Base 50) and the input limits. A message is refused with 403 AVATAR_EXAM_IN_PROGRESS while the student has an exam in progress, and 403 AVATAR_DAILY_LIMIT_REACHED at the daily limit. The lesson request needs a Published lesson in {{lessonId}} that is open for the student; Global needs no ids. See docs/avatar.md.",
+      "description": "Student-only (Avatar.Chat). Status returns examInProgress, today's message counter (Free 5, Base 50) and the input limits. A message is refused with 403 AVATAR_EXAM_IN_PROGRESS while the student has an exam in progress, and 403 AVATAR_DAILY_LIMIT_REACHED at the daily limit. The lesson request needs a Published lesson in {{lessonId}} that is open for the student; Global needs no ids. conversationId is null for the first message; the reply returns it, and sending it back continues that conversation (404 AVATAR_CONVERSATION_NOT_FOUND for another student's id, 400 AVATAR_CONVERSATION_CONTEXT_MISMATCH for another context). The API keeps the history. See docs/avatar.md.",
       "item": [
         {
           "name": "Get avatar status",
@@ -2685,7 +2687,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"avatarConversationId\", pm.response.json().conversationId);"
                 ]
               }
             }
@@ -2700,7 +2703,37 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"entryPoint\": \"Lesson\",\n  \"lessonId\": \"{{lessonId}}\",\n  \"history\": [],\n  \"message\": \"ما هو قانون أوم؟\"\n}",
+              "raw": "{\n  \"entryPoint\": \"Lesson\",\n  \"lessonId\": \"{{lessonId}}\",\n  \"conversationId\": null,\n  \"message\": \"ما هو قانون أوم؟\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send avatar message (lesson, follow-up)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"continues the conversation\", function () { pm.expect(pm.response.json().conversationId).to.eql(pm.collectionVariables.get(\"avatarConversationId\")); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/avatar/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "avatar", "messages"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entryPoint\": \"Lesson\",\n  \"lessonId\": \"{{lessonId}}\",\n  \"conversationId\": \"{{avatarConversationId}}\",\n  \"message\": \"وما وحدة قياس المقاومة؟\"\n}",
               "options": { "raw": { "language": "json" } }
             }
           },
@@ -2729,8 +2762,74 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"entryPoint\": \"Global\",\n  \"history\": [],\n  \"message\": \"كيف أذاكر الفيزياء؟\"\n}",
+              "raw": "{\n  \"entryPoint\": \"Global\",\n  \"message\": \"كيف أذاكر الفيزياء؟\"\n}",
               "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "AvatarConversations",
+      "description": "Admin only (AvatarConversations.View). Sign in as an admin first so accessToken is set. search matches message text or the student's display name; from is inclusive and to exclusive, on the last message time, ISO 8601 with offset.",
+      "item": [
+        {
+          "name": "List avatar conversations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const items = pm.response.json().items;",
+                  "pm.test(\"returns a page\", function () { pm.expect(items).to.be.an(\"array\"); });",
+                  "if (items.length > 0) { pm.collectionVariables.set(\"adminAvatarConversationId\", items[0].id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/avatar/conversations?pageNumber=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "avatar", "conversations"],
+              "query": [
+                { "key": "pageNumber", "value": "1" },
+                { "key": "pageSize", "value": "20" },
+                { "key": "search", "value": "أوم", "disabled": true },
+                { "key": "entryPoint", "value": "Lesson", "disabled": true },
+                { "key": "from", "value": "2026-01-01T00:00:00Z", "disabled": true },
+                { "key": "to", "value": "2026-12-31T00:00:00Z", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get avatar conversation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns the messages\", function () { pm.expect(pm.response.json().messages).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/avatar/conversations/{{adminAvatarConversationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "avatar", "conversations", "{{adminAvatarConversationId}}"]
             }
           },
           "response": []

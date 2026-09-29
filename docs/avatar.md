@@ -2,7 +2,7 @@
 
 ## Role
 
-The AI Avatar is the in-app study assistant for students (PRD §9). The student asks a short question from a panel that opens on any student screen, and the API answers with a short Arabic reply grounded on the lesson material, listing the lesson sections it used. The .NET API owns everything the student can see or be refused: the entry point, the context bundle, retrieval, the exam refusal and the daily quota. The Python service ([ai-service.md](ai-service.md)) only turns a prepared request into a reply. Conversations live in the browser's memory; persisting them is #92.
+The AI Avatar is the in-app study assistant for students (PRD §9). The student asks a short question from a panel that opens on any student screen, and the API answers with a short Arabic reply grounded on the lesson material, listing the lesson sections it used. The .NET API owns everything the student can see or be refused: the entry point, the context bundle, retrieval, the exam refusal and the daily quota. The Python service ([ai-service.md](ai-service.md)) only turns a prepared request into a reply. The API stores every conversation (see Conversation log).
 
 Only students may use it (`Avatar.Chat` policy; Teachers and Admins get 403).
 
@@ -30,7 +30,7 @@ Rules per entry point:
 - **Lesson text.** When retrieval returned matches, the lesson `explanation` and `summary` are sent empty, because the chunks carry the relevant text and can be cited. When there are none (for example the lesson is not indexed yet), both are sent as plain text (the rich text's blocks joined by new lines), each cut to `Avatar:ContextFieldMaxLength`. Objectives are always sent, in order.
 - **Question.** Everything comes from the served question revision (the version the student saw, PRD §17 rule 2), as plain text in the UI's wording: the chosen option text (options in the question's order, joined by «، »), «صح» or «خطأ», blanks as `[[id]] text`, the short answer; the correct answer the same way, with numeric answers as `value ± tolerance` (plus `%` for a percent tolerance). Each field is cut to `ContextFieldMaxLength`.
 - **Global.** `entryPoint: global` and the subject names only: no lesson, no retrieval, no sources. The prompt and the greeting ask the student to open the lesson they need; there is no lesson picker.
-- **History.** The browser keeps one conversation per opened context and sends the last `Avatar:MaxHistoryMessages` completed turns. The API checks the count, that turns alternate starting with the student and end with the assistant, the role and each turn's length.
+- **History.** The browser sends `conversationId`: null for the first message, then the id returned in each reply; it resets to null when the context changes. The API loads that conversation (only the student's own; a foreign or unknown id is `404 AVATAR_CONVERSATION_NOT_FOUND`) and checks that it belongs to the same context: the same entry point, the same lesson for `Lesson`, the same session and question for `QuizQuestion` and `ExamReview` (otherwise `400 AVATAR_CONVERSATION_CONTEXT_MISMATCH`). Both checks run before the model call and use no quota. The API then sends the last `Avatar:MaxHistoryMessages` stored messages as history, each cut to `Avatar:HistoryTurnMaxLength`. The browser never sends history; a `history` field from an old client is ignored.
 - **Size.** Six long fields of 8000 characters plus the objectives stay under the AI service's 60 000-character context limit; sources have their own limits (20 sources, 8000 characters each). Oversized requests would otherwise fail as a generic 503.
 
 ## Guardrails
@@ -54,7 +54,7 @@ Citations are structure from the API, not parsed model text, so the model cannot
 - Before calling the model, the handler counts today's messages, where the day follows `Subscriptions:DailyQuotaTimeZone` (Africa/Cairo). At the limit it returns `403 AVATAR_DAILY_LIMIT_REACHED` with context `limit`.
 - A message counts only after a successful reply: a refusal, a validation error or an AI failure uses nothing.
 - It is a soft limit: the count is read before the model call and the row is written after it, so every request sent while others are still waiting for a reply passes the check. Any number of parallel requests can pass, and the count can end above the limit by up to that number minus one (for example, five requests sent together at 0 of 5 all pass, and so do five sent at 4 of 5, ending at 9). Hardening is tracked for #115.
-- Storage: table `AvatarMessageUsages` (`Id`, `StudentId`, `EntryPoint`, `CreatedAt`, `IsDeleted`, `DeletedAt`) with an index on `(StudentId, CreatedAt)`. It stores no text, model or prompt; #92 owns conversations and messages.
+- Storage: table `AvatarMessageUsages` (`Id`, `StudentId`, `EntryPoint`, `CreatedAt`, `IsDeleted`, `DeletedAt`) with an index on `(StudentId, CreatedAt)`. It stores no text, model or prompt; the messages are in the [Conversation log](#conversation-log).
 
 ## HTTP
 
@@ -77,10 +77,7 @@ Citations are structure from the API, not parsed model text, so the model cannot
   "lessonId": null,
   "sessionId": "5b0f8a4e-0000-4000-8000-000000000001",
   "questionId": "5b0f8a4e-0000-4000-8000-000000000002",
-  "history": [
-    { "role": "User", "content": "ما هو قانون أوم؟" },
-    { "role": "Assistant", "content": "قانون أوم يربط فرق الجهد بشدة التيار والمقاومة." }
-  ],
+  "conversationId": "5b0f8a4e-0000-4000-8000-000000000004",
   "message": "لماذا إجابتي خطأ؟"
 }
 ```
@@ -89,6 +86,7 @@ Response `200`:
 
 ```json
 {
+  "conversationId": "5b0f8a4e-0000-4000-8000-000000000004",
   "reply": "1. المقاومة = فرق الجهد ÷ شدة التيار ...",
   "citations": [
     { "reference": "explanation-1", "section": "Explanation", "sectionTitle": "قانون أوم", "lessonId": "5b0f8a4e-0000-4000-8000-000000000003", "questionId": null }
@@ -101,7 +99,7 @@ Response `200`:
 }
 ```
 
-`model` and `promptVersion` are returned for #92 and are not shown to the student.
+Send `conversationId` back with the next message to continue the conversation; it is null for the first message. `model` and `promptVersion` are stored per reply and are not shown to the student.
 
 | Code | HTTP | When |
 |---|---|---|
@@ -110,8 +108,9 @@ Response `200`:
 | `AVATAR_QUESTION_NOT_ANSWERED` | 400 | `QuizQuestion` on a question the student has not answered |
 | `AVATAR_ENTRY_POINT_INVALID` | 422 | unknown entry point |
 | `AVATAR_MESSAGE_REQUIRED` / `AVATAR_MESSAGE_TOO_LONG` | 422 | blank message, or longer than `Avatar:MessageMaxLength` |
-| `AVATAR_HISTORY_TOO_LONG` | 422 | more than `Avatar:MaxHistoryMessages` turns |
-| `AVATAR_HISTORY_INVALID` | 422 | turns do not alternate from the student, a role is unknown, or a turn is blank or longer than `Avatar:HistoryTurnMaxLength` |
+| `AVATAR_CONVERSATION_NOT_FOUND` | 404 | `conversationId` is unknown or belongs to another student |
+| `AVATAR_CONVERSATION_CONTEXT_MISMATCH` | 400 | `conversationId` belongs to another entry point, lesson, session or question |
+| `AVATAR_CONVERSATION_MODIFIED_CONCURRENTLY` | 409 | two messages were sent in one conversation at the same time; nothing of the second is stored or counted |
 | `LESSON_ID_REQUIRED` / `SESSION_ID_REQUIRED` / `QUESTION_ID_REQUIRED` | 422 | an id the entry point needs is missing |
 | `LESSON_NOT_FOUND` / `SESSION_NOT_FOUND` / `SESSION_QUESTION_NOT_FOUND` / `QUESTION_NOT_FOUND` | 404 | see Entry points |
 | `LESSON_LOCKED` | 403 | Free student, locked lesson |
@@ -125,11 +124,41 @@ Response `200`:
 | Key | Default | Range | Notes |
 |---|---|---|---|
 | `Avatar:MessageMaxLength` | 2000 | 1 to 4000 | at most the AI service's `ELMANHG_AI_CHAT_MAX_MESSAGE_CHARS` |
-| `Avatar:HistoryTurnMaxLength` | 4000 | 1 to 4000 | per history turn |
+| `Avatar:HistoryTurnMaxLength` | 4000 | 1 to 4000 | each stored turn is cut to this when sent back as history; the AI service rejects turns over 4000 |
 | `Avatar:MaxHistoryMessages` | 10 | 0 to 20, even | at most `ELMANHG_AI_CHAT_MAX_HISTORY_MESSAGES` |
 | `Avatar:ContextFieldMaxLength` | 8000 | 500 to 8000 | per long context field |
+| `Avatar:AdminConversationsMaxPageSize` | 100 | 1 to 200 | largest admin conversation page |
+| `Avatar:ConversationSearchMaxLength` | 200 | 1 to 500 | longest admin search text |
 
 The AI service's prompt version is `ELMANHG_AI_CHAT_PROMPT_VERSION` (default `v2`). See [deployment.md](deployment.md) for production values.
+
+## Conversation log
+
+- **When rows are written.** Only a successful reply writes. The first successful message starts an `AvatarConversation`; each reply appends two `AvatarMessage` rows (the student's message, then the reply). The conversation, its messages and the usage row are saved in one transaction. A refusal, a validation error, an AI failure or a conversation error writes nothing.
+- **`AvatarConversations`**: `Id`, `StudentId`, `EntryPoint`, `SubjectId`, `UnitId`, `LessonId`, `SessionId`, `QuestionId` (null when the entry point has none; `SessionId` only for `QuizQuestion` and `ExamReview`), `StartedAt`, `LastMessageAt`, `MessageCount`, the audit columns and an `xmin` row version. Indexes: `(StudentId, LastMessageAt)` and `LastMessageAt`.
+- **`AvatarMessages`**: `Id`, `ConversationId`, `Position` (0, 1, 2, … taken from `MessageCount`; unique per conversation), `Role` (`Student` or `Assistant`), `Text` and `CreatedAt`. Assistant rows also carry `Model`, `PromptVersion`, `InputTokens`, `OutputTokens`, `CostUsd` (`numeric(12,6)`), `StopReason`, `HistoryMessageCount` (how many earlier messages were sent), `Context` and `Citations` (jsonb). Student rows leave them null. Indexes: unique `(ConversationId, Position)` and `CreatedAt`.
+- **Context JSON** (camelCase keys and enums, nulls omitted): `{ "bundle": <the context bundle sent>, "sources": [{ "reference", "title", "content" }] }`, exactly what the model read, including the source content.
+- **Citations JSON**: the mapped citations returned to the student, `[{ "reference", "section", "sectionTitle", "lessonId", "questionId" }]`.
+- **Cost** is the AI service's `costUsd` for the reply ([ai-service.md](ai-service.md)); the fake returns 0.
+- **Append-only.** Triggers reject `UPDATE`, `DELETE` and `TRUNCATE` on `AvatarMessages`, with the same `reject_append_only_mutation()` as the attempt log. `AvatarConversations` stays mutable for `LastMessageAt` and `MessageCount`.
+- **Concurrency.** Two messages sent at once in one conversation collide on the row version or on the position index. The second returns `409 AVATAR_CONVERSATION_MODIFIED_CONCURRENTLY`, and its usage row rolls back with it.
+- **Privacy.** Rows are keyed by the real student id (operational data; #109 derives hashed-id copies). The send command is not audited, so no message text reaches `AuditLogs`, and no log line carries message text. The admin view shows the student's display name only (no phone or email). Teachers have no access. A student can only continue their own conversation id; there is no student history view.
+- **Retention.** Kept indefinitely in v1: there is no purge job, and no endpoint deletes a conversation or a message. The retention period and the erasure path belong to #109's retention and privacy review.
+- **Consumers.** #109 (training records) and #110 (JSONL export) read messages by `CreatedAt` and use the subject, unit, lesson and question references.
+
+## Admin view
+
+Admins (`AvatarConversations.View`; Students and Teachers get 403) see «محادثات المساعد» at `/admin/avatar-conversations` and each conversation at `/admin/avatar-conversation/{id}`.
+
+| Method | Route | Policy | Query | Result |
+|---|---|---|---|---|
+| GET | `/api/avatar/conversations` | `AvatarConversations.View` (Admin) | `search`, `entryPoint`, `from`, `to`, `pageNumber` (1), `pageSize` (20) | `PageData<AdminAvatarConversationResult>` |
+| GET | `/api/avatar/conversations/{conversationId}` | `AvatarConversations.View` (Admin) | — | `AdminAvatarConversationDetailResult` |
+
+- `search` is trimmed and matched case-insensitively as a substring of any message text in the conversation, or of the student's display name. `entryPoint` filters by entry point. `from` (inclusive) and `to` (exclusive) apply to `LastMessageAt`. The newest `LastMessageAt` comes first.
+- Each list item has the student's display name, the entry point, the subject and lesson names, the message count and the first student message (`firstQuestion`).
+- The detail has the summary (student, context names, start and last message, message count, total tokens, and total cost, which is null when no reply is priced) and every message in position order with its reply metadata, citations and the context sent.
+- Validation (422): `AVATAR_CONVERSATIONS_PAGE_NUMBER_INVALID`, `AVATAR_CONVERSATIONS_PAGE_SIZE_INVALID` (over `Avatar:AdminConversationsMaxPageSize`), `AVATAR_CONVERSATIONS_SEARCH_TOO_LONG` (over `Avatar:ConversationSearchMaxLength`), `AVATAR_CONVERSATIONS_ENTRY_POINT_INVALID` and `AVATAR_CONVERSATIONS_DATE_RANGE_INVALID` (`from` not before `to`). An unknown id is `404 AVATAR_CONVERSATION_NOT_FOUND`.
 
 ## Streaming
 
@@ -143,7 +172,8 @@ There is no streaming: each message gets one JSON reply, and the panel shows «�
 - The composer has «سؤالك» and «إرسال». It is disabled during an exam, at the daily limit and while a reply is pending.
 - Outcomes stay inline as notices in the conversation, not toasts: the exam refusal, the daily-limit notice (with «اشترك» for Free students), «المساعد غير متاح الآن» and a generic failure notice. After every send, successful or not, the status is refreshed.
 - If the status cannot load, the panel shows «تعذّر تحميل المساعد.» with «إعادة المحاولة».
-- Opening a different context starts a new conversation; reopening the same one keeps it.
+- Opening a different context starts a new conversation; reopening the same one keeps it. The panel keeps the `conversationId` of the open context and sends it with each message; reloading the page starts a new conversation.
+- Admins read the log in «محادثات المساعد» (see Admin view): a filterable list, and each conversation with every reply's model, prompt version, tokens, cost, stop reason, sources and the context sent.
 
 ## Eval
 
@@ -151,6 +181,6 @@ There is no streaming: each message gets one JSON reply, and the panel shows «�
 
 ## Not in this story
 
-- Persisting conversations and messages, and the admin conversation view (#92).
+- A student history view, and a retention purge (#109 review).
 - A per-student concurrency cap on avatar calls (#115).
 - Ask a Teacher (E9).

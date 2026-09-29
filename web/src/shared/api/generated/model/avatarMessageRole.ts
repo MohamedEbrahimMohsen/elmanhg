@@ -5,10 +5,10 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type AvatarTurnRole = typeof AvatarTurnRole[keyof typeof AvatarTurnRole];
+export type AvatarMessageRole = typeof AvatarMessageRole[keyof typeof AvatarMessageRole];
 
 
-export const AvatarTurnRole = {
-  User: 'User',
+export const AvatarMessageRole = {
+  Student: 'Student',
   Assistant: 'Assistant',
 } as const;

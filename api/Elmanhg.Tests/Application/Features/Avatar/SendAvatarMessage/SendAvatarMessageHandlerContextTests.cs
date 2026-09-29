@@ -78,7 +78,7 @@ public sealed class SendAvatarMessageHandlerContextTests
     {
         _harness.Quiz(answered: true);
 
-        var act = () => _harness.SendAsync(new SendAvatarMessageCommand(AvatarEntryPoint.QuizQuestion, null, Guid.NewGuid(), Guid.NewGuid(), [], "لماذا؟"));
+        var act = () => _harness.SendAsync(new SendAvatarMessageCommand(AvatarEntryPoint.QuizQuestion, null, Guid.NewGuid(), Guid.NewGuid(), null, "لماذا؟"));
 
         (await act.Should().ThrowAsync<NotFoundCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.SessionNotFound);
     }
@@ -216,7 +216,7 @@ public sealed class SendAvatarMessageHandlerContextTests
         _harness.Subjects.GetAllAsync(Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Subject>, IQueryable<Subject>>?>(), Arg.Any<Func<IQueryable<Subject>, IOrderedQueryable<Subject>>?>(), Arg.Any<bool>())
             .Returns(call => call.ArgAt<Func<IQueryable<Subject>, IOrderedQueryable<Subject>>?>(2)!(subjects.AsQueryable()).ToList());
 
-        await _harness.SendAsync(new SendAvatarMessageCommand(AvatarEntryPoint.Global, null, null, null, [], "كيف أذاكر؟"));
+        await _harness.SendAsync(new SendAvatarMessageCommand(AvatarEntryPoint.Global, null, null, null, null, "كيف أذاكر؟"));
 
         _harness.LastChat!.Context.EntryPoint.Should().Be(AiChatEntryPoint.Global);
         _harness.LastChat.Context.Subjects.Should().Equal("الفيزياء", "الأحياء");

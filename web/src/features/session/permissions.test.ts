@@ -18,6 +18,12 @@ describe('can', () => {
     expect(can('student', 'paymentsManage')).toBe(false);
   });
 
+  it('grants an admin the assistant conversations view and denies other roles', () => {
+    expect(can('admin', 'avatarConversationsView')).toBe(true);
+    expect(can('teacher', 'avatarConversationsView')).toBe(false);
+    expect(can('student', 'avatarConversationsView')).toBe(false);
+  });
+
   it('denies an admin question validation', () => {
     expect(can('admin', 'questionsValidate')).toBe(false);
   });

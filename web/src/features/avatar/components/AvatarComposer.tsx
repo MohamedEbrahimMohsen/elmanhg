@@ -31,7 +31,7 @@ export function AvatarComposer({ status }: AvatarComposerProps) {
     <Form
       form={form}
       onSubmit={async (values) => {
-        await chat.send(values.message, Number(status.maxHistoryMessages));
+        await chat.send(values.message);
         form.reset();
       }}
     >

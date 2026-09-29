@@ -1,3 +1,3 @@
 namespace Elmanhg.Application.Shared.AiService;
 
-public sealed record AiChatReply(string Reply, string Model, string PromptVersion, int InputTokens, int OutputTokens, string? StopReason, IReadOnlyList<string> Citations);
+public sealed record AiChatReply(string Reply, string Model, string PromptVersion, int InputTokens, int OutputTokens, string? StopReason, IReadOnlyList<string> Citations, decimal CostUsd);

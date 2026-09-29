@@ -18,6 +18,7 @@ import { Route as StudentRouteRouteImport } from './routes/student/route'
 import { Route as TeacherRouteRouteImport } from './routes/teacher/route'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminAuditRouteImport } from './routes/admin/audit'
+import { Route as AdminAvatarConversationsRouteImport } from './routes/admin/avatar-conversations'
 import { Route as AdminBlueprintsRouteImport } from './routes/admin/blueprints'
 import { Route as AdminContentRouteImport } from './routes/admin/content'
 import { Route as AdminExportRouteImport } from './routes/admin/export'
@@ -35,6 +36,7 @@ import { Route as StudentSubscriptionRouteImport } from './routes/student/subscr
 import { Route as TeacherIndexRouteImport } from './routes/teacher/index'
 import { Route as TeacherInboxRouteImport } from './routes/teacher/inbox'
 import { Route as TeacherStatsRouteImport } from './routes/teacher/stats'
+import { Route as AdminAvatarConversationConversationIdRouteImport } from './routes/admin/avatar-conversation.$conversationId'
 import { Route as AdminLessonLessonIdRouteImport } from './routes/admin/lesson.$lessonId'
 import { Route as AdminQuestionQuestionIdRouteImport } from './routes/admin/question.$questionId'
 import { Route as StudentCheckoutResultPaymentIdRouteImport } from './routes/student/checkout-result.$paymentId'
@@ -102,6 +104,12 @@ const AdminAuditRoute = AdminAuditRouteImport.update({
   path: '/audit',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminAvatarConversationsRoute =
+  AdminAvatarConversationsRouteImport.update({
+    id: '/avatar-conversations',
+    path: '/avatar-conversations',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
 const AdminBlueprintsRoute = AdminBlueprintsRouteImport.update({
   id: '/blueprints',
   path: '/blueprints',
@@ -187,6 +195,12 @@ const TeacherStatsRoute = TeacherStatsRouteImport.update({
   path: '/stats',
   getParentRoute: () => TeacherRouteRoute,
 } as any)
+const AdminAvatarConversationConversationIdRoute =
+  AdminAvatarConversationConversationIdRouteImport.update({
+    id: '/avatar-conversation/$conversationId',
+    path: '/avatar-conversation/$conversationId',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
 const AdminLessonLessonIdRoute = AdminLessonLessonIdRouteImport.update({
   id: '/lesson/$lessonId',
   path: '/lesson/$lessonId',
@@ -312,6 +326,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/avatar-conversations': typeof AdminAvatarConversationsRoute
   '/admin/blueprints': typeof AdminBlueprintsRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/export': typeof AdminExportRoute
@@ -330,6 +345,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/student/': typeof StudentIndexRoute
   '/teacher/': typeof TeacherIndexRoute
+  '/admin/avatar-conversation/$conversationId': typeof AdminAvatarConversationConversationIdRoute
   '/admin/lesson/$lessonId': typeof AdminLessonLessonIdRoute
   '/admin/question/$questionId': typeof AdminQuestionQuestionIdRoute
   '/student/checkout-result/$paymentId': typeof StudentCheckoutResultPaymentIdRoute
@@ -358,6 +374,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/avatar-conversations': typeof AdminAvatarConversationsRoute
   '/admin/blueprints': typeof AdminBlueprintsRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/export': typeof AdminExportRoute
@@ -376,6 +393,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/student': typeof StudentIndexRoute
   '/teacher': typeof TeacherIndexRoute
+  '/admin/avatar-conversation/$conversationId': typeof AdminAvatarConversationConversationIdRoute
   '/admin/lesson/$lessonId': typeof AdminLessonLessonIdRoute
   '/admin/question/$questionId': typeof AdminQuestionQuestionIdRoute
   '/student/checkout-result/$paymentId': typeof StudentCheckoutResultPaymentIdRoute
@@ -407,6 +425,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/avatar-conversations': typeof AdminAvatarConversationsRoute
   '/admin/blueprints': typeof AdminBlueprintsRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/export': typeof AdminExportRoute
@@ -425,6 +444,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/student/': typeof StudentIndexRoute
   '/teacher/': typeof TeacherIndexRoute
+  '/admin/avatar-conversation/$conversationId': typeof AdminAvatarConversationConversationIdRoute
   '/admin/lesson/$lessonId': typeof AdminLessonLessonIdRoute
   '/admin/question/$questionId': typeof AdminQuestionQuestionIdRoute
   '/student/checkout-result/$paymentId': typeof StudentCheckoutResultPaymentIdRoute
@@ -458,6 +478,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/admin/audit'
+    | '/admin/avatar-conversations'
     | '/admin/blueprints'
     | '/admin/content'
     | '/admin/export'
@@ -476,6 +497,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/student/'
     | '/teacher/'
+    | '/admin/avatar-conversation/$conversationId'
     | '/admin/lesson/$lessonId'
     | '/admin/question/$questionId'
     | '/student/checkout-result/$paymentId'
@@ -504,6 +526,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/admin/audit'
+    | '/admin/avatar-conversations'
     | '/admin/blueprints'
     | '/admin/content'
     | '/admin/export'
@@ -522,6 +545,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/student'
     | '/teacher'
+    | '/admin/avatar-conversation/$conversationId'
     | '/admin/lesson/$lessonId'
     | '/admin/question/$questionId'
     | '/student/checkout-result/$paymentId'
@@ -552,6 +576,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/admin/audit'
+    | '/admin/avatar-conversations'
     | '/admin/blueprints'
     | '/admin/content'
     | '/admin/export'
@@ -570,6 +595,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/student/'
     | '/teacher/'
+    | '/admin/avatar-conversation/$conversationId'
     | '/admin/lesson/$lessonId'
     | '/admin/question/$questionId'
     | '/student/checkout-result/$paymentId'
@@ -666,6 +692,13 @@ declare module '@tanstack/react-router' {
       path: '/audit'
       fullPath: '/admin/audit'
       preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/avatar-conversations': {
+      id: '/admin/avatar-conversations'
+      path: '/avatar-conversations'
+      fullPath: '/admin/avatar-conversations'
+      preLoaderRoute: typeof AdminAvatarConversationsRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/blueprints': {
@@ -786,6 +819,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/teacher/stats'
       preLoaderRoute: typeof TeacherStatsRouteImport
       parentRoute: typeof TeacherRouteRoute
+    }
+    '/admin/avatar-conversation/$conversationId': {
+      id: '/admin/avatar-conversation/$conversationId'
+      path: '/avatar-conversation/$conversationId'
+      fullPath: '/admin/avatar-conversation/$conversationId'
+      preLoaderRoute: typeof AdminAvatarConversationConversationIdRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/admin/lesson/$lessonId': {
       id: '/admin/lesson/$lessonId'
@@ -939,6 +979,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteRouteChildren {
   AdminAuditRoute: typeof AdminAuditRoute
+  AdminAvatarConversationsRoute: typeof AdminAvatarConversationsRoute
   AdminBlueprintsRoute: typeof AdminBlueprintsRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminExportRoute: typeof AdminExportRoute
@@ -947,6 +988,7 @@ interface AdminRouteRouteChildren {
   AdminQuestionsRoute: typeof AdminQuestionsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminAvatarConversationConversationIdRoute: typeof AdminAvatarConversationConversationIdRoute
   AdminLessonLessonIdRoute: typeof AdminLessonLessonIdRoute
   AdminQuestionQuestionIdRoute: typeof AdminQuestionQuestionIdRoute
   AdminQuestionImportLessonIdRoute: typeof AdminQuestionImportLessonIdRoute
@@ -955,6 +997,7 @@ interface AdminRouteRouteChildren {
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminAuditRoute: AdminAuditRoute,
+  AdminAvatarConversationsRoute: AdminAvatarConversationsRoute,
   AdminBlueprintsRoute: AdminBlueprintsRoute,
   AdminContentRoute: AdminContentRoute,
   AdminExportRoute: AdminExportRoute,
@@ -963,6 +1006,8 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminQuestionsRoute: AdminQuestionsRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminAvatarConversationConversationIdRoute:
+    AdminAvatarConversationConversationIdRoute,
   AdminLessonLessonIdRoute: AdminLessonLessonIdRoute,
   AdminQuestionQuestionIdRoute: AdminQuestionQuestionIdRoute,
   AdminQuestionImportLessonIdRoute: AdminQuestionImportLessonIdRoute,
