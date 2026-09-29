@@ -30,3 +30,4 @@ jobs:
         with:
           name: load-test-${{ inputs.profile }}
           path: deploy/.loadtest-results
+          include-hidden-files: true

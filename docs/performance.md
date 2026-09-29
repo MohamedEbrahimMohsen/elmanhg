@@ -85,7 +85,7 @@ Budget = measured × 1.05, rounded up to the next 5 KB. They are regression guar
 | `LOAD_KEY` | `loadtest` | load-test data key (subject `Load test <key>`, emails `<key>-student-NNN@loadtest.example.com`) |
 | `LOAD_STUDENT_COUNT` | `60` | students to seed; API VU n uses student n, the browser uses students 51–60 |
 
-Students think between steps (1–3 s per quiz answer or browse step, 1 s per exam answer, 5–10 s after an avatar message). Exam VUs alternate unit and multi-unit exams.
+Students think between steps (1–3 s per quiz answer or browse step, 1 s per exam answer, 5–10 s after an avatar message). Exam VUs alternate unit and multi-unit exams. Before the scenarios start, `setup()` warms the API as student 1: one quiz start and finish and one avatar message, tagged `warmup`, which has no budget. Without it the first cold quiz start (JIT, EF query compilation) is the smoke profile's `quiz_start` p95, because each quiz VU starts only two or three quizzes in 45 s.
 
 **Seed.** `--SeedLoadTestAndExit=true` sends `SeedLoadTestDataCommand` through MediatR and exits. It creates, through the domain factories: subject `Load test <key>`; 3 units × 5 published lessons (3 objectives each; even-numbered lessons carry one inline and one block formula); 30 approved MCQs per lesson (450, difficulties Easy/Medium/Hard in turn); a 20-MCQ, 30-minute, pass-mark-50 blueprint per unit; one assigned teacher; and `StudentCount` onboarded students with the subject as interest and an active Base yearly subscription. A second run adds nothing (the subject and every email are looked up first).
 

@@ -14,7 +14,9 @@ export function setup() {
     tokens.push(login(studentEmail(index)).token);
   }
 
-  return { tokens, catalog: discover(tokens[0]) };
+  const catalog = discover(tokens[0]);
+  flows.warmUp({ token: tokens[0], catalog });
+  return { tokens, catalog };
 }
 
 const context = (data) => ({ token: data.tokens[exec.vu.idInTest - 1], catalog: data.catalog, iteration: exec.vu.iterationInScenario });

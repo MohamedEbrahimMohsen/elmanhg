@@ -83,6 +83,11 @@
     "vitest": "4.1.11",
     "vitest-axe": "0.1.0"
   },
+  "overrides": {
+    "@scalar/json-magic": {
+      "undici": "7.29.1"
+    }
+  },
   "sideEffects": [
     "**/*.css"
   ]

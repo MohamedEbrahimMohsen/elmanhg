@@ -45,6 +45,7 @@ jobs:
         with:
           name: load-test-smoke
           path: deploy/.loadtest-results
+          include-hidden-files: true
 
   publish:
     needs: deploy-smoke

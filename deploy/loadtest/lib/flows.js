@@ -19,6 +19,17 @@ export const avatarBody = (lessonId) => ({
   message: 'اشرح لي فكرة الدرس باختصار.',
 });
 
+// Pays the API's first-call cost (JIT, EF query compilation) before the scenarios start. The `warmup` name carries
+// no budget: in the smoke profile a quiz VU starts only 2-3 quizzes, so one cold start would be the p95.
+export function warmUp({ token, catalog }) {
+  const started = post('/api/sessions/quiz', { lessonId: pick(allLessons(catalog)), questionCount: quizSize }, token, 'warmup');
+  if (started.status === 200) {
+    post(`/api/sessions/${started.json('id')}/finish`, undefined, token, 'warmup');
+  }
+
+  post('/api/avatar/messages', avatarBody(pick(allLessons(catalog))), token, 'warmup');
+}
+
 export function landing() {
   get('/', null, 'landing_shell');
   get('/api/questions/servable-count', null, 'servable_count');
