@@ -1,12 +1,12 @@
 # Elmanhg — autopilot progress
 
-Last updated: laptop session, after story #96 merged (main at `df47428`).
-**Next story: #97 [E9.S4] SLA timers, reminders and follow-up rules**, the first row of "Remaining stories".
+Last updated: laptop session, after story #114 merged (main at `64424c5`).
+**Next story: #104 [E11.S1] Dashboard metrics queries**, the first row of "Remaining stories".
 The laptop run did #54–#64; the cloud session did #65–#76 (see "Running in a cloud session" and "Hand-off" below).
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (42 of 60)
+## Finished stories (44 of 60)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -52,24 +52,24 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 40 | #113 [E13.S2] Observability | #212 | 3 (+main merge) | skipped (too many files) | #213 |
 | 41 | #92 [E8.S4] Conversation logging | #214 | 1 (+main merge) | skipped (too many files) | #215 |
 | 42 | #96 [E9.S3] Voice replies with transcription | #216 | 2 (+main merge) | skipped (too many files) | #217 |
+| 43 | #97 [E9.S4] SLA timers, reminders and follow-up rules | #221 | 1 (+hardening, main merge) | skipped (too many files) | #222 |
+| 44 | #114 [E13.S3] Performance targets | #219 | 2 (+CodeRabbit, CI fix) | 9 comments: 4 fixed, 5 rejected | #220 |
 
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (18), in run order
+## Remaining stories (16), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
 | Order | Issue | Story |
 |---|---|---|
-| 31 | #97 | [E9.S4] SLA timers, reminders and follow-up rules |
 | 32 | #104 | [E11.S1] Dashboard metrics queries |
 | 33 | #105 | [E11.S2] Dashboard UI |
 | 34 | #106 | [E11.S3] Student and teacher administration |
 | 35 | #107 | [E11.S4] Teacher personal stats card |
 | 36 | #109 | [E12.S1] Append-only training records |
 | 37 | #110 | [E12.S2] JSONL export |
-| 40 | #114 | [E13.S3] Performance targets |
 | 41 | #115 | [E13.S4] Security hardening |
 | 42 | #117 | [E14.S1] Essay question authoring with rubric (v2) |
 | 43 | #118 | [E14.S2] LLM essay grader (v2) |
@@ -215,14 +215,14 @@ How the next agent resumes, in a cloud session or on the laptop:
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199, #201, #204, #205, #207, #209, #211, #213, #215, #217 · `dev-decision`: none open (#135 and #155 confirmed and closed).
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199, #201, #204, #205, #207, #209, #211, #213, #215, #217, #222, #220 · `dev-decision`: none open (#135 and #155 confirmed and closed).
 ## Resume notes (safe stop for /compact, 2026-09-30)
 
 **State:** there are no running agents, no open PRs except as listed below, and the heartbeat cron is cancelled.
 
 - **#117** was merged (PR #218) before its CodeRabbit comments were triaged. The triage is in `.process/117-*/06-coderabbit-triage.md`. The valid items (an empty model answer after sanitising, and the essay-grading wording) are folded into **#118's plan**.
 - **#118 [E14.S2] LLM essay grader:** the plan is APPROVED and PARKED on branch `feature/118-llm-essay-grader` (pushed, no PR), with `.process/118-llm-essay-grader/01-plan.md` in place. **Resume here:** check out the branch, `git merge origin/main`, launch `feature-implementer` on the plan, then review, PR, CodeRabbit (read the comments BEFORE merging) and merge.
-- **#114** is being finalised: if it is not merged yet when you read this, see `../elmanhg-wt/114` (PR #219) and finish the merge.
+- **#97** (PR #221) and **#114** (PR #219) are merged. #114's CI fix added an npm `overrides` entry for undici 7.29.1 under `@scalar/json-magic` (security advisory), plus a k6 warm-up in `setup()`.
 - **Parallel lanes:** up to 3 at a time (see Conventions). After #118, the remaining stories are:
   - #119 (essay input, after #118)
   - #104–#107 dashboards
