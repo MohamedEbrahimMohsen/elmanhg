@@ -15,6 +15,7 @@ Arabic-first exam-prep platform for Egyptian Thanaweya Amma students. Students d
 | [docs/otp-delivery.md](docs/otp-delivery.md) | OTP delivery channels (WhatsApp, Email, SMS): configuration and go-live steps |
 | [docs/paymob.md](docs/paymob.md) | Paymob checkout: configuration, the fake gateway and go-live steps |
 | [docs/ai-service.md](docs/ai-service.md) | AI service: contract, service auth, config, fakes, running it |
+| [docs/content-retrieval.md](docs/content-retrieval.md) | Lesson content retrieval: chunking, re-indexing, search, rebuild |
 
 ## Folders
 
@@ -58,6 +59,8 @@ uv run pytest -m "not eval"
 ```
 
 Or in Docker: `docker compose --profile ai up -d --build ai`. The service uses a fake model until `ELMANHG_AI_LLM_PROVIDER=anthropic` is set, and the API calls it only when `AiService__Provider=Http`. See docs/ai-service.md.
+
+Embeddings for lesson retrieval are fake (deterministic lexical vectors) until `ELMANHG_AI_EMBEDDING_PROVIDER=openai` is set with `ELMANHG_AI_OPENAI_API_KEY`; the API re-indexes Published lessons in the background. See docs/content-retrieval.md.
 
 ## Run the frontend locally
 

@@ -9,6 +9,7 @@ from fastapi import FastAPI
 from pydantic import SecretStr
 from structlog.testing import LogCapture
 
+from elmanhg_ai.clients.fake_embedding import FakeEmbeddingClient
 from elmanhg_ai.clients.fake_model import FakeModelClient
 from elmanhg_ai.main import create_app
 from elmanhg_ai.settings import Settings
@@ -38,8 +39,15 @@ def fake_model() -> FakeModelClient:
 
 
 @pytest.fixture
-def app(settings: Settings, fake_model: FakeModelClient) -> FastAPI:
-    return create_app(settings, model_client=fake_model)
+def fake_embedding() -> FakeEmbeddingClient:
+    return FakeEmbeddingClient()
+
+
+@pytest.fixture
+def app(
+    settings: Settings, fake_model: FakeModelClient, fake_embedding: FakeEmbeddingClient
+) -> FastAPI:
+    return create_app(settings, model_client=fake_model, embedding_client=fake_embedding)
 
 
 @pytest.fixture
@@ -102,5 +110,13 @@ def log_capture(app: FastAPI) -> Iterator[LogCapture]:
 def anthropic_fixture() -> Callable[[str], str]:
     def read(name: str) -> str:
         return (FIXTURES / "anthropic" / name).read_text(encoding="utf-8")
+
+    return read
+
+
+@pytest.fixture
+def openai_fixture() -> Callable[[str], str]:
+    def read(name: str) -> str:
+        return (FIXTURES / "openai" / name).read_text(encoding="utf-8")
 
     return read

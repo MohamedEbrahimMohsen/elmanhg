@@ -17,4 +17,5 @@ def test_openapi_document_matches_committed_file() -> None:
 
     assert committed == document
     assert "/v1/chat" in document["paths"]
+    assert "/v1/embeddings" in document["paths"]
     assert not any(path.startswith("/health") for path in document["paths"])

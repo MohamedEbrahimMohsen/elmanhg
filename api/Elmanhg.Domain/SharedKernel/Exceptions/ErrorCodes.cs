@@ -63,4 +63,7 @@ public static class ErrorCodes
     public const string PaymentAlreadyRefunded = "PAYMENT_ALREADY_REFUNDED";
     public const string PaymentNotRefundable = "PAYMENT_NOT_REFUNDABLE";
     public const string PaymentReviewNotOpen = "PAYMENT_REVIEW_NOT_OPEN";
+
+    // CONTENT RETRIEVAL
+    public const string ContentEmbeddingDimensionsInvalid = "CONTENT_EMBEDDING_DIMENSIONS_INVALID";
 }
