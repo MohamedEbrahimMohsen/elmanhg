@@ -1,6 +1,7 @@
 using Elmanhg.Tests.Integration.Auth;
 using Elmanhg.Tests.Integration.Authorization;
 using Elmanhg.Tests.Integration.Infrastructure;
+using Elmanhg.Tests.Integration.TeacherThreads;
 using FluentAssertions;
 using System.Net;
 using System.Net.Http.Json;
@@ -42,6 +43,18 @@ public sealed class UsageEndpointTests(ApiFactory factory)
 
         body.GetProperty("tier").GetString().Should().Be("Base");
         (body.GetProperty("dailyQuizQuestionLimit").ValueKind, body.GetProperty("quizQuestionsRemainingToday").ValueKind).Should().Be((JsonValueKind.Null, JsonValueKind.Null));
+    }
+
+    [Fact]
+    public async Task Get_AskTeacherStudentWithThreadsThisMonth_ReturnsMonthlyQuota()
+    {
+        var (subjectId, _) = await TeacherThreadTestData.SeedPublishedLessonAsync(factory);
+        var (student, client) = await TeacherThreadTestData.SignedInAskTeacherStudentAsync(factory);
+        await TeacherThreadTestData.SeedThreadsAsync(factory, student.Id, subjectId, 2, DateTimeOffset.UtcNow);
+
+        var body = await client.GetFromJsonAsync<JsonElement>(UsageRoute, CancellationToken);
+
+        (body.GetProperty("monthlyAskTeacherQuestionLimit").GetInt32(), body.GetProperty("askTeacherQuestionsUsedThisMonth").GetInt32(), body.GetProperty("askTeacherQuestionsRemainingThisMonth").GetInt32()).Should().Be((20, 2, 18));
     }
 
     [Fact]

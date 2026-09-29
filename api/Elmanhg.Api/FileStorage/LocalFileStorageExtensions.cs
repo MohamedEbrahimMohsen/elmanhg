@@ -1,3 +1,4 @@
+using Elmanhg.Application.TeacherThreads.CreateTeacherThread;
 using Elmanhg.Infrastructure.Storage;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
@@ -16,9 +17,11 @@ public static class LocalFileStorageExtensions
 
         var root = Path.GetFullPath(options.LocalRootPath, app.Environment.ContentRootPath);
         Directory.CreateDirectory(root);
+        var files = new PhysicalFileProvider(root);
+        app.UseMiddleware<TeacherThreadMediaMiddleware>(files, new PathString(options.PublicBaseUrl));
         app.UseStaticFiles(new StaticFileOptions
         {
-            FileProvider = new PhysicalFileProvider(root),
+            FileProvider = new PublicMediaFileProvider(files, [TeacherThreadImageFormats.StorageFolder]),
             RequestPath = options.PublicBaseUrl,
             OnPrepareResponse = context =>
             {

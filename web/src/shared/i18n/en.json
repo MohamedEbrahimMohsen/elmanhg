@@ -214,7 +214,27 @@
     "LESSON_ALREADY_OPENED": "This lesson opening was already recorded.",
     "QUIZ_DAILY_LIMIT_REACHED": "You have reached the free plan's daily limit.",
     "LESSON_LOCKED": "This lesson is for subscribers only.",
-    "EXAM_REQUIRES_SUBSCRIPTION": "Exams are included in the Base plan."
+    "EXAM_REQUIRES_SUBSCRIPTION": "Exams are included in the Base plan.",
+    "TEACHER_MESSAGE_TEXT_REQUIRED": "The message text is required.",
+    "TEACHER_THREAD_NOT_FOUND": "The question was not found.",
+    "ATTEMPT_NOT_FOUND": "The attempt was not found.",
+    "TEACHER_THREAD_EXAM_IN_PROGRESS": "Finish your exam before asking a teacher about its questions.",
+    "ASK_TEACHER_REQUIRES_SUBSCRIPTION": "Ask a Teacher needs the add-on with an active Base plan.",
+    "ASK_TEACHER_MONTHLY_LIMIT_REACHED": "You have used all your questions for this month.",
+    "TEACHER_THREAD_CONTEXT_INVALID": "Attach exactly one lesson, question or attempt.",
+    "TEACHER_THREAD_TEXT_REQUIRED": "Write your question.",
+    "TEACHER_THREAD_TEXT_TOO_LONG": "The question is too long.",
+    "TEACHER_THREAD_IMAGE_TYPE_INVALID": "The image must be PNG, JPG or WEBP.",
+    "TEACHER_THREAD_IMAGE_TOO_LARGE": "The image is too large.",
+    "TEACHER_THREAD_PAGE_NUMBER_INVALID": "The page number is not valid.",
+    "TEACHER_THREAD_PAGE_SIZE_INVALID": "The page size is not valid.",
+    "TEACHER_THREAD_ALREADY_CLAIMED": "Another teacher has already claimed this question.",
+    "TEACHER_THREAD_NOT_CLAIMED": "Claim the question before replying.",
+    "TEACHER_THREAD_NOT_AWAITING_REPLY": "This question is not waiting for a reply.",
+    "TEACHER_THREAD_MODIFIED_CONCURRENTLY": "The conversation just changed. Reload it and try again.",
+    "TEACHER_THREAD_REPLY_TEXT_REQUIRED": "Write your reply.",
+    "TEACHER_THREAD_REPLY_TEXT_TOO_LONG": "The reply is too long.",
+    "TEACHER_INBOX_FILTER_INVALID": "The inbox filter is not valid."
   },
   "error": {
     "title": "Something went wrong"

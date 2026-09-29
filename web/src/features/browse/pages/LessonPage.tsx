@@ -1,5 +1,6 @@
 import { Outlet } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
+import { AskTeacherLink } from '@/features/askTeacher';
 import { AskAvatarButton } from '@/features/avatar';
 import { ContentErrorState, ContentListSkeleton } from '@/features/content';
 import { useGetStudentLesson } from '@/shared/api/generated/browse/browse';
@@ -55,6 +56,7 @@ export function LessonPage({ lessonId }: LessonPageProps) {
           <LessonTabs lessonId={lessonId} />
           <Outlet />
           <AskAvatarButton context={{ entryPoint: 'Lesson', lessonId, title: data.name }} label="lesson" />
+          <AskTeacherLink lessonId={lessonId} />
         </>
       )}
       <LessonNavigation lesson={data} />

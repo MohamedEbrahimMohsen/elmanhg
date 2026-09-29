@@ -398,7 +398,8 @@ Prices, billing periods and quotas are configuration (`Subscriptions` section, s
 
 ### 12.1 Flow
 
-1. Student (with add-on) opens "اسأل معلّم" from a lesson or question. Context (subject/unit/lesson/question) is attached automatically; student writes text and may attach an image (e.g. a photo of their work).
+1. Student (with add-on) opens "اسأل معلّم" from a lesson or question, or the quiz attempt being asked about. Context (subject/unit/lesson/question) is attached automatically; student writes text and may attach an image (e.g. a photo of their work).
+   Each new question counts against the monthly quota, which resets on the 1st of each calendar month in `DailyQuotaTimeZone` (Africa/Cairo); a follow-up does not count. The student may attach one photo (PNG, JPG or WEBP). Photos are private: only the owning student, a teacher assigned to the thread's subject, or an admin can open one (`docs/ask-teacher.md`).
 2. The thread is routed to the queue of teachers assigned to that subject. First teacher to claim it owns it.
 3. SLA clock starts at submission. Reminders to the teacher at 12h and 20h; admin alert on breach.
 4. Teacher replies with **text or voice**. Voice is recorded in-browser, stored, and transcribed to Arabic text automatically. The teacher sees the transcript and can correct it before sending.
@@ -474,9 +475,8 @@ QuestionMastery(student_id, question_id, mastered bool, latest_attempt_id, lates
 Subscription(id, student_id, plan[Base|AskTeacher], period[Monthly|Termly|Yearly], status[Active|PastDue|Cancelled|Expired], current_period_start, current_period_end, cancelled_at?, expired_at?, paymob_ref?)
 Payment(id, student_id, subscription_id?, plan, period, period_months, amount_minor, currency, status[Pending|Succeeded|Failed|Refunded], paymob_txn_id?, provider_order_id?, raw_webhook_json?, completed_at?, review_reason?, review_resolved_at?, review_resolved_by?, refunded_at?, refunded_by?, refund_reason?, refund_transaction_id?, refund_idempotency_key?, created_at)  -- docs/subscriptions.md
 
-TeacherThread(id, student_id, teacher_id?, subject_id, context_json, status,
-              submitted_at, sla_due_at, closed_at, rating?)
-TeacherMessage(id, thread_id, sender_id, kind[Text|Voice], text, audio_url?, transcript_final bool, created_at)
+TeacherThread(id, student_id, teacher_id?, subject_id, context_json, status[Open|Answered|Closed], submitted_at, sla_due_at, claimed_at?, closed_at?, rating?)  -- docs/ask-teacher.md
+TeacherMessage(id, thread_id, sender_id, kind[Text|Voice], text, image_url?, audio_url?, transcript_final bool, student_read_at?, created_at)
 
 AvatarConversation(id, student_id, context_json, model, prompt_version, started_at)
 AvatarMessage(id, conversation_id, role, text, created_at)
@@ -572,4 +572,4 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 | Attempt | One answer to one question |
 | Mastered | Correct on the last two attempts |
 | Blueprint | Per-unit recipe of question counts per type for an exam |
-| Context bundle | The subject/unit/lesson/question ids attached to an Avatar or teacher thread |
+| Context bundle | The subject/unit/lesson/question ids attached to an Avatar or teacher thread; a teacher thread also keeps the attempt id when asked from a quiz answer |

@@ -1,0 +1,96 @@
+{
+  "link": "اسأل معلّم",
+  "upsell": {
+    "body": "هذه الخدمة إضافة مدفوعة وتتطلب الباقة الأساسية.",
+    "cta": "الاشتراك"
+  },
+  "list": {
+    "title": "اسأل معلّم",
+    "new": "سؤال جديد",
+    "allowance": "الرصيد الشهري: {used} / {limit}",
+    "loading": "جارٍ تحميل أسئلتك…",
+    "errorTitle": "تعذّر تحميل أسئلتك",
+    "empty": "لا توجد أسئلة.",
+    "meta": "{subject} / {lesson} · {date}"
+  },
+  "badge": {
+    "closed": "مغلق",
+    "overdue": "متأخر",
+    "awaiting": "بانتظار الرد · متبقٍ {hours, plural, zero {أقل من ساعة} one {ساعة واحدة} two {ساعتان} few {# ساعات} many {# ساعة} other {# ساعة}}",
+    "answered": "تم الرد",
+    "newReply": "رد جديد"
+  },
+  "new": {
+    "title": "سؤال جديد للمعلّم",
+    "quotaUsed": "استخدمت كل أسئلتك لهذا الشهر ({limit}).",
+    "backToList": "العودة إلى أسئلتي"
+  },
+  "context": {
+    "label": "السياق المرفق تلقائيًا",
+    "path": "{subject} / {unit} / {lesson}",
+    "question": "السؤال:",
+    "loading": "جارٍ تحميل السياق…",
+    "errorTitle": "تعذّر تحميل السياق"
+  },
+  "picker": {
+    "subject": "المادة",
+    "chooseSubject": "اختر المادة",
+    "lesson": "الدرس",
+    "chooseLesson": "اختر الدرس"
+  },
+  "form": {
+    "text": "سؤالك",
+    "textHint": "اكتب سؤالك للمعلّم",
+    "textRequired": "اكتب سؤالك",
+    "lessonRequired": "اختر الدرس",
+    "image": "إرفاق صورة لحلّك (اختياري)",
+    "slaNote": "سيُرسل السؤال لمعلّمي المادة، ومهلة الرد {hours} ساعة.",
+    "send": "إرسال"
+  },
+  "toast": {
+    "sent": "تم إرسال سؤالك."
+  },
+  "thread": {
+    "title": "المحادثة",
+    "breadcrumb": "مسار التنقل",
+    "path": "المادة: {subject} · الدرس: {lesson}",
+    "due": "موعد الرد: {date}",
+    "you": "أنت",
+    "teacher": "المعلّم",
+    "imageAlt": "صورة مرفقة بالسؤال",
+    "imageLoading": "جارٍ تحميل الصورة…",
+    "imageError": "تعذّر تحميل الصورة",
+    "loading": "جارٍ تحميل المحادثة…",
+    "errorTitle": "تعذّر تحميل المحادثة"
+  },
+  "inbox": {
+    "title": "أسئلة الطلاب",
+    "filters": {
+      "label": "تصفية الأسئلة",
+      "All": "الكل",
+      "Unclaimed": "غير مُستلمة",
+      "Mine": "الخاصة بي"
+    },
+    "loading": "جارٍ تحميل أسئلة الطلاب…",
+    "errorTitle": "تعذّر تحميل أسئلة الطلاب",
+    "empty": "لا توجد أسئلة.",
+    "meta": "{subject} / {lesson} · {student} · {date}",
+    "unclaimed": "غير مُستلم",
+    "claimedByMe": "مستلم بواسطتك",
+    "claimedBy": "المعلّم: {teacher}"
+  },
+  "inboxThread": {
+    "people": "الطالب: {student} · المعلّم: {teacher}",
+    "claim": "استلام السؤال",
+    "claimed": "تم استلام السؤال.",
+    "claimedByOther": "هذه المحادثة مستلمة بواسطة معلّم آخر.",
+    "replyTitle": "الرد",
+    "replyLabel": "ردّك",
+    "replyHint": "اكتب ردك",
+    "replyRequired": "اكتب الرد",
+    "send": "إرسال الرد",
+    "sent": "تم إرسال الرد.",
+    "answered": "تم الرد على هذا السؤال.",
+    "closed": "أُغلق هذا السؤال."
+  }
+}

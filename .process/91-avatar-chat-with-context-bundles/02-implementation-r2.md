@@ -50,3 +50,27 @@ Rework for `03-review.md` (CHANGES_REQUESTED): blocking #1, plus two orchestrato
 - The withheld set is not limited to the lesson being asked about. That is harmless, because only chunks of that lesson are searched.
 - The one comment in `AvatarWithheldQuestions` points to the sessions.md invariant, because the exam-versus-quiz rule is not obvious from the code.
 - `docs/subscriptions.md:165` and `docs/sessions.md:63` describe the **quiz** quota as "two parallel answers can both pass". That understates it in the same way, but it is outside #91 and I left it unchanged.
+
+## Main merge
+
+Story work committed as `d2f75dd` (`feat(E8.S3): avatar chat with context bundles`), then `origin/main` (#94 teacher threads, #95 teacher inbox) merged in.
+
+| Conflict | Resolution |
+|---|---|
+| `api/Elmanhg.Tests/Integration/Persistence/AppDbContextTests.cs` | Migration list holds all 28 in timestamp order: ... `_AddLessonContentIndex`, `_AddTeacherThreads`, `_AddAvatarMessageUsages`, `_AddTeacherThreadClaims`. The model snapshot auto-merged; the pending-model-changes check passes. |
+| `deploy/api.env.example`, `docs/deployment.md` | Both sections kept: AI Avatar, then Ask a Teacher. |
+| `docs/claude-design-prompt.md` | Main's Ask a Teacher lines kept; lesson line says «اسأل المساعد عن الدرس» opens the assistant, quiz feedback lists both «اسأل المساعد» and «اسأل معلّم». |
+| `docs/subscriptions.md` | "For later stories": #91 (done) and #94 (done) both recorded. |
+| `postman/elmanhg.postman_collection.json` | Main's collection plus the `Avatar` folder (before `AskTeacher`). |
+| `web/src/app/i18n.ts` | Both `avatar` and `askTeacher` namespaces. |
+| `web/src/features/browse/pages/LessonPage.tsx` | `AskAvatarButton` (lesson context) followed by `AskTeacherLink`. |
+| `web/src/features/quiz/components/FeedbackPanel.tsx`, `QuizQuestionCard.tsx` | Story interaction: main added a `children` slot next to the old quiz-local `AskAvatarButton` (deleted by this story). `FeedbackPanel` now takes both `ask` (avatar context) and `children`, rendering `<AskAvatarButton context={ask} />` and `AskTeacherLink attemptId` in main's flex row. |
+
+Generated files (`api/openapi/v1.json`, Orval output) regenerated with `dotnet build` and `npm --prefix web run gen:api`; both matched the merged content, no diff.
+
+### Verification (after the merge)
+- `dotnet build` (api/): 0 errors.
+- `dotnet test api/ -c Release` (appsettings.json moved aside, restored): 3019 passed, 0 failed.
+- web `typecheck`: clean. `lint`: clean. `test -- --run`: 159 files, 936 tests passed.
+- `prettier --check . --end-of-line auto`: clean (after formatting `FeedbackPanel.tsx`).
+- ai (`python -m uv`): `sync --locked` ok, `ruff format --check` ok, `ruff check` ok, `mypy src` ok, `pytest -m "not eval"` 135 passed.

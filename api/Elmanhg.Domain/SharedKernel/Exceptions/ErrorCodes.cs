@@ -51,6 +51,12 @@ public static class ErrorCodes
     public const string ExamTimeExpired = "EXAM_TIME_EXPIRED";
     public const string ExamShortfall = "EXAM_SHORTFALL";
 
+    // TEACHER THREADS
+    public const string TeacherMessageTextRequired = "TEACHER_MESSAGE_TEXT_REQUIRED";
+    public const string TeacherThreadAlreadyClaimed = "TEACHER_THREAD_ALREADY_CLAIMED";
+    public const string TeacherThreadNotClaimed = "TEACHER_THREAD_NOT_CLAIMED";
+    public const string TeacherThreadNotAwaitingReply = "TEACHER_THREAD_NOT_AWAITING_REPLY";
+
     // SUBSCRIPTIONS
     public const string SubscriptionPeriodInvalid = "SUBSCRIPTION_PERIOD_INVALID";
     public const string SubscriptionNotActive = "SUBSCRIPTION_NOT_ACTIVE";

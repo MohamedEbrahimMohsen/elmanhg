@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { CircleAlert, CircleCheck, CircleX } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { AskAvatarButton, type AvatarContextInput } from '@/features/avatar';
@@ -14,6 +15,7 @@ export interface FeedbackPanelProps {
   attempt: AttemptResult;
   question: StudentQuestion;
   ask: AvatarContextInput;
+  children?: ReactNode;
 }
 
 const verdicts = {
@@ -36,7 +38,7 @@ function toVerdict(outcome: string): keyof typeof verdicts {
   return outcome === 'Correct' || outcome === 'Partial' ? outcome : 'Incorrect';
 }
 
-export function FeedbackPanel({ item, attempt, question, ask }: FeedbackPanelProps) {
+export function FeedbackPanel({ item, attempt, question, ask, children }: FeedbackPanelProps) {
   const { t, i18n } = useTranslation('quiz');
   const lng = i18n.resolvedLanguage ?? i18n.language;
   const verdict = verdicts[toVerdict(attempt.outcome)];
@@ -79,7 +81,10 @@ export function FeedbackPanel({ item, attempt, question, ask }: FeedbackPanelPro
           </div>
         </div>
       ) : null}
-      <AskAvatarButton context={ask} />
+      <div className="flex flex-wrap items-start gap-2">
+        <AskAvatarButton context={ask} />
+        {children}
+      </div>
     </div>
   );
 }

@@ -126,6 +126,9 @@ export function freeUsage(overrides?: Partial<UsageResult>): UsageResult {
     quizQuestionsUsedToday: 3,
     quizQuestionsRemainingToday: 7,
     dailyAvatarMessageLimit: 5,
+    monthlyAskTeacherQuestionLimit: 0,
+    askTeacherQuestionsUsedThisMonth: 0,
+    askTeacherQuestionsRemainingThisMonth: 0,
     ...overrides,
   };
 }
@@ -138,5 +141,8 @@ export function baseUsage(): UsageResult {
     quizQuestionsUsedToday: 0,
     quizQuestionsRemainingToday: null,
     dailyAvatarMessageLimit: 50,
+    monthlyAskTeacherQuestionLimit: 0,
+    askTeacherQuestionsUsedThisMonth: 0,
+    askTeacherQuestionsRemainingThisMonth: 0,
   };
 }

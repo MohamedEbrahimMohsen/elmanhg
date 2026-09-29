@@ -165,13 +165,22 @@ Every gate loads entitlement through `StudentEntitlementLoader.LoadAsync` before
 - **Known limit:** the quota is a soft limit. Two answers sent in parallel at 9/10 can both pass; there is no lock.
 - `GET /api/subscriptions/usage` returns today's count for the counters on Home, the practice tab and the quiz screen. The web opens a paywall dialog on each of the three codes; «اشترك» opens `/student/subscription`, «لاحقًا» closes it. A fake payment success refreshes the entitlement, usage, browse, mastery and exam views.
 
+## Ask a Teacher quota
+
+`AskTeacherGate` (`Application/TeacherThreads/Shared`) guards `POST /api/teacher-threads`, after the entitlement is loaded through `StudentEntitlementLoader`.
+
+- **Gate order:** validation `422` → user `401` → no add-on `403 ASK_TEACHER_REQUIRES_SUBSCRIPTION` → quota `403 ASK_TEACHER_MONTHLY_LIMIT_REACHED` (context `limit`) → context `404`s → the photo is stored → one save. Nothing is stored when a check fails.
+- **What counts:** threads the student submitted in the current calendar month of `DailyQuotaTimeZone` (Africa/Cairo); the month's bounds are converted to UTC. The quota resets on the 1st. A follow-up (#95) does not count. The limit is `AskTeacherMonthlyQuestions`, 0 without the add-on.
+- **Known limit:** the quota is a soft limit, like the quiz quota. Two questions sent in parallel at 19/20 can both pass.
+- See `docs/ask-teacher.md` for the thread model, context rules and photo access.
+
 ## API
 
 | Method | Route | Policy | Response |
 |---|---|---|---|
 | GET | `/api/plans` | anonymous | `PlanCatalogueResult`: `free` limits, `base` Avatar limit and prices ordered by months, `askTeacher` quota, SLA and its single monthly price |
 | GET | `/api/subscriptions/entitlement` | `Subscription.Manage` (Student) | `EntitlementResult`: `tier` (`Free`/`Base`), `hasAskTeacher`, `canTakeExams`, the limits (`null` = unlimited) and the entitled `subscriptions` with `entitledUntil`, `inGracePeriod` (Active or PastDue with `currentPeriodEnd` ≤ now) and `canRenew` (checkout would accept this plan now) |
-| GET | `/api/subscriptions/usage` | `Subscription.Manage` (Student) | `UsageResult`: `tier`, `hasAskTeacher`, `dailyQuizQuestionLimit` (`null` = unlimited), `quizQuestionsUsedToday`, `quizQuestionsRemainingToday` (`null` = unlimited, never below 0) and `dailyAvatarMessageLimit` |
+| GET | `/api/subscriptions/usage` | `Subscription.Manage` (Student) | `UsageResult`: `tier`, `hasAskTeacher`, `dailyQuizQuestionLimit` (`null` = unlimited), `quizQuestionsUsedToday`, `quizQuestionsRemainingToday` (`null` = unlimited, never below 0), `dailyAvatarMessageLimit`, `monthlyAskTeacherQuestionLimit` (0 without the add-on), `askTeacherQuestionsUsedThisMonth` and `askTeacherQuestionsRemainingThisMonth` (never below 0) |
 | GET | `/api/subscriptions/payments?pageNumber&pageSize` | `Subscription.Manage` (Student) | `PageData<PaymentResult>`; `422 PAYMENT_HISTORY_PAGE_NUMBER_INVALID` / `PAYMENT_HISTORY_PAGE_SIZE_INVALID` |
 | POST | `/api/subscriptions/checkout` | `Subscription.Manage` (Student) | `CheckoutResult`; `400 CHECKOUT_PLAN_ALREADY_ACTIVE` (held plan outside the renewal window) / `CHECKOUT_REQUIRES_BASE`; `422` validation; `503 PAYMENT_GATEWAY_UNAVAILABLE` |
 | GET | `/api/subscriptions/payments/{paymentId}` | `Subscription.Manage` (Student) | `PaymentResult` (Pending included); `404 PAYMENT_NOT_FOUND` |
@@ -186,7 +195,7 @@ Enum values travel as PascalCase strings. The web page `/student/subscription` s
 
 ## For later stories
 
-- **Gates** call `StudentEntitlementLoader.LoadAsync(subscriptionRepository, studentId, options, now, cancellationToken)`. It is the one definition of entitlement and limits. **#87** (done): the Free tier gates above. **#91** (done) enforces the Avatar quota through the same loader, and its counters are served by `GET /api/avatar/status` ([avatar.md](avatar.md)); `UsageResult.dailyAvatarMessageLimit` still exposes the limit. **#94** (Ask a Teacher) adds its counters to `UsageResult` and enforces its quota through the same loader.
+- **Gates** call `StudentEntitlementLoader.LoadAsync(subscriptionRepository, studentId, options, now, cancellationToken)`. It is the one definition of entitlement and limits. **#87** (done): the Free tier gates above. **#91** (done) enforces the Avatar quota through the same loader, and its counters are served by `GET /api/avatar/status` ([avatar.md](avatar.md)); `UsageResult.dailyAvatarMessageLimit` still exposes the limit. **#94** (done): Ask a Teacher counters in `UsageResult` and the create gate (`AskTeacherGate`).
 - **#100** (done): checkout, the Pending payment, the fake gateway and the result page (see Checkout).
 - **#101** (done): the webhook, renewal, the lapse sweep and the student cancel (see above).
 - **#102** (done): `PaymentStatus.Refunded`, admin refunds, signed refund and void callbacks, and the admin payment log with its review queue (see Refunds and Admin payment log). Automatic detection of overlapping subscriptions (the known limit under Webhook) is a follow-up issue.

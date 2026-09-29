@@ -34,6 +34,8 @@ export default defineConfig({
           GetValidationQueue: { zod: { generate: { query: false } } },
           GetSessionHistory: { zod: { generate: { query: false } } },
           GetMyPayments: { zod: { generate: { query: false } } },
+          GetMyTeacherThreads: { zod: { generate: { query: false } } },
+          GetTeacherInbox: { zod: { generate: { query: false } } },
           GetPaymentLog: { zod: { generate: { query: false } } },
         },
       },

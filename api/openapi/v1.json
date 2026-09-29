@@ -203,6 +203,268 @@
         }
       }
     },
+    "/api/teacher-threads/context": {
+      "get": {
+        "tags": [
+          "TeacherThreads"
+        ],
+        "operationId": "GetTeacherThreadContext",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "attemptId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherThreadContextResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherThreadContextResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherThreadContextResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher-threads": {
+      "get": {
+        "tags": [
+          "TeacherThreads"
+        ],
+        "operationId": "GetMyTeacherThreads",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfTeacherThreadSummaryResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfTeacherThreadSummaryResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfTeacherThreadSummaryResult"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "TeacherThreads"
+        ],
+        "operationId": "CreateTeacherThread",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "lessonId": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "questionId": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "attemptId": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "image": {
+                        "$ref": "#/components/schemas/IFormFile"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherThreadResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherThreadResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherThreadResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher-threads/{threadId}": {
+      "get": {
+        "tags": [
+          "TeacherThreads"
+        ],
+        "operationId": "GetMyTeacherThread",
+        "parameters": [
+          {
+            "name": "threadId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherThreadResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherThreadResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherThreadResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher-threads/{threadId}/read": {
+      "post": {
+        "tags": [
+          "TeacherThreads"
+        ],
+        "operationId": "MarkTeacherThreadRead",
+        "parameters": [
+          {
+            "name": "threadId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/teachers": {
       "get": {
         "tags": [
@@ -319,6 +581,215 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/teacher-inbox": {
+      "get": {
+        "tags": [
+          "TeacherInbox"
+        ],
+        "operationId": "GetTeacherInbox",
+        "parameters": [
+          {
+            "name": "filter",
+            "in": "query",
+            "schema": {
+              "default": "All",
+              "$ref": "#/components/schemas/TeacherInboxFilter"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfTeacherInboxItemResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfTeacherInboxItemResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfTeacherInboxItemResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher-inbox/{threadId}": {
+      "get": {
+        "tags": [
+          "TeacherInbox"
+        ],
+        "operationId": "GetInboxThread",
+        "parameters": [
+          {
+            "name": "threadId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher-inbox/{threadId}/claim": {
+      "post": {
+        "tags": [
+          "TeacherInbox"
+        ],
+        "operationId": "ClaimTeacherThread",
+        "parameters": [
+          {
+            "name": "threadId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher-inbox/{threadId}/replies": {
+      "post": {
+        "tags": [
+          "TeacherInbox"
+        ],
+        "operationId": "ReplyToTeacherThread",
+        "parameters": [
+          {
+            "name": "threadId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplyToTeacherThreadRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplyToTeacherThreadRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplyToTeacherThreadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              }
+            }
           }
         }
       }
@@ -7217,6 +7688,92 @@
           }
         }
       },
+      "PageDataOfTeacherInboxItemResult": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeacherInboxItemResult"
+            }
+          },
+          "pageNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalItems": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "PageDataOfTeacherThreadSummaryResult": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeacherThreadSummaryResult"
+            }
+          },
+          "pageNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalItems": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
       "PageDataOfValidationQueueItemResult": {
         "type": "object",
         "properties": {
@@ -7868,6 +8425,20 @@
             "format": "int32"
           },
           "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "ReplyToTeacherThreadRequest": {
+        "required": [
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "text": {
             "type": [
               "null",
               "string"
@@ -9141,6 +9712,184 @@
           "Expired"
         ]
       },
+      "TeacherInboxFilter": {
+        "enum": [
+          "All",
+          "Unclaimed",
+          "Mine"
+        ]
+      },
+      "TeacherInboxItemResult": {
+        "required": [
+          "id",
+          "subjectName",
+          "lessonName",
+          "questionText",
+          "studentName",
+          "teacherName",
+          "isClaimedByMe",
+          "status",
+          "isOverdue",
+          "submittedAt",
+          "slaDueAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "lessonName": {
+            "type": "string"
+          },
+          "questionText": {
+            "type": "string"
+          },
+          "studentName": {
+            "type": "string"
+          },
+          "teacherName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isClaimedByMe": {
+            "type": "boolean"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TeacherThreadStatus"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "slaDueAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TeacherInboxThreadResult": {
+        "required": [
+          "id",
+          "context",
+          "studentName",
+          "teacherName",
+          "isClaimedByMe",
+          "canClaim",
+          "canReply",
+          "status",
+          "isOverdue",
+          "submittedAt",
+          "slaDueAt",
+          "claimedAt",
+          "messages"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "context": {
+            "$ref": "#/components/schemas/TeacherThreadContextResult"
+          },
+          "studentName": {
+            "type": "string"
+          },
+          "teacherName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isClaimedByMe": {
+            "type": "boolean"
+          },
+          "canClaim": {
+            "type": "boolean"
+          },
+          "canReply": {
+            "type": "boolean"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TeacherThreadStatus"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "slaDueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "claimedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeacherMessageResult"
+            }
+          }
+        }
+      },
+      "TeacherMessageKind": {
+        "enum": [
+          "Text",
+          "Voice"
+        ]
+      },
+      "TeacherMessageResult": {
+        "required": [
+          "id",
+          "isFromStudent",
+          "kind",
+          "text",
+          "imageUrl",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "isFromStudent": {
+            "type": "boolean"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/TeacherMessageKind"
+          },
+          "text": {
+            "type": "string"
+          },
+          "imageUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "TeacherResult": {
         "required": [
           "id",
@@ -9176,6 +9925,171 @@
           "assignedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "TeacherThreadContextResult": {
+        "required": [
+          "subjectId",
+          "subjectName",
+          "unitId",
+          "unitName",
+          "lessonId",
+          "lessonName",
+          "questionId",
+          "questionVersion",
+          "questionStem",
+          "attemptId"
+        ],
+        "type": "object",
+        "properties": {
+          "subjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitName": {
+            "type": "string"
+          },
+          "lessonId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lessonName": {
+            "type": "string"
+          },
+          "questionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "questionVersion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "questionStem": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "attemptId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          }
+        }
+      },
+      "TeacherThreadResult": {
+        "required": [
+          "id",
+          "context",
+          "status",
+          "isOverdue",
+          "submittedAt",
+          "slaDueAt",
+          "messages",
+          "hasUnreadReply"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "context": {
+            "$ref": "#/components/schemas/TeacherThreadContextResult"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TeacherThreadStatus"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "slaDueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeacherMessageResult"
+            }
+          },
+          "hasUnreadReply": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TeacherThreadStatus": {
+        "enum": [
+          "Open",
+          "Answered",
+          "Closed"
+        ]
+      },
+      "TeacherThreadSummaryResult": {
+        "required": [
+          "id",
+          "subjectName",
+          "lessonName",
+          "questionText",
+          "status",
+          "isOverdue",
+          "submittedAt",
+          "slaDueAt",
+          "hasUnreadReply"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "lessonName": {
+            "type": "string"
+          },
+          "questionText": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TeacherThreadStatus"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "slaDueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hasUnreadReply": {
+            "type": "boolean"
           }
         }
       },
@@ -9605,7 +10519,10 @@
           "dailyQuizQuestionLimit",
           "quizQuestionsUsedToday",
           "quizQuestionsRemainingToday",
-          "dailyAvatarMessageLimit"
+          "dailyAvatarMessageLimit",
+          "monthlyAskTeacherQuestionLimit",
+          "askTeacherQuestionsUsedThisMonth",
+          "askTeacherQuestionsRemainingThisMonth"
         ],
         "type": "object",
         "properties": {
@@ -9642,6 +10559,30 @@
             "format": "int32"
           },
           "dailyAvatarMessageLimit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "monthlyAskTeacherQuestionLimit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "askTeacherQuestionsUsedThisMonth": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "askTeacherQuestionsRemainingThisMonth": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": [
               "integer",
@@ -10125,7 +11066,13 @@
       "name": "Units"
     },
     {
+      "name": "TeacherThreads"
+    },
+    {
       "name": "Teachers"
+    },
+    {
+      "name": "TeacherInbox"
     },
     {
       "name": "Plans"
