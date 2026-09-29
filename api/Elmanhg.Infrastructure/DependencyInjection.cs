@@ -13,6 +13,7 @@ using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.Units;
+using Elmanhg.Infrastructure.AiService;
 using Elmanhg.Infrastructure.Analytics;
 using Elmanhg.Infrastructure.ExamBlueprints;
 using Elmanhg.Infrastructure.Identity;
@@ -41,6 +42,7 @@ public static class DependencyInjection
     {
         services.AddOtpDelivery();
         services.AddPayments();
+        services.AddAiService();
         services.AddOptions<FileStorageOptions>().BindConfiguration(FileStorageOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddScoped<LocalDiskFileStorage>();
         services.AddScoped<IFileStorage>(serviceProvider => serviceProvider.GetRequiredService<IOptions<FileStorageOptions>>().Value.Provider switch

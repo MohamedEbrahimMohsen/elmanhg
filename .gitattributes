@@ -1,4 +1,6 @@
 api/openapi/*.json text eol=lf
+ai/openapi/*.json text eol=lf
+ai/uv.lock text eol=lf
 web/src/shared/api/generated/** text eol=lf
 web/src/routeTree.gen.ts text eol=lf
 web/src/styles/tokens.css text eol=lf

@@ -23,7 +23,7 @@ A different, cheaper model implements from your plan and never sees the original
 |---|---|---|---|
 | `api/` | .NET 10, PostgreSQL | `.claude/skills/dotnet-feature/SKILL.md` (read its "Elmanhg deltas" first) | `.claude/conventions/dotnet-testing.md` |
 | `web/` | React + Vite + Tailwind v4 + shadcn | `.claude/skills/react-feature/SKILL.md` + `.claude/design-system.md` | `.claude/conventions/react-testing.md` |
-| `ai/` | Python 3.14 FastAPI service (AI Avatar, grading, transcription) | No vendored guide: typed code, FastAPI routers per feature, pydantic models, `pytest`, `ruff`; mirror the existing `ai/` code | `pytest` with fakes for every external provider |
+| `ai/` | Python 3.13 FastAPI service (AI Avatar, grading, transcription), uv-managed | `.claude/skills/python-feature/SKILL.md` (read its "Elmanhg deltas" first) | `.claude/conventions/python-testing.md` |
 
 Screen content, flow and states for `web/` come from `prototype/app.js` (match the route) and `docs/claude-design-prompt.md` §4–§6. There is no Figma.
 Product rules come from `docs/PRD.md` (the section the story cites) and `docs/constitution.md`.

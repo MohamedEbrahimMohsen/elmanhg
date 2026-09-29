@@ -1,0 +1,45 @@
+name: ai-ci
+on:
+  pull_request:
+    paths: ['ai/**', '.github/workflows/ai-ci.yml']
+  push:
+    branches: [main]
+    paths: ['ai/**', '.github/workflows/ai-ci.yml']
+permissions:
+  contents: read
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ai
+    env:
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          version: "0.12.17"
+          enable-cache: true
+          cache-dependency-glob: ai/uv.lock
+      - name: Install
+        run: uv sync --locked
+      - name: Format
+        run: uv run ruff format --check .
+      - name: Lint
+        run: uv run ruff check .
+      - name: Typecheck
+        run: uv run mypy src
+      - name: Test
+        run: uv run pytest -m "not eval" --cov=elmanhg_ai --cov-branch --cov-report=term-missing
+      - name: Vulnerable packages
+        run: uv export --frozen --no-dev --no-hashes --no-emit-project -o requirements-audit.txt && uvx pip-audit==2.10.1 -r requirements-audit.txt
+      - name: Docker image builds
+        run: docker build -t elmanhg-ai:ci .
+      - name: Container becomes ready
+        run: |
+          docker run -d --name elmanhg-ai -p 8000:8000 -e ELMANHG_AI_SERVICE_TOKEN=ci-only-service-token-not-a-secret-0123 elmanhg-ai:ci
+          for i in $(seq 1 30); do curl -fsS --max-time 2 http://localhost:8000/health/ready && exit 0; sleep 1; done
+          docker logs elmanhg-ai; exit 1

@@ -1,0 +1,1 @@
+{"id":"msg_01","type":"message","role":"assistant","model":"claude-sonnet-5","content":[{"type":"text","text":"الخطوة ١: طبّق قانون أوم."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":120,"output_tokens":40}}
