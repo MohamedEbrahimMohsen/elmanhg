@@ -16,17 +16,15 @@ public static class QuestionImportTemplate
     private const int InstructionsNarrowWidth = 20;
     private const int InstructionsDescriptionWidth = 90;
 
-    private static readonly IReadOnlyList<QuestionType> Types = [QuestionType.Mcq, QuestionType.Multi, QuestionType.TrueFalse, QuestionType.Fill, QuestionType.Short];
-
     public static IReadOnlyList<SpreadsheetSheetDefinition> Build(ContentOptions options, ILocalizer localizer)
     {
         IReadOnlyList<SpreadsheetColumn> instructionColumns = [new("sheet", [], InstructionsNarrowWidth), new("column", [], InstructionsNarrowWidth), new("required", [], InstructionsNarrowWidth), new("description", [], InstructionsDescriptionWidth)];
         IReadOnlyList<string> intro = [string.Empty, string.Empty, string.Empty, localizer.GetMessage(Help.Intro)];
-        var columnRows = Types
+        var columnRows = Columns.Types
             .SelectMany(type => Columns.For(type, options).Select(column => (IReadOnlyList<string>)[type.ToString(), column, Columns.IsRequired(type, column) ? "yes" : string.Empty, localizer.GetMessage(HelpKey(type, column))]))
             .ToList();
         var instructions = new SpreadsheetSheetDefinition(InstructionsSheetName, instructionColumns, [intro, .. columnRows]);
-        var typeSheets = Types
+        var typeSheets = Columns.Types
             .Select(type => new SpreadsheetSheetDefinition(type.ToString(), Columns.For(type, options).Select(column => new SpreadsheetColumn(column, Columns.AllowedValues(column), TypeColumnWidth)).ToList(), []))
             .ToList();
         return [instructions, .. typeSheets];

@@ -75,6 +75,27 @@ public sealed class ContentOptions
     [Range(1, int.MaxValue)]
     public int QuestionImportMaxFileSizeInMb { get; set; }
 
+    [Range(1, int.MaxValue)]
+    public int QuestionEssayMaxWordsMax { get; set; } = 2000;
+
+    [Range(1, int.MaxValue)]
+    public int QuestionRubricCriteriaMaxCount { get; set; } = 10;
+
+    [Range(1, int.MaxValue)]
+    public int QuestionRubricLevelsMaxCount { get; set; } = 6;
+
+    [Range(1, int.MaxValue)]
+    public int QuestionRubricPointsMax { get; set; } = 100;
+
+    [Range(1, int.MaxValue)]
+    public int QuestionRubricTextMaxLength { get; set; } = 1000;
+
+    [Range(1, int.MaxValue)]
+    public int QuestionModelAnswersMaxCount { get; set; } = 3;
+
+    [Range(1, int.MaxValue)]
+    public int QuestionModelAnswerMaxLength { get; set; } = 20000;
+
     [Range(1, 3600)]
     public int ServableCountCacheSeconds { get; set; } = 60;
 }

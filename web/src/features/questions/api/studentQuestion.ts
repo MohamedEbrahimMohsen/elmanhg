@@ -7,6 +7,7 @@ export interface StudentQuestion {
   options: { id: string; text: string }[];
   blankIds: string[];
   answerKind: 'numeric' | 'text' | null;
+  maxWords?: number | null | undefined;
 }
 
 export interface QuestionAnswer {
@@ -32,6 +33,7 @@ export function toStudentQuestion(values: DeepPartialSkipArrayKey<QuestionValues
     options: (values.options ?? []).map((option) => ({ id: option.id ?? '', text: option.text ?? '' })),
     blankIds: (values.blanks ?? []).map((blank) => blank.id ?? ''),
     answerKind: type === 'Short' ? (values.answerKind ?? 'numeric') : null,
+    maxWords: type === 'Essay' && /^\d+$/.test(values.maxWords ?? '') ? Number(values.maxWords) : null,
   };
 }
 
@@ -50,6 +52,8 @@ export function toAnswerPayload(question: StudentQuestion, answer: QuestionAnswe
     case 'Fill':
       return { blanks: question.blankIds.map((id) => ({ id, text: answer.blanks[id] ?? '' })) };
     case 'Short':
+      return { text: answer.text };
+    case 'Essay':
       return { text: answer.text };
   }
 }

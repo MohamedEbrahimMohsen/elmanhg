@@ -136,5 +136,13 @@ public sealed class QuestionGraderTests
         act.Should().Throw<InvalidOperationException>().WithMessage("Question answer was not validated.");
     }
 
+    [Fact]
+    public void Grade_Essay_ThrowsInvalidOperationException()
+    {
+        var act = () => QuestionGrader.Grade(QuestionType.Essay, EssaySpecJson, 5, Json("{}"));
+
+        act.Should().Throw<InvalidOperationException>();
+    }
+
     private const string PartialNormalizationSpec = """{"blanks":[{"id":"1","acceptedAnswers":["القاهرة"]}],"normalization":{"unifyTaaMarbuta":false}}""";
 }

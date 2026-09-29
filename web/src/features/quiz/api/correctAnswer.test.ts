@@ -93,4 +93,11 @@ describe('correctAnswer', () => {
     expect(choiceReview(question('Short'), { value: 1, tolerance: 0, toleranceMode: 'absolute' })).toBeUndefined();
     expect(choiceReview(question('Mcq'), null)).toBeUndefined();
   });
+
+  it('describes no correct answer or choice review for an essay', () => {
+    const essay = question('Essay');
+
+    expect(describeCorrectAnswer(essay, {})).toBeNull();
+    expect(choiceReview(essay, {})).toBeUndefined();
+  });
 });

@@ -60,6 +60,8 @@ export function describeCorrectAnswer(question: StudentQuestion, correctAnswer: 
     }
     case 'Short':
       return describeShort(question, correctAnswer);
+    case 'Essay':
+      return null;
   }
 }
 
@@ -79,6 +81,7 @@ export function choiceReview(question: StudentQuestion, correctAnswer: unknown):
     }
     case 'Fill':
     case 'Short':
+    case 'Essay':
       return undefined;
   }
 }

@@ -25,4 +25,4 @@ export { QuestionImportPage } from './pages/QuestionImportPage';
 export { ValidationQueuePage } from './pages/ValidationQueuePage';
 export { ValidationQuestionPage } from './pages/ValidationQuestionPage';
 export { validationQueueSearchSchema } from './schemas/validationQueueSearchSchema';
-export { questionTypes } from './api/questionOptions';
+export { questionTypes, servedQuestionTypes } from './api/questionOptions';

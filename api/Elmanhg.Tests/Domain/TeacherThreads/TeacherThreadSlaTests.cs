@@ -53,6 +53,26 @@ public sealed class TeacherThreadSlaTests
     }
 
     [Fact]
+    public void DueSlaStages_VoiceReply_ClosesWindow()
+    {
+        var thread = new TeacherThreadBuilder().ClaimedBy(_teacherId).Build();
+
+        thread.ReplyWithVoice(_teacherId, "Because F = ma.", "https://files.example/voice.webm", 42, SubmittedAt.AddHours(13));
+
+        (thread.Status, Stages(thread, SubmittedAt.AddHours(30)).Count).Should().Be((TeacherThreadStatus.Answered, 0));
+    }
+
+    [Fact]
+    public void DueSlaStages_VoiceReplyToFollowUp_ClosesThreadAndWindow()
+    {
+        var thread = new TeacherThreadBuilder().AnsweredBy(_teacherId).FollowedUp().Build();
+
+        thread.ReplyWithVoice(_teacherId, "Yes.", "https://files.example/voice.webm", 10, SubmittedAt.AddHours(15));
+
+        (thread.Status, Stages(thread, SubmittedAt.AddHours(40)).Count).Should().Be((TeacherThreadStatus.Closed, 0));
+    }
+
+    [Fact]
     public void DueSlaStages_AfterFollowUp_MeasuresFromNewWindow()
     {
         var thread = new TeacherThreadBuilder().AnsweredBy(_teacherId).FollowedUp().Build();

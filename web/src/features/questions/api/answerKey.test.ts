@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { toAnswerKey } from './answerKey';
 import { emptyQuestionValues } from './questionValues';
+import { emptyAnswer } from './studentQuestion';
 
 describe('toAnswerKey', () => {
   it('ticks the correct option of an mcq', () => {
@@ -55,5 +56,9 @@ describe('toAnswerKey', () => {
     const values = { ...emptyQuestionValues('Short'), answerKind: 'text' as const, acceptedAnswers: 'Force\nPush' };
 
     expect(toAnswerKey(values).text).toBe('Force');
+  });
+
+  it('leaves the essay answer empty', () => {
+    expect(toAnswerKey(emptyQuestionValues('Essay'))).toEqual(emptyAnswer());
   });
 });

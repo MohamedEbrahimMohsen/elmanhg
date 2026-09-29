@@ -106,6 +106,16 @@ public sealed class QuestionFieldsValidatorTests
         Codes(ValidMcq() with { GradingSpec = Json("""{"correctOptionId":"z"}""") }).Should().Contain(ErrorCodes.QuestionCorrectOptionInvalid);
     }
 
+    [Fact]
+    public void Validate_EssayWithoutModelAnswer_ReturnsCodeOnBody()
+    {
+        var fields = EssayFields() with { GradingSpec = Json("""{"criteria":[{"id":"c1","title":"Definition","points":2,"levels":[{"points":0,"description":"Missing"},{"points":2,"description":"Complete"}]}]}""") };
+
+        var errors = _validator.Validate(fields).Errors;
+
+        errors.Should().ContainSingle(x => x.ErrorCode == ErrorCodes.QuestionModelAnswersCountInvalid && x.PropertyName == nameof(QuestionFields.Body));
+    }
+
     private List<string> Codes(QuestionFields fields)
     {
         return _validator.Validate(fields).Errors

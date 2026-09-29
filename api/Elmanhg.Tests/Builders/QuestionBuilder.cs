@@ -15,6 +15,7 @@ public sealed class QuestionBuilder
     private bool _approved;
     private string? _rejectionReason;
     private bool _retired;
+    private bool _essay;
 
     public QuestionBuilder()
     {
@@ -57,9 +58,15 @@ public sealed class QuestionBuilder
         return this;
     }
 
+    public QuestionBuilder Essay()
+    {
+        _essay = true;
+        return this;
+    }
+
     public Question Build()
     {
-        var question = Question.Create(Lesson, Unit, QuestionType.Mcq, McqContent(), _metadata ?? new QuestionMetadata(QuestionDifficulty.Medium, null, []), Guid.NewGuid());
+        var question = Question.Create(Lesson, Unit, _essay ? QuestionType.Essay : QuestionType.Mcq, _essay ? EssayContent() : McqContent(), _metadata ?? new QuestionMetadata(QuestionDifficulty.Medium, null, []), Guid.NewGuid());
         if (_approved)
         {
             question.Approve(TeacherSubject.Create(Teacher, Subject, Guid.NewGuid()), question.Version);
@@ -86,6 +93,18 @@ public sealed class QuestionBuilder
     public static QuestionFields McqFields(string stem = "<p>2 + 2 = ?</p>")
     {
         return new QuestionFields(QuestionType.Mcq, stem, Json("""{"options":[{"id":"a","text":"3"},{"id":"b","text":"4"}]}"""), Json("""{"correctOptionId":"b"}"""), "<p>Add the numbers.</p>", QuestionDifficulty.Medium, null, [], 1);
+    }
+
+    public const string EssaySpecJson = """{"criteria":[{"id":"c1","title":"Definition","points":2,"levels":[{"points":0,"description":"Missing"},{"points":1,"description":"Partial"},{"points":2,"description":"Complete"}]}],"modelAnswers":["<p>Inertia is resistance to change in motion.</p>"]}""";
+
+    public static QuestionContent EssayContent()
+    {
+        return new QuestionContent("<p>Explain inertia.</p>", """{"maxWords":200}""", EssaySpecJson, "<p>Newton 1.</p>", 5);
+    }
+
+    public static QuestionFields EssayFields()
+    {
+        return new QuestionFields(QuestionType.Essay, "<p>Explain inertia.</p>", Json("""{"maxWords":200}"""), Json(EssaySpecJson), "<p>Newton 1.</p>", QuestionDifficulty.Medium, null, [], 5);
     }
 
     public static JsonElement Json(string json)

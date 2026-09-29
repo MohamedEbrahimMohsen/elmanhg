@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { questionTypes } from '@/features/questions';
+import { servedQuestionTypes } from '@/features/questions';
 
 // mirrors ExamBlueprints:MaxQuestionCount
 export const blueprintMaxQuestionCount = 100;
@@ -33,14 +33,14 @@ export const examBlueprintSchema = z
     const issue = (path: string[], message: string) => {
       context.addIssue({ code: 'custom', path, message });
     };
-    const invalidTypes = questionTypes.filter(
+    const invalidTypes = servedQuestionTypes.filter(
       (type) => !isWholeInRange(values.counts[type], 0, blueprintMaxQuestionCount),
     );
     for (const type of invalidTypes) {
       issue(['counts', type], 'blueprints:editor.errors.countInvalid');
     }
     if (invalidTypes.length === 0) {
-      const total = questionTypes.reduce((sum, type) => sum + Number(values.counts[type]), 0);
+      const total = servedQuestionTypes.reduce((sum, type) => sum + Number(values.counts[type]), 0);
       if (total === 0) {
         issue(['counts'], 'blueprints:editor.errors.empty');
       } else if (total > blueprintMaxQuestionCount) {

@@ -56,4 +56,12 @@ describe('studentQuestion', () => {
 
     expect(toAnswerPayload(view, answer)).toEqual(payload);
   });
+
+  it('carries the word limit of an essay and sends its text', () => {
+    const values = { ...emptyQuestionValues('Essay'), maxWords: '150' };
+
+    expect(toStudentQuestion(values).maxWords).toBe(150);
+    expect(toStudentQuestion({ ...values, maxWords: '' }).maxWords).toBeNull();
+    expect(toAnswerPayload(question({ type: 'Essay' }), { ...emptyAnswer(), text: 'x' })).toEqual({ text: 'x' });
+  });
 });

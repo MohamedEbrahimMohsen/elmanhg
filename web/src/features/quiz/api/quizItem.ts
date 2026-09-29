@@ -49,6 +49,8 @@ export function fromAnswerPayload(question: StudentQuestion, payload: unknown): 
       return { ...answer, blanks: Object.fromEntries((blanks ?? []).map((blank) => [blank.id, blank.text])) };
     case 'Short':
       return { ...answer, text: text ?? '' };
+    case 'Essay':
+      return { ...answer, text: text ?? '' };
   }
 }
 
@@ -62,6 +64,8 @@ export function isAnswerEmpty(question: StudentQuestion, answer: QuestionAnswer)
     case 'Fill':
       return question.blankIds.every((id) => (answer.blanks[id] ?? '').trim() === '');
     case 'Short':
+      return answer.text.trim() === '';
+    case 'Essay':
       return answer.text.trim() === '';
   }
 }
