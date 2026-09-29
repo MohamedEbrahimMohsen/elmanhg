@@ -35,6 +35,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public const string InProgressSessionIndex = "IX_Sessions_InProgressScope";
     public const string AttemptPerQuestionIndex = "IX_Attempts_SessionId_QuestionId";
     public const string QuestionMasteryPerStudentIndex = "IX_QuestionMasteries_StudentId_QuestionId";
+    public const string LessonOpeningPerStudentIndex = "IX_LessonOpenings_StudentId_LessonId";
     public const string SubjectDefaultBlueprintIndex = "IX_ExamBlueprints_SubjectDefault";
     public const string UnitBlueprintIndex = "IX_ExamBlueprints_UnitId";
     public const string OneOpenExamIndex = "IX_Sessions_OneOpenExam";
@@ -50,6 +51,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public DbSet<CurriculumUnit> Units { get; set; }
     public DbSet<Lesson> Lessons { get; set; }
     public DbSet<LessonObjective> LessonObjectives { get; set; }
+    public DbSet<LessonOpening> LessonOpenings { get; set; }
     public DbSet<Question> Questions { get; set; }
     public DbSet<QuestionRevision> QuestionRevisions { get; set; }
     public DbSet<QuestionImportBatch> QuestionImportBatches { get; set; }
@@ -107,6 +109,10 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         {
             throw new ConflictCoreException(ErrorCodes.ExamAlreadyInProgress, innerException: exception);
         }
+        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: LessonOpeningPerStudentIndex })
+        {
+            throw new ConflictCoreException(ErrorCodes.LessonAlreadyOpened, innerException: exception);
+        }
         catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: SubjectDefaultBlueprintIndex or UnitBlueprintIndex })
         {
             throw new ConflictCoreException(ErrorCodes.ExamBlueprintModifiedConcurrently, innerException: exception);
@@ -120,6 +126,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         ConfigureSubjects(modelBuilder);
         ConfigureUnits(modelBuilder);
         ConfigureLessons(modelBuilder);
+        ConfigureLessonOpenings(modelBuilder);
         ConfigureQuestions(modelBuilder);
         ConfigureQuestionImportBatches(modelBuilder);
         ConfigureReviewSessions(modelBuilder);
@@ -173,6 +180,17 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
             builder.Property(x => x.Id).ValueGeneratedNever();
             builder.Property(x => x.Text).IsRequired();
             builder.HasIndex(x => new { x.LessonId, x.Order });
+        });
+    }
+
+    private static void ConfigureLessonOpenings(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<LessonOpening>(builder =>
+        {
+            builder.Property(x => x.Id).ValueGeneratedNever();
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Lesson>().WithMany().HasForeignKey(x => x.LessonId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.StudentId, x.LessonId }).IsUnique().HasDatabaseName(LessonOpeningPerStudentIndex);
         });
     }
 
@@ -362,6 +380,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         modelBuilder.Entity<CurriculumUnit>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<Lesson>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<LessonObjective>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<LessonOpening>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<Question>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<QuestionRevision>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<QuestionImportBatch>().HasQueryFilter(x => !x.IsDeleted);

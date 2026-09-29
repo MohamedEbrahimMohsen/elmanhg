@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { getGetMasteryOverviewMockHandler } from '@/shared/api/generated/mastery/mastery.msw';
 import type { MasteryOverviewResult } from '@/shared/api/generated/model';
 import { axe } from '@/test/axe';
-import { masteryOverview } from '@/test/masteryFixtures';
+import { masteryOverview, physicsId } from '@/test/masteryFixtures';
 import { server } from '@/test/msw/server';
 import { renderApp } from '@/test/renderWithProviders';
 import { testSessions } from '@/test/sessions';
@@ -93,5 +93,16 @@ describe('StudentHomePage', () => {
     await screen.findByText('40 of 60 questions left for you');
 
     expect((await axe(container)).violations).toEqual([]);
+  });
+
+  it('links each subject card to its subject page', async () => {
+    openHome();
+
+    const physics = await screen.findByRole('article', { name: 'Physics' });
+
+    expect(within(physics).getByRole('link', { name: 'Physics' })).toHaveAttribute(
+      'href',
+      `/student/subject/${physicsId}`,
+    );
   });
 });

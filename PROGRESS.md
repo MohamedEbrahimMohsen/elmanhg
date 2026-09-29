@@ -1,12 +1,12 @@
 # Elmanhg — autopilot progress
 
-Last updated: laptop session, after story #101 merged (main at `4434899`).
-**Next story: #102 [E10.S4] Refunds and payment log**, the first row of "Remaining stories".
+Last updated: laptop session, after story #102 merged (main at `75d18da`).
+**Next story: #85 [E7.S1] Subject, unit and lesson browsing**, the first row of "Remaining stories".
 The laptop run did #54–#64; the cloud session did #65–#76 (see "Running in a cloud session" and "Hand-off" below).
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (29 of 60)
+## Finished stories (30 of 60)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -39,17 +39,17 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 27 | #99 [E10.S1] Plan catalogue and subscription state | #186 | 1 | skipped (too many files) | #187 |
 | 28 | #100 [E10.S2] Paymob checkout integration | #188 | 2 | 2 comments, fixed (eligibility, polling) | #189 |
 | 29 | #101 [E10.S3] Webhook-driven entitlement | #190 | 1 (+doc fix) | skipped (too many files) | #191 |
+| 30 | #102 [E10.S4] Refunds and payment log | #192 | 2 | skipped (too many files) | #193 |
 
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (31), in run order
+## Remaining stories (30), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
 | Order | Issue | Story |
 |---|---|---|
-| 20 | #102 | [E10.S4] Refunds and payment log |
 | 21 | #85 | [E7.S1] Subject, unit and lesson browsing |
 | 22 | #86 | [E7.S2] Landing page and onboarding |
 | 23 | #87 | [E7.S3] Free tier limits |
@@ -118,7 +118,7 @@ The flow is `.claude/commands/feature.md`. Every stage is a fresh subagent: `fea
 - **Graders already exist (from #65):** the Arabic answer normaliser and deterministic graders for all five v1 types live in `api/Elmanhg.Domain/Questions/Grading/`, with `POST /api/questions/grade-draft`. #70–#72 extend them rather than create them: #70 added 8 per-question normalisation toggles (`normalization` object in the grading spec; a missing value means on) and the always-on Unicode steps. #71 added structured `GradeFeedback` (Domain), localised in Application via `ILocalizer`, and returned as `feedback`. #72 did the same for Fill and Short and made numeric tolerance overflow-safe. `QuestionGrader.Grade` is the single entry point for grading; attempts (#74) must reuse it. Leftovers are in #151 and #160. `Question.Reject` and `Resubmit` exist; #68 adds the teacher approve/reject commands and UI.
 - **Validation (#68):** `Approve`/`Reject` take the reviewed version, and a mismatch returns 409 `QUESTION_VERSION_CHANGED`. There is no concurrency token yet (#158). `QuestionDecision` is the append-only approve/reject history, and `Question.SubmittedAt` drives queue age. Bulk approve requires a server-side `ReviewSession` with a `ReviewSessionOpening` per question at its current version.
 - **Sessions (#74):** `Session` owns `SessionItem`s (the question plus the version served, fixed at start) and append-only `Attempt`s (a DB trigger, like the audit log). `docs/sessions.md` is the contract. Answers are graded against the served `QuestionRevision`. The session has an xmin row version, so a concurrent finish vs answer returns 409 `SESSION_MODIFIED_CONCURRENTLY`. Timestamps are truncated to microseconds in the aggregate. Start resumes the open session for the same lesson. Selection (#75) is `QuestionSelector` in Domain, a pure function with an injected `Random`, using PRD §7.2 buckets. Correct means normalised ≥ `Mastery:CorrectThreshold` (0.8, `MasteryOptions`).
-- **Quiz UI (#76):** `web/src/features/quiz/`. The start response seeds the TanStack cache (no refetch, and "Next" makes no request). Resume opens at the server position. `QuestionView` (from #65) takes an optional correct/wrong marking. "اسأل المساعد" is disabled until E8 (#91) wires it. The practice route has no UI link until #85 adds the lesson tabs.
+- **Quiz UI (#76):** `web/src/features/quiz/`. The start response seeds the TanStack cache (no refetch, and "Next" makes no request). Resume opens at the server position. `QuestionView` (from #65) takes an optional correct/wrong marking. "اسأل المساعد" is disabled until E8 (#91) wires it. The practice route is the fourth lesson tab (#85), reached through the subject → unit → lesson pages.
 - **Question content** is jsonb, one schema per type, documented in `docs/question-schemas.md`. A content edit on an Approved question sends it back to Pending, bumps the version, and saves a `QuestionRevision`.
 - **Web:**
   - Every visual value comes from `.claude/design-system.md` tokens (Glass, light only).
@@ -210,4 +210,4 @@ How the next agent resumes, in a cloud session or on the laptop:
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191 · `dev-decision`: none open (#135 and #155 confirmed and closed).
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193 · `dev-decision`: none open (#135 and #155 confirmed and closed).

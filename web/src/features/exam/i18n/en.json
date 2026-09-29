@@ -17,7 +17,10 @@
     "start": "Start exam",
     "continue": "Continue exam",
     "otherInProgress": "You have an exam in progress.",
-    "openOther": "Continue that exam"
+    "openOther": "Continue that exam",
+    "crumb": "Unit exam",
+    "lessonsNotOpened": "Open every lesson in this unit before the exam. {count, plural, one {# lesson} other {# lessons}} left.",
+    "toUnit": "Go to the unit lessons"
   },
   "exam": {
     "title": "Exam: {unit}",

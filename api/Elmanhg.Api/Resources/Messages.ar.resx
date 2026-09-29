@@ -279,6 +279,8 @@
   <data name="MULTI_UNIT_EXAM_UNIT_DUPLICATE" xml:space="preserve"><value>تم اختيار وحدة اكثر من مرة.</value></data>
   <data name="MULTI_UNIT_EXAM_SIZE_INVALID" xml:space="preserve"><value>عدد الاسئلة يجب ان يكون 20 او 40 او 60.</value></data>
   <data name="MULTI_UNIT_EXAM_NO_BLUEPRINT" xml:space="preserve"><value>لا يوجد امتحان لبعض الوحدات المختارة: {units}</value></data>
+  <data name="EXAM_LESSONS_NOT_OPENED" xml:space="preserve"><value>افتح كل دروس الوحدة قبل بدء الامتحان.</value></data>
+  <data name="LESSON_ALREADY_OPENED" xml:space="preserve"><value>تم تسجيل فتح هذا الدرس من قبل.</value></data>
   <data name="SUBSCRIPTION_PERIOD_INVALID" xml:space="preserve"><value>مدة الاشتراك غير صالحة.</value></data>
   <data name="SUBSCRIPTION_NOT_ACTIVE" xml:space="preserve"><value>الاشتراك غير نشط.</value></data>
   <data name="SUBSCRIPTION_ENDED" xml:space="preserve"><value>انتهى هذا الاشتراك او تم الغاؤه.</value></data>

@@ -20,5 +20,7 @@ public sealed class ExamsOptions
     [Range(1, 20)]
     public int WeakestObjectiveCount { get; set; } = 3;
 
+    public bool RequireAllLessonsOpened { get; set; }
+
     public TimeSpan DeadlineGrace => TimeSpan.FromSeconds(DeadlineGraceSeconds);
 }

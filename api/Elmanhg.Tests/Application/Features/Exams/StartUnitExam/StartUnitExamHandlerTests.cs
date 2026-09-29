@@ -31,6 +31,7 @@ public sealed class StartUnitExamHandlerTests
     private readonly ICurriculumUnitRepository _unitRepository = Substitute.For<ICurriculumUnitRepository>();
     private readonly ISubjectRepository _subjectRepository = Substitute.For<ISubjectRepository>();
     private readonly ILessonRepository _lessonRepository = Substitute.For<ILessonRepository>();
+    private readonly ILessonOpeningRepository _lessonOpeningRepository = Substitute.For<ILessonOpeningRepository>();
     private readonly IQuestionRepository _questionRepository = Substitute.For<IQuestionRepository>();
     private readonly IExamBlueprintRepository _examBlueprintRepository = Substitute.For<IExamBlueprintRepository>();
     private readonly IQuestionMasteryRepository _questionMasteryRepository = Substitute.For<IQuestionMasteryRepository>();
@@ -40,6 +41,8 @@ public sealed class StartUnitExamHandlerTests
     private readonly List<Question> _pool;
     private readonly List<ExamBlueprint> _blueprints = [];
     private readonly List<QuestionMastery> _masteries = [];
+    private readonly List<LessonOpening> _openings = [];
+    private readonly IOptions<ExamsOptions> _examsOptions = Options.Create(new ExamsOptions());
     private readonly StartUnitExamHandler _handler;
 
     public StartUnitExamHandlerTests()
@@ -59,9 +62,11 @@ public sealed class StartUnitExamHandlerTests
         _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(_pool.SelectMany(x => x.Revisions).ToList());
         _lessonRepository.FindAsync(Arg.Any<Expression<Func<Lesson, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Lesson>, IQueryable<Lesson>>?>(), Arg.Any<Func<IQueryable<Lesson>, IOrderedQueryable<Lesson>>?>(), Arg.Any<bool>())
             .Returns(call => new List<Lesson> { _builder.Questions.Lesson }.Where(call.Arg<Expression<Func<Lesson, bool>>>().Compile()).ToList());
+        _lessonOpeningRepository.FindAsync(Arg.Any<Expression<Func<LessonOpening, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<LessonOpening>, IQueryable<LessonOpening>>?>(), Arg.Any<Func<IQueryable<LessonOpening>, IOrderedQueryable<LessonOpening>>?>(), Arg.Any<bool>())
+            .Returns(call => _openings.Where(call.Arg<Expression<Func<LessonOpening, bool>>>().Compile()).ToList());
         _questionMasteryRepository.FindAsync(Arg.Any<Expression<Func<QuestionMastery, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<QuestionMastery>, IQueryable<QuestionMastery>>?>(), Arg.Any<Func<IQueryable<QuestionMastery>, IOrderedQueryable<QuestionMastery>>?>(), Arg.Any<bool>())
             .Returns(call => _masteries.Where(call.Arg<Expression<Func<QuestionMastery, bool>>>().Compile()).ToList());
-        _handler = new StartUnitExamHandler(_sessionRepository, _unitRepository, _subjectRepository, _lessonRepository, _questionRepository, _examBlueprintRepository, _questionMasteryRepository, Options.Create(new ExamsOptions()), Options.Create(new MasteryOptions()), new Random(42), _timeProvider, _currentUserService, Substitute.For<ILocalizer>());
+        _handler = new StartUnitExamHandler(_sessionRepository, _unitRepository, _subjectRepository, _lessonRepository, _lessonOpeningRepository, _questionRepository, _examBlueprintRepository, _questionMasteryRepository, _examsOptions, Options.Create(new MasteryOptions()), new Random(42), _timeProvider, _currentUserService, Substitute.For<ILocalizer>());
     }
 
     private CurriculumUnit Unit => _builder.Questions.Unit;
@@ -167,6 +172,50 @@ public sealed class StartUnitExamHandlerTests
 
         result.IsTestMode.Should().BeTrue();
         await _sessionRepository.Received(1).AddAsync(Arg.Is<Session>(x => x.IsTestMode), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_GateOnLessonUnopened_ThrowsExamLessonsNotOpened()
+    {
+        _examsOptions.Value.RequireAllLessonsOpened = true;
+
+        await AssertThrowsAsync<BusinessRuleViolationCoreException>(Unit.Id, ErrorCodes.ExamLessonsNotOpened);
+    }
+
+    [Fact]
+    public async Task Handle_GateOnAllLessonsOpened_StartsExam()
+    {
+        _examsOptions.Value.RequireAllLessonsOpened = true;
+        _openings.Add(LessonOpening.Record(_builder.StudentId, _builder.Questions.Lesson, ExamSessionBuilder.Now));
+
+        var result = await _handler.Handle(new StartUnitExamCommand(Unit.Id), TestContext.Current.CancellationToken);
+
+        result.Kind.Should().Be(nameof(SessionKind.UnitExam));
+        await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_GateOnAdmin_StartsTestModeExamWithoutOpenings()
+    {
+        _examsOptions.Value.RequireAllLessonsOpened = true;
+        _currentUserService.GetClaim(ClaimTypes.Role).Returns(nameof(UserRole.Admin));
+
+        var result = await _handler.Handle(new StartUnitExamCommand(Unit.Id), TestContext.Current.CancellationToken);
+
+        result.IsTestMode.Should().BeTrue();
+        await _sessionRepository.Received(1).AddAsync(Arg.Is<Session>(x => x.IsTestMode), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_GateOnOpenExamSameUnit_ResumesWithoutGate()
+    {
+        _examsOptions.Value.RequireAllLessonsOpened = true;
+        var open = OpenExam();
+
+        var result = await _handler.Handle(new StartUnitExamCommand(Unit.Id), TestContext.Current.CancellationToken);
+
+        result.Id.Should().Be(open.Id);
+        await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     private Session OpenExam()

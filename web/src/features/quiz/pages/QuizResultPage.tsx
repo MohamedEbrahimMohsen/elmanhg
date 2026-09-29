@@ -1,7 +1,8 @@
-import { Navigate } from '@tanstack/react-router';
+import { Link, Navigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ContentErrorState, ContentListSkeleton } from '@/features/content';
 import { useGetSession } from '@/shared/api/generated/sessions/sessions';
+import { Button } from '@/shared/ui/button';
 import { lessonIdOf, sortedItems } from '../api/quizSession';
 import { NewPracticeButton } from '../components/NewPracticeButton';
 import { QuizResultSummary } from '../components/QuizResultSummary';
@@ -46,6 +47,13 @@ export function QuizResultPage({ sessionId }: QuizResultPageProps) {
         <p className="text-ui text-text-muted">{t('result.none')}</p>
       )}
       {lessonId !== null ? <NewPracticeButton lessonId={lessonId} servedCount={data.items.length} /> : null}
+      {lessonId !== null ? (
+        <Button asChild variant="secondary" className="self-start">
+          <Link to="/student/lesson/$lessonId" params={{ lessonId }}>
+            {t('result.backToLesson')}
+          </Link>
+        </Button>
+      ) : null}
     </section>
   );
 }

@@ -17,7 +17,10 @@
     "start": "ابدأ الامتحان",
     "continue": "استكمل الامتحان",
     "otherInProgress": "لديك امتحان جارٍ.",
-    "openOther": "استكمل الامتحان"
+    "openOther": "استكمل الامتحان",
+    "crumb": "امتحان الوحدة",
+    "lessonsNotOpened": "افتح كل دروس الوحدة قبل الامتحان. متبقٍّ {count, number} درس.",
+    "toUnit": "إلى دروس الوحدة"
   },
   "exam": {
     "title": "امتحان: {unit}",

@@ -33,7 +33,15 @@ export function UnitProgressTable({ units, subjectName }: UnitProgressTableProps
         <tbody>
           {units.map((unit) => (
             <tr key={unit.unitId} className="border-t border-border">
-              <td className={cellClassName}>{unit.name}</td>
+              <td className={cellClassName}>
+                <Link
+                  to="/student/unit/$unitId"
+                  params={{ unitId: unit.unitId }}
+                  className="rounded-sm text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+                >
+                  {unit.name}
+                </Link>
+              </td>
               <td className={cellClassName}>
                 {t('subjects.unitMasteryValue', { percent: Number(unit.masteryPercent) })}
               </td>

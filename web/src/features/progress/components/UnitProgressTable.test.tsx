@@ -30,4 +30,21 @@ describe('UnitProgressTable', () => {
         .map((link) => link.getAttribute('href')),
     ).toEqual([`/student/exam-start/${mechanicsUnitId}`, `/student/exam-start/${wavesUnitId}`]);
   });
+
+  it('links each unit name to its unit page', async () => {
+    server.use(
+      getGetMasteryOverviewMockHandler(masteryOverview()),
+      getGetSubjectProgressMockHandler(subjectProgress()),
+      getGetWeakSpotsMockHandler(weakSpots()),
+      getGetSessionHistoryMockHandler(sessionHistoryPage([])),
+    );
+    renderApp('/student/progress', { session: testSessions.student });
+
+    const table = await screen.findByRole('table', { name: 'Physics units' });
+    expect(within(table).getByRole('link', { name: 'Mechanics' })).toHaveAttribute(
+      'href',
+      `/student/unit/${mechanicsUnitId}`,
+    );
+    expect(within(table).getByRole('link', { name: 'Waves' })).toHaveAttribute('href', `/student/unit/${wavesUnitId}`);
+  });
 });

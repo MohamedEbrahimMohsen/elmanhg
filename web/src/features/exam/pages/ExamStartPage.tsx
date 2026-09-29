@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { StudentBreadcrumbs } from '@/features/browse';
 import { ContentErrorState, ContentListSkeleton } from '@/features/content';
 import { useGetUnitExamAttempts, useGetUnitExamOverview } from '@/shared/api/generated/exams/exams';
 import { ExamAttemptsSection } from '../components/ExamAttemptsSection';
@@ -30,6 +31,11 @@ export function ExamStartPage({ unitId }: ExamStartPageProps) {
   }
   return (
     <section className="flex flex-col gap-4">
+      <StudentBreadcrumbs
+        subject={{ id: data.subjectId, name: data.subjectName }}
+        unit={{ id: data.unitId, name: data.unitName }}
+        current={t('start.crumb')}
+      />
       <h1 className="font-display text-h1 font-bold lg:text-h1-desktop">{t('start.title', { unit: data.unitName })}</h1>
       {data.blueprint ? (
         <ExamBlueprintSummary blueprint={data.blueprint} />

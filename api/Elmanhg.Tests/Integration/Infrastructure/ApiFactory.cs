@@ -49,6 +49,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("CoreAuditing:Enabled", "true");
         // The sweep would race tests that expire sessions on purpose; AutoSubmitExam is exercised directly through the mediator.
         builder.UseSetting("Exams:AutoSubmitEnabled", "false");
+        builder.UseSetting("Exams:RequireAllLessonsOpened", "false");
         // The lapse sweep would race tests that seed ended subscriptions; LapseSubscription is exercised directly through the mediator.
         builder.UseSetting("Subscriptions:LapseSweepEnabled", "false");
         builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>

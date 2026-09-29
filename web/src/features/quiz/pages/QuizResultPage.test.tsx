@@ -126,4 +126,13 @@ describe('QuizResultPage', () => {
 
     expect((await axe(container)).violations).toEqual([]);
   });
+
+  it('links back to the lesson', async () => {
+    openResult();
+
+    expect(await screen.findByRole('link', { name: 'Back to the lesson' })).toHaveAttribute(
+      'href',
+      `/student/lesson/${quizLessonId}`,
+    );
+  });
 });

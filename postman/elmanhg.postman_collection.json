@@ -2068,6 +2068,108 @@
       ]
     },
     {
+      "name": "Browse",
+      "description": "Sign in as a Student. Published lessons only; draft or archived lessons return 404. Recording an opening is idempotent and feeds the optional unit-exam gate (Exams:RequireAllLessonsOpened).",
+      "item": [
+        {
+          "name": "Get student subject",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/browse/subjects/{{subjectId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "browse", "subjects", "{{subjectId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get student unit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/browse/units/{{unitId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "browse", "units", "{{unitId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get student lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/browse/lessons/{{lessonId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "browse", "lessons", "{{lessonId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Record lesson opening",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/browse/lessons/{{lessonId}}/openings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "browse", "lessons", "{{lessonId}}", "openings"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Progress",
       "description": "Sign in as a Student. Practise in the Sessions folder first to see progress. kind is Quiz or Exam; remove it for all sessions.",
       "item": [

@@ -13,6 +13,7 @@ import { axe } from '@/test/axe';
 import { masteryOverview } from '@/test/masteryFixtures';
 import { server } from '@/test/msw/server';
 import {
+  physicsSubjectId,
   sessionHistoryPage,
   subjectProgress,
   weakLessonId,
@@ -158,5 +159,16 @@ describe('ProgressPage', () => {
     await screen.findByText('40 of 60 questions left for you');
 
     expect((await axe(container)).violations).toEqual([]);
+  });
+
+  it('links each subject name to its subject page', async () => {
+    openProgress();
+
+    const physics = await screen.findByRole('article', { name: 'Physics' });
+
+    expect(within(physics).getByRole('link', { name: 'Physics' })).toHaveAttribute(
+      'href',
+      `/student/subject/${physicsSubjectId}`,
+    );
   });
 });

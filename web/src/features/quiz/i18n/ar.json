@@ -1,6 +1,5 @@
 {
   "practice": {
-    "title": "التدريب",
     "choose": "كم سؤالًا تريد؟",
     "size": "{count, plural, zero {# سؤال} one {سؤال واحد} two {سؤالان} few {# أسئلة} many {# سؤالًا} other {# سؤال}}",
     "resumeHint": "إذا كان لديك تدريب لم يكتمل في هذا الدرس فستكمله من حيث توقفت.",
@@ -46,6 +45,7 @@
     "review": "مراجعة الأسئلة",
     "reviewItem": "السؤال {position, number}",
     "none": "لم تُجب عن أي سؤال في هذا التدريب.",
-    "newPractice": "تدريب جديد"
+    "newPractice": "تدريب جديد",
+    "backToLesson": "العودة للدرس"
   }
 }

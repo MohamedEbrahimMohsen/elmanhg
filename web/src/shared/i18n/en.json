@@ -209,7 +209,9 @@
     "PAYMENT_LOG_STATUS_INVALID": "Unknown payment status.",
     "PAYMENT_LOG_PLAN_INVALID": "Unknown plan.",
     "PAYMENT_LOG_REFERENCE_TOO_LONG": "The reference is too long.",
-    "PAYMENT_LOG_DATE_RANGE_INVALID": "The start must be before the end."
+    "PAYMENT_LOG_DATE_RANGE_INVALID": "The start must be before the end.",
+    "EXAM_LESSONS_NOT_OPENED": "Open every lesson in the unit before starting the exam.",
+    "LESSON_ALREADY_OPENED": "This lesson opening was already recorded."
   },
   "error": {
     "title": "Something went wrong"

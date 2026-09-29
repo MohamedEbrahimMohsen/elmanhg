@@ -26,4 +26,15 @@ describe('invalidateMastery', () => {
     expect(client.getQueryState(['/api/progress/weak-spots'])?.isInvalidated).toBe(true);
     expect(client.getQueryState(['/api/sessions/s'])?.isInvalidated).toBe(false);
   });
+
+  it('invalidates browse queries', async () => {
+    const client = createTestQueryClient();
+    client.setQueryData(['/api/browse/lessons/x'], { name: 'Energy' });
+    client.setQueryData(['/api/other'], { id: 'o' });
+
+    await invalidateMastery(client);
+
+    expect(client.getQueryState(['/api/browse/lessons/x'])?.isInvalidated).toBe(true);
+    expect(client.getQueryState(['/api/other'])?.isInvalidated).toBe(false);
+  });
 });

@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { getGetSessionHistoryQueryKey } from '@/shared/api/generated/progress/progress';
 import { getGetUnitExamOverviewMockHandler, getStartUnitExamMockHandler } from '@/shared/api/generated/exams/exams.msw';
 import { axe } from '@/test/axe';
-import { examItem, examSessionId, examUnitId, openExam, overview } from '@/test/examFixtures';
+import { examItem, examSessionId, examSubjectId, examUnitId, openExam, overview } from '@/test/examFixtures';
 import { server } from '@/test/msw/server';
 import { renderApp } from '@/test/renderWithProviders';
 import { testSessions } from '@/test/sessions';
@@ -172,5 +172,36 @@ describe('ExamStartPage', () => {
     await screen.findByRole('button', { name: 'Start exam' });
 
     expect((await axe(container)).violations).toEqual([]);
+  });
+
+  it('shows breadcrumbs to home, the subject and the unit', async () => {
+    server.use(getGetUnitExamOverviewMockHandler(overview()));
+    openStart();
+
+    const breadcrumb = await screen.findByRole('navigation', { name: 'Breadcrumb' });
+    expect(within(breadcrumb).getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/student');
+    expect(within(breadcrumb).getByRole('link', { name: 'Physics' })).toHaveAttribute(
+      'href',
+      `/student/subject/${examSubjectId}`,
+    );
+    expect(within(breadcrumb).getByRole('link', { name: 'Mechanics' })).toHaveAttribute(
+      'href',
+      `/student/unit/${examUnitId}`,
+    );
+    expect(within(breadcrumb).getByText('Unit exam')).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('asks to open every lesson and hides the start button when lessons are unopened', async () => {
+    server.use(getGetUnitExamOverviewMockHandler(overview({ unopenedLessonCount: 2 })));
+    openStart();
+
+    expect(
+      await screen.findByText('Open every lesson in this unit before the exam. 2 lessons left.'),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Go to the unit lessons' })).toHaveAttribute(
+      'href',
+      `/student/unit/${examUnitId}`,
+    );
+    expect(screen.queryByRole('button', { name: 'Start exam' })).toBeNull();
   });
 });
