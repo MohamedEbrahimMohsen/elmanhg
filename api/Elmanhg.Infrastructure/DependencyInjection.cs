@@ -2,6 +2,7 @@ using Elmanhg.Application.Shared.RichText;
 using Elmanhg.Application.Shared.Spreadsheets;
 using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.Analytics;
+using Elmanhg.Domain.ContentRetrieval;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
@@ -16,7 +17,9 @@ using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.Units;
 using Elmanhg.Infrastructure.AiService;
 using Elmanhg.Infrastructure.Analytics;
+using Elmanhg.Infrastructure.ContentRetrieval;
 using Elmanhg.Infrastructure.ExamBlueprints;
+using Elmanhg.Infrastructure.Hosting;
 using Elmanhg.Infrastructure.Identity;
 using Elmanhg.Infrastructure.Lessons;
 using Elmanhg.Infrastructure.Mastery;
@@ -46,6 +49,8 @@ public static class DependencyInjection
         services.AddPayments();
         services.AddAiService();
         services.AddOptions<FileStorageOptions>().BindConfiguration(FileStorageOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<ReverseProxyOptions>().BindConfiguration(ReverseProxyOptions.SectionName).ValidateOnStart();
+        services.AddSingleton<IValidateOptions<ReverseProxyOptions>, ReverseProxyOptionsValidator>();
         services.AddScoped<LocalDiskFileStorage>();
         services.AddScoped<IFileStorage>(serviceProvider => serviceProvider.GetRequiredService<IOptions<FileStorageOptions>>().Value.Provider switch
         {
@@ -53,6 +58,7 @@ public static class DependencyInjection
             _ => throw new InvalidOperationException("Unsupported FileStorage:Provider."),
         });
         services.AddSingleton<IRichTextSanitizer, RichTextSanitizer>();
+        services.AddSingleton<IRichTextExtractor, RichTextExtractor>();
         services.AddSingleton<ISpreadsheetReader, ClosedXmlSpreadsheetReader>();
         services.AddSingleton<ISpreadsheetWriter, ClosedXmlSpreadsheetWriter>();
         services.AddScoped<IUserRepository, UserRepository>();
@@ -71,6 +77,8 @@ public static class DependencyInjection
         services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<ITeacherThreadRepository, TeacherThreadRepository>();
         services.AddScoped<IFunnelEventRepository, FunnelEventRepository>();
+        services.AddScoped<ILessonContentChunkRepository, LessonContentChunkRepository>();
+        services.AddScoped<ILessonContentIndexRepository, LessonContentIndexRepository>();
         return services;
     }
 }

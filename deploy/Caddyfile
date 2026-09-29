@@ -1,0 +1,24 @@
+# Edge for one environment (docs/deployment.md). SITE_ADDRESS is the public host name
+# (automatic HTTPS through Let's Encrypt), or ":80" for plain HTTP in the smoke test.
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	handle /api/* {
+		reverse_proxy api:8080
+	}
+
+	handle {
+		root * /srv
+		@assets path /assets/*
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+		@shell not path /assets/*
+		header @shell Cache-Control "no-cache"
+		try_files {path} /index.html
+		file_server
+	}
+}
+
+# Container-internal health endpoint for the compose health check; the port is not published.
+:2080 {
+	respond /healthz "ok" 200
+}

@@ -481,6 +481,9 @@ TeacherMessage(id, thread_id, sender_id, kind[Text|Voice], text, image_url?, aud
 AvatarConversation(id, student_id, context_json, model, prompt_version, started_at)
 AvatarMessage(id, conversation_id, role, text, created_at)
 
+LessonContentChunk(id, lesson_id, section[Explanation|Objectives|Summary|QuestionExplanation], section_title?, position, question_id?, question_version?, content, embedding vector(1536), embedding_model, created_at)  -- derived; docs/content-retrieval.md
+LessonContentIndex(id, lesson_id, source_updated_at, questions_updated_at?, chunk_count, embedding_model?, indexed_at)
+
 FunnelEvent(id, anonymous_id, user_id?, type[LandingViewed|SignUpStarted|SignUpCompleted|OnboardingCompleted|FirstQuizAnswered], occurred_at)  -- docs/analytics.md
 
 AuditLog(id, actor_id, actor_name, actor_role, action, entity, entity_id, outcome, error_code, diff_json, trace_id, created_at)  -- append-only
@@ -536,12 +539,14 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 ## 18. Recommended technical shape (for the implementation workflow to adopt or adjust)
 
 - **Backend**: .NET 10, DDD/CQRS, PostgreSQL (JSONB for question bodies; pgvector for Avatar retrieval).
-- **AI/grading service**: Python FastAPI — LLM grading (v2), SymPy CAS checks (v2), Avatar retrieval + generation (v1), transcription orchestration (v1).
+- **AI/grading service**: Python FastAPI — LLM grading (v2), SymPy CAS checks (v2), Avatar embeddings + generation (v1). Retrieval search itself runs in the .NET API over pgvector (see `docs/content-retrieval.md`), transcription orchestration (v1).
 - **LLM**: Claude API. Confirm current model IDs and pricing at build time.
+- **Embeddings**: OpenAI text-embedding-3-small (1536) through the AI service; Anthropic has no embeddings API. Fake by default.
 - **Frontend**: React + TypeScript, shadcn/ui, i18next RTL. v2 adds a math input with LaTeX preview, a drag-and-drop canvas, and a rich Arabic editor.
 - **Media**: S3-compatible object storage for images and audio.
 - **Jobs / realtime**: background jobs for grading, transcription, SLA reminders; SignalR for grade results and teacher replies.
 - **Payments**: Paymob, webhook-driven.
+- **Hosting**: Docker Compose on one VPS per environment (staging, production); Caddy (TLS, SPA, /api proxy), images built by CI and pushed to GHCR; PostgreSQL + pgvector. Object storage (from #96) is a managed S3-compatible service (Cloudflare R2 or AWS S3), set by config; local dev and CI use the local-disk store, and there is no object-store container in compose. Runbook: docs/deployment.md.
 
 ---
 

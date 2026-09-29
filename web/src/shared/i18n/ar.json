@@ -218,7 +218,7 @@
     "TEACHER_MESSAGE_TEXT_REQUIRED": "نص الرسالة مطلوب.",
     "TEACHER_THREAD_NOT_FOUND": "السؤال غير موجود.",
     "ATTEMPT_NOT_FOUND": "المحاولة غير موجودة.",
-    "TEACHER_THREAD_EXAM_IN_PROGRESS": "أنه الامتحان أولا قبل أن تسأل معلما عن أسئلته.",
+    "TEACHER_THREAD_EXAM_IN_PROGRESS": "أكمل الامتحان أولا قبل أن تسأل معلما عن أسئلته.",
     "ASK_TEACHER_REQUIRES_SUBSCRIPTION": "خدمة اسأل معلّم تتطلب الإضافة مع الباقة الأساسية.",
     "ASK_TEACHER_MONTHLY_LIMIT_REACHED": "استخدمت كل أسئلتك لهذا الشهر.",
     "TEACHER_THREAD_CONTEXT_INVALID": "أرفق درسا أو سؤالا أو محاولة واحدة فقط.",

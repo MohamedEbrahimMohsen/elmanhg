@@ -90,6 +90,92 @@
           }
         ]
       }
+    },
+    "/v1/embeddings": {
+      "post": {
+        "tags": [
+          "embeddings"
+        ],
+        "summary": "Create Embeddings",
+        "operationId": "embeddings_create_embeddings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmbeddingsIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmbeddingsOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -282,6 +368,71 @@
           "name"
         ],
         "title": "ContextRefIn"
+      },
+      "EmbeddingInputType": {
+        "type": "string",
+        "enum": [
+          "document",
+          "query"
+        ],
+        "title": "EmbeddingInputType"
+      },
+      "EmbeddingsIn": {
+        "properties": {
+          "inputType": {
+            "$ref": "#/components/schemas/EmbeddingInputType"
+          },
+          "texts": {
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Texts"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "inputType",
+          "texts"
+        ],
+        "title": "EmbeddingsIn"
+      },
+      "EmbeddingsOut": {
+        "properties": {
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "dimensions": {
+            "type": "integer",
+            "title": "Dimensions"
+          },
+          "embeddings": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Embeddings"
+          },
+          "inputTokens": {
+            "type": "integer",
+            "title": "Inputtokens"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model",
+          "dimensions",
+          "embeddings",
+          "inputTokens"
+        ],
+        "title": "EmbeddingsOut"
       },
       "HTTPValidationError": {
         "properties": {

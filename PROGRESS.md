@@ -1,12 +1,12 @@
 # Elmanhg — autopilot progress
 
-Last updated: laptop session, after story #87 merged (main at `b16d127`).
-**Next story: #89 [E8.S1] AI service skeleton (Python FastAPI)**, the first row of "Remaining stories".
+Last updated: laptop session, after story #90 merged (main at `bcb0c5b`).
+**Next story: #91 [E8.S3] Avatar chat with context bundles**, the first row of "Remaining stories".
 The laptop run did #54–#64; the cloud session did #65–#76 (see "Running in a cloud session" and "Hand-off" below).
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (33 of 60)
+## Finished stories (35 of 60)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -43,18 +43,18 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 31 | #85 [E7.S1] Subject, unit and lesson browsing | #194 | 2 | skipped (too many files) | #195 |
 | 32 | #86 [E7.S2] Landing page and onboarding | #196 | 1 | skipped (too many files) | #197 |
 | 33 | #87 [E7.S3] Free tier limits | #198 | 1 (+doc fix) | skipped (too many files) | #199 |
+| 34 | #89 [E8.S1] AI service skeleton (Python FastAPI) | #200 | 2 (+perf fix) | 7 comments: 6 fixed, 1 rejected | #201 |
+| 35 | #90 [E8.S2] Lesson content retrieval | #203 | 1 (+PRD fix) | skipped (too many files) | #204 |
 
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (27), in run order
+## Remaining stories (25), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
 | Order | Issue | Story |
 |---|---|---|
-| 24 | #89 | [E8.S1] AI service skeleton (Python FastAPI) |
-| 25 | #90 | [E8.S2] Lesson content retrieval |
 | 26 | #91 | [E8.S3] Avatar chat with context bundles |
 | 27 | #92 | [E8.S4] Conversation logging |
 | 28 | #94 | [E9.S1] Thread creation with attached context and quota |
@@ -98,6 +98,9 @@ The flow is `.claude/commands/feature.md`. Every stage is a fresh subagent: `fea
 9. **Metrics:** `python scripts/pipeline_orch.py metric <issue> "#|Stage|Agent|Model|duration_ms|tokens|tool_uses|outcome"` after each stage, using the numbers the subagent reports.
 
 ## Conventions and decisions the next session must know
+
+- **Parallel lanes (dev instruction, 2026-09-29):** up to 4 independent stories run at once. Each one after the first runs in a linked worktree: `python scripts/pipeline_orch.py wtstart <n>` creates `../elmanhg-wt/<n>`. Every later `pipeline_orch.py` command for that story runs from inside that worktree (the root is detected from the current directory). Agent prompts must say "work only inside <worktree>". When lanes collide on generated files (OpenAPI, Orval, Postman, EF model snapshot, AppDbContextTests migration list, PROGRESS.md), merge `origin/main` into the branch and regenerate before merging. After a lane merges, run `git worktree remove ../elmanhg-wt/<n>`. The lanes are chains of stories that do not depend on each other, e.g. E8 (#90→#91→#92), E9 (#94→#97) and E13 (#112→#115).
+
 
 - **Agent definitions are cached at session start.** Edits to `.claude/agents/*.md` are not seen by already-registered agent types. Every agent prompt therefore starts with: "First read your current role definition at `.claude/agents/<name>.md` and follow it; where it differs, the file wins." Keep doing this.
 - **Keep subagent final messages short.** Prompts cap them at 5–15 lines, and the full content goes to the `.process` file. Without the cap, the orchestrator's context fills with plans.
@@ -199,6 +202,8 @@ How the next agent resumes, in a cloud session or on the laptop:
   - It is rate-limited. After a "Review limit reached — next review in N minutes" notice, wait N+1 minutes, comment `@coderabbitai review`, and poll again. `pipeline_orch.py poll` does this once.
 - **Git credentials:** this repo pins github.com to `gh auth token --user MohamedEbrahimMohsen` through a repo-local credential helper, so git never shows the account picker. `gh` must stay signed in to that account.
 - **Prettier on Windows:** plain `format:check` fails on CRLF, so run `npx prettier --check "src/**/*.{ts,tsx,json,css}" --end-of-line auto` in `web/`. That catches real line-length problems (the #77 CI miss) without the CRLF noise. Implementers and reviewers must run it.
+- **ai/ stack (#89):** Python 3.13 in CI with uv 0.12.17 (local: `pip install --user uv==0.12.17`, then `python -m uv ...`). Run the checks exactly as `.github/workflows/ai-ci.yml` does. The .NET API calls the service through `AiService:Provider` (Fake by default, or Http) with a Bearer service token. In compose the service runs under the `ai` profile, bound to 127.0.0.1. The Claude adapter is `anthropic` with `ELMANHG_AI_CHAT_MODEL` (default `claude-sonnet-5`). The fake is the default. Delimiter stripping is per field and linear-time; keep the 58.7k performance regression test.
+- **Classifier and security mutations:** the auto-mode classifier refuses deliberate mutations of security code (auth compare, sanitisers). Do not retry them. Verify by reading, and make the tests assert exact behaviour.
 - **Local-only noise:** `prettier --check` fails on CRLF endings in the Windows checkout, and `dotnet format` flags whitespace only inside the vendored `core-libraries`. CI (Linux) is clean. Neither counts as a finding.
 - **Visual Studio's `api/.vs/` cache:** now in `.gitignore`. Earlier it blocked the pre-flight stash.
 - **Flaky web test:** `RichTextEditor.test.tsx` "inserts an inline formula" sometimes times out under `--coverage` (tracked in #148). Re-run CI once before treating a web-ci failure as real.
@@ -210,4 +215,4 @@ How the next agent resumes, in a cloud session or on the laptop:
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199 · `dev-decision`: none open (#135 and #155 confirmed and closed).
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199, #201, #204 · `dev-decision`: none open (#135 and #155 confirmed and closed).

@@ -1,0 +1,120 @@
+# Staging / production stack, one environment per host (docs/deployment.md).
+# Settings: .env (compose), api.env (API), ai.env (AI service) next to this file; none is committed.
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+x-api-image: &api-image ${IMAGE_REGISTRY:-ghcr.io/mohamedebrahimmohsen}/elmanhg-api:${IMAGE_TAG:?set IMAGE_TAG in .env}
+
+x-api-environment: &api-environment
+  ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:?set ASPNETCORE_ENVIRONMENT in .env}
+  ConnectionStrings__DbConnectionString: Host=postgres;Port=5432;Database=${POSTGRES_DB:?set POSTGRES_DB in .env};Username=${POSTGRES_USER:?set POSTGRES_USER in .env};Password=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+  ReverseProxy__TrustedNetworks__0: ${DOCKER_SUBNET:-172.30.0.0/24}
+  AiService__BaseUrl: http://ai:8000
+  FileStorage__Provider: Local
+  FileStorage__LocalRootPath: /app/App_Data/media
+  FileStorage__PublicBaseUrl: /api/media
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17@sha256:cf134a767f474095eeba57e0117be8e568e011a63f33fbf252f14c9b760f8e6f
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    logging: *logging
+
+  migrate:
+    image: *api-image
+    command: ["--MigrateAndExit=true"]
+    restart: "no"
+    env_file:
+      - ${API_ENV_FILE:-api.env}
+    environment: *api-environment
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *logging
+
+  api:
+    image: *api-image
+    restart: unless-stopped
+    env_file:
+      - ${API_ENV_FILE:-api.env}
+    environment: *api-environment
+    volumes:
+      - api-media:/app/App_Data/media
+      - api-data-protection:/home/app/.aspnet/DataProtection-Keys
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "--max-time", "3", "http://127.0.0.1:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    logging: *logging
+
+  web:
+    image: ${IMAGE_REGISTRY:-ghcr.io/mohamedebrahimmohsen}/elmanhg-web:${IMAGE_TAG:?set IMAGE_TAG in .env}
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?set SITE_ADDRESS in .env}
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+      - "${HTTPS_PORT:-443}:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:2080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    logging: *logging
+
+  ai:
+    profiles: ["ai"]
+    image: ${IMAGE_REGISTRY:-ghcr.io/mohamedebrahimmohsen}/elmanhg-ai:${IMAGE_TAG:?set IMAGE_TAG in .env}
+    restart: unless-stopped
+    env_file:
+      - ${AI_ENV_FILE:-ai.env}
+    environment:
+      ELMANHG_AI_ENV: ${ELMANHG_AI_ENV:-production}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys, urllib.request; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3).status == 200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    logging: *logging
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: ${DOCKER_SUBNET:-172.30.0.0/24}
+
+volumes:
+  postgres-data:
+  api-media:
+  api-data-protection:
+  caddy-data:
+  caddy-config:

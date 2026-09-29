@@ -4,3 +4,7 @@ ai/uv.lock text eol=lf
 web/src/shared/api/generated/** text eol=lf
 web/src/routeTree.gen.ts text eol=lf
 web/src/styles/tokens.css text eol=lf
+*.sh text eol=lf
+deploy/** text eol=lf
+**/Dockerfile text eol=lf
+.dockerignore text eol=lf

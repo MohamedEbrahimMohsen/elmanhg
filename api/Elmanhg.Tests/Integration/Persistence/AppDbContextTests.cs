@@ -20,7 +20,7 @@ public sealed class AppDbContextTests(ApiFactory factory)
         var applied = await context.Database.GetAppliedMigrationsAsync(TestContext.Current.CancellationToken);
 
         pending.Should().BeEmpty();
-        applied.Should().SatisfyRespectively(first => first.Should().EndWith("_InitialCreate"), second => second.Should().EndWith("_AddUserProfileFields"), third => third.Should().EndWith("_AddTeacherSubjectScoping"), fourth => fourth.Should().EndWith("_AddAuditLogDiffAndAppendOnly"), fifth => fifth.Should().EndWith("_AddSubjectOrderAndUnits"), sixth => sixth.Should().EndWith("_AddLessons"), seventh => seventh.Should().EndWith("_AddLessonPublishedAt"), eighth => eighth.Should().EndWith("_AddQuestions"), ninth => ninth.Should().EndWith("_AddQuestionRejectionReason"), tenth => tenth.Should().EndWith("_AddQuestionImportBatches"), eleventh => eleventh.Should().EndWith("_AddQuestionRetiredAt"), twelfth => twelfth.Should().EndWith("_AddQuestionValidationQueue"), thirteenth => thirteenth.Should().EndWith("_AddAnswerNormalizationRules"), fourteenth => fourteenth.Should().EndWith("_AddSessionsAndAttempts"), fifteenth => fifteenth.Should().EndWith("_AddSessionVersion"), sixteenth => sixteenth.Should().EndWith("_AddQuestionMastery"), seventeenth => seventeenth.Should().EndWith("_AddExamBlueprints"), eighteenth => eighteenth.Should().EndWith("_AddExamSittings"), nineteenth => nineteenth.Should().EndWith("_AddOtpRecipientType"), twentieth => twentieth.Should().EndWith("_AddSubscriptionsAndPayments"), twentyFirst => twentyFirst.Should().EndWith("_AddPaymentWebhookState"), twentySecond => twentySecond.Should().EndWith("_AddPaymentRefunds"), twentyThird => twentyThird.Should().EndWith("_AddLessonOpenings"), twentyFourth => twentyFourth.Should().EndWith("_AddOnboardingAndFunnelEvents"), twentyFifth => twentyFifth.Should().EndWith("_AddTeacherThreads"));
+        applied.Should().SatisfyRespectively(first => first.Should().EndWith("_InitialCreate"), second => second.Should().EndWith("_AddUserProfileFields"), third => third.Should().EndWith("_AddTeacherSubjectScoping"), fourth => fourth.Should().EndWith("_AddAuditLogDiffAndAppendOnly"), fifth => fifth.Should().EndWith("_AddSubjectOrderAndUnits"), sixth => sixth.Should().EndWith("_AddLessons"), seventh => seventh.Should().EndWith("_AddLessonPublishedAt"), eighth => eighth.Should().EndWith("_AddQuestions"), ninth => ninth.Should().EndWith("_AddQuestionRejectionReason"), tenth => tenth.Should().EndWith("_AddQuestionImportBatches"), eleventh => eleventh.Should().EndWith("_AddQuestionRetiredAt"), twelfth => twelfth.Should().EndWith("_AddQuestionValidationQueue"), thirteenth => thirteenth.Should().EndWith("_AddAnswerNormalizationRules"), fourteenth => fourteenth.Should().EndWith("_AddSessionsAndAttempts"), fifteenth => fifteenth.Should().EndWith("_AddSessionVersion"), sixteenth => sixteenth.Should().EndWith("_AddQuestionMastery"), seventeenth => seventeenth.Should().EndWith("_AddExamBlueprints"), eighteenth => eighteenth.Should().EndWith("_AddExamSittings"), nineteenth => nineteenth.Should().EndWith("_AddOtpRecipientType"), twentieth => twentieth.Should().EndWith("_AddSubscriptionsAndPayments"), twentyFirst => twentyFirst.Should().EndWith("_AddPaymentWebhookState"), twentySecond => twentySecond.Should().EndWith("_AddPaymentRefunds"), twentyThird => twentyThird.Should().EndWith("_AddLessonOpenings"), twentyFourth => twentyFourth.Should().EndWith("_AddOnboardingAndFunnelEvents"), twentyFifth => twentyFifth.Should().EndWith("_AddLessonContentIndex"), twentySixth => twentySixth.Should().EndWith("_AddTeacherThreads"));
     }
 
     [Fact]
@@ -45,6 +45,19 @@ public sealed class AppDbContextTests(ApiFactory factory)
             .SingleAsync(TestContext.Current.CancellationToken);
 
         dataType.Should().Be("jsonb");
+    }
+
+    [Fact]
+    public async Task Migrate_LessonContentChunks_CreatesVectorColumn()
+    {
+        using var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var udtName = await context.Database
+            .SqlQuery<string>($"SELECT udt_name AS \"Value\" FROM information_schema.columns WHERE table_name = {"LessonContentChunks"} AND column_name = {"Embedding"}")
+            .SingleAsync(TestContext.Current.CancellationToken);
+
+        udtName.Should().Be("vector");
     }
 
     [Fact]

@@ -43,6 +43,10 @@ ai/requirements-audit.txt
 # Secrets and personal overrides
 .env
 .env.local
+/deploy/api.env
+/deploy/ai.env
+/deploy/backups/
+/deploy/.smoke/
 .claude/pipeline.local.yml
 
 # IDE

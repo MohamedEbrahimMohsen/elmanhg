@@ -106,7 +106,10 @@ public sealed class ProvisioningOptions
   to remember: CI and fresh clones have NO configuration, so integration-style runs
   must supply it explicitly; and a new options section must be announced to the dev
   so it can be mirrored into every environment rather than silently defaulting to
-  0/empty.
+  0/empty. Deployed images bake the committed `appsettings.example.json` as
+  `appsettings.json` (shapes only); each host supplies secrets and per-host values
+  through uncommitted env files (`deploy/.env`, `api.env`, `ai.env`) as described in
+  `docs/deployment.md`.
 - **Never re-add `appsettings.json` to the index.** Removing or weakening its
   `.gitignore` entry, or committing it with `git add -f`, is a blocking review
   finding — it publishes the signing key and the connection string in one commit.

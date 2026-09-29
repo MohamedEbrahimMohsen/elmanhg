@@ -2,7 +2,7 @@
 
 ## Role
 
-`ai/` is an internal Python 3.13 FastAPI service (package `elmanhg_ai`, managed with uv). It answers avatar chat turns over the Claude API (PRD §9). Only the .NET API calls it, over HTTP with a shared service token; browsers never do. The .NET side of the contract is `api/Elmanhg.Application/Shared/AiService/` (`IAiServiceClient`), and the Python side is `ai/src/elmanhg_ai/api/chat/schemas.py`. Both change together, and `ai/openapi/v1.json` is the committed contract (regenerate with `uv run python -m elmanhg_ai.openapi_export` from `ai/`; a test fails on drift).
+`ai/` is an internal Python 3.13 FastAPI service (package `elmanhg_ai`, managed with uv). It answers avatar chat turns over the Claude API (PRD §9) and embeds text for lesson retrieval ([content-retrieval.md](content-retrieval.md)). Only the .NET API calls it, over HTTP with a shared service token; browsers never do. The .NET side of the contract is `api/Elmanhg.Application/Shared/AiService/` (`IAiServiceClient`), and the Python side is `ai/src/elmanhg_ai/api/chat/schemas.py` and `ai/src/elmanhg_ai/api/embeddings/schemas.py`. Both change together, and `ai/openapi/v1.json` is the committed contract (regenerate with `uv run python -m elmanhg_ai.openapi_export` from `ai/`; a test fails on drift).
 
 The .NET API's own readiness (`/health`) does not depend on the AI service: the avatar is non-critical, so a down AI service must not take the API out of rotation.
 
@@ -76,6 +76,33 @@ Limits (checked by the pipeline; exceeding one returns `400 VALIDATION_FAILED` w
 | `ELMANHG_AI_CHAT_MAX_MESSAGE_CHARS` | 4000 | length of `message` and of each `history[].content` |
 | `ELMANHG_AI_CHAT_MAX_CONTEXT_CHARS` | 60000 | length of the serialized `context` JSON |
 
+### `POST /v1/embeddings`
+
+operationId `embeddings_create_embeddings`. Turns texts into vectors for lesson retrieval. The API sends lesson chunks as `document` and the search text as `query`; the fake and OpenAI adapters treat both the same, and the field exists so a provider that distinguishes them needs no contract change.
+
+Request:
+
+```json
+{ "inputType": "query", "texts": ["قانون أوم", "المقاومة"] }
+```
+
+Response `200`:
+
+```json
+{ "model": "text-embedding-3-small", "dimensions": 1536, "embeddings": [[0.012, -0.034, "…"], [0.021, 0.005, "…"]], "inputTokens": 7 }
+```
+
+- `inputType` is `document` or `query`. `texts` has at least one item, and every item is non-empty.
+- `embeddings` has one vector per text, in request order, and every vector has exactly `dimensions` numbers. The service checks both before answering (`502 MODEL_OUTPUT_INVALID` otherwise), and the .NET `HttpAiServiceClient` checks them again (`AI_SERVICE_UNAVAILABLE` otherwise).
+- `model` is the provider's model id. The API stores it with every chunk and searches only chunks of the same model.
+
+Limits (`400 VALIDATION_FAILED`, field code `TOO_MANY_ITEMS` on `texts` or `TOO_LONG` on `texts[i]`):
+
+| Setting | Default | Applies to |
+|---|---|---|
+| `ELMANHG_AI_EMBEDDING_MAX_TEXTS` | 64 | number of `texts` (the API sends at most `ContentRetrieval:EmbeddingBatchSize`, 32) |
+| `ELMANHG_AI_EMBEDDING_MAX_TEXT_CHARS` | 8000 | length of each text |
+
 ## Errors
 
 Every error is RFC 9457 `application/problem+json`. `detail` is omitted when the status is 500 or above, and `errors` appears only for `VALIDATION_FAILED`. Titles are English only: the one caller, the .NET API, maps any failure to its own localised `AI_SERVICE_UNAVAILABLE` (503).
@@ -94,17 +121,17 @@ Every error is RFC 9457 `application/problem+json`. `detail` is omitted when the
 
 | Code | Status | When |
 |---|---|---|
-| `VALIDATION_FAILED` | 400 | Invalid body (FastAPI's 422 is mapped to 400) or a chat limit exceeded |
+| `VALIDATION_FAILED` | 400 | Invalid body (FastAPI's 422 is mapped to 400) or a chat or embeddings limit exceeded |
 | `MALFORMED_REQUEST` | 4xx | Any other client HTTP error |
 | `UNAUTHENTICATED` | 401 | Missing or wrong service token (`WWW-Authenticate: Bearer`) |
 | `NOT_FOUND` | 404 | Unknown route |
 | `METHOD_NOT_ALLOWED` | 405 | Wrong method |
-| `MODEL_OUTPUT_INVALID` | 502 | The model returned no text |
-| `DEPENDENCY_UNAVAILABLE` | 503 | The Claude API failed (any SDK error, after SDK retries) |
+| `MODEL_OUTPUT_INVALID` | 502 | The model returned no text, or an embeddings reply was unreadable or had the wrong vector count or width |
+| `DEPENDENCY_UNAVAILABLE` | 503 | The Claude API failed (any SDK error, after SDK retries), or the OpenAI embeddings call failed (after retries for 429, 5xx and transport errors; any other 4xx is not retried) |
 | `SERVICE_NOT_READY` | 503 | Startup has not finished |
 | `INTERNAL_ERROR` | 500 | Anything unexpected (logged, never echoed) |
 
-On the .NET side, `HttpAiServiceClient` throws `ServiceUnavailableCoreException(AI_SERVICE_UNAVAILABLE)` on a transport failure, any non-2xx response, or an unreadable or empty reply.
+On the .NET side, `HttpAiServiceClient` throws `ServiceUnavailableCoreException(AI_SERVICE_UNAVAILABLE)` on a transport failure, any non-2xx response, or an unreadable or empty reply. For embeddings it also throws when the model is blank, `dimensions` is not positive, the vector count differs from the text count, or any vector's length differs from `dimensions`.
 
 ## Service auth
 
@@ -119,7 +146,7 @@ AI service (`ELMANHG_AI_*` environment variables; `settings.py` is the only plac
 
 | Variable | Default | Notes |
 |---|---|---|
-| `ELMANHG_AI_ENV` | `development` | `development`, `testing` or `production`. Production hides `/docs` and `/openapi.json`. |
+| `ELMANHG_AI_ENV` | `development` | `development`, `testing` or `production`. Production hides `/docs` and `/openapi.json`. Staging and production hosts both use `production`. |
 | `ELMANHG_AI_LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
 | `ELMANHG_AI_LOG_FORMAT` | `json` | `json` or `console` |
 | `ELMANHG_AI_SERVICE_TOKEN` | required | at least 32 characters |
@@ -135,6 +162,15 @@ AI service (`ELMANHG_AI_*` environment variables; `settings.py` is the only plac
 | `ELMANHG_AI_MODEL_MAX_RETRIES` | 1 | SDK retries with exponential backoff, 0 to 5 |
 | `ELMANHG_AI_MODEL_INPUT_USD_PER_MILLION_TOKENS` | 3 | cost logging only; confirm the list price at go-live |
 | `ELMANHG_AI_MODEL_OUTPUT_USD_PER_MILLION_TOKENS` | 15 | cost logging only; confirm the list price at go-live |
+| `ELMANHG_AI_EMBEDDING_PROVIDER` | `fake` | `fake` or `openai` (Anthropic has no embeddings API) |
+| `ELMANHG_AI_OPENAI_API_KEY` | unset | required when the embedding provider is `openai`; never logged |
+| `ELMANHG_AI_EMBEDDING_MODEL` | `text-embedding-3-small` | OpenAI embeddings model id |
+| `ELMANHG_AI_EMBEDDING_DIMENSIONS` | 1536 | 1 to 2000, sent as the OpenAI `dimensions` parameter; must equal the API's `vector(1536)` column |
+| `ELMANHG_AI_EMBEDDING_MAX_TEXTS` | 64 | 1 to 2048 texts per call |
+| `ELMANHG_AI_EMBEDDING_MAX_TEXT_CHARS` | 8000 | characters per text |
+| `ELMANHG_AI_EMBEDDING_USD_PER_MILLION_TOKENS` | 0.02 | cost logging only; confirm the list price at go-live |
+
+The OpenAI adapter reuses `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` per call and `ELMANHG_AI_MODEL_MAX_RETRIES` for retries, with `0.5 s × 2^attempt` backoff.
 
 .NET API (`AiService` section; environment form `AiService__*`):
 
@@ -152,6 +188,8 @@ Timeouts nest so the AI service always answers before the API gives up: the wors
 
 - `ELMANHG_AI_LLM_PROVIDER=fake` (the default) uses `FakeModelClient`, which returns the fixed Arabic reply `هذا رد تجريبي من المساعد.` with model `fake`. CI needs no keys.
 - The .NET `AiService:Provider=Fake` (the default) uses `FakeAiServiceClient`, which returns the same fixed reply with model and prompt version `fake` without calling the service. It refuses with `AI_SERVICE_UNAVAILABLE` in Production. The test `ApiFactory` pins `Fake`.
+- `ELMANHG_AI_EMBEDDING_PROVIDER=fake` (the default) uses `FakeEmbeddingClient`: deterministic lexical vectors (NFKC, case folding, tashkeel and tatweel removed, alef variants unified, word tokens hashed with BLAKE2b into signed buckets, L2-normalised; text with no words gives the unit vector on the first axis). Model `fake-embedding`.
+- The .NET fake embeds in-process the same way (SHA-256 buckets over `AnswerNormalizer` output) with model `fake`, so a mixed fake index never matches across the two (the search filters by model). Texts that share words score higher, which makes retrieval tests meaningful without a key.
 
 ## Prompts
 
@@ -164,6 +202,8 @@ Timeouts nest so the AI service always answers before the API gives up: the wors
 - structlog writes one JSON object per line (`ELMANHG_AI_LOG_FORMAT=console` for local reading) with `timestamp`, `level`, `event`, `trace_id` and `request_id`.
 - The trace id comes from the W3C `traceparent` header (the .NET `HttpClient` sends it), so API and AI logs share one id; otherwise the service generates one. `X-Request-Id` is reused when valid. Both are echoed as `X-Trace-Id` and `X-Request-Id`.
 - There is one `request.completed` line per request (DEBUG for `/health*`), and one `chat.completed` line per chat with `pipeline`, `prompt_version`, `model`, `tokens_in`, `tokens_out`, `latency_ms`, `cost_usd` and `stop_reason`. Message and context text are never logged.
+- There is one `embedding.completed` line per embeddings call with `pipeline` (`embeddings`), `model`, `input_type`, `count`, `tokens_in`, `latency_ms` and `cost_usd`. The texts are never logged. A failed OpenAI call logs `embedding.call_failed` (`provider`, `model`, `status_code`, `error_type`), and a bad reply logs `embedding.output_invalid`.
+- `service.started` also records `embedding_provider` and `embedding_model`.
 
 ## Run locally
 
@@ -180,9 +220,19 @@ Docker: `docker compose --profile ai up -d --build ai` (published on `127.0.0.1:
 
 To make the API call it, set `AiService__Provider=Http`, `AiService__BaseUrl=http://localhost:8000`, and the same token in `AiService__ServiceToken` and `ELMANHG_AI_SERVICE_TOKEN` (see `.env.example`).
 
+Staging and production: the `ai` compose profile in `deploy/docker-compose.prod.yml`, variables in the host's `ai.env`; see [docs/deployment.md](deployment.md).
+
 ## Go live with Claude
 
 1. Set `ELMANHG_AI_LLM_PROVIDER=anthropic` and `ELMANHG_AI_ANTHROPIC_API_KEY`.
 2. Confirm the `ELMANHG_AI_CHAT_MODEL` id and the per-million-token prices (`ELMANHG_AI_MODEL_*_USD_PER_MILLION_TOKENS`) against Anthropic's current list (PRD §18).
 3. Set the API to `AiService__Provider=Http` with the service's URL and the shared token.
 4. Check `/health/ready`, then send one chat and confirm that `chat.completed` shows real token counts.
+
+## Go live with OpenAI embeddings
+
+1. Set `ELMANHG_AI_EMBEDDING_PROVIDER=openai` and `ELMANHG_AI_OPENAI_API_KEY`. Keep `ELMANHG_AI_EMBEDDING_DIMENSIONS=1536`, which is the width of the API's vector column.
+2. Confirm `ELMANHG_AI_EMBEDDING_MODEL` and `ELMANHG_AI_EMBEDDING_USD_PER_MILLION_TOKENS` against OpenAI's current list.
+3. Set the API to `AiService__Provider=Http` (the same switch as chat), restart both, and check `/health/ready`.
+4. As an admin, call `POST /api/content-index/rebuild`. The index sweep then re-embeds every Published lesson with the new model; until a lesson is re-embedded, its search returns no matches, because chunks of the old model are never compared with a query of the new one.
+5. Confirm that `embedding.completed` shows the OpenAI model and real token counts, then run a search from Postman (`ContentRetrieval` folder).

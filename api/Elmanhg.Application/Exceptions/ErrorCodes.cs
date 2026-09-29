@@ -237,6 +237,11 @@ public static class ErrorCodes
     // AI SERVICE
     public const string AiServiceUnavailable = "AI_SERVICE_UNAVAILABLE";
 
+    // CONTENT RETRIEVAL
+    public const string ContentSearchQueryRequired = "CONTENT_SEARCH_QUERY_REQUIRED";
+    public const string ContentSearchQueryTooLong = "CONTENT_SEARCH_QUERY_TOO_LONG";
+    public const string ContentSearchTopInvalid = "CONTENT_SEARCH_TOP_INVALID";
+
     // PLATFORM
     public const string TooManyRequests = "TOO_MANY_REQUESTS";
     public const string AdminSeedFailed = "ADMIN_SEED_FAILED";

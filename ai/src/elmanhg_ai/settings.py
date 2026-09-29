@@ -30,6 +30,13 @@ class Settings(BaseSettings):
     model_max_retries: int = Field(default=1, ge=0, le=5)
     model_input_usd_per_million_tokens: Decimal = Field(default=Decimal("3"), ge=0)
     model_output_usd_per_million_tokens: Decimal = Field(default=Decimal("15"), ge=0)
+    embedding_provider: Literal["fake", "openai"] = "fake"
+    openai_api_key: SecretStr | None = None
+    embedding_model: str = Field(default="text-embedding-3-small", min_length=1)
+    embedding_dimensions: int = Field(default=1536, ge=1, le=2000)
+    embedding_max_texts: int = Field(default=64, ge=1, le=2048)
+    embedding_max_text_chars: int = Field(default=8000, ge=1)
+    embedding_usd_per_million_tokens: Decimal = Field(default=Decimal("0.02"), ge=0)
 
     @field_validator("service_token")
     @classmethod
@@ -43,6 +50,15 @@ class Settings(BaseSettings):
         key = self.anthropic_api_key
         if self.llm_provider == "anthropic" and (key is None or not key.get_secret_value().strip()):
             raise ValueError("anthropic_api_key is required when llm_provider is anthropic")
+        return self
+
+    @model_validator(mode="after")
+    def _openai_needs_key(self) -> Self:
+        key = self.openai_api_key
+        if self.embedding_provider == "openai" and (
+            key is None or not key.get_secret_value().strip()
+        ):
+            raise ValueError("openai_api_key is required when embedding_provider is openai")
         return self
 
 

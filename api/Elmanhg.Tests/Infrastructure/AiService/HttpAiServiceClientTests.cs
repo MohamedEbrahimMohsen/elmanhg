@@ -15,6 +15,8 @@ public sealed class HttpAiServiceClientTests
 {
     private const string ReplyBody = "{\"reply\":\"r\",\"model\":\"claude-sonnet-5\",\"promptVersion\":\"v1\",\"inputTokens\":10,\"outputTokens\":5,\"stopReason\":\"end_turn\"}";
 
+    private const string EmbeddingsBody = "{\"model\":\"text-embedding-3-small\",\"dimensions\":2,\"embeddings\":[[0.6,0.8],[1.0,0.0]],\"inputTokens\":4}";
+
     private readonly StubHttpMessageHandler _handler = new() { ResponseBody = ReplyBody };
 
     [Fact]
@@ -104,6 +106,73 @@ public sealed class HttpAiServiceClientTests
         var act = () => ChatAsync(cancellation.Token);
 
         (await act.Should().ThrowAsync<OperationCanceledException>()).Which.Should().NotBeOfType<ServiceUnavailableCoreException>();
+    }
+
+    [Fact]
+    public async Task EmbedAsync_ValidRequest_PostsCamelCaseBodyToV1Embeddings()
+    {
+        _handler.ResponseBody = EmbeddingsBody;
+
+        await EmbedAsync();
+
+        _handler.LastRequest!.Method.Should().Be(HttpMethod.Post);
+        _handler.LastRequest.RequestUri.Should().Be(new Uri("http://ai.test/v1/embeddings"));
+        _handler.LastRequest.Headers.Authorization!.ToString().Should().Be($"Bearer {AiServiceTestSettings.ServiceToken}");
+        using var body = JsonDocument.Parse(_handler.LastBody!);
+        body.RootElement.GetProperty("inputType").GetString().Should().Be("query");
+        body.RootElement.GetProperty("texts").EnumerateArray().Select(x => x.GetString()).Should().Equal("a", "b");
+    }
+
+    [Fact]
+    public async Task EmbedAsync_Success_ReturnsVectorsModelAndTokens()
+    {
+        _handler.ResponseBody = EmbeddingsBody;
+
+        var result = await EmbedAsync();
+
+        result.Model.Should().Be("text-embedding-3-small");
+        result.Dimensions.Should().Be(2);
+        result.Embeddings.Should().HaveCount(2);
+        result.Embeddings[0].Should().Equal(0.6f, 0.8f);
+        result.Embeddings[1].Should().Equal(1f, 0f);
+        result.InputTokens.Should().Be(4);
+    }
+
+    [Fact]
+    public async Task EmbedAsync_CountMismatch_ThrowsAiServiceUnavailable()
+    {
+        _handler.ResponseBody = "{\"model\":\"m\",\"dimensions\":2,\"embeddings\":[[0.6,0.8]],\"inputTokens\":4}";
+
+        await ExpectEmbedUnavailableAsync();
+    }
+
+    [Fact]
+    public async Task EmbedAsync_VectorLengthNotDimensions_ThrowsAiServiceUnavailable()
+    {
+        _handler.ResponseBody = "{\"model\":\"m\",\"dimensions\":2,\"embeddings\":[[0.6,0.8],[1.0]],\"inputTokens\":4}";
+
+        await ExpectEmbedUnavailableAsync();
+    }
+
+    [Fact]
+    public async Task EmbedAsync_ServerError_ThrowsAiServiceUnavailable()
+    {
+        _handler.StatusCode = HttpStatusCode.BadGateway;
+
+        await ExpectEmbedUnavailableAsync();
+    }
+
+    private async Task ExpectEmbedUnavailableAsync()
+    {
+        var act = () => EmbedAsync();
+
+        (await act.Should().ThrowAsync<ServiceUnavailableCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.AiServiceUnavailable);
+    }
+
+    private Task<AiEmbeddingResult> EmbedAsync()
+    {
+        var client = new HttpAiServiceClient(new HttpClient(_handler) { BaseAddress = new Uri("http://ai.test/") }, Options.Create(AiServiceTestSettings.WithHttp()), NullLogger<HttpAiServiceClient>.Instance);
+        return client.EmbedAsync(new AiEmbeddingRequest(AiEmbeddingInputType.Query, ["a", "b"]), TestContext.Current.CancellationToken);
     }
 
     private async Task<ServiceUnavailableCoreException> ExpectUnavailableAsync()

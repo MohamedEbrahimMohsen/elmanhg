@@ -15,6 +15,8 @@
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.5" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <PackageVersion Include="Pgvector" Version="0.3.2" />
+    <PackageVersion Include="Pgvector.EntityFrameworkCore" Version="0.3.0" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.13.14" />
     <PackageVersion Include="DotNetEnv" Version="3.1.1" />
     <PackageVersion Include="HtmlSanitizer" Version="9.2.1039" />

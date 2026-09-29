@@ -4,6 +4,7 @@ using Core.EntityFrameworkCore.Context;
 using Core.Errors;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Analytics;
+using Elmanhg.Domain.ContentRetrieval;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
@@ -70,6 +71,8 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public DbSet<TeacherThread> TeacherThreads { get; set; }
     public DbSet<TeacherMessage> TeacherMessages { get; set; }
     public DbSet<FunnelEvent> FunnelEvents { get; set; }
+    public DbSet<LessonContentChunk> LessonContentChunks { get; set; }
+    public DbSet<LessonContentIndex> LessonContentIndexes { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
@@ -127,6 +130,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.HasPostgresExtension("vector");
         ConfigureUsers(modelBuilder);
         ConfigureSubjects(modelBuilder);
         ConfigureUnits(modelBuilder);
@@ -142,6 +146,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         ConfigureTeacherThreads(modelBuilder);
         ConfigureTeacherSubjects(modelBuilder);
         ConfigureFunnelEvents(modelBuilder);
+        ConfigureContentRetrieval(modelBuilder);
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
 
@@ -416,6 +421,30 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         });
     }
 
+    private static void ConfigureContentRetrieval(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<LessonContentChunk>(builder =>
+        {
+            builder.Property(x => x.Id).ValueGeneratedNever();
+            builder.Property(x => x.Section).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.SectionTitle).HasMaxLength(LessonContentChunk.SectionTitleMaxLength);
+            builder.Property(x => x.Content).IsRequired();
+            builder.Property(x => x.Embedding).HasColumnType($"vector({LessonContentChunk.EmbeddingDimensions})").IsRequired();
+            builder.Property(x => x.EmbeddingModel).IsRequired().HasMaxLength(LessonContentChunk.EmbeddingModelMaxLength);
+            builder.HasOne<Lesson>().WithMany().HasForeignKey(x => x.LessonId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Question>().WithMany().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => x.LessonId);
+            builder.HasIndex(x => x.QuestionId);
+        });
+        modelBuilder.Entity<LessonContentIndex>(builder =>
+        {
+            builder.Property(x => x.Id).ValueGeneratedNever();
+            builder.Property(x => x.EmbeddingModel).HasMaxLength(LessonContentChunk.EmbeddingModelMaxLength);
+            builder.HasOne<Lesson>().WithMany().HasForeignKey(x => x.LessonId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => x.LessonId).IsUnique();
+        });
+    }
+
     private static void ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>().HasQueryFilter(x => !x.IsDeleted);
@@ -441,5 +470,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         modelBuilder.Entity<TeacherThread>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<TeacherMessage>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<FunnelEvent>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<LessonContentChunk>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<LessonContentIndex>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

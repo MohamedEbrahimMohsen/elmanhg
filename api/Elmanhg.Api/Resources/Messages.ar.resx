@@ -330,7 +330,7 @@
   <data name="TEACHER_MESSAGE_TEXT_REQUIRED" xml:space="preserve"><value>نص الرسالة مطلوب.</value></data>
   <data name="TEACHER_THREAD_NOT_FOUND" xml:space="preserve"><value>السؤال غير موجود.</value></data>
   <data name="ATTEMPT_NOT_FOUND" xml:space="preserve"><value>المحاولة غير موجودة.</value></data>
-  <data name="TEACHER_THREAD_EXAM_IN_PROGRESS" xml:space="preserve"><value>أنه الامتحان أولا قبل أن تسأل معلما عن أسئلته.</value></data>
+  <data name="TEACHER_THREAD_EXAM_IN_PROGRESS" xml:space="preserve"><value>أكمل الامتحان أولا قبل أن تسأل معلما عن أسئلته.</value></data>
   <data name="ASK_TEACHER_REQUIRES_SUBSCRIPTION" xml:space="preserve"><value>خدمة اسأل معلم تتطلب الإضافة مع الباقة الأساسية.</value></data>
   <data name="ASK_TEACHER_MONTHLY_LIMIT_REACHED" xml:space="preserve"><value>استخدمت كل أسئلتك لهذا الشهر.</value></data>
   <data name="TEACHER_THREAD_CONTEXT_INVALID" xml:space="preserve"><value>أرفق درسا أو سؤالا أو محاولة واحدة فقط.</value></data>
@@ -344,4 +344,8 @@
   <data name="FUNNEL_EVENT_TYPE_INVALID" xml:space="preserve"><value>نوع الحدث غير صالح.</value></data>
   <data name="USER_NOT_STUDENT" xml:space="preserve"><value>هذا الاجراء للطلاب فقط.</value></data>
   <data name="AI_SERVICE_UNAVAILABLE" xml:space="preserve"><value>المساعد غير متاح الآن. حاول مرة أخرى بعد قليل.</value></data>
+  <data name="CONTENT_SEARCH_QUERY_REQUIRED" xml:space="preserve"><value>اكتب نص البحث.</value></data>
+  <data name="CONTENT_SEARCH_QUERY_TOO_LONG" xml:space="preserve"><value>نص البحث أطول من المسموح.</value></data>
+  <data name="CONTENT_SEARCH_TOP_INVALID" xml:space="preserve"><value>عدد النتائج المطلوبة غير صالح.</value></data>
+  <data name="CONTENT_EMBEDDING_DIMENSIONS_INVALID" xml:space="preserve"><value>أبعاد التمثيل الرقمي للمحتوى غير متوافقة.</value></data>
 </root>

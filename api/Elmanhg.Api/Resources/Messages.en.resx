@@ -344,4 +344,8 @@
   <data name="FUNNEL_EVENT_TYPE_INVALID" xml:space="preserve"><value>The event type is not valid.</value></data>
   <data name="USER_NOT_STUDENT" xml:space="preserve"><value>This action is for students only.</value></data>
   <data name="AI_SERVICE_UNAVAILABLE" xml:space="preserve"><value>The assistant is unavailable right now. Try again in a moment.</value></data>
+  <data name="CONTENT_SEARCH_QUERY_REQUIRED" xml:space="preserve"><value>Enter the search text.</value></data>
+  <data name="CONTENT_SEARCH_QUERY_TOO_LONG" xml:space="preserve"><value>The search text is too long.</value></data>
+  <data name="CONTENT_SEARCH_TOP_INVALID" xml:space="preserve"><value>The number of results requested is not valid.</value></data>
+  <data name="CONTENT_EMBEDDING_DIMENSIONS_INVALID" xml:space="preserve"><value>The content embedding has the wrong number of dimensions.</value></data>
 </root>

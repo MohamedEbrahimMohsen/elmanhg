@@ -998,6 +998,65 @@
       ]
     },
     {
+      "name": "ContentRetrieval",
+      "description": "Admin only (Content.Manage). Lesson content retrieval for the AI avatar (docs/content-retrieval.md). Set lessonId to a Published lesson and sign in as an admin first; the Lessons folder ends by deleting its sample lesson, so publish another one (or re-run Create lesson, Update lesson and Publish lesson) before these requests. The index sweep embeds Published lessons every 30 s, so a just-published lesson may return indexedAt null and no matches until the next sweep. Search returns the top chunks of one lesson with a section reference and a cosine score; a Draft, Archived or unknown lesson returns 404 LESSON_NOT_FOUND. Rebuild content index deletes all index state so the sweep re-embeds every Published lesson; use it after switching the embedding provider or model. It is audited as ContentIndex.Rebuild.",
+      "item": [
+        {
+          "name": "Search lesson content",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/{{lessonId}}/content-chunks/search",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons", "{{lessonId}}", "content-chunks", "search"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"قانون أوم\",\n  \"top\": 5,\n  \"includeQuestionExplanations\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Rebuild content index",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/content-index/rebuild",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "content-index", "rebuild"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Questions",
       "description": "Admin only (Content.Manage). Set unitId (or run Create unit) and sign in as an admin first. Create lesson for questions stores lessonId; Create question stores questionId. Every question is created Pending at version 1; no request carries a status. Body and gradingSpec shapes per type: docs/question-schemas.md. A content edit (stem, body, grading spec, explanation, max score) bumps the version and returns an Approved question to Pending; difficulty, objective and tag edits do not. The type cannot change. Resubmit question only works on a Rejected question: it applies the edit and returns the question to Pending. The sample question is Pending, so that request expects 400 QUESTION_NOT_REJECTED. The question import requests need a filled .xlsx from Download question import template chosen in the file field: Preview checks it and saves nothing (it also sets a fresh importBatchId); Import questions creates every row as Pending in one go, and re-sending the same batch id and file replays the first result (docs/question-import.md).",
       "item": [

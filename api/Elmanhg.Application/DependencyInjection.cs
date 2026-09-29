@@ -38,6 +38,9 @@ public static class DependencyInjection
         services.AddOptions<StudentsOptions>().BindConfiguration(StudentsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<AskTeacherOptions>().BindConfiguration(AskTeacherOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<AnalyticsOptions>().BindConfiguration(AnalyticsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<ContentRetrievalOptions>().BindConfiguration(ContentRetrievalOptions.SectionName).ValidateDataAnnotations()
+            .Validate(x => x.DefaultTopK <= x.MaxTopK, "ContentRetrieval:DefaultTopK must not exceed MaxTopK.")
+            .ValidateOnStart();
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton(Random.Shared);
         return services;

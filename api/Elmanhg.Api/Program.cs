@@ -10,6 +10,7 @@ using Core.Utilities;
 using DotNetEnv;
 using Elmanhg.Api.Authorization;
 using Elmanhg.Api.FileStorage;
+using Elmanhg.Api.Hosting;
 using Elmanhg.Api.RateLimiting;
 using Elmanhg.Api.Workers;
 using Elmanhg.Application;
@@ -19,6 +20,7 @@ using Elmanhg.Domain.SharedKernel;
 using Elmanhg.Infrastructure;
 using Elmanhg.Infrastructure.Data.Context;
 using MediatR;
+using Pgvector.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -60,7 +62,7 @@ builder.Services.AddOpenApi(options => options.AddSchemaTransformer((schema, _, 
 }));
 
 #region IDENTITY
-builder.Services.AddCoreIdentity<User, Guid, Role, AppDbContext>(configuration: builder.Configuration, dbContextOptions: options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnectionString"), npgsql => npgsql.EnableRetryOnFailure()), identityOptions: options => builder.Configuration.GetSection(nameof(IdentityOptions)).Bind(options));
+builder.Services.AddCoreIdentity<User, Guid, Role, AppDbContext>(configuration: builder.Configuration, dbContextOptions: options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnectionString"), npgsql => npgsql.EnableRetryOnFailure().UseVector()), identityOptions: options => builder.Configuration.GetSection(nameof(IdentityOptions)).Bind(options));
 builder.Services.AddAuthorizationBuilder().AddPolicy(DefaultCodes.AuthenticatedUser, policy => policy.RequireAuthenticatedUser()).AddPermissionMatrixPolicies();
 #endregion
 
@@ -78,12 +80,30 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 builder.Services.AddHostedService<ExpiredExamSubmissionWorker>();
 builder.Services.AddHostedService<SubscriptionLapseWorker>();
+builder.Services.AddHostedService<LessonContentIndexWorker>();
 builder.Services.AddAuthRateLimiting();
 #endregion
 
 builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
 
 var app = builder.Build();
+
+#region DEPLOY-TIME MIGRATION
+// The compose `migrate` service runs `--MigrateAndExit=true`: apply pending migrations, then exit before the seed and the HTTP pipeline.
+if (MigrationCommand.IsRequested(app.Configuration))
+{
+    try
+    {
+        await MigrationCommand.RunAsync(app.Services, CancellationToken.None);
+    }
+    finally
+    {
+        await Serilog.Log.CloseAndFlushAsync();
+    }
+
+    return;
+}
+#endregion
 
 #region SEED
 if (!isBuildTimeOpenApiGeneration)
@@ -99,7 +119,10 @@ if (!app.Environment.IsProduction())
     app.MapScalarApiReference();
 }
 
-// First, so every downstream middleware and handler resolves in the caller's language.
+// First: every later middleware (logging, rate limits) must see the client IP and scheme Caddy forwarded.
+app.UseReverseProxyForwardedHeaders();
+
+// Right after forwarded headers, so every downstream middleware and handler resolves in the caller's language.
 app.UseCoreLocalization(builder.Configuration);
 
 app.UseMiddleware<CoreRequestLoggingMiddleware>();
