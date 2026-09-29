@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
+import { AskTeacherLink } from '@/features/askTeacher';
 import { QuestionView } from '@/features/questions';
 import { PaywallDialog } from '@/features/subscription';
 import type { SessionItemResult } from '@/shared/api/generated/model';
@@ -71,7 +72,11 @@ export function QuizQuestionCard({
           {t('session.answerRequired')}
         </p>
       ) : null}
-      {attempt ? <FeedbackPanel item={item} attempt={attempt} question={question} /> : null}
+      {attempt ? (
+        <FeedbackPanel item={item} attempt={attempt} question={question}>
+          <AskTeacherLink attemptId={attempt.id} />
+        </FeedbackPanel>
+      ) : null}
       <QuizQuestionActions
         sessionId={sessionId}
         answered={attempt !== null}

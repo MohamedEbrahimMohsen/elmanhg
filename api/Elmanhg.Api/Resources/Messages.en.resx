@@ -327,6 +327,19 @@
   <data name="EXAM_REQUIRES_SUBSCRIPTION" xml:space="preserve"><value>Exams are included in the Base plan.</value></data>
   <data name="SUBJECT_INTERESTS_TOO_MANY" xml:space="preserve"><value>Too many subjects were chosen.</value></data>
   <data name="SUBJECT_INTERESTS_DUPLICATE" xml:space="preserve"><value>A subject was chosen more than once.</value></data>
+  <data name="TEACHER_MESSAGE_TEXT_REQUIRED" xml:space="preserve"><value>The message text is required.</value></data>
+  <data name="TEACHER_THREAD_NOT_FOUND" xml:space="preserve"><value>The question was not found.</value></data>
+  <data name="ATTEMPT_NOT_FOUND" xml:space="preserve"><value>The attempt was not found.</value></data>
+  <data name="TEACHER_THREAD_EXAM_IN_PROGRESS" xml:space="preserve"><value>Finish your exam before asking a teacher about its questions.</value></data>
+  <data name="ASK_TEACHER_REQUIRES_SUBSCRIPTION" xml:space="preserve"><value>Ask a Teacher needs the add-on with an active Base plan.</value></data>
+  <data name="ASK_TEACHER_MONTHLY_LIMIT_REACHED" xml:space="preserve"><value>You have used all your questions for this month.</value></data>
+  <data name="TEACHER_THREAD_CONTEXT_INVALID" xml:space="preserve"><value>Attach exactly one lesson, question or attempt.</value></data>
+  <data name="TEACHER_THREAD_TEXT_REQUIRED" xml:space="preserve"><value>Write your question.</value></data>
+  <data name="TEACHER_THREAD_TEXT_TOO_LONG" xml:space="preserve"><value>The question is too long.</value></data>
+  <data name="TEACHER_THREAD_IMAGE_TYPE_INVALID" xml:space="preserve"><value>The image must be PNG, JPG or WEBP.</value></data>
+  <data name="TEACHER_THREAD_IMAGE_TOO_LARGE" xml:space="preserve"><value>The image is too large.</value></data>
+  <data name="TEACHER_THREAD_PAGE_NUMBER_INVALID" xml:space="preserve"><value>The page number is not valid.</value></data>
+  <data name="TEACHER_THREAD_PAGE_SIZE_INVALID" xml:space="preserve"><value>The page size is not valid.</value></data>
   <data name="FUNNEL_ANONYMOUS_ID_REQUIRED" xml:space="preserve"><value>The visitor id is required.</value></data>
   <data name="FUNNEL_EVENT_TYPE_INVALID" xml:space="preserve"><value>The event type is not valid.</value></data>
   <data name="USER_NOT_STUDENT" xml:space="preserve"><value>This action is for students only.</value></data>

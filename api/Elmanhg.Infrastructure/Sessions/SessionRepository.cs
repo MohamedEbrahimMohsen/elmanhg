@@ -73,4 +73,12 @@ public class SessionRepository(AppDbContext context) : Repository<Session>(conte
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
     }
+
+    public async Task<Attempt?> GetStudentAttemptAsync(Guid attemptId, Guid studentId, CancellationToken cancellationToken)
+    {
+        return await _context.Set<Attempt>()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == attemptId && x.StudentId == studentId, cancellationToken)
+            .ConfigureAwait(false);
+    }
 }

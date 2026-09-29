@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { CircleAlert, CircleCheck, CircleX } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { RichTextViewer } from '@/features/content';
@@ -13,6 +14,7 @@ export interface FeedbackPanelProps {
   item: SessionItemResult;
   attempt: AttemptResult;
   question: StudentQuestion;
+  children?: ReactNode;
 }
 
 const verdicts = {
@@ -35,7 +37,7 @@ function toVerdict(outcome: string): keyof typeof verdicts {
   return outcome === 'Correct' || outcome === 'Partial' ? outcome : 'Incorrect';
 }
 
-export function FeedbackPanel({ item, attempt, question }: FeedbackPanelProps) {
+export function FeedbackPanel({ item, attempt, question, children }: FeedbackPanelProps) {
   const { t, i18n } = useTranslation('quiz');
   const lng = i18n.resolvedLanguage ?? i18n.language;
   const verdict = verdicts[toVerdict(attempt.outcome)];
@@ -78,7 +80,10 @@ export function FeedbackPanel({ item, attempt, question }: FeedbackPanelProps) {
           </div>
         </div>
       ) : null}
-      <AskAvatarButton />
+      <div className="flex flex-wrap items-start gap-2">
+        <AskAvatarButton />
+        {children}
+      </div>
     </div>
   );
 }

@@ -11,6 +11,7 @@ using Elmanhg.Domain.ReviewSessions;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Subscriptions;
+using Elmanhg.Domain.TeacherThreads;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.Units;
 using Elmanhg.Infrastructure.AiService;
@@ -29,6 +30,7 @@ using Elmanhg.Infrastructure.Spreadsheets;
 using Elmanhg.Infrastructure.Storage;
 using Elmanhg.Infrastructure.Subjects;
 using Elmanhg.Infrastructure.Subscriptions;
+using Elmanhg.Infrastructure.TeacherThreads;
 using Elmanhg.Infrastructure.Teachers;
 using Elmanhg.Infrastructure.Units;
 using Microsoft.Extensions.DependencyInjection;
@@ -67,6 +69,7 @@ public static class DependencyInjection
         services.AddScoped<IExamBlueprintRepository, ExamBlueprintRepository>();
         services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
         services.AddScoped<IPaymentRepository, PaymentRepository>();
+        services.AddScoped<ITeacherThreadRepository, TeacherThreadRepository>();
         services.AddScoped<IFunnelEventRepository, FunnelEventRepository>();
         return services;
     }

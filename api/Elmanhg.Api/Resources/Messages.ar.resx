@@ -327,6 +327,19 @@
   <data name="EXAM_REQUIRES_SUBSCRIPTION" xml:space="preserve"><value>الامتحانات متاحة في الباقة الأساسية.</value></data>
   <data name="SUBJECT_INTERESTS_TOO_MANY" xml:space="preserve"><value>تم اختيار عدد كبير جدا من المواد.</value></data>
   <data name="SUBJECT_INTERESTS_DUPLICATE" xml:space="preserve"><value>تم اختيار مادة اكثر من مرة.</value></data>
+  <data name="TEACHER_MESSAGE_TEXT_REQUIRED" xml:space="preserve"><value>نص الرسالة مطلوب.</value></data>
+  <data name="TEACHER_THREAD_NOT_FOUND" xml:space="preserve"><value>السؤال غير موجود.</value></data>
+  <data name="ATTEMPT_NOT_FOUND" xml:space="preserve"><value>المحاولة غير موجودة.</value></data>
+  <data name="TEACHER_THREAD_EXAM_IN_PROGRESS" xml:space="preserve"><value>أنه الامتحان أولا قبل أن تسأل معلما عن أسئلته.</value></data>
+  <data name="ASK_TEACHER_REQUIRES_SUBSCRIPTION" xml:space="preserve"><value>خدمة اسأل معلم تتطلب الإضافة مع الباقة الأساسية.</value></data>
+  <data name="ASK_TEACHER_MONTHLY_LIMIT_REACHED" xml:space="preserve"><value>استخدمت كل أسئلتك لهذا الشهر.</value></data>
+  <data name="TEACHER_THREAD_CONTEXT_INVALID" xml:space="preserve"><value>أرفق درسا أو سؤالا أو محاولة واحدة فقط.</value></data>
+  <data name="TEACHER_THREAD_TEXT_REQUIRED" xml:space="preserve"><value>اكتب سؤالك.</value></data>
+  <data name="TEACHER_THREAD_TEXT_TOO_LONG" xml:space="preserve"><value>السؤال طويل جدا.</value></data>
+  <data name="TEACHER_THREAD_IMAGE_TYPE_INVALID" xml:space="preserve"><value>الصورة يجب أن تكون PNG أو JPG أو WEBP.</value></data>
+  <data name="TEACHER_THREAD_IMAGE_TOO_LARGE" xml:space="preserve"><value>حجم الصورة أكبر من المسموح.</value></data>
+  <data name="TEACHER_THREAD_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة غير صالح.</value></data>
+  <data name="TEACHER_THREAD_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة غير صالح.</value></data>
   <data name="FUNNEL_ANONYMOUS_ID_REQUIRED" xml:space="preserve"><value>معرف الزائر مطلوب.</value></data>
   <data name="FUNNEL_EVENT_TYPE_INVALID" xml:space="preserve"><value>نوع الحدث غير صالح.</value></data>
   <data name="USER_NOT_STUDENT" xml:space="preserve"><value>هذا الاجراء للطلاب فقط.</value></data>

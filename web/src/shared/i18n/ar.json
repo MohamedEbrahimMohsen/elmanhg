@@ -214,7 +214,20 @@
     "LESSON_ALREADY_OPENED": "تم تسجيل فتح هذا الدرس من قبل.",
     "QUIZ_DAILY_LIMIT_REACHED": "وصلت إلى الحد اليومي للباقة المجانية.",
     "LESSON_LOCKED": "هذا الدرس متاح للمشتركين فقط.",
-    "EXAM_REQUIRES_SUBSCRIPTION": "الامتحانات متاحة في الباقة الأساسية."
+    "EXAM_REQUIRES_SUBSCRIPTION": "الامتحانات متاحة في الباقة الأساسية.",
+    "TEACHER_MESSAGE_TEXT_REQUIRED": "نص الرسالة مطلوب.",
+    "TEACHER_THREAD_NOT_FOUND": "السؤال غير موجود.",
+    "ATTEMPT_NOT_FOUND": "المحاولة غير موجودة.",
+    "TEACHER_THREAD_EXAM_IN_PROGRESS": "أنه الامتحان أولا قبل أن تسأل معلما عن أسئلته.",
+    "ASK_TEACHER_REQUIRES_SUBSCRIPTION": "خدمة اسأل معلّم تتطلب الإضافة مع الباقة الأساسية.",
+    "ASK_TEACHER_MONTHLY_LIMIT_REACHED": "استخدمت كل أسئلتك لهذا الشهر.",
+    "TEACHER_THREAD_CONTEXT_INVALID": "أرفق درسا أو سؤالا أو محاولة واحدة فقط.",
+    "TEACHER_THREAD_TEXT_REQUIRED": "اكتب سؤالك.",
+    "TEACHER_THREAD_TEXT_TOO_LONG": "السؤال طويل جدا.",
+    "TEACHER_THREAD_IMAGE_TYPE_INVALID": "الصورة يجب أن تكون PNG أو JPG أو WEBP.",
+    "TEACHER_THREAD_IMAGE_TOO_LARGE": "حجم الصورة أكبر من المسموح.",
+    "TEACHER_THREAD_PAGE_NUMBER_INVALID": "رقم الصفحة غير صالح.",
+    "TEACHER_THREAD_PAGE_SIZE_INVALID": "حجم الصفحة غير صالح."
   },
   "error": {
     "title": "حدث خطأ"

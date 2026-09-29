@@ -23,4 +23,10 @@ export interface UsageResult {
   quizQuestionsRemainingToday: number | string | null;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   dailyAvatarMessageLimit: number | string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  monthlyAskTeacherQuestionLimit: number | string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  askTeacherQuestionsUsedThisMonth: number | string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  askTeacherQuestionsRemainingThisMonth: number | string;
 }

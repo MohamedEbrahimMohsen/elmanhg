@@ -39,6 +39,9 @@ export const getMyUsageResponseDailyQuizQuestionLimitRegExpTwo = new RegExp('^-?
 export const getMyUsageResponseQuizQuestionsUsedTodayRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const getMyUsageResponseQuizQuestionsRemainingTodayRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const getMyUsageResponseDailyAvatarMessageLimitRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMyUsageResponseMonthlyAskTeacherQuestionLimitRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMyUsageResponseAskTeacherQuestionsUsedThisMonthRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMyUsageResponseAskTeacherQuestionsRemainingThisMonthRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 
 
 export const GetMyUsageResponse = zod.object({
@@ -47,7 +50,10 @@ export const GetMyUsageResponse = zod.object({
   "dailyQuizQuestionLimit": zod.union([zod.int(),zod.stringFormat('int32', getMyUsageResponseDailyQuizQuestionLimitRegExpTwo)]).nullable(),
   "quizQuestionsUsedToday": zod.union([zod.int(),zod.stringFormat('int32', getMyUsageResponseQuizQuestionsUsedTodayRegExpTwo)]),
   "quizQuestionsRemainingToday": zod.union([zod.int(),zod.stringFormat('int32', getMyUsageResponseQuizQuestionsRemainingTodayRegExpTwo)]).nullable(),
-  "dailyAvatarMessageLimit": zod.union([zod.int(),zod.stringFormat('int32', getMyUsageResponseDailyAvatarMessageLimitRegExpTwo)])
+  "dailyAvatarMessageLimit": zod.union([zod.int(),zod.stringFormat('int32', getMyUsageResponseDailyAvatarMessageLimitRegExpTwo)]),
+  "monthlyAskTeacherQuestionLimit": zod.union([zod.int(),zod.stringFormat('int32', getMyUsageResponseMonthlyAskTeacherQuestionLimitRegExpTwo)]),
+  "askTeacherQuestionsUsedThisMonth": zod.union([zod.int(),zod.stringFormat('int32', getMyUsageResponseAskTeacherQuestionsUsedThisMonthRegExpTwo)]),
+  "askTeacherQuestionsRemainingThisMonth": zod.union([zod.int(),zod.stringFormat('int32', getMyUsageResponseAskTeacherQuestionsRemainingThisMonthRegExpTwo)])
 })
 
 export const getMyPaymentsResponseItemsItemAmountAmountMinorRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
