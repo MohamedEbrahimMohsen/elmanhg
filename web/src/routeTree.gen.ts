@@ -27,6 +27,7 @@ import { Route as AdminQuestionsRouteImport } from './routes/admin/questions'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as StudentIndexRouteImport } from './routes/student/index'
 import { Route as StudentAskRouteImport } from './routes/student/ask'
+import { Route as StudentAskNewRouteImport } from './routes/student/ask-new'
 import { Route as StudentMoreRouteImport } from './routes/student/more'
 import { Route as StudentMultiExamRouteImport } from './routes/student/multi-exam'
 import { Route as StudentProgressRouteImport } from './routes/student/progress'
@@ -45,6 +46,7 @@ import { Route as StudentLessonLessonIdRouteImport } from './routes/student/less
 import { Route as StudentQuizResultSessionIdRouteImport } from './routes/student/quiz-result.$sessionId'
 import { Route as StudentQuizSessionIdRouteImport } from './routes/student/quiz.$sessionId'
 import { Route as StudentSubjectSubjectIdRouteImport } from './routes/student/subject.$subjectId'
+import { Route as StudentThreadThreadIdRouteImport } from './routes/student/thread.$threadId'
 import { Route as StudentUnitUnitIdRouteImport } from './routes/student/unit.$unitId'
 import { Route as TeacherQQuestionIdRouteImport } from './routes/teacher/q.$questionId'
 import { Route as AdminQuestionImportLessonIdRouteImport } from './routes/admin/question.import.$lessonId'
@@ -144,6 +146,11 @@ const StudentAskRoute = StudentAskRouteImport.update({
   path: '/ask',
   getParentRoute: () => StudentRouteRoute,
 } as any)
+const StudentAskNewRoute = StudentAskNewRouteImport.update({
+  id: '/ask-new',
+  path: '/ask-new',
+  getParentRoute: () => StudentRouteRoute,
+} as any)
 const StudentMoreRoute = StudentMoreRouteImport.update({
   id: '/more',
   path: '/more',
@@ -238,6 +245,11 @@ const StudentSubjectSubjectIdRoute = StudentSubjectSubjectIdRouteImport.update({
   path: '/subject/$subjectId',
   getParentRoute: () => StudentRouteRoute,
 } as any)
+const StudentThreadThreadIdRoute = StudentThreadThreadIdRouteImport.update({
+  id: '/thread/$threadId',
+  path: '/thread/$threadId',
+  getParentRoute: () => StudentRouteRoute,
+} as any)
 const StudentUnitUnitIdRoute = StudentUnitUnitIdRouteImport.update({
   id: '/unit/$unitId',
   path: '/unit/$unitId',
@@ -302,6 +314,7 @@ export interface FileRoutesByFullPath {
   '/admin/questions': typeof AdminQuestionsRoute
   '/admin/users': typeof AdminUsersRoute
   '/student/ask': typeof StudentAskRoute
+  '/student/ask-new': typeof StudentAskNewRoute
   '/student/more': typeof StudentMoreRoute
   '/student/multi-exam': typeof StudentMultiExamRoute
   '/student/progress': typeof StudentProgressRoute
@@ -322,6 +335,7 @@ export interface FileRoutesByFullPath {
   '/student/quiz-result/$sessionId': typeof StudentQuizResultSessionIdRoute
   '/student/quiz/$sessionId': typeof StudentQuizSessionIdRoute
   '/student/subject/$subjectId': typeof StudentSubjectSubjectIdRoute
+  '/student/thread/$threadId': typeof StudentThreadThreadIdRoute
   '/student/unit/$unitId': typeof StudentUnitUnitIdRoute
   '/teacher/q/$questionId': typeof TeacherQQuestionIdRoute
   '/admin/question/import/$lessonId': typeof AdminQuestionImportLessonIdRoute
@@ -345,6 +359,7 @@ export interface FileRoutesByTo {
   '/admin/questions': typeof AdminQuestionsRoute
   '/admin/users': typeof AdminUsersRoute
   '/student/ask': typeof StudentAskRoute
+  '/student/ask-new': typeof StudentAskNewRoute
   '/student/more': typeof StudentMoreRoute
   '/student/multi-exam': typeof StudentMultiExamRoute
   '/student/progress': typeof StudentProgressRoute
@@ -364,6 +379,7 @@ export interface FileRoutesByTo {
   '/student/quiz-result/$sessionId': typeof StudentQuizResultSessionIdRoute
   '/student/quiz/$sessionId': typeof StudentQuizSessionIdRoute
   '/student/subject/$subjectId': typeof StudentSubjectSubjectIdRoute
+  '/student/thread/$threadId': typeof StudentThreadThreadIdRoute
   '/student/unit/$unitId': typeof StudentUnitUnitIdRoute
   '/teacher/q/$questionId': typeof TeacherQQuestionIdRoute
   '/admin/question/import/$lessonId': typeof AdminQuestionImportLessonIdRoute
@@ -391,6 +407,7 @@ export interface FileRoutesById {
   '/admin/questions': typeof AdminQuestionsRoute
   '/admin/users': typeof AdminUsersRoute
   '/student/ask': typeof StudentAskRoute
+  '/student/ask-new': typeof StudentAskNewRoute
   '/student/more': typeof StudentMoreRoute
   '/student/multi-exam': typeof StudentMultiExamRoute
   '/student/progress': typeof StudentProgressRoute
@@ -411,6 +428,7 @@ export interface FileRoutesById {
   '/student/quiz-result/$sessionId': typeof StudentQuizResultSessionIdRoute
   '/student/quiz/$sessionId': typeof StudentQuizSessionIdRoute
   '/student/subject/$subjectId': typeof StudentSubjectSubjectIdRoute
+  '/student/thread/$threadId': typeof StudentThreadThreadIdRoute
   '/student/unit/$unitId': typeof StudentUnitUnitIdRoute
   '/teacher/q/$questionId': typeof TeacherQQuestionIdRoute
   '/admin/question/import/$lessonId': typeof AdminQuestionImportLessonIdRoute
@@ -439,6 +457,7 @@ export interface FileRouteTypes {
     | '/admin/questions'
     | '/admin/users'
     | '/student/ask'
+    | '/student/ask-new'
     | '/student/more'
     | '/student/multi-exam'
     | '/student/progress'
@@ -459,6 +478,7 @@ export interface FileRouteTypes {
     | '/student/quiz-result/$sessionId'
     | '/student/quiz/$sessionId'
     | '/student/subject/$subjectId'
+    | '/student/thread/$threadId'
     | '/student/unit/$unitId'
     | '/teacher/q/$questionId'
     | '/admin/question/import/$lessonId'
@@ -482,6 +502,7 @@ export interface FileRouteTypes {
     | '/admin/questions'
     | '/admin/users'
     | '/student/ask'
+    | '/student/ask-new'
     | '/student/more'
     | '/student/multi-exam'
     | '/student/progress'
@@ -501,6 +522,7 @@ export interface FileRouteTypes {
     | '/student/quiz-result/$sessionId'
     | '/student/quiz/$sessionId'
     | '/student/subject/$subjectId'
+    | '/student/thread/$threadId'
     | '/student/unit/$unitId'
     | '/teacher/q/$questionId'
     | '/admin/question/import/$lessonId'
@@ -527,6 +549,7 @@ export interface FileRouteTypes {
     | '/admin/questions'
     | '/admin/users'
     | '/student/ask'
+    | '/student/ask-new'
     | '/student/more'
     | '/student/multi-exam'
     | '/student/progress'
@@ -547,6 +570,7 @@ export interface FileRouteTypes {
     | '/student/quiz-result/$sessionId'
     | '/student/quiz/$sessionId'
     | '/student/subject/$subjectId'
+    | '/student/thread/$threadId'
     | '/student/unit/$unitId'
     | '/teacher/q/$questionId'
     | '/admin/question/import/$lessonId'
@@ -695,6 +719,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentAskRouteImport
       parentRoute: typeof StudentRouteRoute
     }
+    '/student/ask-new': {
+      id: '/student/ask-new'
+      path: '/ask-new'
+      fullPath: '/student/ask-new'
+      preLoaderRoute: typeof StudentAskNewRouteImport
+      parentRoute: typeof StudentRouteRoute
+    }
     '/student/more': {
       id: '/student/more'
       path: '/more'
@@ -821,6 +852,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentSubjectSubjectIdRouteImport
       parentRoute: typeof StudentRouteRoute
     }
+    '/student/thread/$threadId': {
+      id: '/student/thread/$threadId'
+      path: '/thread/$threadId'
+      fullPath: '/student/thread/$threadId'
+      preLoaderRoute: typeof StudentThreadThreadIdRouteImport
+      parentRoute: typeof StudentRouteRoute
+    }
     '/student/unit/$unitId': {
       id: '/student/unit/$unitId'
       path: '/unit/$unitId'
@@ -937,6 +975,7 @@ const StudentLessonLessonIdRouteWithChildren =
 
 interface StudentRouteRouteChildren {
   StudentAskRoute: typeof StudentAskRoute
+  StudentAskNewRoute: typeof StudentAskNewRoute
   StudentMoreRoute: typeof StudentMoreRoute
   StudentMultiExamRoute: typeof StudentMultiExamRoute
   StudentProgressRoute: typeof StudentProgressRoute
@@ -951,11 +990,13 @@ interface StudentRouteRouteChildren {
   StudentQuizResultSessionIdRoute: typeof StudentQuizResultSessionIdRoute
   StudentQuizSessionIdRoute: typeof StudentQuizSessionIdRoute
   StudentSubjectSubjectIdRoute: typeof StudentSubjectSubjectIdRoute
+  StudentThreadThreadIdRoute: typeof StudentThreadThreadIdRoute
   StudentUnitUnitIdRoute: typeof StudentUnitUnitIdRoute
 }
 
 const StudentRouteRouteChildren: StudentRouteRouteChildren = {
   StudentAskRoute: StudentAskRoute,
+  StudentAskNewRoute: StudentAskNewRoute,
   StudentMoreRoute: StudentMoreRoute,
   StudentMultiExamRoute: StudentMultiExamRoute,
   StudentProgressRoute: StudentProgressRoute,
@@ -970,6 +1011,7 @@ const StudentRouteRouteChildren: StudentRouteRouteChildren = {
   StudentQuizResultSessionIdRoute: StudentQuizResultSessionIdRoute,
   StudentQuizSessionIdRoute: StudentQuizSessionIdRoute,
   StudentSubjectSubjectIdRoute: StudentSubjectSubjectIdRoute,
+  StudentThreadThreadIdRoute: StudentThreadThreadIdRoute,
   StudentUnitUnitIdRoute: StudentUnitUnitIdRoute,
 }
 

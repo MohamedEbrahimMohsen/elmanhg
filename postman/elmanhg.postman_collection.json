@@ -28,7 +28,8 @@
     { "key": "examQuestionId", "value": "" },
     { "key": "secondUnitId", "value": "" },
     { "key": "checkoutPaymentId", "value": "" },
-    { "key": "baseSubscriptionId", "value": "" }
+    { "key": "baseSubscriptionId", "value": "" },
+    { "key": "teacherThreadId", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -2641,6 +2642,170 @@
               "raw": "{{baseUrl}}/api/subscriptions/{{baseSubscriptionId}}/cancel",
               "host": ["{{baseUrl}}"],
               "path": ["api", "subscriptions", "{{baseSubscriptionId}}", "cancel"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "AskTeacher",
+      "item": [
+        {
+          "name": "Get thread context",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200 or 403\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 403]); });",
+                  "if (pm.response.code === 200) { pm.test(\"returns the subject name\", function () { pm.expect(pm.response.json()).to.have.property(\"subjectName\"); }); }",
+                  "if (pm.response.code === 403) { pm.test(\"needs the add-on\", function () { pm.expect(pm.response.json().code).to.eql(\"ASK_TEACHER_REQUIRES_SUBSCRIPTION\"); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teacher-threads/context?lessonId={{lessonId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teacher-threads",
+                "context"
+              ],
+              "query": [
+                {
+                  "key": "lessonId",
+                  "value": "{{lessonId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create thread",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200 or 403\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 403]); });",
+                  "if (pm.response.code === 200) { pm.collectionVariables.set(\"teacherThreadId\", pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teacher-threads",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teacher-threads"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "text",
+                  "value": "Why is F = ma?",
+                  "type": "text"
+                },
+                {
+                  "key": "lessonId",
+                  "value": "{{lessonId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List my threads",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns items\", function () { pm.expect(pm.response.json().items).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teacher-threads?pageNumber=1&pageSize=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teacher-threads"
+              ],
+              "query": [
+                {
+                  "key": "pageNumber",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get my thread",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200 or 404\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 404]); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teacher-threads/{{teacherThreadId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teacher-threads",
+                "{{teacherThreadId}}"
+              ]
             }
           },
           "response": []

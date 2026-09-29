@@ -14,6 +14,7 @@ using Elmanhg.Domain.ReviewSessions;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Subscriptions;
+using Elmanhg.Domain.TeacherThreads;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.Units;
 using MediatR;
@@ -67,6 +68,8 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public DbSet<ExamBlueprint> ExamBlueprints { get; set; }
     public DbSet<Subscription> Subscriptions { get; set; }
     public DbSet<Payment> Payments { get; set; }
+    public DbSet<TeacherThread> TeacherThreads { get; set; }
+    public DbSet<TeacherMessage> TeacherMessages { get; set; }
     public DbSet<FunnelEvent> FunnelEvents { get; set; }
     public DbSet<LessonContentChunk> LessonContentChunks { get; set; }
     public DbSet<LessonContentIndex> LessonContentIndexes { get; set; }
@@ -140,6 +143,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         ConfigureQuestionMastery(modelBuilder);
         ConfigureExamBlueprints(modelBuilder);
         ConfigureSubscriptions(modelBuilder);
+        ConfigureTeacherThreads(modelBuilder);
         ConfigureTeacherSubjects(modelBuilder);
         ConfigureFunnelEvents(modelBuilder);
         ConfigureContentRetrieval(modelBuilder);
@@ -371,6 +375,30 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         });
     }
 
+    private static void ConfigureTeacherThreads(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TeacherThread>(builder =>
+        {
+            builder.Property(x => x.Context).IsRequired().HasColumnType("jsonb");
+            builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.Version).IsRowVersion();
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasMany(x => x.Messages).WithOne().HasForeignKey(x => x.ThreadId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.StudentId, x.SubmittedAt });
+            builder.HasIndex(x => new { x.SubjectId, x.Status, x.SubmittedAt });
+        });
+        modelBuilder.Entity<TeacherMessage>(builder =>
+        {
+            builder.Property(x => x.Id).ValueGeneratedNever();
+            builder.Property(x => x.Kind).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.Text).IsRequired();
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.SenderId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.ThreadId, x.CreatedAt });
+            builder.HasIndex(x => x.ImageUrl).HasFilter("\"ImageUrl\" IS NOT NULL");
+        });
+    }
+
     private static void ConfigureTeacherSubjects(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TeacherSubject>(builder =>
@@ -439,6 +467,8 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         modelBuilder.Entity<ExamBlueprint>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<Subscription>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<Payment>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<TeacherThread>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<TeacherMessage>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<FunnelEvent>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<LessonContentChunk>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<LessonContentIndex>().HasQueryFilter(x => !x.IsDeleted);

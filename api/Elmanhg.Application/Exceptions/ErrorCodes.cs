@@ -216,6 +216,20 @@ public static class ErrorCodes
     public const string SubjectInterestsTooMany = "SUBJECT_INTERESTS_TOO_MANY";
     public const string SubjectInterestsDuplicate = "SUBJECT_INTERESTS_DUPLICATE";
 
+    // ASK A TEACHER
+    public const string TeacherThreadNotFound = "TEACHER_THREAD_NOT_FOUND";
+    public const string AttemptNotFound = "ATTEMPT_NOT_FOUND";
+    public const string TeacherThreadExamInProgress = "TEACHER_THREAD_EXAM_IN_PROGRESS";
+    public const string AskTeacherRequiresSubscription = "ASK_TEACHER_REQUIRES_SUBSCRIPTION";
+    public const string AskTeacherMonthlyLimitReached = "ASK_TEACHER_MONTHLY_LIMIT_REACHED";
+    public const string TeacherThreadContextInvalid = "TEACHER_THREAD_CONTEXT_INVALID";
+    public const string TeacherThreadTextRequired = "TEACHER_THREAD_TEXT_REQUIRED";
+    public const string TeacherThreadTextTooLong = "TEACHER_THREAD_TEXT_TOO_LONG";
+    public const string TeacherThreadImageTypeInvalid = "TEACHER_THREAD_IMAGE_TYPE_INVALID";
+    public const string TeacherThreadImageTooLarge = "TEACHER_THREAD_IMAGE_TOO_LARGE";
+    public const string TeacherThreadPageNumberInvalid = "TEACHER_THREAD_PAGE_NUMBER_INVALID";
+    public const string TeacherThreadPageSizeInvalid = "TEACHER_THREAD_PAGE_SIZE_INVALID";
+
     // ANALYTICS
     public const string FunnelAnonymousIdRequired = "FUNNEL_ANONYMOUS_ID_REQUIRED";
     public const string FunnelEventTypeInvalid = "FUNNEL_EVENT_TYPE_INVALID";

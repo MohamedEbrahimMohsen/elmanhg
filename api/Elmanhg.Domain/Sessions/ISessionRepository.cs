@@ -10,4 +10,5 @@ public interface ISessionRepository : IRepository<Session>
     Task<int> CountQuizAttemptsOnDayAsync(Guid studentId, string timeZone, DateOnly day, CancellationToken cancellationToken);
     Task<List<ExamBestScore>> GetBestExamScoresAsync(Guid studentId, CancellationToken cancellationToken);
     Task<List<ExamAttemptSummary>> GetExamAttemptsAsync(Guid studentId, SessionKind kind, string scopeKey, CancellationToken cancellationToken);
+    Task<Attempt?> GetStudentAttemptAsync(Guid attemptId, Guid studentId, CancellationToken cancellationToken);
 }

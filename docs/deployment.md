@@ -155,6 +155,19 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 
 The sweep calls the embeddings endpoint, so with `AiService__Provider=Http` the `ai` profile must be on (`COMPOSE_PROFILES=ai`); otherwise failed lessons are logged as warnings and retried by later sweeps.
 
+### Ask a Teacher (`api.env`, [docs/ask-teacher.md](ask-teacher.md))
+
+None is a secret; the baked defaults suit staging and production. Validated at startup, so a value out of range stops the API.
+
+| Variable | Default | Notes |
+|---|---|---|
+| `AskTeacher__QuestionTextMaxLength` | `2000` | 1 to 20000 |
+| `AskTeacher__ImageMaxSizeInMb` | `5` | 1 to 20 |
+| `AskTeacher__ThreadListMaxPageSize` | `50` | 1 to 100 |
+| `Subscriptions__AskTeacherMonthlyQuestions` / `Subscriptions__AskTeacherReplySlaHours` | `20` / `24` | the add-on's monthly quota and reply SLA ([docs/subscriptions.md](subscriptions.md)) |
+
+Question photos are stored in the `api-media` volume under `teacher-threads/` and are private: the API serves them only to the owning student, a teacher of the subject or an admin. Caddy proxies all of `/api/*` to the API, so never serve `/api/media` straight from the volume at the edge. The media backup (section 9) includes them.
+
 ### AI service (`ai.env`, [docs/ai-service.md](ai-service.md))
 
 | Variable | Default | Notes |

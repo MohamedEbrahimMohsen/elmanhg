@@ -1,0 +1,65 @@
+{
+  "link": "Ask a teacher",
+  "upsell": {
+    "body": "This is a paid add-on and needs the Base plan.",
+    "cta": "Subscription"
+  },
+  "list": {
+    "title": "Ask a teacher",
+    "new": "New question",
+    "allowance": "Monthly allowance: {used} / {limit}",
+    "loading": "Loading your questions…",
+    "errorTitle": "Could not load your questions",
+    "empty": "No questions yet.",
+    "meta": "{subject} / {lesson} · {date}"
+  },
+  "badge": {
+    "closed": "Closed",
+    "overdue": "Overdue",
+    "awaiting": "Awaiting reply · {hours, plural, one {# hour} other {# hours}} left",
+    "answered": "Answered"
+  },
+  "new": {
+    "title": "New question for a teacher",
+    "quotaUsed": "You have used all {limit} questions for this month.",
+    "backToList": "Back to my questions"
+  },
+  "context": {
+    "label": "Attached automatically",
+    "path": "{subject} / {unit} / {lesson}",
+    "question": "Question:",
+    "loading": "Loading the context…",
+    "errorTitle": "Could not load the context"
+  },
+  "picker": {
+    "subject": "Subject",
+    "chooseSubject": "Choose a subject",
+    "lesson": "Lesson",
+    "chooseLesson": "Choose a lesson"
+  },
+  "form": {
+    "text": "Your question",
+    "textHint": "Write your question for the teacher",
+    "textRequired": "Write your question",
+    "lessonRequired": "Choose a lesson",
+    "image": "Attach a photo of your work (optional)",
+    "slaNote": "Your question goes to the subject's teachers, who reply within {hours} hours.",
+    "send": "Send"
+  },
+  "toast": {
+    "sent": "Your question was sent."
+  },
+  "thread": {
+    "title": "Conversation",
+    "breadcrumb": "Breadcrumb",
+    "path": "Subject: {subject} · Lesson: {lesson}",
+    "due": "Reply due: {date}",
+    "you": "You",
+    "teacher": "Teacher",
+    "imageAlt": "Photo attached to the question",
+    "imageLoading": "Loading the photo…",
+    "imageError": "Could not load the photo",
+    "loading": "Loading the conversation…",
+    "errorTitle": "Could not load the conversation"
+  }
+}

@@ -16,6 +16,7 @@ export * from './sessions/sessions';
 export * from './students/students';
 export * from './subjects/subjects';
 export * from './subscriptions/subscriptions';
+export * from './teacher-threads/teacher-threads';
 export * from './teachers/teachers';
 export * from './units/units';
 export * from './validation-queue/validation-queue';

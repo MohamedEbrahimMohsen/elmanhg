@@ -36,6 +36,7 @@ public static class DependencyInjection
             .Validate(x => TimeZoneInfo.TryFindSystemTimeZoneById(x.DailyQuotaTimeZone, out _), "Subscriptions:DailyQuotaTimeZone must be a known IANA time zone id.")
             .ValidateOnStart();
         services.AddOptions<StudentsOptions>().BindConfiguration(StudentsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<AskTeacherOptions>().BindConfiguration(AskTeacherOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<AnalyticsOptions>().BindConfiguration(AnalyticsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<ContentRetrievalOptions>().BindConfiguration(ContentRetrievalOptions.SectionName).ValidateDataAnnotations()
             .Validate(x => x.DefaultTopK <= x.MaxTopK, "ContentRetrieval:DefaultTopK must not exceed MaxTopK.")
