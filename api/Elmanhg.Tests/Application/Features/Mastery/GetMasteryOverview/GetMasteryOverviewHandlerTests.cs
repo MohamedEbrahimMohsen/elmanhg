@@ -4,6 +4,7 @@ using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Mastery.GetMasteryOverview;
 using Elmanhg.Application.Mastery.Shared;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
 using Elmanhg.Domain.Sessions;
@@ -21,6 +22,7 @@ public sealed class GetMasteryOverviewHandlerTests
     private readonly ISessionRepository _sessionRepository = Substitute.For<ISessionRepository>();
     private readonly ISubjectRepository _subjectRepository = Substitute.For<ISubjectRepository>();
     private readonly ILessonRepository _lessonRepository = Substitute.For<ILessonRepository>();
+    private readonly IUserRepository _userRepository = Substitute.For<IUserRepository>();
     private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
     private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
     private readonly Guid _studentId = Guid.NewGuid();
@@ -39,7 +41,7 @@ public sealed class GetMasteryOverviewHandlerTests
         _lessonRepository.GetByIdAsync(_lesson.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Lesson>, IQueryable<Lesson>>?>(), Arg.Any<bool>()).Returns(_lesson);
         StubActivity([]);
         StubCounts([]);
-        _handler = new GetMasteryOverviewHandler(_questionMasteryRepository, _sessionRepository, _subjectRepository, _lessonRepository, Options.Create(new ProgressOptions()), _timeProvider, _currentUserService);
+        _handler = new GetMasteryOverviewHandler(_questionMasteryRepository, _sessionRepository, _subjectRepository, _lessonRepository, _userRepository, Options.Create(new ProgressOptions()), _timeProvider, _currentUserService);
     }
 
     [Fact]
@@ -69,7 +71,19 @@ public sealed class GetMasteryOverviewHandlerTests
 
         var result = await _handler.Handle(new GetMasteryOverviewQuery(), TestContext.Current.CancellationToken);
 
-        result.Subjects.Should().Equal(new SubjectMasteryResult(_subjectA.Id, "Physics", 40, 5, 5, 12), new SubjectMasteryResult(_subjectB.Id, "Chemistry", 0, 0, 0, 0));
+        result.Subjects.Should().Equal(new SubjectMasteryResult(_subjectA.Id, "Physics", 40, 5, 5, 12, false), new SubjectMasteryResult(_subjectB.Id, "Chemistry", 0, 0, 0, 0, false));
+    }
+
+    [Fact]
+    public async Task Handle_SubjectInterests_ListsInterestedSubjectsFirst()
+    {
+        var student = User.CreateStudentWithEmail("Sara", "sara@example.com");
+        student.ChooseSubjectInterests([_subjectB.Id], new DateTimeOffset(2026, 9, 28, 12, 0, 0, TimeSpan.Zero));
+        _userRepository.GetByIdAsync(_studentId, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<User>, IQueryable<User>>?>(), Arg.Any<bool>()).Returns(student);
+
+        var result = await _handler.Handle(new GetMasteryOverviewQuery(), TestContext.Current.CancellationToken);
+
+        result.Subjects.Select(x => (x.SubjectId, x.IsInterested)).Should().Equal((_subjectB.Id, true), (_subjectA.Id, false));
     }
 
     [Fact]

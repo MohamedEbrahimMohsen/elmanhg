@@ -317,6 +317,42 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.ToTable("Otps");
                 });
 
+            modelBuilder.Entity("Elmanhg.Domain.Analytics.FunnelEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AnonymousId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnonymousId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("Type", "OccurredAt");
+
+                    b.ToTable("FunnelEvents");
+                });
+
             modelBuilder.Entity("Elmanhg.Domain.ExamBlueprints.ExamBlueprint", b =>
                 {
                     b.Property<Guid>("Id")
@@ -455,6 +491,9 @@ namespace Elmanhg.Infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<DateTimeOffset?>("OnboardedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
 
@@ -476,6 +515,12 @@ namespace Elmanhg.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.PrimitiveCollection<List<Guid>>("SubjectInterestIds")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid[]")
+                        .HasDefaultValueSql("'{}'");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
@@ -1727,6 +1772,14 @@ namespace Elmanhg.Infrastructure.Migrations
 
                     b.Navigation("Title")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Elmanhg.Domain.Analytics.FunnelEvent", b =>
+                {
+                    b.HasOne("Elmanhg.Domain.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Elmanhg.Domain.ExamBlueprints.ExamBlueprint", b =>

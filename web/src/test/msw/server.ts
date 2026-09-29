@@ -1,4 +1,5 @@
 import { setupServer } from 'msw/node';
+import { getRecordFunnelEventMockHandler } from '@/shared/api/generated/analytics/analytics.msw';
 import {
   getGetStudentLessonMockHandler,
   getRecordLessonOpeningMockHandler,
@@ -15,4 +16,5 @@ export const server = setupServer(
   getGetUnitExamAttemptsMockHandler(noExamAttempts()),
   getGetStudentLessonMockHandler(studentLesson()),
   getRecordLessonOpeningMockHandler(),
+  getRecordFunnelEventMockHandler(),
 );

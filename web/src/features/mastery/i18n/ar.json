@@ -20,6 +20,8 @@
     "mastery": "إتقان {percent, number}٪",
     "available": "{count, number} سؤال متاح",
     "barLabel": "إتقان {name}",
-    "empty": "لا توجد مواد بعد."
+    "empty": "لا توجد مواد بعد.",
+    "others": "مواد أخرى",
+    "edit": "تعديل موادي"
   }
 }

@@ -6,17 +6,18 @@ namespace Elmanhg.Application.Mastery.Shared;
 
 public static class MasteryOverviewResultGenerator
 {
-    public static MasteryOverviewResult Generate(IReadOnlyCollection<LessonMasteryCount> lessons, IReadOnlyList<Subject> subjects, int streakDays, LessonMasteryCount? next, Lesson? nextLesson)
+    public static MasteryOverviewResult Generate(IReadOnlyCollection<LessonMasteryCount> lessons, IReadOnlyList<Subject> subjects, IReadOnlyCollection<Guid> interestedSubjectIds, int streakDays, LessonMasteryCount? next, Lesson? nextLesson)
     {
         var totals = MasteryTotals.Of(lessons);
         var headline = new MasteryHeadlineResult(totals.ServableCount, totals.MasteredCount, totals.RemainingCount, totals.SeenCount);
         var subjectResults = subjects
-            .Select(subject => GenerateSubject(subject, MasteryTotals.Of(lessons.Where(x => x.SubjectId == subject.Id))))
+            .OrderByDescending(subject => interestedSubjectIds.Contains(subject.Id))
+            .Select(subject => GenerateSubject(subject, MasteryTotals.Of(lessons.Where(x => x.SubjectId == subject.Id)), interestedSubjectIds.Contains(subject.Id)))
             .ToList();
         return new MasteryOverviewResult(headline, streakDays, GenerateNextLesson(subjects, next, nextLesson), subjectResults);
     }
 
-    private static SubjectMasteryResult GenerateSubject(Subject subject, MasteryTotals totals) => new(subject.Id, subject.Name, totals.ServableCount, totals.MasteredCount, totals.SeenCount, totals.MasteryPercent);
+    private static SubjectMasteryResult GenerateSubject(Subject subject, MasteryTotals totals, bool isInterested) => new(subject.Id, subject.Name, totals.ServableCount, totals.MasteredCount, totals.SeenCount, totals.MasteryPercent, isInterested);
 
     private static NextLessonResult? GenerateNextLesson(IReadOnlyList<Subject> subjects, LessonMasteryCount? next, Lesson? nextLesson)
     {

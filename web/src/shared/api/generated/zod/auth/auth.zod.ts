@@ -50,7 +50,8 @@ export const RegisterWithPhoneResponse = zod.object({
   "displayName": zod.string(),
   "role": zod.string(),
   "phoneNumber": zod.string().nullable(),
-  "email": zod.string().nullable()
+  "email": zod.string().nullable(),
+  "needsOnboarding": zod.boolean()
 })
 })
 
@@ -67,7 +68,8 @@ export const RegisterWithEmailResponse = zod.object({
   "displayName": zod.string(),
   "role": zod.string(),
   "phoneNumber": zod.string().nullable(),
-  "email": zod.string().nullable()
+  "email": zod.string().nullable(),
+  "needsOnboarding": zod.boolean()
 })
 })
 
@@ -82,7 +84,8 @@ export const LoginWithPhoneResponse = zod.object({
   "displayName": zod.string(),
   "role": zod.string(),
   "phoneNumber": zod.string().nullable(),
-  "email": zod.string().nullable()
+  "email": zod.string().nullable(),
+  "needsOnboarding": zod.boolean()
 })
 })
 
@@ -98,7 +101,8 @@ export const LoginWithEmailResponse = zod.object({
   "displayName": zod.string(),
   "role": zod.string(),
   "phoneNumber": zod.string().nullable(),
-  "email": zod.string().nullable()
+  "email": zod.string().nullable(),
+  "needsOnboarding": zod.boolean()
 })
 })
 
@@ -113,7 +117,8 @@ export const LoginWithEmailCodeResponse = zod.object({
   "displayName": zod.string(),
   "role": zod.string(),
   "phoneNumber": zod.string().nullable(),
-  "email": zod.string().nullable()
+  "email": zod.string().nullable(),
+  "needsOnboarding": zod.boolean()
 })
 })
 
@@ -124,7 +129,8 @@ export const RefreshAccessTokenResponse = zod.object({
   "displayName": zod.string(),
   "role": zod.string(),
   "phoneNumber": zod.string().nullable(),
-  "email": zod.string().nullable()
+  "email": zod.string().nullable(),
+  "needsOnboarding": zod.boolean()
 })
 })
 

@@ -7,15 +7,23 @@ import {
   getSendOtpMockHandler,
   getVerifyOtpMockHandler,
 } from '@/shared/api/generated/auth/auth.msw';
-import { getMasteryMock } from '@/shared/api/generated/mastery/mastery.msw';
-import type { AuthResult } from '@/shared/api/generated/model';
+import type { AuthResult, RecordFunnelEventRequest } from '@/shared/api/generated/model';
+import { getGetSubjectInterestsMockHandler } from '@/shared/api/generated/students/students.msw';
 import { axe } from '@/test/axe';
 import { server } from '@/test/msw/server';
+import { subjectInterests } from '@/test/onboardingFixtures';
 import { renderApp } from '@/test/renderWithProviders';
 
 const studentResult: AuthResult = {
   accessToken: 'token-student',
-  user: { id: 's1', displayName: 'Mona', role: 'Student', phoneNumber: null, email: 'mona@elmanhg.test' },
+  user: {
+    id: 's1',
+    displayName: 'Mona',
+    role: 'Student',
+    phoneNumber: null,
+    email: 'mona@elmanhg.test',
+    needsOnboarding: true,
+  },
 };
 
 const apiError = (status: number, code: string) => HttpResponse.json({ code, message: '' }, { status });
@@ -39,14 +47,33 @@ async function signUpWithPhone(user: User) {
 }
 
 describe('SignUpPage', () => {
-  it('creates a student account with email and lands on the student home', async () => {
-    server.use(getRegisterWithEmailMockHandler(studentResult), ...getMasteryMock());
+  it('creates a student account with email and lands on onboarding', async () => {
+    server.use(getRegisterWithEmailMockHandler(studentResult), getGetSubjectInterestsMockHandler(subjectInterests()));
     const user = userEvent.setup();
     renderApp('/signup');
 
     await fillEmailSignUp(user);
 
-    expect(await screen.findByRole('heading', { name: 'Hello, Mona' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Choose your subjects' })).toBeInTheDocument();
+  });
+
+  it('records sign-up started and completed events', async () => {
+    const types: string[] = [];
+    server.use(
+      getRegisterWithEmailMockHandler(studentResult),
+      getGetSubjectInterestsMockHandler(subjectInterests()),
+      http.post('*/api/analytics/funnel-events', async ({ request }) => {
+        types.push(((await request.json()) as RecordFunnelEventRequest).type);
+        return new HttpResponse(null, { status: 200 });
+      }),
+    );
+    const user = userEvent.setup();
+    renderApp('/signup');
+
+    await fillEmailSignUp(user);
+
+    expect(await screen.findByRole('heading', { name: 'Choose your subjects' })).toBeInTheDocument();
+    expect(types).toEqual(['SignUpStarted', 'SignUpCompleted']);
   });
 
   it('shows the duplicate-email error on the email field', async () => {
@@ -80,14 +107,14 @@ describe('SignUpPage', () => {
         registeredName = ((await request.json()) as { displayName: string }).displayName;
         return HttpResponse.json(studentResult);
       }),
-      ...getMasteryMock(),
+      getGetSubjectInterestsMockHandler(subjectInterests()),
     );
     const user = userEvent.setup();
     renderApp('/signup');
 
     await signUpWithPhone(user);
 
-    expect(await screen.findByRole('heading', { name: 'Hello, Mona' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Choose your subjects' })).toBeInTheDocument();
     expect(registeredName).toBe('Ahmed');
   });
 

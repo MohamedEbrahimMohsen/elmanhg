@@ -1,8 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { redirectToHome } from '@/features/session';
+import { LandingPage } from '@/features/landing';
+import { redirectSignedIn } from '@/features/session';
 
 export const Route = createFileRoute('/')({
   beforeLoad: ({ context }) => {
-    redirectToHome(context.sessionStore.get());
+    redirectSignedIn(context.sessionStore.get(), undefined);
   },
+  component: LandingPage,
 });

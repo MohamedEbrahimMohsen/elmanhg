@@ -27,7 +27,7 @@ All state is saved in `localStorage` under the key `elmanhg.v1`. Click **إعا�
 
 ## Suggested walkthrough
 
-1. **Student home (أحمد)**: headline "متبقّي لك X سؤال من Y", "شاهدت N", streak, next suggested lesson, subject cards with mastery %.
+1. **Student home (أحمد)**: headline "متبقّي لك X سؤال من Y", "شاهدت N", streak, next suggested lesson, subject cards with mastery %. The product also opens on a landing page and asks a new student to choose subjects of interest after sign-up; the prototype does not simulate them.
 2. **الفيزياء → الكهربية التيارية → التيار الكهربي وقانون أوم**: tabs الشرح / الأهداف / الملخص / التدريب. In التدريب pick 5/10/20. The product also has breadcrumbs on every level, previous/next lesson links across units and the mastery line under the lesson title; the prototype does not simulate them.
 3. **Quiz**: answer, press تحقّق for instant feedback (correct answer + explanation), then **اسأل المساعد** to open the avatar panel with that question's context.
 4. **Unit exam** (from the unit page): see the blueprint summary, start, note the countdown and "محفوظ تلقائيًا". Reload the page: the exam resumes. Open the avatar during the exam and it refuses to reveal answers. Submit to see score, per-lesson breakdown, weakest objectives and all attempts (best score is highlighted).

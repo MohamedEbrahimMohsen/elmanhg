@@ -23,6 +23,7 @@ export function masteryOverview(overrides?: Partial<MasteryOverviewResult>): Mas
         masteredCount: 20,
         seenCount: 30,
         masteryPercent: 40,
+        isInterested: false,
       },
       {
         subjectId: chemistryId,
@@ -31,6 +32,7 @@ export function masteryOverview(overrides?: Partial<MasteryOverviewResult>): Mas
         masteredCount: 0,
         seenCount: 0,
         masteryPercent: 0,
+        isInterested: false,
       },
     ],
     ...overrides,

@@ -20,6 +20,8 @@
     "mastery": "{percent, number}% mastered",
     "available": "{count, plural, one {# question available} other {# questions available}}",
     "barLabel": "{name} mastery",
-    "empty": "No subjects yet."
+    "empty": "No subjects yet.",
+    "others": "Other subjects",
+    "edit": "Edit my subjects"
   }
 }

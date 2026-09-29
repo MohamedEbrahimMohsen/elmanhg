@@ -21,7 +21,7 @@ const phoneNumber = '01012345678';
 
 const authResult = (role: string): AuthResult => ({
   accessToken: `token-${role}`,
-  user: { id: 'u1', displayName: 'Mona', role, phoneNumber: null, email: null },
+  user: { id: 'u1', displayName: 'Mona', role, phoneNumber: null, email: null, needsOnboarding: false },
 });
 
 const apiError = (status: number, code: string) => HttpResponse.json({ code, message: '' }, { status });

@@ -41,6 +41,18 @@ public sealed class PhoneAuthEndpointTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task RegisterWithPhone_NewStudent_ReturnsNeedsOnboarding()
+    {
+        using var client = AuthTestClient.Create(factory);
+
+        using var response = await AuthTestClient.RegisterByPhoneAsync(client, factory, AuthTestClient.NewPhoneNumber(), TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken);
+        body.GetProperty("user").GetProperty("needsOnboarding").GetBoolean().Should().BeTrue();
+    }
+
+    [Fact]
     public async Task RegisterWithPhone_UnverifiedOtp_Returns400()
     {
         using var client = AuthTestClient.Create(factory);

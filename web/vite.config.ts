@@ -28,6 +28,8 @@ export default defineConfig(({ mode }) => {
             name: 'dom',
             environment: 'jsdom',
             setupFiles: ['./src/test/setup.ts'],
+            // Heavy editor/page suites exceed 5 s under v8 coverage on busy runners (#148, #179).
+            testTimeout: 15_000,
             include: ['src/**/*.test.{ts,tsx}'],
           },
         },

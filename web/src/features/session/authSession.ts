@@ -15,7 +15,12 @@ export function toSession(user: AuthUserResult): Session {
   if (!isApiRole(user.role)) {
     throw new Error('Unknown role');
   }
-  return { userId: user.id, displayName: user.displayName, role: apiRoles[user.role] };
+  return {
+    userId: user.id,
+    displayName: user.displayName,
+    role: apiRoles[user.role],
+    needsOnboarding: user.needsOnboarding,
+  };
 }
 
 export function startSession(store: SessionStore, result: AuthResult): void {

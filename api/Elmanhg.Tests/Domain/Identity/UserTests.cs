@@ -76,4 +76,77 @@ public sealed class UserTests
 
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.UserAlreadySuspended);
     }
+
+    [Fact]
+    public void NeedsOnboarding_NewStudent_IsTrue()
+    {
+        var user = User.CreateStudentWithEmail("Mona", "mona@elmanhg.test");
+
+        user.NeedsOnboarding.Should().BeTrue();
+        user.OnboardedAt.Should().BeNull();
+    }
+
+    [Fact]
+    public void NeedsOnboarding_Teacher_IsFalse()
+    {
+        var user = User.CreateTeacher("Teacher", "t@elmanhg.test");
+
+        user.NeedsOnboarding.Should().BeFalse();
+    }
+
+    [Fact]
+    public void ChooseSubjectInterests_Student_StoresDistinctIdsAndMarksOnboarded()
+    {
+        var user = User.CreateStudentWithPhone("Ahmed", "01012345678");
+        var physics = Guid.NewGuid();
+        var chemistry = Guid.NewGuid();
+        var chosenAt = new DateTimeOffset(2026, 9, 29, 10, 0, 0, TimeSpan.Zero);
+
+        user.ChooseSubjectInterests([physics, physics, chemistry], chosenAt);
+
+        user.SubjectInterestIds.Should().Equal(physics, chemistry);
+        user.OnboardedAt.Should().Be(chosenAt);
+        user.UpdationDate.Should().Be(chosenAt);
+        user.NeedsOnboarding.Should().BeFalse();
+    }
+
+    [Fact]
+    public void ChooseSubjectInterests_SecondCall_KeepsFirstOnboardedAtAndReplacesIds()
+    {
+        var user = User.CreateStudentWithPhone("Ahmed", "01012345678");
+        var physics = Guid.NewGuid();
+        var chemistry = Guid.NewGuid();
+        var first = new DateTimeOffset(2026, 9, 29, 10, 0, 0, TimeSpan.Zero);
+        var second = first.AddDays(3);
+        user.ChooseSubjectInterests([physics], first);
+
+        user.ChooseSubjectInterests([chemistry], second);
+
+        user.OnboardedAt.Should().Be(first);
+        user.SubjectInterestIds.Should().Equal(chemistry);
+        user.UpdationDate.Should().Be(second);
+    }
+
+    [Fact]
+    public void ChooseSubjectInterests_EmptyList_MarksOnboardedWithoutInterests()
+    {
+        var user = User.CreateStudentWithPhone("Ahmed", "01012345678");
+        var chosenAt = new DateTimeOffset(2026, 9, 29, 10, 0, 0, TimeSpan.Zero);
+
+        user.ChooseSubjectInterests([], chosenAt);
+
+        user.SubjectInterestIds.Should().BeEmpty();
+        user.OnboardedAt.Should().Be(chosenAt);
+    }
+
+    [Fact]
+    public void ChooseSubjectInterests_Teacher_ThrowsUserNotStudent()
+    {
+        var user = User.CreateTeacher("Teacher", "t@elmanhg.test");
+
+        var act = () => user.ChooseSubjectInterests([Guid.NewGuid()], new DateTimeOffset(2026, 9, 29, 10, 0, 0, TimeSpan.Zero));
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.UserNotStudent);
+        user.SubjectInterestIds.Should().BeEmpty();
+    }
 }

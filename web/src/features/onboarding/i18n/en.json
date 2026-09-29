@@ -1,0 +1,22 @@
+{
+  "page": {
+    "title": "Choose your subjects",
+    "intro": "Pick the subjects you study and we will show them first on your home. You can change them later.",
+    "loading": "Loading subjects…",
+    "errorTitle": "Could not load the subjects.",
+    "empty": "No subjects yet."
+  },
+  "form": {
+    "legend": "Subjects",
+    "subjectRequired": "Choose at least one subject."
+  },
+  "actions": {
+    "continue": "Continue",
+    "skip": "Skip for now",
+    "backHome": "Back to home",
+    "continueHome": "Continue to home"
+  },
+  "toast": {
+    "saved": "Your subjects are saved."
+  }
+}
