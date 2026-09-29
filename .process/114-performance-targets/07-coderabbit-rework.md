@@ -72,3 +72,20 @@ Merged `origin/main`, which brought in #97 (SLA timers, reminders and follow-up 
 
 - The SignalR change edits a #97 file on this branch. It keeps the `RealtimeClient` contract, so `useRealtimeEvents` and the fake hub are unchanged. It was not exercised against a live hub here. `NotificationsHubTests` covers the server side only.
 - `docs/performance.md` was already not prettier-clean before this change (checked against `HEAD~` in the temp folder). The web prettier check does not cover `docs/`.
+
+## CI fix (run 36630943944: web-ci `npm audit`, images `deploy-smoke`)
+
+### Root causes
+
+| Job | Root cause | Fix (commit `cd47521`) |
+|---|---|---|
+| web-ci `npm audit --audit-level=high` | `orval@8.38.0 → @scalar/json-magic@0.15.2` pins `undici` **exactly** at `7.29.0`, inside the new high advisories (GHSA-3wwx-pv8p-q78v and nine others, range `<7.29.1`). `jsdom → undici@8.11.2` is not affected. No parent release fixes it that is at least 7 days old (`@scalar/json-magic@0.15.3` is 1 day old, `orval@8.38.0` is the latest). | `web/package.json` `overrides: { "@scalar/json-magic": { "undici": "7.29.1" } }`, scoped so jsdom keeps undici 8. `7.29.1` was published 2026-09-04 (26 days old); `7.30.0` is 5 days old and was not used. Lockfile regenerated and committed. |
+| images `deploy-smoke`, load-test step | Not the seed and not a script error: the seed and every check passed (`checks` 100 %, `http_req_failed` 0 %). k6 failed one threshold, `http_req_duration{name:quiz_start}` p95 609.97 ms > 500 ms. In the smoke profile each of the 2 quiz VUs starts only 2–3 quizzes in 45 s, and both first starts ran cold (JIT, EF query compilation) at ~610 ms while the rest took 11–13 ms, so the cold call was the p95. The previous green run had the same shape (first start 291 ms). The runner was about 2× slower this time. | `deploy/loadtest/lib/flows.js` `warmUp()`: `setup()` in `api-load.js` starts and finishes one quiz and sends one avatar message as student 1, under the `warmup` name, which has no budget. The budgets are unchanged. `docs/performance.md` §5 describes the warm-up. |
+| images artifact (found on the way) | `upload-artifact` skipped `deploy/.loadtest-results` as a hidden directory ("No files were found"), so `docs/performance.md` §5's artifact never existed. | `include-hidden-files: true` in `images.yml` and `load-test.yml`. |
+
+### Build & test
+
+- `npm audit --audit-level=high` (web): "found 0 vulnerabilities". `npm ls undici`: `@scalar/json-magic` → `undici@7.29.1 overridden`, `jsdom` → `undici@8.11.2`.
+- `npm run gen:api`: both outputs generated, no diff. `npm run build`: exit 0. `npx vitest --run`: Test Files 192 passed (192), Tests 1084 passed (1084). `prettier --check package.json`: clean.
+- Local `deploy/load-test.sh` (fresh images, `LOAD_PROJECT_NAME=elmanhg-load-114fix`, tag `ci114fix`, ports 8198/8553, subnet 172.30.214.0/24): "Load test (smoke) passed", `quiz_start` p95 53.66 ms, checks 280/280. The lesson budget warning (p75 2970 ms) is advisory. The stack and volumes were removed by the script, and the `ci114fix` images were deleted.
+- CI on `cd47521`: api-ci build-test, web-ci build-test, images deploy-smoke (`quiz_start` p95 69.09 ms; the `load-test-smoke` artifact is now uploaded, 10 KB) and CodeRabbit all pass. `publish` is skipped (PR).
