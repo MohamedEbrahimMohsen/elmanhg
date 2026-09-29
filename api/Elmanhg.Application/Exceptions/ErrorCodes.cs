@@ -245,8 +245,14 @@ public static class ErrorCodes
     public const string AvatarEntryPointInvalid = "AVATAR_ENTRY_POINT_INVALID";
     public const string AvatarMessageRequired = "AVATAR_MESSAGE_REQUIRED";
     public const string AvatarMessageTooLong = "AVATAR_MESSAGE_TOO_LONG";
-    public const string AvatarHistoryTooLong = "AVATAR_HISTORY_TOO_LONG";
-    public const string AvatarHistoryInvalid = "AVATAR_HISTORY_INVALID";
+    public const string AvatarConversationNotFound = "AVATAR_CONVERSATION_NOT_FOUND";
+    public const string AvatarConversationContextMismatch = "AVATAR_CONVERSATION_CONTEXT_MISMATCH";
+    public const string AvatarConversationModifiedConcurrently = "AVATAR_CONVERSATION_MODIFIED_CONCURRENTLY";
+    public const string AvatarConversationsPageNumberInvalid = "AVATAR_CONVERSATIONS_PAGE_NUMBER_INVALID";
+    public const string AvatarConversationsPageSizeInvalid = "AVATAR_CONVERSATIONS_PAGE_SIZE_INVALID";
+    public const string AvatarConversationsSearchTooLong = "AVATAR_CONVERSATIONS_SEARCH_TOO_LONG";
+    public const string AvatarConversationsEntryPointInvalid = "AVATAR_CONVERSATIONS_ENTRY_POINT_INVALID";
+    public const string AvatarConversationsDateRangeInvalid = "AVATAR_CONVERSATIONS_DATE_RANGE_INVALID";
 
     // AI SERVICE
     public const string AiServiceUnavailable = "AI_SERVICE_UNAVAILABLE";

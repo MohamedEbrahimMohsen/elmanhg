@@ -82,6 +82,7 @@ public static class DependencyInjection
         services.AddScoped<ILessonContentChunkRepository, LessonContentChunkRepository>();
         services.AddScoped<ILessonContentIndexRepository, LessonContentIndexRepository>();
         services.AddScoped<IAvatarMessageUsageRepository, AvatarMessageUsageRepository>();
+        services.AddScoped<IAvatarConversationRepository, AvatarConversationRepository>();
         return services;
     }
 }

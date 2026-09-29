@@ -5,7 +5,6 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { AvatarEntryPoint } from './avatarEntryPoint';
-import type { AvatarTurn } from './avatarTurn';
 
 export interface SendAvatarMessageCommand {
   entryPoint: AvatarEntryPoint;
@@ -15,6 +14,7 @@ export interface SendAvatarMessageCommand {
   sessionId: string | null;
   /** @nullable */
   questionId: string | null;
-  history: AvatarTurn[];
+  /** @nullable */
+  conversationId: string | null;
   message: string;
 }

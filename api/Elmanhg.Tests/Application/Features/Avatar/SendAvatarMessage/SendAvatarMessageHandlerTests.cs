@@ -75,7 +75,7 @@ public sealed class SendAvatarMessageHandlerTests
     {
         AvatarTestData.StubUsedToday(_harness.Usage, 2);
         AvatarTestData.StubSearch(_harness.Sender, AvatarTestData.Match("explanation-1", LessonContentSection.Explanation, "قانون أوم"));
-        _harness.Ai.ChatAsync(Arg.Any<AiChatRequest>(), Arg.Any<CancellationToken>()).Returns(new AiChatReply("رد", "claude-sonnet-5", "v2", 10, 5, "end_turn", ["explanation-1"]));
+        _harness.Ai.ChatAsync(Arg.Any<AiChatRequest>(), Arg.Any<CancellationToken>()).Returns(new AiChatReply("رد", "claude-sonnet-5", "v2", 10, 5, "end_turn", ["explanation-1"], 0.0021m));
 
         var result = await _harness.SendAsync(_harness.LessonCommand());
 
@@ -88,28 +88,18 @@ public sealed class SendAvatarMessageHandlerTests
         result.Model.Should().Be("claude-sonnet-5");
         result.PromptVersion.Should().Be("v2");
         result.Citations.Should().Equal(new AvatarCitationResult("explanation-1", LessonContentSection.Explanation, "قانون أوم", _harness.Lesson.Id, null));
+        result.ConversationId.Should().Be(_harness.AddedConversation!.Id);
     }
 
     [Fact]
     public async Task Handle_ReplyCitesUnknownReference_DropsIt()
     {
         AvatarTestData.StubSearch(_harness.Sender, AvatarTestData.Match("explanation-1", LessonContentSection.Explanation));
-        _harness.Ai.ChatAsync(Arg.Any<AiChatRequest>(), Arg.Any<CancellationToken>()).Returns(new AiChatReply("رد", "m", "v2", 1, 1, "end_turn", ["summary-9", "explanation-1"]));
+        _harness.Ai.ChatAsync(Arg.Any<AiChatRequest>(), Arg.Any<CancellationToken>()).Returns(new AiChatReply("رد", "m", "v2", 1, 1, "end_turn", ["summary-9", "explanation-1"], 0m));
 
         var result = await _harness.SendAsync(_harness.LessonCommand());
 
         result.Citations.Select(x => x.Reference).Should().Equal("explanation-1");
-    }
-
-    [Fact]
-    public async Task Handle_HistoryTurns_MapsRolesToAiChatMessages()
-    {
-        var command = _harness.LessonCommand() with { History = [new AvatarTurn(AvatarTurnRole.User, "س1"), new AvatarTurn(AvatarTurnRole.Assistant, "ج1")] };
-
-        await _harness.SendAsync(command);
-
-        _harness.LastChat!.History.Should().Equal(new AiChatMessage(AiChatRole.User, "س1"), new AiChatMessage(AiChatRole.Assistant, "ج1"));
-        _harness.LastChat.Message.Should().Be("ما هو قانون أوم؟");
     }
 
     [Fact]

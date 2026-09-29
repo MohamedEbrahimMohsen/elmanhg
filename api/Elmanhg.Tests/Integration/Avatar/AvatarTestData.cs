@@ -27,6 +27,25 @@ public static class AvatarTestData
         await context.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
     }
 
+    public static Task<HttpResponseMessage> GetConversationsAsync(HttpClient client, string query) => client.GetAsync($"{Route}/conversations{query}", CancellationToken);
+
+    public static Task<HttpResponseMessage> GetConversationAsync(HttpClient client, Guid conversationId) => client.GetAsync($"{Route}/conversations/{conversationId}", CancellationToken);
+
+    public static async Task SeedConversationAsync(ApiFactory factory, AvatarConversation conversation)
+    {
+        using var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        context.AvatarConversations.Add(conversation);
+        await context.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
+    }
+
+    public static async Task<AvatarConversation?> ReadConversationAsync(ApiFactory factory, Guid conversationId)
+    {
+        using var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        return await context.AvatarConversations.AsNoTracking().Include(x => x.Messages).SingleOrDefaultAsync(x => x.Id == conversationId, CancellationToken).ConfigureAwait(false);
+    }
+
     public static async Task<List<AvatarMessageUsage>> ReadUsageAsync(ApiFactory factory, Guid studentId)
     {
         using var scope = factory.Services.CreateScope();

@@ -1,5 +1,4 @@
 using Elmanhg.Application.Avatar.SendAvatarMessage;
-using Elmanhg.Application.Avatar.Shared;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.Avatar;
@@ -16,7 +15,7 @@ public sealed class SendAvatarMessageValidatorTests
     [Fact]
     public void Validate_LessonEntryWithLessonId_Passes()
     {
-        var result = _validator.Validate(Lesson() with { History = [Turn(AvatarTurnRole.User), Turn(AvatarTurnRole.Assistant)] });
+        var result = _validator.Validate(Lesson() with { ConversationId = Guid.NewGuid() });
 
         result.IsValid.Should().BeTrue();
     }
@@ -24,7 +23,7 @@ public sealed class SendAvatarMessageValidatorTests
     [Fact]
     public void Validate_GlobalEntryWithoutIds_Passes()
     {
-        var result = _validator.Validate(new SendAvatarMessageCommand(AvatarEntryPoint.Global, null, null, null, [], "كيف أذاكر؟"));
+        var result = _validator.Validate(new SendAvatarMessageCommand(AvatarEntryPoint.Global, null, null, null, null, "كيف أذاكر؟"));
 
         result.IsValid.Should().BeTrue();
     }
@@ -48,7 +47,7 @@ public sealed class SendAvatarMessageValidatorTests
     [Fact]
     public void Validate_QuizEntryWithoutSessionId_FailsWithSessionIdRequired()
     {
-        var result = _validator.Validate(new SendAvatarMessageCommand(AvatarEntryPoint.QuizQuestion, null, null, Guid.NewGuid(), [], "لماذا؟"));
+        var result = _validator.Validate(new SendAvatarMessageCommand(AvatarEntryPoint.QuizQuestion, null, null, Guid.NewGuid(), null, "لماذا؟"));
 
         Codes(result).Should().Contain(ErrorCodes.SessionIdRequired);
     }
@@ -56,7 +55,7 @@ public sealed class SendAvatarMessageValidatorTests
     [Fact]
     public void Validate_ExamReviewEntryWithoutQuestionId_FailsWithQuestionIdRequired()
     {
-        var result = _validator.Validate(new SendAvatarMessageCommand(AvatarEntryPoint.ExamReview, null, Guid.NewGuid(), null, [], "لماذا؟"));
+        var result = _validator.Validate(new SendAvatarMessageCommand(AvatarEntryPoint.ExamReview, null, Guid.NewGuid(), null, null, "لماذا؟"));
 
         Codes(result).Should().Contain(ErrorCodes.QuestionIdRequired);
     }
@@ -77,53 +76,7 @@ public sealed class SendAvatarMessageValidatorTests
         Codes(result).Should().Contain(ErrorCodes.AvatarMessageTooLong);
     }
 
-    [Fact]
-    public void Validate_HistoryOverMax_FailsWithAvatarHistoryTooLong()
-    {
-        var history = Enumerable.Range(0, 12)
-            .Select(x => Turn(x % 2 == 0 ? AvatarTurnRole.User : AvatarTurnRole.Assistant))
-            .ToList();
-
-        var result = _validator.Validate(Lesson() with { History = history });
-
-        Codes(result).Should().Contain(ErrorCodes.AvatarHistoryTooLong);
-    }
-
-    [Fact]
-    public void Validate_HistoryStartingWithAssistant_FailsWithAvatarHistoryInvalid()
-    {
-        var result = _validator.Validate(Lesson() with { History = [Turn(AvatarTurnRole.Assistant), Turn(AvatarTurnRole.User)] });
-
-        Codes(result).Should().Contain(ErrorCodes.AvatarHistoryInvalid);
-    }
-
-    [Fact]
-    public void Validate_OddHistory_FailsWithAvatarHistoryInvalid()
-    {
-        var result = _validator.Validate(Lesson() with { History = [Turn(AvatarTurnRole.User)] });
-
-        Codes(result).Should().Contain(ErrorCodes.AvatarHistoryInvalid);
-    }
-
-    [Fact]
-    public void Validate_BlankTurnContent_FailsWithAvatarHistoryInvalid()
-    {
-        var result = _validator.Validate(Lesson() with { History = [Turn(AvatarTurnRole.User), new AvatarTurn(AvatarTurnRole.Assistant, " ")] });
-
-        Codes(result).Should().Contain(ErrorCodes.AvatarHistoryInvalid);
-    }
-
-    [Fact]
-    public void Validate_TurnContentOverMax_FailsWithAvatarHistoryInvalid()
-    {
-        var result = _validator.Validate(Lesson() with { History = [new AvatarTurn(AvatarTurnRole.User, new string('q', 4001)), Turn(AvatarTurnRole.Assistant)] });
-
-        Codes(result).Should().Contain(ErrorCodes.AvatarHistoryInvalid);
-    }
-
-    private static SendAvatarMessageCommand Lesson() => new(AvatarEntryPoint.Lesson, Guid.NewGuid(), null, null, [], "ما هو قانون أوم؟");
-
-    private static AvatarTurn Turn(AvatarTurnRole role) => new(role, "نص");
+    private static SendAvatarMessageCommand Lesson() => new(AvatarEntryPoint.Lesson, Guid.NewGuid(), null, null, null, "ما هو قانون أوم؟");
 
     private static IEnumerable<string> Codes(ValidationResult result) => result.Errors.Select(x => x.ErrorCode);
 }

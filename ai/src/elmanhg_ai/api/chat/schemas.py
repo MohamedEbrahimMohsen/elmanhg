@@ -106,4 +106,5 @@ class ChatOut(ApiOutModel):
     input_tokens: int
     output_tokens: int
     stop_reason: str | None
+    cost_usd: float
     citations: list[str]

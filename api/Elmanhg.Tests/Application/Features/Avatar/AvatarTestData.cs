@@ -33,6 +33,12 @@ public static class AvatarTestData
             .Returns(call => sessions.Where(call.Arg<Expression<Func<Session, bool>>>().Compile()).ToList());
     }
 
+    public static void StubConversations(IAvatarConversationRepository repository, params AvatarConversation[] conversations)
+    {
+        repository.FirstOrDefaultAsync(Arg.Any<Expression<Func<AvatarConversation, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<AvatarConversation>, IQueryable<AvatarConversation>>?>(), Arg.Any<Func<IQueryable<AvatarConversation>, IOrderedQueryable<AvatarConversation>>?>(), Arg.Any<bool>())
+            .Returns(call => conversations.FirstOrDefault(call.Arg<Expression<Func<AvatarConversation, bool>>>().Compile()));
+    }
+
     public static void StubUsedToday(IAvatarMessageUsageRepository repository, int used)
     {
         repository.CountOnDayAsync(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<DateOnly>(), Arg.Any<CancellationToken>()).Returns(used);
@@ -62,7 +68,8 @@ public static class AvatarTestData
             StubUsedToday(Usage, 0);
             StubSessions(Sessions);
             StubSearch(Sender);
-            Ai.ChatAsync(Arg.Do<AiChatRequest>(x => LastChat = x), Arg.Any<CancellationToken>()).Returns(new AiChatReply("رد", "claude-sonnet-5", "v2", 10, 5, "end_turn", []));
+            Conversations.AddAsync(Arg.Do<AvatarConversation>(x => AddedConversation = x), Arg.Any<CancellationToken>());
+            Ai.ChatAsync(Arg.Do<AiChatRequest>(x => LastChat = x), Arg.Any<CancellationToken>()).Returns(new AiChatReply("رد", "claude-sonnet-5", "v2", 10, 5, "end_turn", [], 0.0021m));
         }
 
         public ExamSessionBuilder Builder { get; } = new();
@@ -74,22 +81,24 @@ public static class AvatarTestData
         public IQuestionRepository Questions { get; } = Substitute.For<IQuestionRepository>();
         public ISubscriptionRepository Subscriptions { get; } = Substitute.For<ISubscriptionRepository>();
         public IAvatarMessageUsageRepository Usage { get; } = Substitute.For<IAvatarMessageUsageRepository>();
+        public IAvatarConversationRepository Conversations { get; } = Substitute.For<IAvatarConversationRepository>();
         public IAiServiceClient Ai { get; } = Substitute.For<IAiServiceClient>();
         public ISender Sender { get; } = Substitute.For<ISender>();
         public TimeProvider Time { get; } = Substitute.For<TimeProvider>();
         public ICurrentUserService CurrentUser { get; } = Substitute.For<ICurrentUserService>();
         public AvatarOptions AvatarOptions { get; } = new();
         public AiChatRequest? LastChat { get; private set; }
+        public AvatarConversation? AddedConversation { get; private set; }
 
         public Task<AvatarReplyResult> SendAsync(SendAvatarMessageCommand command)
         {
-            var handler = new SendAvatarMessageHandler(Sessions, Lessons, Units, Subjects, Questions, Subscriptions, Usage, new RichTextExtractor(), Ai, Sender, Options.Create(AvatarOptions), Options.Create(new SubscriptionsOptions()), Options.Create(new ExamsOptions()), Options.Create(new ContentRetrievalOptions()), Time, CurrentUser);
+            var handler = new SendAvatarMessageHandler(Sessions, Lessons, Units, Subjects, Questions, Subscriptions, Usage, Conversations, new RichTextExtractor(), Ai, Sender, Options.Create(AvatarOptions), Options.Create(new SubscriptionsOptions()), Options.Create(new ExamsOptions()), Options.Create(new ContentRetrievalOptions()), Time, CurrentUser);
             return handler.Handle(command, TestContext.Current.CancellationToken);
         }
 
-        public SendAvatarMessageCommand LessonCommand(string message = "ما هو قانون أوم؟") => new(AvatarEntryPoint.Lesson, Lesson.Id, null, null, [], message);
+        public SendAvatarMessageCommand LessonCommand(string message = "ما هو قانون أوم؟") => new(AvatarEntryPoint.Lesson, Lesson.Id, null, null, null, message);
 
-        public SendAvatarMessageCommand QuestionCommand(AvatarEntryPoint entryPoint, Session session, Guid questionId) => new(entryPoint, null, session.Id, questionId, [], "لماذا إجابتي خطأ؟");
+        public SendAvatarMessageCommand QuestionCommand(AvatarEntryPoint entryPoint, Session session, Guid questionId) => new(entryPoint, null, session.Id, questionId, null, "لماذا إجابتي خطأ؟");
 
         public Session Quiz(bool answered)
         {

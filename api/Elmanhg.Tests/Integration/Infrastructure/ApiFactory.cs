@@ -144,6 +144,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Avatar:HistoryTurnMaxLength"] = "4000",
             ["Avatar:MaxHistoryMessages"] = "10",
             ["Avatar:ContextFieldMaxLength"] = "8000",
+            ["Avatar:AdminConversationsMaxPageSize"] = "100",
+            ["Avatar:ConversationSearchMaxLength"] = "200",
             ["Payments:Provider"] = "Fake",
             ["Payments:FakeCheckoutPath"] = "/student/fake-checkout",
             ["Payments:AllowFakePayments"] = "true",

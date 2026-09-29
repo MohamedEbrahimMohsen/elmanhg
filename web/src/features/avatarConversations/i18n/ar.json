@@ -1,0 +1,93 @@
+{
+  "page": {
+    "title": "محادثات المساعد",
+    "intro": "محادثات الطلاب مع المساعد الذكي، الأحدث أولًا. لكل رد النموذج ونسخة التعليمات والرموز والتكلفة والسياق المرسل.",
+    "loading": "جارٍ تحميل المحادثات"
+  },
+  "filters": {
+    "search": "بحث",
+    "searchHint": "نص في المحادثة أو اسم الطالب",
+    "entryPoint": "نقطة الدخول",
+    "allEntryPoints": "الكل",
+    "from": "من",
+    "to": "إلى",
+    "apply": "تطبيق",
+    "clear": "مسح الفلاتر",
+    "errors": {
+      "searchTooLong": "نص البحث طويل جدًا.",
+      "date": "أدخل تاريخًا صحيحًا.",
+      "dateRange": "يجب أن يكون تاريخ النهاية في يوم البداية أو بعده."
+    }
+  },
+  "entryPoint": {
+    "Lesson": "الدرس",
+    "QuizQuestion": "سؤال تدريب",
+    "ExamReview": "مراجعة امتحان",
+    "Global": "عام"
+  },
+  "table": {
+    "caption": "محادثات المساعد",
+    "lastMessage": "آخر رسالة",
+    "student": "الطالب",
+    "context": "السياق",
+    "firstQuestion": "أول سؤال",
+    "messages": "الرسائل",
+    "actions": "إجراءات",
+    "open": "عرض",
+    "openLabel": "عرض محادثة {student}"
+  },
+  "empty": {
+    "noData": "لا توجد محادثات بعد.",
+    "noResults": "لا توجد محادثات تطابق الفلاتر."
+  },
+  "error": {
+    "title": "تعذّر تحميل المحادثات"
+  },
+  "detail": {
+    "back": "محادثات المساعد",
+    "title": "محادثة المساعد",
+    "loading": "جارٍ تحميل المحادثة",
+    "error": "تعذّر تحميل المحادثة",
+    "student": "الطالب",
+    "context": "السياق",
+    "startedAt": "بدأت",
+    "lastMessageAt": "آخر رسالة",
+    "messages": "الرسائل",
+    "tokens": "الرموز: دخل {input} · خرج {output}",
+    "cost": "التكلفة",
+    "notPriced": "غير محسوبة"
+  },
+  "message": {
+    "student": "الطالب",
+    "assistant": "المساعد",
+    "model": "النموذج",
+    "promptVersion": "نسخة التعليمات",
+    "tokens": "الرموز",
+    "cost": "التكلفة",
+    "stopReason": "سبب التوقف",
+    "history": "رسائل سابقة مرسلة",
+    "sources": "المصادر"
+  },
+  "section": {
+    "Explanation": "الشرح",
+    "Objectives": "الأهداف",
+    "Summary": "الملخص",
+    "QuestionExplanation": "شرح سؤال"
+  },
+  "context": {
+    "summary": "السياق المرسل",
+    "subject": "المادة",
+    "unit": "الوحدة",
+    "lesson": "الدرس",
+    "objectives": "الأهداف",
+    "explanation": "الشرح",
+    "summaryText": "الملخص",
+    "question": "السؤال",
+    "studentAnswer": "إجابة الطالب",
+    "correctAnswer": "الإجابة الصحيحة",
+    "questionExplanation": "شرح السؤال",
+    "subjects": "المواد",
+    "sources": "نتائج البحث المرسلة",
+    "none": "لا شيء"
+  }
+}

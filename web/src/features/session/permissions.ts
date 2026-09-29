@@ -20,6 +20,7 @@ export const capabilities = [
   'usersManage',
   'auditLogView',
   'trainingDataExport',
+  'avatarConversationsView',
 ] as const;
 
 export type Capability = (typeof capabilities)[number];
@@ -49,6 +50,7 @@ export const roleCapabilities: Record<Role, readonly Capability[]> = {
     'paymentsManage',
     'auditLogView',
     'trainingDataExport',
+    'avatarConversationsView',
   ],
 };
 

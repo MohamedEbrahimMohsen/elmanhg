@@ -15,6 +15,7 @@ describe('MorePage', () => {
       'Users',
       'Payments',
       'Audit log',
+      'Assistant conversations',
       'Data export',
     ]);
   });

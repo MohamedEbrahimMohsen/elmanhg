@@ -35,6 +35,8 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     private const int CurrencyCodeLength = 3;
     // Paymob ids and references are short numeric strings; a schema invariant.
     private const int PaymobReferenceMaxLength = 100;
+    // Model ids, prompt versions and stop reasons are short identifiers set by the AI service; a schema invariant.
+    private const int AiIdentifierMaxLength = 100;
 
     public const string InProgressSessionIndex = "IX_Sessions_InProgressScope";
     public const string AttemptPerQuestionIndex = "IX_Attempts_SessionId_QuestionId";
@@ -49,6 +51,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public const string PaymentRefundTransactionIndex = "IX_Payments_RefundTransactionId";
     public const string PaymentOpenReviewIndex = "IX_Payments_OpenReview";
     public const string SubscriptionLapseIndex = "IX_Subscriptions_Status_CurrentPeriodEnd";
+    public const string AvatarMessagePositionIndex = "IX_AvatarMessages_ConversationId_Position";
 
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<TeacherSubject> TeacherSubjects { get; set; }
@@ -75,6 +78,8 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public DbSet<LessonContentChunk> LessonContentChunks { get; set; }
     public DbSet<LessonContentIndex> LessonContentIndexes { get; set; }
     public DbSet<AvatarMessageUsage> AvatarMessageUsages { get; set; }
+    public DbSet<AvatarConversation> AvatarConversations { get; set; }
+    public DbSet<AvatarMessage> AvatarMessages { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
@@ -97,6 +102,10 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is TeacherThread))
         {
             throw new ConflictCoreException(ErrorCodes.TeacherThreadModifiedConcurrently, innerException: exception);
+        }
+        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is AvatarConversation))
+        {
+            throw new ConflictCoreException(ErrorCodes.AvatarConversationModifiedConcurrently, innerException: exception);
         }
         catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: PaymobTransactionIndex or PaymentRefundTransactionIndex })
         {
@@ -130,6 +139,10 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: SubjectDefaultBlueprintIndex or UnitBlueprintIndex })
         {
             throw new ConflictCoreException(ErrorCodes.ExamBlueprintModifiedConcurrently, innerException: exception);
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: AvatarMessagePositionIndex })
+        {
+            throw new ConflictCoreException(ErrorCodes.AvatarConversationModifiedConcurrently, innerException: exception);
         }
     }
 
@@ -462,6 +475,34 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.StudentId, x.CreatedAt });
         });
+        modelBuilder.Entity<AvatarConversation>(builder =>
+        {
+            builder.Property(x => x.EntryPoint).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.Version).IsRowVersion();
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<CurriculumUnit>().WithMany().HasForeignKey(x => x.UnitId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Lesson>().WithMany().HasForeignKey(x => x.LessonId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Session>().WithMany().HasForeignKey(x => x.SessionId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Question>().WithMany().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasMany(x => x.Messages).WithOne().HasForeignKey(x => x.ConversationId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.StudentId, x.LastMessageAt });
+            builder.HasIndex(x => x.LastMessageAt);
+        });
+        modelBuilder.Entity<AvatarMessage>(builder =>
+        {
+            builder.Property(x => x.Id).ValueGeneratedNever();
+            builder.Property(x => x.Role).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.Text).IsRequired();
+            builder.Property(x => x.Model).HasMaxLength(AiIdentifierMaxLength);
+            builder.Property(x => x.PromptVersion).HasMaxLength(AiIdentifierMaxLength);
+            builder.Property(x => x.StopReason).HasMaxLength(AiIdentifierMaxLength);
+            builder.Property(x => x.CostUsd).HasPrecision(12, 6);
+            builder.Property(x => x.Context).HasColumnType("jsonb");
+            builder.Property(x => x.Citations).HasColumnType("jsonb");
+            builder.HasIndex(x => new { x.ConversationId, x.Position }, AvatarMessagePositionIndex).IsUnique();
+            builder.HasIndex(x => x.CreatedAt);
+        });
     }
 
     private static void ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(ModelBuilder modelBuilder)
@@ -492,5 +533,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         modelBuilder.Entity<LessonContentChunk>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<LessonContentIndex>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<AvatarMessageUsage>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<AvatarConversation>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<AvatarMessage>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

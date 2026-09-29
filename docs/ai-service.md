@@ -57,13 +57,14 @@ Response `200`:
   "inputTokens": 0,
   "outputTokens": 0,
   "stopReason": "end_turn",
+  "costUsd": 0.0,
   "citations": ["explanation-1"]
 }
 ```
 
 `sources` are the retrieved lesson chunks ([content-retrieval.md](content-retrieval.md)); the field may be omitted or empty. `citations` lists the `reference` of every source the reply cites, distinct and in first-cited order; it only ever contains references that were sent, and is `[]` when nothing is cited.
 
-`model` and `promptVersion` are recorded per message (PRD §9.3).
+`model` and `promptVersion` are recorded per message (PRD §9.3). `costUsd` is `estimate_cost_usd` of the reply's tokens at `ELMANHG_AI_MODEL_*_USD_PER_MILLION_TOKENS`; the API stores it per reply ([avatar.md](avatar.md), Conversation log).
 
 Field rules:
 
@@ -174,8 +175,8 @@ AI service (`ELMANHG_AI_*` environment variables; `settings.py` is the only plac
 | `ELMANHG_AI_CHAT_MAX_SOURCE_CHARS` | 8000 | |
 | `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` | 20 | per Claude call, up to 120 |
 | `ELMANHG_AI_MODEL_MAX_RETRIES` | 1 | SDK retries with exponential backoff, 0 to 5 |
-| `ELMANHG_AI_MODEL_INPUT_USD_PER_MILLION_TOKENS` | 3 | cost logging only; confirm the list price at go-live |
-| `ELMANHG_AI_MODEL_OUTPUT_USD_PER_MILLION_TOKENS` | 15 | cost logging only; confirm the list price at go-live |
+| `ELMANHG_AI_MODEL_INPUT_USD_PER_MILLION_TOKENS` | 3 | cost logging and the `costUsd` returned per reply; confirm the list price at go-live |
+| `ELMANHG_AI_MODEL_OUTPUT_USD_PER_MILLION_TOKENS` | 15 | cost logging and the `costUsd` returned per reply; confirm the list price at go-live |
 | `ELMANHG_AI_EMBEDDING_PROVIDER` | `fake` | `fake` or `openai` (Anthropic has no embeddings API) |
 | `ELMANHG_AI_OPENAI_API_KEY` | unset | required when the embedding provider is `openai`; never logged |
 | `ELMANHG_AI_EMBEDDING_MODEL` | `text-embedding-3-small` | OpenAI embeddings model id |

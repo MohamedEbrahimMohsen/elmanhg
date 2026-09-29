@@ -8,7 +8,7 @@ import {
 } from '@/shared/api/generated/avatar/avatar.msw';
 import { getMasteryMock } from '@/shared/api/generated/mastery/mastery.msw';
 import type { AvatarStatusResult, SendAvatarMessageCommand } from '@/shared/api/generated/model';
-import { avatarReply, avatarStatus, freeAvatarStatus } from '@/test/avatarFixtures';
+import { avatarConversationId, avatarReply, avatarStatus, freeAvatarStatus } from '@/test/avatarFixtures';
 import { axe } from '@/test/axe';
 import { browseLessonId } from '@/test/browseFixtures';
 import { server } from '@/test/msw/server';
@@ -71,7 +71,7 @@ describe('AvatarPanel', () => {
       lessonId: null,
       sessionId: null,
       questionId: null,
-      history: [],
+      conversationId: null,
       message: 'What is resistance?',
     });
     expect(within(panel).getByText('Sources')).toBeInTheDocument();
@@ -81,7 +81,7 @@ describe('AvatarPanel', () => {
     );
   });
 
-  it('sends the previous turns as history on the next question', async () => {
+  it('continues the same conversation on the next question', async () => {
     const bodies = captureSends();
     const { user, panel } = await openPanel();
 
@@ -92,10 +92,8 @@ describe('AvatarPanel', () => {
     await waitFor(() => {
       expect(bodies).toHaveLength(2);
     });
-    expect(bodies[1]?.history).toEqual([
-      { role: 'User', content: 'First question' },
-      { role: 'Assistant', content: avatarReply().reply },
-    ]);
+    expect(bodies[1]?.conversationId).toBe(avatarConversationId);
+    expect(bodies[1]).not.toHaveProperty('history');
   });
 
   it('shows the exam refusal and disables the composer while an exam is in progress', async () => {

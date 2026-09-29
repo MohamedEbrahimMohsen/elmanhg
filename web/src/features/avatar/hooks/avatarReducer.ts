@@ -1,4 +1,4 @@
-import type { AvatarCitationResult, AvatarReplyResult, AvatarTurn } from '@/shared/api/generated/model';
+import type { AvatarCitationResult, AvatarReplyResult } from '@/shared/api/generated/model';
 import { contextKey, type AvatarContextInput } from '../api/avatarContext';
 import type { AvatarNoticeKind } from '../api/avatarErrors';
 
@@ -11,7 +11,7 @@ export interface AvatarState {
   isOpen: boolean;
   context: AvatarContextInput;
   messages: AvatarMessage[];
-  turns: AvatarTurn[];
+  conversationId: string | null;
   nextId: number;
 }
 
@@ -19,14 +19,14 @@ export type AvatarAction =
   | { type: 'open'; context: AvatarContextInput }
   | { type: 'close' }
   | { type: 'sent'; text: string }
-  | { type: 'replied'; question: string; reply: AvatarReplyResult }
+  | { type: 'replied'; reply: AvatarReplyResult }
   | { type: 'failed'; notice: AvatarNoticeKind };
 
 export const initialAvatarState: AvatarState = {
   isOpen: false,
   context: { entryPoint: 'Global' },
   messages: [],
-  turns: [],
+  conversationId: null,
   nextId: 0,
 };
 
@@ -39,7 +39,7 @@ export function avatarReducer(state: AvatarState, action: AvatarAction): AvatarS
     case 'open':
       return contextKey(action.context) === contextKey(state.context)
         ? { ...state, isOpen: true, context: action.context }
-        : { ...state, isOpen: true, context: action.context, messages: [], turns: [] };
+        : { ...state, isOpen: true, context: action.context, messages: [], conversationId: null };
     case 'close':
       return { ...state, isOpen: false };
     case 'sent':
@@ -52,11 +52,7 @@ export function avatarReducer(state: AvatarState, action: AvatarAction): AvatarS
           text: action.reply.reply,
           citations: action.reply.citations,
         })),
-        turns: [
-          ...state.turns,
-          { role: 'User', content: action.question },
-          { role: 'Assistant', content: action.reply.reply },
-        ],
+        conversationId: action.reply.conversationId,
       };
     case 'failed':
       return append(state, (id) => ({ id, kind: 'notice', notice: action.notice }));

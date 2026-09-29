@@ -4,9 +4,9 @@
  * Elmanhg.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { AvatarTurnRole } from './avatarTurnRole';
 
-export interface AvatarTurn {
-  role: AvatarTurnRole;
+export interface AiChatSource {
+  reference: string;
+  title: string;
   content: string;
 }

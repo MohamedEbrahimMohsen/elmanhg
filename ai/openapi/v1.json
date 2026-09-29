@@ -275,6 +275,10 @@
             ],
             "title": "Stopreason"
           },
+          "costUsd": {
+            "type": "number",
+            "title": "Costusd"
+          },
           "citations": {
             "items": {
               "type": "string"
@@ -291,6 +295,7 @@
           "inputTokens",
           "outputTokens",
           "stopReason",
+          "costUsd",
           "citations"
         ],
         "title": "ChatOut"

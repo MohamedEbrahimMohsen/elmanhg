@@ -24,6 +24,7 @@
       "users": "Users",
       "payments": "Payments",
       "audit": "Audit log",
+      "avatarConversations": "Assistant conversations",
       "export": "Data export"
     }
   },

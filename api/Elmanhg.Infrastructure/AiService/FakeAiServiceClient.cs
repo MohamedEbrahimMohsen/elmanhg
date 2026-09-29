@@ -17,7 +17,7 @@ public sealed class FakeAiServiceClient(IHostEnvironment hostEnvironment) : IAiS
     {
         EnsureNotProduction();
         IReadOnlyList<string> citations = request.Sources.Count > 0 ? [request.Sources[0].Reference] : [];
-        return Task.FromResult(new AiChatReply(FakeReply, FakeModel, FakePromptVersion, 0, 0, "end_turn", citations));
+        return Task.FromResult(new AiChatReply(FakeReply, FakeModel, FakePromptVersion, 0, 0, "end_turn", citations, 0m));
     }
 
     public Task<AiEmbeddingResult> EmbedAsync(AiEmbeddingRequest request, CancellationToken cancellationToken)
