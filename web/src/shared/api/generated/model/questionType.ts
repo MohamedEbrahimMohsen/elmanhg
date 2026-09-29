@@ -14,4 +14,5 @@ export const QuestionType = {
   TrueFalse: 'TrueFalse',
   Fill: 'Fill',
   Short: 'Short',
+  Essay: 'Essay',
 } as const;

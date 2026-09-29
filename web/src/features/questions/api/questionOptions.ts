@@ -1,6 +1,21 @@
 import type { QuestionDifficulty, QuestionType, QuestionValidationStatus } from '@/shared/api/generated/model';
 
-export const questionTypes = ['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short'] as const satisfies readonly QuestionType[];
+export const questionTypes = [
+  'Mcq',
+  'Multi',
+  'TrueFalse',
+  'Fill',
+  'Short',
+  'Essay',
+] as const satisfies readonly QuestionType[];
+
+export const servedQuestionTypes = [
+  'Mcq',
+  'Multi',
+  'TrueFalse',
+  'Fill',
+  'Short',
+] as const satisfies readonly QuestionType[];
 
 export const questionDifficulties = ['Easy', 'Medium', 'Hard'] as const satisfies readonly QuestionDifficulty[];
 
@@ -20,6 +35,23 @@ export const questionOptionsMax = 10;
 
 // mirrors Content:QuestionBlanksMaxCount
 export const questionBlanksMax = 10;
+
+// mirrors Content:QuestionEssayMaxWordsMax
+export const essayMaxWordsMax = 2000;
+
+// mirrors Content:QuestionRubricCriteriaMaxCount
+export const rubricCriteriaMax = 10;
+
+export const rubricLevelsMin = 2;
+
+// mirrors Content:QuestionRubricLevelsMaxCount
+export const rubricLevelsMax = 6;
+
+// mirrors Content:QuestionRubricPointsMax
+export const rubricPointsMax = 100;
+
+// mirrors Content:QuestionModelAnswersMaxCount
+export const modelAnswersMax = 3;
 
 // mirrors Content:QuestionFilterMaxLength
 export const questionFilterMaxLength = 200;

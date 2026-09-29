@@ -10,7 +10,7 @@ The AI avatar answers "grounded on lesson content via retrieval (embeddings over
 
 ## What is indexed
 
-Only **Published** lessons, and only **servable** questions of those lessons (`ServableQuestionSpecification`: Approved, not retired, lesson Published). Each lesson becomes a list of chunks, in this order:
+Only **Published** lessons, and only **servable** questions of those lessons (`ServableQuestionSpecification`: Approved, not retired, lesson Published, not an essay until #119). Each lesson becomes a list of chunks, in this order:
 
 | Section | Source | Chunking |
 |---|---|---|

@@ -1,6 +1,6 @@
 import { useFormContext, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { questionTypes } from '@/features/questions';
+import { servedQuestionTypes } from '@/features/questions';
 import type { ExamTypeCountResult } from '@/shared/api/generated/model';
 import { cn } from '@/shared/lib/utils';
 import { Input } from '@/shared/ui/input';
@@ -26,7 +26,7 @@ export function TypeCountsTable({ available }: TypeCountsTableProps) {
   const countOf = (entries: readonly ExamTypeCountResult[], type: string) =>
     Number(entries.find((entry) => entry.type === type)?.count ?? 0);
   const total = required.reduce((sum, entry) => sum + Number(entry.count), 0);
-  const rowErrors = questionTypes.flatMap((type) => {
+  const rowErrors = servedQuestionTypes.flatMap((type) => {
     const message = errors.counts?.[type]?.message;
     return message ? [{ type, message }] : [];
   });
@@ -49,7 +49,7 @@ export function TypeCountsTable({ available }: TypeCountsTableProps) {
             </tr>
           </thead>
           <tbody>
-            {questionTypes.map((type) => {
+            {servedQuestionTypes.map((type) => {
               const typeLabel = t(`questions:types.${type}`);
               const isShort = countOf(required, type) > countOf(available, type);
               return (

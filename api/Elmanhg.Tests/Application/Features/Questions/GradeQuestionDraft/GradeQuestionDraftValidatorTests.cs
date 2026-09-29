@@ -51,6 +51,14 @@ public sealed class GradeQuestionDraftValidatorTests
         codes.Should().Contain(ErrorCodes.QuestionTypeRequired).And.NotContain(ErrorCodes.QuestionAnswerInvalid);
     }
 
+    [Fact]
+    public void Validate_Essay_ReturnsQuestionTypeNotGradableOnly()
+    {
+        var codes = Codes(new GradeQuestionDraftQuery(EssayFields(), Json("{}")));
+
+        codes.Should().Contain(ErrorCodes.QuestionTypeNotGradable).And.NotContain(ErrorCodes.QuestionAnswerInvalid);
+    }
+
     private List<string> Codes(GradeQuestionDraftQuery query)
     {
         return _validator.Validate(query).Errors

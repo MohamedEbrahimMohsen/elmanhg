@@ -12,7 +12,7 @@ export const createQuestionBodyMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*
 
 export const CreateQuestionBody = zod.object({
   "lessonId": zod.uuid(),
-  "type": zod.union([zod.null(),zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short'])]),
+  "type": zod.union([zod.null(),zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay'])]),
   "stem": zod.string().nullable(),
   "body": zod.unknown(),
   "gradingSpec": zod.unknown(),
@@ -100,7 +100,7 @@ export const updateQuestionBodyMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*
 
 
 export const UpdateQuestionBody = zod.object({
-  "type": zod.union([zod.null(),zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short'])]),
+  "type": zod.union([zod.null(),zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay'])]),
   "stem": zod.string().nullable(),
   "body": zod.unknown(),
   "gradingSpec": zod.unknown(),
@@ -121,7 +121,7 @@ export const resubmitQuestionBodyMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\
 
 
 export const ResubmitQuestionBody = zod.object({
-  "type": zod.union([zod.null(),zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short'])]),
+  "type": zod.union([zod.null(),zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay'])]),
   "stem": zod.string().nullable(),
   "body": zod.unknown(),
   "gradingSpec": zod.unknown(),
@@ -144,7 +144,7 @@ export const gradeQuestionDraftBodyMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]
 
 
 export const GradeQuestionDraftBody = zod.object({
-  "type": zod.union([zod.null(),zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short'])]),
+  "type": zod.union([zod.null(),zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay'])]),
   "stem": zod.string().nullable(),
   "body": zod.unknown(),
   "gradingSpec": zod.unknown(),

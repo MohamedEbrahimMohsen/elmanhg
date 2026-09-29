@@ -15,6 +15,7 @@ public static class QuestionSchemaRules
             QuestionType.TrueFalse => TrueFalseQuestionRules.Validate(fields.Body, fields.GradingSpec),
             QuestionType.Fill => FillQuestionRules.Validate(fields.Stem ?? string.Empty, fields.Body, fields.GradingSpec, options),
             QuestionType.Short => ShortQuestionRules.Validate(fields.Body, fields.GradingSpec, options),
+            QuestionType.Essay => EssayQuestionRules.Validate(fields.Body, fields.GradingSpec, options),
             _ => [],
         };
     }
@@ -28,6 +29,7 @@ public static class QuestionSchemaRules
             QuestionType.TrueFalse => TrueFalseQuestionRules.Normalize(fields.GradingSpec),
             QuestionType.Fill => FillQuestionRules.Normalize(fields.Body, fields.GradingSpec),
             QuestionType.Short => ShortQuestionRules.Normalize(fields.Body, fields.GradingSpec),
+            QuestionType.Essay => EssayQuestionRules.Normalize(fields.Body, fields.GradingSpec, sanitizer),
             _ => throw new InvalidOperationException("Unsupported question type."),
         };
     }
