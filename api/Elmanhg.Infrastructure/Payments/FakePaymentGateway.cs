@@ -19,4 +19,14 @@ public sealed class FakePaymentGateway(IOptions<PaymentsOptions> paymentsOptions
 
         return Task.FromResult(new PaymentCheckout($"{paymentsOptions.Value.FakeCheckoutPath.TrimEnd('/')}/{request.PaymentId}"));
     }
+
+    public Task<PaymentRefund> RefundAsync(PaymentRefundRequest request, CancellationToken cancellationToken)
+    {
+        if (hostEnvironment.IsProduction())
+        {
+            throw new ServiceUnavailableCoreException(ErrorCodes.PaymentGatewayUnavailable);
+        }
+
+        return Task.FromResult(new PaymentRefund($"fake-refund-{request.PaymentId:N}"));
+    }
 }

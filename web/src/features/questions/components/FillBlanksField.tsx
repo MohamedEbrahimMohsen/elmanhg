@@ -6,7 +6,7 @@ import { questionBlanksMax } from '../api/questionOptions';
 import { nextBlankId } from '../api/questionValues';
 import type { QuestionValues } from '../schemas/questionEditorSchema';
 import { NormalizationRulesField } from './NormalizationRulesField';
-import { TextAreaField } from './TextAreaField';
+import { TextAreaField } from '@/shared/form/TextAreaField';
 
 export function FillBlanksField() {
   const { t } = useTranslation('questions');

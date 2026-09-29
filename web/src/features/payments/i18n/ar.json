@@ -1,0 +1,91 @@
+{
+  "page": {
+    "title": "المدفوعات",
+    "loading": "جارٍ تحميل المدفوعات…"
+  },
+  "tabs": {
+    "all": "كل المعاملات",
+    "review": "بحاجة لمراجعة"
+  },
+  "filters": {
+    "status": "الحالة",
+    "allStatuses": "كل الحالات",
+    "plan": "الباقة",
+    "allPlans": "كل الباقات",
+    "reference": "المرجع",
+    "referenceHint": "رقم الدفع أو رقم معاملة Paymob",
+    "from": "من",
+    "to": "إلى",
+    "apply": "تطبيق",
+    "clear": "مسح الفلاتر",
+    "studentActive": "تعرض مدفوعات طالب واحد.",
+    "errors": {
+      "date": "أدخل تاريخًا صحيحًا.",
+      "dateRange": "تاريخ النهاية قبل تاريخ البداية.",
+      "referenceTooLong": "المرجع طويل جدًا."
+    }
+  },
+  "status": {
+    "Pending": "قيد الانتظار",
+    "Succeeded": "ناجحة",
+    "Failed": "فاشلة",
+    "Refunded": "مستردة"
+  },
+  "plan": {
+    "Base": "الأساسية",
+    "AskTeacher": "اسأل معلّم"
+  },
+  "period": {
+    "Monthly": "شهري",
+    "Termly": "ترم",
+    "Yearly": "سنوي"
+  },
+  "review": {
+    "badge": "بحاجة لمراجعة",
+    "AskTeacherWithoutBase": "اسأل معلّم مدفوع بدون الباقة الأساسية",
+    "PartialRefundAtProvider": "استرداد جزئي في Paymob"
+  },
+  "table": {
+    "caption": "سجل المدفوعات",
+    "date": "التاريخ",
+    "student": "الطالب",
+    "plan": "الباقة",
+    "amount": "المبلغ",
+    "status": "الحالة",
+    "reference": "المرجع",
+    "actions": "إجراءات",
+    "showStudent": "عرض مدفوعات {name}",
+    "refundedLine": "استُرد في {date}: {reason}"
+  },
+  "actions": {
+    "refund": "استرداد",
+    "keep": "إبقاء الدفع"
+  },
+  "refund": {
+    "title": "استرداد {amount}؟",
+    "body": "يعود المبلغ إلى {name} عبر Paymob، وتُخصم المدة التي اشتراها هذا الدفع من الاشتراك فورًا. لا يمكن التراجع عن الاسترداد.",
+    "reason": "سبب الاسترداد",
+    "cancel": "تراجع",
+    "confirm": "تأكيد الاسترداد",
+    "done": "تم استرداد الدفع.",
+    "errors": {
+      "reasonRequired": "اكتب سبب الاسترداد.",
+      "reasonTooLong": "سبب الاسترداد طويل جدًا."
+    }
+  },
+  "resolve": {
+    "title": "إبقاء هذا الدفع؟",
+    "body": "تُغلق المراجعة ويبقى الدفع والاشتراك كما هما.",
+    "cancel": "تراجع",
+    "confirm": "إبقاء الدفع",
+    "done": "أُغلقت المراجعة."
+  },
+  "empty": {
+    "noData": "لا توجد مدفوعات بعد.",
+    "noReview": "لا توجد مدفوعات بحاجة لمراجعة.",
+    "noResults": "لا توجد مدفوعات تطابق الفلاتر."
+  },
+  "error": {
+    "title": "تعذّر تحميل المدفوعات."
+  }
+}

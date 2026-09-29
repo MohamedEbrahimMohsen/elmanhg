@@ -23,7 +23,7 @@ public sealed class PaymobNotificationReaderTests
 
         var notification = Reader().Read(payload, PaymobPayloads.Sign(payload, Secret));
 
-        notification.Should().Be(new PaymentNotification("555", _paymentId.ToString(), "777", true, false, false, 19900, "EGP"));
+        notification.Should().Be(new PaymentNotification("555", _paymentId.ToString(), "777", true, false, PaymentNotificationKind.Charge, 19900, "EGP"));
     }
 
     [Fact]
@@ -87,13 +87,61 @@ public sealed class PaymobNotificationReaderTests
     }
 
     [Fact]
-    public void Read_RefundedTransaction_FlagsRefundOrVoid()
+    public void Read_RefundedParentTransaction_IsOther()
     {
         var payload = Payload(PaymobPayloads.Refunded);
 
         var notification = Reader().Read(payload, PaymobPayloads.Sign(payload, Secret));
 
-        (notification!.IsRefundOrVoid, notification.Succeeded).Should().Be((true, true));
+        (notification!.Kind, notification.Succeeded).Should().Be((PaymentNotificationKind.Other, true));
+    }
+
+    [Fact]
+    public void Read_RefundChildTransaction_IsReversal()
+    {
+        var payload = PaymobPayloads.ForPayment(PaymobPayloads.RefundChild, _paymentId, 556, 19900, 777);
+
+        var notification = Reader().Read(payload, PaymobPayloads.Sign(payload, Secret));
+
+        (notification!.Kind, notification.TransactionId, notification.AmountMinor, notification.Succeeded).Should().Be((PaymentNotificationKind.Reversal, "556", 19900L, true));
+    }
+
+    [Fact]
+    public void Read_UnsignedRefundFlagsOnCharge_StayCharge()
+    {
+        var root = JsonNode.Parse(Payload(PaymobPayloads.Succeeded))!;
+        root["obj"]!["is_refund"] = true;
+        root["obj"]!["is_void"] = true;
+        var payload = root.ToJsonString();
+
+        var notification = Reader().Read(payload, PaymobPayloads.Sign(payload, Secret));
+
+        notification!.Kind.Should().Be(PaymentNotificationKind.Charge);
+    }
+
+    [Fact]
+    public void Read_CaptureChildTransaction_IsOther()
+    {
+        var root = JsonNode.Parse(PaymobPayloads.ForPayment(PaymobPayloads.RefundChild, _paymentId, 556, 19900, 777))!;
+        root["obj"]!["is_capture"] = true;
+        var payload = root.ToJsonString();
+
+        var notification = Reader().Read(payload, PaymobPayloads.Sign(payload, Secret));
+
+        notification!.Kind.Should().Be(PaymentNotificationKind.Other);
+    }
+
+    [Fact]
+    public void Read_ParentFlagTampered_ThrowsSignatureInvalid()
+    {
+        var charge = Payload(PaymobPayloads.Succeeded);
+        var signature = PaymobPayloads.Sign(charge, Secret);
+        var root = JsonNode.Parse(charge)!;
+        root["obj"]!["has_parent_transaction"] = true;
+
+        var act = () => Reader().Read(root.ToJsonString(), signature);
+
+        act.Should().Throw<UnauthorizedCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.PaymobWebhookSignatureInvalid);
     }
 
     private PaymobNotificationReader Reader() => new(Options.Create(_options));

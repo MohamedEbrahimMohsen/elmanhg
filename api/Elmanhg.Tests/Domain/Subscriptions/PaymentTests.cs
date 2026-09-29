@@ -11,6 +11,7 @@ public sealed class PaymentTests
     private const string Transaction = "txn-1";
     private const string Raw = "{\"obj\":{\"id\":1}}";
     private static readonly DateTimeOffset CompletedAt = new(2026, 9, 29, 12, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset RefundedAt = CompletedAt.AddDays(2);
     private readonly Guid _studentId = Guid.NewGuid();
 
     [Fact]
@@ -134,6 +135,130 @@ public sealed class PaymentTests
         var act = () => payment.MarkFailed("txn-2", Raw, CompletedAt);
 
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.PaymentNotPending);
+    }
+
+    [Fact]
+    public void MarkRefunded_Succeeded_RecordsRefundAndStatus()
+    {
+        var payment = Completed(true);
+        var adminId = Guid.NewGuid();
+        var key = Guid.NewGuid();
+
+        payment.MarkRefunded("refund-1", RefundedAt, adminId, "Duplicate charge", key);
+
+        (payment.Status, payment.RefundTransactionId, payment.RefundedAt, payment.RefundedBy).Should().Be((PaymentStatus.Refunded, "refund-1", (DateTimeOffset?)RefundedAt, (Guid?)adminId));
+        (payment.RefundReason, payment.RefundIdempotencyKey, payment.IsRefundable).Should().Be(("Duplicate charge", (Guid?)key, false));
+    }
+
+    [Fact]
+    public void MarkRefunded_FlaggedPayment_ResolvesReview()
+    {
+        var payment = Completed(true);
+        payment.FlagForReview(PaymentReviewReason.AskTeacherWithoutBase);
+        var adminId = Guid.NewGuid();
+
+        payment.MarkRefunded("refund-1", RefundedAt, adminId, "Duplicate charge", Guid.NewGuid());
+
+        (payment.NeedsReview, payment.ReviewResolvedAt, payment.ReviewResolvedBy).Should().Be((false, (DateTimeOffset?)RefundedAt, (Guid?)adminId));
+    }
+
+    [Fact]
+    public void MarkRefunded_AlreadyRefunded_ThrowsAlreadyRefunded()
+    {
+        var payment = Refunded(Guid.NewGuid());
+
+        var act = () => payment.MarkRefunded("refund-2", RefundedAt, Guid.NewGuid(), "Again", Guid.NewGuid());
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.PaymentAlreadyRefunded);
+    }
+
+    [Theory]
+    [InlineData(PaymentStatus.Pending)]
+    [InlineData(PaymentStatus.Failed)]
+    public void MarkRefunded_NotSucceeded_ThrowsNotRefundable(PaymentStatus status)
+    {
+        var payment = status == PaymentStatus.Pending ? Pending() : Completed(false);
+
+        var act = () => payment.MarkRefunded("refund-1", RefundedAt, Guid.NewGuid(), "Reason", Guid.NewGuid());
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.PaymentNotRefundable);
+        payment.Status.Should().Be(status);
+    }
+
+    [Fact]
+    public void MarkSucceeded_Refunded_ThrowsNotPending()
+    {
+        var payment = Refunded(Guid.NewGuid());
+
+        var act = () => payment.MarkSucceeded(Guid.NewGuid(), "txn-2", Raw, CompletedAt);
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.PaymentNotPending);
+    }
+
+    [Fact]
+    public void ResolveReview_OpenReview_RecordsResolver()
+    {
+        var payment = Completed(true);
+        payment.FlagForReview(PaymentReviewReason.AskTeacherWithoutBase);
+        var adminId = Guid.NewGuid();
+
+        payment.ResolveReview(adminId, RefundedAt);
+
+        (payment.NeedsReview, payment.ReviewResolvedAt, payment.ReviewResolvedBy, payment.Status).Should().Be((false, (DateTimeOffset?)RefundedAt, (Guid?)adminId, PaymentStatus.Succeeded));
+    }
+
+    [Fact]
+    public void ResolveReview_NotFlagged_ThrowsReviewNotOpen()
+    {
+        var payment = Completed(true);
+
+        var act = () => payment.ResolveReview(Guid.NewGuid(), RefundedAt);
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.PaymentReviewNotOpen);
+    }
+
+    [Fact]
+    public void ResolveReview_AlreadyResolved_ThrowsReviewNotOpen()
+    {
+        var payment = Completed(true);
+        payment.FlagForReview(PaymentReviewReason.AskTeacherWithoutBase);
+        payment.ResolveReview(Guid.NewGuid(), RefundedAt);
+
+        var act = () => payment.ResolveReview(Guid.NewGuid(), RefundedAt.AddMinutes(1));
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.PaymentReviewNotOpen);
+    }
+
+    [Fact]
+    public void FlagForReview_AfterResolution_ReopensReview()
+    {
+        var payment = Completed(true);
+        payment.FlagForReview(PaymentReviewReason.AskTeacherWithoutBase);
+        payment.ResolveReview(Guid.NewGuid(), RefundedAt);
+
+        payment.FlagForReview(PaymentReviewReason.PartialRefundAtProvider);
+
+        (payment.NeedsReview, payment.ReviewReason, payment.ReviewResolvedAt, payment.ReviewResolvedBy).Should().Be((true, (PaymentReviewReason?)PaymentReviewReason.PartialRefundAtProvider, (DateTimeOffset?)null, (Guid?)null));
+    }
+
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(false, false)]
+    public void IsRefundReplay_ByKey_MatchesOnlySameKeyAfterRefund(bool sameKey, bool expected)
+    {
+        var key = Guid.NewGuid();
+        var payment = Refunded(key);
+
+        var replay = payment.IsRefundReplay(sameKey ? key : Guid.NewGuid());
+
+        replay.Should().Be(expected);
+    }
+
+    private Payment Refunded(Guid key)
+    {
+        var payment = Completed(true);
+        payment.MarkRefunded("refund-1", RefundedAt, Guid.NewGuid(), "Duplicate charge", key);
+        return payment;
     }
 
     private Payment Pending() => Payment.Create(_studentId, SubscriptionPlan.Base, BillingPeriod.Monthly, 1, new Money(19900, "EGP"));

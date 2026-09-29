@@ -19,6 +19,7 @@ public static class DefaultCodes
     public const string ProgressViewOwn = "Progress.ViewOwn";
     public const string ProgressViewAny = "Progress.ViewAny";
     public const string SubscriptionManage = "Subscription.Manage";
+    public const string PaymentsManage = "Payments.Manage";
     public const string DashboardsView = "Dashboards.View";
     public const string TeacherStatsViewOwn = "TeacherStats.ViewOwn";
     public const string UsersManage = "Users.Manage";

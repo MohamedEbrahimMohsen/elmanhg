@@ -4,7 +4,7 @@ import { TextField } from '@/shared/form/TextField';
 import type { QuestionValues } from '../schemas/questionEditorSchema';
 import { NormalizationRulesField } from './NormalizationRulesField';
 import { SelectField } from './SelectField';
-import { TextAreaField } from './TextAreaField';
+import { TextAreaField } from '@/shared/form/TextAreaField';
 
 export function ShortAnswerFields() {
   const { t } = useTranslation('questions');

@@ -42,6 +42,7 @@ All state is saved in `localStorage` under the key `elmanhg.v1`. Click **إعا�
     - Question editor has a live preview and a **جرّب الإجابة** box that runs the real grader. Editing the stem, options or answer of an approved question sends it back to *pending* with version +1. Changing only the difficulty keeps it approved. Rejected questions get **تعديل وإعادة إرسال**. Fill-in and text short answers have per-rule answer-normalisation checkboxes, all on by default.
     - Blueprint editor refuses to save when there is a shortfall.
     - Users page: suspend students, grant plans, assign subjects to teachers. The last active admin cannot be deactivated.
+    - The product also has a payments page (log, needs-review queue, refunds); the prototype does not simulate it.
     - Audit log.
     - JSONL training-data export, with student ids hashed.
 

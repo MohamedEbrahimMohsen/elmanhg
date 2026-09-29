@@ -2654,6 +2654,198 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "AdminPayments",
+      "description": "Admin only (Payments.Manage). Sign in as an admin first. Refund uses checkoutPaymentId from the Subscriptions folder (fake-completed). A refund needs an Idempotency-Key header.",
+      "item": [
+        {
+          "name": "Get payment log",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns a page\", function () { pm.expect(pm.response.json().items).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments?pageNumber=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"],
+              "query": [
+                { "key": "pageNumber", "value": "1" },
+                { "key": "pageSize", "value": "20" },
+                { "key": "status", "value": "Succeeded", "disabled": true },
+                { "key": "plan", "value": "Base", "disabled": true },
+                { "key": "needsReview", "value": "true", "disabled": true },
+                { "key": "studentId", "value": "00000000-0000-0000-0000-000000000000", "disabled": true },
+                { "key": "reference", "value": "192036465", "disabled": true },
+                { "key": "from", "value": "2026-01-01T00:00:00Z", "disabled": true },
+                { "key": "to", "value": "2026-12-31T00:00:00Z", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get review queue",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments?needsReview=true&pageNumber=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"],
+              "query": [
+                { "key": "needsReview", "value": "true" },
+                { "key": "pageNumber", "value": "1" },
+                { "key": "pageSize", "value": "20" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refund payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"payment is refunded\", function () { pm.expect(pm.response.json().status).to.eql(\"Refunded\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/{{checkoutPaymentId}}/refund",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "{{checkoutPaymentId}}", "refund"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Duplicate charge\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refund payment again",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"already refunded\", function () { pm.expect(pm.response.json().code).to.eql(\"PAYMENT_ALREADY_REFUNDED\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/{{checkoutPaymentId}}/refund",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "{{checkoutPaymentId}}", "refund"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Duplicate charge\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refund without key",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 422\", function () { pm.response.to.have.status(422); });",
+                  "pm.test(\"key required\", function () { pm.expect(pm.response.json().code).to.include(\"PAYMENT_REFUND_IDEMPOTENCY_KEY_REQUIRED\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/{{checkoutPaymentId}}/refund",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "{{checkoutPaymentId}}", "refund"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Duplicate charge\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Resolve review (not flagged)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"review not open\", function () { pm.expect(pm.response.json().code).to.eql(\"PAYMENT_REVIEW_NOT_OPEN\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/{{checkoutPaymentId}}/review-resolution",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "{{checkoutPaymentId}}", "review-resolution"]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

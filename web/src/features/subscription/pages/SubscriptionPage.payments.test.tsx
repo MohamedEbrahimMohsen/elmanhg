@@ -75,6 +75,15 @@ describe('SubscriptionPage payments', () => {
     expect(within(failedRow).getByText('EGP 699', { normalizer: normalizeSpaces })).toBeInTheDocument();
   });
 
+  it('labels a refunded payment', async () => {
+    await openPayments(() => paymentsPage([payment({ status: 'Refunded' })]));
+
+    const table = await paymentsTable();
+    const row = within(table).getByRole('row', { name: /Refunded/ });
+
+    expect(within(row).getByText('Refunded')).toBeInTheDocument();
+  });
+
   it('pages through payments', async () => {
     const user = userEvent.setup();
     const { router } = await openPayments((request) =>

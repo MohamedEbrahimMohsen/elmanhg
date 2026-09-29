@@ -4,6 +4,7 @@ export * from './exam-blueprints/exam-blueprints.zod';
 export * from './exams/exams.zod';
 export * from './lessons/lessons.zod';
 export * from './mastery/mastery.zod';
+export * from './payments/payments.zod';
 export * from './plans/plans.zod';
 export * from './progress/progress.zod';
 export * from './question-imports/question-imports.zod';

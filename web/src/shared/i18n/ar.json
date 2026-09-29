@@ -194,7 +194,22 @@
     "PAYMENT_NOT_PENDING": "تمت معالجة هذا الدفع بالفعل.",
     "SUBSCRIPTION_ENDED": "انتهى هذا الاشتراك او تم الغاؤه.",
     "SUBSCRIPTION_NOT_FOUND": "الاشتراك غير موجود.",
-    "SUBSCRIPTION_MODIFIED_CONCURRENTLY": "تم تعديل هذا الاشتراك بواسطة طلب آخر. حاول مرة أخرى."
+    "SUBSCRIPTION_MODIFIED_CONCURRENTLY": "تم تعديل هذا الاشتراك بواسطة طلب آخر. حاول مرة أخرى.",
+    "PAYMENT_ALREADY_REFUNDED": "تم استرداد هذا الدفع بالفعل.",
+    "PAYMENT_NOT_REFUNDABLE": "لا يمكن استرداد الا دفع ناجح.",
+    "PAYMENT_REVIEW_NOT_OPEN": "لا توجد مراجعة مفتوحة لهذا الدفع.",
+    "PAYMENT_ID_REQUIRED": "معرف الدفع مطلوب.",
+    "PAYMENT_REFUND_REASON_REQUIRED": "اكتب سبب الاسترداد.",
+    "PAYMENT_REFUND_REASON_TOO_LONG": "سبب الاسترداد طويل جدا.",
+    "PAYMENT_REFUND_IDEMPOTENCY_KEY_REQUIRED": "ترويسة Idempotency-Key مطلوبة ويجب ان تكون UUID غير فارغ.",
+    "PAYMENT_REFUND_DECLINED": "رفضت Paymob الاسترداد. راجع المعاملة في لوحة Paymob.",
+    "PAYMENT_NOT_SETTLED": "لم تتم تسوية الدفع بعد.",
+    "PAYMENT_LOG_PAGE_NUMBER_INVALID": "رقم الصفحة يجب ان يكون 1 او اكثر.",
+    "PAYMENT_LOG_PAGE_SIZE_INVALID": "حجم الصفحة غير صالح.",
+    "PAYMENT_LOG_STATUS_INVALID": "حالة الدفع غير معروفة.",
+    "PAYMENT_LOG_PLAN_INVALID": "الباقة غير معروفة.",
+    "PAYMENT_LOG_REFERENCE_TOO_LONG": "المرجع طويل جدا.",
+    "PAYMENT_LOG_DATE_RANGE_INVALID": "يجب ان تكون البداية قبل النهاية."
   },
   "error": {
     "title": "حدث خطأ"

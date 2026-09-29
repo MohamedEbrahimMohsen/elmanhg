@@ -1256,9 +1256,31 @@ namespace Elmanhg.Infrastructure.Migrations
                         .HasColumnType("jsonb")
                         .HasAnnotation("Core:AuditExcluded", true);
 
+                    b.Property<Guid?>("RefundIdempotencyKey")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RefundReason")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RefundTransactionId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTimeOffset?>("RefundedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("RefundedBy")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("ReviewReason")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<DateTimeOffset?>("ReviewResolvedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ReviewResolvedBy")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1285,9 +1307,14 @@ namespace Elmanhg.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreationDate");
+
                     b.HasIndex("SubscriptionId");
 
                     b.HasIndex("StudentId", "CreationDate");
+
+                    b.HasIndex(new[] { "CreationDate" }, "IX_Payments_OpenReview")
+                        .HasFilter("\"ReviewReason\" IS NOT NULL AND \"ReviewResolvedAt\" IS NULL");
 
                     b.HasIndex(new[] { "PaymobTransactionId" }, "IX_Payments_PaymobTransactionId")
                         .IsUnique()
@@ -1295,6 +1322,10 @@ namespace Elmanhg.Infrastructure.Migrations
 
                     b.HasIndex(new[] { "ProviderOrderId" }, "IX_Payments_ProviderOrderId")
                         .HasFilter("\"ProviderOrderId\" IS NOT NULL");
+
+                    b.HasIndex(new[] { "RefundTransactionId" }, "IX_Payments_RefundTransactionId")
+                        .IsUnique()
+                        .HasFilter("\"RefundTransactionId\" IS NOT NULL");
 
                     b.ToTable("Payments");
                 });

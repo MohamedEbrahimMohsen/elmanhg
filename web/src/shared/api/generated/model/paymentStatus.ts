@@ -12,4 +12,5 @@ export const PaymentStatus = {
   Pending: 'Pending',
   Succeeded: 'Succeeded',
   Failed: 'Failed',
+  Refunded: 'Refunded',
 } as const;

@@ -9,14 +9,19 @@ using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.Subscriptions.ProcessPaymentNotification;
 
-public sealed class ProcessPaymentNotificationHandler(IPaymentRepository paymentRepository, ISubscriptionRepository subscriptionRepository, IPaymentNotificationReader notificationReader, IOptions<SubscriptionsOptions> subscriptionsOptions, TimeProvider timeProvider) : IRequestHandler<ProcessPaymentNotificationCommand, PaymentNotificationResult>
+public sealed partial class ProcessPaymentNotificationHandler(IPaymentRepository paymentRepository, ISubscriptionRepository subscriptionRepository, IPaymentNotificationReader notificationReader, IOptions<SubscriptionsOptions> subscriptionsOptions, TimeProvider timeProvider) : IRequestHandler<ProcessPaymentNotificationCommand, PaymentNotificationResult>
 {
     public async Task<PaymentNotificationResult> Handle(ProcessPaymentNotificationCommand request, CancellationToken cancellationToken)
     {
         var notification = notificationReader.Read(request.Payload, request.Signature);
-        if (notification is null || notification.Pending || notification.IsRefundOrVoid)
+        if (notification is null || notification.Pending || notification.Kind == PaymentNotificationKind.Other)
         {
             return new PaymentNotificationResult(null, PaymentNotificationOutcome.Ignored);
+        }
+
+        if (notification.Kind == PaymentNotificationKind.Reversal)
+        {
+            return await ReverseAsync(notification, cancellationToken).ConfigureAwait(false);
         }
 
         var recorded = await paymentRepository.FirstOrDefaultAsync(x => x.PaymobTransactionId == notification.TransactionId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
@@ -26,7 +31,7 @@ public sealed class ProcessPaymentNotificationHandler(IPaymentRepository payment
         }
 
         var payment = await FindPaymentAsync(notification, cancellationToken).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.PaymentNotFound);
-        if (payment.AmountMinor != notification.AmountMinor || payment.Currency != notification.Currency || (payment.ProviderOrderId is not null && payment.ProviderOrderId != notification.ProviderOrderId))
+        if (!IsBound(payment, notification) || payment.AmountMinor != notification.AmountMinor)
         {
             throw new BadRequestCoreException(ErrorCodes.PaymentNotificationMismatch);
         }
@@ -44,7 +49,7 @@ public sealed class ProcessPaymentNotificationHandler(IPaymentRepository payment
             return new PaymentNotificationResult(payment.Id, PaymentNotificationOutcome.MarkedFailed);
         }
 
-        if (payment.Status == PaymentStatus.Succeeded)
+        if (payment.Status is PaymentStatus.Succeeded or PaymentStatus.Refunded)
         {
             return new PaymentNotificationResult(payment.Id, PaymentNotificationOutcome.OutOfOrder);
         }
@@ -61,6 +66,8 @@ public sealed class ProcessPaymentNotificationHandler(IPaymentRepository payment
         await paymentRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return new PaymentNotificationResult(payment.Id, PaymentNotificationOutcome.Succeeded);
     }
+
+    private static bool IsBound(Payment payment, PaymentNotification notification) => payment.Currency == notification.Currency && (payment.ProviderOrderId is null || payment.ProviderOrderId == notification.ProviderOrderId);
 
     private async Task<Payment?> FindPaymentAsync(PaymentNotification notification, CancellationToken cancellationToken)
     {

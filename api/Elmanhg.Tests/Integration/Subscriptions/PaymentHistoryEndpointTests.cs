@@ -1,6 +1,7 @@
 using Elmanhg.Tests.Integration.Auth;
 using Elmanhg.Tests.Integration.Authorization;
 using Elmanhg.Tests.Integration.Infrastructure;
+using Elmanhg.Tests.Integration.Payments;
 using FluentAssertions;
 using System.Net;
 using System.Net.Http.Json;
@@ -54,6 +55,21 @@ public sealed class PaymentHistoryEndpointTests(ApiFactory factory)
         body.GetProperty("items").EnumerateArray()
             .Select(x => (x.GetProperty("id").GetGuid(), x.GetProperty("status").GetString(), x.GetProperty("amount").GetProperty("amountMinor").GetInt64(), x.GetProperty("amount").GetProperty("currency").GetString()))
             .Should().Equal((succeeded.Id, "Succeeded", 69900L, "EGP"), (failed.Id, "Failed", 19900L, "EGP"));
+    }
+
+    [Fact]
+    public async Task Get_StudentWithRefundedPayment_ListsRefundedStatus()
+    {
+        var (student, client) = await SignedInStudentAsync(factory);
+        var payment = await SubscriptionTestData.SeedCompletedPaymentAsync(factory, student.Id, succeeded: true, 19900, CancellationToken);
+        using var admin = await PaymentsTestData.AdminClientAsync(factory, CancellationToken);
+        using var refund = await admin.SendAsync(PaymentsTestData.RefundRequest(payment.Id, "Duplicate charge", Guid.NewGuid()), CancellationToken);
+
+        using var response = await client.GetAsync(PaymentsPath, CancellationToken);
+
+        refund.StatusCode.Should().Be(HttpStatusCode.OK);
+        var item = (await response.Content.ReadFromJsonAsync<JsonElement>(CancellationToken)).GetProperty("items").EnumerateArray().Should().ContainSingle().Subject;
+        (item.GetProperty("id").GetGuid(), item.GetProperty("status").GetString()).Should().Be((payment.Id, "Refunded"));
     }
 
     [Fact]

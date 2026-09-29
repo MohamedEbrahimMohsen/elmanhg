@@ -126,6 +126,13 @@ export const navByRole: Record<Role, RoleNav> = {
         capability: 'blueprintsManage',
       },
       { key: 'users', to: '/admin/users', labelKey: 'nav.admin.users', icon: Users, capability: 'usersManage' },
+      {
+        key: 'payments',
+        to: '/admin/payments',
+        labelKey: 'nav.admin.payments',
+        icon: CreditCard,
+        capability: 'paymentsManage',
+      },
       { key: 'audit', to: '/admin/audit', labelKey: 'nav.admin.audit', icon: ScrollText, capability: 'auditLogView' },
       {
         key: 'export',

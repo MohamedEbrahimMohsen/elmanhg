@@ -10,7 +10,13 @@ describe('MorePage', () => {
 
     expect(await screen.findByRole('heading', { name: 'More' })).toBeInTheDocument();
     const links = within(screen.getByRole('main')).getAllByRole('link');
-    expect(links.map((link) => link.textContent)).toEqual(['Exam blueprints', 'Users', 'Audit log', 'Data export']);
+    expect(links.map((link) => link.textContent)).toEqual([
+      'Exam blueprints',
+      'Users',
+      'Payments',
+      'Audit log',
+      'Data export',
+    ]);
   });
 
   it('opens a destination from the list', async () => {

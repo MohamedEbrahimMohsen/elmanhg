@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import type { PaymentResult } from '@/shared/api/generated/model';
+import type { PaymentResult, PaymentStatus } from '@/shared/api/generated/model';
 import { formatDate, formatMoney } from '@/shared/lib/format';
 import { cn } from '@/shared/lib/utils';
 
@@ -10,6 +10,13 @@ export interface PaymentHistoryTableProps {
 const headerKeys = ['date', 'plan', 'amount', 'status'] as const;
 
 const cellClassName = 'px-2.5 py-2.25 text-caption';
+
+const statusClasses: Record<PaymentStatus, string> = {
+  Succeeded: 'bg-success text-surface',
+  Failed: 'bg-danger text-surface',
+  Refunded: 'bg-soft text-text-muted',
+  Pending: 'bg-soft text-text-muted',
+};
 
 export function PaymentHistoryTable({ items }: PaymentHistoryTableProps) {
   const { t, i18n } = useTranslation('subscription');
@@ -43,12 +50,7 @@ export function PaymentHistoryTable({ items }: PaymentHistoryTableProps) {
                 {formatMoney(Number(item.amount.amountMinor), item.amount.currency, lng)}
               </td>
               <td className={cellClassName}>
-                <span
-                  className={cn(
-                    'rounded-pill px-2.5 py-0.5 text-micro font-semibold text-surface',
-                    item.status === 'Succeeded' ? 'bg-success' : 'bg-danger',
-                  )}
-                >
+                <span className={cn('rounded-pill px-2.5 py-0.5 text-micro font-semibold', statusClasses[item.status])}>
                   {t(`payments.${item.status}`)}
                 </span>
               </td>

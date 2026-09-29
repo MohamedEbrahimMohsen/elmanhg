@@ -4,6 +4,7 @@ export * from './exam-blueprints/exam-blueprints';
 export * from './exams/exams';
 export * from './lessons/lessons';
 export * from './mastery/mastery';
+export * from './payments/payments';
 export * from './plans/plans';
 export * from './progress/progress';
 export * from './question-imports/question-imports';

@@ -62,10 +62,10 @@ public sealed class ProcessPaymentNotificationHandlerTests
     }
 
     [Fact]
-    public async Task Handle_RefundOrVoid_ReturnsIgnored()
+    public async Task Handle_OtherKind_ReturnsIgnored()
     {
         var payment = AddPending();
-        Notify(payment, "txn-1", refundOrVoid: true);
+        Notify(payment, "txn-1", kind: PaymentNotificationKind.Other);
 
         var result = await Handle();
 
@@ -89,7 +89,7 @@ public sealed class ProcessPaymentNotificationHandlerTests
     [Fact]
     public async Task Handle_UnknownMerchantOrder_ThrowsPaymentNotFound()
     {
-        _notificationReader.Read(Payload, Signature).Returns(new PaymentNotification("txn-1", Guid.NewGuid().ToString(), OrderId, true, false, false, 19900, "EGP"));
+        _notificationReader.Read(Payload, Signature).Returns(new PaymentNotification("txn-1", Guid.NewGuid().ToString(), OrderId, true, false, PaymentNotificationKind.Charge, 19900, "EGP"));
 
         var act = () => Handle();
 
@@ -102,7 +102,7 @@ public sealed class ProcessPaymentNotificationHandlerTests
     {
         var payment = AddPending();
         payment.LinkProviderOrder(OrderId);
-        _notificationReader.Read(Payload, Signature).Returns(new PaymentNotification("txn-1", null, OrderId, true, false, false, 19900, "EGP"));
+        _notificationReader.Read(Payload, Signature).Returns(new PaymentNotification("txn-1", null, OrderId, true, false, PaymentNotificationKind.Charge, 19900, "EGP"));
 
         var result = await Handle();
 
@@ -114,7 +114,7 @@ public sealed class ProcessPaymentNotificationHandlerTests
     public async Task Handle_AmountDiffers_ThrowsMismatch()
     {
         var payment = AddPending();
-        _notificationReader.Read(Payload, Signature).Returns(new PaymentNotification("txn-1", payment.Id.ToString(), OrderId, true, false, false, 100, "EGP"));
+        _notificationReader.Read(Payload, Signature).Returns(new PaymentNotification("txn-1", payment.Id.ToString(), OrderId, true, false, PaymentNotificationKind.Charge, 100, "EGP"));
 
         var act = () => Handle();
 
@@ -128,7 +128,7 @@ public sealed class ProcessPaymentNotificationHandlerTests
     {
         var payment = AddPending();
         payment.LinkProviderOrder(OrderId);
-        _notificationReader.Read(Payload, Signature).Returns(new PaymentNotification("txn-1", payment.Id.ToString(), "999", true, false, false, 19900, "EGP"));
+        _notificationReader.Read(Payload, Signature).Returns(new PaymentNotification("txn-1", payment.Id.ToString(), "999", true, false, PaymentNotificationKind.Charge, 19900, "EGP"));
 
         var act = () => Handle();
 
@@ -222,11 +222,39 @@ public sealed class ProcessPaymentNotificationHandlerTests
         await _paymentRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
+    [Fact]
+    public async Task Handle_SuccessForRefundedPayment_ReturnsOutOfOrder()
+    {
+        var payment = AddPending();
+        payment.MarkSucceeded(Guid.NewGuid(), "txn-1", Payload, Now);
+        payment.MarkRefunded("refund-1", Now, Guid.NewGuid(), "Duplicate charge", Guid.NewGuid());
+        Notify(payment, "txn-2");
+
+        var result = await Handle();
+
+        (result.Outcome, payment.Status).Should().Be((PaymentNotificationOutcome.OutOfOrder, PaymentStatus.Refunded));
+        await _subscriptionRepository.DidNotReceive().AddAsync(Arg.Any<Subscription>(), Arg.Any<CancellationToken>());
+        await _paymentRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_CurrencyDiffers_ThrowsMismatch()
+    {
+        var payment = AddPending();
+        _notificationReader.Read(Payload, Signature).Returns(new PaymentNotification("txn-1", payment.Id.ToString(), OrderId, true, false, PaymentNotificationKind.Charge, 19900, "USD"));
+
+        var act = () => Handle();
+
+        (await act.Should().ThrowAsync<BadRequestCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.PaymentNotificationMismatch);
+        payment.Status.Should().Be(PaymentStatus.Pending);
+        await _paymentRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
     private Task<PaymentNotificationResult> Handle() => _handler.Handle(new ProcessPaymentNotificationCommand(Payload, Signature), TestContext.Current.CancellationToken);
 
-    private void Notify(Payment payment, string transactionId, bool succeeded = true, bool pending = false, bool refundOrVoid = false)
+    private void Notify(Payment payment, string transactionId, bool succeeded = true, bool pending = false, PaymentNotificationKind kind = PaymentNotificationKind.Charge)
     {
-        _notificationReader.Read(Payload, Signature).Returns(new PaymentNotification(transactionId, payment.Id.ToString(), OrderId, succeeded, pending, refundOrVoid, payment.AmountMinor, payment.Currency));
+        _notificationReader.Read(Payload, Signature).Returns(new PaymentNotification(transactionId, payment.Id.ToString(), OrderId, succeeded, pending, kind, payment.AmountMinor, payment.Currency));
     }
 
     private Payment AddPending()

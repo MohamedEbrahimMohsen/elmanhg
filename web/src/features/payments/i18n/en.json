@@ -1,0 +1,91 @@
+{
+  "page": {
+    "title": "Payments",
+    "loading": "Loading payments…"
+  },
+  "tabs": {
+    "all": "All transactions",
+    "review": "Needs review"
+  },
+  "filters": {
+    "status": "Status",
+    "allStatuses": "All statuses",
+    "plan": "Plan",
+    "allPlans": "All plans",
+    "reference": "Reference",
+    "referenceHint": "Payment id or Paymob transaction id",
+    "from": "From",
+    "to": "To",
+    "apply": "Apply",
+    "clear": "Clear filters",
+    "studentActive": "Showing one student's payments.",
+    "errors": {
+      "date": "Enter a valid date.",
+      "dateRange": "The end date is before the start date.",
+      "referenceTooLong": "The reference is too long."
+    }
+  },
+  "status": {
+    "Pending": "Pending",
+    "Succeeded": "Successful",
+    "Failed": "Failed",
+    "Refunded": "Refunded"
+  },
+  "plan": {
+    "Base": "Base",
+    "AskTeacher": "Ask a Teacher"
+  },
+  "period": {
+    "Monthly": "Monthly",
+    "Termly": "Termly",
+    "Yearly": "Yearly"
+  },
+  "review": {
+    "badge": "Needs review",
+    "AskTeacherWithoutBase": "Ask a Teacher paid without Base",
+    "PartialRefundAtProvider": "Partial refund in Paymob"
+  },
+  "table": {
+    "caption": "Payment log",
+    "date": "Date",
+    "student": "Student",
+    "plan": "Plan",
+    "amount": "Amount",
+    "status": "Status",
+    "reference": "Reference",
+    "actions": "Actions",
+    "showStudent": "Show {name}'s payments",
+    "refundedLine": "Refunded on {date}: {reason}"
+  },
+  "actions": {
+    "refund": "Refund",
+    "keep": "Keep payment"
+  },
+  "refund": {
+    "title": "Refund {amount}?",
+    "body": "The amount goes back to {name} through Paymob, and the time this payment bought is removed from the plan at once. A refund cannot be undone.",
+    "reason": "Refund reason",
+    "cancel": "Back",
+    "confirm": "Confirm refund",
+    "done": "Payment refunded.",
+    "errors": {
+      "reasonRequired": "Enter a refund reason.",
+      "reasonTooLong": "The refund reason is too long."
+    }
+  },
+  "resolve": {
+    "title": "Keep this payment?",
+    "body": "The review closes; the payment and the plan stay as they are.",
+    "cancel": "Back",
+    "confirm": "Keep payment",
+    "done": "Review closed."
+  },
+  "empty": {
+    "noData": "No payments yet.",
+    "noReview": "No payments need review.",
+    "noResults": "No payments match these filters."
+  },
+  "error": {
+    "title": "Could not load payments."
+  }
+}

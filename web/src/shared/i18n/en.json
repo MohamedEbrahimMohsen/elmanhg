@@ -194,7 +194,22 @@
     "PAYMENT_NOT_PENDING": "This payment has already been processed.",
     "SUBSCRIPTION_ENDED": "This subscription has ended or was cancelled.",
     "SUBSCRIPTION_NOT_FOUND": "Subscription not found.",
-    "SUBSCRIPTION_MODIFIED_CONCURRENTLY": "This subscription was changed by another request. Please try again."
+    "SUBSCRIPTION_MODIFIED_CONCURRENTLY": "This subscription was changed by another request. Please try again.",
+    "PAYMENT_ALREADY_REFUNDED": "This payment has already been refunded.",
+    "PAYMENT_NOT_REFUNDABLE": "Only a successful payment can be refunded.",
+    "PAYMENT_REVIEW_NOT_OPEN": "This payment has no open review.",
+    "PAYMENT_ID_REQUIRED": "The payment id is required.",
+    "PAYMENT_REFUND_REASON_REQUIRED": "Enter a refund reason.",
+    "PAYMENT_REFUND_REASON_TOO_LONG": "The refund reason is too long.",
+    "PAYMENT_REFUND_IDEMPOTENCY_KEY_REQUIRED": "The Idempotency-Key header must be a non-empty UUID.",
+    "PAYMENT_REFUND_DECLINED": "Paymob declined the refund. Check the transaction in the Paymob dashboard.",
+    "PAYMENT_NOT_SETTLED": "The payment has not been settled yet.",
+    "PAYMENT_LOG_PAGE_NUMBER_INVALID": "The page number must be 1 or more.",
+    "PAYMENT_LOG_PAGE_SIZE_INVALID": "The page size is not valid.",
+    "PAYMENT_LOG_STATUS_INVALID": "Unknown payment status.",
+    "PAYMENT_LOG_PLAN_INVALID": "Unknown plan.",
+    "PAYMENT_LOG_REFERENCE_TOO_LONG": "The reference is too long.",
+    "PAYMENT_LOG_DATE_RANGE_INVALID": "The start must be before the end."
   },
   "error": {
     "title": "Something went wrong"

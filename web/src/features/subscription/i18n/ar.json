@@ -63,7 +63,8 @@
     "amount": "المبلغ",
     "status": "الحالة",
     "Succeeded": "ناجحة",
-    "Failed": "فاشلة"
+    "Failed": "فاشلة",
+    "Refunded": "مستردة"
   },
   "period": {
     "Monthly": "شهري",
@@ -120,6 +121,8 @@
     "failedTitle": "فشل الدفع",
     "failedBody": "لم يتم تفعيل الاشتراك.",
     "done": "حسنًا",
-    "tryAgain": "حاول مرة أخرى"
+    "tryAgain": "حاول مرة أخرى",
+    "refundedTitle": "تم استرداد هذا الدفع",
+    "refundedBody": "أعيد المبلغ إليك."
   }
 }

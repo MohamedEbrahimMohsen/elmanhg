@@ -63,7 +63,8 @@
     "amount": "Amount",
     "status": "Status",
     "Succeeded": "Successful",
-    "Failed": "Failed"
+    "Failed": "Failed",
+    "Refunded": "Refunded"
   },
   "period": {
     "Monthly": "Monthly",
@@ -120,6 +121,8 @@
     "failedTitle": "Payment failed",
     "failedBody": "Your plan was not activated.",
     "done": "Done",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "refundedTitle": "This payment was refunded",
+    "refundedBody": "The amount was returned to you."
   }
 }

@@ -31,6 +31,15 @@ export function CheckoutStatusCard({ payment, timedOut, isFetching, onCheckAgain
       </section>
     );
   }
+  if (payment.status === 'Refunded') {
+    return (
+      <section className={cardClassName}>
+        <h1 className={titleClassName}>{t('checkoutResult.refundedTitle')}</h1>
+        <p className="text-ui">{t('checkoutResult.refundedBody')}</p>
+        <div className="flex flex-wrap gap-2">{backLink('secondary', t('checkoutResult.done'))}</div>
+      </section>
+    );
+  }
   if (payment.status === 'Failed') {
     return (
       <section className={cardClassName}>
