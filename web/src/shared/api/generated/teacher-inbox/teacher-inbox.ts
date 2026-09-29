@@ -33,6 +33,7 @@ import type {
   RecordTeacherVoiceDraftBody,
   ReplyToTeacherThreadRequest,
   SendVoiceReplyRequest,
+  TeacherInboxReminderResult,
   TeacherInboxThreadResult,
   TeacherVoiceDraftResult,
   VoiceReplySettingsResult
@@ -348,6 +349,152 @@ export function useGetVoiceReplySettingsSuspense<TData = Awaited<ReturnType<type
  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetVoiceReplySettingsSuspenseQueryOptions(options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetTeacherInboxRemindersUrl = () => {
+
+
+
+
+  return `/api/teacher-inbox/reminders`
+}
+
+export const getTeacherInboxReminders = async ( options?: Parameters<typeof http>[1]): Promise<TeacherInboxReminderResult[]> => {
+
+  return http<TeacherInboxReminderResult[]>(getGetTeacherInboxRemindersUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTeacherInboxRemindersQueryKey = () => {
+    return [
+    `/api/teacher-inbox/reminders`
+    ] as const;
+    }
+
+
+export const getGetTeacherInboxRemindersQueryOptions = <TData = Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTeacherInboxRemindersQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeacherInboxReminders>>> = ({ signal }) => getTeacherInboxReminders({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTeacherInboxRemindersQueryResult = NonNullable<Awaited<ReturnType<typeof getTeacherInboxReminders>>>
+export type GetTeacherInboxRemindersQueryError = unknown
+
+
+export function useGetTeacherInboxReminders<TData = Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeacherInboxReminders>>,
+          TError,
+          Awaited<ReturnType<typeof getTeacherInboxReminders>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeacherInboxReminders<TData = Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeacherInboxReminders>>,
+          TError,
+          Awaited<ReturnType<typeof getTeacherInboxReminders>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeacherInboxReminders<TData = Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetTeacherInboxReminders<TData = Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTeacherInboxRemindersQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetTeacherInboxRemindersSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError = unknown>( options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTeacherInboxRemindersQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeacherInboxReminders>>> = ({ signal }) => getTeacherInboxReminders({ signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetTeacherInboxRemindersSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getTeacherInboxReminders>>>
+export type GetTeacherInboxRemindersSuspenseQueryError = unknown
+
+
+export function useGetTeacherInboxRemindersSuspense<TData = Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError = unknown>(
+  options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeacherInboxRemindersSuspense<TData = Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeacherInboxRemindersSuspense<TData = Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetTeacherInboxRemindersSuspense<TData = Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTeacherInboxReminders>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTeacherInboxRemindersSuspenseQueryOptions(options)
 
   const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

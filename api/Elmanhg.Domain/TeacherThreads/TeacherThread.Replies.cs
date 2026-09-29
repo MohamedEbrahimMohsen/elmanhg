@@ -57,10 +57,17 @@ public partial class TeacherThread
         }
     }
 
+    // The final reply closes the thread; this reads Messages, so callers must load them.
     private TeacherMessage Answer(Guid teacherId, TeacherMessage message, DateTimeOffset at)
     {
+        var isFinalReply = HasFollowUp();
         Messages.Add(message);
-        Status = TeacherThreadStatus.Answered;
+        Status = isFinalReply ? TeacherThreadStatus.Closed : TeacherThreadStatus.Answered;
+        if (isFinalReply)
+        {
+            ClosedAt = at;
+        }
+
         UpdatedBy = teacherId;
         UpdationDate = at;
         return message;

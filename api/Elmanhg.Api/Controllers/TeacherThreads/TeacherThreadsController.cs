@@ -1,9 +1,11 @@
 using Core.DDD.Models;
 using Elmanhg.Application.TeacherThreads.CreateTeacherThread;
+using Elmanhg.Application.TeacherThreads.FollowUpTeacherThread;
 using Elmanhg.Application.TeacherThreads.GetMyTeacherThread;
 using Elmanhg.Application.TeacherThreads.GetMyTeacherThreads;
 using Elmanhg.Application.TeacherThreads.GetTeacherThreadContext;
 using Elmanhg.Application.TeacherThreads.MarkTeacherThreadRead;
+using Elmanhg.Application.TeacherThreads.RateTeacherThread;
 using Elmanhg.Application.TeacherThreads.Shared;
 using Elmanhg.Domain.SharedKernel;
 using MediatR;
@@ -51,6 +53,24 @@ public class TeacherThreadsController(IMediator mediator) : ControllerBase
     {
         await mediator.Send(new MarkTeacherThreadReadCommand(threadId), cancellationToken);
         return Ok();
+    }
+
+    [HttpPost("{threadId:guid}/follow-ups", Name = "FollowUpTeacherThread")]
+    [Authorize(Policy = DefaultCodes.AskTeacherSubmit)]
+    [ProducesResponseType<TeacherThreadResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> FollowUpTeacherThread([FromRoute] Guid threadId, [FromBody] FollowUpTeacherThreadRequest request, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new FollowUpTeacherThreadCommand(threadId, request.Text), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("{threadId:guid}/rating", Name = "RateTeacherThread")]
+    [Authorize(Policy = DefaultCodes.AskTeacherSubmit)]
+    [ProducesResponseType<TeacherThreadResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> RateTeacherThread([FromRoute] Guid threadId, [FromBody] RateTeacherThreadRequest request, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new RateTeacherThreadCommand(threadId, request.Rating), cancellationToken);
+        return Ok(result);
     }
 
     [HttpPost(Name = "CreateTeacherThread")]

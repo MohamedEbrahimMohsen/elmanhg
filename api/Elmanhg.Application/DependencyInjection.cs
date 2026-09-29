@@ -4,6 +4,7 @@ using Elmanhg.Application.Shared.Options;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System.Reflection;
 
 namespace Elmanhg.Application;
@@ -37,6 +38,7 @@ public static class DependencyInjection
             .ValidateOnStart();
         services.AddOptions<StudentsOptions>().BindConfiguration(StudentsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<AskTeacherOptions>().BindConfiguration(AskTeacherOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddSingleton<IValidateOptions<AskTeacherOptions>, AskTeacherOptionsValidator>();
         services.AddOptions<AnalyticsOptions>().BindConfiguration(AnalyticsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<ClientErrorsOptions>().BindConfiguration(ClientErrorsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<ContentRetrievalOptions>().BindConfiguration(ContentRetrievalOptions.SectionName).ValidateDataAnnotations()

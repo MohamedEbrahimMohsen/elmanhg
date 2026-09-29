@@ -254,6 +254,7 @@ public static class ErrorCodes
     public const string TeacherVoiceDraftIdRequired = "TEACHER_VOICE_DRAFT_ID_REQUIRED";
     public const string TeacherVoiceDraftNotFound = "TEACHER_VOICE_DRAFT_NOT_FOUND";
     public const string TeacherVoiceAudioNotFound = "TEACHER_VOICE_AUDIO_NOT_FOUND";
+    public const string TeacherThreadRatingInvalid = "TEACHER_THREAD_RATING_INVALID";
 
     // ANALYTICS
     public const string FunnelAnonymousIdRequired = "FUNNEL_ANONYMOUS_ID_REQUIRED";

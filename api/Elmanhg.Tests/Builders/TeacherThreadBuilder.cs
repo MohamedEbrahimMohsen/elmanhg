@@ -13,6 +13,9 @@ public sealed class TeacherThreadBuilder
     private Guid? _claimedBy;
     private bool _answered;
     private string? _voiceAudioUrl;
+    private bool _followedUp;
+    private bool _finalReplied;
+    private int? _rating;
 
     public TeacherThreadBuilder ForStudent(Guid studentId)
     {
@@ -58,6 +61,25 @@ public sealed class TeacherThreadBuilder
         return this;
     }
 
+    public TeacherThreadBuilder FollowedUp()
+    {
+        _followedUp = true;
+        return this;
+    }
+
+    public TeacherThreadBuilder FinalReplied()
+    {
+        _followedUp = true;
+        _finalReplied = true;
+        return this;
+    }
+
+    public TeacherThreadBuilder Rated(int rating)
+    {
+        _rating = rating;
+        return this;
+    }
+
     public TeacherThread Build()
     {
         var thread = TeacherThread.Submit(_studentId, _context, "Why is F = ma?", _imageUrl, _submittedAt, TimeSpan.FromHours(24));
@@ -72,6 +94,21 @@ public sealed class TeacherThreadBuilder
             {
                 thread.Reply(teacherId, "Because force equals mass times acceleration.", _submittedAt.AddHours(1));
             }
+
+            if (_followedUp)
+            {
+                thread.FollowUp("Can you show the units?", _submittedAt.AddHours(2), TimeSpan.FromHours(24));
+            }
+
+            if (_finalReplied)
+            {
+                thread.Reply(teacherId, "Newtons.", _submittedAt.AddHours(3));
+            }
+        }
+
+        if (_rating is { } rating)
+        {
+            thread.Rate(rating, _submittedAt.AddHours(4));
         }
 
         return thread;

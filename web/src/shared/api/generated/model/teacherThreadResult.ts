@@ -17,4 +17,13 @@ export interface TeacherThreadResult {
   slaDueAt: string;
   messages: TeacherMessageResult[];
   hasUnreadReply: boolean;
+  /**
+     * @nullable
+     * @pattern ^-?(?:0|[1-9]\d*)$
+     */
+  rating: number | string | null;
+  /** @nullable */
+  closedAt: string | null;
+  canFollowUp: boolean;
+  canRate: boolean;
 }

@@ -3,8 +3,10 @@ import { ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ContentErrorState, ContentListSkeleton } from '@/features/content';
 import { useGetMyTeacherThread } from '@/shared/api/generated/teacher-threads/teacher-threads';
+import { StudentThreadActions } from '../components/StudentThreadActions';
 import { ThreadContextCard } from '../components/ThreadContextCard';
 import { ThreadMessage } from '../components/ThreadMessage';
+import { ThreadRating } from '../components/ThreadRating';
 import { useMarkThreadRead } from '../hooks/useMarkThreadRead';
 
 export interface TeacherThreadPageProps {
@@ -55,6 +57,8 @@ export function TeacherThreadPage({ threadId }: TeacherThreadPageProps) {
           <ThreadMessage key={message.id} message={message} />
         ))}
       </div>
+      {data.rating != null ? <ThreadRating rating={Number(data.rating)} /> : null}
+      <StudentThreadActions thread={data} />
     </section>
   );
 }

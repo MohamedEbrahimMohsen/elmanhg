@@ -41,4 +41,21 @@ public sealed class AskTeacherOptions
 
     [Range(1, 3600)]
     public int TranscriptionRetryBaseDelaySeconds { get; set; } = 15;
+
+    public bool SlaSweepEnabled { get; set; } = true;
+
+    [Range(1, 3600)]
+    public int SlaSweepIntervalSeconds { get; set; } = 60;
+
+    [Range(1, 500)]
+    public int SlaSweepBatchSize { get; set; } = 50;
+
+    [Range(1, 168)]
+    public int FirstReminderAfterHours { get; set; } = 12;
+
+    [Range(1, 168)]
+    public int SecondReminderAfterHours { get; set; } = 20;
+
+    [Range(1, 100)]
+    public int ReminderListMaxCount { get; set; } = 20;
 }

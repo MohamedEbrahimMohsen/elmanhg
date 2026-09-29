@@ -300,3 +300,28 @@ tests:
             exp_annotations:
               summary: Background job exam-auto-submit failed to list its work 3 or more times in 15 minutes.
               runbook: docs/observability.md#alerts
+
+  - name: first ask-teacher breach of a new series fires
+    interval: 1m
+    input_series:
+      - series: 'elmanhg_ask_teacher_sla_events_total{job="elmanhg-api",elmanhg_kind="Breach"}'
+        values: '_x2 1 1 1'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: AskTeacherSlaBreached
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+            exp_annotations:
+              summary: An Ask a Teacher question passed its reply deadline without a reply.
+              runbook: docs/observability.md#alerts
+
+  - name: ask-teacher reminders alone stay quiet
+    interval: 1m
+    input_series:
+      - series: 'elmanhg_ask_teacher_sla_events_total{job="elmanhg-api",elmanhg_kind="FirstReminder"}'
+        values: '_x2 1 2 3'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: AskTeacherSlaBreached
+        exp_alerts: []

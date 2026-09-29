@@ -47,6 +47,7 @@ export function inboxThread(overrides?: Partial<TeacherInboxThreadResult>): Teac
     slaDueAt: '2026-10-02T07:00:00Z',
     claimedAt: null,
     messages: teacherThread().messages,
+    rating: null,
     ...overrides,
   };
 }

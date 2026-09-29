@@ -11,6 +11,7 @@ import {
   getGetUnitExamAttemptsMockHandler,
 } from '@/shared/api/generated/exams/exams.msw';
 import { getGetMyUsageMockHandler } from '@/shared/api/generated/subscriptions/subscriptions.msw';
+import { getGetTeacherInboxRemindersMockHandler } from '@/shared/api/generated/teacher-inbox/teacher-inbox.msw';
 import { avatarStatus } from '@/test/avatarFixtures';
 import { studentLesson } from '@/test/browseFixtures';
 import { noExamAttempts } from '@/test/examFixtures';
@@ -25,4 +26,5 @@ export const server = setupServer(
   getReportClientErrorMockHandler(),
   getGetMyUsageMockHandler(baseUsage()),
   getGetAvatarStatusMockHandler(avatarStatus()),
+  getGetTeacherInboxRemindersMockHandler([]),
 );

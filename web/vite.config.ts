@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
     ],
     resolve: { tsconfigPaths: true },
     server: {
-      ...(proxyTarget ? { proxy: { '/api': { target: proxyTarget, changeOrigin: true } } } : {}),
+      ...(proxyTarget ? { proxy: { '/api': { target: proxyTarget, changeOrigin: true, ws: true } } } : {}),
     },
     test: {
       projects: [
