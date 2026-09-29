@@ -5,16 +5,19 @@ using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Questions.Shared;
 using Elmanhg.Application.Sessions.Shared;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Subscriptions.Shared;
+using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
+using Elmanhg.Domain.Subscriptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.Sessions.SubmitAnswer;
 
-public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, IOptions<MasteryOptions> masteryOptions, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<SubmitAnswerCommand, SessionItemResult>
+public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, ILessonRepository lessonRepository, ISubscriptionRepository subscriptionRepository, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<SubmitAnswerCommand, SessionItemResult>
 {
     public async Task<SessionItemResult> Handle(SubmitAnswerCommand request, CancellationToken cancellationToken)
     {
@@ -34,6 +37,11 @@ public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQ
         if (item is null)
         {
             throw new NotFoundCoreException(ErrorCodes.SessionQuestionNotFound);
+        }
+
+        if (!session.IsTestMode && session.FindAttempt(item.QuestionId) is null)
+        {
+            await EnsureFreeTierAsync(userId, session, cancellationToken).ConfigureAwait(false);
         }
 
         var revisions = await questionRepository.GetRevisionsAsync([item.QuestionId], cancellationToken).ConfigureAwait(false);
@@ -59,6 +67,15 @@ public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQ
         await sessionRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return SessionResultGenerator.GenerateItem(session, item, revision, localizer);
+    }
+
+    private async Task EnsureFreeTierAsync(Guid studentId, Session session, CancellationToken cancellationToken)
+    {
+        var now = timeProvider.GetUtcNow();
+        var options = subscriptionsOptions.Value;
+        var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, studentId, options, now, cancellationToken).ConfigureAwait(false);
+        await FreeTierGate.EnsureLessonOpenAsync(entitlement, QuizScope.FromJson(session.Scope).LessonId, lessonRepository, cancellationToken).ConfigureAwait(false);
+        await FreeTierGate.EnsureQuizQuestionAvailableAsync(entitlement, studentId, sessionRepository, options, now, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task RecordMasteryAsync(Guid studentId, Attempt attempt, CancellationToken cancellationToken)

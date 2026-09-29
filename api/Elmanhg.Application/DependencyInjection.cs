@@ -33,6 +33,7 @@ public static class DependencyInjection
         services.AddOptions<ExamsOptions>().BindConfiguration(ExamsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<SubscriptionsOptions>().BindConfiguration(SubscriptionsOptions.SectionName).ValidateDataAnnotations()
             .Validate(x => x.BasePrices.Count > 0 && x.BasePrices.Values.All(price => price.Months is >= 1 and <= 36 && price.AmountMinor > 0), "Subscriptions:BasePrices needs at least one period, each with Months 1-36 and AmountMinor > 0.")
+            .Validate(x => TimeZoneInfo.TryFindSystemTimeZoneById(x.DailyQuotaTimeZone, out _), "Subscriptions:DailyQuotaTimeZone must be a known IANA time zone id.")
             .ValidateOnStart();
         services.AddOptions<StudentsOptions>().BindConfiguration(StudentsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<AnalyticsOptions>().BindConfiguration(AnalyticsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();

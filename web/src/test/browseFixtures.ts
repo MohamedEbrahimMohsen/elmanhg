@@ -60,8 +60,17 @@ export function studentUnit(overrides?: Partial<StudentUnitResult>): StudentUnit
         masteredCount: 2,
         seenCount: 3,
         masteryPercent: 50,
+        isLocked: false,
       },
-      { id: browseLessonId, name: 'Energy', servableCount: 2, masteredCount: 0, seenCount: 0, masteryPercent: 0 },
+      {
+        id: browseLessonId,
+        name: 'Energy',
+        servableCount: 2,
+        masteredCount: 0,
+        seenCount: 0,
+        masteryPercent: 0,
+        isLocked: false,
+      },
     ],
     ...overrides,
   };
@@ -88,6 +97,7 @@ export function studentLesson(overrides?: Partial<StudentLessonResult>): Student
     masteryPercent: 50,
     previousLesson: { id: browsePreviousLessonId, name: 'Forces', unitId: browseUnitId, unitName: 'Mechanics' },
     nextLesson: { id: browseNextLessonId, name: 'Wave basics', unitId: browseSecondUnitId, unitName: 'Waves' },
+    isLocked: false,
     ...overrides,
   };
 }

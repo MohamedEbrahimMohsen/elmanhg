@@ -28,7 +28,9 @@
     "examTitle": "Unit exam",
     "bestExam": "Best score: {score, number} / 100",
     "noExam": "You have not taken this exam yet.",
-    "openExam": "Open the unit exam"
+    "openExam": "Open the unit exam",
+    "locked": "Locked - subscribers only",
+    "unlock": "Subscribe to unlock"
   },
   "lesson": {
     "loading": "Loading the lesson…",
@@ -47,6 +49,8 @@
     "navLabel": "Lesson navigation",
     "previous": "Previous lesson: {name}",
     "next": "Next lesson: {name}",
-    "backToUnit": "Back to {name}"
+    "backToUnit": "Back to {name}",
+    "lockedNotice": "This lesson is for subscribers only. The free plan opens the first lesson of each unit.",
+    "subscribe": "Subscribe"
   }
 }

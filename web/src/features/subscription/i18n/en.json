@@ -124,5 +124,29 @@
     "tryAgain": "Try again",
     "refundedTitle": "This payment was refunded",
     "refundedBody": "The amount was returned to you."
+  },
+  "usage": {
+    "plan": "Your plan: {plan}",
+    "homeCounter": "Practice questions today: {used, number} / {limit, number}",
+    "practiceCounter": "Free plan: {used, number} / {limit, number} questions today",
+    "quizCounter": "Today: {used, number} / {limit, number}",
+    "subscribe": "Subscribe"
+  },
+  "paywall": {
+    "dailyQuiz": {
+      "title": "Free limit reached",
+      "body": "You have reached the free plan's daily limit ({count, number} practice questions). Subscribe to Base for unlimited practice.",
+      "bodyNoLimit": "You have reached the free plan's daily limit. Subscribe to Base for unlimited practice."
+    },
+    "lesson": {
+      "title": "For subscribers",
+      "body": "This lesson is for subscribers only."
+    },
+    "exam": {
+      "title": "For subscribers",
+      "body": "Exams are included in the Base plan."
+    },
+    "subscribe": "Subscribe",
+    "later": "Later"
   }
 }

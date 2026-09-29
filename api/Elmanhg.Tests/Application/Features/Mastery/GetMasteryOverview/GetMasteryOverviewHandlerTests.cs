@@ -9,7 +9,9 @@ using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subjects;
+using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Domain.Units;
+using Elmanhg.Tests.Application.Features.Subscriptions;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -23,6 +25,7 @@ public sealed class GetMasteryOverviewHandlerTests
     private readonly ISubjectRepository _subjectRepository = Substitute.For<ISubjectRepository>();
     private readonly ILessonRepository _lessonRepository = Substitute.For<ILessonRepository>();
     private readonly IUserRepository _userRepository = Substitute.For<IUserRepository>();
+    private readonly ISubscriptionRepository _subscriptionRepository = Substitute.For<ISubscriptionRepository>();
     private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
     private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
     private readonly Guid _studentId = Guid.NewGuid();
@@ -41,7 +44,8 @@ public sealed class GetMasteryOverviewHandlerTests
         _lessonRepository.GetByIdAsync(_lesson.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Lesson>, IQueryable<Lesson>>?>(), Arg.Any<bool>()).Returns(_lesson);
         StubActivity([]);
         StubCounts([]);
-        _handler = new GetMasteryOverviewHandler(_questionMasteryRepository, _sessionRepository, _subjectRepository, _lessonRepository, _userRepository, Options.Create(new ProgressOptions()), _timeProvider, _currentUserService);
+        SubscriptionRepositoryStub.Stub(_subscriptionRepository, SubscriptionRepositoryStub.EntitledBase(_studentId, new DateTimeOffset(2026, 9, 28, 12, 0, 0, TimeSpan.Zero)));
+        _handler = new GetMasteryOverviewHandler(_questionMasteryRepository, _sessionRepository, _subjectRepository, _lessonRepository, _userRepository, _subscriptionRepository, Options.Create(new ProgressOptions()), Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService);
     }
 
     [Fact]

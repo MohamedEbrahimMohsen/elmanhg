@@ -41,7 +41,7 @@ public sealed class EntitlementEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Get_NewStudent_ReturnsFree()
     {
-        var (_, client) = await SignedInStudentAsync(factory);
+        var (_, client) = await SignedInFreeStudentAsync(factory);
 
         var body = await GetEntitlementAsync(client);
 
@@ -53,7 +53,7 @@ public sealed class EntitlementEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Get_ActiveBaseAndAskTeacher_ReturnsBaseWithAskTeacher()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
         var start = DateTimeOffset.UtcNow.AddDays(-5);
         await SubscriptionTestData.SeedSubscriptionAsync(factory, new SubscriptionBuilder().ForStudent(student.Id).StartingAt(start).Build(), CancellationToken);
         await SubscriptionTestData.SeedSubscriptionAsync(factory, new SubscriptionBuilder().ForStudent(student.Id).WithPlan(SubscriptionPlan.AskTeacher).StartingAt(start).Build(), CancellationToken);
@@ -68,7 +68,7 @@ public sealed class EntitlementEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Get_BaseLapsedBeyondGrace_ReturnsFree()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
         await SubscriptionTestData.SeedSubscriptionAsync(factory, new SubscriptionBuilder().ForStudent(student.Id).StartingAt(DateTimeOffset.UtcNow.AddMonths(-2)).Build(), CancellationToken);
 
         var body = await GetEntitlementAsync(client);
@@ -81,7 +81,7 @@ public sealed class EntitlementEndpointTests(ApiFactory factory)
     {
         var other = await ScopeTestData.SeedStudentAsync(factory, CancellationToken);
         await SubscriptionTestData.SeedSubscriptionAsync(factory, new SubscriptionBuilder().ForStudent(other.Id).StartingAt(DateTimeOffset.UtcNow.AddDays(-5)).Build(), CancellationToken);
-        var (_, client) = await SignedInStudentAsync(factory);
+        var (_, client) = await SignedInFreeStudentAsync(factory);
 
         var body = await GetEntitlementAsync(client);
 
@@ -91,7 +91,7 @@ public sealed class EntitlementEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Get_BaseInsideRenewalWindow_ReportsCanRenew()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
         await SubscriptionTestData.SeedSubscriptionAsync(factory, new SubscriptionBuilder().ForStudent(student.Id).StartingAt(DateTimeOffset.UtcNow.AddMonths(-1).AddDays(3)).Build(), CancellationToken);
 
         var body = await GetEntitlementAsync(client);

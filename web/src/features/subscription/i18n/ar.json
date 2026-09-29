@@ -124,5 +124,29 @@
     "tryAgain": "حاول مرة أخرى",
     "refundedTitle": "تم استرداد هذا الدفع",
     "refundedBody": "أعيد المبلغ إليك."
+  },
+  "usage": {
+    "plan": "باقتك: {plan}",
+    "homeCounter": "أسئلة التدريب اليوم: {used, number} / {limit, number}",
+    "practiceCounter": "الباقة المجانية: {used, number} / {limit, number} سؤال اليوم",
+    "quizCounter": "اليوم: {used, number} / {limit, number}",
+    "subscribe": "اشترك"
+  },
+  "paywall": {
+    "dailyQuiz": {
+      "title": "انتهى الحد المجاني",
+      "body": "وصلت إلى الحد اليومي للباقة المجانية ({count, number} أسئلة تدريب). اشترك في الباقة الأساسية للتدريب بلا حدود.",
+      "bodyNoLimit": "وصلت إلى الحد اليومي للباقة المجانية. اشترك في الباقة الأساسية للتدريب بلا حدود."
+    },
+    "lesson": {
+      "title": "ميزة للمشتركين",
+      "body": "هذا الدرس متاح للمشتركين فقط."
+    },
+    "exam": {
+      "title": "ميزة للمشتركين",
+      "body": "الامتحانات متاحة في الباقة الأساسية."
+    },
+    "subscribe": "اشترك",
+    "later": "لاحقًا"
   }
 }

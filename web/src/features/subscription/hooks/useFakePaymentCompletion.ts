@@ -3,12 +3,12 @@ import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
-  getGetMyEntitlementQueryKey,
   getGetMyPaymentQueryKey,
   getGetMyPaymentsQueryKey,
   useCompleteFakePayment,
 } from '@/shared/api/generated/subscriptions/subscriptions';
 import { ApiError, unhandledErrorCode } from '@/shared/lib/apiError';
+import { invalidateEntitlementViews } from '../api/invalidateEntitlementViews';
 
 export interface FakePaymentCompletion {
   complete: (succeeded: boolean) => void;
@@ -23,7 +23,7 @@ export function useFakePaymentCompletion(paymentId: string): FakePaymentCompleti
     mutation: {
       onSuccess: async (payment) => {
         queryClient.setQueryData(getGetMyPaymentQueryKey(paymentId), payment);
-        await queryClient.invalidateQueries({ queryKey: getGetMyEntitlementQueryKey() });
+        await invalidateEntitlementViews(queryClient);
         await queryClient.invalidateQueries({ queryKey: [getGetMyPaymentsQueryKey()[0]] });
         await navigate({ to: '/student/checkout-result/$paymentId', params: { paymentId } });
       },

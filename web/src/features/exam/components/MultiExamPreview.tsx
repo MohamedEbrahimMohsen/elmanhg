@@ -1,6 +1,7 @@
 import { keepPreviousData } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { ContentListSkeleton } from '@/features/content';
+import { PaywallDialog, paywallReason } from '@/features/subscription';
 import { usePreviewMultiUnitExam } from '@/shared/api/generated/exams/exams';
 import { ApiError, unhandledErrorCode } from '@/shared/lib/apiError';
 import { Button } from '@/shared/ui/button';
@@ -56,11 +57,12 @@ export function MultiExamPreview({ subjectId, unitIds, size, canStart }: MultiEx
           >
             {t('start.start')}
           </Button>
-          {starter.errorCode ? (
+          {starter.errorCode && paywallReason(starter.errorCode) === null ? (
             <p role="alert" className="text-caption text-danger">
               {t(errorTextKey(starter.errorCode))}
             </p>
           ) : null}
+          <PaywallDialog reason={paywallReason(starter.errorCode)} onClose={starter.reset} />
         </div>
       ) : null}
     </div>

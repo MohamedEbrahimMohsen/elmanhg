@@ -26,7 +26,7 @@ public sealed class PaymobWebhookEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Post_SignedSuccess_ActivatesBaseAndStoresRawPayload()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
         var payment = await SeedPendingAsync(student.Id);
 
         using var response = await PostSignedAsync(PaymobPayloads.Succeeded, payment);
@@ -43,7 +43,7 @@ public sealed class PaymobWebhookEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Post_SignedDeclined_MarksFailedAndStudentStaysFree()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
         var payment = await SeedPendingAsync(student.Id);
 
         using var response = await PostSignedAsync(PaymobPayloads.Declined, payment);

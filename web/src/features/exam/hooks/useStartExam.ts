@@ -8,6 +8,7 @@ export interface StartExam {
   start: () => void;
   isPending: boolean;
   errorCode: string | null;
+  reset: () => void;
 }
 
 export function useStartExam(unitId: string): StartExam {
@@ -37,5 +38,6 @@ export function useStartExam(unitId: string): StartExam {
     },
     isPending: mutation.isPending,
     errorCode,
+    reset: mutation.reset,
   };
 }

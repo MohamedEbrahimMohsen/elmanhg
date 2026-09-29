@@ -56,9 +56,11 @@ The served questions are chosen and written when the session starts and never ch
 
 1. **Start or resume** — `POST /api/sessions/quiz { lessonId, questionCount? }`.
    - The lesson must be Published; otherwise 404 `LESSON_NOT_FOUND` (student reads see Published lessons only).
+   - **Free tier** (`docs/subscriptions.md` → Free tier gates): for a non-Admin caller, a lesson locked for a Free student returns 403 `LESSON_LOCKED`, on start and on resume. A **new** session when the student has already answered `FreeDailyQuizQuestions` quiz questions today (in `Subscriptions:DailyQuotaTimeZone`) returns 403 `QUIZ_DAILY_LIMIT_REACHED` (context `limit`); resuming an open session is allowed. An Admin (test mode) is never gated.
    - If the student already has an open quiz session for that lesson, it is returned as is and `questionCount` is ignored (a refresh resumes, PRD §14).
    - Otherwise up to `questionCount` (default `Sessions:DefaultQuizSize`) questions are chosen by adaptive selection (see Selection) from the lesson's **servable** questions (`ServableQuestionSpecification`, #67). The domain re-checks each question with `ServableQuestionSpecification.IsSatisfiedBy`. A lesson with fewer servable questions gives a shorter quiz; none gives 400 `SESSION_NO_SERVABLE_QUESTIONS`.
 2. **Answer** — `POST /api/sessions/{id}/answers { questionId, answer, timeTakenMilliseconds? }`. One answer per question, graded at once and saved immediately. There is no draft state for quizzes. A new attempt in a non-test session also updates the student's `QuestionMastery` row in the same save (`docs/mastery.md`); a replayed answer does not.
+   - **Free tier:** a new attempt in a non-test session re-checks the lesson lock (403 `LESSON_LOCKED`, which covers a quiz started while subscribed and continued after a lapse) and then the daily quota (403 `QUIZ_DAILY_LIMIT_REACHED`); nothing is stored when refused. A replayed identical answer and a test-mode session are not gated. The quota is a soft limit: two parallel answers at 9/10 can both pass.
 3. **Finish** — `POST /api/sessions/{id}/finish`. Allowed at any time, including mid-quiz. Nothing finishes a session automatically.
 4. **Read** — `GET /api/sessions/{id}` returns the items, the saved attempts and `currentPosition`: the lowest unanswered position, or null when every item is answered or the session is finished.
 
@@ -193,6 +195,8 @@ History: `GET /api/progress/sessions` (`docs/progress.md`).
 | `SESSION_ALREADY_SUBMITTED` | 400 | Answering or resuming a finished session. |
 | `SESSION_QUESTION_ALREADY_ANSWERED` | 409 | A different answer for an answered question, or a concurrent first answer. |
 | `SESSION_MODIFIED_CONCURRENTLY` | 409 | A concurrent answer, finish or resume changed the session first, or a concurrent answer updated the same question's mastery row; retry. |
+| `LESSON_LOCKED` | 403 | Free tier: the lesson is locked for the student (start, resume or a new answer). |
+| `QUIZ_DAILY_LIMIT_REACHED` | 403 | Free tier: today's quiz questions are used up (a new session or a new answer; context `limit`). |
 | `LESSON_ID_REQUIRED`, `LESSON_NOT_FOUND`, `QUESTION_ID_REQUIRED`, `QUESTION_NOT_FOUND`, `QUESTION_ANSWER_INVALID`, `USER_NOT_AUTHENTICATED` | 422 / 404 / 422 / 404 / 422 / 401 | Reused codes. |
 
 ## Student screens (web)

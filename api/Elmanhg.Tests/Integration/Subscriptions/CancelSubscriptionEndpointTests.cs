@@ -42,7 +42,7 @@ public sealed class CancelSubscriptionEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Post_OwnActiveBase_Returns200AndKeepsAccessUntilPeriodEnd()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
         var subscription = await SeedActiveBaseAsync(student.Id);
 
         using var response = await client.PostAsync(CancelPath(subscription.Id), null, CancellationToken);
@@ -62,7 +62,7 @@ public sealed class CancelSubscriptionEndpointTests(ApiFactory factory)
     {
         var other = await ScopeTestData.SeedStudentAsync(factory, CancellationToken);
         var subscription = await SeedActiveBaseAsync(other.Id);
-        var (_, client) = await SignedInStudentAsync(factory);
+        var (_, client) = await SignedInFreeStudentAsync(factory);
 
         using var response = await client.PostAsync(CancelPath(subscription.Id), null, CancellationToken);
 
@@ -73,7 +73,7 @@ public sealed class CancelSubscriptionEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Post_AlreadyCancelled_Returns400SubscriptionEnded()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
         var subscription = await SeedActiveBaseAsync(student.Id);
         using var first = await client.PostAsync(CancelPath(subscription.Id), null, CancellationToken);
 

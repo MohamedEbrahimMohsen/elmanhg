@@ -3,3 +3,7 @@ export { FakeCheckoutPage } from './pages/FakeCheckoutPage';
 export { PublicPlanCards } from './components/PublicPlanCards';
 export { SubscriptionPage } from './pages/SubscriptionPage';
 export { subscriptionSearchSchema } from './schemas/subscriptionSearchSchema';
+export { PaywallDialog } from './components/PaywallDialog';
+export { DailyQuizCounter } from './components/DailyQuizCounter';
+export { PlanSummaryLine } from './components/PlanSummaryLine';
+export { paywallReason, type PaywallReason } from './api/paywall';

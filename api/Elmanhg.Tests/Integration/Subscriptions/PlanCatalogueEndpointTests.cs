@@ -33,7 +33,7 @@ public sealed class PlanCatalogueEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Get_SignedInStudent_Returns200()
     {
-        var (_, client) = await SignedInStudentAsync(factory);
+        var (_, client) = await SignedInFreeStudentAsync(factory);
 
         using var response = await client.GetAsync(SubscriptionTestData.PlansRoute, CancellationToken);
 

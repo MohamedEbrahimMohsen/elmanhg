@@ -383,6 +383,36 @@
         }
       }
     },
+    "/api/subscriptions/usage": {
+      "get": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "operationId": "GetMyUsage",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/subscriptions/payments": {
       "get": {
         "tags": [
@@ -7790,7 +7820,8 @@
           "seenCount",
           "masteryPercent",
           "previousLesson",
-          "nextLesson"
+          "nextLesson",
+          "isLocked"
         ],
         "type": "object",
         "properties": {
@@ -7884,6 +7915,9 @@
                 "$ref": "#/components/schemas/LessonLinkResult"
               }
             ]
+          },
+          "isLocked": {
+            "type": "boolean"
           }
         }
       },
@@ -7894,7 +7928,8 @@
           "servableCount",
           "masteredCount",
           "seenCount",
-          "masteryPercent"
+          "masteryPercent",
+          "isLocked"
         ],
         "type": "object",
         "properties": {
@@ -7936,6 +7971,9 @@
               "string"
             ],
             "format": "int32"
+          },
+          "isLocked": {
+            "type": "boolean"
           }
         }
       },
@@ -9060,6 +9098,59 @@
         "properties": {
           "url": {
             "type": "string"
+          }
+        }
+      },
+      "UsageResult": {
+        "required": [
+          "tier",
+          "hasAskTeacher",
+          "dailyQuizQuestionLimit",
+          "quizQuestionsUsedToday",
+          "quizQuestionsRemainingToday",
+          "dailyAvatarMessageLimit"
+        ],
+        "type": "object",
+        "properties": {
+          "tier": {
+            "$ref": "#/components/schemas/PlanTier"
+          },
+          "hasAskTeacher": {
+            "type": "boolean"
+          },
+          "dailyQuizQuestionLimit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "quizQuestionsUsedToday": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "quizQuestionsRemainingToday": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "dailyAvatarMessageLimit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },

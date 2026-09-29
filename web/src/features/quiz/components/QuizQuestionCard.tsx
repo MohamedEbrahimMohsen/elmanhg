@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { QuestionView } from '@/features/questions';
+import { PaywallDialog } from '@/features/subscription';
 import type { SessionItemResult } from '@/shared/api/generated/model';
 import { choiceReview } from '../api/correctAnswer';
 import { fromAnswerPayload, toQuizQuestion } from '../api/quizItem';
@@ -79,6 +80,7 @@ export function QuizQuestionCard({
         onCheck={quiz.check}
         onNext={onNext}
       />
+      <PaywallDialog reason={quiz.paywall} onClose={quiz.closePaywall} />
     </article>
   );
 }

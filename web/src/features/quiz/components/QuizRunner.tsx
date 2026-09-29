@@ -1,5 +1,6 @@
 import { preload } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import { DailyQuizCounter } from '@/features/subscription';
 import type { SessionResult } from '@/shared/api/generated/model';
 import { questionImageSources } from '../api/quizItem';
 import { useQuizNavigation } from '../hooks/useQuizNavigation';
@@ -19,6 +20,7 @@ export function QuizRunner({ session }: QuizRunnerProps) {
   return (
     <section className="flex flex-col gap-4">
       <h1 className="font-display text-h1 font-bold lg:text-h1-desktop">{t('session.title')}</h1>
+      {session.isTestMode ? null : <DailyQuizCounter variant="quiz" />}
       <QuizQuestionCard
         key={nav.position}
         sessionId={session.id}

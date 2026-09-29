@@ -21,7 +21,7 @@ public sealed class RefundPaymentEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Post_Admin_RefundsPaymentAndStudentLosesAccess()
     {
-        var (student, studentClient) = await SignedInStudentAsync(factory);
+        var (student, studentClient) = await SignedInFreeStudentAsync(factory);
         var (payment, subscription) = await PaymentsTestData.SeedSucceededAsync(factory, student.Id, DateTimeOffset.UtcNow.AddDays(-1), null, CancellationToken);
         using var admin = await PaymentsTestData.AdminClientAsync(factory, CancellationToken);
 

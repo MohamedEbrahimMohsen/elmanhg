@@ -7,6 +7,7 @@ export interface StartQuiz {
   start: (questionCount: number) => void;
   isPending: boolean;
   errorCode: string | null;
+  reset: () => void;
 }
 
 export function useStartQuiz(lessonId: string): StartQuiz {
@@ -32,5 +33,6 @@ export function useStartQuiz(lessonId: string): StartQuiz {
     },
     isPending: mutation.isPending,
     errorCode,
+    reset: mutation.reset,
   };
 }

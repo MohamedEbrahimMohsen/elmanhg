@@ -26,7 +26,7 @@ public sealed class PaymobRefundWebhookEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Post_SignedFullRefund_MarksRefundedAndStudentBecomesFree()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
         var (payment, _) = await PaymentsTestData.SeedSucceededAsync(factory, student.Id, DateTimeOffset.UtcNow.AddDays(-1), null, CancellationToken);
         var refundId = NewTransactionId();
 
@@ -54,7 +54,7 @@ public sealed class PaymobRefundWebhookEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Post_SignedPartialRefund_FlagsForReviewAndKeepsAccess()
     {
-        var (student, client) = await SignedInStudentAsync(factory);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
         var (payment, _) = await PaymentsTestData.SeedSucceededAsync(factory, student.Id, DateTimeOffset.UtcNow.AddDays(-1), null, CancellationToken);
 
         using var response = await PostSignedAsync(RefundPayload(payment, NewTransactionId(), 5000));

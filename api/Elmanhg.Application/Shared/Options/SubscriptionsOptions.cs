@@ -25,6 +25,9 @@ public sealed class SubscriptionsOptions
     [Range(0, 100)]
     public int FreeOpenLessonsPerUnit { get; set; } = 1;
 
+    [Required]
+    public string DailyQuotaTimeZone { get; set; } = "Africa/Cairo";
+
     [Range(1, 10000)]
     public int BaseDailyAvatarMessages { get; set; } = 50;
 

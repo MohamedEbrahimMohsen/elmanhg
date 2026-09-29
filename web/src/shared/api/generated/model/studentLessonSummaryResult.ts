@@ -16,4 +16,5 @@ export interface StudentLessonSummaryResult {
   seenCount: number | string;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   masteryPercent: number | string;
+  isLocked: boolean;
 }

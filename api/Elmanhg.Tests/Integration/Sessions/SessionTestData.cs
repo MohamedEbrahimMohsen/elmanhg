@@ -3,9 +3,11 @@ using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Infrastructure.Data.Context;
+using Elmanhg.Tests.Builders;
 using Elmanhg.Tests.Integration.Authorization;
 using Elmanhg.Tests.Integration.Content;
 using Elmanhg.Tests.Integration.Infrastructure;
+using Elmanhg.Tests.Integration.Subscriptions;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,6 +38,13 @@ public static class SessionTestData
     }
 
     public static async Task<(User Student, HttpClient Client)> SignedInStudentAsync(ApiFactory factory)
+    {
+        var student = await ScopeTestData.SeedStudentAsync(factory, CancellationToken).ConfigureAwait(false);
+        await SubscriptionTestData.SeedSubscriptionAsync(factory, new SubscriptionBuilder().ForStudent(student.Id).StartingAt(DateTimeOffset.UtcNow.AddDays(-1)).Build(), CancellationToken).ConfigureAwait(false);
+        return (student, await ScopeTestData.SignedInClientAsync(factory, student, CancellationToken).ConfigureAwait(false));
+    }
+
+    public static async Task<(User Student, HttpClient Client)> SignedInFreeStudentAsync(ApiFactory factory)
     {
         var student = await ScopeTestData.SeedStudentAsync(factory, CancellationToken).ConfigureAwait(false);
         return (student, await ScopeTestData.SignedInClientAsync(factory, student, CancellationToken).ConfigureAwait(false));

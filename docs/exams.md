@@ -11,11 +11,12 @@ A **unit exam** is a session of kind `UnitExam` (`docs/sessions.md`) built from 
    - for this unit, it is resumed with no new draw; if it is past `Deadline + Exams:DeadlineGraceSeconds`, it is submitted first and returned submitted;
    - for another unit, the call returns 409 `EXAM_ALREADY_IN_PROGRESS`.
    The unique partial index `IX_Sessions_OneOpenExam` backs the rule; a concurrent start that loses the race gets the same 409.
-3. **Lesson-open gate.** Only for a new exam, and only when `Exams:RequireAllLessonsOpened` is true: every Published lesson of the unit must have a lesson opening for the student, or the call returns 400 `EXAM_LESSONS_NOT_OPENED`. A resume is never blocked, and an Admin's test-mode exam is exempt.
-4. **Resolution.** `ExamBlueprintResolution.ForUnit`: the unit's blueprint, else the subject default, else none (400 `UNIT_EXAM_NO_BLUEPRINT`).
-5. **Servability.** `ExamBlueprint.EnsureServable` re-runs the shortfall check against the unit's live servable pool (400 `EXAM_SHORTFALL`, context `types`, for example `"Mcq 1/2"`).
-6. The session copies `TimeLimitMinutes` and `PassMark` from the blueprint and sets `Deadline = StartedAt + TimeLimitMinutes` (null when untimed). A later blueprint edit never changes a started exam.
-7. An Admin gets a test-mode exam (`IsTestMode = true`): no mastery and no history effect, but it still counts as the admin's one open exam.
+3. **Subscription gate.** Only for a new exam: a student without an entitled Base (Free) gets 403 `EXAM_REQUIRES_SUBSCRIPTION` (PRD §11.1: exams are a Base feature). It runs before the lesson-open gate. Resuming, saving and submitting an exam already started are never gated, so an exam started before a lapse can still be finished, and the auto-submit worker still runs. An Admin's test-mode exam is exempt. See `docs/subscriptions.md` → Free tier gates.
+4. **Lesson-open gate.** Only for a new exam, and only when `Exams:RequireAllLessonsOpened` is true: every Published lesson of the unit must have a lesson opening for the student, or the call returns 400 `EXAM_LESSONS_NOT_OPENED`. A resume is never blocked, and an Admin's test-mode exam is exempt.
+5. **Resolution.** `ExamBlueprintResolution.ForUnit`: the unit's blueprint, else the subject default, else none (400 `UNIT_EXAM_NO_BLUEPRINT`).
+6. **Servability.** `ExamBlueprint.EnsureServable` re-runs the shortfall check against the unit's live servable pool (400 `EXAM_SHORTFALL`, context `types`, for example `"Mcq 1/2"`).
+7. The session copies `TimeLimitMinutes` and `PassMark` from the blueprint and sets `Deadline = StartedAt + TimeLimitMinutes` (null when untimed). A later blueprint edit never changes a started exam.
+8. An Admin gets a test-mode exam (`IsTestMode = true`): no mastery and no history effect, but it still counts as the admin's one open exam.
 
 The lesson-open gate of PRD §7.4 is off by default (`Exams:RequireAllLessonsOpened` = false). A lesson counts as opened once the student has loaded its lesson page, which records a lesson opening (`POST /api/browse/lessons/{lessonId}/openings`, [browsing](browsing.md)). The gate counts the unit's Published lessons with no opening, so a lesson published later locks the gate again until it is opened.
 
@@ -97,7 +98,7 @@ Only a shortfall of the **union** pool blocks the exam: 400 `EXAM_SHORTFALL`, co
 
 **Scope.** `MultiUnitExamScope { subjectId, unitIds, size }` is stored as jsonb, with `unitIds` in unit order. The key is `units:{size}:{sorted lowercase unit ids joined by ","}`, so the selection order does not matter and a retake of the same units and size has the same key.
 
-**Start and resume.** `POST /api/exams/subjects/{subjectId}/multi-unit` validates the selection (422 codes below), then loads the subject (404 `SUBJECT_NOT_FOUND`) and the units (404 `UNIT_NOT_FOUND` for a missing unit or a unit of another subject). The one-open-exam rule is unchanged: an open exam with the same key is resumed (and submitted first when past the deadline plus grace), and any other open exam returns 409 `EXAM_ALREADY_IN_PROGRESS`. The exam is planned and drawn only when nothing is open, so a resume never fails on a blueprint edited later. When `Exams:RequireAllLessonsOpened` is true, a new multi-unit exam also needs every Published lesson of every selected unit to be opened (400 `EXAM_LESSONS_NOT_OPENED`); a resume and an Admin's test-mode exam are exempt. An Admin gets a test-mode exam.
+**Start and resume.** `POST /api/exams/subjects/{subjectId}/multi-unit` validates the selection (422 codes below), then loads the subject (404 `SUBJECT_NOT_FOUND`) and the units (404 `UNIT_NOT_FOUND` for a missing unit or a unit of another subject). The one-open-exam rule is unchanged: an open exam with the same key is resumed (and submitted first when past the deadline plus grace), and any other open exam returns 409 `EXAM_ALREADY_IN_PROGRESS`. The exam is planned and drawn only when nothing is open, so a resume never fails on a blueprint edited later. A new multi-unit exam needs Base (403 `EXAM_REQUIRES_SUBSCRIPTION`, checked before the lesson-open gate; a resume and an Admin's test-mode exam are exempt). When `Exams:RequireAllLessonsOpened` is true, a new multi-unit exam also needs every Published lesson of every selected unit to be opened (400 `EXAM_LESSONS_NOT_OPENED`); a resume and an Admin's test-mode exam are exempt. An Admin gets a test-mode exam.
 
 **Preview.** `GET /api/exams/subjects/{subjectId}/multi-unit/preview?unitIds=…&unitIds=…&size=20` returns the merged blueprint (`typeCounts` with the union availability, the time, the pass mark and `difficultyMix: null`), `isAvailable` (false on a union shortfall) and each unit's share. It saves nothing.
 
@@ -149,6 +150,7 @@ Policy `Assessments.Take` (Students and Admins). Teachers get 403, anonymous cal
 |---|---|---|
 | `EXAM_ALREADY_IN_PROGRESS` | 409 | Another exam is open for the student (start, or a lost start race). |
 | `UNIT_EXAM_NO_BLUEPRINT` | 400 | Neither the unit nor its subject has a blueprint. |
+| `EXAM_REQUIRES_SUBSCRIPTION` | 403 | A Free student starts a new unit or multi-unit exam. |
 | `EXAM_LESSONS_NOT_OPENED` | 400 | The lesson-open gate is on and a Published lesson of the unit (or of a selected unit) has not been opened. |
 | `MULTI_UNIT_EXAM_NO_BLUEPRINT` | 400 | A selected unit has no blueprint and its subject has no default (context `units`). |
 | `MULTI_UNIT_EXAM_UNITS_TOO_FEW` | 422 | Fewer than two units, or no selection. |

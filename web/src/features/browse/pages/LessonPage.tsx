@@ -4,6 +4,7 @@ import { ContentErrorState, ContentListSkeleton } from '@/features/content';
 import { useGetStudentLesson } from '@/shared/api/generated/browse/browse';
 import { LessonNavigation } from '../components/LessonNavigation';
 import { LessonTabs } from '../components/LessonTabs';
+import { LockedLessonNotice } from '../components/LockedLessonNotice';
 import { MasterySummary } from '../components/MasterySummary';
 import { StudentBreadcrumbs } from '../components/StudentBreadcrumbs';
 import { useLessonOpening } from '../hooks/useLessonOpening';
@@ -15,7 +16,7 @@ export interface LessonPageProps {
 export function LessonPage({ lessonId }: LessonPageProps) {
   const { t } = useTranslation('browse');
   const query = useGetStudentLesson(lessonId);
-  useLessonOpening(lessonId, query.data?.unitId);
+  useLessonOpening(lessonId, query.data?.isLocked ? undefined : query.data?.unitId);
   const { data, error, isPending, isError, refetch } = query;
 
   if (isError) {
@@ -46,8 +47,14 @@ export function LessonPage({ lessonId }: LessonPageProps) {
         servable={Number(data.servableCount)}
         seen={Number(data.seenCount)}
       />
-      <LessonTabs lessonId={lessonId} />
-      <Outlet />
+      {data.isLocked ? (
+        <LockedLessonNotice />
+      ) : (
+        <>
+          <LessonTabs lessonId={lessonId} />
+          <Outlet />
+        </>
+      )}
       <LessonNavigation lesson={data} />
     </section>
   );

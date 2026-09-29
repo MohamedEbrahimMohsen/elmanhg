@@ -322,6 +322,9 @@
   <data name="PAYMENT_LOG_PLAN_INVALID" xml:space="preserve"><value>الباقة غير معروفة.</value></data>
   <data name="PAYMENT_LOG_REFERENCE_TOO_LONG" xml:space="preserve"><value>المرجع طويل جدا.</value></data>
   <data name="PAYMENT_LOG_DATE_RANGE_INVALID" xml:space="preserve"><value>يجب ان تكون البداية قبل النهاية.</value></data>
+  <data name="QUIZ_DAILY_LIMIT_REACHED" xml:space="preserve"><value>وصلت إلى الحد اليومي للباقة المجانية.</value></data>
+  <data name="LESSON_LOCKED" xml:space="preserve"><value>هذا الدرس متاح للمشتركين فقط.</value></data>
+  <data name="EXAM_REQUIRES_SUBSCRIPTION" xml:space="preserve"><value>الامتحانات متاحة في الباقة الأساسية.</value></data>
   <data name="SUBJECT_INTERESTS_TOO_MANY" xml:space="preserve"><value>تم اختيار عدد كبير جدا من المواد.</value></data>
   <data name="SUBJECT_INTERESTS_DUPLICATE" xml:space="preserve"><value>تم اختيار مادة اكثر من مرة.</value></data>
   <data name="FUNNEL_ANONYMOUS_ID_REQUIRED" xml:space="preserve"><value>معرف الزائر مطلوب.</value></data>
