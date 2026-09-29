@@ -387,7 +387,7 @@ Caddy terminates TLS and, with no `trusted_proxies` setting, replaces any client
 | `SMOKE_OBSERVABILITY` | `1` | `0` skips the observability profile and its assertions (Docker Desktop may not expose `/var/lib/docker/containers`; CI on Linux is authoritative) |
 | `SMOKE_GRAFANA_PORT` | `3300` | loopback port for Grafana during the smoke test |
 
-`bash deploy/load-test.sh` runs the same stack with seeded load-test data, then the pinned k6 API load and the throttled lesson-page browser run against Caddy, and saves the k6 summaries and the EXPLAIN plans in `deploy/.loadtest-results`. It fails when an API budget or the quiz-transition budget is exceeded; the lesson-page budget is advisory (a `::warning::`) until the #114 follow-up meets it. Its knobs, profiles and CI placement are in [docs/performance.md](performance.md) §5.
+`bash deploy/load-test.sh` runs the same stack with seeded load-test data, then the pinned k6 API load and the throttled lesson-page browser run against Caddy, and saves the k6 summaries and the EXPLAIN plans in `deploy/.loadtest-results`. It fails when an API budget or the quiz-transition budget is exceeded; the lesson-page budget is advisory (a `::warning::`) until [#220](https://github.com/MohamedEbrahimMohsen/elmanhg/issues/220) meets it. Its knobs, profiles and CI placement are in [docs/performance.md](performance.md) §5.
 
 ## 13. Not done yet
 
@@ -399,5 +399,5 @@ Caddy terminates TLS and, with no `trusted_proxies` setting, replaces any client
 | Object storage | built (#96): `FileStorage__Provider=S3` with an R2 or S3 bucket; not yet checked against a live bucket (needs credentials) |
 | Voice transcription | built (#96): `ELMANHG_AI_TRANSCRIPTION_PROVIDER=openai`; not yet checked against Whisper (needs a key), and the Egyptian-dialect evaluation waits for recorded clips |
 | Observability (#113) | done ([docs/observability.md](observability.md)); an external uptime monitor, a vendor error tracker (Sentry) and live alert receivers are deferred |
-| Performance (#114) | done ([docs/performance.md](performance.md)); CDN deferred until the live domain |
+| Performance (#114) | done ([docs/performance.md](performance.md)); the lesson p75 budget is missed (2.96 s locally, advisory in CI) and tracked in [#220](https://github.com/MohamedEbrahimMohsen/elmanhg/issues/220); CDN deferred until the live domain |
 | Security headers (#115) | HSTS and CSP; the request log still trusts `CF-Connecting-IP` |

@@ -73,13 +73,13 @@ const formatValues = (values) =>
     .map(([stat, value]) => `${stat}=${Number.isInteger(value) ? value : value.toFixed(2)}`)
     .join(' ');
 
-// The lesson budget is advisory in CI until the #114 follow-up meets it (docs/performance.md §5): it warns, it does not fail the run.
+// The lesson budget is advisory in CI until #220 meets it (docs/performance.md §5): it warns, it does not fail the run.
 export function handleSummary(data) {
   const lessonP75 = data.metrics.lesson_content_visible?.values['p(75)'];
   const lines = Object.entries(data.metrics).map(([name, metric]) => `${name}: ${formatValues(metric.values)}`);
   if (lessonP75 === undefined || lessonP75 >= lessonBudgetMs) {
     const measured = lessonP75 === undefined ? 'was not measured against' : `${Math.round(lessonP75)} ms is over`;
-    lines.push(`::warning::lesson_content_visible p75 ${measured} the ${lessonBudgetMs} ms budget (advisory until the #114 follow-up)`);
+    lines.push(`::warning::lesson_content_visible p75 ${measured} the ${lessonBudgetMs} ms budget (advisory until #220)`);
   }
 
   return { stdout: `${lines.join('\n')}\n`, '/results/browser-summary.json': JSON.stringify(data, null, 2) };

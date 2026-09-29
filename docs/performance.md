@@ -70,7 +70,7 @@ Budget = measured × 1.05, rounded up to the next 5 KB. They are regression guar
 3. seeds the load-test data with `compose run --rm migrate --SeedLoadTestAndExit=true`;
 4. runs `deploy/loadtest/api-load.js` (API budgets) and `deploy/loadtest/lesson-page.js` (throttled browser) in the pinned `grafana/k6:2.3.0-with-browser` image, on the stack network, against `http://web` (Caddy);
 5. runs `deploy/loadtest/explain.sql` in Postgres;
-6. writes `api-summary.json`, `browser-summary.json` and `explain.txt` to `deploy/.loadtest-results`, removes the stack and its volumes, and exits non-zero if an API budget, `quiz_transition` or the browser `checks` failed. The lesson budget (`lesson_content_visible` p75 < 2000 ms) is **advisory** until the #114 follow-up meets it (§8): `lesson-page.js` reports it in `handleSummary`, which prints a `::warning::` with the measured p75 when it is at or over 2000 ms, and it does not change the exit code.
+6. writes `api-summary.json`, `browser-summary.json` and `explain.txt` to `deploy/.loadtest-results`, removes the stack and its volumes, and exits non-zero if an API budget, `quiz_transition` or the browser `checks` failed. The lesson budget (`lesson_content_visible` p75 < 2000 ms) is **advisory** until [#220](https://github.com/MohamedEbrahimMohsen/elmanhg/issues/220) meets it (§8): `lesson-page.js` reports it in `handleSummary`, which prints a `::warning::` with the measured p75 when it is at or over 2000 ms, and it does not change the exit code.
 
 | Knob | Default | Effect |
 |---|---|---|
@@ -96,7 +96,7 @@ Students think between steps (1–3 s per quiz answer or browse step, 1 s per ex
 
 The command exits 1, and seeds nothing, in Production or with an invalid key, count or missing password. A failed user creation throws `LOAD_TEST_SEED_FAILED`.
 
-**CI.** The `images` workflow runs the smoke profile after the deploy smoke test on every image build, reusing its images, and uploads `deploy/.loadtest-results` as the `load-test-smoke` artifact. The full profile is the manual `load-test` workflow (`workflow_dispatch`, input `profile`), with a `load-test-<profile>` artifact. A GitHub runner is not staging hardware: read its numbers as a regression signal. The API budgets, `quiz_transition` and `checks` block the workflow; a missed lesson budget shows as a workflow warning annotation and does not block image publishing, until the #114 follow-up brings the lesson page under 2 s and the budget becomes a k6 threshold again.
+**CI.** The `images` workflow runs the smoke profile after the deploy smoke test on every image build, reusing its images, and uploads `deploy/.loadtest-results` as the `load-test-smoke` artifact. The full profile is the manual `load-test` workflow (`workflow_dispatch`, input `profile`), with a `load-test-<profile>` artifact. A GitHub runner is not staging hardware: read its numbers as a regression signal. The API budgets, `quiz_transition` and `checks` block the workflow; a missed lesson budget shows as a workflow warning annotation and does not block image publishing, until [#220](https://github.com/MohamedEbrahimMohsen/elmanhg/issues/220) brings the lesson page under 2 s and the budget becomes a k6 threshold again.
 
 ## 6. Database
 
@@ -178,7 +178,7 @@ With so few samples, the `quiz_start` and `multi_exam_start` p95s are their slow
 | LCP | p95 2.97 s | 2.78 s | reported only |
 | CLS | 0.002 max | 0 | reported only |
 
-**The lesson budget is missed**, and it is kept at 2 s (a PRD rule; relaxing it is a product decision). A follow-up issue tracks it. Where the time goes, from the build and the web vitals:
+**The lesson budget is missed**, and it is kept at 2 s (a PRD rule; relaxing it is a product decision). [#220](https://github.com/MohamedEbrahimMohsen/elmanhg/issues/220) tracks it. Where the time goes, from the build and the web vitals:
 
 - First paint alone takes about 2.1 s. The entry bundle (`index-*.js`) is 146 KB brotli, but over plain HTTP Chromium does not offer brotli, so the local run downloads the 175 KB gzip copy: about 0.9 s at 200 KB/s, after the HTML round trip.
 - The Arabic web fonts (Noto Sans Arabic 400/500/600 and Readex Pro 500/600/700, about 200 KB of woff2) compete for the same 1.6 Mbps.
@@ -186,7 +186,7 @@ With so few samples, the `quiz_start` and `multi_exam_start` p95s are their slow
 
 Levers for the follow-up, in expected order of effect: split the entry bundle (react-dom, router, query, i18n and every locale are in one 584 KB chunk); load fewer font weights, with `font-display: optional` for the rest; start the lesson request during the session restore on a cold load (§9); and measure over HTTPS with HTTP/2 and brotli, as production serves.
 
-**Bundle sizes after this change** (brotli, the `perf:budget` report): entry 197 KB, landing 205 KB, lesson 224 KB, quiz 242 KB. KaTeX (78 KB gzip) and the avatar panel, with react-hook-form and the radix dialog, are no longer on the lesson critical path.
+**Bundle sizes after this change** (brotli, the `perf:budget` report): entry 199 KB, landing 208 KB, lesson 227 KB, quiz 245 KB. KaTeX (78 KB gzip) and the avatar panel, with react-hook-form and the radix dialog, are no longer on the lesson critical path.
 
 ## 9. Levers not yet used
 

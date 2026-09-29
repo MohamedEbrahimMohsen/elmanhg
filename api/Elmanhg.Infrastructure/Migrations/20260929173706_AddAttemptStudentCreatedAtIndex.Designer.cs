@@ -1766,6 +1766,13 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<int?>("AudioDurationSeconds")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("AudioUrl")
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -1796,7 +1803,15 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<Guid>("ThreadId")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("TranscriptFinal")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
                     b.HasKey("Id");
+
+                    b.HasIndex("AudioUrl")
+                        .HasFilter("\"AudioUrl\" IS NOT NULL");
 
                     b.HasIndex("ImageUrl")
                         .HasFilter("\"ImageUrl\" IS NOT NULL");
@@ -1874,6 +1889,88 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.HasIndex("SubjectId", "Status", "SubmittedAt");
 
                     b.ToTable("TeacherThreads");
+                });
+
+            modelBuilder.Entity("Elmanhg.Domain.TeacherThreads.TeacherVoiceDraft", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AudioDurationSeconds")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("AudioKey")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
+                    b.Property<string>("AudioUrl")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("NextAttemptAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("RecordedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("SentMessageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("TeacherId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ThreadId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("TranscribedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Transcript")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TranscriptionModel")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NextAttemptAt")
+                        .HasFilter("\"Status\" = 'Pending'");
+
+                    b.HasIndex("TeacherId");
+
+                    b.HasIndex("ThreadId", "TeacherId");
+
+                    b.ToTable("TeacherVoiceDrafts");
                 });
 
             modelBuilder.Entity("Elmanhg.Domain.Teachers.TeacherSubject", b =>
@@ -2493,6 +2590,21 @@ namespace Elmanhg.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Elmanhg.Domain.TeacherThreads.TeacherVoiceDraft", b =>
+                {
+                    b.HasOne("Elmanhg.Domain.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Elmanhg.Domain.TeacherThreads.TeacherThread", null)
+                        .WithMany()
+                        .HasForeignKey("ThreadId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Elmanhg.Domain.Teachers.TeacherSubject", b =>

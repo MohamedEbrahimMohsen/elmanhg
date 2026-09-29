@@ -9,7 +9,12 @@ const { pages } = JSON.parse(readFileSync(resolve(import.meta.dirname, 'budgets.
   pages: PageBudget[];
 };
 const sizeOf = (file: string) =>
-  brotliCompressSync(readFileSync(resolve(dist, file)), { params: { [constants.BROTLI_PARAM_QUALITY]: 11 } }).length;
+  brotliCompressSync(readFileSync(resolve(dist, file)), {
+    params: {
+      [constants.BROTLI_PARAM_QUALITY]: 11,
+      [constants.BROTLI_PARAM_MODE]: constants.BROTLI_MODE_TEXT,
+    },
+  }).length;
 
 const results = checkBudgets(manifest, pages, sizeOf);
 console.log(formatReport(results));
