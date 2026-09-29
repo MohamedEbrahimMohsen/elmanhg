@@ -36,6 +36,9 @@ coverage/
 .venv/
 .pytest_cache/
 .ruff_cache/
+.mypy_cache/
+.coverage
+ai/requirements-audit.txt
 
 # Secrets and personal overrides
 .env

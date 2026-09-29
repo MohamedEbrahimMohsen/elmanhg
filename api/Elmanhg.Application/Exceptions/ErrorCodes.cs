@@ -220,6 +220,9 @@ public static class ErrorCodes
     public const string FunnelAnonymousIdRequired = "FUNNEL_ANONYMOUS_ID_REQUIRED";
     public const string FunnelEventTypeInvalid = "FUNNEL_EVENT_TYPE_INVALID";
 
+    // AI SERVICE
+    public const string AiServiceUnavailable = "AI_SERVICE_UNAVAILABLE";
+
     // PLATFORM
     public const string TooManyRequests = "TOO_MANY_REQUESTS";
     public const string AdminSeedFailed = "ADMIN_SEED_FAILED";

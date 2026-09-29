@@ -52,6 +52,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("Exams:RequireAllLessonsOpened", "false");
         // The lapse sweep would race tests that seed ended subscriptions; LapseSubscription is exercised directly through the mediator.
         builder.UseSetting("Subscriptions:LapseSweepEnabled", "false");
+        // Pins the offline assistant even when the developer's environment switches the API to the Python service.
+        builder.UseSetting("AiService:Provider", "Fake");
         builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["ConnectionStrings:DbConnectionString"] = _database.GetConnectionString(),

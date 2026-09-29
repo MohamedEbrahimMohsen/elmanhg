@@ -52,10 +52,10 @@ stacks:
 
   ai:
     root:    ai/
-    build:   python -m compileall -q ai/
-    test:    python -m pytest ai/
-    style:   none                                  # typed FastAPI + pydantic + pytest + ruff, mirror existing ai/ code
-    testing: none
+    build:   uv --directory ai run python -m compileall -q src
+    test:    uv --directory ai run pytest -m "not eval"
+    style:   .claude/skills/python-feature/SKILL.md
+    testing: .claude/conventions/python-testing.md
     ui:      false
     tests:
       unit:     { on: true }
@@ -63,7 +63,7 @@ stacks:
       e2e:      { on: false }
       coverage: { on: false }
     security:
-      packages:         { on: false }
+      packages:         { on: true,  cmd: "uv --directory ai export --frozen --no-dev --no-hashes --no-emit-project -o requirements-audit.txt && uvx pip-audit==2.10.1 -r ai/requirements-audit.txt" }
       secrets:          { on: false }
       sast:             { on: false }
       prompt-injection: { on: true }            # the AI Avatar builds prompts from student input
