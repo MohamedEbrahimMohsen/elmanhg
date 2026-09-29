@@ -18,6 +18,8 @@ export interface PlanCardGridProps {
   isCheckoutPending: boolean;
 }
 
+type CheckoutMode = 'subscribe' | 'renew' | null;
+
 export function PlanCardGrid({ catalogue, entitlement, onCheckout, isCheckoutPending }: PlanCardGridProps) {
   const { t, i18n } = useTranslation('subscription');
   const { free, base, askTeacher } = catalogue;
@@ -27,6 +29,15 @@ export function PlanCardGrid({ catalogue, entitlement, onCheckout, isCheckoutPen
         price: formatMoney(Number(price.price.amountMinor), price.price.currency, i18n.language),
       }),
     );
+  const held = (plan: SubscriptionPlan) => entitlement.subscriptions.find((s) => s.plan === plan);
+  const modeFor = (plan: SubscriptionPlan, holds: boolean): CheckoutMode => {
+    if (!holds) {
+      return 'subscribe';
+    }
+    return held(plan)?.canRenew ? 'renew' : null;
+  };
+  const baseMode = modeFor('Base', entitlement.tier === 'Base');
+  const askTeacherMode = modeFor('AskTeacher', entitlement.hasAskTeacher);
 
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -52,8 +63,9 @@ export function PlanCardGrid({ catalogue, entitlement, onCheckout, isCheckoutPen
         ]}
         isActive={entitlement.tier === 'Base'}
         actions={
-          entitlement.tier === 'Base' ? null : (
+          baseMode === null ? null : (
             <BaseCheckoutActions
+              mode={baseMode}
               prices={base.prices}
               disabled={isCheckoutPending}
               onCheckout={(period) => {
@@ -73,8 +85,9 @@ export function PlanCardGrid({ catalogue, entitlement, onCheckout, isCheckoutPen
         ]}
         isActive={entitlement.hasAskTeacher}
         actions={
-          entitlement.hasAskTeacher ? null : (
+          askTeacherMode === null ? null : (
             <AskTeacherCheckoutAction
+              mode={askTeacherMode}
               hasBase={entitlement.tier === 'Base'}
               disabled={isCheckoutPending}
               onCheckout={() => {

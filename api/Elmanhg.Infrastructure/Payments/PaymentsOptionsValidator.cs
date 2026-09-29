@@ -23,7 +23,7 @@ public sealed class PaymentsOptionsValidator : IValidateOptions<PaymentsOptions>
 
     private static void ValidatePaymob(PaymobOptions paymob, List<string> failures)
     {
-        List<(string Key, string Value)> required = [("SecretKey", paymob.SecretKey), ("PublicKey", paymob.PublicKey), ("RedirectionUrl", paymob.RedirectionUrl), ("BillingCountry", paymob.BillingCountry)];
+        List<(string Key, string Value)> required = [("SecretKey", paymob.SecretKey), ("PublicKey", paymob.PublicKey), ("RedirectionUrl", paymob.RedirectionUrl), ("BillingCountry", paymob.BillingCountry), ("HmacSecret", paymob.HmacSecret)];
         failures.AddRange(required
             .Where(x => string.IsNullOrWhiteSpace(x.Value))
             .Select(x => $"Payments:Paymob:{x.Key} is required when the Paymob provider is selected."));

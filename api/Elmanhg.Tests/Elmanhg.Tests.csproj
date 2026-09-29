@@ -20,6 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Fixtures\Paymob\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Elmanhg.Api\Elmanhg.Api.csproj" />
     <ProjectReference Include="..\Elmanhg.Application\Elmanhg.Application.csproj" />
     <ProjectReference Include="..\Elmanhg.Domain\Elmanhg.Domain.csproj" />

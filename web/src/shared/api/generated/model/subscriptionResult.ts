@@ -18,4 +18,6 @@ export interface SubscriptionResult {
   entitledUntil: string;
   /** @nullable */
   cancelledAt: string | null;
+  inGracePeriod: boolean;
+  canRenew: boolean;
 }

@@ -28,12 +28,16 @@ public sealed class StartCheckoutHandler(IPaymentRepository paymentRepository, I
         var period = request.Period!.Value;
 
         var subscriptions = await subscriptionRepository.FindAsync(SubscriptionEntitlementSpecification.EntitledFor(studentId, now, options.GracePeriod), cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        StudentEntitlement.Resolve(subscriptions, now, options.GracePeriod).EnsureCanPurchase(plan);
+        StudentEntitlement.Resolve(subscriptions, now, options.GracePeriod).EnsureCanPurchase(plan, now, options.RenewalWindow);
         var price = options.PriceFor(plan, period) ?? throw new BadRequestCoreException(ErrorCodes.CheckoutPeriodUnavailable);
         var user = await userRepository.GetByIdAsync(studentId, cancellationToken, asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.UserNotFound);
 
-        var payment = Payment.Create(studentId, plan, period, new Money(price.AmountMinor, options.Currency));
+        var payment = Payment.Create(studentId, plan, period, price.Months, new Money(price.AmountMinor, options.Currency));
         var checkout = await paymentGateway.StartCheckoutAsync(new PaymentCheckoutRequest(payment.Id, payment.Amount, plan, period, new PaymentCustomer(user.DisplayName, user.Email, user.PhoneNumber)), cancellationToken).ConfigureAwait(false);
+        if (checkout.ProviderOrderId is not null)
+        {
+            payment.LinkProviderOrder(checkout.ProviderOrderId);
+        }
 
         await paymentRepository.AddAsync(payment, cancellationToken).ConfigureAwait(false);
         await paymentRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

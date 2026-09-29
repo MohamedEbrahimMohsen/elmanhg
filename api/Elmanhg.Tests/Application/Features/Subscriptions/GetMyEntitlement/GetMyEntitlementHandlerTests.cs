@@ -58,7 +58,7 @@ public sealed class GetMyEntitlementHandlerTests
         var result = await Handle();
 
         (result.Tier, result.CanTakeExams, result.DailyQuizQuestionLimit, result.OpenLessonsPerUnit, result.DailyAvatarMessageLimit, result.MonthlyAskTeacherQuestionLimit).Should().Be((PlanTier.Base, true, (int?)null, (int?)null, 50, 0));
-        result.Subscriptions.Should().Equal(new SubscriptionResult(baseSubscription.Id, SubscriptionPlan.Base, BillingPeriod.Monthly, SubscriptionStatus.Active, RecentStart, RecentStart.AddMonths(1), RecentStart.AddMonths(1).AddDays(3), null));
+        result.Subscriptions.Should().Equal(new SubscriptionResult(baseSubscription.Id, SubscriptionPlan.Base, BillingPeriod.Monthly, SubscriptionStatus.Active, RecentStart, RecentStart.AddMonths(1), RecentStart.AddMonths(1).AddDays(3), null, false, false));
     }
 
     [Fact]
@@ -101,6 +101,26 @@ public sealed class GetMyEntitlementHandlerTests
         var result = await Handle();
 
         result.Tier.Should().Be(PlanTier.Free);
+    }
+
+    [Fact]
+    public async Task Handle_BaseInsideRenewalWindow_MarksCanRenew()
+    {
+        Add(SubscriptionPlan.Base, SubscriptionStatus.Active, Now.AddMonths(-1).AddDays(3));
+
+        var result = await Handle();
+
+        result.Subscriptions.Select(x => (x.CanRenew, x.InGracePeriod)).Should().Equal((true, false));
+    }
+
+    [Fact]
+    public async Task Handle_ActiveInsideGrace_MarksInGracePeriod()
+    {
+        Add(SubscriptionPlan.Base, SubscriptionStatus.Active, Now.AddMonths(-1).AddDays(-1));
+
+        var result = await Handle();
+
+        result.Subscriptions.Select(x => (x.Status, x.InGracePeriod, x.CanRenew)).Should().Equal((SubscriptionStatus.Active, true, true));
     }
 
     private Task<EntitlementResult> Handle() => _handler.Handle(new GetMyEntitlementQuery(), TestContext.Current.CancellationToken);

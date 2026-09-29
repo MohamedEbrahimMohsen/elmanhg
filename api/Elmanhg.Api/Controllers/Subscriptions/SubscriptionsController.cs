@@ -1,4 +1,5 @@
 using Core.DDD.Models;
+using Elmanhg.Application.Subscriptions.CancelSubscription;
 using Elmanhg.Application.Subscriptions.CompleteFakePayment;
 using Elmanhg.Application.Subscriptions.GetMyEntitlement;
 using Elmanhg.Application.Subscriptions.GetMyPayment;
@@ -59,6 +60,15 @@ public class SubscriptionsController(IMediator mediator) : ControllerBase
     public async Task<ActionResult> CompleteFakePayment(Guid paymentId, [FromBody] CompleteFakePaymentRequest request, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new CompleteFakePaymentCommand(paymentId, request.Succeeded), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("{subscriptionId:guid}/cancel", Name = "CancelSubscription")]
+    [Authorize(Policy = DefaultCodes.SubscriptionManage)]
+    [ProducesResponseType<EntitlementResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> CancelSubscription([FromRoute] Guid subscriptionId, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new CancelSubscriptionCommand(subscriptionId), cancellationToken);
         return Ok(result);
     }
 }

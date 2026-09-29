@@ -23,7 +23,8 @@
   "status": {
     "Active": "{plan} — active until {date}",
     "PastDue": "{plan} — payment overdue, available until {date}",
-    "Cancelled": "{plan} — cancelled, available until {date}"
+    "Cancelled": "{plan} — cancelled, available until {date}",
+    "ActiveGrace": "{plan} — period ended, available until {date}"
   },
   "price": {
     "Monthly": "{price}/month",
@@ -75,9 +76,24 @@
       "Termly": "Subscribe for a term",
       "Yearly": "Subscribe yearly"
     },
+    "renew": {
+      "Monthly": "Renew monthly",
+      "Termly": "Renew for a term",
+      "Yearly": "Renew yearly"
+    },
     "subscribeAskTeacher": "Subscribe",
+    "renewAskTeacher": "Renew",
     "requiresBaseHint": "Subscribe to Base first",
     "redirecting": "Redirecting to payment…"
+  },
+  "cancel": {
+    "button": "Cancel",
+    "buttonLabel": "Cancel {plan}",
+    "title": "Cancel {plan}?",
+    "body": "You keep access until {date}, the end of the period you paid for.",
+    "keep": "Keep subscription",
+    "confirm": "Cancel subscription",
+    "done": "Subscription cancelled"
   },
   "fakeCheckout": {
     "title": "Paymob checkout (simulation)",

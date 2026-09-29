@@ -95,6 +95,24 @@ public sealed class PaymobPaymentGatewayTests
     }
 
     [Fact]
+    public async Task StartCheckoutAsync_IntentionOrderId_ReturnsProviderOrderId()
+    {
+        _handler.ResponseBody = "{\"id\":\"pi_1\",\"client_secret\":\"egy_csk_test_1\",\"intention_order_id\":217503754}";
+
+        var checkout = await StartAsync();
+
+        checkout.ProviderOrderId.Should().Be("217503754");
+    }
+
+    [Fact]
+    public async Task StartCheckoutAsync_NoIntentionOrderId_ReturnsNullProviderOrderId()
+    {
+        var checkout = await StartAsync();
+
+        checkout.ProviderOrderId.Should().BeNull();
+    }
+
+    [Fact]
     public async Task StartCheckoutAsync_ServerError_ThrowsPaymentGatewayUnavailable()
     {
         _handler.StatusCode = HttpStatusCode.InternalServerError;

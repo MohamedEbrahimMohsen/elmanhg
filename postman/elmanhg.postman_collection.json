@@ -27,7 +27,8 @@
     { "key": "examSessionId", "value": "" },
     { "key": "examQuestionId", "value": "" },
     { "key": "secondUnitId", "value": "" },
-    { "key": "checkoutPaymentId", "value": "" }
+    { "key": "checkoutPaymentId", "value": "" },
+    { "key": "baseSubscriptionId", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -2154,7 +2155,7 @@
     },
     {
       "name": "Subscriptions",
-      "description": "The plan catalogue is public (no auth). Entitlement, payments and checkout need a Student sign-in (Subscription.Manage). Checkout creates a Pending payment. With the fake gateway (default) complete it via fake-completion. A second run on the same student returns 400 CHECKOUT_PLAN_ALREADY_ACTIVE.",
+      "description": "The plan catalogue is public (no auth). Entitlement, payments and checkout need a Student sign-in (Subscription.Manage). Checkout creates a Pending payment. With the fake gateway (default) complete it via fake-completion; the Paymob webhook settles real payments. From 7 days before the period end the held plan can be bought again to renew it. Cancel keeps access until the paid period ends. A second run on the same student returns 400 CHECKOUT_PLAN_ALREADY_ACTIVE at checkout and 400 SUBSCRIPTION_ENDED at cancel.",
       "item": [
         {
           "name": "Get plan catalogue",
@@ -2332,7 +2333,8 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
-                  "pm.test(\"tier is Base\", function () { pm.expect(pm.response.json().tier).to.eql(\"Base\"); });"
+                  "pm.test(\"tier is Base\", function () { pm.expect(pm.response.json().tier).to.eql(\"Base\"); });",
+                  "pm.collectionVariables.set(\"baseSubscriptionId\", pm.response.json().subscriptions[0].id);"
                 ]
               }
             }
@@ -2344,6 +2346,69 @@
               "raw": "{{baseUrl}}/api/subscriptions/entitlement",
               "host": ["{{baseUrl}}"],
               "path": ["api", "subscriptions", "entitlement"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel subscription",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"plan is cancelled\", function () { pm.expect(pm.response.json().subscriptions[0].status).to.eql(\"Cancelled\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/{{baseSubscriptionId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "{{baseSubscriptionId}}", "cancel"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "PaymobWebhook",
+      "description": "Server-to-server Paymob transaction callback (docs/paymob.md section 8). Anonymous: the HMAC query parameter is the authentication. An unsigned or wrongly signed callback is refused with 401 PAYMOB_WEBHOOK_SIGNATURE_INVALID and changes nothing.",
+      "item": [
+        {
+          "name": "Unsigned webhook is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"signature is invalid\", function () { pm.expect(pm.response.json().code).to.eql(\"PAYMOB_WEBHOOK_SIGNATURE_INVALID\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": { "type": "noauth" },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/paymob/webhook?hmac=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "paymob", "webhook"],
+              "query": [{ "key": "hmac", "value": "0" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"type\":\"TRANSACTION\",\"obj\":{\"id\":1,\"success\":true,\"pending\":false,\"amount_cents\":100,\"currency\":\"EGP\",\"order\":{\"id\":1}}}",
+              "options": { "raw": { "language": "json" } }
             }
           },
           "response": []

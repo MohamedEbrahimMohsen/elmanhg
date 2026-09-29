@@ -7,12 +7,14 @@ import { PaymentHistorySection } from '../components/PaymentHistorySection';
 import { PlanCardGrid } from '../components/PlanCardGrid';
 import { SubscribeHeader } from '../components/SubscribeHeader';
 import { useCheckout } from '../hooks/useCheckout';
+import { useSubscriptionCancellation } from '../hooks/useSubscriptionCancellation';
 
 export function SubscriptionPage() {
   const { t } = useTranslation('subscription');
   const catalogue = useGetPlanCatalogue();
   const entitlement = useGetMyEntitlement();
   const checkout = useCheckout();
+  const cancellation = useSubscriptionCancellation();
 
   const renderPlans = () => {
     if (catalogue.isError || entitlement.isError) {
@@ -32,7 +34,11 @@ export function SubscriptionPage() {
     }
     return (
       <>
-        <CurrentPlanCard entitlement={entitlement.data} />
+        <CurrentPlanCard
+          entitlement={entitlement.data}
+          onCancel={cancellation.cancel}
+          isCancelPending={cancellation.isPending}
+        />
         {checkout.isPending ? (
           <p role="status" className="text-caption text-text-muted">
             {t('checkout.redirecting')}

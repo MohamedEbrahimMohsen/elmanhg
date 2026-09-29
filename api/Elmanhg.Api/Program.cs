@@ -77,6 +77,7 @@ builder.Services.AddCoreUtilities();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 builder.Services.AddHostedService<ExpiredExamSubmissionWorker>();
+builder.Services.AddHostedService<SubscriptionLapseWorker>();
 builder.Services.AddAuthRateLimiting();
 #endregion
 

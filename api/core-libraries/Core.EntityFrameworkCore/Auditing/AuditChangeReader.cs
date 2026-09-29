@@ -10,6 +10,8 @@ namespace Core.EntityFrameworkCore.Auditing;
 
 public static class AuditChangeReader
 {
+    public const string ExcludedAnnotation = "Core:AuditExcluded";
+
     // Bookkeeping stamped on every write; the audit row already carries actor and time.
     private static readonly HashSet<string> IgnoredProperties = [nameof(IEntity.Id), nameof(IEntity.DeletedAt), nameof(IAuditEntity.CreatedBy), nameof(IAuditEntity.CreationDate), nameof(IAuditEntity.UpdatedBy), nameof(IAuditEntity.UpdationDate)];
 
@@ -51,7 +53,7 @@ public static class AuditChangeReader
 
     private static bool IsAudited(EntityState state, PropertyEntry property)
     {
-        if (IgnoredProperties.Contains(property.Metadata.Name) || property.Metadata.IsShadowProperty() || property.Metadata.IsConcurrencyToken)
+        if (IgnoredProperties.Contains(property.Metadata.Name) || property.Metadata.IsShadowProperty() || property.Metadata.IsConcurrencyToken || property.Metadata.FindAnnotation(ExcludedAnnotation)?.Value is true)
         {
             return false;
         }

@@ -184,6 +184,14 @@ public static class ErrorCodes
     public const string PaymentNotFound = "PAYMENT_NOT_FOUND";
     public const string PaymentGatewayUnavailable = "PAYMENT_GATEWAY_UNAVAILABLE";
     public const string FakeCheckoutUnavailable = "FAKE_CHECKOUT_UNAVAILABLE";
+    public const string SubscriptionNotFound = "SUBSCRIPTION_NOT_FOUND";
+    public const string SubscriptionIdRequired = "SUBSCRIPTION_ID_REQUIRED";
+    public const string SubscriptionModifiedConcurrently = "SUBSCRIPTION_MODIFIED_CONCURRENTLY";
+    public const string PaymentModifiedConcurrently = "PAYMENT_MODIFIED_CONCURRENTLY";
+    public const string PaymentTransactionAlreadyRecorded = "PAYMENT_TRANSACTION_ALREADY_RECORDED";
+    public const string PaymentNotificationMismatch = "PAYMENT_NOTIFICATION_MISMATCH";
+    public const string PaymobWebhookSignatureInvalid = "PAYMOB_WEBHOOK_SIGNATURE_INVALID";
+    public const string PaymobWebhookPayloadInvalid = "PAYMOB_WEBHOOK_PAYLOAD_INVALID";
 
     // PLATFORM
     public const string TooManyRequests = "TOO_MANY_REQUESTS";

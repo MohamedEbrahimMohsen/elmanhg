@@ -42,6 +42,21 @@ public sealed class CheckoutEndpointTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task Post_BaseInsideRenewalWindow_ReturnsRedirect()
+    {
+        var (student, client) = await SignedInStudentAsync(factory);
+        await SubscriptionTestData.SeedSubscriptionAsync(factory, new SubscriptionBuilder().ForStudent(student.Id).StartingAt(DateTimeOffset.UtcNow.AddMonths(-1).AddDays(3)).Build(), CancellationToken);
+
+        using var response = await client.PostAsJsonAsync(CheckoutPath, new { plan = "Base", period = "Yearly" }, CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var paymentId = (await response.Content.ReadFromJsonAsync<JsonElement>(CancellationToken)).GetProperty("paymentId").GetGuid();
+        using var scope = factory.Services.CreateScope();
+        var payment = await scope.ServiceProvider.GetRequiredService<AppDbContext>().Payments.SingleAsync(x => x.Id == paymentId, CancellationToken);
+        (payment.Status, payment.Period, payment.PeriodMonths, payment.StudentId).Should().Be((PaymentStatus.Pending, BillingPeriod.Yearly, 12, student.Id));
+    }
+
+    [Fact]
     public async Task Post_FreeStudentBaseMonthly_ReturnsFakeRedirectAndStoresPendingPayment()
     {
         var (student, client) = await SignedInStudentAsync(factory);

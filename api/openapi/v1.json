@@ -593,6 +593,47 @@
         }
       }
     },
+    "/api/subscriptions/{subscriptionId}/cancel": {
+      "post": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "operationId": "CancelSubscription",
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitlementResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitlementResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitlementResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/subjects": {
       "get": {
         "tags": [
@@ -7367,7 +7408,9 @@
           "currentPeriodStart",
           "currentPeriodEnd",
           "entitledUntil",
-          "cancelledAt"
+          "cancelledAt",
+          "inGracePeriod",
+          "canRenew"
         ],
         "type": "object",
         "properties": {
@@ -7402,6 +7445,12 @@
               "string"
             ],
             "format": "date-time"
+          },
+          "inGracePeriod": {
+            "type": "boolean"
+          },
+          "canRenew": {
+            "type": "boolean"
           }
         }
       },

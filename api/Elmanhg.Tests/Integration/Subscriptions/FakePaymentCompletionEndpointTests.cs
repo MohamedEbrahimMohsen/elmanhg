@@ -76,22 +76,23 @@ public sealed class FakePaymentCompletionEndpointTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task Post_SecondBaseCheckoutAfterFirstSucceeded_Returns400AndMarksFailed()
+    public async Task Post_SecondBaseCheckoutAfterFirstSucceeded_ExtendsExistingBase()
     {
         var (student, client) = await SignedInStudentAsync(factory);
         var first = await StartBaseCheckoutAsync(client);
         var second = await StartBaseCheckoutAsync(client);
         using var firstCompletion = await client.PostAsJsonAsync(CompletionPath(first), new { succeeded = true }, CancellationToken);
+        var endAfterFirst = await BaseEndAsync(student.Id);
 
         using var response = await client.PostAsJsonAsync(CompletionPath(second), new { succeeded = true }, CancellationToken);
 
-        firstCompletion.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        (await response.Content.ReadFromJsonAsync<JsonElement>(CancellationToken)).GetProperty("code").GetString().Should().Be("CHECKOUT_PLAN_ALREADY_ACTIVE");
+        (firstCompletion.StatusCode, response.StatusCode).Should().Be((HttpStatusCode.OK, HttpStatusCode.OK));
+        (await response.Content.ReadFromJsonAsync<JsonElement>(CancellationToken)).GetProperty("status").GetString().Should().Be("Succeeded");
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        (await context.Payments.SingleAsync(x => x.Id == second, CancellationToken)).Status.Should().Be(PaymentStatus.Failed);
-        (await context.Subscriptions.CountAsync(x => x.StudentId == student.Id, CancellationToken)).Should().Be(1);
+        var subscription = await context.Subscriptions.SingleAsync(x => x.StudentId == student.Id, CancellationToken);
+        subscription.CurrentPeriodEnd.Should().Be(endAfterFirst.AddMonths(1));
+        (await context.Payments.SingleAsync(x => x.Id == second, CancellationToken)).SubscriptionId.Should().Be(subscription.Id);
     }
 
     [Fact]
@@ -107,6 +108,12 @@ public sealed class FakePaymentCompletionEndpointTests(ApiFactory factory)
         (await response.Content.ReadFromJsonAsync<JsonElement>(CancellationToken)).GetProperty("code").GetString().Should().Be("PAYMENT_NOT_FOUND");
         using var scope = factory.Services.CreateScope();
         (await scope.ServiceProvider.GetRequiredService<AppDbContext>().Payments.SingleAsync(x => x.Id == payment.Id, CancellationToken)).Status.Should().Be(PaymentStatus.Pending);
+    }
+
+    private async Task<DateTimeOffset> BaseEndAsync(Guid studentId)
+    {
+        using var scope = factory.Services.CreateScope();
+        return (await scope.ServiceProvider.GetRequiredService<AppDbContext>().Subscriptions.SingleAsync(x => x.StudentId == studentId, CancellationToken).ConfigureAwait(false)).CurrentPeriodEnd;
     }
 
     private Task<Payment> SeedPendingAsync(Guid studentId) => SubscriptionTestData.SeedPendingPaymentAsync(factory, studentId, SubscriptionPlan.Base, BillingPeriod.Monthly, 19900, CancellationToken);

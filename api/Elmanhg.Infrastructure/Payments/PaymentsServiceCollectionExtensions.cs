@@ -22,6 +22,7 @@ public static class PaymentsServiceCollectionExtensions
                 resilience.Retry.DisableForUnsafeHttpMethods();
             });
         services.AddScoped<FakePaymentGateway>();
+        services.AddSingleton<IPaymentNotificationReader, PaymobNotificationReader>();
         services.AddScoped<IPaymentGateway>(serviceProvider => Options(serviceProvider).Provider switch
         {
             PaymentProvider.Fake => serviceProvider.GetRequiredService<FakePaymentGateway>(),

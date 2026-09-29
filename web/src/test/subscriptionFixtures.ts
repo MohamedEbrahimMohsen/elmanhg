@@ -45,7 +45,13 @@ export function freeEntitlement(): EntitlementResult {
   };
 }
 
-function subscription(id: string, plan: SubscriptionResult['plan'], status: SubscriptionStatus): SubscriptionResult {
+function subscription(
+  id: string,
+  plan: SubscriptionResult['plan'],
+  status: SubscriptionStatus,
+  canRenew = false,
+  inGracePeriod = false,
+): SubscriptionResult {
   return {
     id,
     plan,
@@ -55,16 +61,25 @@ function subscription(id: string, plan: SubscriptionResult['plan'], status: Subs
     currentPeriodEnd: '2026-10-29T12:00:00Z',
     entitledUntil: status === 'Active' || status === 'PastDue' ? '2026-11-01T12:00:00Z' : '2026-10-29T12:00:00Z',
     cancelledAt: status === 'Cancelled' ? '2026-10-01T12:00:00Z' : null,
+    inGracePeriod,
+    canRenew,
   };
 }
 
 export function baseEntitlement({
   withAskTeacher = false,
   status = 'Active',
-}: { withAskTeacher?: boolean; status?: SubscriptionStatus } = {}): EntitlementResult {
-  const subscriptions = [subscription(baseSubscriptionId, 'Base', status)];
+  canRenew = false,
+  inGracePeriod = false,
+}: {
+  withAskTeacher?: boolean;
+  status?: SubscriptionStatus;
+  canRenew?: boolean;
+  inGracePeriod?: boolean;
+} = {}): EntitlementResult {
+  const subscriptions = [subscription(baseSubscriptionId, 'Base', status, canRenew, inGracePeriod)];
   if (withAskTeacher) {
-    subscriptions.push(subscription(askTeacherSubscriptionId, 'AskTeacher', status));
+    subscriptions.push(subscription(askTeacherSubscriptionId, 'AskTeacher', status, canRenew, inGracePeriod));
   }
   return {
     tier: 'Base',

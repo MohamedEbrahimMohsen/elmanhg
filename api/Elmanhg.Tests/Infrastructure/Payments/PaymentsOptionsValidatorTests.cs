@@ -29,6 +29,7 @@ public sealed class PaymentsOptionsValidatorTests
     [InlineData("PublicKey")]
     [InlineData("RedirectionUrl")]
     [InlineData("BillingCountry")]
+    [InlineData("HmacSecret")]
     public void Validate_PaymobRequiredValueBlank_FailsNamingKey(string key)
     {
         var options = PaymentsTestSettings.WithPaymob();
@@ -96,6 +97,7 @@ public sealed class PaymentsOptionsValidatorTests
             nameof(PaymobOptions.PublicKey) => () => paymob.PublicKey = value,
             nameof(PaymobOptions.RedirectionUrl) => () => paymob.RedirectionUrl = value,
             nameof(PaymobOptions.BillingCountry) => () => paymob.BillingCountry = value,
+            nameof(PaymobOptions.HmacSecret) => () => paymob.HmacSecret = value,
             nameof(PaymobOptions.BaseUrl) => () => paymob.BaseUrl = value,
             nameof(PaymobOptions.CheckoutUrl) => () => paymob.CheckoutUrl = value,
             nameof(PaymobOptions.NotificationUrl) => () => paymob.NotificationUrl = value,

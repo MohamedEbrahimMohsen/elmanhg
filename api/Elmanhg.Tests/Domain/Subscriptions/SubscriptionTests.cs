@@ -10,7 +10,9 @@ public sealed class SubscriptionTests
 {
     private static readonly DateTimeOffset Start = SubscriptionBuilder.DefaultStart;
     private static readonly DateTimeOffset MonthEnd = Start.AddMonths(1);
+    private static readonly DateTimeOffset MidPeriod = Start.AddDays(10);
     private static readonly TimeSpan Grace = TimeSpan.FromDays(3);
+    private static readonly TimeSpan RenewalWindow = TimeSpan.FromDays(7);
 
     [Fact]
     public void Start_ValidInput_IsActiveForOnePeriod()
@@ -36,7 +38,7 @@ public sealed class SubscriptionTests
     {
         var subscription = new SubscriptionBuilder().Build();
 
-        subscription.Renew(4, "ref-2");
+        subscription.Renew(BillingPeriod.Monthly, 4, "ref-2", MidPeriod, Grace);
 
         (subscription.CurrentPeriodStart, subscription.CurrentPeriodEnd, subscription.Status).Should().Be((MonthEnd, MonthEnd.AddMonths(4), SubscriptionStatus.Active));
     }
@@ -46,22 +48,61 @@ public sealed class SubscriptionTests
     {
         var subscription = new SubscriptionBuilder().InStatus(SubscriptionStatus.PastDue).Build();
 
-        subscription.Renew(1, null);
+        subscription.Renew(BillingPeriod.Monthly, 1, null, MonthEnd.AddDays(1), Grace);
 
         (subscription.Status, subscription.CurrentPeriodEnd).Should().Be((SubscriptionStatus.Active, MonthEnd.AddMonths(1)));
     }
 
-    [Theory]
-    [InlineData(SubscriptionStatus.Cancelled)]
-    [InlineData(SubscriptionStatus.Expired)]
-    public void Renew_CancelledOrExpired_ThrowsSubscriptionEnded(SubscriptionStatus status)
+    [Fact]
+    public void Renew_Expired_ThrowsSubscriptionEnded()
     {
-        var subscription = new SubscriptionBuilder().InStatus(status).Build();
+        var subscription = new SubscriptionBuilder().InStatus(SubscriptionStatus.Expired).Build();
 
-        var act = () => subscription.Renew(1, null);
+        var act = () => subscription.Renew(BillingPeriod.Monthly, 1, null, MidPeriod, Grace);
 
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.SubscriptionEnded);
         (subscription.CurrentPeriodStart, subscription.CurrentPeriodEnd).Should().Be((Start, MonthEnd));
+    }
+
+    [Fact]
+    public void Renew_CancelledBeforeEnd_ResumesAndClearsCancelledAt()
+    {
+        var subscription = new SubscriptionBuilder().InStatus(SubscriptionStatus.Cancelled).Build();
+
+        subscription.Renew(BillingPeriod.Monthly, 1, null, MidPeriod, Grace);
+
+        (subscription.Status, subscription.CancelledAt, subscription.CurrentPeriodEnd).Should().Be((SubscriptionStatus.Active, (DateTimeOffset?)null, MonthEnd.AddMonths(1)));
+    }
+
+    [Fact]
+    public void Renew_ActivePastGrace_ThrowsSubscriptionEnded()
+    {
+        var subscription = new SubscriptionBuilder().Build();
+
+        var act = () => subscription.Renew(BillingPeriod.Monthly, 1, null, MonthEnd + Grace, Grace);
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.SubscriptionEnded);
+        subscription.CurrentPeriodEnd.Should().Be(MonthEnd);
+    }
+
+    [Fact]
+    public void Renew_InsideGrace_ExtendsFromPreviousPeriodEnd()
+    {
+        var subscription = new SubscriptionBuilder().Build();
+
+        subscription.Renew(BillingPeriod.Monthly, 1, null, MonthEnd.AddDays(2), Grace);
+
+        (subscription.CurrentPeriodStart, subscription.CurrentPeriodEnd).Should().Be((MonthEnd, MonthEnd.AddMonths(1)));
+    }
+
+    [Fact]
+    public void Renew_DifferentPeriod_SwitchesPeriod()
+    {
+        var subscription = new SubscriptionBuilder().Build();
+
+        subscription.Renew(BillingPeriod.Yearly, 12, null, MidPeriod, Grace);
+
+        (subscription.Period, subscription.CurrentPeriodEnd).Should().Be((BillingPeriod.Yearly, MonthEnd.AddMonths(12)));
     }
 
     [Fact]
@@ -69,7 +110,7 @@ public sealed class SubscriptionTests
     {
         var subscription = new SubscriptionBuilder().Build();
 
-        var act = () => subscription.Renew(0, null);
+        var act = () => subscription.Renew(BillingPeriod.Monthly, 0, null, MidPeriod, Grace);
 
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.SubscriptionPeriodInvalid);
         subscription.CurrentPeriodEnd.Should().Be(MonthEnd);
@@ -80,9 +121,23 @@ public sealed class SubscriptionTests
     {
         var subscription = new SubscriptionBuilder().Build();
 
-        subscription.Renew(1, null);
+        subscription.Renew(BillingPeriod.Monthly, 1, null, MidPeriod, Grace);
 
         subscription.PaymobReference.Should().Be(SubscriptionBuilder.Reference);
+    }
+
+    [Theory]
+    [InlineData(8, false)]
+    [InlineData(7, true)]
+    [InlineData(1, true)]
+    [InlineData(-1, true)]
+    public void IsRenewableAt_ByDaysBeforeEnd_OpensInsideWindow(int daysBeforeEnd, bool expected)
+    {
+        var subscription = new SubscriptionBuilder().Build();
+
+        var renewable = subscription.IsRenewableAt(MonthEnd.AddDays(-daysBeforeEnd), RenewalWindow);
+
+        renewable.Should().Be(expected);
     }
 
     [Fact]
@@ -169,5 +224,65 @@ public sealed class SubscriptionTests
         var entitledUntil = subscription.EntitledUntil(Grace);
 
         entitledUntil.Should().Be(daysAfterEnd is null ? null : MonthEnd.AddDays(daysAfterEnd.Value));
+    }
+
+    [Fact]
+    public void Lapse_ActiveBeforeEnd_ReturnsFalseAndKeepsActive()
+    {
+        var subscription = new SubscriptionBuilder().Build();
+
+        var lapsed = subscription.Lapse(MonthEnd.AddTicks(-1), Grace);
+
+        (lapsed, subscription.Status).Should().Be((false, SubscriptionStatus.Active));
+    }
+
+    [Fact]
+    public void Lapse_ActiveAfterEndInsideGrace_BecomesPastDue()
+    {
+        var subscription = new SubscriptionBuilder().Build();
+
+        var lapsed = subscription.Lapse(MonthEnd, Grace);
+
+        (lapsed, subscription.Status, subscription.ExpiredAt).Should().Be((true, SubscriptionStatus.PastDue, (DateTimeOffset?)null));
+    }
+
+    [Fact]
+    public void Lapse_PastDueAfterGrace_ExpiresAtGraceEnd()
+    {
+        var subscription = new SubscriptionBuilder().InStatus(SubscriptionStatus.PastDue).Build();
+
+        var lapsed = subscription.Lapse(MonthEnd.AddDays(10), Grace);
+
+        (lapsed, subscription.Status, subscription.ExpiredAt).Should().Be((true, SubscriptionStatus.Expired, (DateTimeOffset?)(MonthEnd + Grace)));
+    }
+
+    [Fact]
+    public void Lapse_ActiveAfterGrace_ExpiresAtGraceEnd()
+    {
+        var subscription = new SubscriptionBuilder().Build();
+
+        var lapsed = subscription.Lapse(MonthEnd + Grace, Grace);
+
+        (lapsed, subscription.Status, subscription.ExpiredAt).Should().Be((true, SubscriptionStatus.Expired, (DateTimeOffset?)(MonthEnd + Grace)));
+    }
+
+    [Fact]
+    public void Lapse_CancelledAfterEnd_ExpiresAtPeriodEnd()
+    {
+        var subscription = new SubscriptionBuilder().InStatus(SubscriptionStatus.Cancelled).Build();
+
+        var lapsed = subscription.Lapse(MonthEnd.AddDays(1), Grace);
+
+        (lapsed, subscription.Status, subscription.ExpiredAt).Should().Be((true, SubscriptionStatus.Expired, (DateTimeOffset?)MonthEnd));
+    }
+
+    [Fact]
+    public void Lapse_Expired_ReturnsFalse()
+    {
+        var subscription = new SubscriptionBuilder().InStatus(SubscriptionStatus.Expired).Build();
+
+        var lapsed = subscription.Lapse(MonthEnd.AddDays(30), Grace);
+
+        (lapsed, subscription.Status, subscription.ExpiredAt).Should().Be((false, SubscriptionStatus.Expired, (DateTimeOffset?)MonthEnd));
     }
 }

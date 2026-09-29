@@ -42,7 +42,20 @@ public sealed class SubscriptionsOptions
     [Range(1, 100)]
     public int PaymentHistoryMaxPageSize { get; set; } = 50;
 
+    [Range(0, 30)]
+    public int RenewalWindowDays { get; set; } = 7;
+
+    public bool LapseSweepEnabled { get; set; } = true;
+
+    [Range(5, 86400)]
+    public int LapseSweepIntervalSeconds { get; set; } = 300;
+
+    [Range(1, 1000)]
+    public int LapseSweepBatchSize { get; set; } = 100;
+
     public TimeSpan GracePeriod => TimeSpan.FromDays(GracePeriodDays);
+
+    public TimeSpan RenewalWindow => TimeSpan.FromDays(RenewalWindowDays);
 
     public PlanPriceOptions? PriceFor(SubscriptionPlan plan, BillingPeriod period) => plan switch
     {

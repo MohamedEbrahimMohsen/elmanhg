@@ -55,6 +55,26 @@ public sealed class SubscriptionsOptionsTests
     }
 
     [Fact]
+    public void AddApplication_RenewalWindowDaysOutOfRange_ThrowsOptionsValidationException()
+    {
+        using var provider = BuildProvider(WithPrices(new Dictionary<string, string?> { ["Subscriptions:RenewalWindowDays"] = "31" }));
+
+        var act = () => provider.GetRequiredService<IOptions<SubscriptionsOptions>>().Value;
+
+        act.Should().Throw<OptionsValidationException>().Which.Failures.Should().Contain(x => x.Contains(nameof(SubscriptionsOptions.RenewalWindowDays)));
+    }
+
+    [Fact]
+    public void AddApplication_LapseSweepIntervalBelowMinimum_ThrowsOptionsValidationException()
+    {
+        using var provider = BuildProvider(WithPrices(new Dictionary<string, string?> { ["Subscriptions:LapseSweepIntervalSeconds"] = "4" }));
+
+        var act = () => provider.GetRequiredService<IOptions<SubscriptionsOptions>>().Value;
+
+        act.Should().Throw<OptionsValidationException>().Which.Failures.Should().Contain(x => x.Contains(nameof(SubscriptionsOptions.LapseSweepIntervalSeconds)));
+    }
+
+    [Fact]
     public void AddApplication_ConfiguredPrices_ResolvesWithPrdDefaults()
     {
         using var provider = BuildProvider(WithPrices([]));

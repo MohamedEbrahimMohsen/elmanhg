@@ -69,7 +69,7 @@ public sealed class GetMyPaymentsHandlerTests
 
     private Payment Add(Guid studentId, PaymentStatus status)
     {
-        var payment = Payment.Create(studentId, SubscriptionPlan.Base, BillingPeriod.Termly, new Money(69900, "EGP"));
+        var payment = Payment.Create(studentId, SubscriptionPlan.Base, BillingPeriod.Termly, 4, new Money(69900, "EGP"));
         if (status == PaymentStatus.Succeeded)
         {
             payment.MarkSucceeded(Guid.NewGuid(), $"txn-{Guid.NewGuid():N}", "{}", CompletedAt);

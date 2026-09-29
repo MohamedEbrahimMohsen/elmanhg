@@ -297,4 +297,12 @@
   <data name="PAYMENT_NOT_FOUND" xml:space="preserve"><value>Payment not found.</value></data>
   <data name="PAYMENT_GATEWAY_UNAVAILABLE" xml:space="preserve"><value>The payment service is unavailable. Try again in a moment.</value></data>
   <data name="FAKE_CHECKOUT_UNAVAILABLE" xml:space="preserve"><value>Simulated checkout is not available.</value></data>
+  <data name="SUBSCRIPTION_NOT_FOUND" xml:space="preserve"><value>Subscription not found.</value></data>
+  <data name="SUBSCRIPTION_ID_REQUIRED" xml:space="preserve"><value>The subscription id is required.</value></data>
+  <data name="SUBSCRIPTION_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>This subscription was changed by another request. Please try again.</value></data>
+  <data name="PAYMENT_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>This payment was changed by another request. Please try again.</value></data>
+  <data name="PAYMENT_TRANSACTION_ALREADY_RECORDED" xml:space="preserve"><value>This payment transaction has already been recorded.</value></data>
+  <data name="PAYMENT_NOTIFICATION_MISMATCH" xml:space="preserve"><value>The payment notification does not match the payment.</value></data>
+  <data name="PAYMOB_WEBHOOK_SIGNATURE_INVALID" xml:space="preserve"><value>The payment notification signature is not valid.</value></data>
+  <data name="PAYMOB_WEBHOOK_PAYLOAD_INVALID" xml:space="preserve"><value>The payment notification is not valid.</value></data>
 </root>

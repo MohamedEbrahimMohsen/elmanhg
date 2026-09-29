@@ -23,7 +23,8 @@
   "status": {
     "Active": "{plan} — نشطة حتى {date}",
     "PastDue": "{plan} — الدفع متأخر، متاحة حتى {date}",
-    "Cancelled": "{plan} — ملغاة، متاحة حتى {date}"
+    "Cancelled": "{plan} — ملغاة، متاحة حتى {date}",
+    "ActiveGrace": "{plan} — انتهت المدة، متاحة حتى {date}"
   },
   "price": {
     "Monthly": "{price}/شهر",
@@ -75,9 +76,24 @@
       "Termly": "اشترك لفصل دراسي",
       "Yearly": "اشترك سنويًا"
     },
+    "renew": {
+      "Monthly": "جدد شهريًا",
+      "Termly": "جدد لفصل دراسي",
+      "Yearly": "جدد سنويًا"
+    },
     "subscribeAskTeacher": "اشترك",
+    "renewAskTeacher": "جدد",
     "requiresBaseHint": "اشترك في الباقة الأساسية أولًا",
     "redirecting": "جارٍ التحويل إلى صفحة الدفع…"
+  },
+  "cancel": {
+    "button": "إلغاء",
+    "buttonLabel": "إلغاء {plan}",
+    "title": "إلغاء {plan}؟",
+    "body": "ستبقى الباقة متاحة حتى {date}، نهاية المدة التي دفعت ثمنها.",
+    "keep": "الإبقاء على الاشتراك",
+    "confirm": "إلغاء الاشتراك",
+    "done": "تم إلغاء الاشتراك"
   },
   "fakeCheckout": {
     "title": "Paymob checkout (محاكاة)",
