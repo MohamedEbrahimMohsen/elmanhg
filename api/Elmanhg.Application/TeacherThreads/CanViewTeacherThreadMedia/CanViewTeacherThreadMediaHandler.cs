@@ -5,18 +5,18 @@ using Elmanhg.Domain.Teachers;
 using MediatR;
 using System.Security.Claims;
 
-namespace Elmanhg.Application.TeacherThreads.CanViewTeacherThreadImage;
+namespace Elmanhg.Application.TeacherThreads.CanViewTeacherThreadMedia;
 
-public sealed class CanViewTeacherThreadImageHandler(ITeacherThreadRepository teacherThreadRepository, ITeacherSubjectRepository teacherSubjectRepository, ICurrentUserService currentUserService) : IRequestHandler<CanViewTeacherThreadImageQuery, bool>
+public sealed class CanViewTeacherThreadMediaHandler(ITeacherThreadRepository teacherThreadRepository, ITeacherSubjectRepository teacherSubjectRepository, ICurrentUserService currentUserService) : IRequestHandler<CanViewTeacherThreadMediaQuery, bool>
 {
-    public async Task<bool> Handle(CanViewTeacherThreadImageQuery request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(CanViewTeacherThreadMediaQuery request, CancellationToken cancellationToken)
     {
         if (currentUserService.UserId is not { } userId || userId == default)
         {
             return false;
         }
 
-        var thread = await teacherThreadRepository.FirstOrDefaultAsync(x => x.Messages.Any(message => message.ImageUrl == request.ImageUrl), cancellationToken, asNoTracking: true).ConfigureAwait(false);
+        var thread = await teacherThreadRepository.FirstOrDefaultAsync(x => x.Messages.Any(message => message.ImageUrl == request.MediaUrl || message.AudioUrl == request.MediaUrl), cancellationToken, asNoTracking: true).ConfigureAwait(false);
         if (thread is null)
         {
             return false;

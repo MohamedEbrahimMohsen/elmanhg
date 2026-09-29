@@ -50,7 +50,10 @@ export function QuestionEditorForm({ lesson, question }: QuestionEditorFormProps
         <SelectField<QuestionValues>
           name="type"
           label={t('editor.fields.type')}
-          options={questionTypes.map((value) => ({ value, label: t(`types.${value}`) }))}
+          options={questionTypes.map((value) => ({
+            value,
+            label: value === 'Essay' ? t('editor.fields.typeV2', { type: t('types.Essay') }) : t(`types.${value}`),
+          }))}
           disabled={locked}
           description={locked ? t('editor.fields.typeLocked') : undefined}
         />

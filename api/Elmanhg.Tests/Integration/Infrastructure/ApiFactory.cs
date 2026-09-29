@@ -56,6 +56,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("AiService:Provider", "Fake");
         // The index sweep would race tests that reindex through the mediator and assert exact chunk and index state.
         builder.UseSetting("ContentRetrieval:IndexSweepEnabled", "false");
+        // The sweep would race tests that transcribe through the mediator.
+        builder.UseSetting("AskTeacher:TranscriptionSweepEnabled", "false");
         builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
             // UseVector() makes EF build an NpgsqlDataSource, whose connection string drops the password unless it is persisted; tests that open raw connections read it back through DbContext.
@@ -89,6 +91,13 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Content:QuestionImportMaxRows"] = "500",
             ["Content:QuestionImportMaxFileSizeInMb"] = "5",
             ["Content:ServableCountCacheSeconds"] = "60",
+            ["Content:QuestionEssayMaxWordsMax"] = "2000",
+            ["Content:QuestionRubricCriteriaMaxCount"] = "10",
+            ["Content:QuestionRubricLevelsMaxCount"] = "6",
+            ["Content:QuestionRubricPointsMax"] = "100",
+            ["Content:QuestionRubricTextMaxLength"] = "1000",
+            ["Content:QuestionModelAnswersMaxCount"] = "3",
+            ["Content:QuestionModelAnswerMaxLength"] = "20000",
             ["QuestionValidation:QueueMaxPageSize"] = "100",
             ["QuestionValidation:QueueMaxAgeDays"] = "365",
             ["QuestionValidation:RejectionReasonMaxLength"] = "1000",

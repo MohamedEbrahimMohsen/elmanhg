@@ -12,6 +12,7 @@ public sealed class TeacherThreadBuilder
     private string? _imageUrl;
     private Guid? _claimedBy;
     private bool _answered;
+    private string? _voiceAudioUrl;
 
     public TeacherThreadBuilder ForStudent(Guid studentId)
     {
@@ -50,13 +51,24 @@ public sealed class TeacherThreadBuilder
         return this;
     }
 
+    public TeacherThreadBuilder AnsweredByVoice(Guid teacherId, string audioUrl)
+    {
+        _claimedBy = teacherId;
+        _voiceAudioUrl = audioUrl;
+        return this;
+    }
+
     public TeacherThread Build()
     {
         var thread = TeacherThread.Submit(_studentId, _context, "Why is F = ma?", _imageUrl, _submittedAt, TimeSpan.FromHours(24));
         if (_claimedBy is { } teacherId)
         {
             thread.Claim(teacherId, _submittedAt.AddMinutes(10));
-            if (_answered)
+            if (_voiceAudioUrl is not null)
+            {
+                thread.ReplyWithVoice(teacherId, "Voice transcript.", _voiceAudioUrl, 42, _submittedAt.AddHours(1));
+            }
+            else if (_answered)
             {
                 thread.Reply(teacherId, "Because force equals mass times acceleration.", _submittedAt.AddHours(1));
             }

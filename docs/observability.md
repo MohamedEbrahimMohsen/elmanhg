@@ -44,7 +44,7 @@ The Grafana, Loki and Tempo images are AGPL-licensed operator tools. They run un
 | api | one span per background sweep, `job <name>`, tagged `elmanhg.job` and `elmanhg.outcome`, marked as an error when listing failed | `BackgroundJobMetrics` (`ActivitySource` `Elmanhg`) |
 | api | errors: `CoreExceptionMiddleware` tags the request span with `app.error_code`, and adds an `exception` event for 5xx | `Core.Exceptions` |
 | ai | one SERVER span per request (`/health*` excluded) | FastAPI instrumentation |
-| ai | one CLIENT span per model call: `chat <model>` or `embeddings <model>`, with GenAI attributes and token usage | `clients/metered.py` |
+| ai | one CLIENT span per model call: `chat <model>`, `embeddings <model>` or `transcription <model>`, with GenAI attributes and token usage (chat and embeddings) | `clients/metered.py` |
 
 - Sampling: `ParentBased(TraceIdRatio)`. `Observability__TraceSampleRatio` and `ELMANHG_AI_TRACE_SAMPLE_RATIO` (default 1.0) set the share of new traces kept. A request that arrives with a sampled `traceparent` is always kept, so API and AI never split a trace.
 - Propagation: W3C `traceparent`. Caddy passes the header through unchanged. The API continues it, and its `HttpClient` sends it to the AI service. The AI service reports the server span's trace id as `X-Trace-Id` and in its logs.
@@ -71,14 +71,14 @@ Prometheus receives OTLP from the collector (`--web.enable-otlp-receiver`). Name
 | (recording rule) | p95 per route | s | `http_route` | Prometheus, over sessions, exams and browse routes of the API | `elmanhg:api_route_latency_p95:rate15m` |
 | `http.client.request.duration` | histogram | s | `server.address`, `http.response.status_code` | HttpClient (api) | `http_client_request_duration_seconds_*` |
 | `System.Runtime` meter | various | | | .NET runtime (GC, memory, thread pool) | `dotnet_*` |
-| `gen_ai.client.operation.duration` | histogram | s | `gen_ai.operation.name` (`chat`, `embeddings`), `gen_ai.provider.name`, `gen_ai.request.model`, `error.type` on failure | `clients/metered.py` (ai) | `gen_ai_client_operation_duration_seconds_*` |
+| `gen_ai.client.operation.duration` | histogram | s | `gen_ai.operation.name` (`chat`, `embeddings`, `transcription`), `gen_ai.provider.name`, `gen_ai.request.model`, `error.type` on failure | `clients/metered.py` (ai) | `gen_ai_client_operation_duration_seconds_*` |
 | `gen_ai.client.token.usage` | histogram | {token} | the same, plus `gen_ai.token.type` (`input`, `output`) | `clients/metered.py` | `gen_ai_client_token_usage_*` |
 | `elmanhg.ai.cost` | counter | {USD} | operation, provider, model | `clients/metered.py` (price settings in docs/ai-service.md) | `elmanhg_ai_cost_total` |
 | `probe_success` | gauge | | `target_name` (`edge`, `api`, `ai`), `instance` | blackbox exporter | `probe_success` |
 
 Request outcomes (`elmanhg.outcome` on `elmanhg.requests`): `Success`; `VALIDATION_FAILED` for any validation failure; `CANCELLED` when the caller went away; the error code of any other core exception (for example `SESSION_NOT_FOUND`, `AI_SERVICE_UNAVAILABLE`); `UNHANDLED_EXCEPTION` otherwise. Every tag value is a type name, an enum name or an error code, never an id or user data.
 
-Background jobs (`elmanhg.job`): `exam-auto-submit`, `subscription-lapse`, `lesson-content-index`. A job registers when its worker starts (last success = now). Each sweep records one run: `Failed` when listing the work threw, `PartiallyFailed` when at least one item failed, `Succeeded` otherwise. Only a sweep that is not `Failed` advances the last success.
+Background jobs (`elmanhg.job`): `exam-auto-submit`, `subscription-lapse`, `lesson-content-index`, `teacher-voice-transcription`. A job registers when its worker starts (last success = now). Each sweep records one run: `Failed` when listing the work threw, `PartiallyFailed` when at least one item failed, `Succeeded` otherwise. Only a sweep that is not `Failed` advances the last success.
 
 ## 5. Logs
 
@@ -140,7 +140,7 @@ Rules live in `deploy/observability/prometheus/rules/elmanhg.rules.yml`, and eac
 | `ApiTelemetryMissing` | no `target_info{job="elmanhg-api"}` for 10 m, for 5 m | warning | Is `OTLP_ENDPOINT` set, and is `otel-collector` running (`docker compose logs otel-collector`)? |
 | `BackgroundJobStale` | now − last success > 3 × interval, for 5 m | warning | Background jobs → Worker logs; restart `api` if the worker loop stopped |
 | `BackgroundJobFailing` | ≥ 3 `Failed` sweeps in 15 m | warning | The listing query failed: check the database and the API logs |
-| `BackgroundJobItemsFailing` | ≥ 10 failed items in 30 m | warning | Worker logs show the failing ids; fix the data or the dependency (the AI service for `lesson-content-index`) |
+| `BackgroundJobItemsFailing` | ≥ 10 failed items in 30 m | warning | Worker logs show the failing ids; fix the data or the dependency (the AI service for `lesson-content-index` and `teacher-voice-transcription`) |
 | `ApiUnhandledErrors` | any `UNHANDLED_EXCEPTION` in 10 m | warning | Errors across services; find the trace by its id and fix the bug |
 | `ProviderUnavailable` | ≥ 5 `AI_SERVICE_UNAVAILABLE`, `OTP_CHANNEL_UNAVAILABLE` or `PAYMENT_GATEWAY_UNAVAILABLE` in 15 m | warning | Check the provider's status page and the matching `*.env` keys |
 | `OtpDeliveryFailing` | ≥ 5 failed OTP sends in 15 m | critical | Nobody can sign in: check the WhatsApp or Resend credentials and quotas ([docs/otp-delivery.md](otp-delivery.md)) |

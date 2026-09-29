@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { questionDifficulties, questionMaxScoreMax, questionOptionsMin, questionTypes } from '../api/questionOptions';
 import { splitLines } from '../api/questionValues';
 import { countOccurrences, hasRichTextContent } from '../api/richTextContent';
+import { addEssayIssues } from './essayRules';
 
 const errorKey = (key: string) => `questions:editor.errors.${key}`;
 
@@ -37,6 +38,17 @@ export const questionEditorSchema = z
     tolerance: z.string(),
     toleranceMode: z.enum(['absolute', 'percent']),
     acceptedAnswers: z.string(),
+    maxWords: z.string(),
+    criteria: z.array(
+      z.object({
+        id: z.string(),
+        title: z.string(),
+        description: z.string(),
+        points: z.string(),
+        levels: z.array(z.object({ points: z.string(), description: z.string() })),
+      }),
+    ),
+    modelAnswers: z.array(z.object({ text: z.string() })),
   })
   .superRefine((values, context) => {
     const issue = (path: (string | number)[], message: string) => {
@@ -92,6 +104,9 @@ export const questionEditorSchema = z
     }
     if (values.type === 'Short' && values.answerKind === 'text' && splitLines(values.acceptedAnswers).length === 0) {
       issue(['acceptedAnswers'], errorKey('acceptedAnswers'));
+    }
+    if (values.type === 'Essay') {
+      addEssayIssues(values, issue);
     }
   });
 

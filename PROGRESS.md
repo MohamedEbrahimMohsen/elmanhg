@@ -1,12 +1,12 @@
 # Elmanhg — autopilot progress
 
-Last updated: laptop session, after story #113 merged (main at `07a3e4b`).
-**Next story: #92 [E8.S4] Conversation logging**, the first row of "Remaining stories".
+Last updated: laptop session, after story #96 merged (main at `df47428`).
+**Next story: #97 [E9.S4] SLA timers, reminders and follow-up rules**, the first row of "Remaining stories".
 The laptop run did #54–#64; the cloud session did #65–#76 (see "Running in a cloud session" and "Hand-off" below).
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (40 of 60)
+## Finished stories (42 of 60)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -50,18 +50,18 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 38 | #95 [E9.S2] Teacher inbox, claiming and text replies | #208 | 1 | skipped (too many files) | #209 |
 | 39 | #91 [E8.S3] Avatar chat with context bundles | #210 | 2 (+main merge) | skipped (too many files) | #211 |
 | 40 | #113 [E13.S2] Observability | #212 | 3 (+main merge) | skipped (too many files) | #213 |
+| 41 | #92 [E8.S4] Conversation logging | #214 | 1 (+main merge) | skipped (too many files) | #215 |
+| 42 | #96 [E9.S3] Voice replies with transcription | #216 | 2 (+main merge) | skipped (too many files) | #217 |
 
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (20), in run order
+## Remaining stories (18), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
 | Order | Issue | Story |
 |---|---|---|
-| 27 | #92 | [E8.S4] Conversation logging |
-| 30 | #96 | [E9.S3] Voice replies with transcription |
 | 31 | #97 | [E9.S4] SLA timers, reminders and follow-up rules |
 | 32 | #104 | [E11.S1] Dashboard metrics queries |
 | 33 | #105 | [E11.S2] Dashboard UI |
@@ -138,7 +138,7 @@ The dev answered these before a 3-day unattended run. The laptop session took ov
   - Paymob (E10)
   - Claude API for the avatar and essay grading (E8 and E14)
   - OpenAI Whisper for voice-reply transcription (#96)
-  - S3-compatible storage (AWS S3, R2 or MinIO, with MinIO in compose) for voice notes and uploads
+  - S3-compatible storage (AWS S3 or Cloudflare R2 (managed, by config); no MinIO (image unavailable) — local dev uses local disk) for voice notes and uploads
 - **OTP delivery (#171, new story, runs before E10):**
   - WhatsApp through the Meta Cloud API: **enabled**.
   - Email through Resend.com: **enabled**.
@@ -215,4 +215,4 @@ How the next agent resumes, in a cloud session or on the laptop:
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199, #201, #204, #205, #207, #209, #211, #213 · `dev-decision`: none open (#135 and #155 confirmed and closed).
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199, #201, #204, #205, #207, #209, #211, #213, #215, #217 · `dev-decision`: none open (#135 and #155 confirmed and closed).

@@ -100,6 +100,20 @@ public static class ErrorCodes
     public const string QuestionAnswerKindRequired = "QUESTION_ANSWER_KIND_REQUIRED";
     public const string QuestionNumericValueRequired = "QUESTION_NUMERIC_VALUE_REQUIRED";
     public const string QuestionToleranceInvalid = "QUESTION_TOLERANCE_INVALID";
+    public const string QuestionTypeNotGradable = "QUESTION_TYPE_NOT_GRADABLE";
+    public const string QuestionEssayMaxWordsInvalid = "QUESTION_ESSAY_MAX_WORDS_INVALID";
+    public const string QuestionRubricCriteriaCountInvalid = "QUESTION_RUBRIC_CRITERIA_COUNT_INVALID";
+    public const string QuestionRubricCriterionIdInvalid = "QUESTION_RUBRIC_CRITERION_ID_INVALID";
+    public const string QuestionRubricCriterionIdDuplicate = "QUESTION_RUBRIC_CRITERION_ID_DUPLICATE";
+    public const string QuestionRubricCriterionTitleRequired = "QUESTION_RUBRIC_CRITERION_TITLE_REQUIRED";
+    public const string QuestionRubricTextTooLong = "QUESTION_RUBRIC_TEXT_TOO_LONG";
+    public const string QuestionRubricPointsInvalid = "QUESTION_RUBRIC_POINTS_INVALID";
+    public const string QuestionRubricLevelsCountInvalid = "QUESTION_RUBRIC_LEVELS_COUNT_INVALID";
+    public const string QuestionRubricLevelPointsInvalid = "QUESTION_RUBRIC_LEVEL_POINTS_INVALID";
+    public const string QuestionRubricLevelDescriptionRequired = "QUESTION_RUBRIC_LEVEL_DESCRIPTION_REQUIRED";
+    public const string QuestionModelAnswersCountInvalid = "QUESTION_MODEL_ANSWERS_COUNT_INVALID";
+    public const string QuestionModelAnswerRequired = "QUESTION_MODEL_ANSWER_REQUIRED";
+    public const string QuestionModelAnswerTooLong = "QUESTION_MODEL_ANSWER_TOO_LONG";
     public const string QuestionAnswerInvalid = "QUESTION_ANSWER_INVALID";
     public const string QuestionPageNumberInvalid = "QUESTION_PAGE_NUMBER_INVALID";
     public const string QuestionPageSizeInvalid = "QUESTION_PAGE_SIZE_INVALID";
@@ -233,6 +247,13 @@ public static class ErrorCodes
     public const string TeacherThreadReplyTextRequired = "TEACHER_THREAD_REPLY_TEXT_REQUIRED";
     public const string TeacherThreadReplyTextTooLong = "TEACHER_THREAD_REPLY_TEXT_TOO_LONG";
     public const string TeacherInboxFilterInvalid = "TEACHER_INBOX_FILTER_INVALID";
+    public const string TeacherVoiceAudioRequired = "TEACHER_VOICE_AUDIO_REQUIRED";
+    public const string TeacherVoiceAudioTypeInvalid = "TEACHER_VOICE_AUDIO_TYPE_INVALID";
+    public const string TeacherVoiceAudioTooLarge = "TEACHER_VOICE_AUDIO_TOO_LARGE";
+    public const string TeacherVoiceDurationInvalid = "TEACHER_VOICE_DURATION_INVALID";
+    public const string TeacherVoiceDraftIdRequired = "TEACHER_VOICE_DRAFT_ID_REQUIRED";
+    public const string TeacherVoiceDraftNotFound = "TEACHER_VOICE_DRAFT_NOT_FOUND";
+    public const string TeacherVoiceAudioNotFound = "TEACHER_VOICE_AUDIO_NOT_FOUND";
 
     // ANALYTICS
     public const string FunnelAnonymousIdRequired = "FUNNEL_ANONYMOUS_ID_REQUIRED";

@@ -103,6 +103,30 @@ def test_settings_embedding_dimensions_above_2000_raises_validation_error() -> N
     assert error.value.errors()[0]["loc"] == ("embedding_dimensions",)
 
 
+def test_settings_defaults_select_fake_transcription_whisper() -> None:
+    settings = Settings(service_token=SecretStr(VALID_TOKEN))
+
+    assert settings.transcription_provider == "fake"
+    assert settings.transcription_model == "whisper-1"
+    assert settings.transcription_timeout_seconds == 60
+    assert settings.transcription_max_audio_bytes == 10_485_760
+    assert settings.transcription_max_duration_seconds == 600
+
+
+def test_settings_openai_transcription_without_api_key_raises_validation_error() -> None:
+    with pytest.raises(ValidationError) as error:
+        Settings(service_token=SecretStr(VALID_TOKEN), transcription_provider="openai")
+
+    assert "openai_api_key is required when transcription_provider is openai" in str(error.value)
+
+
+def test_settings_transcription_max_audio_bytes_above_25mb_raises_validation_error() -> None:
+    with pytest.raises(ValidationError) as error:
+        Settings(service_token=SecretStr(VALID_TOKEN), transcription_max_audio_bytes=26_214_401)
+
+    assert error.value.errors()[0]["loc"] == ("transcription_max_audio_bytes",)
+
+
 def test_settings_blank_otlp_endpoint_is_none() -> None:
     settings = Settings(service_token=SecretStr(VALID_TOKEN), otlp_endpoint="  ")
 

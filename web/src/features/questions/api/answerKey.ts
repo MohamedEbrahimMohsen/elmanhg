@@ -22,5 +22,7 @@ export function toAnswerKey(values: QuestionValues): QuestionAnswer {
         ...answer,
         text: values.answerKind === 'numeric' ? values.numericValue : (splitLines(values.acceptedAnswers)[0] ?? ''),
       };
+    case 'Essay':
+      return answer;
   }
 }

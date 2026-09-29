@@ -20,13 +20,23 @@ from elmanhg_ai.clients.embedding import (
 )
 from elmanhg_ai.clients.fake_embedding import FakeEmbeddingClient
 from elmanhg_ai.clients.fake_model import FakeModelClient
-from elmanhg_ai.clients.metered import AiMetrics, MeteredEmbeddingClient, MeteredModelClient
+from elmanhg_ai.clients.fake_transcription import FakeTranscriptionClient
+from elmanhg_ai.clients.metered import (
+    AiMetrics,
+    MeteredEmbeddingClient,
+    MeteredModelClient,
+    MeteredTranscriptionClient,
+)
 from elmanhg_ai.clients.model import ModelMessage, ModelReply, ModelRequest, estimate_cost_usd
+from elmanhg_ai.clients.transcription import TranscriptionRequest, estimate_transcription_cost_usd
 from elmanhg_ai.core.errors import ModelUnavailableError
 from elmanhg_ai.settings import Settings
 
 REQUEST = ModelRequest(system="system", messages=(ModelMessage("user", "hi"),), max_tokens=64)
 EMBEDDING_REQUEST = EmbeddingRequest(texts=("قانون أوم",), input_type="query", dimensions=8)
+TRANSCRIPTION_REQUEST = TranscriptionRequest(
+    audio=b"voice", content_type="audio/webm", language="ar", duration_seconds=30
+)
 REPLY = ModelReply(text="ok", model="m", input_tokens=120, output_tokens=40, stop_reason="end_turn")
 
 
@@ -78,6 +88,17 @@ def metered_embedding(
     inner: FakeEmbeddingClient, instruments: Instruments, settings: Settings
 ) -> MeteredEmbeddingClient:
     return MeteredEmbeddingClient(
+        inner,
+        metrics=instruments.metrics,
+        tracer=instruments.tracer_provider.get_tracer("test"),
+        settings=settings,
+    )
+
+
+def metered_transcription(
+    inner: FakeTranscriptionClient, instruments: Instruments, settings: Settings
+) -> MeteredTranscriptionClient:
+    return MeteredTranscriptionClient(
         inner,
         metrics=instruments.metrics,
         tracer=instruments.tracer_provider.get_tracer("test"),
@@ -170,6 +191,45 @@ async def test_metered_embedding_failure_records_error_type_and_reraises(
 
     [duration] = instruments.points("gen_ai.client.operation.duration")
     assert (duration.attributes or {})["error.type"] == "TimeoutError"
+
+
+async def test_metered_transcription_success_records_duration_cost_and_span(
+    instruments: Instruments, settings: Settings
+) -> None:
+    client = metered_transcription(FakeTranscriptionClient(), instruments, settings)
+
+    await client.transcribe(TRANSCRIPTION_REQUEST)
+
+    [duration] = instruments.points("gen_ai.client.operation.duration")
+    assert dict(duration.attributes or {}) == {
+        "gen_ai.operation.name": "transcription",
+        "gen_ai.provider.name": settings.transcription_provider,
+        "gen_ai.request.model": settings.transcription_model,
+    }
+    assert instruments.points("gen_ai.client.token.usage") == []
+    [cost] = instruments.points("elmanhg.ai.cost")
+    assert isinstance(cost, NumberDataPoint)
+    assert cost.value == pytest.approx(float(estimate_transcription_cost_usd(30, settings)))
+    [span] = instruments.spans.get_finished_spans()
+    assert span.name == f"transcription {settings.transcription_model}"
+    assert span.kind == SpanKind.CLIENT
+
+
+async def test_metered_transcription_failure_records_error_type_and_reraises(
+    instruments: Instruments, settings: Settings
+) -> None:
+    client = metered_transcription(
+        FakeTranscriptionClient([ModelUnavailableError()]), instruments, settings
+    )
+
+    with pytest.raises(ModelUnavailableError):
+        await client.transcribe(TRANSCRIPTION_REQUEST)
+
+    [duration] = instruments.points("gen_ai.client.operation.duration")
+    assert (duration.attributes or {})["error.type"] == "DEPENDENCY_UNAVAILABLE"
+    assert instruments.points("elmanhg.ai.cost") == []
+    [span] = instruments.spans.get_finished_spans()
+    assert span.status.status_code == StatusCode.ERROR
 
 
 class ClosingModelClient(FakeModelClient):

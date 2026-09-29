@@ -1,0 +1,49 @@
+VERDICT: CHANGES_REQUESTED
+
+# Review — [E9.S3] Voice replies with transcription (#96)
+
+## Blocking
+
+### 1. The `.ogg` and `.m4a`/`.mp4` signature checks have no failing test, and `.mp4` has no passing test
+**Where:** `api/Elmanhg.Application/TeacherInbox/RecordVoiceDraft/TeacherVoiceFormats.cs:24-25`; tests `api/Elmanhg.Tests/Application/Features/TeacherInbox/RecordVoiceDraft/RecordVoiceDraftValidatorTests.cs:75-81`
+**Rule:** testing convention (every validator rule needs a failing case); the caller's brief (the surviving `.ogg` mutation is blocking); plan D9.
+**Problem:** The only signature-mismatch test is `Validate_SignatureMismatch_FailsTypeInvalid`, which sends PNG bytes named `voice.webm`. No test sends a `.ogg` or `.m4a`/`.mp4` file with the wrong bytes. `02-implementation.md` (Build & test, "Not caught") confirms that replacing the `.ogg` arm with `true` passes the whole suite, and says the m4a/mp4 arm has the same gap. The `.mp4` extension, which D9 allows, is never validated in any test.
+**Failure:** A regression to `".ogg" => true` (or dropping `header.Length >= 8 &&` / the `ftyp` compare) lets `voice.ogg` or `voice.m4a` with arbitrary bytes, for example PNG or HTML, be stored under `teacher-threads/` and served as `audio/ogg`/`audio/mp4`. CI stays green.
+**Fix:** In `RecordVoiceDraftValidatorTests`, add a Theory `Validate_SignatureMismatchPerExtension_FailsTypeInvalid` with PNG bytes as `voice.ogg`/`audio/ogg`, `voice.m4a`/`audio/mp4` and `voice.mp4`/`audio/mp4`, each expecting exactly `TEACHER_VOICE_AUDIO_TYPE_INVALID`. Add a short m4a case too (fewer than 8 bytes, e.g. `00 00 00 20 66 74`), and a `voice.mp4` + `M4a` bytes row to `Validate_ValidOggAndM4a_Passes`.
+
+### 2. The transcription HttpClient keeps the default 100 s `HttpClient.Timeout`, so the configured 150 s budget never applies
+**Where:** `api/Elmanhg.Infrastructure/AiService/AiServiceServiceCollectionExtensions.cs:25-34`
+**Rule:** plan D12/D13 (a separate typed client whose own timeout is `TranscriptionTimeoutSeconds` 150, which nests over Python's ~121 s worst case); docs-sync (`docs/ai-service.md` § Configuration, line 233 "under the API's 150 s"; `docs/deployment.md` table row `AiService__TranscriptionTimeoutSeconds` "above the AI service's worst case (about 121 s)").
+**Problem:** `AddHttpClient<HttpAiTranscriptionClient>` sets only `BaseAddress`. An `IHttpClientFactory` client has `HttpClient.Timeout = 100 s`, and that timeout wraps the whole handler pipeline, resilience handler included. The resilience `AttemptTimeout`/`TotalRequestTimeout` of 150 s therefore never takes effect: the call is cancelled at 100 s. The existing chat client is not affected because its budget (50 s) is under 100 s.
+**Failure:** With `AiService:Provider=Http`, Whisper's first attempt times out in Python at 60 s and the retry answers at about 110 s. .NET has already cancelled at 100 s (`TaskCanceledException`, mapped to `AI_SERVICE_UNAVAILABLE`), so the worker records a failed attempt for a transcription that was succeeding. A long clip can fail all 4 attempts and end `Failed`. Any `AiService__TranscriptionTimeoutSeconds` above 100 is silently ignored, which contradicts the docs' nesting claim.
+**Fix:** In the transcription typed-client configure delegate, set `client.Timeout = Timeout.InfiniteTimeSpan` and let the resilience handler own the budget. Setting it to `TranscriptionTimeoutSeconds` plus a margin also works. Add a test in `AiServiceServiceCollectionExtensionsTests` that resolves the typed client and asserts its `HttpClient.Timeout` is not below `TranscriptionTimeoutSeconds`.
+
+## Non-blocking
+- `api/Elmanhg.Api/FileStorage/PublicMediaMiddleware.cs:80-89`: `IsPublicKey` does not refuse percent signs. Kestrel leaves an encoded slash (%2F) encoded, so `GET /api/media/teacher-threads%2Fx.webm` passes the check as a single segment and reaches `GetObjectAsync` with that literal key. Today only the SDK's own key encoding keeps this from resolving to the private object. Keys are always hex plus an extension, so allow-listing `[A-Za-z0-9._/-]` is cheap defence in depth. Add that spelling to `Invoke_PrivateFolderAnySpelling_Returns404WithoutReading`.
+- `web/src/features/askTeacher/hooks/useVoiceRecorder.ts:61-67,94-104`: if the teacher switches the «نص / صوت» radio while recording, the unmount cleanup stops the tracks. The MediaRecorder then fires `stop`, which uploads the abandoned recording (an orphan draft) and creates an object URL that is never revoked. Guard the `stop` listener with an unmounted/cancelled flag, or remove the listener in the cleanup.
+- `api/Elmanhg.Infrastructure/Storage/S3FileStorage.cs:31-32`: only `ResponseStream` is kept, and the `GetObjectResponse` is never disposed. Disposing the stream releases the connection in practice. Also, on AWS S3 without `s3:ListBucket`, a missing key is a 403, not a 404, so the public proxy returns 500 instead of 404. Document that the key needs ListBucket, or map it.
+- `api/Elmanhg.Infrastructure/Storage/FileStorageOptionsValidator.cs:58`: with an empty `S3ServiceUrl`, the default `S3Region=auto` is accepted, although it is not an AWS region. Consider requiring a real region when there is no service URL.
+- `SendVoiceReplyHandlerTests`: no admin-claimer case and no "claimed by another teacher" case. Both are covered indirectly, by `RecordVoiceDraftHandlerTests.Handle_AdminClaimer_SkipsSubjectAssignment` (the same `TeacherInboxAccess` helper) and by the domain `ReplyWithVoice_ClaimedByOther_ThrowsAlreadyClaimed`. Worth adding later.
+- `PROGRESS.md:141` still says "AWS S3, R2 or MinIO, with MinIO in compose". The code and `docs/deployment.md` follow the current no-MinIO decision. The orchestrator should update that line; it is outside `/docs`, so it does not gate.
+
+## Verified
+- Build and tests, run by me: `dotnet test api/ -c Release` with `appsettings.json` moved aside and then restored gives Passed 3162/3162. ai: `pytest -m "not eval"` 172 passed, 2 deselected; `ruff format --check` clean; `ruff check` clean; `mypy src` clean (44 files); `uv sync --locked` OK. web: `tsc -b` exit 0; `eslint --max-warnings=0` exit 0; `prettier --check --end-of-line auto` clean; `vitest --run` 965/965 in 166 files.
+- Media privacy: `TeacherThreadMediaMiddleware.cs:20-38` runs `CanViewTeacherThreadMediaQuery` before `OpenReadAsync`, for both providers (registered for Local and S3 in `MediaStorageExtensions.cs:104`). The predicate matches only a sent message's `ImageUrl`/`AudioUrl`, so draft audio is never served (`Get_UnsentDraftAudio_Returns404ForItsTeacher`). Local static files still exclude `teacher-threads`. The S3 public proxy refuses empty keys, backslashes, tildes, dot and empty segments, and the private folder in any case or with trailing dots. It reads only from the configured bucket by key, so there is no URL fetch and no SSRF.
+- Upload validation: extension, media type (before `;`), signature and size cascade (`RecordVoiceDraftValidator.cs:15-28`); duration is 1..180. Size cap 5 MB, and ai-side caps of 10 MB / 600 s.
+- Worker: a scope per call, `when (!stoppingToken.IsCancellationRequested)` filters, failure goes to `FailVoiceDraftTranscriptionCommand`, retries are bounded (4 attempts, 15/30/60 s), and failing drafts leave the head of the batch through `NextAttemptAt` (the #81 lesson). It is idempotent: `IsDueAt` guards transcribe, and the Pending guard makes fail a no-op.
+- Secrets: the OpenAI key goes only into the `Authorization` header, and transcript text is never logged. The S3 credentials go only into `BasicAWSCredentials`, and validator messages name keys, not values. The fakes stay the default (ai `fake`, `AiService:Provider` Fake, `FileStorage:Provider` Local in the baked example config).
+- S3 adapter: matches plan I2/I4/D8 (bucket/key, `AutoCloseStream=false`, `DisablePayloadSigning`, content type from the key, NotFound-only catch, R2 config).
+- Contract: every file in *Files to create* exists (A9 existed on main, as reported). The deletions and moves were done. The migration is additive with Restrict FKs, and `TranscriptFinal` defaults to false. `TeacherVoiceDraft` is in the soft-delete filter. The 4 endpoints use `AskTeacherReply`. All 10 codes are in both resx files and both web `errors.*` files.
+- Every row in the Deviations table of `02-implementation.md` was checked and is accurate.
+- Postman: the voice thread and draft chain uses `voiceThreadId`/`voiceDraftId`, is ordered before "Get inbox (mine)", and its methods and URLs match the controller.
+- Docs: all the docs the plan lists were updated and agree with the code, except the timeout nesting (finding 2).
+- Web: every visual value is a design token. There is no red on the recorder, both `<audio>` elements have an `aria-label`, and the transcribing status is `aria-live="polite"`.
+
+## Test quality
+- `RecordVoiceDraftValidatorTests`: good for webm, media type, size and duration. It does not constrain the ogg/m4a/mp4 signature arms (finding 1).
+- The handler tests (Record, Send, GetVoiceDraft, Transcribe, Fail) constrain the behaviour. Predicates are compiled over in-memory lists, `Received(1)`/`DidNotReceive()` is on Save and on storage, and guard ordering is checked.
+- The domain tests constrain the backoff exponent, the status machine and the microsecond truncation. The worker tests constrain failure recording, continue-after-failure and the stop path.
+- `PublicMediaMiddlewareTests` and `S3FileStorageTests` constrain the implementation.
+- `AiServiceServiceCollectionExtensionsTests` (transcription rows): they assert the resolved type only. Nothing constrains the client timeout, which is how finding 2 went unnoticed.
+- `VoiceReplyEndpointTests` / `TeacherThreadMediaEndpointTests`: real end-to-end checks of storage, DB state and the media access rule.
+- The web voice page tests assert request bodies, polling and the failed and denied states. They constrain the implementation.

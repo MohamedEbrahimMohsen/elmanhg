@@ -43,3 +43,18 @@ export const shortTextSpecSchema = z.object({
   acceptedAnswers: z.array(z.string()),
   normalization: normalizationSchema.optional(),
 });
+
+export const essayBodySchema = z.object({ maxWords: z.number().int().optional() });
+
+export const essaySpecSchema = z.object({
+  criteria: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      description: z.string().optional(),
+      points: z.number(),
+      levels: z.array(z.object({ points: z.number(), description: z.string() })),
+    }),
+  ),
+  modelAnswers: z.array(z.string()),
+});

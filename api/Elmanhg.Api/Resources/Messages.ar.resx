@@ -173,6 +173,20 @@
   <data name="QUESTION_ANSWER_KIND_REQUIRED" xml:space="preserve"><value>اختر اجابة رقمية او نصية.</value></data>
   <data name="QUESTION_NUMERIC_VALUE_REQUIRED" xml:space="preserve"><value>اكتب الرقم الصحيح.</value></data>
   <data name="QUESTION_TOLERANCE_INVALID" xml:space="preserve"><value>اكتب هامش خطا صفرا او اكثر واختر قيمة مطلقة او نسبة مئوية.</value></data>
+  <data name="QUESTION_TYPE_NOT_GRADABLE" xml:space="preserve"><value>هذا النوع من الاسئلة يصححه مصحح الذكاء الاصطناعي وليس المصحح التجريبي.</value></data>
+  <data name="QUESTION_ESSAY_MAX_WORDS_INVALID" xml:space="preserve"><value>اكتب حدا للكلمات رقما صحيحا في النطاق المسموح او اتركه فارغا.</value></data>
+  <data name="QUESTION_RUBRIC_CRITERIA_COUNT_INVALID" xml:space="preserve"><value>اضف معيارا واحدا على الاقل وبما لا يتجاوز الحد المسموح.</value></data>
+  <data name="QUESTION_RUBRIC_CRITERION_ID_INVALID" xml:space="preserve"><value>معرف كل معيار من 1 الى 20 حرفا لاتينيا صغيرا او رقما او شرطة.</value></data>
+  <data name="QUESTION_RUBRIC_CRITERION_ID_DUPLICATE" xml:space="preserve"><value>يجب الا يتكرر معرف المعيار.</value></data>
+  <data name="QUESTION_RUBRIC_CRITERION_TITLE_REQUIRED" xml:space="preserve"><value>اكتب عنوانا لكل معيار.</value></data>
+  <data name="QUESTION_RUBRIC_TEXT_TOO_LONG" xml:space="preserve"><value>عنوان المعيار او وصفه او وصف المستوى اطول من المسموح.</value></data>
+  <data name="QUESTION_RUBRIC_POINTS_INVALID" xml:space="preserve"><value>نقاط كل معيار رقم صحيح من 1 الى الحد المسموح.</value></data>
+  <data name="QUESTION_RUBRIC_LEVELS_COUNT_INVALID" xml:space="preserve"><value>يحتاج كل معيار الى مستويين او اكثر بما لا يتجاوز الحد المسموح.</value></data>
+  <data name="QUESTION_RUBRIC_LEVEL_POINTS_INVALID" xml:space="preserve"><value>نقاط المستويات ارقام صحيحة مختلفة من 0 الى نقاط المعيار وتشمل 0 والنقاط كاملة.</value></data>
+  <data name="QUESTION_RUBRIC_LEVEL_DESCRIPTION_REQUIRED" xml:space="preserve"><value>اكتب وصفا لكل مستوى.</value></data>
+  <data name="QUESTION_MODEL_ANSWERS_COUNT_INVALID" xml:space="preserve"><value>اضف اجابة نموذجية واحدة على الاقل وبما لا يتجاوز الحد المسموح.</value></data>
+  <data name="QUESTION_MODEL_ANSWER_REQUIRED" xml:space="preserve"><value>لا يمكن ان تكون الاجابة النموذجية فارغة.</value></data>
+  <data name="QUESTION_MODEL_ANSWER_TOO_LONG" xml:space="preserve"><value>الاجابة النموذجية اطول من المسموح.</value></data>
   <data name="QUESTION_OBJECTIVE_NOT_IN_LESSON" xml:space="preserve"><value>هذا الهدف لا ينتمي الى درس السؤال.</value></data>
   <data name="QUESTION_TYPE_IMMUTABLE" xml:space="preserve"><value>لا يمكن تغيير نوع السؤال. انشئ سؤالا جديدا بدلا من ذلك.</value></data>
   <data name="QUESTION_NOT_PENDING" xml:space="preserve"><value>لا يمكن اعتماد الا سؤال قيد المراجعة.</value></data>
@@ -348,6 +362,16 @@
   <data name="TEACHER_THREAD_REPLY_TEXT_REQUIRED" xml:space="preserve"><value>اكتب الرد.</value></data>
   <data name="TEACHER_THREAD_REPLY_TEXT_TOO_LONG" xml:space="preserve"><value>الرد طويل جدا.</value></data>
   <data name="TEACHER_INBOX_FILTER_INVALID" xml:space="preserve"><value>تصفية الأسئلة غير صالحة.</value></data>
+  <data name="TEACHER_VOICE_AUDIO_REQUIRED" xml:space="preserve"><value>أرفق التسجيل الصوتي.</value></data>
+  <data name="TEACHER_VOICE_AUDIO_TYPE_INVALID" xml:space="preserve"><value>التسجيل يجب أن يكون WEBM أو OGG أو M4A.</value></data>
+  <data name="TEACHER_VOICE_AUDIO_TOO_LARGE" xml:space="preserve"><value>حجم التسجيل أكبر من المسموح.</value></data>
+  <data name="TEACHER_VOICE_DURATION_INVALID" xml:space="preserve"><value>مدة التسجيل غير صالحة.</value></data>
+  <data name="TEACHER_VOICE_DRAFT_ID_REQUIRED" xml:space="preserve"><value>التسجيل مطلوب.</value></data>
+  <data name="TEACHER_VOICE_DRAFT_NOT_FOUND" xml:space="preserve"><value>التسجيل غير موجود.</value></data>
+  <data name="TEACHER_VOICE_AUDIO_NOT_FOUND" xml:space="preserve"><value>ملف التسجيل غير موجود.</value></data>
+  <data name="TEACHER_VOICE_DRAFT_NOT_READY" xml:space="preserve"><value>لم ينته تفريغ التسجيل بعد.</value></data>
+  <data name="TEACHER_VOICE_DRAFT_ALREADY_SENT" xml:space="preserve"><value>أرسل هذا التسجيل من قبل.</value></data>
+  <data name="TEACHER_VOICE_DRAFT_NOT_PENDING" xml:space="preserve"><value>لا ينتظر هذا التسجيل التفريغ.</value></data>
   <data name="FUNNEL_ANONYMOUS_ID_REQUIRED" xml:space="preserve"><value>معرف الزائر مطلوب.</value></data>
   <data name="FUNNEL_EVENT_TYPE_INVALID" xml:space="preserve"><value>نوع الحدث غير صالح.</value></data>
   <data name="CLIENT_ERROR_MESSAGE_REQUIRED" xml:space="preserve"><value>رسالة الخطأ مطلوبة.</value></data>

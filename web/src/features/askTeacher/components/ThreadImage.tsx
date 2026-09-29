@@ -1,31 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { http } from '@/shared/lib/http';
+import { blobToDataUrl } from '../api/blobToDataUrl';
 
 export interface ThreadImageProps {
   url: string;
-}
-
-// Keeps each String.fromCharCode spread well under the engine's argument limit.
-const chunkSize = 0x8000;
-
-async function toDataUrl(blob: Blob): Promise<string> {
-  if (!blob.type.startsWith('image/')) {
-    throw new Error('The attachment is not an image.');
-  }
-  const bytes = new Uint8Array(await blob.arrayBuffer());
-  let binary = '';
-  for (let index = 0; index < bytes.length; index += chunkSize) {
-    binary += String.fromCharCode(...bytes.subarray(index, index + chunkSize));
-  }
-  return `data:${blob.type};base64,${btoa(binary)}`;
 }
 
 export function ThreadImage({ url }: ThreadImageProps) {
   const { t } = useTranslation('askTeacher');
   const image = useQuery({
     queryKey: ['askTeacher', 'image', url],
-    queryFn: async ({ signal }) => toDataUrl(await http<Blob>(url, { signal })),
+    queryFn: async ({ signal }) => blobToDataUrl(await http<Blob>(url, { signal }), 'image/'),
     staleTime: Infinity,
   });
 

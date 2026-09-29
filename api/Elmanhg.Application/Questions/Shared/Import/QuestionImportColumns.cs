@@ -29,6 +29,8 @@ public static class QuestionImportColumns
 
     private static readonly IReadOnlyList<string> CommonTail = [Explanation, Difficulty, MaxScore, Objective, Tags];
 
+    public static IReadOnlyList<QuestionType> Types { get; } = [QuestionType.Mcq, QuestionType.Multi, QuestionType.TrueFalse, QuestionType.Fill, QuestionType.Short];
+
     public static string Option(string id) => $"option_{id}";
 
     public static string Blank(string id) => $"blank_{id}";
@@ -93,7 +95,7 @@ public static class QuestionImportColumns
     public static QuestionType? TypeForSheet(string sheetName)
     {
         var name = sheetName.Trim();
-        return Enum.GetValues<QuestionType>()
+        return Types
             .Select(x => (QuestionType?)x)
             .FirstOrDefault(x => string.Equals(x.ToString(), name, StringComparison.OrdinalIgnoreCase));
     }

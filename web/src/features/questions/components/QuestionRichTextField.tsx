@@ -5,7 +5,7 @@ import { RichTextEditor } from '@/features/content';
 import type { QuestionValues } from '../schemas/questionEditorSchema';
 
 export interface QuestionRichTextFieldProps {
-  name: 'stem' | 'explanation' | `options.${number}.text`;
+  name: 'stem' | 'explanation' | `options.${number}.text` | `modelAnswers.${number}.text`;
   label: string;
   description?: string | undefined;
   compact?: boolean;

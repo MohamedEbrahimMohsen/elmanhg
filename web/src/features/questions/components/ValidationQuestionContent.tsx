@@ -4,6 +4,7 @@ import type { ValidationQuestionDetailResult } from '@/shared/api/generated/mode
 import { toAnswerKey } from '../api/answerKey';
 import { toStudentQuestion } from '../api/studentQuestion';
 import type { QuestionValues } from '../schemas/questionEditorSchema';
+import { EssayRubricView } from './EssayRubricView';
 import { QuestionView } from './QuestionView';
 
 export interface ValidationQuestionContentProps {
@@ -27,6 +28,9 @@ export function ValidationQuestionContent({ question, values }: ValidationQuesti
           disabled
         />
       </section>
+      {values.type === 'Essay' ? (
+        <EssayRubricView criteria={values.criteria} modelAnswers={values.modelAnswers} />
+      ) : null}
       <section aria-label={t('validation.detail.explanation')} className={cardClassName}>
         <h2 className="font-display text-h3 font-semibold">{t('validation.detail.explanation')}</h2>
         <RichTextViewer html={question.explanation} />

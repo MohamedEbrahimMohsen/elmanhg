@@ -4,7 +4,8 @@
     "Multi": "Multiple answers",
     "TrueFalse": "True or false",
     "Fill": "Fill in the blank",
-    "Short": "Short answer"
+    "Short": "Short answer",
+    "Essay": "Essay"
   },
   "statuses": {
     "Pending": "Pending review",
@@ -88,7 +89,8 @@
       "noObjective": "No objective",
       "maxScore": "Points",
       "tags": "Tags",
-      "tagsHint": "Separate tags with commas."
+      "tagsHint": "Separate tags with commas.",
+      "typeV2": "{type} (v2)"
     },
     "options": {
       "legend": "Options",
@@ -143,7 +145,36 @@
       "acceptedAnswers": "Add at least one accepted answer.",
       "blankPlaceholder": "Place each blank's [[id]] exactly once in the question text.",
       "number": "Enter a number.",
-      "tolerance": "Enter a tolerance of 0 or more."
+      "tolerance": "Enter a tolerance of 0 or more.",
+      "maxWords": "Enter a word limit from 1 to 2000, or leave it empty.",
+      "criteriaCount": "Add at least one criterion.",
+      "rubricPoints": "Enter whole points from 1 to 100.",
+      "levelsCount": "Add at least two levels.",
+      "levelPoints": "Enter whole points from 0 to the criterion's points.",
+      "levelScale": "Levels need different points, including 0 and the criterion's full points.",
+      "modelAnswersCount": "Add at least one model answer."
+    },
+    "essay": {
+      "maxWords": "Word limit (optional)",
+      "maxWordsHint": "Shown to the student under the answer box.",
+      "rubricLegend": "Grading rubric",
+      "rubricHint": "Total points: {total}. The score is the points earned ÷ {total} × the question's points.",
+      "criterion": "Criterion {number}",
+      "criterionTitle": "Criterion {number} title",
+      "criterionDescription": "What criterion {number} checks (optional)",
+      "criterionPoints": "Criterion {number} points",
+      "addCriterion": "Add criterion",
+      "removeCriterion": "Remove criterion {number}",
+      "levelsLegend": "Levels of criterion {number}",
+      "levelPoints": "Criterion {number}, level {level} points",
+      "levelDescription": "Criterion {number}, level {level} description",
+      "addLevel": "Add level to criterion {number}",
+      "removeLevel": "Remove level {level} of criterion {number}",
+      "modelAnswersLegend": "Model answers",
+      "modelAnswersHint": "Used by the AI grader; never shown to the student.",
+      "modelAnswer": "Model answer {number}",
+      "addModelAnswer": "Add model answer",
+      "removeModelAnswer": "Remove model answer {number}"
     }
   },
   "preview": {
@@ -154,7 +185,8 @@
     "partial": "Partially correct",
     "incorrect": "Incorrect",
     "score": "Score {score} / {maxScore}",
-    "gradeFailed": "This draft cannot be graded yet."
+    "gradeFailed": "This draft cannot be graded yet.",
+    "essayNotGradable": "Essays are graded by the AI grader; the test grader does not cover them."
   },
   "view": {
     "answerLegend": "Your answer",
@@ -164,7 +196,11 @@
     "blankMarker": "({number})",
     "yourAnswer": "Your answer",
     "correctOption": "Correct answer",
-    "wrongOption": "Your answer, wrong"
+    "wrongOption": "Your answer, wrong",
+    "essayLabel": "Your essay",
+    "essayPlaceholder": "Write your answer",
+    "essayWords": "{count} words",
+    "essayWordsOf": "{count} of {max} words"
   },
   "import": {
     "title": "Import questions",
@@ -261,7 +297,13 @@
       "previousRejection": "Previous rejection reason: {reason}",
       "preview": "Preview as the student sees it",
       "explanation": "Explanation",
-      "gradingSpec": "Grading spec (JSON)"
+      "gradingSpec": "Grading spec (JSON)",
+      "rubric": "Grading rubric",
+      "rubricTotal": "Total points: {total}",
+      "criterionPoints": "({points} points)",
+      "level": "{points} points: {description}",
+      "modelAnswers": "Model answers",
+      "modelAnswer": "Model answer {number}"
     },
     "decision": {
       "title": "Decision",

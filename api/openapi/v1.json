@@ -651,6 +651,36 @@
         }
       }
     },
+    "/api/teacher-inbox/voice-settings": {
+      "get": {
+        "tags": [
+          "TeacherInbox"
+        ],
+        "operationId": "GetVoiceReplySettings",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceReplySettingsResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceReplySettingsResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceReplySettingsResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/teacher-inbox/{threadId}": {
       "get": {
         "tags": [
@@ -765,6 +795,191 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/ReplyToTeacherThreadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher-inbox/{threadId}/voice-drafts": {
+      "post": {
+        "tags": [
+          "TeacherInbox"
+        ],
+        "operationId": "RecordTeacherVoiceDraft",
+        "parameters": [
+          {
+            "name": "threadId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "audio": {
+                        "$ref": "#/components/schemas/IFormFile"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "durationSeconds": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                          "integer",
+                          "string"
+                        ],
+                        "format": "int32"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherVoiceDraftResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherVoiceDraftResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherVoiceDraftResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher-inbox/{threadId}/voice-drafts/{draftId}": {
+      "get": {
+        "tags": [
+          "TeacherInbox"
+        ],
+        "operationId": "GetTeacherVoiceDraft",
+        "parameters": [
+          {
+            "name": "threadId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "draftId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherVoiceDraftResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherVoiceDraftResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherVoiceDraftResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher-inbox/{threadId}/voice-replies": {
+      "post": {
+        "tags": [
+          "TeacherInbox"
+        ],
+        "operationId": "SendTeacherVoiceReply",
+        "parameters": [
+          {
+            "name": "threadId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendVoiceReplyRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendVoiceReplyRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendVoiceReplyRequest"
               }
             }
           },
@@ -9065,7 +9280,8 @@
           "Multi",
           "TrueFalse",
           "Fill",
-          "Short"
+          "Short",
+          "Essay"
         ]
       },
       "QuestionValidationStatus": {
@@ -9314,6 +9530,25 @@
           },
           "message": {
             "type": "string"
+          }
+        }
+      },
+      "SendVoiceReplyRequest": {
+        "required": [
+          "draftId",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "draftId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "text": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -10630,7 +10865,9 @@
           "kind",
           "text",
           "imageUrl",
-          "createdAt"
+          "createdAt",
+          "audioUrl",
+          "audioDurationSeconds"
         ],
         "type": "object",
         "properties": {
@@ -10656,6 +10893,21 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "audioUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "audioDurationSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -10861,6 +11113,64 @@
             "type": "boolean"
           }
         }
+      },
+      "TeacherVoiceDraftResult": {
+        "required": [
+          "id",
+          "threadId",
+          "status",
+          "transcript",
+          "audioDurationSeconds",
+          "recordedAt",
+          "transcribedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "threadId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TeacherVoiceDraftStatus"
+          },
+          "transcript": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "audioDurationSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "transcribedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "TeacherVoiceDraftStatus": {
+        "enum": [
+          "Pending",
+          "Ready",
+          "Failed",
+          "Sent"
+        ]
       },
       "UnitExamBlueprintResult": {
         "required": [
@@ -11675,6 +11985,31 @@
       },
       "VerifyOTPResult": {
         "type": "object"
+      },
+      "VoiceReplySettingsResult": {
+        "required": [
+          "maxDurationSeconds",
+          "maxSizeInMb"
+        ],
+        "type": "object",
+        "properties": {
+          "maxDurationSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "maxSizeInMb": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
       },
       "WeakLessonResult": {
         "required": [

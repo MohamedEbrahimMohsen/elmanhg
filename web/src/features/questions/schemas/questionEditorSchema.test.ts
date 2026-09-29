@@ -116,4 +116,98 @@ describe('questionEditorSchema', () => {
 
     expect(questionEditorSchema.safeParse(values).success).toBe(true);
   });
+
+  const essay = (overrides: Partial<QuestionValues> = {}): QuestionValues => ({
+    ...emptyQuestionValues('Essay'),
+    stem: '<p>Explain inertia.</p>',
+    criteria: [
+      {
+        id: 'c1',
+        title: 'Definition',
+        description: '',
+        points: '2',
+        levels: [
+          { points: '0', description: 'Missing' },
+          { points: '2', description: 'Complete' },
+        ],
+      },
+    ],
+    modelAnswers: [{ text: '<p>x</p>' }],
+    ...overrides,
+  });
+
+  const essayLevels = (levels: { points: string; description: string }[]) =>
+    essay({ criteria: [{ id: 'c1', title: 'Definition', description: '', points: '2', levels }] });
+
+  it('accepts a complete essay', () => {
+    expect(questionEditorSchema.safeParse(essay()).success).toBe(true);
+  });
+
+  it('requires a criterion and a model answer for an essay', () => {
+    const paths = issues(essay({ criteria: [], modelAnswers: [] })).map((issue) => issue.path);
+
+    expect(paths).toEqual(expect.arrayContaining(['criteria', 'modelAnswers']));
+  });
+
+  it('flags an essay criterion without a title or with invalid points', () => {
+    const criteria = [
+      {
+        id: 'c1',
+        title: '',
+        description: '',
+        points: '0',
+        levels: [
+          { points: '0', description: 'Missing' },
+          { points: '2', description: 'Complete' },
+        ],
+      },
+    ];
+
+    const paths = issues(essay({ criteria })).map((issue) => issue.path);
+
+    expect(paths).toEqual(expect.arrayContaining(['criteria.0.title', 'criteria.0.points']));
+  });
+
+  it('requires two levels on a full 0-to-points scale', () => {
+    expect(issues(essayLevels([{ points: '0', description: 'Missing' }]))).toContainEqual({
+      path: 'criteria.0.levels',
+      message: 'questions:editor.errors.levelsCount',
+    });
+    expect(
+      issues(
+        essayLevels([
+          { points: '1', description: 'Partial' },
+          { points: '2', description: 'Complete' },
+        ]),
+      ),
+    ).toContainEqual({ path: 'criteria.0.levels', message: 'questions:editor.errors.levelScale' });
+  });
+
+  it('flags an essay level without a description or above the criterion points', () => {
+    const paths = issues(
+      essayLevels([
+        { points: '0', description: 'Missing' },
+        { points: '5', description: '' },
+      ]),
+    ).map((issue) => issue.path);
+
+    expect(paths).toEqual(expect.arrayContaining(['criteria.0.levels.1.description', 'criteria.0.levels.1.points']));
+  });
+
+  it('rejects an essay word limit outside 1 to 2000', () => {
+    for (const maxWords of ['0', '2001', 'abc']) {
+      expect(issues(essay({ maxWords }))).toContainEqual({
+        path: 'maxWords',
+        message: 'questions:editor.errors.maxWords',
+      });
+    }
+    expect(issues(essay({ maxWords: '' })).map((issue) => issue.path)).not.toContain('maxWords');
+  });
+
+  it('requires model answer text', () => {
+    expect(issues(essay({ modelAnswers: [{ text: '<p></p>' }] }))).toContainEqual({
+      path: 'modelAnswers.0.text',
+      message: 'validation.required',
+    });
+  });
 });

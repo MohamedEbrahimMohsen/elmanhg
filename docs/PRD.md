@@ -120,7 +120,7 @@ Transitions: **Publish** Draft or Archived → Published (sets `published_at`). 
 | Field | Values |
 |---|---|
 | Validation status | Pending · Approved · Rejected |
-| Servable (derived, not stored) | `Approved AND lesson.state == Published AND question.not_retired` |
+| Servable (derived, not stored) | `Approved AND lesson.state == Published AND question.not_retired AND type != Essay` (until student essay input ships, E14.S3) |
 
 Rules:
 - A question is created as Pending. Only a Teacher assigned to the question's subject can Approve or Reject.
@@ -480,7 +480,8 @@ Subscription(id, student_id, plan[Base|AskTeacher], period[Monthly|Termly|Yearly
 Payment(id, student_id, subscription_id?, plan, period, period_months, amount_minor, currency, status[Pending|Succeeded|Failed|Refunded], paymob_txn_id?, provider_order_id?, raw_webhook_json?, completed_at?, review_reason?, review_resolved_at?, review_resolved_by?, refunded_at?, refunded_by?, refund_reason?, refund_transaction_id?, refund_idempotency_key?, created_at)  -- docs/subscriptions.md
 
 TeacherThread(id, student_id, teacher_id?, subject_id, context_json, status[Open|Answered|Closed], submitted_at, sla_due_at, claimed_at?, closed_at?, rating?)  -- docs/ask-teacher.md
-TeacherMessage(id, thread_id, sender_id, kind[Text|Voice], text, image_url?, audio_url?, transcript_final bool, student_read_at?, created_at)
+TeacherMessage(id, thread_id, sender_id, kind[Text|Voice], text, image_url?, audio_url?, audio_duration_seconds?, transcript_final bool, student_read_at?, created_at)
+TeacherVoiceDraft(id, thread_id, teacher_id, audio_key, audio_url, audio_duration_seconds, status[Pending|Ready|Failed|Sent], transcript?, transcription_model?, attempts, next_attempt_at?, recorded_at, transcribed_at?, sent_message_id?)  -- transcription job; docs/ask-teacher.md
 
 AvatarConversation(id, student_id, entry_point, subject_id?, unit_id?, lesson_id?, session_id?, question_id?, started_at, last_message_at, message_count)  -- docs/avatar.md
 AvatarMessage(id, conversation_id, position, role[Student|Assistant], text, created_at, model?, prompt_version?, input_tokens?, output_tokens?, cost_usd?, stop_reason?, history_message_count?, context_json?, citations_json?)  -- append-only; replies carry the context bundle, model and prompt version
@@ -527,7 +528,7 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 
 ## 17. Key business rules (single list, for implementation reference)
 
-1. Servable = Approved ∧ Lesson Published ∧ not retired. Derived, never stored.
+1. Servable = Approved ∧ Lesson Published ∧ not retired. Derived, never stored; essays are not servable until student essay input ships.
 2. Content edit on an Approved question → Pending, version + 1. Historical attempts keep the old version.
 3. Only a Teacher assigned to the subject may validate. Admins cannot.
 4. Rejection requires a reason.
@@ -546,11 +547,11 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 ## 18. Recommended technical shape (for the implementation workflow to adopt or adjust)
 
 - **Backend**: .NET 10, DDD/CQRS, PostgreSQL (JSONB for question bodies; pgvector for Avatar retrieval).
-- **AI/grading service**: Python FastAPI — LLM grading (v2), SymPy CAS checks (v2), Avatar embeddings + generation (v1). Retrieval search itself runs in the .NET API over pgvector (see `docs/content-retrieval.md`), transcription orchestration (v1).
+- **AI/grading service**: Python FastAPI — LLM grading (v2), SymPy CAS checks (v2), Avatar embeddings + generation (v1). Retrieval search itself runs in the .NET API over pgvector (see `docs/content-retrieval.md`), speech-to-text through OpenAI Whisper (v1; the API's background worker schedules and retries it).
 - **LLM**: Claude API. Confirm current model IDs and pricing at build time.
 - **Embeddings**: OpenAI text-embedding-3-small (1536) through the AI service; Anthropic has no embeddings API. Fake by default.
 - **Frontend**: React + TypeScript, shadcn/ui, i18next RTL. v2 adds a math input with LaTeX preview, a drag-and-drop canvas, and a rich Arabic editor.
-- **Media**: S3-compatible object storage for images and audio.
+- **Media**: S3-compatible object storage for images and audio; private media (question photos, voice replies) is served only through the API after an access check.
 - **Jobs / realtime**: background jobs for grading, transcription, SLA reminders; SignalR for grade results and teacher replies.
 - **Payments**: Paymob, webhook-driven.
 - **Hosting**: Docker Compose on one VPS per environment (staging, production); Caddy (TLS, SPA, /api proxy), images built by CI and pushed to GHCR; PostgreSQL + pgvector. Object storage (from #96) is a managed S3-compatible service (Cloudflare R2 or AWS S3), set by config; local dev and CI use the local-disk store, and there is no object-store container in compose. Runbook: docs/deployment.md.
@@ -565,8 +566,8 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 3. Multi-select partial-credit formula: on or off by default?
 4. Should unit-exam access be gated on opening all lessons? (Default: no gate.)
 5. Avatar daily limits for Free vs Base. Configured defaults: Free 5/day, Base 50/day.
-6. Transcription provider for Arabic voice (evaluate quality on Egyptian dialect before committing).
-7. v2: essay rubric format — free criteria list, or a fixed platform-wide template?
+6. Transcription provider for Arabic voice (evaluate quality on Egyptian dialect before committing). The evaluation harness is in `docs/ai-service.md`; the run waits for recorded Egyptian-dialect clips.
+7. v2: essay rubric format. Decided (#117): a free criteria list per question; each criterion has points (its weight) and a level scale from 0 to full points; one to three model answers.
 
 ---
 

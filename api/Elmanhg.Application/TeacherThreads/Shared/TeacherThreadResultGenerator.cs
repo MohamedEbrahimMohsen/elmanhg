@@ -36,5 +36,5 @@ public static class TeacherThreadResultGenerator
 
     public static TeacherThreadContextResult GenerateContext(TeacherThreadContext context) => new(context.SubjectId, context.SubjectName, context.UnitId, context.UnitName, context.LessonId, context.LessonName, context.QuestionId, context.QuestionVersion, context.QuestionStem, context.AttemptId);
 
-    private static TeacherMessageResult GenerateMessage(TeacherThread thread, TeacherMessage message) => new(message.Id, message.SenderId == thread.StudentId, message.Kind, message.Text, message.ImageUrl, message.CreatedAt);
+    private static TeacherMessageResult GenerateMessage(TeacherThread thread, TeacherMessage message) => new(message.Id, message.SenderId == thread.StudentId, message.Kind, message.Text, message.ImageUrl, message.CreatedAt, message.AudioUrl, message.AudioDurationSeconds);
 }

@@ -2,6 +2,7 @@ import { useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import type { QuestionValues } from '../schemas/questionEditorSchema';
 import { ChoiceOptionsField } from './ChoiceOptionsField';
+import { EssayFields } from './EssayFields';
 import { FillBlanksField } from './FillBlanksField';
 import { SelectField } from './SelectField';
 import { ShortAnswerFields } from './ShortAnswerFields';
@@ -30,5 +31,7 @@ export function TypeSpecificFields() {
       return <FillBlanksField />;
     case 'Short':
       return <ShortAnswerFields />;
+    case 'Essay':
+      return <EssayFields />;
   }
 }

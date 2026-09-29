@@ -23,26 +23,35 @@ export function QuestionPreviewPanel() {
     >
       <h2 className="font-display text-h2 font-bold">{t('preview.title')}</h2>
       <QuestionView question={question} answer={answer} onAnswerChange={setAnswer} />
-      <div>
-        <Button
-          variant="secondary"
-          disabled={isPending}
-          onClick={() => {
-            grade(getValues(), answer);
-          }}
-        >
-          {isPending ? t('preview.grading') : t('preview.tryAnswer')}
-        </Button>
-      </div>
-      {errorCode ? (
-        <div role="alert" className="flex flex-col gap-1 rounded-md border border-danger bg-danger-soft px-3.5 py-3">
-          <p className="text-ui font-semibold text-danger">{t('preview.gradeFailed')}</p>
-          <p className="text-caption text-text">
-            {t([`common:errors.${errorCode}`, 'common:errors.UNHANDLED_EXCEPTION'])}
-          </p>
-        </div>
-      ) : null}
-      {result ? <GradeResultPanel result={result} /> : null}
+      {values.type === 'Essay' ? (
+        <p className="text-caption text-text-muted">{t('preview.essayNotGradable')}</p>
+      ) : (
+        <>
+          <div>
+            <Button
+              variant="secondary"
+              disabled={isPending}
+              onClick={() => {
+                grade(getValues(), answer);
+              }}
+            >
+              {isPending ? t('preview.grading') : t('preview.tryAnswer')}
+            </Button>
+          </div>
+          {errorCode ? (
+            <div
+              role="alert"
+              className="flex flex-col gap-1 rounded-md border border-danger bg-danger-soft px-3.5 py-3"
+            >
+              <p className="text-ui font-semibold text-danger">{t('preview.gradeFailed')}</p>
+              <p className="text-caption text-text">
+                {t([`common:errors.${errorCode}`, 'common:errors.UNHANDLED_EXCEPTION'])}
+              </p>
+            </div>
+          ) : null}
+          {result ? <GradeResultPanel result={result} /> : null}
+        </>
+      )}
     </section>
   );
 }

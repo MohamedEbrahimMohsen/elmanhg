@@ -17,4 +17,28 @@ public sealed class AskTeacherOptions
 
     [Range(1, 20000)]
     public int ReplyTextMaxLength { get; set; } = 4000;
+
+    [Range(1, 25)]
+    public int VoiceMaxSizeInMb { get; set; } = 5;
+
+    [Range(10, 600)]
+    public int VoiceMaxDurationSeconds { get; set; } = 180;
+
+    [Required]
+    [RegularExpression("^[a-z]{2}$")]
+    public string TranscriptionLanguage { get; set; } = "ar";
+
+    public bool TranscriptionSweepEnabled { get; set; } = true;
+
+    [Range(1, 3600)]
+    public int TranscriptionSweepIntervalSeconds { get; set; } = 5;
+
+    [Range(1, 100)]
+    public int TranscriptionSweepBatchSize { get; set; } = 5;
+
+    [Range(1, 10)]
+    public int TranscriptionMaxAttempts { get; set; } = 4;
+
+    [Range(1, 3600)]
+    public int TranscriptionRetryBaseDelaySeconds { get; set; } = 15;
 }

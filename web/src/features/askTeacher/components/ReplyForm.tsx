@@ -21,26 +21,23 @@ export function ReplyForm({ threadId }: ReplyFormProps) {
   });
 
   return (
-    <div className="rounded-lg border border-border bg-surface p-4 shadow-1">
-      <Form
-        form={form}
-        onSubmit={async (values) => {
-          await submit(values);
-        }}
-        serverErrorFields={{
-          TEACHER_THREAD_REPLY_TEXT_REQUIRED: 'text',
-          TEACHER_THREAD_REPLY_TEXT_TOO_LONG: 'text',
-        }}
-      >
-        <h2 className="font-display text-h2 font-bold lg:text-h2-desktop">{t('inboxThread.replyTitle')}</h2>
-        <TextAreaField<ReplyFormValues>
-          name="text"
-          label={t('inboxThread.replyLabel')}
-          description={t('inboxThread.replyHint')}
-        />
-        <FormRootError />
-        <SubmitButton>{t('inboxThread.send')}</SubmitButton>
-      </Form>
-    </div>
+    <Form
+      form={form}
+      onSubmit={async (values) => {
+        await submit(values);
+      }}
+      serverErrorFields={{
+        TEACHER_THREAD_REPLY_TEXT_REQUIRED: 'text',
+        TEACHER_THREAD_REPLY_TEXT_TOO_LONG: 'text',
+      }}
+    >
+      <TextAreaField<ReplyFormValues>
+        name="text"
+        label={t('inboxThread.replyLabel')}
+        description={t('inboxThread.replyHint')}
+      />
+      <FormRootError />
+      <SubmitButton>{t('inboxThread.send')}</SubmitButton>
+    </Form>
   );
 }
