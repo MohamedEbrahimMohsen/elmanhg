@@ -279,4 +279,12 @@
   <data name="MULTI_UNIT_EXAM_UNIT_DUPLICATE" xml:space="preserve"><value>A unit was chosen more than once.</value></data>
   <data name="MULTI_UNIT_EXAM_SIZE_INVALID" xml:space="preserve"><value>The number of questions must be 20, 40 or 60.</value></data>
   <data name="MULTI_UNIT_EXAM_NO_BLUEPRINT" xml:space="preserve"><value>Some chosen units have no exam: {units}</value></data>
+  <data name="SUBSCRIPTION_PERIOD_INVALID" xml:space="preserve"><value>The subscription period is not valid.</value></data>
+  <data name="SUBSCRIPTION_NOT_ACTIVE" xml:space="preserve"><value>The subscription is not active.</value></data>
+  <data name="SUBSCRIPTION_ENDED" xml:space="preserve"><value>This subscription has ended or was cancelled.</value></data>
+  <data name="SUBSCRIPTION_ALREADY_EXPIRED" xml:space="preserve"><value>This subscription has already expired.</value></data>
+  <data name="PAYMENT_AMOUNT_INVALID" xml:space="preserve"><value>The payment amount is not valid.</value></data>
+  <data name="PAYMENT_NOT_PENDING" xml:space="preserve"><value>This payment has already been processed.</value></data>
+  <data name="PAYMENT_HISTORY_PAGE_NUMBER_INVALID" xml:space="preserve"><value>The page number must be 1 or more.</value></data>
+  <data name="PAYMENT_HISTORY_PAGE_SIZE_INVALID" xml:space="preserve"><value>The page size is not valid.</value></data>
 </root>

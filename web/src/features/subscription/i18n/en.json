@@ -1,0 +1,67 @@
+{
+  "header": {
+    "title": "Subscribe to Elmanhg",
+    "taglineWithCount": "{count, number} questions approved by real teachers · Unlimited practice · Unit exams",
+    "tagline": "Questions approved by real teachers · Unlimited practice · Unit exams"
+  },
+  "page": {
+    "title": "Subscription",
+    "loading": "Loading plans…",
+    "errorTitle": "Could not load plans."
+  },
+  "current": {
+    "label": "Your current plan",
+    "free": "Free",
+    "base": "Base",
+    "baseWithAskTeacher": "Base + Ask a Teacher"
+  },
+  "plan": {
+    "Free": "Free",
+    "Base": "Base",
+    "AskTeacher": "Ask a Teacher"
+  },
+  "status": {
+    "Active": "{plan} — active until {date}",
+    "PastDue": "{plan} — payment overdue, available until {date}",
+    "Cancelled": "{plan} — cancelled, available until {date}"
+  },
+  "price": {
+    "Monthly": "{price}/month",
+    "Termly": "{price}/term",
+    "Yearly": "{price}/year"
+  },
+  "features": {
+    "free": {
+      "browse": "Browse all content",
+      "lessons": "{count, plural, one {The first lesson of each unit} other {The first # lessons of each unit}}",
+      "quiz": "{count, number} practice questions a day",
+      "avatar": "Assistant: {count, number} messages a day"
+    },
+    "base": {
+      "unlimited": "Unlimited practice and exams",
+      "allLessons": "Every lesson",
+      "progress": "Full progress",
+      "avatar": "Assistant: {count, number} messages a day"
+    },
+    "askTeacher": {
+      "requiresBase": "Requires Base",
+      "quota": "{count, number} questions a month",
+      "sla": "Reply within {hours, number} hours"
+    }
+  },
+  "badge": {
+    "active": "Active"
+  },
+  "payments": {
+    "title": "Payments",
+    "caption": "Your payments",
+    "loading": "Loading payments…",
+    "errorTitle": "Could not load payments.",
+    "date": "Date",
+    "plan": "Plan",
+    "amount": "Amount",
+    "status": "Status",
+    "Succeeded": "Successful",
+    "Failed": "Failed"
+  }
+}

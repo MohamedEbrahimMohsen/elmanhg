@@ -10,6 +10,7 @@ import { progressLocales } from '@/features/progress/locales';
 import { questionsLocales } from '@/features/questions/locales';
 import { quizLocales } from '@/features/quiz/locales';
 import { sessionLocales } from '@/features/session';
+import { subscriptionLocales } from '@/features/subscription/locales';
 import { shellLocales } from '@/features/shell';
 import { numberLocale } from '@/shared/lib/format';
 import commonAr from '@/shared/i18n/ar.json';
@@ -36,6 +37,7 @@ const resources = {
     progress: progressLocales.ar,
     blueprints: blueprintsLocales.ar,
     exam: examLocales.ar,
+    subscription: subscriptionLocales.ar,
   },
   en: {
     common: commonEn,
@@ -49,6 +51,7 @@ const resources = {
     progress: progressLocales.en,
     blueprints: blueprintsLocales.en,
     exam: examLocales.en,
+    subscription: subscriptionLocales.en,
   },
 };
 
@@ -83,6 +86,7 @@ export function initI18n(lng: Language = defaultLanguage): void {
         'progress',
         'blueprints',
         'exam',
+        'subscription',
       ],
       defaultNS: 'common',
       resources,

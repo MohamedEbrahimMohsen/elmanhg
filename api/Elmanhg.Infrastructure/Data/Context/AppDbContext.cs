@@ -10,6 +10,7 @@ using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.ReviewSessions;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subjects;
+using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.Units;
 using MediatR;
@@ -25,6 +26,10 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     private const int EnumColumnMaxLength = 50;
     // A SHA-256 digest is 32 bytes, 64 lower-case hex characters; a schema invariant.
     private const int Sha256HexLength = 64;
+    // ISO 4217 alphabetic codes are exactly three letters; a schema invariant.
+    private const int CurrencyCodeLength = 3;
+    // Paymob ids and references are short numeric strings; a schema invariant.
+    private const int PaymobReferenceMaxLength = 100;
 
     public const string InProgressSessionIndex = "IX_Sessions_InProgressScope";
     public const string AttemptPerQuestionIndex = "IX_Attempts_SessionId_QuestionId";
@@ -33,6 +38,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public const string UnitBlueprintIndex = "IX_ExamBlueprints_UnitId";
     public const string OneOpenExamIndex = "IX_Sessions_OneOpenExam";
     public const string OpenExamDeadlineIndex = "IX_Sessions_OpenExamDeadline";
+    public const string PaymobTransactionIndex = "IX_Payments_PaymobTransactionId";
 
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<TeacherSubject> TeacherSubjects { get; set; }
@@ -50,6 +56,8 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public DbSet<Attempt> Attempts { get; set; }
     public DbSet<QuestionMastery> QuestionMasteries { get; set; }
     public DbSet<ExamBlueprint> ExamBlueprints { get; set; }
+    public DbSet<Subscription> Subscriptions { get; set; }
+    public DbSet<Payment> Payments { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
@@ -101,6 +109,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         ConfigureSessions(modelBuilder);
         ConfigureQuestionMastery(modelBuilder);
         ConfigureExamBlueprints(modelBuilder);
+        ConfigureSubscriptions(modelBuilder);
         ConfigureTeacherSubjects(modelBuilder);
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
@@ -279,6 +288,33 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         });
     }
 
+    private static void ConfigureSubscriptions(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Subscription>(builder =>
+        {
+            builder.Property(x => x.Plan).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.Period).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.PaymobReference).HasMaxLength(PaymobReferenceMaxLength);
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.StudentId, x.Plan, x.CurrentPeriodEnd });
+        });
+        modelBuilder.Entity<Payment>(builder =>
+        {
+            builder.Property(x => x.Plan).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.Period).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.Currency).IsRequired().HasMaxLength(CurrencyCodeLength);
+            builder.Property(x => x.PaymobTransactionId).HasMaxLength(PaymobReferenceMaxLength);
+            builder.Property(x => x.RawWebhook).HasColumnType("jsonb");
+            builder.Ignore(x => x.Amount);
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Subscription>().WithMany().HasForeignKey(x => x.SubscriptionId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.StudentId, x.CreationDate });
+            builder.HasIndex(x => x.PaymobTransactionId, PaymobTransactionIndex).IsUnique().HasFilter("\"PaymobTransactionId\" IS NOT NULL");
+        });
+    }
+
     private static void ConfigureTeacherSubjects(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TeacherSubject>(builder =>
@@ -308,5 +344,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         modelBuilder.Entity<Attempt>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<QuestionMastery>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<ExamBlueprint>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<Subscription>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<Payment>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

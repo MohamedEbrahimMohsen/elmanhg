@@ -2152,6 +2152,92 @@
       ]
     },
     {
+      "name": "Subscriptions",
+      "description": "The plan catalogue is public (no auth). Entitlement and payments need a Student sign-in (Subscription.Manage). Until Paymob checkout ships every student is Free with no payments.",
+      "item": [
+        {
+          "name": "Get plan catalogue",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns base prices\", function () { pm.expect(pm.response.json().base.prices).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/plans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "plans"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get my entitlement",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns a tier\", function () { pm.expect(pm.response.json()).to.have.property(\"tier\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/entitlement",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "entitlement"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get my payments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns a page\", function () { pm.expect(pm.response.json().items).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/payments?pageNumber=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "payments"],
+              "query": [
+                { "key": "pageNumber", "value": "1" },
+                { "key": "pageSize", "value": "20" }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "ExamBlueprints",
       "description": "Admin only (Blueprints.Manage). Sign in as an admin first so accessToken is set. The requests create a fresh subject and unit (blueprintSubjectId, blueprintUnitId) with no servable questions, so both saves are refused with EXAM_BLUEPRINT_SHORTFALL. A save is an upsert; only a unit blueprint can be deleted.",
       "item": [

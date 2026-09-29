@@ -173,6 +173,10 @@ public static class ErrorCodes
     public const string AuditLogFilterTooLong = "AUDIT_LOG_FILTER_TOO_LONG";
     public const string AuditLogDateRangeInvalid = "AUDIT_LOG_DATE_RANGE_INVALID";
 
+    // SUBSCRIPTIONS
+    public const string PaymentHistoryPageNumberInvalid = "PAYMENT_HISTORY_PAGE_NUMBER_INVALID";
+    public const string PaymentHistoryPageSizeInvalid = "PAYMENT_HISTORY_PAGE_SIZE_INVALID";
+
     // PLATFORM
     public const string TooManyRequests = "TOO_MANY_REQUESTS";
     public const string AdminSeedFailed = "ADMIN_SEED_FAILED";

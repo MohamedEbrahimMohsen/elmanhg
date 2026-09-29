@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { PlaceholderPage } from '@/features/shell';
+import { SubscriptionPage, subscriptionSearchSchema } from '@/features/subscription';
 
 export const Route = createFileRoute('/student/subscription')({
-  component: () => <PlaceholderPage titleKey="nav.student.subscription" />,
+  validateSearch: subscriptionSearchSchema,
+  component: SubscriptionPage,
 });

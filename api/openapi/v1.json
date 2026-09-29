@@ -323,6 +323,124 @@
         }
       }
     },
+    "/api/plans": {
+      "get": {
+        "tags": [
+          "Plans"
+        ],
+        "operationId": "GetPlanCatalogue",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanCatalogueResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanCatalogueResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanCatalogueResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/subscriptions/entitlement": {
+      "get": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "operationId": "GetMyEntitlement",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitlementResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitlementResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitlementResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/subscriptions/payments": {
+      "get": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "operationId": "GetMyPayments",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfPaymentResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfPaymentResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfPaymentResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/subjects": {
       "get": {
         "tags": [
@@ -3466,6 +3584,38 @@
           }
         }
       },
+      "AskTeacherPlanResult": {
+        "required": [
+          "monthlyQuestions",
+          "replySlaHours",
+          "prices"
+        ],
+        "type": "object",
+        "properties": {
+          "monthlyQuestions": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "replySlaHours": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "prices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlanPriceResult"
+            }
+          }
+        }
+      },
       "AttemptResult": {
         "required": [
           "id",
@@ -3654,6 +3804,36 @@
           }
         }
       },
+      "BasePlanResult": {
+        "required": [
+          "dailyAvatarMessages",
+          "prices"
+        ],
+        "type": "object",
+        "properties": {
+          "dailyAvatarMessages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "prices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlanPriceResult"
+            }
+          }
+        }
+      },
+      "BillingPeriod": {
+        "enum": [
+          "Monthly",
+          "Termly",
+          "Yearly"
+        ]
+      },
       "BulkApproveQuestionsRequest": {
         "required": [
           "reviewSessionId",
@@ -3838,6 +4018,70 @@
           "id": {
             "type": "string",
             "format": "uuid"
+          }
+        }
+      },
+      "EntitlementResult": {
+        "required": [
+          "tier",
+          "hasAskTeacher",
+          "canTakeExams",
+          "dailyQuizQuestionLimit",
+          "dailyAvatarMessageLimit",
+          "openLessonsPerUnit",
+          "monthlyAskTeacherQuestionLimit",
+          "subscriptions"
+        ],
+        "type": "object",
+        "properties": {
+          "tier": {
+            "$ref": "#/components/schemas/PlanTier"
+          },
+          "hasAskTeacher": {
+            "type": "boolean"
+          },
+          "canTakeExams": {
+            "type": "boolean"
+          },
+          "dailyQuizQuestionLimit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "dailyAvatarMessageLimit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "openLessonsPerUnit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "monthlyAskTeacherQuestionLimit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "subscriptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionResult"
+            }
           }
         }
       },
@@ -4661,6 +4905,40 @@
           }
         }
       },
+      "FreePlanResult": {
+        "required": [
+          "dailyQuizQuestions",
+          "dailyAvatarMessages",
+          "openLessonsPerUnit"
+        ],
+        "type": "object",
+        "properties": {
+          "dailyQuizQuestions": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "dailyAvatarMessages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "openLessonsPerUnit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "GenerateOTPCommand": {
         "required": [
           "phoneNumber"
@@ -5212,6 +5490,26 @@
           }
         }
       },
+      "Money": {
+        "required": [
+          "amountMinor",
+          "currency"
+        ],
+        "type": "object",
+        "properties": {
+          "amountMinor": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "currency": {
+            "type": "string"
+          }
+        }
+      },
       "MultiUnitExamOverviewResult": {
         "required": [
           "subjectId",
@@ -5440,6 +5738,49 @@
           }
         }
       },
+      "PageDataOfPaymentResult": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentResult"
+            }
+          },
+          "pageNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalItems": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
       "PageDataOfQuestionListItemResult": {
         "type": "object",
         "properties": {
@@ -5568,6 +5909,103 @@
             "format": "int64"
           }
         }
+      },
+      "PaymentResult": {
+        "required": [
+          "id",
+          "plan",
+          "period",
+          "amount",
+          "status",
+          "createdAt",
+          "completedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/SubscriptionPlan"
+          },
+          "period": {
+            "$ref": "#/components/schemas/BillingPeriod"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PaymentStatus"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "PaymentStatus": {
+        "enum": [
+          "Pending",
+          "Succeeded",
+          "Failed"
+        ]
+      },
+      "PlanCatalogueResult": {
+        "required": [
+          "free",
+          "base",
+          "askTeacher"
+        ],
+        "type": "object",
+        "properties": {
+          "free": {
+            "$ref": "#/components/schemas/FreePlanResult"
+          },
+          "base": {
+            "$ref": "#/components/schemas/BasePlanResult"
+          },
+          "askTeacher": {
+            "$ref": "#/components/schemas/AskTeacherPlanResult"
+          }
+        }
+      },
+      "PlanPriceResult": {
+        "required": [
+          "period",
+          "months",
+          "price"
+        ],
+        "type": "object",
+        "properties": {
+          "period": {
+            "$ref": "#/components/schemas/BillingPeriod"
+          },
+          "months": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "price": {
+            "$ref": "#/components/schemas/Money"
+          }
+        }
+      },
+      "PlanTier": {
+        "enum": [
+          "Free",
+          "Base"
+        ]
       },
       "QuestionDecisionResult": {
         "required": [
@@ -6702,6 +7140,67 @@
           }
         }
       },
+      "SubscriptionPlan": {
+        "enum": [
+          "Base",
+          "AskTeacher"
+        ]
+      },
+      "SubscriptionResult": {
+        "required": [
+          "id",
+          "plan",
+          "period",
+          "status",
+          "currentPeriodStart",
+          "currentPeriodEnd",
+          "entitledUntil",
+          "cancelledAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/SubscriptionPlan"
+          },
+          "period": {
+            "$ref": "#/components/schemas/BillingPeriod"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SubscriptionStatus"
+          },
+          "currentPeriodStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "currentPeriodEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "entitledUntil": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelledAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "SubscriptionStatus": {
+        "enum": [
+          "Active",
+          "PastDue",
+          "Cancelled",
+          "Expired"
+        ]
+      },
       "TeacherResult": {
         "required": [
           "id",
@@ -7625,6 +8124,12 @@
     },
     {
       "name": "Teachers"
+    },
+    {
+      "name": "Plans"
+    },
+    {
+      "name": "Subscriptions"
     },
     {
       "name": "Subjects"
