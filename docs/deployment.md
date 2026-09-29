@@ -11,8 +11,15 @@ How Elmanhg runs on a server: one Docker Compose stack per environment, one envi
 | `migrate` | `elmanhg-api` | One-shot: applies pending EF migrations, then exits | no | none | exit code 0 |
 | `postgres` | `pgvector/pgvector:pg17` | PostgreSQL 17 with pgvector | no | `postgres-data` | `pg_isready` |
 | `ai` (profile `ai`) | `elmanhg-ai` | Python AI service | no | none | `/health/ready` |
+| `otel-collector` (profile `observability`) | `otel/opentelemetry-collector-contrib` | Receives OTLP from `api` and `ai`, tails every container's log file, redacts PII, ships to the three stores | no | `otel-collector-data` | none |
+| `prometheus` (profile `observability`) | `prom/prometheus` | Metrics store (35 d), alert rules, blackbox scrapes | no | `prometheus-data` | `wget /-/ready` |
+| `alertmanager` (profile `observability`) | `prom/alertmanager` | Routes alerts; reads the host file `alertmanager.yml` | no | `alertmanager-data` | `wget /-/ready` |
+| `blackbox` (profile `observability`) | `prom/blackbox-exporter` | HTTP probes of edge, api and ai | no | none | `wget /-/healthy` |
+| `loki` (profile `observability`) | `grafana/loki` | Log store (14 d) | no | `loki-data` | none (no probe tool in the image) |
+| `tempo` (profile `observability`) | `grafana/tempo` | Trace store (7 d) | no | `tempo-data` | none (no probe tool in the image) |
+| `grafana` (profile `observability`) | `grafana/grafana` | Dashboards | `127.0.0.1:${GRAFANA_PORT}` only (reach it with `ssh -L`) | `grafana-data` | `wget /api/health` |
 
-Traffic: browser → Caddy `:443` → `/api/*` → `api:8080`; every other path → the SPA (`index.html` fallback). The API calls `ai:8000` with the shared service token. Postgres and the AI service are never public, and the API's `/health` is not proxied.
+Traffic: browser → Caddy `:443` → `/api/*` → `api:8080`; every other path → the SPA (`index.html` fallback). The API calls `ai:8000` with the shared service token. Postgres and the AI service are never public. `/api/health` is public (Caddy rewrites it to the API's `/health`, body `Healthy` or `Unhealthy` only) for an external uptime monitor. The observability stack is described in [docs/observability.md](observability.md).
 
 Object storage (from #96) is a managed S3-compatible service (Cloudflare R2 or AWS S3), set by config. It is never a container in this stack. Local dev and CI use the local-disk store, and media lives in the `api-media` volume until #96 lands.
 
@@ -33,13 +40,14 @@ Object storage (from #96) is a managed S3-compatible service (Cloudflare R2 or A
 
 ## 3. Configuration and secrets
 
-Three files sit next to `docker-compose.prod.yml` on the host. None is committed; the committed `deploy/*.example` files hold their shapes. Make each one `chmod 600`, owned by the deploy user.
+Three files sit next to `docker-compose.prod.yml` on the host, four with the `observability` profile. None is committed; the committed example files hold their shapes. Make each one `chmod 600`, owned by the deploy user.
 
 | File | Read by | Holds |
 |---|---|---|
 | `.env` | Docker Compose (interpolation) | image registry and tag, site address, ports, network subnet, environment names, Postgres credentials, the env-file paths |
 | `api.env` | the `api` and `migrate` containers | every API `Section__Key`: JWT, OTP, admin seed, OTP delivery, payments, AI client, content retrieval |
 | `ai.env` | the `ai` container | every `ELMANHG_AI_*` |
+| `alertmanager.yml` (profile `observability`) | the `alertmanager` container | alert receivers (email, webhook); copied from `observability/alertmanager/alertmanager.example.yml` ([docs/observability.md](observability.md), Alert delivery) |
 
 The API never sees the AI provider keys (Anthropic, OpenAI), and the AI service never sees the JWT key.
 
@@ -48,7 +56,7 @@ Precedence inside the API container, highest first:
 2. `api.env`.
 3. The baked `/app/appsettings.json`, which is the committed `api/Elmanhg.Api/appsettings.example.json` (shapes and safe defaults, no secrets).
 
-Never committed: `.gitignore` covers `.env`, `/deploy/api.env`, `/deploy/ai.env`, `/deploy/backups/` and `/deploy/.smoke/`. The root `.dockerignore` keeps a developer's `appsettings.json` and `.env` out of the API image.
+Never committed: `.gitignore` covers `.env`, `/deploy/api.env`, `/deploy/ai.env`, `/deploy/alertmanager.yml`, `/deploy/backups/` and `/deploy/.smoke/`. The root `.dockerignore` keeps a developer's `appsettings.json` and `.env` out of the API image.
 
 Generating secrets:
 
@@ -76,7 +84,7 @@ A story that adds an options section holding a secret or a per-host value must a
 | Variable | Required | Default | Notes |
 |---|---|---|---|
 | `COMPOSE_PROJECT_NAME` | yes | folder name | `elmanhg-prod` or `elmanhg-staging` |
-| `COMPOSE_PROFILES` | no | empty | `ai` starts the AI service |
+| `COMPOSE_PROFILES` | no | empty | `ai` starts the AI service; `observability` starts the telemetry stack (`ai,observability` for both) |
 | `IMAGE_REGISTRY` | no | `ghcr.io/mohamedebrahimmohsen` | |
 | `IMAGE_TAG` | yes | none | `sha-<7>`; `deploy.sh` rewrites it |
 | `SITE_ADDRESS` | yes | none | public host name; Caddy gets its certificate automatically. `:80` means plain HTTP (smoke test only) |
@@ -88,6 +96,10 @@ A story that adds an options section holding a secret or a per-host value must a
 | `POSTGRES_PASSWORD` | yes | none | hex (section 3) |
 | `API_ENV_FILE` / `AI_ENV_FILE` | no | `api.env` / `ai.env` | paths relative to the compose file |
 | `BACKUP_DIR` / `BACKUP_RETENTION_DAYS` | no | `backups` / `14` | read by `backup.sh` from the shell, not from `.env` |
+| `OTLP_ENDPOINT` | no | empty | OTLP/gRPC endpoint for `api` and `ai` traces and metrics; empty exports nothing. With the profile: `http://otel-collector:4317` |
+| `GRAFANA_ADMIN_PASSWORD` | with the profile | none | `openssl rand -hex 16`; `deploy.sh` refuses the profile without it |
+| `GRAFANA_PORT` | no | `3000` | loopback port Grafana listens on |
+| `ALERTMANAGER_CONFIG_FILE` | no | `alertmanager.yml` | path of the Alertmanager config, relative to the compose file; `deploy.sh` refuses the profile when it is missing |
 
 ### API identity and seed (`api.env`)
 
@@ -191,6 +203,18 @@ Question photos are stored in the `api-media` volume under `teacher-threads/` an
 
 Switching the embedding provider or model (for example `fake` to `openai`) needs a re-index: after `up -d`, call `POST /api/content-index/rebuild` as an admin (Postman, `ContentRetrieval` folder). Until each lesson is re-embedded by the sweep, its search returns no matches, because old-model chunks are never compared with a new-model query ([docs/content-retrieval.md](content-retrieval.md), Rebuild).
 
+### Observability (`api.env`, [docs/observability.md](observability.md))
+
+| Variable | Default | Notes |
+|---|---|---|
+| `Observability__OtlpHeaders` | empty | secret; `key=value` pairs for a SaaS OTLP endpoint (for example `authorization=Bearer <token>`) |
+| `Observability__TraceSampleRatio` | `1.0` | share of new traces kept (0 to 1); child spans follow the caller's decision |
+| `Observability__MetricExportIntervalSeconds` | `30` | 5 to 3600 |
+| `ClientErrors__PermitLimit` / `ClientErrors__WindowSeconds` | `30` / `60` | browser error reports allowed per IP per window |
+| `ClientErrors__MessageMaxLength` / `ErrorNameMaxLength` / `StackMaxLength` / `PathMaxLength` | `500` / `100` / `4000` / `300` | size caps; the web app truncates to the same values |
+
+The AI service's telemetry keys are in [docs/ai-service.md](ai-service.md), Configuration.
+
 ### Set by compose (do not put these in `api.env`)
 
 | Variable | Value |
@@ -199,6 +223,10 @@ Switching the embedding provider or model (for example `fake` to `openai`) needs
 | `ConnectionStrings__DbConnectionString` | `Host=postgres;…` built from the `POSTGRES_*` values |
 | `ReverseProxy__TrustedNetworks__0` | `DOCKER_SUBNET` |
 | `FileStorage__Provider` / `FileStorage__LocalRootPath` / `FileStorage__PublicBaseUrl` | `Local` / `/app/App_Data/media` / `/api/media` |
+| `Observability__OtlpEndpoint` / `ELMANHG_AI_OTLP_ENDPOINT` | `OTLP_ENDPOINT` from `.env` |
+| `Observability__ServiceVersion` / `ELMANHG_AI_SERVICE_VERSION` | `IMAGE_TAG` |
+| `CoreLogging__Console__Format` | `Json` (one JSON object per log line) |
+| `OTEL_SEMCONV_STABILITY_OPT_IN` (ai) | `http` |
 
 Every other key in `appsettings.example.json` can be overridden in `api.env` as `Section__Key`.
 
@@ -207,17 +235,17 @@ Every other key in `appsettings.example.json` can be overridden in `api.env` as 
 - The `images` workflow (`.github/workflows/images.yml`) runs `deploy-smoke` on every pull request that touches `api/`, `web/`, `ai/`, `deploy/`, `global.json` or `.dockerignore`. It builds the three images and runs `deploy/smoke-test.sh`.
 - On every push to main (and on a manual run on main), after the smoke test passes, it pushes `ghcr.io/<owner>/elmanhg-api`, `elmanhg-web` and `elmanhg-ai`, each tagged `sha-<7>` and `main`. Only that job has `packages: write`.
 - Images are linux/amd64 only.
-- Every base and third-party image is pinned as `name:tag@sha256:<digest>`: each `FROM` (and the `uv` `COPY --from`) in `api/`, `web/` and `ai/` `Dockerfile`, and `postgres` in `docker-compose.prod.yml`. The tag is for readers; the digest is what Docker pulls. To bump one, run `docker buildx imagetools inspect <name>:<tag>`, copy the top-level `Digest:` line (the multi-platform index, not a per-platform manifest), replace the old digest, and let the `images` workflow smoke-test the change in a pull request. Never write a digest by hand.
+- Every base and third-party image is pinned as `name:tag@sha256:<digest>`: each `FROM` (and the `uv` `COPY --from`) in `api/`, `web/` and `ai/` `Dockerfile`, and `postgres` and every observability image in `docker-compose.prod.yml`. The tag is for readers; the digest is what Docker pulls. To bump one, run `docker buildx imagetools inspect <name>:<tag>`, copy the top-level `Digest:` line (the multi-platform index, not a per-platform manifest), replace the old digest, and let the `images` workflow smoke-test the change in a pull request. Never write a digest by hand.
 - Main runs never cancel each other (one concurrency group per commit), so every main commit gets a full set of images. Pull request runs cancel the older run on the same branch.
 - Deploy `sha-<7>` tags, never `main`, so a rollback names an exact build.
 - If a GHCR package is private, log the host in once: `docker login ghcr.io -u <user>` with a personal access token that has `read:packages`.
 
 ## 6. First-time host setup
 
-1. VPS: Ubuntu 24.04, at least 2 vCPU and 4 GB RAM. Install Docker Engine with the Compose v2.24+ plugin.
+1. VPS: Ubuntu 24.04, at least 2 vCPU and 4 GB RAM (8 GB recommended with the `observability` profile, which needs about 1.5 GB). Install Docker Engine with the Compose v2.24+ plugin.
 2. DNS: an A (and AAAA) record for the site name pointing at the host. Firewall: allow 22, 80 and 443 only.
 3. `sudo mkdir -p /opt/elmanhg && sudo chown deploy:deploy /opt/elmanhg`.
-4. Copy `deploy/docker-compose.prod.yml`, `Caddyfile`, `lib.sh`, `deploy.sh`, `backup.sh` and `restore.sh` there. Create `.env`, `api.env` and `ai.env` from the examples, fill in the secrets (section 3), and `chmod 600 .env api.env ai.env`.
+4. Copy `deploy/docker-compose.prod.yml`, `Caddyfile`, `lib.sh`, `deploy.sh`, `backup.sh`, `restore.sh` and the `observability/` folder there. Create `.env`, `api.env` and `ai.env` from the examples, fill in the secrets (section 3), and `chmod 600 .env api.env ai.env`. With the `observability` profile, also `cp observability/alertmanager/alertmanager.example.yml alertmanager.yml && chmod 600 alertmanager.yml`, set `GRAFANA_ADMIN_PASSWORD` and `OTLP_ENDPOINT=http://otel-collector:4317` in `.env` ([docs/observability.md](observability.md), Turning it on).
 5. `docker login ghcr.io` (section 5), if the packages are private.
 6. `bash deploy.sh sha-<7>`.
 7. Open `https://<site>` and sign in as the seeded admin.
@@ -227,7 +255,7 @@ Every other key in `appsettings.example.json` can be overridden in `api.env` as 
 
 ### Deploy from GitHub
 
-Run the `deploy` workflow (Actions → deploy → Run workflow) with the environment and a `sha-<7>` tag. It checks the secrets and the tag, copies the `deploy/` files to the host over SSH and runs `deploy.sh` there. Inputs reach the scripts only through `env:`.
+Run the `deploy` workflow (Actions → deploy → Run workflow) with the environment and a `sha-<7>` tag. It checks the secrets and the tag, copies the `deploy/` files (including `observability/`) to the host over SSH and runs `deploy.sh` there. Inputs reach the scripts only through `env:`.
 
 Each GitHub Environment (`staging`, `production`) holds these secrets:
 
@@ -247,12 +275,12 @@ Give `production` a required reviewer, so every production deploy waits for appr
 
 ### What `deploy.sh` does
 
-1. Accepts only `sha-<7-40 hex>` or `main`, and reads the previous tag from `.env`.
+1. Accepts only `sha-<7-40 hex>` or `main`, refuses the `observability` profile without `GRAFANA_ADMIN_PASSWORD` or the Alertmanager config file, and reads the previous tag from `.env`.
 2. Writes the new tag into `.env` and pulls the images.
 3. Takes a backup when Postgres is running (skipped on the first deploy).
 4. `docker compose run --rm migrate`: applies pending migrations while the old `api` and `web` keep serving. A failure stops the script here, before any container is replaced.
 5. `docker compose up -d --remove-orphans`: replaces the containers. `migrate` runs again inside `up` (0 pending migrations) and `api` starts only after it succeeds.
-6. Waits for `api` (up to 300 s), checks the migrate exit code, then waits for `web` and `ai`.
+6. Waits for `api` (up to 300 s), checks the migrate exit code, then waits for `web`, `ai` and, when they run, `prometheus`, `alertmanager`, `blackbox` and `grafana`.
 7. Prunes dangling images and prints `Deployed <tag> (previous: <tag>)`.
 8. On any failure it prints the rollback command, `docker compose ps -a` and the last 100 log lines of `migrate` and `api`.
 
@@ -285,8 +313,11 @@ The workflow has not run against a live host yet: there is no VPS, domain or SSH
 | `api` | `curl -fsS http://127.0.0.1:8080/health` | 10 s (30 s start period) | the API runs and reaches the database |
 | `web` | `wget -qO- http://127.0.0.1:2080/healthz` | 10 s | Caddy runs its config |
 | `ai` | `/health/ready` through Python `urllib` | 10 s | the AI service is ready |
+| `prometheus` / `alertmanager` | `wget -qO- http://127.0.0.1:<port>/-/ready` | 10 s | ready to serve |
+| `blackbox` | `wget -qO- http://127.0.0.1:9115/-/healthy` | 10 s | the exporter runs |
+| `grafana` | `wget -qO- http://127.0.0.1:3000/api/health` | 10 s | Grafana and its database are up |
 
-The API's `/health` is internal only. Useful commands: `docker compose -f docker-compose.prod.yml ps` and `docker compose -f docker-compose.prod.yml logs -f api`. Container logs rotate at 10 MB × 5 files. Monitoring and alerting come with #113.
+`/api/health` is public (rewritten to `/health`) so an external uptime monitor can poll it; the body is only `Healthy` or `Unhealthy`. Useful commands: `docker compose -f docker-compose.prod.yml ps` and `docker compose -f docker-compose.prod.yml logs -f api`. Container logs rotate at 10 MB × 5 files. Monitoring, dashboards and alerting are described in [docs/observability.md](observability.md).
 
 ## 11. Reverse proxy and client IPs
 
@@ -296,15 +327,18 @@ Caddy terminates TLS and, with no `trusted_proxies` setting, replaces any client
 
 ## 12. Run the production stack locally
 
-`bash deploy/smoke-test.sh` (Docker Desktop and Git Bash on Windows work) builds the three images, starts the stack with plain HTTP on `http://localhost:8088`, checks the SPA, the `/api` proxy and the cache headers, runs `migrate` a second time, takes a backup and runs the restore drill. It removes the stack and its volumes afterwards.
+`bash deploy/smoke-test.sh` (Docker Desktop and Git Bash on Windows work) builds the three images, validates the Caddyfile, starts the stack with plain HTTP on `http://localhost:8088`, checks the SPA, the `/api` proxy, the cache headers, the public `/api/health` and `POST /api/client-errors`, runs `migrate` a second time, takes a backup and runs the restore drill. With the `observability` profile (the default) it also validates every observability config (`promtool check config` and `test rules`, `amtool check-config`, `otelcol validate`) and waits until metrics, traces, logs linked by trace id, log redaction, probes, alert rules and the three dashboards arrive ([docs/observability.md](observability.md), Running it locally). It removes the stack and its volumes afterwards.
 
 | Knob | Default | Effect |
 |---|---|---|
 | `SMOKE_HTTP_PORT` / `SMOKE_HTTPS_PORT` | `8088` / `8443` | host ports |
 | `SMOKE_PROJECT_NAME` | `elmanhg-smoke` | compose project name, when several stacks share one Docker |
 | `SMOKE_DOCKER_SUBNET` | `172.30.250.0/24` | compose network |
-| `SMOKE_SKIP_BUILD` | unset | `1` reuses the `local/elmanhg-*:smoke` images |
+| `SMOKE_SKIP_BUILD` | unset | `1` reuses the `local/elmanhg-*:<SMOKE_IMAGE_TAG>` images |
 | `SMOKE_KEEP` | unset | `1` keeps `deploy/.smoke/` (the generated env files and the backup) |
+| `SMOKE_IMAGE_TAG` | `smoke` | tag of the `local/elmanhg-*` images, when several checkouts share one Docker |
+| `SMOKE_OBSERVABILITY` | `1` | `0` skips the observability profile and its assertions (Docker Desktop may not expose `/var/lib/docker/containers`; CI on Linux is authoritative) |
+| `SMOKE_GRAFANA_PORT` | `3300` | loopback port for Grafana during the smoke test |
 
 ## 13. Not done yet
 
@@ -314,6 +348,6 @@ Caddy terminates TLS and, with no `trusted_proxies` setting, replaces any client
 | Off-site backup copy | needs an off-host bucket and credentials; backups stay on the VPS disk |
 | Staging OTP | needs real Resend (or WhatsApp) keys, because the fake logs codes in Development only |
 | Object storage (#96) | a managed S3-compatible service (Cloudflare R2 or AWS S3), set by config; no object-store container in compose |
-| Observability (#113) | structured logs, metrics, alerting, uptime checks |
+| Observability (#113) | done ([docs/observability.md](observability.md)); an external uptime monitor, a vendor error tracker (Sentry) and live alert receivers are deferred |
 | Performance (#114) | tuning |
 | Security headers (#115) | HSTS and CSP; the request log still trusts `CF-Connecting-IP` |

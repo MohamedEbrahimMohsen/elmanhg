@@ -1,0 +1,136 @@
+# OpenTelemetry Collector: OTLP traces and metrics from api and ai, container logs tailed from Docker's json-file driver
+# (docs/observability.md, Overview and signal flow).
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+  file_storage:
+    directory: /var/lib/otelcol/file_storage
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+  filelog/containers:
+    include: [/var/lib/docker/containers/*/*-json.log]
+    start_at: end
+    storage: file_storage
+    operators:
+      - id: docker
+        type: json_parser
+        timestamp:
+          parse_from: attributes.time
+          layout_type: gotime
+          layout: '2006-01-02T15:04:05.999999999Z07:00'
+      # Streams without the compose service label (other projects, the telemetry stack itself) are dropped.
+      - id: foreign
+        type: filter
+        expr: 'attributes.attrs == nil || attributes.attrs["com.docker.compose.service"] == nil'
+      - id: service
+        type: add
+        field: resource["service.name"]
+        value: 'EXPR("elmanhg-" + attributes.attrs["com.docker.compose.service"])'
+      - id: body
+        type: move
+        from: attributes.log
+        to: body
+      - id: cleanup
+        type: retain
+        fields: [attributes.stream]
+      - id: app_json
+        type: json_parser
+        if: 'body matches "^\\s*\\{"'
+        parse_from: body
+        parse_to: attributes
+        on_error: send_quiet
+      - id: dotnet_trace
+        type: trace_parser
+        if: 'attributes["@tr"] != nil'
+        trace_id:
+          parse_from: attributes["@tr"]
+        span_id:
+          parse_from: attributes["@sp"]
+      - id: python_trace
+        type: trace_parser
+        if: 'attributes.trace_id != nil'
+        trace_id:
+          parse_from: attributes.trace_id
+      - id: dotnet_level
+        type: severity_parser
+        if: 'attributes["@l"] != nil'
+        parse_from: attributes["@l"]
+        mapping: &levels
+          debug: [Debug, Verbose, debug]
+          info: [Information, info]
+          warn: [Warning, warning, warn]
+          error: [Error, error]
+          fatal: [Fatal, critical, fatal]
+      - id: text_level
+        type: severity_parser
+        if: 'attributes.level != nil'
+        parse_from: attributes.level
+        mapping: *levels
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 80
+    spike_limit_percentage: 25
+  batch: {}
+  # Same patterns as LogRedactor in the API: email addresses (literal or URL-encoded @) and Egyptian mobile numbers
+  # (docs/observability.md, PII rules). flatten first: replace_all_patterns only reaches top-level values, and Caddy
+  # nests the URI under request.
+  transform/redact:
+    error_mode: ignore
+    log_statements:
+      - context: log
+        statements:
+          - flatten(attributes)
+          - replace_pattern(body, "[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted-email]") where IsString(body)
+          - replace_pattern(body, "(\\+?20)?0?1[0125][0-9]{8}\\b", "[redacted-phone]") where IsString(body)
+          - replace_all_patterns(attributes, "value", "[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted-email]")
+          - replace_all_patterns(attributes, "value", "(\\+?20)?0?1[0125][0-9]{8}\\b", "[redacted-phone]")
+  transform/redact-traces:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          - replace_all_patterns(attributes, "value", "[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted-email]")
+          - replace_all_patterns(attributes, "value", "(\\+?20)?0?1[0125][0-9]{8}\\b", "[redacted-phone]")
+      - context: spanevent
+        statements:
+          - replace_all_patterns(attributes, "value", "[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted-email]")
+          - replace_all_patterns(attributes, "value", "(\\+?20)?0?1[0125][0-9]{8}\\b", "[redacted-phone]")
+
+exporters:
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+  otlphttp/prometheus:
+    endpoint: http://prometheus:9090/api/v1/otlp
+    tls:
+      insecure: true
+  otlphttp/loki:
+    endpoint: http://loki:3100/otlp
+    tls:
+      insecure: true
+
+service:
+  extensions: [health_check, file_storage]
+  telemetry:
+    logs:
+      level: warn
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, transform/redact-traces, batch]
+      exporters: [otlp/tempo]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlphttp/prometheus]
+    logs:
+      receivers: [filelog/containers]
+      processors: [memory_limiter, transform/redact, batch]
+      exporters: [otlphttp/loki]

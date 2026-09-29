@@ -1,13 +1,16 @@
 using Elmanhg.Application.ContentRetrieval.GetStaleLessonContentIds;
 using Elmanhg.Application.ContentRetrieval.ReindexLessonContent;
+using Elmanhg.Application.Shared.Observability;
 using Elmanhg.Application.Shared.Options;
 using MediatR;
 using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Api.Workers;
 
-public sealed class LessonContentIndexWorker(IServiceScopeFactory scopeFactory, IOptions<ContentRetrievalOptions> contentRetrievalOptions, TimeProvider timeProvider, ILogger<LessonContentIndexWorker> logger) : BackgroundService
+public sealed class LessonContentIndexWorker(IServiceScopeFactory scopeFactory, IOptions<ContentRetrievalOptions> contentRetrievalOptions, TimeProvider timeProvider, ILogger<LessonContentIndexWorker> logger, BackgroundJobMetrics jobMetrics) : BackgroundService
 {
+    private const string JobName = "lesson-content-index";
+
     // Ids whose reindex failed are left out of later batches until a sweep reaches the end of the backlog, so failing lessons cannot hold the head of every batch.
     private readonly HashSet<Guid> _deferredIds = [];
 
@@ -19,6 +22,7 @@ public sealed class LessonContentIndexWorker(IServiceScopeFactory scopeFactory, 
             return;
         }
 
+        jobMetrics.Register(JobName, TimeSpan.FromSeconds(options.IndexSweepIntervalSeconds));
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(options.IndexSweepIntervalSeconds), timeProvider);
         while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false))
         {
@@ -28,7 +32,14 @@ public sealed class LessonContentIndexWorker(IServiceScopeFactory scopeFactory, 
 
     private async Task SweepAsync(int batchSize, CancellationToken stoppingToken)
     {
+        using var run = jobMetrics.StartRun(JobName);
         var lessonIds = await ListStaleAsync(stoppingToken).ConfigureAwait(false);
+        if (lessonIds is null)
+        {
+            run.MarkListingFailed();
+        }
+
+        lessonIds ??= [];
         if (lessonIds.Count < batchSize)
         {
             _deferredIds.Clear();
@@ -36,14 +47,18 @@ public sealed class LessonContentIndexWorker(IServiceScopeFactory scopeFactory, 
 
         foreach (var lessonId in lessonIds)
         {
-            if (!await ReindexAsync(lessonId, stoppingToken).ConfigureAwait(false))
+            if (await ReindexAsync(lessonId, stoppingToken).ConfigureAwait(false))
             {
-                _deferredIds.Add(lessonId);
+                run.ItemSucceeded();
+                continue;
             }
+
+            run.ItemFailed();
+            _deferredIds.Add(lessonId);
         }
     }
 
-    private async Task<List<Guid>> ListStaleAsync(CancellationToken stoppingToken)
+    private async Task<List<Guid>?> ListStaleAsync(CancellationToken stoppingToken)
     {
         try
         {
@@ -53,7 +68,7 @@ public sealed class LessonContentIndexWorker(IServiceScopeFactory scopeFactory, 
         catch (Exception exception) when (!stoppingToken.IsCancellationRequested)
         {
             logger.LogError(exception, "Listing stale lesson content failed.");
-            return [];
+            return null;
         }
     }
 

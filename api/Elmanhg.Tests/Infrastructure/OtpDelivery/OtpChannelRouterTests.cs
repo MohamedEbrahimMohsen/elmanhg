@@ -2,10 +2,14 @@ using Core.Errors;
 using Core.OTP.Delivery;
 using Core.OTP.Entities;
 using Elmanhg.Application.Exceptions;
+using Elmanhg.Application.Shared.Observability;
+using Elmanhg.Tests.Application.Features.Shared.Observability;
 using Elmanhg.Infrastructure.OtpDelivery;
 using FluentAssertions;
+using Microsoft.Extensions.Diagnostics.Metrics.Testing;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using System.Diagnostics.Metrics;
 
 namespace Elmanhg.Tests.Infrastructure.OtpDelivery;
 
@@ -19,6 +23,7 @@ public sealed class OtpChannelRouterTests
     private readonly IOtpChannel _sms = Channel(OtpChannel.Sms);
     private readonly IOtpChannel _email = Channel(OtpChannel.Email);
     private readonly OtpDeliveryOptions _options = OtpDeliveryTestSettings.Fake();
+    private readonly IMeterFactory _meterFactory = MeterFactories.Create();
 
     [Fact]
     public async Task SendAsync_PhoneWithWhatsAppEnabled_SendsViaWhatsApp()
@@ -91,7 +96,29 @@ public sealed class OtpChannelRouterTests
         await AssertNoChannelCalledAsync();
     }
 
-    private OtpChannelRouter Router() => new(Options.Create(_options), [_whatsApp, _sms, _email]);
+    [Fact]
+    public async Task SendAsync_ChannelDelivers_RecordsDeliveredSend()
+    {
+        using var sends = new MetricCollector<long>(_meterFactory, ElmanhgTelemetry.SourceName, "elmanhg.otp.sends");
+
+        await Router().SendAsync(OtpRecipientType.Phone, Phone, Code, TestContext.Current.CancellationToken);
+
+        sends.GetMeasurementSnapshot().Should().ContainSingle().Which.Tags.Should().Contain(ElmanhgMetrics.ChannelTag, "WhatsApp").And.Contain(ElmanhgMetrics.OutcomeTag, ElmanhgMetrics.DeliveredOutcome);
+    }
+
+    [Fact]
+    public async Task SendAsync_ChannelThrows_RecordsFailedSendAndRethrows()
+    {
+        using var sends = new MetricCollector<long>(_meterFactory, ElmanhgTelemetry.SourceName, "elmanhg.otp.sends");
+        _whatsApp.SendAsync(Phone, Code, Arg.Any<CancellationToken>()).Returns(Task.FromException(new HttpRequestException()));
+
+        var act = () => Router().SendAsync(OtpRecipientType.Phone, Phone, Code, TestContext.Current.CancellationToken);
+
+        await act.Should().ThrowAsync<HttpRequestException>();
+        sends.GetMeasurementSnapshot().Should().ContainSingle().Which.Tags.Should().Contain(ElmanhgMetrics.ChannelTag, "WhatsApp").And.Contain(ElmanhgMetrics.OutcomeTag, ElmanhgMetrics.FailedOutcome);
+    }
+
+    private OtpChannelRouter Router() => new(Options.Create(_options), [_whatsApp, _sms, _email], new ElmanhgMetrics(_meterFactory));
 
     private async Task AssertNoChannelCalledAsync()
     {

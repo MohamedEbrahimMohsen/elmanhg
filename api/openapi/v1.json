@@ -2668,6 +2668,39 @@
         }
       }
     },
+    "/api/client-errors": {
+      "post": {
+        "tags": [
+          "ClientErrors"
+        ],
+        "operationId": "ReportClientError",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportClientErrorRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportClientErrorRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportClientErrorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/mastery/overview": {
       "get": {
         "tags": [
@@ -5023,6 +5056,13 @@
             "$ref": "#/components/schemas/Money"
           }
         }
+      },
+      "ClientErrorSource": {
+        "enum": [
+          "Window",
+          "UnhandledRejection",
+          "Route"
+        ]
       },
       "CompleteFakePaymentRequest": {
         "required": [
@@ -7899,6 +7939,42 @@
           }
         }
       },
+      "ReportClientErrorRequest": {
+        "required": [
+          "message",
+          "errorName",
+          "stack",
+          "source",
+          "path"
+        ],
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "errorName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "stack": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "source": {
+            "$ref": "#/components/schemas/ClientErrorSource"
+          },
+          "path": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "ReviewSessionResult": {
         "required": [
           "reviewSessionId",
@@ -10363,6 +10439,9 @@
     },
     {
       "name": "Payments"
+    },
+    {
+      "name": "ClientErrors"
     },
     {
       "name": "Mastery"

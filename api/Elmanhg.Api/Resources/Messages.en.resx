@@ -342,6 +342,13 @@
   <data name="TEACHER_THREAD_PAGE_SIZE_INVALID" xml:space="preserve"><value>The page size is not valid.</value></data>
   <data name="FUNNEL_ANONYMOUS_ID_REQUIRED" xml:space="preserve"><value>The visitor id is required.</value></data>
   <data name="FUNNEL_EVENT_TYPE_INVALID" xml:space="preserve"><value>The event type is not valid.</value></data>
+  <data name="CLIENT_ERROR_MESSAGE_REQUIRED" xml:space="preserve"><value>The error message is required.</value></data>
+  <data name="CLIENT_ERROR_MESSAGE_TOO_LONG" xml:space="preserve"><value>The error message is too long.</value></data>
+  <data name="CLIENT_ERROR_NAME_TOO_LONG" xml:space="preserve"><value>The error name is too long.</value></data>
+  <data name="CLIENT_ERROR_STACK_TOO_LONG" xml:space="preserve"><value>The error stack is too long.</value></data>
+  <data name="CLIENT_ERROR_PATH_TOO_LONG" xml:space="preserve"><value>The page path is too long.</value></data>
+  <data name="CLIENT_ERROR_PATH_INVALID" xml:space="preserve"><value>The page path is not valid.</value></data>
+  <data name="CLIENT_ERROR_SOURCE_INVALID" xml:space="preserve"><value>The error source is not valid.</value></data>
   <data name="USER_NOT_STUDENT" xml:space="preserve"><value>This action is for students only.</value></data>
   <data name="AI_SERVICE_UNAVAILABLE" xml:space="preserve"><value>The assistant is unavailable right now. Try again in a moment.</value></data>
   <data name="CONTENT_SEARCH_QUERY_REQUIRED" xml:space="preserve"><value>Enter the search text.</value></data>

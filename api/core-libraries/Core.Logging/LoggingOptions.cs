@@ -25,7 +25,10 @@ public class ConsoleLoggingOptions
     public bool Enabled { get; set; }
     public LogEventLevel MinimumLevel { get; set; } = LogEventLevel.Debug;
     public string[] Environments { get; set; } = [];
+    public ConsoleLogFormat Format { get; set; } = ConsoleLogFormat.Text;
 }
+
+public enum ConsoleLogFormat { Text, Json }
 
 public class FileLoggingOptions
 {

@@ -44,17 +44,15 @@ public class CoreRequestLoggingMiddleware(RequestDelegate next, IHostEnvironment
                    .ForContext("DebugId", debugId)
                    .ForContext("Method", context?.Request?.Method)
                    .ForContext("Path", context?.Request?.Path)
-                   .ForContext("QueryString", context?.Request?.QueryString.ToString())
+                   .ForContext("QueryString", RequestLogScrubber.Query(context?.Request))
                    .ForContext("Host", context?.Request?.Host.ToString())
                    .ForContext("ClientIp", GetClientIp(context))
-                   .ForContext("ForwardedFor", Header(context, "X-Forwarded-For"))
+                   .ForContext("ForwardedFor", RequestLogScrubber.IpList(Header(context, "X-Forwarded-For")))
                    .ForContext("Country", Header(context, "CF-IPCountry"))
                    .ForContext("City", Header(context, "CF-IPCity"))
                    .ForContext("State", Header(context, "CF-Region"))
                    .ForContext("Region", Header(context, "CF-Region-Code"))
                    .ForContext("Timezone", Header(context, "CF-Timezone"))
-                   .ForContext("Latitude", Header(context, "CF-IPLatitude"))
-                   .ForContext("Longitude", Header(context, "CF-IPLongitude"))
                    .ForContext("UserAgent", (context?.Request?.Headers["User-Agent"])?.FirstOrDefault()?.ToString())
                    .ForContext("StatusCode", context?.Response?.StatusCode)
                    .ForContext("MachineName", Environment.MachineName)
@@ -70,8 +68,8 @@ public class CoreRequestLoggingMiddleware(RequestDelegate next, IHostEnvironment
 
     private string GetClientIp(HttpContext? context)
     {
-        return context?.Request?.Headers["CF-Connecting-IP"].FirstOrDefault()
-            ?? context?.Connection?.RemoteIpAddress?.ToString() ?? string.Empty;
+        var forwarded = context?.Request?.Headers["CF-Connecting-IP"].FirstOrDefault();
+        return forwarded is null ? RequestLogScrubber.Ip(context?.Connection?.RemoteIpAddress) : RequestLogScrubber.Ip(forwarded);
     }
 
     // Cloudflare / proxy request headers. Null when the header is absent (e.g. local run, or the

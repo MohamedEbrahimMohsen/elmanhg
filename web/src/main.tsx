@@ -13,8 +13,10 @@ import { AppProviders } from '@/app/providers';
 import { createQueryClient } from '@/app/queryClient';
 import { createAppRouter } from '@/app/router';
 import { createSessionStore, installAuthHandlers, restoreSession } from '@/features/session';
+import { clientErrorReporter } from '@/shared/lib/clientErrorReporter';
 
 initI18n();
+clientErrorReporter.install(window);
 
 const queryClient = createQueryClient();
 const sessionStore = createSessionStore(null);

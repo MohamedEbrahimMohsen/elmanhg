@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
 
@@ -11,6 +12,8 @@ namespace Core.Exceptions;
 
 public class CoreExceptionMiddleware(RequestDelegate next, ILogger<CoreExceptionMiddleware> logger)
 {
+    public const string ErrorCodeTag = "app.error_code";
+
     // MVC serialises successful responses with JsonSerializerDefaults.Web (camelCase). Serialising
     // errors with the bare default would emit PascalCase, so a client reading `code` off a failure
     // body would silently get undefined on every error.
@@ -54,12 +57,15 @@ public class CoreExceptionMiddleware(RequestDelegate next, ILogger<CoreException
         // probe) indistinguishable from a real failure, and buries the 5xx that actually need eyes.
         var isClientError = exceptionDetails.StatusCode is >= 400 and < 500;
 
+        Activity.Current?.SetTag(ErrorCodeTag, exceptionDetails.Code);
+
         if (isClientError)
         {
             logger.LogWarning($"StatusCode: {exceptionDetails.StatusCode}, ErrorCode: {exceptionDetails.Code}, ErrorMessage: {exceptionDetails.Message}");
         }
         else
         {
+            Activity.Current?.AddException(exception);
             logger.LogError(exception, $"StatusCode: {exceptionDetails.StatusCode}, ErrorCode: {exceptionDetails.Code}, ErrorMessage: {exceptionDetails.Message}");
         }
 

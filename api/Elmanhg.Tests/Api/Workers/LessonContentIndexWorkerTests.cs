@@ -1,13 +1,17 @@
 using Elmanhg.Api.Workers;
 using Elmanhg.Application.ContentRetrieval.GetStaleLessonContentIds;
 using Elmanhg.Application.ContentRetrieval.ReindexLessonContent;
+using Elmanhg.Application.Shared.Observability;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Tests.Application.Features.Shared.Observability;
 using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.Metrics.Testing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using System.Diagnostics.Metrics;
 
 namespace Elmanhg.Tests.Api.Workers;
 
@@ -17,6 +21,7 @@ public sealed class LessonContentIndexWorkerTests
     private readonly ISender _sender = Substitute.For<ISender>();
     private readonly ILogger<LessonContentIndexWorker> _logger = Substitute.For<ILogger<LessonContentIndexWorker>>();
     private readonly ManualTimeProvider _time = new();
+    private readonly IMeterFactory _meterFactory = MeterFactories.Create();
     private readonly TaskCompletionSource _done = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     [Fact]
@@ -91,7 +96,7 @@ public sealed class LessonContentIndexWorkerTests
     [Fact]
     public async Task Execute_Disabled_EndsWithoutSweeping()
     {
-        using var worker = new LessonContentIndexWorker(ScopeFactory(), Options.Create(new ContentRetrievalOptions { IndexSweepEnabled = false }), _time, _logger);
+        using var worker = new LessonContentIndexWorker(ScopeFactory(), Options.Create(new ContentRetrievalOptions { IndexSweepEnabled = false }), _time, _logger, new BackgroundJobMetrics(_meterFactory, _time));
 
         await worker.StartAsync(TestContext.Current.CancellationToken);
         await worker.ExecuteTask!.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
@@ -100,9 +105,63 @@ public sealed class LessonContentIndexWorkerTests
         _sender.ReceivedCalls().Should().BeEmpty();
     }
 
+    [Fact]
+    public async Task Sweep_AllReindexed_RecordsSucceededRunWithItemCount()
+    {
+        Guid[] ids = [Guid.CreateVersion7(), Guid.CreateVersion7()];
+        using var runs = new MetricCollector<long>(_meterFactory, ElmanhgTelemetry.SourceName, "elmanhg.job.runs");
+        using var items = new MetricCollector<long>(_meterFactory, ElmanhgTelemetry.SourceName, "elmanhg.job.items");
+        _sender.Send(Arg.Any<GetStaleLessonContentIdsQuery>(), Arg.Any<CancellationToken>()).Returns(Task.FromResult<List<Guid>>([.. ids]));
+        _sender.Send(Arg.Is<ReindexLessonContentCommand>(x => x.LessonId == ids[0]), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
+        _sender.Send(Arg.Is<ReindexLessonContentCommand>(x => x.LessonId == ids[1]), Arg.Any<CancellationToken>()).Returns(_ =>
+        {
+            Complete();
+            return Task.CompletedTask;
+        });
+
+        using var worker = await RunAsync(new ContentRetrievalOptions());
+        await runs.WaitForMeasurementsAsync(1, WaitLimit);
+
+        runs.LastMeasurement!.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "lesson-content-index").And.Contain(BackgroundJobMetrics.OutcomeTag, "Succeeded");
+        items.GetMeasurementSnapshot().Should().ContainSingle().Which.Should().Match<CollectedMeasurement<long>>(x => x.Value == ids.Length && Equals(x.Tags[BackgroundJobMetrics.OutcomeTag], "Succeeded"));
+    }
+
+    [Fact]
+    public async Task Sweep_ListingFails_RecordsFailedRun()
+    {
+        using var runs = new MetricCollector<long>(_meterFactory, ElmanhgTelemetry.SourceName, "elmanhg.job.runs");
+        _sender.Send(Arg.Any<GetStaleLessonContentIdsQuery>(), Arg.Any<CancellationToken>()).Returns(_ =>
+        {
+            Complete();
+            return Task.FromException<List<Guid>>(new InvalidOperationException());
+        });
+
+        using var worker = await RunAsync(new ContentRetrievalOptions());
+        await runs.WaitForMeasurementsAsync(1, WaitLimit);
+
+        runs.LastMeasurement!.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "lesson-content-index").And.Contain(BackgroundJobMetrics.OutcomeTag, "Failed");
+    }
+
+    [Fact]
+    public async Task Execute_Enabled_RegistersJobInterval()
+    {
+        using var interval = new MetricCollector<double>(_meterFactory, ElmanhgTelemetry.SourceName, "elmanhg.job.interval");
+        _sender.Send(Arg.Any<GetStaleLessonContentIdsQuery>(), Arg.Any<CancellationToken>()).Returns(_ =>
+        {
+            Complete();
+            return Task.FromResult<List<Guid>>([]);
+        });
+
+        using var worker = await RunAsync(new ContentRetrievalOptions { IndexSweepIntervalSeconds = 45 });
+        interval.RecordObservableInstruments();
+
+        interval.LastMeasurement!.Value.Should().Be(45);
+        interval.LastMeasurement.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "lesson-content-index");
+    }
+
     private async Task<LessonContentIndexWorker> RunAsync(ContentRetrievalOptions options)
     {
-        var worker = new LessonContentIndexWorker(ScopeFactory(), Options.Create(options), _time, _logger);
+        var worker = new LessonContentIndexWorker(ScopeFactory(), Options.Create(options), _time, _logger, new BackgroundJobMetrics(_meterFactory, _time));
         await worker.StartAsync(TestContext.Current.CancellationToken);
         await _time.TimerCreated.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
         _time.Tick();

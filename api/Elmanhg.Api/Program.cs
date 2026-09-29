@@ -72,6 +72,8 @@ builder.Services.AddCoreLocalization();
 builder.Services.AddCoreExceptions();
 // Auditing before CQRS so AuditBehaviour sits outermost in the MediatR pipeline.
 builder.Services.AddCoreAuditing(builder.Configuration);
+// After auditing (AuditBehaviour stays outermost), before CQRS so RequestMetricsBehaviour also sees validation failures.
+builder.Services.AddElmanhgObservability(builder.Configuration, builder.Environment);
 builder.Services.AddCoreCQRS();
 builder.Services.AddCoreOtp(builder.Configuration);
 builder.Services.AddCoreEntityFrameworkCore<User, Role, Guid, AppDbContext>();
