@@ -128,7 +128,8 @@ Keep the top bar role switcher and user switcher exactly as in the prototype: ro
 Every route below exists in `prototype/app.js`. Match its behaviour one to one. Improve only the visual execution.
 
 **Student**
-- `#/student` Home: greeting, headline counter card ("متبقّي لك X سؤال من Y", seen count, streak), plan line, next recommended lesson with "درّب الآن", subject cards with mastery percent and progress bar.
+- `#/student` Home: greeting, headline counter card ("متبقّي لك X سؤال من Y", seen count, streak), plan line, next recommended lesson with "درّب الآن", subject cards with mastery percent and progress bar; chosen subjects under «موادك», others under «مواد أخرى», link «تعديل موادي».
+- `/onboarding` after sign-up: «اختر موادك», subject checkboxes, «متابعة» (needs one), «تخطّي الآن»; reopened from Home «تعديل موادي» with «العودة إلى الرئيسية»; loading, empty, error-with-retry.
 - `#/student/subject/:id` breadcrumb (الرئيسية › subject), subject mastery line and bar, units in order with mastery bar, published-lesson count, best unit-exam score («—» when none) and «امتحان الوحدة»; «امتحان متعدد الوحدات» opens the builder for this subject. `#/student/unit/:id` breadcrumb (الرئيسية › subject › unit), unit mastery, published lessons in order with mastery and question count (locked lessons for Free users arrive with #87), and a unit-exam card with the best score and a link to the exam start. Loading, empty, error-with-retry and RTL states on both.
 - `#/student/lesson/:id` breadcrumb (الرئيسية › subject › unit › lesson), the lesson title with «إتقانك X٪ · أسئلة متاحة: N · شاهدت: M» and a mastery bar, pill tabs الشرح / الأهداف / الملخص / التدريب (each a route; التدريب is `/practice`: pick 5 / 10 / 20 and start), empty messages per tab, and previous/next lesson links that continue into the next unit («العودة إلى {unit}» at the end). Opening the page records the lesson as opened (used by the optional unit-exam gate). "اسأل المساعد عن الدرس" and "اسأل معلّم" arrive with the Avatar and Ask a Teacher stories.
 - `#/student/quiz/:sessionId` One question at a time, question counter, type and difficulty chips, option list, "تحقّق", immediate feedback with explanation and "اسأل المساعد", "التالي", "إنهاء التدريب". `#/student/quiz-result/:id` score, time, per-question review.
@@ -156,7 +157,7 @@ Every route below exists in `prototype/app.js`. Match its behaviour one to one. 
 - `#/admin/audit` audit log. `#/admin/export` three JSONL downloads.
 
 **Landing** (new, the only screen not in the prototype)
-- `#/` a marketing landing page: Aurora gradient hero with the live servable count ("100,000 سؤال" style headline using the real number from data), three value props (تدريب لا نهائي، امتحانات وحدات، اسأل معلّم خلال 24 ساعة), plan cards, and a "ابدأ مجانًا" button that goes to `#/student` as سارة. Light, generous whitespace, Readex Pro display. This is the one place the gradient is allowed besides the subscribe header.
+- `#/` a marketing landing page: Aurora gradient hero with the live servable count ("100,000 سؤال" style headline using the real number from data), three value props (تدريب لا نهائي، امتحانات وحدات، اسأل معلّم خلال 24 ساعة), plan cards, and a "ابدأ مجانًا" button that goes to sign-up (the prototype jumps to `#/student` as سارة). A top-bar «تسجيل الدخول» opens sign-in; the plan cards come from the live catalogue; a signed-in visitor is sent to their home. Light, generous whitespace, Readex Pro display. This is the one place the gradient is allowed besides the subscribe header.
 
 ## 5. Business rules that must survive the redesign
 

@@ -18,6 +18,9 @@ public class User : IdentityUser<Guid>, IAuditEntity
     public UserRole Role { get; private set; }
     public UserStatus Status { get; private set; }
     public bool IsActive => Status == UserStatus.Active;
+    public DateTimeOffset? OnboardedAt { get; private set; }
+    public List<Guid> SubjectInterestIds { get; private set; } = [];
+    public bool NeedsOnboarding => Role == UserRole.Student && OnboardedAt is null;
 
     public static User CreateStudentWithPhone(string displayName, string phoneNumber)
     {
@@ -60,6 +63,18 @@ public class User : IdentityUser<Guid>, IAuditEntity
 
         Status = UserStatus.Suspended;
         UpdationDate = DateTimeOffset.UtcNow;
+    }
+
+    public void ChooseSubjectInterests(IReadOnlyCollection<Guid> subjectIds, DateTimeOffset chosenAt)
+    {
+        if (Role != UserRole.Student)
+        {
+            throw new BusinessRuleViolationCoreException(ErrorCodes.UserNotStudent);
+        }
+
+        SubjectInterestIds = [.. subjectIds.Distinct()];
+        OnboardedAt ??= chosenAt;
+        UpdationDate = chosenAt;
     }
 
     private static User Create(string displayName, UserRole role, string userName)

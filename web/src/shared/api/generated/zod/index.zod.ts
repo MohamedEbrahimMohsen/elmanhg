@@ -1,3 +1,4 @@
+export * from './analytics/analytics.zod';
 export * from './audit-logs/audit-logs.zod';
 export * from './auth/auth.zod';
 export * from './browse/browse.zod';
@@ -11,6 +12,7 @@ export * from './progress/progress.zod';
 export * from './question-imports/question-imports.zod';
 export * from './questions/questions.zod';
 export * from './sessions/sessions.zod';
+export * from './students/students.zod';
 export * from './subjects/subjects.zod';
 export * from './subscriptions/subscriptions.zod';
 export * from './teachers/teachers.zod';

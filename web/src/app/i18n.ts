@@ -6,7 +6,9 @@ import { blueprintsLocales } from '@/features/blueprints/locales';
 import { browseLocales } from '@/features/browse/locales';
 import { contentLocales } from '@/features/content/locales';
 import { examLocales } from '@/features/exam/locales';
+import { landingLocales } from '@/features/landing/locales';
 import { masteryLocales } from '@/features/mastery/locales';
+import { onboardingLocales } from '@/features/onboarding/locales';
 import { paymentsLocales } from '@/features/payments/locales';
 import { progressLocales } from '@/features/progress/locales';
 import { questionsLocales } from '@/features/questions/locales';
@@ -42,6 +44,8 @@ const resources = {
     subscription: subscriptionLocales.ar,
     payments: paymentsLocales.ar,
     browse: browseLocales.ar,
+    landing: landingLocales.ar,
+    onboarding: onboardingLocales.ar,
   },
   en: {
     common: commonEn,
@@ -58,6 +62,8 @@ const resources = {
     subscription: subscriptionLocales.en,
     payments: paymentsLocales.en,
     browse: browseLocales.en,
+    landing: landingLocales.en,
+    onboarding: onboardingLocales.en,
   },
 };
 
@@ -95,6 +101,8 @@ export function initI18n(lng: Language = defaultLanguage): void {
         'subscription',
         'payments',
         'browse',
+        'landing',
+        'onboarding',
       ],
       defaultNS: 'common',
       resources,

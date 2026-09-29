@@ -16,4 +16,5 @@ export interface SubjectMasteryResult {
   seenCount: number | string;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   masteryPercent: number | string;
+  isInterested: boolean;
 }

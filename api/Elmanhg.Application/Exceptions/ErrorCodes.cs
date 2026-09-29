@@ -207,6 +207,14 @@ public static class ErrorCodes
     public const string PaymentLogReferenceTooLong = "PAYMENT_LOG_REFERENCE_TOO_LONG";
     public const string PaymentLogDateRangeInvalid = "PAYMENT_LOG_DATE_RANGE_INVALID";
 
+    // STUDENTS
+    public const string SubjectInterestsTooMany = "SUBJECT_INTERESTS_TOO_MANY";
+    public const string SubjectInterestsDuplicate = "SUBJECT_INTERESTS_DUPLICATE";
+
+    // ANALYTICS
+    public const string FunnelAnonymousIdRequired = "FUNNEL_ANONYMOUS_ID_REQUIRED";
+    public const string FunnelEventTypeInvalid = "FUNNEL_EVENT_TYPE_INVALID";
+
     // PLATFORM
     public const string TooManyRequests = "TOO_MANY_REQUESTS";
     public const string AdminSeedFailed = "ADMIN_SEED_FAILED";

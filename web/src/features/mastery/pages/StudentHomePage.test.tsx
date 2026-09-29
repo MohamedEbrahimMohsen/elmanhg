@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { getGetMasteryOverviewMockHandler } from '@/shared/api/generated/mastery/mastery.msw';
 import type { MasteryOverviewResult } from '@/shared/api/generated/model';
 import { axe } from '@/test/axe';
-import { masteryOverview, physicsId } from '@/test/masteryFixtures';
+import { chemistryId, masteryOverview, physicsId } from '@/test/masteryFixtures';
 import { server } from '@/test/msw/server';
 import { renderApp } from '@/test/renderWithProviders';
 import { testSessions } from '@/test/sessions';
@@ -104,5 +104,27 @@ describe('StudentHomePage', () => {
       'href',
       `/student/subject/${physicsId}`,
     );
+  });
+
+  it('lists chosen subjects under Your subjects and the rest under Other subjects', async () => {
+    const base = masteryOverview();
+    openHome({
+      subjects: base.subjects.map((subject) => ({ ...subject, isInterested: subject.subjectId === chemistryId })),
+    });
+
+    const chemistry = await screen.findByRole('article', { name: 'Chemistry' });
+    const physics = screen.getByRole('article', { name: 'Physics' });
+    const yours = screen.getByRole('heading', { name: 'Your subjects' });
+    const others = screen.getByRole('heading', { name: 'Other subjects' });
+
+    expect(yours.compareDocumentPosition(chemistry) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(chemistry.compareDocumentPosition(others) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(others.compareDocumentPosition(physics) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('links to editing my subjects', async () => {
+    openHome();
+
+    expect(await screen.findByRole('link', { name: 'Edit my subjects' })).toHaveAttribute('href', '/onboarding');
   });
 });

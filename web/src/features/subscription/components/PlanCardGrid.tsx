@@ -1,12 +1,10 @@
-import { useTranslation } from 'react-i18next';
 import type {
   BillingPeriod,
   EntitlementResult,
   PlanCatalogueResult,
-  PlanPriceResult,
   SubscriptionPlan,
 } from '@/shared/api/generated/model';
-import { formatMoney } from '@/shared/lib/format';
+import { usePlanCardContent } from '../hooks/usePlanCardContent';
 import { AskTeacherCheckoutAction } from './AskTeacherCheckoutAction';
 import { BaseCheckoutActions } from './BaseCheckoutActions';
 import { PlanCard } from './PlanCard';
@@ -21,14 +19,7 @@ export interface PlanCardGridProps {
 type CheckoutMode = 'subscribe' | 'renew' | null;
 
 export function PlanCardGrid({ catalogue, entitlement, onCheckout, isCheckoutPending }: PlanCardGridProps) {
-  const { t, i18n } = useTranslation('subscription');
-  const { free, base, askTeacher } = catalogue;
-  const priceLines = (prices: PlanPriceResult[]) =>
-    prices.map((price) =>
-      t(`price.${price.period}`, {
-        price: formatMoney(Number(price.price.amountMinor), price.price.currency, i18n.language),
-      }),
-    );
+  const content = usePlanCardContent(catalogue);
   const held = (plan: SubscriptionPlan) => entitlement.subscriptions.find((s) => s.plan === plan);
   const modeFor = (plan: SubscriptionPlan, holds: boolean): CheckoutMode => {
     if (!holds) {
@@ -41,32 +32,15 @@ export function PlanCardGrid({ catalogue, entitlement, onCheckout, isCheckoutPen
 
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+      <PlanCard {...content.free} isActive={false} />
       <PlanCard
-        title={t('plan.Free')}
-        priceLines={[]}
-        features={[
-          t('features.free.browse'),
-          t('features.free.lessons', { count: Number(free.openLessonsPerUnit) }),
-          t('features.free.quiz', { count: Number(free.dailyQuizQuestions) }),
-          t('features.free.avatar', { count: Number(free.dailyAvatarMessages) }),
-        ]}
-        isActive={false}
-      />
-      <PlanCard
-        title={t('plan.Base')}
-        priceLines={priceLines(base.prices)}
-        features={[
-          t('features.base.unlimited'),
-          t('features.base.allLessons'),
-          t('features.base.progress'),
-          t('features.base.avatar', { count: Number(base.dailyAvatarMessages) }),
-        ]}
+        {...content.base}
         isActive={entitlement.tier === 'Base'}
         actions={
           baseMode === null ? null : (
             <BaseCheckoutActions
               mode={baseMode}
-              prices={base.prices}
+              prices={catalogue.base.prices}
               disabled={isCheckoutPending}
               onCheckout={(period) => {
                 onCheckout('Base', period);
@@ -76,13 +50,7 @@ export function PlanCardGrid({ catalogue, entitlement, onCheckout, isCheckoutPen
         }
       />
       <PlanCard
-        title={t('plan.AskTeacher')}
-        priceLines={priceLines(askTeacher.prices)}
-        features={[
-          t('features.askTeacher.requiresBase'),
-          t('features.askTeacher.quota', { count: Number(askTeacher.monthlyQuestions) }),
-          t('features.askTeacher.sla', { hours: Number(askTeacher.replySlaHours) }),
-        ]}
+        {...content.askTeacher}
         isActive={entitlement.hasAskTeacher}
         actions={
           askTeacherMode === null ? null : (

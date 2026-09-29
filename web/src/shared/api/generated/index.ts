@@ -1,3 +1,4 @@
+export * from './analytics/analytics';
 export * from './audit-logs/audit-logs';
 export * from './auth/auth';
 export * from './browse/browse';
@@ -11,6 +12,7 @@ export * from './progress/progress';
 export * from './question-imports/question-imports';
 export * from './questions/questions';
 export * from './sessions/sessions';
+export * from './students/students';
 export * from './subjects/subjects';
 export * from './subscriptions/subscriptions';
 export * from './teachers/teachers';

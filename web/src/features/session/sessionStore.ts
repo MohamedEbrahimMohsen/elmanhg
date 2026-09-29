@@ -6,6 +6,7 @@ export interface Session {
   userId: string;
   displayName: string;
   role: Role;
+  needsOnboarding: boolean;
 }
 
 export interface SessionStore {

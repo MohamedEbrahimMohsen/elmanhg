@@ -3,6 +3,7 @@ using Core.EntityFrameworkCore.Auditing;
 using Core.EntityFrameworkCore.Context;
 using Core.Errors;
 using Elmanhg.Application.Exceptions;
+using Elmanhg.Domain.Analytics;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
@@ -65,6 +66,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public DbSet<ExamBlueprint> ExamBlueprints { get; set; }
     public DbSet<Subscription> Subscriptions { get; set; }
     public DbSet<Payment> Payments { get; set; }
+    public DbSet<FunnelEvent> FunnelEvents { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
@@ -135,6 +137,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         ConfigureExamBlueprints(modelBuilder);
         ConfigureSubscriptions(modelBuilder);
         ConfigureTeacherSubjects(modelBuilder);
+        ConfigureFunnelEvents(modelBuilder);
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
 
@@ -145,6 +148,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
             builder.Property(x => x.DisplayName).IsRequired();
             builder.Property(x => x.Role).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.SubjectInterestIds).IsRequired().HasDefaultValueSql("'{}'");
         });
     }
 
@@ -372,6 +376,18 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         });
     }
 
+    private static void ConfigureFunnelEvents(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<FunnelEvent>(builder =>
+        {
+            builder.Property(x => x.Id).ValueGeneratedNever();
+            builder.Property(x => x.Type).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.Type, x.OccurredAt });
+            builder.HasIndex(x => x.AnonymousId);
+        });
+    }
+
     private static void ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>().HasQueryFilter(x => !x.IsDeleted);
@@ -394,5 +410,6 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         modelBuilder.Entity<ExamBlueprint>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<Subscription>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<Payment>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<FunnelEvent>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

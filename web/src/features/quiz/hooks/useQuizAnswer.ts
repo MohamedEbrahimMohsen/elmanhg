@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { trackFunnelEvent } from '@/features/analytics';
 import { invalidateMastery } from '@/features/mastery';
 import { emptyAnswer, toAnswerPayload, type QuestionAnswer, type StudentQuestion } from '@/features/questions';
 import type { SessionItemResult, SessionResult } from '@/shared/api/generated/model';
@@ -32,6 +33,7 @@ export function useQuizAnswer(sessionId: string, item: SessionItemResult, questi
           old === undefined ? old : mergeAnsweredItem(old, answered),
         );
         void invalidateMastery(queryClient);
+        trackFunnelEvent('FirstQuizAnswered', { once: true });
       },
       onError: async (error) => {
         const code = error instanceof ApiError ? error.code : unhandledErrorCode;

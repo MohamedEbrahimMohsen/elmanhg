@@ -40,7 +40,8 @@ export const GetMasteryOverviewResponse = zod.object({
   "servableCount": zod.union([zod.int(),zod.stringFormat('int32', getMasteryOverviewResponseSubjectsItemServableCountRegExpTwo)]),
   "masteredCount": zod.union([zod.int(),zod.stringFormat('int32', getMasteryOverviewResponseSubjectsItemMasteredCountRegExpTwo)]),
   "seenCount": zod.union([zod.int(),zod.stringFormat('int32', getMasteryOverviewResponseSubjectsItemSeenCountRegExpTwo)]),
-  "masteryPercent": zod.union([zod.int(),zod.stringFormat('int32', getMasteryOverviewResponseSubjectsItemMasteryPercentRegExpTwo)])
+  "masteryPercent": zod.union([zod.int(),zod.stringFormat('int32', getMasteryOverviewResponseSubjectsItemMasteryPercentRegExpTwo)]),
+  "isInterested": zod.boolean()
 }))
 })
 

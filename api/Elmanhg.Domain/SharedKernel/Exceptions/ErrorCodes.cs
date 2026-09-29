@@ -4,6 +4,7 @@ public static class ErrorCodes
 {
     // USERS
     public const string UserAlreadySuspended = "USER_ALREADY_SUSPENDED";
+    public const string UserNotStudent = "USER_NOT_STUDENT";
 
     // TEACHERS
     public const string UserNotTeacher = "USER_NOT_TEACHER";

@@ -2170,6 +2170,90 @@
       ]
     },
     {
+      "name": "Onboarding",
+      "description": "Sign in as a Student. Set subjectId (or run Create subject as an admin first). Saving interests, even an empty list, completes onboarding (needsOnboarding becomes false); Mastery overview then lists the chosen subjects first.",
+      "item": [
+        {
+          "name": "Get subject interests",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/me/subject-interests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "students", "me", "subject-interests"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Save subject interests",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/me/subject-interests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "students", "me", "subject-interests"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subjectIds\": [\"{{subjectId}}\"]\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get subject interests after save",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"onboarding done\", function () { pm.expect(pm.response.json().needsOnboarding).to.eql(false); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/me/subject-interests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "students", "me", "subject-interests"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Progress",
       "description": "Sign in as a Student. Practise in the Sessions folder first to see progress. kind is Quiz or Exam; remove it for all sessions.",
       "item": [
@@ -2943,6 +3027,42 @@
               "raw": "{{baseUrl}}/api/payments/{{checkoutPaymentId}}/review-resolution",
               "host": ["{{baseUrl}}"],
               "path": ["api", "payments", "{{checkoutPaymentId}}", "review-resolution"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "description": "Anonymous, first-party sign-up funnel events (docs/analytics.md). No PII: a random browser id plus a whitelisted event type. Rate limited per IP (Analytics:FunnelEventPermitLimit per Analytics:FunnelEventWindowSeconds).",
+      "item": [
+        {
+          "name": "Record funnel event",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/funnel-events",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "funnel-events"]
+            },
+            "auth": { "type": "noauth" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"anonymousId\": \"{{$guid}}\",\n  \"type\": \"LandingViewed\"\n}",
+              "options": { "raw": { "language": "json" } }
             }
           },
           "response": []

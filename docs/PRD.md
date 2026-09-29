@@ -189,10 +189,12 @@ Numeric answers ignore the per-question rules and must be a plain decimal (`docs
 
 ### 7.1 Navigation
 
-1. Landing → sign up (phone + one-time code, or email + password) → choose subjects of interest. Students with an email account can also sign in with a one-time code sent to that email; teachers and admins always sign in with email and password.
+1. Landing (live servable counter, value props, plans) → sign up (phone + one-time code, or email + password) → choose subjects of interest (skippable; editable later from Home). Students with an email account can also sign in with a one-time code sent to that email; teachers and admins always sign in with email and password.
 2. Home: subjects with per-subject mastery and "next recommended lesson".
 3. Subject → Units (ordered, with mastery %) → Lessons (ordered, with mastery %).
 4. Lesson page tabs: Explanation · Objectives · Summary · Practice.
+
+Home lists the chosen subjects first under «موادك», the rest under «مواد أخرى».
 
 Free tier: can browse the tree and read the first lesson of each unit; quizzes limited to a small daily count. Paid tier: unlimited.
 
@@ -354,6 +356,7 @@ The subject default is checked against the subject's whole servable pool; a unit
 | Validation | Pending backlog, median time to decision, per-teacher throughput |
 | Ask a Teacher | Open threads, SLA breaches, median reply time |
 | Payments | Successful / failed transactions, revenue by day, refunds |
+| Sign-up funnel | Distinct visitors per step: landing viewed → sign-up started → account created → onboarding done → first quiz answer, plus median landing-to-first-answer time (`docs/analytics.md`) |
 
 All charts filterable by date range and subject.
 
@@ -442,7 +445,7 @@ Exports (admin only): JSONL per source, date-ranged, with PII stripped.
 ## 15. Data model (entities and key fields)
 
 ```
-User(id, role[Student|Teacher|Admin], phone, email, display_name, status)
+User(id, role[Student|Teacher|Admin], phone, email, display_name, status, onboarded_at?, subject_interest_ids[])
 TeacherSubject(teacher_id, subject_id)
 
 Subject(id, name, order)
@@ -477,6 +480,8 @@ TeacherMessage(id, thread_id, sender_id, kind[Text|Voice], text, audio_url?, tra
 
 AvatarConversation(id, student_id, context_json, model, prompt_version, started_at)
 AvatarMessage(id, conversation_id, role, text, created_at)
+
+FunnelEvent(id, anonymous_id, user_id?, type[LandingViewed|SignUpStarted|SignUpCompleted|OnboardingCompleted|FirstQuizAnswered], occurred_at)  -- docs/analytics.md
 
 AuditLog(id, actor_id, actor_name, actor_role, action, entity, entity_id, outcome, error_code, diff_json, trace_id, created_at)  -- append-only
 ```

@@ -89,8 +89,10 @@ Two answers updating the same row at once are serialised by the `xmin` row versi
 | GET | `/api/mastery/overview` | 200 `MasteryOverviewResult` |
 | GET | `/api/mastery/subjects/{subjectId}` | 200 `SubjectMasteryDetailResult` |
 
-`MasteryOverviewResult { headline { servableTotal, masteredCount, remainingCount, seenCount }, streakDays, nextLesson? { lessonId, lessonName, subjectId, subjectName, masteryPercent }, subjects[] { subjectId, name, servableCount, masteredCount, seenCount, masteryPercent } }`
+`MasteryOverviewResult { headline { servableTotal, masteredCount, remainingCount, seenCount }, streakDays, nextLesson? { lessonId, lessonName, subjectId, subjectName, masteryPercent }, subjects[] { subjectId, name, servableCount, masteredCount, seenCount, masteryPercent, isInterested } }`
 `SubjectMasteryDetailResult { subjectId, name, servableCount, masteredCount, seenCount, masteryPercent, units[] { unitId, name, …counts, masteryPercent, lessons[] { lessonId, name, …counts, masteryPercent } } }`
+
+Subjects the student chose at onboarding come first (`isInterested: true`), each group in admin order.
 
 The subject detail lists every unit (order, then creation date) and its Published lessons (same order). A lesson without servable questions shows 0/0/0 %.
 

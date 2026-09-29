@@ -30,6 +30,7 @@ beforeAll(() => {
 
 afterEach(() => {
   cleanup();
+  localStorage.clear();
   server.resetHandlers();
   setAccessToken(null);
   registerAuthHandlers(null);

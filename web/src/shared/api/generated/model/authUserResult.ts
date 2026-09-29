@@ -13,4 +13,5 @@ export interface AuthUserResult {
   phoneNumber: string | null;
   /** @nullable */
   email: string | null;
+  needsOnboarding: boolean;
 }

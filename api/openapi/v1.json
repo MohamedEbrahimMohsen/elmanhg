@@ -870,6 +870,67 @@
         }
       }
     },
+    "/api/students/me/subject-interests": {
+      "get": {
+        "tags": [
+          "Students"
+        ],
+        "operationId": "GetSubjectInterests",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubjectInterestsResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubjectInterestsResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubjectInterestsResult"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Students"
+        ],
+        "operationId": "SaveSubjectInterests",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubjectInterestsRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubjectInterestsRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubjectInterestsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/sessions/quiz": {
       "post": {
         "tags": [
@@ -4113,6 +4174,39 @@
           }
         }
       }
+    },
+    "/api/analytics/funnel-events": {
+      "post": {
+        "tags": [
+          "Analytics"
+        ],
+        "operationId": "RecordFunnelEvent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordFunnelEventRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordFunnelEventRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordFunnelEventRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4467,7 +4561,8 @@
           "displayName",
           "role",
           "phoneNumber",
-          "email"
+          "email",
+          "needsOnboarding"
         ],
         "type": "object",
         "properties": {
@@ -4492,6 +4587,9 @@
               "null",
               "string"
             ]
+          },
+          "needsOnboarding": {
+            "type": "boolean"
           }
         }
       },
@@ -5660,6 +5758,15 @@
             "format": "int32"
           }
         }
+      },
+      "FunnelEventType": {
+        "enum": [
+          "LandingViewed",
+          "SignUpStarted",
+          "SignUpCompleted",
+          "OnboardingCompleted",
+          "FirstQuizAnswered"
+        ]
       },
       "GenerateOTPCommand": {
         "required": [
@@ -7226,6 +7333,22 @@
           "Rejected"
         ]
       },
+      "RecordFunnelEventRequest": {
+        "required": [
+          "anonymousId",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "anonymousId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "$ref": "#/components/schemas/FunnelEventType"
+          }
+        }
+      },
       "RefundPaymentRequest": {
         "required": [
           "reason"
@@ -8097,6 +8220,62 @@
           }
         }
       },
+      "SubjectInterestResult": {
+        "required": [
+          "subjectId",
+          "name",
+          "isSelected"
+        ],
+        "type": "object",
+        "properties": {
+          "subjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "isSelected": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SubjectInterestsRequest": {
+        "required": [
+          "subjectIds"
+        ],
+        "type": "object",
+        "properties": {
+          "subjectIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "SubjectInterestsResult": {
+        "required": [
+          "needsOnboarding",
+          "subjects"
+        ],
+        "type": "object",
+        "properties": {
+          "needsOnboarding": {
+            "type": "boolean"
+          },
+          "subjects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SubjectInterestResult"
+            }
+          }
+        }
+      },
       "SubjectMasteryDetailResult": {
         "required": [
           "subjectId",
@@ -8163,7 +8342,8 @@
           "servableCount",
           "masteredCount",
           "seenCount",
-          "masteryPercent"
+          "masteryPercent",
+          "isInterested"
         ],
         "type": "object",
         "properties": {
@@ -8205,6 +8385,9 @@
               "string"
             ],
             "format": "int32"
+          },
+          "isInterested": {
+            "type": "boolean"
           }
         }
       },
@@ -9366,6 +9549,9 @@
       "name": "Subjects"
     },
     {
+      "name": "Students"
+    },
+    {
       "name": "Sessions"
     },
     {
@@ -9403,6 +9589,9 @@
     },
     {
       "name": "AuditLogs"
+    },
+    {
+      "name": "Analytics"
     }
   ]
 }

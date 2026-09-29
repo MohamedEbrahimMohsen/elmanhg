@@ -1,0 +1,33 @@
+{
+  "topBar": {
+    "signIn": "Sign in"
+  },
+  "hero": {
+    "eyebrow": "For Thanaweya Amma",
+    "titleWithCount": "{count, number} questions checked by real teachers",
+    "title": "Questions checked by real teachers",
+    "goal": "Our goal is {goal, number} questions. The counter is live and grows with every question a teacher approves.",
+    "start": "Start for free"
+  },
+  "values": {
+    "title": "Why Elmanhg?",
+    "practice": {
+      "title": "Unlimited practice",
+      "body": "Adaptive questions for every lesson, starting with what you have not seen and what you got wrong."
+    },
+    "exams": {
+      "title": "Unit exams",
+      "body": "Blueprint exams for one unit or several, with a detailed result."
+    },
+    "askTeacher": {
+      "title": "Ask a teacher",
+      "bodyWithHours": "A subject teacher answers your question within {hours, plural, one {# hour} other {# hours}}.",
+      "body": "A subject teacher answers your question in text or voice."
+    }
+  },
+  "plans": {
+    "title": "Plans",
+    "loading": "Loading plans…",
+    "errorTitle": "Could not load the plans."
+  }
+}

@@ -26,6 +26,8 @@ public static class AuthRateLimiting
             rateLimiter.AddPolicy(AuthRateLimitPolicies.Credentials, httpContext => CreateFixedWindow(httpContext, auth.CredentialPermitLimit, auth.CredentialWindowSeconds));
         });
 
+        services.AddOptions<RateLimiterOptions>().Configure<IOptions<AnalyticsOptions>>((rateLimiter, analyticsOptions) => rateLimiter.AddPolicy(AnalyticsRateLimitPolicies.FunnelEvents, httpContext => CreateFixedWindow(httpContext, analyticsOptions.Value.FunnelEventPermitLimit, analyticsOptions.Value.FunnelEventWindowSeconds)));
+
         return services;
     }
 

@@ -13,6 +13,7 @@ const apiUser = (role: string): AuthUserResult => ({
   role,
   phoneNumber: null,
   email: 'mona@elmanhg.test',
+  needsOnboarding: false,
 });
 
 describe('authSession', () => {
@@ -48,5 +49,9 @@ describe('authSession', () => {
       'teacher',
       'admin',
     ]);
+  });
+
+  it('carries needsOnboarding onto the session', () => {
+    expect(toSession({ ...apiUser('Student'), needsOnboarding: true }).needsOnboarding).toBe(true);
   });
 });

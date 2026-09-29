@@ -3,8 +3,8 @@ import { ContentErrorState, ContentListSkeleton } from '@/features/content';
 import { useSession } from '@/features/session';
 import { useGetMasteryOverview } from '@/shared/api/generated/mastery/mastery';
 import { HeadlineCounterCard } from '../components/HeadlineCounterCard';
+import { HomeSubjects } from '../components/HomeSubjects';
 import { NextLessonCard } from '../components/NextLessonCard';
-import { SubjectMasteryCard } from '../components/SubjectMasteryCard';
 
 export function StudentHomePage() {
   const { t } = useTranslation('mastery');
@@ -44,18 +44,7 @@ export function StudentHomePage() {
       {greeting}
       <HeadlineCounterCard headline={data.headline} streakDays={Number(data.streakDays)} />
       {data.nextLesson ? <NextLessonCard lesson={data.nextLesson} /> : null}
-      <h2 className="font-display text-h2 font-bold lg:text-h2-desktop">{t('subjects.title')}</h2>
-      {data.subjects.length === 0 ? (
-        <p className="text-ui text-text-muted">{t('subjects.empty')}</p>
-      ) : (
-        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {data.subjects.map((subject) => (
-            <li key={subject.subjectId}>
-              <SubjectMasteryCard subject={subject} />
-            </li>
-          ))}
-        </ul>
-      )}
+      <HomeSubjects subjects={data.subjects} />
     </section>
   );
 }

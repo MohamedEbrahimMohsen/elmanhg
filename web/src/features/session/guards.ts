@@ -22,6 +22,8 @@ export function redirectSignedIn(session: Session | null, redirectTo: string | u
   throw redirectTo ? redirect({ href: redirectTo }) : redirect({ to: roleHome[session.role] });
 }
 
-export function redirectToHome(session: Session | null): never {
-  throw session === null ? redirect({ to: '/login' }) : redirect({ to: roleHome[session.role] });
+export function requireOnboarded(session: Session | null): void {
+  if (session?.role === 'student' && session.needsOnboarding) {
+    throw redirect({ to: '/onboarding' });
+  }
 }

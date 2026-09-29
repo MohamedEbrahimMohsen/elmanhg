@@ -1,6 +1,7 @@
 using Elmanhg.Application.Shared.RichText;
 using Elmanhg.Application.Shared.Spreadsheets;
 using Elmanhg.Application.Shared.Storage;
+using Elmanhg.Domain.Analytics;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
@@ -12,6 +13,7 @@ using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.Units;
+using Elmanhg.Infrastructure.Analytics;
 using Elmanhg.Infrastructure.ExamBlueprints;
 using Elmanhg.Infrastructure.Identity;
 using Elmanhg.Infrastructure.Lessons;
@@ -63,6 +65,7 @@ public static class DependencyInjection
         services.AddScoped<IExamBlueprintRepository, ExamBlueprintRepository>();
         services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
         services.AddScoped<IPaymentRepository, PaymentRepository>();
+        services.AddScoped<IFunnelEventRepository, FunnelEventRepository>();
         return services;
     }
 }

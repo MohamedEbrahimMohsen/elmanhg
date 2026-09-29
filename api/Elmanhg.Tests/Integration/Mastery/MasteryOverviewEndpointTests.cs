@@ -5,6 +5,7 @@ using Elmanhg.Tests.Integration.Content;
 using Elmanhg.Tests.Integration.Infrastructure;
 using FluentAssertions;
 using System.Net;
+using System.Net.Http.Json;
 using System.Text.Json;
 using static Elmanhg.Tests.Integration.Mastery.MasteryTestData;
 using static Elmanhg.Tests.Integration.Sessions.SessionTestData;
@@ -115,6 +116,23 @@ public sealed class MasteryOverviewEndpointTests(ApiFactory factory)
 
         AssertHeadline(overview, mastered: 0, seen: 0);
         AssertCard(SubjectCard(overview, subjectId), servable: 0, mastered: 0, percent: 0);
+    }
+
+    [Fact]
+    public async Task Get_AfterChoosingSubject_ListsItFirstAsInterested()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await ContentTestData.SeedSubjectAsync(factory, "Physics", 1, cancellationToken);
+        var second = await ContentTestData.SeedSubjectAsync(factory, "Chemistry", 2, cancellationToken);
+        var (_, client) = await SignedInStudentAsync(factory);
+        using var saved = await client.PutAsJsonAsync("/api/students/me/subject-interests", new { subjectIds = new[] { second } }, cancellationToken);
+        saved.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var overview = await GetOverviewAsync(client);
+
+        var firstCard = overview.GetProperty("subjects")[0];
+        firstCard.GetProperty("subjectId").GetGuid().Should().Be(second);
+        firstCard.GetProperty("isInterested").GetBoolean().Should().BeTrue();
     }
 
     [Fact]

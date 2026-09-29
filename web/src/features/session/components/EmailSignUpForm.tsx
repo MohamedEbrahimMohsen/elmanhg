@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { trackFunnelEvent } from '@/features/analytics';
 import { useRegisterWithEmail } from '@/shared/api/generated/auth/auth';
 import type { ServerErrorFields } from '@/shared/form/applyServerErrors';
 import { Form } from '@/shared/form/Form';
@@ -33,7 +34,9 @@ export function EmailSignUpForm() {
       form={form}
       serverErrorFields={serverErrorFields}
       onSubmit={async (values) => {
-        startSession(await registerWithEmail.mutateAsync({ data: values }));
+        const result = await registerWithEmail.mutateAsync({ data: values });
+        trackFunnelEvent('SignUpCompleted');
+        startSession(result);
       }}
     >
       <FormRootError />

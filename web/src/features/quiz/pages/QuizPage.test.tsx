@@ -1,8 +1,8 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { SessionItemResult, SessionResult } from '@/shared/api/generated/model';
+import type { RecordFunnelEventRequest, SessionItemResult, SessionResult } from '@/shared/api/generated/model';
 import {
   getFinishSessionMockHandler,
   getGetSessionMockHandler,
@@ -195,6 +195,35 @@ describe('QuizPage', () => {
     expect(await screen.findByRole('heading', { name: 'Question 3 of 3' })).toBeInTheDocument();
     expect(feedbackStatus()).toHaveTextContent('Wrong answer');
     expect(screen.getByRole('button', { name: 'See result' })).toBeInTheDocument();
+  });
+
+  it('records the first quiz answer once', async () => {
+    const types: string[] = [];
+    server.use(
+      getSubmitSessionAnswerMockHandler(async ({ request }) => {
+        const { questionId } = (await request.json()) as { questionId: string };
+        return questionId === quizItem(1).questionId
+          ? item1Wrong()
+          : answered(quizItem(2), 'Incorrect', { optionId: 'a' });
+      }),
+      http.post('*/api/analytics/funnel-events', async ({ request }) => {
+        types.push(((await request.json()) as RecordFunnelEventRequest).type);
+        return new HttpResponse(null, { status: 200 });
+      }),
+    );
+    const user = userEvent.setup();
+    openQuiz();
+
+    await user.click(await screen.findByRole('radio', { name: '3' }));
+    await user.click(screen.getByRole('button', { name: 'Check' }));
+    await user.click(await screen.findByRole('button', { name: 'Next' }));
+    await user.click(await screen.findByRole('radio', { name: '3' }));
+    await user.click(screen.getByRole('button', { name: 'Check' }));
+    await screen.findByRole('button', { name: 'Next' });
+
+    await waitFor(() => {
+      expect(types).toEqual(['FirstQuizAnswered']);
+    });
   });
 
   it('ends the practice early and opens the result', async () => {
