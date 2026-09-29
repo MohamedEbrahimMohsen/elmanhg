@@ -1,6 +1,5 @@
 {
   "practice": {
-    "title": "Practice",
     "choose": "How many questions?",
     "size": "{count, plural, one {# question} other {# questions}}",
     "resumeHint": "If you have an unfinished practice in this lesson, you will continue where you stopped.",
@@ -46,6 +45,7 @@
     "review": "Question review",
     "reviewItem": "Question {position, number}",
     "none": "You did not answer any question in this practice.",
-    "newPractice": "New practice"
+    "newPractice": "New practice",
+    "backToLesson": "Back to the lesson"
   }
 }

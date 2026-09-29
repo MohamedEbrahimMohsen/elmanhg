@@ -19,6 +19,7 @@ export const getUnitExamOverviewResponseBlueprintTwoDifficultyMixTwoMediumPercen
 export const getUnitExamOverviewResponseBlueprintTwoDifficultyMixTwoHardPercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const getUnitExamOverviewResponseBlueprintTwoTimeLimitMinutesRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const getUnitExamOverviewResponseBlueprintTwoPassMarkRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getUnitExamOverviewResponseUnopenedLessonCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 
 
 export const GetUnitExamOverviewResponse = zod.object({
@@ -46,7 +47,8 @@ export const GetUnitExamOverviewResponse = zod.object({
   "inProgressExam": zod.union([zod.null(),zod.object({
   "sessionId": zod.uuid(),
   "isThisUnit": zod.boolean()
-})])
+})]),
+  "unopenedLessonCount": zod.union([zod.int(),zod.stringFormat('int32', getUnitExamOverviewResponseUnopenedLessonCountRegExpTwo)])
 })
 
 export const StartUnitExamParams = zod.object({

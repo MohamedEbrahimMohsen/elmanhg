@@ -3,6 +3,7 @@ import ICU from 'i18next-icu';
 import { initReactI18next } from 'react-i18next';
 import { auditLocales } from '@/features/audit';
 import { blueprintsLocales } from '@/features/blueprints/locales';
+import { browseLocales } from '@/features/browse/locales';
 import { contentLocales } from '@/features/content/locales';
 import { examLocales } from '@/features/exam/locales';
 import { masteryLocales } from '@/features/mastery/locales';
@@ -40,6 +41,7 @@ const resources = {
     exam: examLocales.ar,
     subscription: subscriptionLocales.ar,
     payments: paymentsLocales.ar,
+    browse: browseLocales.ar,
   },
   en: {
     common: commonEn,
@@ -55,6 +57,7 @@ const resources = {
     exam: examLocales.en,
     subscription: subscriptionLocales.en,
     payments: paymentsLocales.en,
+    browse: browseLocales.en,
   },
 };
 
@@ -91,6 +94,7 @@ export function initI18n(lng: Language = defaultLanguage): void {
         'exam',
         'subscription',
         'payments',
+        'browse',
       ],
       defaultNS: 'common',
       resources,

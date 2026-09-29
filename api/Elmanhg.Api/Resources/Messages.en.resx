@@ -279,6 +279,8 @@
   <data name="MULTI_UNIT_EXAM_UNIT_DUPLICATE" xml:space="preserve"><value>A unit was chosen more than once.</value></data>
   <data name="MULTI_UNIT_EXAM_SIZE_INVALID" xml:space="preserve"><value>The number of questions must be 20, 40 or 60.</value></data>
   <data name="MULTI_UNIT_EXAM_NO_BLUEPRINT" xml:space="preserve"><value>Some chosen units have no exam: {units}</value></data>
+  <data name="EXAM_LESSONS_NOT_OPENED" xml:space="preserve"><value>Open every lesson in the unit before starting the exam.</value></data>
+  <data name="LESSON_ALREADY_OPENED" xml:space="preserve"><value>This lesson opening was already recorded.</value></data>
   <data name="SUBSCRIPTION_PERIOD_INVALID" xml:space="preserve"><value>The subscription period is not valid.</value></data>
   <data name="SUBSCRIPTION_NOT_ACTIVE" xml:space="preserve"><value>The subscription is not active.</value></data>
   <data name="SUBSCRIPTION_ENDED" xml:space="preserve"><value>This subscription has ended or was cancelled.</value></data>

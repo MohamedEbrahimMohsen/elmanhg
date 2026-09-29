@@ -1,6 +1,6 @@
 # Mastery and the headline counter
 
-Mastery tells a student how much of the platform they have really learned. It is built from the attempt log (`docs/sessions.md`) and feeds the student home page, and later browsing (#85), [progress (#78)](progress.md) and exam selection (E6).
+Mastery tells a student how much of the platform they have really learned. It is built from the attempt log (`docs/sessions.md`) and feeds the student home page, [browsing](browsing.md) (#85), [progress (#78)](progress.md) and exam selection (E6).
 
 ## Definitions
 
@@ -121,6 +121,6 @@ The progress endpoints (`docs/progress.md`) use the same policy.
 - the greeting "أهلًا {name}";
 - the headline card: "متبقّي لك X سؤال من Y", plus seen, mastered and the day streak;
 - the suggested next lesson with its mastery bar and "درّب الآن", which opens `/student/lesson/{id}/practice`;
-- one card per subject with a mastery bar and its available questions. Cards are not links until #85 adds subject pages.
+- one card per subject with a mastery bar and its available questions. Each card's name links to `/student/subject/{id}` (`docs/browsing.md`).
 
-It has loading, error-with-retry and empty states. Every quiz answer and every exam submission invalidates the `/api/mastery*` queries, so the numbers are fresh when the student returns home.
+It has loading, error-with-retry and empty states. Every quiz answer and every exam submission invalidates the `/api/mastery*` queries (and the `/api/progress*` and `/api/browse*` queries), so the numbers are fresh when the student returns home or to a subject, unit or lesson page.

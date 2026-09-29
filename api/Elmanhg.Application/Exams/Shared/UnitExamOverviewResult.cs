@@ -3,7 +3,7 @@ using Elmanhg.Domain.Questions;
 
 namespace Elmanhg.Application.Exams.Shared;
 
-public sealed record UnitExamOverviewResult(Guid UnitId, string UnitName, Guid SubjectId, string SubjectName, ExamBlueprintSummaryResult? Blueprint, bool IsAvailable, InProgressExamResult? InProgressExam);
+public sealed record UnitExamOverviewResult(Guid UnitId, string UnitName, Guid SubjectId, string SubjectName, ExamBlueprintSummaryResult? Blueprint, bool IsAvailable, InProgressExamResult? InProgressExam, int UnopenedLessonCount);
 
 public sealed record ExamBlueprintSummaryResult(bool IsSubjectDefault, int QuestionCount, List<ExamTypeAvailabilityResult> TypeCounts, ExamDifficultyMixResult? DifficultyMix, int? TimeLimitMinutes, int PassMark);
 

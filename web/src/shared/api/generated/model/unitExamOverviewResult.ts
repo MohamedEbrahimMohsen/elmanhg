@@ -15,4 +15,6 @@ export interface UnitExamOverviewResult {
   blueprint: null | ExamBlueprintSummaryResult;
   isAvailable: boolean;
   inProgressExam: null | InProgressExamResult;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  unopenedLessonCount: number | string;
 }

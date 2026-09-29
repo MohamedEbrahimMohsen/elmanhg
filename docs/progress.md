@@ -7,7 +7,7 @@ The progress page (`/student/progress`, "تقدّمي") shows a student how far 
 The page has four sections. Each one loads, fails and retries on its own.
 
 1. **Summary.** The headline counter and the day streak come from `GET /api/mastery/overview`, the same data and rules as the student home. The streak is student-wide (consecutive days with at least one non-test quiz attempt), so it is shown once here, not per subject.
-2. **Subjects.** One card per subject with its mastery bar and a unit table: unit mastery % and best unit-exam score. The score is rounded to a whole percent, and "—" means no exam yet. The last column links «امتحان الوحدة» to the unit's exam start, `/student/exam-start/{unitId}` (the entry point until the unit page ships in #85).
+2. **Subjects.** One card per subject with its mastery bar and a unit table: unit mastery % and best unit-exam score. The subject name links to `/student/subject/{id}` and each unit name to `/student/unit/{id}` ([browsing](browsing.md)). The score is rounded to a whole percent, and "—" means no exam yet. The last column links «امتحان الوحدة» to the unit's exam start, `/student/exam-start/{unitId}`.
 3. **Weak spots.** The weakest lessons and the weakest objectives, each with "درّب الآن".
 4. **History.** A paged table of the student's quiz and exam sessions, filterable by all, quizzes or exams.
 
@@ -77,4 +77,4 @@ All three endpoints require `Progress.ViewOwn` (PRD §16), which only Students h
 
 ## Freshness
 
-`invalidateMastery` (web) marks every `/api/mastery*` and `/api/progress*` query stale after each answer. The history query also has `staleTime: 0`, so every visit refetches it, because starting or finishing a session changes history without an answer.
+`invalidateMastery` (web) marks every `/api/mastery*`, `/api/progress*` and `/api/browse*` query stale after each answer. The history query also has `staleTime: 0`, so every visit refetches it, because starting or finishing a session changes history without an answer.

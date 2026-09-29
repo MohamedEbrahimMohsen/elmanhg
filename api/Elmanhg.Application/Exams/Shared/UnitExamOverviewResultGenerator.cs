@@ -9,11 +9,11 @@ namespace Elmanhg.Application.Exams.Shared;
 
 public static class UnitExamOverviewResultGenerator
 {
-    public static UnitExamOverviewResult Generate(CurriculumUnit unit, Subject subject, ExamBlueprint? blueprint, IReadOnlyDictionary<QuestionType, int> available, Session? openExam)
+    public static UnitExamOverviewResult Generate(CurriculumUnit unit, Subject subject, ExamBlueprint? blueprint, IReadOnlyDictionary<QuestionType, int> available, Session? openExam, int unopenedLessonCount)
     {
         var isAvailable = blueprint is not null && ExamBlueprintShortfall.Find(blueprint.GetTypeCounts(), available).Count == 0;
         var inProgressExam = openExam is null ? null : new InProgressExamResult(openExam.Id, openExam.ScopeKey == new UnitExamScope(unit.Id).ToKey());
-        return new UnitExamOverviewResult(unit.Id, unit.Name, subject.Id, subject.Name, blueprint is null ? null : Summarize(blueprint, available), isAvailable, inProgressExam);
+        return new UnitExamOverviewResult(unit.Id, unit.Name, subject.Id, subject.Name, blueprint is null ? null : Summarize(blueprint, available), isAvailable, inProgressExam, unopenedLessonCount);
     }
 
     private static ExamBlueprintSummaryResult Summarize(ExamBlueprint blueprint, IReadOnlyDictionary<QuestionType, int> available)

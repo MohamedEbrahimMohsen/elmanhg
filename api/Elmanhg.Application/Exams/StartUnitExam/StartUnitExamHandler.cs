@@ -20,7 +20,7 @@ using System.Security.Claims;
 
 namespace Elmanhg.Application.Exams.StartUnitExam;
 
-public sealed class StartUnitExamHandler(ISessionRepository sessionRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, ILessonRepository lessonRepository, IQuestionRepository questionRepository, IExamBlueprintRepository examBlueprintRepository, IQuestionMasteryRepository questionMasteryRepository, IOptions<ExamsOptions> examsOptions, IOptions<MasteryOptions> masteryOptions, Random random, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<StartUnitExamCommand, ExamSessionResult>
+public sealed class StartUnitExamHandler(ISessionRepository sessionRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, ILessonRepository lessonRepository, ILessonOpeningRepository lessonOpeningRepository, IQuestionRepository questionRepository, IExamBlueprintRepository examBlueprintRepository, IQuestionMasteryRepository questionMasteryRepository, IOptions<ExamsOptions> examsOptions, IOptions<MasteryOptions> masteryOptions, Random random, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<StartUnitExamCommand, ExamSessionResult>
 {
     public async Task<ExamSessionResult> Handle(StartUnitExamCommand request, CancellationToken cancellationToken)
     {
@@ -66,6 +66,12 @@ public sealed class StartUnitExamHandler(ISessionRepository sessionRepository, I
 
     private async Task<Session> StartAsync(Guid userId, CurriculumUnit unit, DateTimeOffset now, CancellationToken cancellationToken)
     {
+        var isTestMode = currentUserService.GetClaim(ClaimTypes.Role) == nameof(UserRole.Admin);
+        if (examsOptions.Value.RequireAllLessonsOpened && !isTestMode)
+        {
+            await ExamLessonGate.EnsureOpenedAsync(userId, [unit.Id], lessonRepository, lessonOpeningRepository, cancellationToken).ConfigureAwait(false);
+        }
+
         var blueprints = await examBlueprintRepository.FindAsync(x => x.SubjectId == unit.SubjectId && (x.UnitId == unit.Id || x.UnitId == null), cancellationToken, asNoTracking: true).ConfigureAwait(false);
         var blueprint = ExamBlueprintResolution.ForUnit(blueprints, unit);
         if (blueprint is null)
@@ -79,7 +85,7 @@ public sealed class StartUnitExamHandler(ISessionRepository sessionRepository, I
             .Distinct()
             .ToList();
         var lessons = await lessonRepository.FindAsync(x => lessonIds.Contains(x.Id), cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        return Session.StartUnitExam(userId, unit, blueprint, questions, lessons, currentUserService.GetClaim(ClaimTypes.Role) == nameof(UserRole.Admin), now);
+        return Session.StartUnitExam(userId, unit, blueprint, questions, lessons, isTestMode, now);
     }
 
     private async Task<List<Question>> DrawAsync(Guid userId, CurriculumUnit unit, ExamBlueprint blueprint, CancellationToken cancellationToken)

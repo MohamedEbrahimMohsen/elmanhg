@@ -1,0 +1,52 @@
+{
+  "breadcrumb": {
+    "label": "Breadcrumb",
+    "home": "Home"
+  },
+  "mastery": {
+    "line": "{percent, number}% mastered · {servable, plural, one {# question} other {# questions}} available · Seen {seen, number}",
+    "barLabel": "{name} mastery"
+  },
+  "subject": {
+    "loading": "Loading the subject…",
+    "errorTitle": "Could not load the subject.",
+    "unitsTitle": "Units",
+    "empty": "This subject has no units yet.",
+    "unitMeta": "{percent, number}% mastered · {lessons, plural, one {# lesson} other {# lessons}}",
+    "bestExam": "Best exam score: {score, number} / 100",
+    "noExam": "Best exam score: —",
+    "unitExam": "Unit exam",
+    "unitExamLabel": "Unit exam: {name}",
+    "multiExam": "Multi-unit exam"
+  },
+  "unit": {
+    "loading": "Loading the unit…",
+    "errorTitle": "Could not load the unit.",
+    "lessonsTitle": "Lessons",
+    "empty": "This unit has no lessons yet.",
+    "lessonMeta": "{percent, number}% mastered · {questions, plural, one {# question} other {# questions}}",
+    "examTitle": "Unit exam",
+    "bestExam": "Best score: {score, number} / 100",
+    "noExam": "You have not taken this exam yet.",
+    "openExam": "Open the unit exam"
+  },
+  "lesson": {
+    "loading": "Loading the lesson…",
+    "errorTitle": "Could not load the lesson.",
+    "tabsLabel": "Lesson sections",
+    "tabs": {
+      "explanation": "Explanation",
+      "objectives": "Objectives",
+      "summary": "Summary",
+      "practice": "Practice"
+    },
+    "noExplanation": "This lesson has no explanation yet.",
+    "noObjectives": "This lesson has no objectives yet.",
+    "noSummary": "This lesson has no summary yet.",
+    "video": "Watch the lesson video",
+    "navLabel": "Lesson navigation",
+    "previous": "Previous lesson: {name}",
+    "next": "Next lesson: {name}",
+    "backToUnit": "Back to {name}"
+  }
+}

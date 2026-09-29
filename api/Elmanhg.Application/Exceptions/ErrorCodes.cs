@@ -65,6 +65,7 @@ public static class ErrorCodes
     public const string LessonImageRequired = "LESSON_IMAGE_REQUIRED";
     public const string LessonImageTypeInvalid = "LESSON_IMAGE_TYPE_INVALID";
     public const string LessonImageTooLarge = "LESSON_IMAGE_TOO_LARGE";
+    public const string LessonAlreadyOpened = "LESSON_ALREADY_OPENED";
 
     // QUESTIONS
     public const string QuestionNotFound = "QUESTION_NOT_FOUND";
@@ -149,6 +150,7 @@ public static class ErrorCodes
     public const string MultiUnitExamUnitDuplicate = "MULTI_UNIT_EXAM_UNIT_DUPLICATE";
     public const string MultiUnitExamSizeInvalid = "MULTI_UNIT_EXAM_SIZE_INVALID";
     public const string MultiUnitExamNoBlueprint = "MULTI_UNIT_EXAM_NO_BLUEPRINT";
+    public const string ExamLessonsNotOpened = "EXAM_LESSONS_NOT_OPENED";
 
     // QUESTION IMPORTS
     public const string QuestionImportFileRequired = "QUESTION_IMPORT_FILE_REQUIRED";

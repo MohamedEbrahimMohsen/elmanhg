@@ -113,6 +113,7 @@ export function overview(overrides?: Partial<UnitExamOverviewResult>): UnitExamO
     },
     isAvailable: true,
     inProgressExam: null,
+    unopenedLessonCount: 0,
     ...overrides,
   };
 }

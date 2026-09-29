@@ -1,0 +1,52 @@
+{
+  "breadcrumb": {
+    "label": "مسار التنقل",
+    "home": "الرئيسية"
+  },
+  "mastery": {
+    "line": "إتقانك {percent, number}٪ · أسئلة متاحة: {servable, number} · شاهدت: {seen, number}",
+    "barLabel": "إتقان {name}"
+  },
+  "subject": {
+    "loading": "جارٍ تحميل المادة…",
+    "errorTitle": "تعذّر تحميل المادة.",
+    "unitsTitle": "الوحدات",
+    "empty": "لا توجد وحدات في هذه المادة بعد.",
+    "unitMeta": "إتقان {percent, number}٪ · {lessons, number} درس",
+    "bestExam": "أفضل درجة امتحان: {score, number} / 100",
+    "noExam": "أفضل درجة امتحان: —",
+    "unitExam": "امتحان الوحدة",
+    "unitExamLabel": "امتحان الوحدة: {name}",
+    "multiExam": "امتحان متعدد الوحدات"
+  },
+  "unit": {
+    "loading": "جارٍ تحميل الوحدة…",
+    "errorTitle": "تعذّر تحميل الوحدة.",
+    "lessonsTitle": "الدروس",
+    "empty": "لا توجد دروس في هذه الوحدة بعد.",
+    "lessonMeta": "إتقان {percent, number}٪ · {questions, number} سؤال",
+    "examTitle": "امتحان الوحدة",
+    "bestExam": "أفضل درجة: {score, number} / 100",
+    "noExam": "لم تمتحن هذه الوحدة بعد.",
+    "openExam": "افتح امتحان الوحدة"
+  },
+  "lesson": {
+    "loading": "جارٍ تحميل الدرس…",
+    "errorTitle": "تعذّر تحميل الدرس.",
+    "tabsLabel": "أقسام الدرس",
+    "tabs": {
+      "explanation": "الشرح",
+      "objectives": "الأهداف",
+      "summary": "الملخص",
+      "practice": "التدريب"
+    },
+    "noExplanation": "لا يوجد شرح لهذا الدرس بعد.",
+    "noObjectives": "لا توجد أهداف لهذا الدرس بعد.",
+    "noSummary": "لا يوجد ملخص لهذا الدرس بعد.",
+    "video": "شاهد فيديو الدرس",
+    "navLabel": "التنقل بين الدروس",
+    "previous": "الدرس السابق: {name}",
+    "next": "الدرس التالي: {name}",
+    "backToUnit": "العودة إلى {name}"
+  }
+}

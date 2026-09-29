@@ -11,12 +11,13 @@ A **unit exam** is a session of kind `UnitExam` (`docs/sessions.md`) built from 
    - for this unit, it is resumed with no new draw; if it is past `Deadline + Exams:DeadlineGraceSeconds`, it is submitted first and returned submitted;
    - for another unit, the call returns 409 `EXAM_ALREADY_IN_PROGRESS`.
    The unique partial index `IX_Sessions_OneOpenExam` backs the rule; a concurrent start that loses the race gets the same 409.
-3. **Resolution.** `ExamBlueprintResolution.ForUnit`: the unit's blueprint, else the subject default, else none (400 `UNIT_EXAM_NO_BLUEPRINT`).
-4. **Servability.** `ExamBlueprint.EnsureServable` re-runs the shortfall check against the unit's live servable pool (400 `EXAM_SHORTFALL`, context `types`, for example `"Mcq 1/2"`).
-5. The session copies `TimeLimitMinutes` and `PassMark` from the blueprint and sets `Deadline = StartedAt + TimeLimitMinutes` (null when untimed). A later blueprint edit never changes a started exam.
-6. An Admin gets a test-mode exam (`IsTestMode = true`): no mastery and no history effect, but it still counts as the admin's one open exam.
+3. **Lesson-open gate.** Only for a new exam, and only when `Exams:RequireAllLessonsOpened` is true: every Published lesson of the unit must have a lesson opening for the student, or the call returns 400 `EXAM_LESSONS_NOT_OPENED`. A resume is never blocked, and an Admin's test-mode exam is exempt.
+4. **Resolution.** `ExamBlueprintResolution.ForUnit`: the unit's blueprint, else the subject default, else none (400 `UNIT_EXAM_NO_BLUEPRINT`).
+5. **Servability.** `ExamBlueprint.EnsureServable` re-runs the shortfall check against the unit's live servable pool (400 `EXAM_SHORTFALL`, context `types`, for example `"Mcq 1/2"`).
+6. The session copies `TimeLimitMinutes` and `PassMark` from the blueprint and sets `Deadline = StartedAt + TimeLimitMinutes` (null when untimed). A later blueprint edit never changes a started exam.
+7. An Admin gets a test-mode exam (`IsTestMode = true`): no mastery and no history effect, but it still counts as the admin's one open exam.
 
-The lesson-open gate of PRD §7.4 ships with its default (no gate); it needs lesson-open tracking from #85.
+The lesson-open gate of PRD §7.4 is off by default (`Exams:RequireAllLessonsOpened` = false). A lesson counts as opened once the student has loaded its lesson page, which records a lesson opening (`POST /api/browse/lessons/{lessonId}/openings`, [browsing](browsing.md)). The gate counts the unit's Published lessons with no opening, so a lesson published later locks the gate again until it is opened.
 
 ## Selection
 
@@ -96,7 +97,7 @@ Only a shortfall of the **union** pool blocks the exam: 400 `EXAM_SHORTFALL`, co
 
 **Scope.** `MultiUnitExamScope { subjectId, unitIds, size }` is stored as jsonb, with `unitIds` in unit order. The key is `units:{size}:{sorted lowercase unit ids joined by ","}`, so the selection order does not matter and a retake of the same units and size has the same key.
 
-**Start and resume.** `POST /api/exams/subjects/{subjectId}/multi-unit` validates the selection (422 codes below), then loads the subject (404 `SUBJECT_NOT_FOUND`) and the units (404 `UNIT_NOT_FOUND` for a missing unit or a unit of another subject). The one-open-exam rule is unchanged: an open exam with the same key is resumed (and submitted first when past the deadline plus grace), and any other open exam returns 409 `EXAM_ALREADY_IN_PROGRESS`. The exam is planned and drawn only when nothing is open, so a resume never fails on a blueprint edited later. An Admin gets a test-mode exam.
+**Start and resume.** `POST /api/exams/subjects/{subjectId}/multi-unit` validates the selection (422 codes below), then loads the subject (404 `SUBJECT_NOT_FOUND`) and the units (404 `UNIT_NOT_FOUND` for a missing unit or a unit of another subject). The one-open-exam rule is unchanged: an open exam with the same key is resumed (and submitted first when past the deadline plus grace), and any other open exam returns 409 `EXAM_ALREADY_IN_PROGRESS`. The exam is planned and drawn only when nothing is open, so a resume never fails on a blueprint edited later. When `Exams:RequireAllLessonsOpened` is true, a new multi-unit exam also needs every Published lesson of every selected unit to be opened (400 `EXAM_LESSONS_NOT_OPENED`); a resume and an Admin's test-mode exam are exempt. An Admin gets a test-mode exam.
 
 **Preview.** `GET /api/exams/subjects/{subjectId}/multi-unit/preview?unitIds=…&unitIds=…&size=20` returns the merged blueprint (`typeCounts` with the union availability, the time, the pass mark and `difficultyMix: null`), `isAvailable` (false on a union shortfall) and each unit's share. It saves nothing.
 
@@ -130,7 +131,7 @@ Policy `Assessments.Take` (Students and Admins). Teachers get 403, anonymous cal
 | PUT | `/api/exams/{sessionId}/answers/{questionId}` | `{ answer }` | 200 `ExamAnswerSavedResult` |
 | POST | `/api/exams/{sessionId}/submit` | — | 200 `ExamSessionResult` |
 
-`UnitExamOverviewResult { unitId, unitName, subjectId, subjectName, blueprint? { isSubjectDefault, questionCount, typeCounts[] { type, required, available }, difficultyMix?, timeLimitMinutes?, passMark }, isAvailable, inProgressExam? { sessionId, isThisUnit } }`
+`UnitExamOverviewResult { unitId, unitName, subjectId, subjectName, blueprint? { isSubjectDefault, questionCount, typeCounts[] { type, required, available }, difficultyMix?, timeLimitMinutes?, passMark }, isAvailable, inProgressExam? { sessionId, isThisUnit }, unopenedLessonCount }` (`unopenedLessonCount` is the unit's Published lessons the student has not opened; always 0 when the gate is off and for an Admin)
 `MultiUnitExamOverviewResult { subjectId, subjectName, units[] { unitId, name, hasBlueprint, isSubjectDefault, servableCount }, sizes[], inProgressExam? { sessionId, isThisUnit: false } }`
 `MultiUnitExamPreviewResult { subjectId, size, blueprint { isSubjectDefault, questionCount, typeCounts[] { type, required, available }, difficultyMix: null, timeLimitMinutes?, passMark }, isAvailable, units[] { unitId, name, questionCount, isSubjectDefault } }`
 `ExamSessionResult { id, kind, isTestMode, subjectId?, subjectName?, units[] { unitId, name? }, startedAt, timeLimitMinutes?, deadline?, serverNow, passMark, submittedAt?, scorePercent?, isPassed?, elapsedMilliseconds, items[], lessons[], unitBreakdown[] { unitId, name?, questionCount, correctCount, score, maxScore, scorePercent }, weakestObjectives[] }`
@@ -148,6 +149,7 @@ Policy `Assessments.Take` (Students and Admins). Teachers get 403, anonymous cal
 |---|---|---|
 | `EXAM_ALREADY_IN_PROGRESS` | 409 | Another exam is open for the student (start, or a lost start race). |
 | `UNIT_EXAM_NO_BLUEPRINT` | 400 | Neither the unit nor its subject has a blueprint. |
+| `EXAM_LESSONS_NOT_OPENED` | 400 | The lesson-open gate is on and a Published lesson of the unit (or of a selected unit) has not been opened. |
 | `MULTI_UNIT_EXAM_NO_BLUEPRINT` | 400 | A selected unit has no blueprint and its subject has no default (context `units`). |
 | `MULTI_UNIT_EXAM_UNITS_TOO_FEW` | 422 | Fewer than two units, or no selection. |
 | `MULTI_UNIT_EXAM_UNIT_DUPLICATE` | 422 | A unit id appears twice. |
@@ -166,6 +168,7 @@ Policy `Assessments.Take` (Students and Admins). Teachers get 403, anonymous cal
 | `Exams:AutoSubmitIntervalSeconds` | 60 | Seconds between sweeps (5–3600). |
 | `Exams:AutoSubmitBatchSize` | 50 | Expired exams handled per sweep (1–1000). |
 | `Exams:WeakestObjectiveCount` | 3 | Objectives shown in the weakest list (1–20). |
+| `Exams:RequireAllLessonsOpened` | false | When true, a student must have opened every Published lesson of the unit (or of every selected unit) before a new exam starts. |
 
 `Sessions:AnswerMaxLength` caps a saved answer, as for quizzes.
 
@@ -173,7 +176,7 @@ Policy `Assessments.Take` (Students and Admins). Teachers get 403, anonymous cal
 
 Feature `web/src/features/exam/`.
 
-- **`/student/exam-start/{unitId}`**: "امتحان: {unit}", the blueprint summary (type, count, available; the available cell turns red when short), the time or «مفتوح», the pass mark and the note «لا تظهر الإجابات الصحيحة إلا بعد التسليم. تُحفظ إجاباتك تلقائيًا.». The subject default shows «النموذج الافتراضي للمادة». Actions: «ابدأ الامتحان»; «استكمل الامتحان» when this unit's exam is open; a warning with a link when another exam is open; the shortfall warning with no start button; «لا يوجد امتحان لهذه الوحدة بعد.» with no blueprint. Loading, error-with-retry and RTL states. After the actions, the card «محاولاتك السابقة» with «أفضل درجة: {score} / 100» and one row per sitting, newest first (date, the score with the «الأفضل» chip on every best sitting, «عرض» to its result); it has its own loading and error-with-retry states and is hidden when there are no sittings. Reached from the progress unit table until #85 adds the unit page.
+- **`/student/exam-start/{unitId}`**: the breadcrumb الرئيسية › subject › unit › امتحان الوحدة, "امتحان: {unit}", the blueprint summary (type, count, available; the available cell turns red when short), the time or «مفتوح», the pass mark and the note «لا تظهر الإجابات الصحيحة إلا بعد التسليم. تُحفظ إجاباتك تلقائيًا.». The subject default shows «النموذج الافتراضي للمادة». Actions: «ابدأ الامتحان»; «استكمل الامتحان» when this unit's exam is open; a warning with a link when another exam is open; the warning «افتح كل دروس الوحدة قبل الامتحان. متبقٍّ N درس.» with «إلى دروس الوحدة» (the unit page) and no start button when `unopenedLessonCount` > 0; the shortfall warning with no start button; «لا يوجد امتحان لهذه الوحدة بعد.» with no blueprint. Loading, error-with-retry and RTL states. After the actions, the card «محاولاتك السابقة» with «أفضل درجة: {score} / 100» and one row per sitting, newest first (date, the score with the «الأفضل» chip on every best sitting, «عرض» to its result); it has its own loading and error-with-retry states and is hidden when there are no sittings. Reached from the unit page, the subject page and the progress unit table.
 - **`/student/exam/{sessionId}`**: a sticky header with the title, the countdown and the save status («محفوظ تلقائيًا», «جارٍ الحفظ…», «تم الحفظ {time}», or the save error). The countdown is anchored to `serverNow`, turns red and is announced once in the last two minutes, and at 0 shows «انتهى الوقت. جارٍ تسليم امتحانك…» and submits. Every question is on the page with its saved answer restored. Each change is saved after 800 ms; saves for one question are chained so the newest lands last, and pending saves are flushed before submitting. «تسليم الامتحان» (sticky at the bottom on mobile) asks for confirmation with the count of unanswered questions. A submitted exam opens its result.
 - **`/student/exam-result/{sessionId}`**: the score out of 100 with «ناجح» or «لم تبلغ درجة النجاح ({passMark})», answered count and time, the per-lesson table with «درّب الآن» to `/student/lesson/{lessonId}/practice`, the weakest objectives or «لا توجد أهداف ضعيفة. أحسنت!», the same «محاولاتك السابقة» card for this exam's scope (the row being viewed says «هذه المحاولة» with no link; hidden when empty), a review of every question (the student's answer with feedback, or «لم تُجب عن هذا السؤال.» with the correct answer), «إعادة الامتحان» to the exam start and «تقدّمي». An open exam opens the exam screen.
 - **`/student/multi-exam`** (the builder, «امتحان متعدد الوحدات»): a subject select, the subject's units as checkboxes with «({count} سؤال متاح)» (a unit with no blueprint is disabled and says «لا يوجد امتحان لهذه الوحدة»), and the size as radios «20 / 40 / 60 سؤال». With fewer than two units it says «اختر وحدتين على الأقل.»; with two or more it shows the live merged preview «النموذج المدمج (تناسبيًا)» (the blueprint summary and «الأسئلة من كل وحدة»), then «ابدأ الامتحان», or the shortfall warning with no button. When any exam is open it shows «لديك امتحان جارٍ.» with a link and no start button. The selection lives in the URL (`?subjectId=&unitIds=[…]&size=`); changing the subject clears the units and size. Loading, error-with-retry, no-subjects, no-units and RTL states.

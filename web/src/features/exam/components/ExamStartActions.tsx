@@ -38,6 +38,22 @@ export function ExamStartActions({ overview }: ExamStartActionsProps) {
       </div>
     );
   }
+  if (Number(overview.unopenedLessonCount) > 0) {
+    return (
+      <div className={warningClassName}>
+        <p className="text-ui text-text">
+          {t('start.lessonsNotOpened', { count: Number(overview.unopenedLessonCount) })}
+        </p>
+        <Link
+          to="/student/unit/$unitId"
+          params={{ unitId: overview.unitId }}
+          className="rounded-sm text-ui text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+        >
+          {t('start.toUnit')}
+        </Link>
+      </div>
+    );
+  }
   if (overview.blueprint && !overview.isAvailable) {
     return (
       <div className={warningClassName}>

@@ -31,6 +31,7 @@ public sealed class StartMultiUnitExamHandlerTests
     private readonly ISubjectRepository _subjectRepository = Substitute.For<ISubjectRepository>();
     private readonly ICurriculumUnitRepository _unitRepository = Substitute.For<ICurriculumUnitRepository>();
     private readonly ILessonRepository _lessonRepository = Substitute.For<ILessonRepository>();
+    private readonly ILessonOpeningRepository _lessonOpeningRepository = Substitute.For<ILessonOpeningRepository>();
     private readonly IQuestionRepository _questionRepository = Substitute.For<IQuestionRepository>();
     private readonly IExamBlueprintRepository _examBlueprintRepository = Substitute.For<IExamBlueprintRepository>();
     private readonly IQuestionMasteryRepository _questionMasteryRepository = Substitute.For<IQuestionMasteryRepository>();
@@ -39,6 +40,8 @@ public sealed class StartMultiUnitExamHandlerTests
     private readonly MultiUnitExamBuilder _builder = new();
     private readonly List<Question> _pool = [];
     private readonly List<ExamBlueprint> _blueprints = [];
+    private readonly List<LessonOpening> _openings = [];
+    private readonly IOptions<ExamsOptions> _examsOptions = Options.Create(new ExamsOptions());
     private readonly StartMultiUnitExamHandler _handler;
 
     public StartMultiUnitExamHandlerTests()
@@ -61,9 +64,11 @@ public sealed class StartMultiUnitExamHandlerTests
         _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(_ => _pool.SelectMany(x => x.Revisions).ToList());
         _lessonRepository.FindAsync(Arg.Any<Expression<Func<Lesson, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Lesson>, IQueryable<Lesson>>?>(), Arg.Any<Func<IQueryable<Lesson>, IOrderedQueryable<Lesson>>?>(), Arg.Any<bool>())
             .Returns(call => _builder.Lessons.Where(call.Arg<Expression<Func<Lesson, bool>>>().Compile()).ToList());
+        _lessonOpeningRepository.FindAsync(Arg.Any<Expression<Func<LessonOpening, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<LessonOpening>, IQueryable<LessonOpening>>?>(), Arg.Any<Func<IQueryable<LessonOpening>, IOrderedQueryable<LessonOpening>>?>(), Arg.Any<bool>())
+            .Returns(call => _openings.Where(call.Arg<Expression<Func<LessonOpening, bool>>>().Compile()).ToList());
         _questionMasteryRepository.FindAsync(Arg.Any<Expression<Func<QuestionMastery, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<QuestionMastery>, IQueryable<QuestionMastery>>?>(), Arg.Any<Func<IQueryable<QuestionMastery>, IOrderedQueryable<QuestionMastery>>?>(), Arg.Any<bool>())
             .Returns(new List<QuestionMastery>());
-        _handler = new StartMultiUnitExamHandler(_sessionRepository, _subjectRepository, _unitRepository, _lessonRepository, _questionRepository, _examBlueprintRepository, _questionMasteryRepository, Options.Create(new ExamsOptions()), Options.Create(new ExamBlueprintsOptions()), Options.Create(new MasteryOptions()), new Random(42), _timeProvider, _currentUserService, Substitute.For<ILocalizer>());
+        _handler = new StartMultiUnitExamHandler(_sessionRepository, _subjectRepository, _unitRepository, _lessonRepository, _lessonOpeningRepository, _questionRepository, _examBlueprintRepository, _questionMasteryRepository, _examsOptions, Options.Create(new ExamBlueprintsOptions()), Options.Create(new MasteryOptions()), new Random(42), _timeProvider, _currentUserService, Substitute.For<ILocalizer>());
     }
 
     [Fact]
@@ -157,6 +162,27 @@ public sealed class StartMultiUnitExamHandlerTests
         var result = await _handler.Handle(Command(), TestContext.Current.CancellationToken);
 
         result.IsTestMode.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Handle_GateOnLessonUnopened_ThrowsExamLessonsNotOpened()
+    {
+        _examsOptions.Value.RequireAllLessonsOpened = true;
+        _openings.Add(LessonOpening.Record(_builder.StudentId, _builder.Lessons[0], MultiUnitExamBuilder.Now));
+
+        await AssertThrowsAsync<BusinessRuleViolationCoreException>(Command(), ErrorCodes.ExamLessonsNotOpened);
+    }
+
+    [Fact]
+    public async Task Handle_GateOnAllLessonsOpened_StartsExam()
+    {
+        _examsOptions.Value.RequireAllLessonsOpened = true;
+        _openings.AddRange(_builder.Lessons.Select(x => LessonOpening.Record(_builder.StudentId, x, MultiUnitExamBuilder.Now)));
+
+        var result = await _handler.Handle(Command(), TestContext.Current.CancellationToken);
+
+        await _sessionRepository.Received(1).AddAsync(Arg.Is<Session>(x => x.Id == result.Id && x.Kind == SessionKind.MultiUnitExam), Arg.Any<CancellationToken>());
+        await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     private void FillPool(int perUnit) => _pool.AddRange(Enumerable.Range(0, 2).SelectMany(index => Enumerable.Range(0, perUnit).Select(_ => _builder.Approved(index))));

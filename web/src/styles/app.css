@@ -139,6 +139,7 @@
     font-size: var(--ds-type-body-size);
     line-height: var(--ds-type-body-line);
     color: var(--ds-color-text);
+    overflow-wrap: anywhere;
   }
 
   .rich-text > * + * {

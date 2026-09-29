@@ -1,0 +1,47 @@
+using Core.Errors;
+using Core.Identity.Tokens.CurrentUser;
+using Elmanhg.Application.Browse.Shared;
+using Elmanhg.Application.Exceptions;
+using Elmanhg.Domain.Lessons;
+using Elmanhg.Domain.Mastery;
+using Elmanhg.Domain.Subjects;
+using Elmanhg.Domain.Units;
+using MediatR;
+
+namespace Elmanhg.Application.Browse.GetStudentLesson;
+
+public sealed class GetStudentLessonHandler(ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IQuestionMasteryRepository questionMasteryRepository, ICurrentUserService currentUserService) : IRequestHandler<GetStudentLessonQuery, StudentLessonResult>
+{
+    public async Task<StudentLessonResult> Handle(GetStudentLessonQuery request, CancellationToken cancellationToken)
+    {
+        if (currentUserService.UserId == null || currentUserService.UserId == default)
+        {
+            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
+        }
+
+        var userId = currentUserService.UserId.Value;
+        var lesson = await lessonRepository.GetWithObjectivesAsync(request.LessonId, asNoTracking: true, cancellationToken).ConfigureAwait(false);
+        if (lesson is null || lesson.State != LessonState.Published)
+        {
+            throw new NotFoundCoreException(ErrorCodes.LessonNotFound);
+        }
+
+        var unit = await unitRepository.GetByIdAsync(lesson.UnitId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
+        if (unit is null)
+        {
+            throw new NotFoundCoreException(ErrorCodes.LessonNotFound);
+        }
+
+        var subject = await subjectRepository.GetByIdAsync(unit.SubjectId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
+        if (subject is null)
+        {
+            throw new NotFoundCoreException(ErrorCodes.LessonNotFound);
+        }
+
+        var units = await unitRepository.FindAsync(x => x.SubjectId == subject.Id, cancellationToken, orderBy: query => query.OrderBy(x => x.Order).ThenBy(x => x.CreationDate), asNoTracking: true).ConfigureAwait(false);
+        var unitIds = units.Select(x => x.Id).ToList();
+        var lessons = await lessonRepository.FindAsync(x => unitIds.Contains(x.UnitId) && x.State == LessonState.Published, cancellationToken, asNoTracking: true).ConfigureAwait(false);
+        var counts = await questionMasteryRepository.GetLessonCountsAsync(userId, subject.Id, cancellationToken).ConfigureAwait(false);
+        return StudentLessonResultGenerator.Generate(lesson, unit, subject, units, lessons, counts);
+    }
+}

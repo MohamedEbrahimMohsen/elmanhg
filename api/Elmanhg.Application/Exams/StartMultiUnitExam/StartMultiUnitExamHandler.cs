@@ -19,7 +19,7 @@ using System.Security.Claims;
 
 namespace Elmanhg.Application.Exams.StartMultiUnitExam;
 
-public sealed class StartMultiUnitExamHandler(ISessionRepository sessionRepository, ISubjectRepository subjectRepository, ICurriculumUnitRepository unitRepository, ILessonRepository lessonRepository, IQuestionRepository questionRepository, IExamBlueprintRepository examBlueprintRepository, IQuestionMasteryRepository questionMasteryRepository, IOptions<ExamsOptions> examsOptions, IOptions<ExamBlueprintsOptions> examBlueprintsOptions, IOptions<MasteryOptions> masteryOptions, Random random, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<StartMultiUnitExamCommand, ExamSessionResult>
+public sealed class StartMultiUnitExamHandler(ISessionRepository sessionRepository, ISubjectRepository subjectRepository, ICurriculumUnitRepository unitRepository, ILessonRepository lessonRepository, ILessonOpeningRepository lessonOpeningRepository, IQuestionRepository questionRepository, IExamBlueprintRepository examBlueprintRepository, IQuestionMasteryRepository questionMasteryRepository, IOptions<ExamsOptions> examsOptions, IOptions<ExamBlueprintsOptions> examBlueprintsOptions, IOptions<MasteryOptions> masteryOptions, Random random, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<StartMultiUnitExamCommand, ExamSessionResult>
 {
     public async Task<ExamSessionResult> Handle(StartMultiUnitExamCommand request, CancellationToken cancellationToken)
     {
@@ -43,8 +43,13 @@ public sealed class StartMultiUnitExamHandler(ISessionRepository sessionReposito
         var session = open;
         if (session is null)
         {
-            var plan = await MultiUnitExamPlanner.PlanAsync(selection, input.Size, examBlueprintRepository, examBlueprintsOptions.Value.MaxTimeLimitMinutes, cancellationToken).ConfigureAwait(false);
             var isTestMode = currentUserService.GetClaim(ClaimTypes.Role) == nameof(UserRole.Admin);
+            if (examsOptions.Value.RequireAllLessonsOpened && !isTestMode)
+            {
+                await ExamLessonGate.EnsureOpenedAsync(userId, selection.Units.Select(x => x.Id).ToList(), lessonRepository, lessonOpeningRepository, cancellationToken).ConfigureAwait(false);
+            }
+
+            var plan = await MultiUnitExamPlanner.PlanAsync(selection, input.Size, examBlueprintRepository, examBlueprintsOptions.Value.MaxTimeLimitMinutes, cancellationToken).ConfigureAwait(false);
             session = await MultiUnitExamDraw.StartAsync(userId, selection, plan, input.Size, isTestMode, now, lessonRepository, questionRepository, questionMasteryRepository, random, cancellationToken).ConfigureAwait(false);
             await sessionRepository.AddAsync(session, cancellationToken).ConfigureAwait(false);
         }

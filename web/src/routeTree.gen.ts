@@ -40,12 +40,18 @@ import { Route as StudentExamResultSessionIdRouteImport } from './routes/student
 import { Route as StudentExamStartUnitIdRouteImport } from './routes/student/exam-start.$unitId'
 import { Route as StudentExamSessionIdRouteImport } from './routes/student/exam.$sessionId'
 import { Route as StudentFakeCheckoutPaymentIdRouteImport } from './routes/student/fake-checkout.$paymentId'
+import { Route as StudentLessonLessonIdRouteImport } from './routes/student/lesson.$lessonId'
 import { Route as StudentQuizResultSessionIdRouteImport } from './routes/student/quiz-result.$sessionId'
 import { Route as StudentQuizSessionIdRouteImport } from './routes/student/quiz.$sessionId'
+import { Route as StudentSubjectSubjectIdRouteImport } from './routes/student/subject.$subjectId'
+import { Route as StudentUnitUnitIdRouteImport } from './routes/student/unit.$unitId'
 import { Route as TeacherQQuestionIdRouteImport } from './routes/teacher/q.$questionId'
 import { Route as AdminQuestionImportLessonIdRouteImport } from './routes/admin/question.import.$lessonId'
 import { Route as AdminQuestionNewLessonIdRouteImport } from './routes/admin/question.new.$lessonId'
+import { Route as StudentLessonLessonIdIndexRouteImport } from './routes/student/lesson.$lessonId.index'
+import { Route as StudentLessonLessonIdObjectivesRouteImport } from './routes/student/lesson.$lessonId.objectives'
 import { Route as StudentLessonLessonIdPracticeRouteImport } from './routes/student/lesson.$lessonId.practice'
+import { Route as StudentLessonLessonIdSummaryRouteImport } from './routes/student/lesson.$lessonId.summary'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -205,6 +211,11 @@ const StudentFakeCheckoutPaymentIdRoute =
     path: '/fake-checkout/$paymentId',
     getParentRoute: () => StudentRouteRoute,
   } as any)
+const StudentLessonLessonIdRoute = StudentLessonLessonIdRouteImport.update({
+  id: '/lesson/$lessonId',
+  path: '/lesson/$lessonId',
+  getParentRoute: () => StudentRouteRoute,
+} as any)
 const StudentQuizResultSessionIdRoute =
   StudentQuizResultSessionIdRouteImport.update({
     id: '/quiz-result/$sessionId',
@@ -214,6 +225,16 @@ const StudentQuizResultSessionIdRoute =
 const StudentQuizSessionIdRoute = StudentQuizSessionIdRouteImport.update({
   id: '/quiz/$sessionId',
   path: '/quiz/$sessionId',
+  getParentRoute: () => StudentRouteRoute,
+} as any)
+const StudentSubjectSubjectIdRoute = StudentSubjectSubjectIdRouteImport.update({
+  id: '/subject/$subjectId',
+  path: '/subject/$subjectId',
+  getParentRoute: () => StudentRouteRoute,
+} as any)
+const StudentUnitUnitIdRoute = StudentUnitUnitIdRouteImport.update({
+  id: '/unit/$unitId',
+  path: '/unit/$unitId',
   getParentRoute: () => StudentRouteRoute,
 } as any)
 const TeacherQQuestionIdRoute = TeacherQQuestionIdRouteImport.update({
@@ -233,11 +254,29 @@ const AdminQuestionNewLessonIdRoute =
     path: '/question/new/$lessonId',
     getParentRoute: () => AdminRouteRoute,
   } as any)
+const StudentLessonLessonIdIndexRoute =
+  StudentLessonLessonIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => StudentLessonLessonIdRoute,
+  } as any)
+const StudentLessonLessonIdObjectivesRoute =
+  StudentLessonLessonIdObjectivesRouteImport.update({
+    id: '/objectives',
+    path: '/objectives',
+    getParentRoute: () => StudentLessonLessonIdRoute,
+  } as any)
 const StudentLessonLessonIdPracticeRoute =
   StudentLessonLessonIdPracticeRouteImport.update({
-    id: '/lesson/$lessonId/practice',
-    path: '/lesson/$lessonId/practice',
-    getParentRoute: () => StudentRouteRoute,
+    id: '/practice',
+    path: '/practice',
+    getParentRoute: () => StudentLessonLessonIdRoute,
+  } as any)
+const StudentLessonLessonIdSummaryRoute =
+  StudentLessonLessonIdSummaryRouteImport.update({
+    id: '/summary',
+    path: '/summary',
+    getParentRoute: () => StudentLessonLessonIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -272,12 +311,18 @@ export interface FileRoutesByFullPath {
   '/student/exam-start/$unitId': typeof StudentExamStartUnitIdRoute
   '/student/exam/$sessionId': typeof StudentExamSessionIdRoute
   '/student/fake-checkout/$paymentId': typeof StudentFakeCheckoutPaymentIdRoute
+  '/student/lesson/$lessonId': typeof StudentLessonLessonIdRouteWithChildren
   '/student/quiz-result/$sessionId': typeof StudentQuizResultSessionIdRoute
   '/student/quiz/$sessionId': typeof StudentQuizSessionIdRoute
+  '/student/subject/$subjectId': typeof StudentSubjectSubjectIdRoute
+  '/student/unit/$unitId': typeof StudentUnitUnitIdRoute
   '/teacher/q/$questionId': typeof TeacherQQuestionIdRoute
   '/admin/question/import/$lessonId': typeof AdminQuestionImportLessonIdRoute
   '/admin/question/new/$lessonId': typeof AdminQuestionNewLessonIdRoute
+  '/student/lesson/$lessonId/objectives': typeof StudentLessonLessonIdObjectivesRoute
   '/student/lesson/$lessonId/practice': typeof StudentLessonLessonIdPracticeRoute
+  '/student/lesson/$lessonId/summary': typeof StudentLessonLessonIdSummaryRoute
+  '/student/lesson/$lessonId/': typeof StudentLessonLessonIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -310,10 +355,15 @@ export interface FileRoutesByTo {
   '/student/fake-checkout/$paymentId': typeof StudentFakeCheckoutPaymentIdRoute
   '/student/quiz-result/$sessionId': typeof StudentQuizResultSessionIdRoute
   '/student/quiz/$sessionId': typeof StudentQuizSessionIdRoute
+  '/student/subject/$subjectId': typeof StudentSubjectSubjectIdRoute
+  '/student/unit/$unitId': typeof StudentUnitUnitIdRoute
   '/teacher/q/$questionId': typeof TeacherQQuestionIdRoute
   '/admin/question/import/$lessonId': typeof AdminQuestionImportLessonIdRoute
   '/admin/question/new/$lessonId': typeof AdminQuestionNewLessonIdRoute
+  '/student/lesson/$lessonId/objectives': typeof StudentLessonLessonIdObjectivesRoute
   '/student/lesson/$lessonId/practice': typeof StudentLessonLessonIdPracticeRoute
+  '/student/lesson/$lessonId/summary': typeof StudentLessonLessonIdSummaryRoute
+  '/student/lesson/$lessonId': typeof StudentLessonLessonIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -348,12 +398,18 @@ export interface FileRoutesById {
   '/student/exam-start/$unitId': typeof StudentExamStartUnitIdRoute
   '/student/exam/$sessionId': typeof StudentExamSessionIdRoute
   '/student/fake-checkout/$paymentId': typeof StudentFakeCheckoutPaymentIdRoute
+  '/student/lesson/$lessonId': typeof StudentLessonLessonIdRouteWithChildren
   '/student/quiz-result/$sessionId': typeof StudentQuizResultSessionIdRoute
   '/student/quiz/$sessionId': typeof StudentQuizSessionIdRoute
+  '/student/subject/$subjectId': typeof StudentSubjectSubjectIdRoute
+  '/student/unit/$unitId': typeof StudentUnitUnitIdRoute
   '/teacher/q/$questionId': typeof TeacherQQuestionIdRoute
   '/admin/question/import/$lessonId': typeof AdminQuestionImportLessonIdRoute
   '/admin/question/new/$lessonId': typeof AdminQuestionNewLessonIdRoute
+  '/student/lesson/$lessonId/objectives': typeof StudentLessonLessonIdObjectivesRoute
   '/student/lesson/$lessonId/practice': typeof StudentLessonLessonIdPracticeRoute
+  '/student/lesson/$lessonId/summary': typeof StudentLessonLessonIdSummaryRoute
+  '/student/lesson/$lessonId/': typeof StudentLessonLessonIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -389,12 +445,18 @@ export interface FileRouteTypes {
     | '/student/exam-start/$unitId'
     | '/student/exam/$sessionId'
     | '/student/fake-checkout/$paymentId'
+    | '/student/lesson/$lessonId'
     | '/student/quiz-result/$sessionId'
     | '/student/quiz/$sessionId'
+    | '/student/subject/$subjectId'
+    | '/student/unit/$unitId'
     | '/teacher/q/$questionId'
     | '/admin/question/import/$lessonId'
     | '/admin/question/new/$lessonId'
+    | '/student/lesson/$lessonId/objectives'
     | '/student/lesson/$lessonId/practice'
+    | '/student/lesson/$lessonId/summary'
+    | '/student/lesson/$lessonId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -427,10 +489,15 @@ export interface FileRouteTypes {
     | '/student/fake-checkout/$paymentId'
     | '/student/quiz-result/$sessionId'
     | '/student/quiz/$sessionId'
+    | '/student/subject/$subjectId'
+    | '/student/unit/$unitId'
     | '/teacher/q/$questionId'
     | '/admin/question/import/$lessonId'
     | '/admin/question/new/$lessonId'
+    | '/student/lesson/$lessonId/objectives'
     | '/student/lesson/$lessonId/practice'
+    | '/student/lesson/$lessonId/summary'
+    | '/student/lesson/$lessonId'
   id:
     | '__root__'
     | '/'
@@ -464,12 +531,18 @@ export interface FileRouteTypes {
     | '/student/exam-start/$unitId'
     | '/student/exam/$sessionId'
     | '/student/fake-checkout/$paymentId'
+    | '/student/lesson/$lessonId'
     | '/student/quiz-result/$sessionId'
     | '/student/quiz/$sessionId'
+    | '/student/subject/$subjectId'
+    | '/student/unit/$unitId'
     | '/teacher/q/$questionId'
     | '/admin/question/import/$lessonId'
     | '/admin/question/new/$lessonId'
+    | '/student/lesson/$lessonId/objectives'
     | '/student/lesson/$lessonId/practice'
+    | '/student/lesson/$lessonId/summary'
+    | '/student/lesson/$lessonId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -700,6 +773,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentFakeCheckoutPaymentIdRouteImport
       parentRoute: typeof StudentRouteRoute
     }
+    '/student/lesson/$lessonId': {
+      id: '/student/lesson/$lessonId'
+      path: '/lesson/$lessonId'
+      fullPath: '/student/lesson/$lessonId'
+      preLoaderRoute: typeof StudentLessonLessonIdRouteImport
+      parentRoute: typeof StudentRouteRoute
+    }
     '/student/quiz-result/$sessionId': {
       id: '/student/quiz-result/$sessionId'
       path: '/quiz-result/$sessionId'
@@ -712,6 +792,20 @@ declare module '@tanstack/react-router' {
       path: '/quiz/$sessionId'
       fullPath: '/student/quiz/$sessionId'
       preLoaderRoute: typeof StudentQuizSessionIdRouteImport
+      parentRoute: typeof StudentRouteRoute
+    }
+    '/student/subject/$subjectId': {
+      id: '/student/subject/$subjectId'
+      path: '/subject/$subjectId'
+      fullPath: '/student/subject/$subjectId'
+      preLoaderRoute: typeof StudentSubjectSubjectIdRouteImport
+      parentRoute: typeof StudentRouteRoute
+    }
+    '/student/unit/$unitId': {
+      id: '/student/unit/$unitId'
+      path: '/unit/$unitId'
+      fullPath: '/student/unit/$unitId'
+      preLoaderRoute: typeof StudentUnitUnitIdRouteImport
       parentRoute: typeof StudentRouteRoute
     }
     '/teacher/q/$questionId': {
@@ -735,12 +829,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminQuestionNewLessonIdRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/student/lesson/$lessonId/': {
+      id: '/student/lesson/$lessonId/'
+      path: '/'
+      fullPath: '/student/lesson/$lessonId/'
+      preLoaderRoute: typeof StudentLessonLessonIdIndexRouteImport
+      parentRoute: typeof StudentLessonLessonIdRoute
+    }
+    '/student/lesson/$lessonId/objectives': {
+      id: '/student/lesson/$lessonId/objectives'
+      path: '/objectives'
+      fullPath: '/student/lesson/$lessonId/objectives'
+      preLoaderRoute: typeof StudentLessonLessonIdObjectivesRouteImport
+      parentRoute: typeof StudentLessonLessonIdRoute
+    }
     '/student/lesson/$lessonId/practice': {
       id: '/student/lesson/$lessonId/practice'
-      path: '/lesson/$lessonId/practice'
+      path: '/practice'
       fullPath: '/student/lesson/$lessonId/practice'
       preLoaderRoute: typeof StudentLessonLessonIdPracticeRouteImport
-      parentRoute: typeof StudentRouteRoute
+      parentRoute: typeof StudentLessonLessonIdRoute
+    }
+    '/student/lesson/$lessonId/summary': {
+      id: '/student/lesson/$lessonId/summary'
+      path: '/summary'
+      fullPath: '/student/lesson/$lessonId/summary'
+      preLoaderRoute: typeof StudentLessonLessonIdSummaryRouteImport
+      parentRoute: typeof StudentLessonLessonIdRoute
     }
   }
 }
@@ -781,6 +896,25 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
   AdminRouteRouteChildren,
 )
 
+interface StudentLessonLessonIdRouteChildren {
+  StudentLessonLessonIdObjectivesRoute: typeof StudentLessonLessonIdObjectivesRoute
+  StudentLessonLessonIdPracticeRoute: typeof StudentLessonLessonIdPracticeRoute
+  StudentLessonLessonIdSummaryRoute: typeof StudentLessonLessonIdSummaryRoute
+  StudentLessonLessonIdIndexRoute: typeof StudentLessonLessonIdIndexRoute
+}
+
+const StudentLessonLessonIdRouteChildren: StudentLessonLessonIdRouteChildren = {
+  StudentLessonLessonIdObjectivesRoute: StudentLessonLessonIdObjectivesRoute,
+  StudentLessonLessonIdPracticeRoute: StudentLessonLessonIdPracticeRoute,
+  StudentLessonLessonIdSummaryRoute: StudentLessonLessonIdSummaryRoute,
+  StudentLessonLessonIdIndexRoute: StudentLessonLessonIdIndexRoute,
+}
+
+const StudentLessonLessonIdRouteWithChildren =
+  StudentLessonLessonIdRoute._addFileChildren(
+    StudentLessonLessonIdRouteChildren,
+  )
+
 interface StudentRouteRouteChildren {
   StudentAskRoute: typeof StudentAskRoute
   StudentMoreRoute: typeof StudentMoreRoute
@@ -793,9 +927,11 @@ interface StudentRouteRouteChildren {
   StudentExamStartUnitIdRoute: typeof StudentExamStartUnitIdRoute
   StudentExamSessionIdRoute: typeof StudentExamSessionIdRoute
   StudentFakeCheckoutPaymentIdRoute: typeof StudentFakeCheckoutPaymentIdRoute
+  StudentLessonLessonIdRoute: typeof StudentLessonLessonIdRouteWithChildren
   StudentQuizResultSessionIdRoute: typeof StudentQuizResultSessionIdRoute
   StudentQuizSessionIdRoute: typeof StudentQuizSessionIdRoute
-  StudentLessonLessonIdPracticeRoute: typeof StudentLessonLessonIdPracticeRoute
+  StudentSubjectSubjectIdRoute: typeof StudentSubjectSubjectIdRoute
+  StudentUnitUnitIdRoute: typeof StudentUnitUnitIdRoute
 }
 
 const StudentRouteRouteChildren: StudentRouteRouteChildren = {
@@ -810,9 +946,11 @@ const StudentRouteRouteChildren: StudentRouteRouteChildren = {
   StudentExamStartUnitIdRoute: StudentExamStartUnitIdRoute,
   StudentExamSessionIdRoute: StudentExamSessionIdRoute,
   StudentFakeCheckoutPaymentIdRoute: StudentFakeCheckoutPaymentIdRoute,
+  StudentLessonLessonIdRoute: StudentLessonLessonIdRouteWithChildren,
   StudentQuizResultSessionIdRoute: StudentQuizResultSessionIdRoute,
   StudentQuizSessionIdRoute: StudentQuizSessionIdRoute,
-  StudentLessonLessonIdPracticeRoute: StudentLessonLessonIdPracticeRoute,
+  StudentSubjectSubjectIdRoute: StudentSubjectSubjectIdRoute,
+  StudentUnitUnitIdRoute: StudentUnitUnitIdRoute,
 }
 
 const StudentRouteRouteWithChildren = StudentRouteRoute._addFileChildren(
