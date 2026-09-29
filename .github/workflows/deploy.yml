@@ -59,6 +59,6 @@ jobs:
           printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
           printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
       - name: Upload deploy files
-        run: scp -i ~/.ssh/deploy_key deploy/docker-compose.prod.yml deploy/Caddyfile deploy/lib.sh deploy/deploy.sh deploy/backup.sh deploy/restore.sh "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/"
+        run: scp -r -i ~/.ssh/deploy_key deploy/docker-compose.prod.yml deploy/Caddyfile deploy/lib.sh deploy/deploy.sh deploy/backup.sh deploy/restore.sh deploy/observability "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/"
       - name: Deploy
         run: ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_PATH' && bash deploy.sh '$IMAGE_TAG'"

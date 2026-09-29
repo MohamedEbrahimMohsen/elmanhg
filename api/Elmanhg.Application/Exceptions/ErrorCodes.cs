@@ -238,6 +238,15 @@ public static class ErrorCodes
     public const string FunnelAnonymousIdRequired = "FUNNEL_ANONYMOUS_ID_REQUIRED";
     public const string FunnelEventTypeInvalid = "FUNNEL_EVENT_TYPE_INVALID";
 
+    // OBSERVABILITY
+    public const string ClientErrorMessageRequired = "CLIENT_ERROR_MESSAGE_REQUIRED";
+    public const string ClientErrorMessageTooLong = "CLIENT_ERROR_MESSAGE_TOO_LONG";
+    public const string ClientErrorNameTooLong = "CLIENT_ERROR_NAME_TOO_LONG";
+    public const string ClientErrorStackTooLong = "CLIENT_ERROR_STACK_TOO_LONG";
+    public const string ClientErrorPathTooLong = "CLIENT_ERROR_PATH_TOO_LONG";
+    public const string ClientErrorPathInvalid = "CLIENT_ERROR_PATH_INVALID";
+    public const string ClientErrorSourceInvalid = "CLIENT_ERROR_SOURCE_INVALID";
+
     // AVATAR
     public const string AvatarExamInProgress = "AVATAR_EXAM_IN_PROGRESS";
     public const string AvatarDailyLimitReached = "AVATAR_DAILY_LIMIT_REACHED";

@@ -1,7 +1,50 @@
 # Edge for one environment (docs/deployment.md). SITE_ADDRESS is the public host name
 # (automatic HTTPS through Let's Encrypt), or ":80" for plain HTTP in the smoke test.
+
+# The default logger carries http.log.error.* entries, which hold the full request; filter it like the access log (docs/observability.md, PII rules).
+{
+	log default {
+		output stdout
+		format filter {
+			wrap json
+			fields {
+				request>headers delete
+				resp_headers delete
+				request>uri regexp `\?.*$` "?redacted"
+				request>remote_ip ip_mask 24 48
+				request>client_ip ip_mask 24 48
+			}
+		}
+	}
+}
+
+# Public, body-only health for external uptime monitors (docs/observability.md).
+(api_health) {
+	handle /api/health {
+		rewrite * /health
+		reverse_proxy api:8080
+	}
+}
+
 {$SITE_ADDRESS} {
 	encode zstd gzip
+
+	# JSON access log on stdout without headers or query strings, client IPs cut to /24 or /48 (docs/observability.md, PII rules).
+	log {
+		output stdout
+		format filter {
+			wrap json
+			fields {
+				request>headers delete
+				resp_headers delete
+				request>uri regexp `\?.*$` "?redacted"
+				request>remote_ip ip_mask 24 48
+				request>client_ip ip_mask 24 48
+			}
+		}
+	}
+
+	import api_health
 
 	handle /api/* {
 		reverse_proxy api:8080
@@ -20,5 +63,6 @@
 
 # Container-internal health endpoint for the compose health check; the port is not published.
 :2080 {
+	import api_health
 	respond /healthz "ok" 200
 }

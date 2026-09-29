@@ -1,0 +1,118 @@
+# Recording and alert rules for the 99.5 % SLO, uptime, background jobs and provider errors (docs/observability.md, Alerts).
+# Counter alerts count increase() for series older than the window plus the whole value of series born inside it:
+# OTel SDKs export a new series at its first value (1, never 0), and increase() alone reads that first event as 0.
+groups:
+  - name: elmanhg-slo-recording
+    rules:
+      - record: elmanhg:api_error_ratio:rate5m
+        expr: sum(rate(http_server_request_duration_seconds_count{job="elmanhg-api",http_route!="/health",http_response_status_code=~"5.."}[5m])) / sum(rate(http_server_request_duration_seconds_count{job="elmanhg-api",http_route!="/health"}[5m]))
+      - record: elmanhg:api_error_ratio:rate30m
+        expr: sum(rate(http_server_request_duration_seconds_count{job="elmanhg-api",http_route!="/health",http_response_status_code=~"5.."}[30m])) / sum(rate(http_server_request_duration_seconds_count{job="elmanhg-api",http_route!="/health"}[30m]))
+      - record: elmanhg:api_error_ratio:rate1h
+        expr: sum(rate(http_server_request_duration_seconds_count{job="elmanhg-api",http_route!="/health",http_response_status_code=~"5.."}[1h])) / sum(rate(http_server_request_duration_seconds_count{job="elmanhg-api",http_route!="/health"}[1h]))
+      - record: elmanhg:api_error_ratio:rate6h
+        expr: sum(rate(http_server_request_duration_seconds_count{job="elmanhg-api",http_route!="/health",http_response_status_code=~"5.."}[6h])) / sum(rate(http_server_request_duration_seconds_count{job="elmanhg-api",http_route!="/health"}[6h]))
+  - name: elmanhg-slo
+    rules:
+      - alert: ApiErrorBudgetFastBurn
+        expr: 'elmanhg:api_error_ratio:rate1h > (14.4 * 0.005) and elmanhg:api_error_ratio:rate5m > (14.4 * 0.005)'
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'API 5xx ratio burns the 30-day error budget 14.4x too fast (2 % of the budget per hour).'
+          runbook: docs/observability.md#alerts
+      - alert: ApiErrorBudgetSlowBurn
+        expr: 'elmanhg:api_error_ratio:rate6h > (6 * 0.005) and elmanhg:api_error_ratio:rate30m > (6 * 0.005)'
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'API 5xx ratio burns the 30-day error budget 6x too fast (5 % of the budget in 6 hours).'
+          runbook: docs/observability.md#alerts
+  - name: elmanhg-uptime
+    rules:
+      - alert: ServiceDown
+        expr: 'probe_success{job="blackbox"} == 0'
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Probe {{ $labels.target_name }} ({{ $labels.instance }}) is failing.'
+          runbook: docs/observability.md#alerts
+      - alert: ApiTelemetryMissing
+        expr: 'absent_over_time(target_info{job="elmanhg-api"}[10m])'
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'No API telemetry has arrived for 10 minutes; the collector or the API exporter is down.'
+          runbook: docs/observability.md#alerts
+  - name: elmanhg-jobs
+    rules:
+      - alert: BackgroundJobStale
+        expr: 'time() - elmanhg_job_last_success_seconds > 3 * elmanhg_job_interval_seconds'
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Background job {{ $labels.elmanhg_job }} has not completed a successful sweep for more than 3 intervals.'
+          runbook: docs/observability.md#alerts
+      - alert: BackgroundJobFailing
+        expr: 'sum by (elmanhg_job) ((increase(elmanhg_job_runs_total{elmanhg_outcome="Failed"}[15m]) unless (elmanhg_job_runs_total{elmanhg_outcome="Failed"} unless elmanhg_job_runs_total{elmanhg_outcome="Failed"} offset 15m)) or (elmanhg_job_runs_total{elmanhg_outcome="Failed"} unless elmanhg_job_runs_total{elmanhg_outcome="Failed"} offset 15m)) >= 3'
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Background job {{ $labels.elmanhg_job }} failed to list its work 3 or more times in 15 minutes.'
+          runbook: docs/observability.md#alerts
+      - alert: BackgroundJobItemsFailing
+        expr: 'sum by (elmanhg_job) ((increase(elmanhg_job_items_total{elmanhg_outcome="Failed"}[30m]) unless (elmanhg_job_items_total{elmanhg_outcome="Failed"} unless elmanhg_job_items_total{elmanhg_outcome="Failed"} offset 30m)) or (elmanhg_job_items_total{elmanhg_outcome="Failed"} unless elmanhg_job_items_total{elmanhg_outcome="Failed"} offset 30m)) >= 10'
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Background job {{ $labels.elmanhg_job }} failed 10 or more items in 30 minutes.'
+          runbook: docs/observability.md#alerts
+  - name: elmanhg-errors
+    rules:
+      - alert: ApiUnhandledErrors
+        expr: 'sum ((increase(elmanhg_requests_total{elmanhg_outcome="UNHANDLED_EXCEPTION"}[10m]) unless (elmanhg_requests_total{elmanhg_outcome="UNHANDLED_EXCEPTION"} unless elmanhg_requests_total{elmanhg_outcome="UNHANDLED_EXCEPTION"} offset 10m)) or (elmanhg_requests_total{elmanhg_outcome="UNHANDLED_EXCEPTION"} unless elmanhg_requests_total{elmanhg_outcome="UNHANDLED_EXCEPTION"} offset 10m)) > 0'
+        labels:
+          severity: warning
+        annotations:
+          summary: 'The API raised unhandled exceptions in the last 10 minutes.'
+          runbook: docs/observability.md#alerts
+      - alert: ProviderUnavailable
+        expr: 'sum by (elmanhg_outcome) ((increase(elmanhg_requests_total{elmanhg_outcome=~"AI_SERVICE_UNAVAILABLE|OTP_CHANNEL_UNAVAILABLE|PAYMENT_GATEWAY_UNAVAILABLE"}[15m]) unless (elmanhg_requests_total{elmanhg_outcome=~"AI_SERVICE_UNAVAILABLE|OTP_CHANNEL_UNAVAILABLE|PAYMENT_GATEWAY_UNAVAILABLE"} unless elmanhg_requests_total{elmanhg_outcome=~"AI_SERVICE_UNAVAILABLE|OTP_CHANNEL_UNAVAILABLE|PAYMENT_GATEWAY_UNAVAILABLE"} offset 15m)) or (elmanhg_requests_total{elmanhg_outcome=~"AI_SERVICE_UNAVAILABLE|OTP_CHANNEL_UNAVAILABLE|PAYMENT_GATEWAY_UNAVAILABLE"} unless elmanhg_requests_total{elmanhg_outcome=~"AI_SERVICE_UNAVAILABLE|OTP_CHANNEL_UNAVAILABLE|PAYMENT_GATEWAY_UNAVAILABLE"} offset 15m)) >= 5'
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Requests failed with {{ $labels.elmanhg_outcome }} 5 or more times in 15 minutes.'
+          runbook: docs/observability.md#alerts
+      - alert: OtpDeliveryFailing
+        expr: 'sum ((increase(elmanhg_otp_sends_total{elmanhg_outcome="Failed"}[15m]) unless (elmanhg_otp_sends_total{elmanhg_outcome="Failed"} unless elmanhg_otp_sends_total{elmanhg_outcome="Failed"} offset 15m)) or (elmanhg_otp_sends_total{elmanhg_outcome="Failed"} unless elmanhg_otp_sends_total{elmanhg_outcome="Failed"} offset 15m)) >= 5'
+        labels:
+          severity: critical
+        annotations:
+          summary: 'OTP delivery failed 5 or more times in 15 minutes; users cannot sign in.'
+          runbook: docs/observability.md#alerts
+      - alert: AiModelErrors
+        expr: 'sum ((increase(gen_ai_client_operation_duration_seconds_count{error_type!=""}[15m]) unless (gen_ai_client_operation_duration_seconds_count{error_type!=""} unless gen_ai_client_operation_duration_seconds_count{error_type!=""} offset 15m)) or (gen_ai_client_operation_duration_seconds_count{error_type!=""} unless gen_ai_client_operation_duration_seconds_count{error_type!=""} offset 15m)) >= 5'
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Model or embedding calls failed 5 or more times in 15 minutes.'
+          runbook: docs/observability.md#alerts
+      - alert: ClientErrorSpike
+        expr: 'sum ((increase(elmanhg_client_errors_total[15m]) unless (elmanhg_client_errors_total unless elmanhg_client_errors_total offset 15m)) or (elmanhg_client_errors_total unless elmanhg_client_errors_total offset 15m)) >= 50'
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Browsers reported 50 or more errors in 15 minutes.'
+          runbook: docs/observability.md#alerts
+      - alert: PaymentNotificationNeedsReview
+        expr: 'sum ((increase(elmanhg_payment_notifications_total{elmanhg_outcome="FlaggedForReview"}[1h]) unless (elmanhg_payment_notifications_total{elmanhg_outcome="FlaggedForReview"} unless elmanhg_payment_notifications_total{elmanhg_outcome="FlaggedForReview"} offset 1h)) or (elmanhg_payment_notifications_total{elmanhg_outcome="FlaggedForReview"} unless elmanhg_payment_notifications_total{elmanhg_outcome="FlaggedForReview"} offset 1h)) > 0'
+        labels:
+          severity: warning
+        annotations:
+          summary: 'A payment notification was flagged for review in the last hour.'
+          runbook: docs/observability.md#alerts

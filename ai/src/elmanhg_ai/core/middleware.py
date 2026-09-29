@@ -6,6 +6,7 @@ import uuid
 from typing import Final
 
 import structlog
+from opentelemetry import trace
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import Response
@@ -24,10 +25,19 @@ def trace_id_from(traceparent: str | None) -> str | None:
     return match.group(1)
 
 
+def current_span_trace_id() -> str | None:
+    context = trace.get_current_span().get_span_context()
+    return trace.format_trace_id(context.trace_id) if context.is_valid else None
+
+
 class RequestContextMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         structlog.contextvars.clear_contextvars()
-        trace_id = trace_id_from(request.headers.get("traceparent")) or secrets.token_hex(16)
+        trace_id = (
+            current_span_trace_id()
+            or trace_id_from(request.headers.get("traceparent"))
+            or secrets.token_hex(16)
+        )
         request_id_header = request.headers.get("X-Request-Id", "")
         request_id = (
             request_id_header if REQUEST_ID_PATTERN.match(request_id_header) else uuid.uuid4().hex

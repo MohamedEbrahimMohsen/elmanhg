@@ -349,6 +349,13 @@
   <data name="TEACHER_INBOX_FILTER_INVALID" xml:space="preserve"><value>تصفية الأسئلة غير صالحة.</value></data>
   <data name="FUNNEL_ANONYMOUS_ID_REQUIRED" xml:space="preserve"><value>معرف الزائر مطلوب.</value></data>
   <data name="FUNNEL_EVENT_TYPE_INVALID" xml:space="preserve"><value>نوع الحدث غير صالح.</value></data>
+  <data name="CLIENT_ERROR_MESSAGE_REQUIRED" xml:space="preserve"><value>رسالة الخطأ مطلوبة.</value></data>
+  <data name="CLIENT_ERROR_MESSAGE_TOO_LONG" xml:space="preserve"><value>رسالة الخطأ طويلة جدا.</value></data>
+  <data name="CLIENT_ERROR_NAME_TOO_LONG" xml:space="preserve"><value>اسم الخطأ طويل جدا.</value></data>
+  <data name="CLIENT_ERROR_STACK_TOO_LONG" xml:space="preserve"><value>تفاصيل الخطأ طويلة جدا.</value></data>
+  <data name="CLIENT_ERROR_PATH_TOO_LONG" xml:space="preserve"><value>مسار الصفحة طويل جدا.</value></data>
+  <data name="CLIENT_ERROR_PATH_INVALID" xml:space="preserve"><value>مسار الصفحة غير صالح.</value></data>
+  <data name="CLIENT_ERROR_SOURCE_INVALID" xml:space="preserve"><value>مصدر الخطأ غير صالح.</value></data>
   <data name="USER_NOT_STUDENT" xml:space="preserve"><value>هذا الاجراء للطلاب فقط.</value></data>
   <data name="AVATAR_EXAM_IN_PROGRESS" xml:space="preserve"><value>لا يمكن استخدام المساعد أثناء امتحان جارٍ. سلّم امتحانك أولًا.</value></data>
   <data name="AVATAR_DAILY_LIMIT_REACHED" xml:space="preserve"><value>وصلت إلى الحد اليومي لرسائل المساعد.</value></data>

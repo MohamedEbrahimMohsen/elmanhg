@@ -439,7 +439,7 @@ Exports (admin only): JSONL per source, date-ranged, with PII stripped.
 | Language | Arabic UI, RTL throughout. English only for admin technical fields if needed. |
 | Devices | Mobile-first responsive web. All interactions touch-friendly. v2 canvas and math input must work on phones. |
 | Performance | Lesson page < 2s on 3G-class connections; quiz question transition < 300ms (prefetch next). |
-| Availability | 99.5% monthly. Exam sessions auto-save every answer; a refresh resumes the session. |
+| Availability | 99.5% monthly, measured and alerted as in docs/observability.md. Exam sessions auto-save every answer; a refresh resumes the session. |
 | Security | Role-based authorisation on every endpoint; teacher subject scoping enforced server-side; Paymob webhooks HMAC-verified; rate limits on auth and Avatar. |
 | Privacy | Students identified to teachers by display name only. Training exports strip PII. |
 | Auditability | All content changes and validation decisions logged with actor and timestamp. |
@@ -554,6 +554,7 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 - **Jobs / realtime**: background jobs for grading, transcription, SLA reminders; SignalR for grade results and teacher replies.
 - **Payments**: Paymob, webhook-driven.
 - **Hosting**: Docker Compose on one VPS per environment (staging, production); Caddy (TLS, SPA, /api proxy), images built by CI and pushed to GHCR; PostgreSQL + pgvector. Object storage (from #96) is a managed S3-compatible service (Cloudflare R2 or AWS S3), set by config; local dev and CI use the local-disk store, and there is no object-store container in compose. Runbook: docs/deployment.md.
+- **Observability**: OpenTelemetry traces and metrics (api, ai), JSON logs from every container, self-hosted collector + Prometheus + Loki + Tempo + Grafana + Alertmanager behind the `observability` compose profile; runbook docs/observability.md.
 
 ---
 
