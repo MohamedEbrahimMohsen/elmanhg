@@ -76,6 +76,25 @@ public sealed class FakePaymentCompletionEndpointTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task Post_SecondBaseCheckoutAfterFirstSucceeded_Returns400AndMarksFailed()
+    {
+        var (student, client) = await SignedInStudentAsync(factory);
+        var first = await StartBaseCheckoutAsync(client);
+        var second = await StartBaseCheckoutAsync(client);
+        using var firstCompletion = await client.PostAsJsonAsync(CompletionPath(first), new { succeeded = true }, CancellationToken);
+
+        using var response = await client.PostAsJsonAsync(CompletionPath(second), new { succeeded = true }, CancellationToken);
+
+        firstCompletion.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await response.Content.ReadFromJsonAsync<JsonElement>(CancellationToken)).GetProperty("code").GetString().Should().Be("CHECKOUT_PLAN_ALREADY_ACTIVE");
+        using var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        (await context.Payments.SingleAsync(x => x.Id == second, CancellationToken)).Status.Should().Be(PaymentStatus.Failed);
+        (await context.Subscriptions.CountAsync(x => x.StudentId == student.Id, CancellationToken)).Should().Be(1);
+    }
+
+    [Fact]
     public async Task Post_OtherStudentsPayment_Returns404PaymentNotFound()
     {
         var other = await ScopeTestData.SeedStudentAsync(factory, CancellationToken);
@@ -93,6 +112,12 @@ public sealed class FakePaymentCompletionEndpointTests(ApiFactory factory)
     private Task<Payment> SeedPendingAsync(Guid studentId) => SubscriptionTestData.SeedPendingPaymentAsync(factory, studentId, SubscriptionPlan.Base, BillingPeriod.Monthly, 19900, CancellationToken);
 
     private static string CompletionPath(Guid paymentId) => $"{SubscriptionTestData.SubscriptionsRoute}/payments/{paymentId}/fake-completion";
+
+    private static async Task<Guid> StartBaseCheckoutAsync(HttpClient client)
+    {
+        using var response = await client.PostAsJsonAsync($"{SubscriptionTestData.SubscriptionsRoute}/checkout", new { plan = "Base", period = "Monthly" }, CancellationToken).ConfigureAwait(false);
+        return (await response.Content.ReadFromJsonAsync<JsonElement>(CancellationToken).ConfigureAwait(false)).GetProperty("paymentId").GetGuid();
+    }
 
     private static async Task<string?> GetTierAsync(HttpClient client)
     {

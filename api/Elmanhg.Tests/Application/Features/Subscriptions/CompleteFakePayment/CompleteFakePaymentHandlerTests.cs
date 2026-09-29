@@ -7,6 +7,7 @@ using Elmanhg.Application.Subscriptions.CompleteFakePayment;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.SharedKernel;
 using Elmanhg.Domain.Subscriptions;
+using Elmanhg.Tests.Builders;
 using FluentAssertions;
 using NSubstitute;
 using System.Linq.Expressions;
@@ -23,6 +24,7 @@ public sealed class CompleteFakePaymentHandlerTests
     private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
     private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
     private readonly List<Payment> _payments = [];
+    private readonly List<Subscription> _subscriptions = [];
     private readonly Guid _studentId = Guid.NewGuid();
     private readonly CompleteFakePaymentHandler _handler;
     private Subscription? _addedSubscription;
@@ -34,6 +36,8 @@ public sealed class CompleteFakePaymentHandlerTests
         _paymentGateway.SupportsSimulatedCompletion.Returns(true);
         _paymentRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<Payment, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Payment>, IQueryable<Payment>>?>(), Arg.Any<Func<IQueryable<Payment>, IOrderedQueryable<Payment>>?>(), Arg.Any<bool>())
             .Returns(call => _payments.FirstOrDefault(call.Arg<Expression<Func<Payment, bool>>>().Compile()));
+        _subscriptionRepository.FindAsync(Arg.Any<Expression<Func<Subscription, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Subscription>, IQueryable<Subscription>>?>(), Arg.Any<Func<IQueryable<Subscription>, IOrderedQueryable<Subscription>>?>(), Arg.Any<bool>())
+            .Returns(call => _subscriptions.Where(call.Arg<Expression<Func<Subscription, bool>>>().Compile()).ToList());
         _subscriptionRepository.AddAsync(Arg.Do<Subscription>(x => _addedSubscription = x), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
         var options = new SubscriptionsOptions { AskTeacherMonthlyPriceMinor = 9900, BasePrices = { [BillingPeriod.Monthly] = new() { Months = 1, AmountMinor = 19900 } } };
         _handler = new CompleteFakePaymentHandler(_paymentRepository, _subscriptionRepository, _paymentGateway, Microsoft.Extensions.Options.Options.Create(options), _timeProvider, _currentUserService);
@@ -94,6 +98,20 @@ public sealed class CompleteFakePaymentHandlerTests
         var result = await Handle(payment.Id, false);
 
         result.Status.Should().Be(PaymentStatus.Failed);
+        await _subscriptionRepository.DidNotReceive().AddAsync(Arg.Any<Subscription>(), Arg.Any<CancellationToken>());
+        await _paymentRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_SucceededWhileBaseEntitled_MarksFailedAndThrowsCheckoutPlanAlreadyActive()
+    {
+        _subscriptions.Add(new SubscriptionBuilder().ForStudent(_studentId).WithPlan(SubscriptionPlan.Base).StartingAt(Now.AddDays(-5)).Build());
+        var payment = AddPending(_studentId);
+
+        var act = () => Handle(payment.Id, true);
+
+        (await act.Should().ThrowAsync<BusinessRuleViolationCoreException>()).Which.ErrorCode.Should().Be(DomainErrorCodes.CheckoutPlanAlreadyActive);
+        payment.Status.Should().Be(PaymentStatus.Failed);
         await _subscriptionRepository.DidNotReceive().AddAsync(Arg.Any<Subscription>(), Arg.Any<CancellationToken>());
         await _paymentRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }

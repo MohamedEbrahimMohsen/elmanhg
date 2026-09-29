@@ -19,21 +19,20 @@ public sealed record StudentEntitlement(Subscription? BaseSubscription, Subscrip
         return new StudentEntitlement(Latest(entitled, SubscriptionPlan.Base, gracePeriod), Latest(entitled, SubscriptionPlan.AskTeacher, gracePeriod));
     }
 
+    public string? PurchaseConflict(SubscriptionPlan plan) => plan switch
+    {
+        SubscriptionPlan.Base when BaseSubscription is not null => ErrorCodes.CheckoutPlanAlreadyActive,
+        SubscriptionPlan.AskTeacher when BaseSubscription is null => ErrorCodes.CheckoutRequiresBase,
+        SubscriptionPlan.AskTeacher when AskTeacherSubscription is not null => ErrorCodes.CheckoutPlanAlreadyActive,
+        _ => null,
+    };
+
     public void EnsureCanPurchase(SubscriptionPlan plan)
     {
-        if (plan == SubscriptionPlan.Base && BaseSubscription is not null)
+        var conflict = PurchaseConflict(plan);
+        if (conflict is not null)
         {
-            throw new BusinessRuleViolationCoreException(ErrorCodes.CheckoutPlanAlreadyActive);
-        }
-
-        if (plan == SubscriptionPlan.AskTeacher && BaseSubscription is null)
-        {
-            throw new BusinessRuleViolationCoreException(ErrorCodes.CheckoutRequiresBase);
-        }
-
-        if (plan == SubscriptionPlan.AskTeacher && AskTeacherSubscription is not null)
-        {
-            throw new BusinessRuleViolationCoreException(ErrorCodes.CheckoutPlanAlreadyActive);
+            throw new BusinessRuleViolationCoreException(conflict);
         }
     }
 

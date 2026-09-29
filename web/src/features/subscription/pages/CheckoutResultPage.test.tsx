@@ -126,6 +126,30 @@ describe('CheckoutResultPage', () => {
     expect(await screen.findByRole('heading', { name: 'Payment successful' })).toBeInTheDocument();
   });
 
+  it('check again starts a new polling window', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    let requests = 0;
+    await openResult(() => {
+      requests += 1;
+      return 'Pending';
+    });
+    await screen.findByRole('heading', { name: 'Confirming your payment…' });
+    await waitOutConfirmationWindow();
+
+    await user.click(await screen.findByRole('button', { name: 'Check again' }));
+
+    expect(await screen.findByRole('heading', { name: 'Confirming your payment…' })).toBeInTheDocument();
+    const requestsAfterClick = requests;
+    await vi.advanceTimersByTimeAsync(checkoutPollIntervalMs * 5);
+    expect(requests).toBeGreaterThanOrEqual(requestsAfterClick + 5);
+    await waitOutConfirmationWindow();
+    expect(await screen.findByRole('heading', { name: 'Confirmation has not arrived yet' })).toBeInTheDocument();
+    const requestsAtSecondTimeout = requests;
+    await vi.advanceTimersByTimeAsync(checkoutPollIntervalMs * 5);
+    expect(requests).toBe(requestsAtSecondTimeout);
+  });
+
   it('shows an error with retry when the payment cannot be loaded', async () => {
     const user = userEvent.setup();
     await openResult(() => 'Succeeded', { failFirst: true });

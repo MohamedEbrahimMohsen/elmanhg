@@ -3,7 +3,7 @@ import { useGetMyPayment } from '@/shared/api/generated/subscriptions/subscripti
 import { checkoutConfirmationTimeoutMs, checkoutPollIntervalMs } from '../api/checkoutPolling';
 
 export function useCheckoutResult(paymentId: string) {
-  const [openedAt] = useState(() => Date.now());
+  const [openedAt, setOpenedAt] = useState(() => Date.now());
   const query = useGetMyPayment(paymentId, {
     query: {
       refetchInterval: (current) =>
@@ -14,8 +14,14 @@ export function useCheckoutResult(paymentId: string) {
     },
   });
 
+  const checkAgain = () => {
+    setOpenedAt(Date.now());
+    void query.refetch();
+  };
+
   return {
     query,
+    checkAgain,
     timedOut: query.data?.status === 'Pending' && query.dataUpdatedAt - openedAt >= checkoutConfirmationTimeoutMs,
   };
 }

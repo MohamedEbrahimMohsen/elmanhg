@@ -30,11 +30,25 @@ public sealed class CompleteFakePaymentHandler(IPaymentRepository paymentReposit
 
         var userId = currentUserService.UserId.Value;
         var payment = await paymentRepository.FirstOrDefaultAsync(x => x.Id == request.PaymentId && x.StudentId == userId, cancellationToken).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.PaymentNotFound);
-        var months = subscriptionsOptions.Value.PriceFor(payment.Plan, payment.Period)?.Months ?? throw new BadRequestCoreException(ErrorCodes.CheckoutPeriodUnavailable);
+        var options = subscriptionsOptions.Value;
+        var months = options.PriceFor(payment.Plan, payment.Period)?.Months ?? throw new BadRequestCoreException(ErrorCodes.CheckoutPeriodUnavailable);
 
         var transactionId = FakeTransactionPrefix + payment.Id.ToString("N");
         var rawNotification = JsonSerializer.Serialize(new { source = FakeNotificationSource, success = request.Succeeded });
-        var subscription = PaymentSettlement.Settle(payment, request.Succeeded, transactionId, rawNotification, months, timeProvider.GetUtcNow());
+        var now = timeProvider.GetUtcNow();
+        if (request.Succeeded)
+        {
+            var subscriptions = await subscriptionRepository.FindAsync(SubscriptionEntitlementSpecification.EntitledFor(userId, now, options.GracePeriod), cancellationToken, asNoTracking: true).ConfigureAwait(false);
+            var conflict = StudentEntitlement.Resolve(subscriptions, now, options.GracePeriod).PurchaseConflict(payment.Plan);
+            if (conflict is not null)
+            {
+                payment.MarkFailed(transactionId, rawNotification, now);
+                await paymentRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                throw new BusinessRuleViolationCoreException(conflict);
+            }
+        }
+
+        var subscription = PaymentSettlement.Settle(payment, request.Succeeded, transactionId, rawNotification, months, now);
         if (subscription is not null)
         {
             await subscriptionRepository.AddAsync(subscription, cancellationToken).ConfigureAwait(false);

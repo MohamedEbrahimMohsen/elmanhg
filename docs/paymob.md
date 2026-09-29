@@ -68,7 +68,7 @@ The adapter was built and tested against a stubbed HTTP handler only; no Paymob 
 
 ## 6. The fake
 
-With `Provider=Fake`, checkout returns the in-app path `{FakeCheckoutPath}/{paymentId}`. That page shows the plan and amount and offers **success**, **failure** and **cancel**. Success and failure call `POST /api/subscriptions/payments/{paymentId}/fake-completion { succeeded }`, which runs the same `PaymentSettlement.Settle` the webhook (#101) will call, so the entitlement changes server-side exactly as it will with Paymob.
+With `Provider=Fake`, checkout returns the in-app path `{FakeCheckoutPath}/{paymentId}`. That page shows the plan and amount and offers **success**, **failure** and **cancel**. Success and failure call `POST /api/subscriptions/payments/{paymentId}/fake-completion { succeeded }`, which runs the same `PaymentSettlement.Settle` the webhook (#101) will call, so the entitlement changes server-side exactly as it will with Paymob. Before settling a success, fake completion re-checks the purchase rules; a payment for a plan the student can no longer buy is marked Failed and the call returns 400 with the checkout conflict code. Whether the webhook applies the same guard is decided in #101.
 
 **Production lock:** in the `Production` environment the fake refuses checkout (503 `PAYMENT_GATEWAY_UNAVAILABLE`) and fake completion (404 `FAKE_CHECKOUT_UNAVAILABLE`), so a misconfigured server can never grant free plans. With `Provider=Paymob`, fake completion is always 404.
 

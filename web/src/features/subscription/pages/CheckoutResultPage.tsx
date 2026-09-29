@@ -9,7 +9,7 @@ export interface CheckoutResultPageProps {
 
 export function CheckoutResultPage({ paymentId }: CheckoutResultPageProps) {
   const { t } = useTranslation('subscription');
-  const { query, timedOut } = useCheckoutResult(paymentId);
+  const { query, timedOut, checkAgain } = useCheckoutResult(paymentId);
 
   if (query.isError) {
     return (
@@ -30,9 +30,7 @@ export function CheckoutResultPage({ paymentId }: CheckoutResultPageProps) {
       payment={query.data}
       timedOut={timedOut}
       isFetching={query.isFetching}
-      onCheckAgain={() => {
-        void query.refetch();
-      }}
+      onCheckAgain={checkAgain}
     />
   );
 }
