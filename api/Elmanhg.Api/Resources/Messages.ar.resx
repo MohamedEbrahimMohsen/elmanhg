@@ -287,4 +287,14 @@
   <data name="PAYMENT_NOT_PENDING" xml:space="preserve"><value>تمت معالجة هذا الدفع بالفعل.</value></data>
   <data name="PAYMENT_HISTORY_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة يجب ان يكون 1 او اكثر.</value></data>
   <data name="PAYMENT_HISTORY_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة غير صالح.</value></data>
+  <data name="CHECKOUT_PLAN_ALREADY_ACTIVE" xml:space="preserve"><value>هذه الباقة مفعّلة بالفعل.</value></data>
+  <data name="CHECKOUT_REQUIRES_BASE" xml:space="preserve"><value>اسأل معلّم يتطلب الباقة الأساسية.</value></data>
+  <data name="CHECKOUT_PLAN_REQUIRED" xml:space="preserve"><value>اختر الباقة.</value></data>
+  <data name="CHECKOUT_PLAN_INVALID" xml:space="preserve"><value>الباقة غير معروفة.</value></data>
+  <data name="CHECKOUT_PERIOD_REQUIRED" xml:space="preserve"><value>اختر مدة الاشتراك.</value></data>
+  <data name="CHECKOUT_PERIOD_INVALID" xml:space="preserve"><value>مدة الاشتراك غير معروفة.</value></data>
+  <data name="CHECKOUT_PERIOD_UNAVAILABLE" xml:space="preserve"><value>مدة الاشتراك هذه غير متاحة لهذه الباقة.</value></data>
+  <data name="PAYMENT_NOT_FOUND" xml:space="preserve"><value>لم يتم العثور على عملية الدفع.</value></data>
+  <data name="PAYMENT_GATEWAY_UNAVAILABLE" xml:space="preserve"><value>تعذّر الاتصال ببوابة الدفع. حاول مرة أخرى بعد قليل.</value></data>
+  <data name="FAKE_CHECKOUT_UNAVAILABLE" xml:space="preserve"><value>الدفع التجريبي غير متاح.</value></data>
 </root>

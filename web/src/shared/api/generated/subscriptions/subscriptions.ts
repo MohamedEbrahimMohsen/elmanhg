@@ -6,6 +6,7 @@
  */
 import {
   queryOptions as queryOptionsBuilder,
+  useMutation,
   useQuery,
   useSuspenseQuery
 } from '@tanstack/react-query';
@@ -13,10 +14,13 @@ import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
   UseSuspenseQueryOptions,
@@ -24,9 +28,13 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  CheckoutResult,
+  CompleteFakePaymentRequest,
   EntitlementResult,
   GetMyPaymentsParams,
-  PageDataOfPaymentResult
+  PageDataOfPaymentResult,
+  PaymentResult,
+  StartCheckoutCommand
 } from '../model';
 
 import { http } from '../../../lib/http';
@@ -350,3 +358,312 @@ export function useGetMyPaymentsSuspense<TData = Awaited<ReturnType<typeof getMy
 
 
 
+export const getStartCheckoutUrl = () => {
+
+
+
+
+  return `/api/subscriptions/checkout`
+}
+
+export const startCheckout = async (startCheckoutCommand: StartCheckoutCommand, options?: Parameters<typeof http>[1]): Promise<CheckoutResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return http<CheckoutResult>(getStartCheckoutUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(startCheckoutCommand)
+  }
+);}
+
+
+
+
+
+export const getStartCheckoutMutationKey = () => ['startCheckout'] as const;
+
+export const getStartCheckoutMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startCheckout>>, TError,StartCheckoutMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof startCheckout>>, TError,StartCheckoutMutationVariables, TContext> => {
+
+const mutationKey = getStartCheckoutMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof startCheckout>>, StartCheckoutMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  startCheckout(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StartCheckoutMutationResult = NonNullable<Awaited<ReturnType<typeof startCheckout>>>
+    export type StartCheckoutMutationBody = StartCheckoutCommand
+    export type StartCheckoutMutationError = unknown
+    export type StartCheckoutMutationVariables = {data: StartCheckoutCommand}
+
+    export const useStartCheckout = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startCheckout>>, TError,StartCheckoutMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof startCheckout>>,
+        TError,
+        StartCheckoutMutationVariables,
+        TContext
+      > => {
+      return useMutation(getStartCheckoutMutationOptions(options), queryClient);
+    }
+    export const getGetMyPaymentUrl = (paymentId: string,) => {
+
+
+
+
+  return `/api/subscriptions/payments/${paymentId}`
+}
+
+export const getMyPayment = async (paymentId: string, options?: Parameters<typeof http>[1]): Promise<PaymentResult> => {
+
+  return http<PaymentResult>(getGetMyPaymentUrl(paymentId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyPaymentQueryKey = (paymentId: string,) => {
+    return [
+    `/api/subscriptions/payments/${paymentId}`
+    ] as const;
+    }
+
+
+export const getGetMyPaymentQueryOptions = <TData = Awaited<ReturnType<typeof getMyPayment>>, TError = unknown>(paymentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyPayment>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyPaymentQueryKey(paymentId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyPayment>>> = ({ signal }) => getMyPayment(paymentId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: paymentId !== null && paymentId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyPayment>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMyPaymentQueryResult = NonNullable<Awaited<ReturnType<typeof getMyPayment>>>
+export type GetMyPaymentQueryError = unknown
+
+
+export function useGetMyPayment<TData = Awaited<ReturnType<typeof getMyPayment>>, TError = unknown>(
+ paymentId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyPayment>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyPayment>>,
+          TError,
+          Awaited<ReturnType<typeof getMyPayment>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyPayment<TData = Awaited<ReturnType<typeof getMyPayment>>, TError = unknown>(
+ paymentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyPayment>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyPayment>>,
+          TError,
+          Awaited<ReturnType<typeof getMyPayment>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyPayment<TData = Awaited<ReturnType<typeof getMyPayment>>, TError = unknown>(
+ paymentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyPayment>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetMyPayment<TData = Awaited<ReturnType<typeof getMyPayment>>, TError = unknown>(
+ paymentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyPayment>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMyPaymentQueryOptions(paymentId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetMyPaymentSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getMyPayment>>, TError = unknown>(paymentId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyPayment>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyPaymentQueryKey(paymentId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyPayment>>> = ({ signal }) => getMyPayment(paymentId, { signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyPayment>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetMyPaymentSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getMyPayment>>>
+export type GetMyPaymentSuspenseQueryError = unknown
+
+
+export function useGetMyPaymentSuspense<TData = Awaited<ReturnType<typeof getMyPayment>>, TError = unknown>(
+ paymentId: string, options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyPayment>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyPaymentSuspense<TData = Awaited<ReturnType<typeof getMyPayment>>, TError = unknown>(
+ paymentId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyPayment>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyPaymentSuspense<TData = Awaited<ReturnType<typeof getMyPayment>>, TError = unknown>(
+ paymentId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyPayment>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetMyPaymentSuspense<TData = Awaited<ReturnType<typeof getMyPayment>>, TError = unknown>(
+ paymentId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyPayment>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMyPaymentSuspenseQueryOptions(paymentId,options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getCompleteFakePaymentUrl = (paymentId: string,) => {
+
+
+
+
+  return `/api/subscriptions/payments/${paymentId}/fake-completion`
+}
+
+export const completeFakePayment = async (paymentId: string,
+    completeFakePaymentRequest: CompleteFakePaymentRequest, options?: Parameters<typeof http>[1]): Promise<PaymentResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return http<PaymentResult>(getCompleteFakePaymentUrl(paymentId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(completeFakePaymentRequest)
+  }
+);}
+
+
+
+
+
+export const getCompleteFakePaymentMutationKey = () => ['completeFakePayment'] as const;
+
+export const getCompleteFakePaymentMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeFakePayment>>, TError,CompleteFakePaymentMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof completeFakePayment>>, TError,CompleteFakePaymentMutationVariables, TContext> => {
+
+const mutationKey = getCompleteFakePaymentMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof completeFakePayment>>, CompleteFakePaymentMutationVariables> = (props) => {
+          const {paymentId,data} = props ?? {};
+
+          return  completeFakePayment(paymentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CompleteFakePaymentMutationResult = NonNullable<Awaited<ReturnType<typeof completeFakePayment>>>
+    export type CompleteFakePaymentMutationBody = CompleteFakePaymentRequest
+    export type CompleteFakePaymentMutationError = unknown
+    export type CompleteFakePaymentMutationVariables = {paymentId: string;data: CompleteFakePaymentRequest}
+
+    export const useCompleteFakePayment = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeFakePayment>>, TError,CompleteFakePaymentMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof completeFakePayment>>,
+        TError,
+        CompleteFakePaymentMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCompleteFakePaymentMutationOptions(options), queryClient);
+    }

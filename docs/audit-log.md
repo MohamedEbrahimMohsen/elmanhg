@@ -78,8 +78,10 @@ An array with one element per changed audited entity. Property keys are camelCas
 | SaveSubjectExamBlueprint | `ExamBlueprint.SaveSubjectDefault` | ExamBlueprint | result |
 | SaveUnitExamBlueprint | `ExamBlueprint.SaveUnit` | ExamBlueprint | result |
 | DeleteExamBlueprint | `ExamBlueprint.Delete` | ExamBlueprint | command |
+| StartCheckout | `Payment.StartCheckout` | Payment | result (the diff shows the new Pending Payment) |
+| CompleteFakePayment | `Payment.CompleteFake` | Payment | command (the diff shows the Payment status change and, on success, the new Subscription) |
 
-Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`, `ExamBlueprint`.
+Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`, `ExamBlueprint`, `Subscription`, `Payment`.
 
 `QuestionRevision` and `QuestionDecision` rows are an append-only history and are not diffed.
 

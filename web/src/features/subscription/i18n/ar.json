@@ -63,5 +63,47 @@
     "status": "الحالة",
     "Succeeded": "ناجحة",
     "Failed": "فاشلة"
+  },
+  "period": {
+    "Monthly": "شهري",
+    "Termly": "فصل دراسي",
+    "Yearly": "سنوي"
+  },
+  "checkout": {
+    "subscribe": {
+      "Monthly": "اشترك شهريًا",
+      "Termly": "اشترك لفصل دراسي",
+      "Yearly": "اشترك سنويًا"
+    },
+    "subscribeAskTeacher": "اشترك",
+    "requiresBaseHint": "اشترك في الباقة الأساسية أولًا",
+    "redirecting": "جارٍ التحويل إلى صفحة الدفع…"
+  },
+  "fakeCheckout": {
+    "title": "Paymob checkout (محاكاة)",
+    "summary": "الباقة: {plan} · {period} — المبلغ: {amount}",
+    "card": "رقم البطاقة: •••• •••• •••• •••• أو محفظة إلكترونية",
+    "note": "في النظام الحقيقي لا يفعّل العميل الاشتراك؛ Paymob يرسل Webhook موقّع (HMAC) للخادم.",
+    "succeed": "نجاح الدفع",
+    "fail": "فشل الدفع",
+    "cancel": "إلغاء",
+    "loading": "جارٍ تحميل الدفع…",
+    "errorTitle": "تعذّر تحميل الدفع."
+  },
+  "checkoutResult": {
+    "loading": "جارٍ تحميل الدفع…",
+    "errorTitle": "تعذّر تحميل الدفع.",
+    "pendingTitle": "جارٍ تأكيد الدفع…",
+    "pendingBody": "ننتظر تأكيد Paymob. لا تغلق الصفحة.",
+    "slowTitle": "لم يصل التأكيد بعد",
+    "slowBody": "ستُفعَّل باقتك فور تأكيد Paymob للدفع. يمكنك التحقق مرة أخرى أو العودة لاحقًا.",
+    "checkAgain": "تحقّق مرة أخرى",
+    "back": "العودة إلى الاشتراك",
+    "succeededTitle": "تم الدفع بنجاح",
+    "succeededBody": "تم تفعيل باقة {plan}.",
+    "failedTitle": "فشل الدفع",
+    "failedBody": "لم يتم تفعيل الاشتراك.",
+    "done": "حسنًا",
+    "tryAgain": "حاول مرة أخرى"
   }
 }

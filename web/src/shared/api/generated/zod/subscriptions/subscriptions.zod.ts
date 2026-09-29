@@ -59,3 +59,64 @@ export const GetMyPaymentsResponse = zod.object({
   "totalPages": zod.union([zod.int(),zod.stringFormat('int64', getMyPaymentsResponseTotalPagesRegExpTwo)]).optional()
 })
 
+export const StartCheckoutBody = zod.object({
+  "plan": zod.union([zod.null(),zod.enum(['Base', 'AskTeacher'])]),
+  "period": zod.union([zod.null(),zod.enum(['Monthly', 'Termly', 'Yearly'])])
+})
+
+export const startCheckoutResponseAmountAmountMinorRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const StartCheckoutResponse = zod.object({
+  "paymentId": zod.uuid(),
+  "redirectUrl": zod.string(),
+  "amount": zod.object({
+  "amountMinor": zod.union([zod.int(),zod.stringFormat('int64', startCheckoutResponseAmountAmountMinorRegExpTwo)]),
+  "currency": zod.string()
+})
+})
+
+export const GetMyPaymentParams = zod.object({
+  "paymentId": zod.uuid()
+})
+
+export const getMyPaymentResponseAmountAmountMinorRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const GetMyPaymentResponse = zod.object({
+  "id": zod.uuid(),
+  "plan": zod.enum(['Base', 'AskTeacher']),
+  "period": zod.enum(['Monthly', 'Termly', 'Yearly']),
+  "amount": zod.object({
+  "amountMinor": zod.union([zod.int(),zod.stringFormat('int64', getMyPaymentResponseAmountAmountMinorRegExpTwo)]),
+  "currency": zod.string()
+}),
+  "status": zod.enum(['Pending', 'Succeeded', 'Failed']),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "completedAt": zod.iso.datetime({"offset":true}).nullable()
+})
+
+export const CompleteFakePaymentParams = zod.object({
+  "paymentId": zod.uuid()
+})
+
+export const CompleteFakePaymentBody = zod.object({
+  "succeeded": zod.boolean()
+})
+
+export const completeFakePaymentResponseAmountAmountMinorRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const CompleteFakePaymentResponse = zod.object({
+  "id": zod.uuid(),
+  "plan": zod.enum(['Base', 'AskTeacher']),
+  "period": zod.enum(['Monthly', 'Termly', 'Yearly']),
+  "amount": zod.object({
+  "amountMinor": zod.union([zod.int(),zod.stringFormat('int64', completeFakePaymentResponseAmountAmountMinorRegExpTwo)]),
+  "currency": zod.string()
+}),
+  "status": zod.enum(['Pending', 'Succeeded', 'Failed']),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "completedAt": zod.iso.datetime({"offset":true}).nullable()
+})
+

@@ -26,7 +26,8 @@
     { "key": "blueprintUnitId", "value": "" },
     { "key": "examSessionId", "value": "" },
     { "key": "examQuestionId", "value": "" },
-    { "key": "secondUnitId", "value": "" }
+    { "key": "secondUnitId", "value": "" },
+    { "key": "checkoutPaymentId", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -2153,7 +2154,7 @@
     },
     {
       "name": "Subscriptions",
-      "description": "The plan catalogue is public (no auth). Entitlement and payments need a Student sign-in (Subscription.Manage). Until Paymob checkout ships every student is Free with no payments.",
+      "description": "The plan catalogue is public (no auth). Entitlement, payments and checkout need a Student sign-in (Subscription.Manage). Checkout creates a Pending payment. With the fake gateway (default) complete it via fake-completion. A second run on the same student returns 400 CHECKOUT_PLAN_ALREADY_ACTIVE.",
       "item": [
         {
           "name": "Get plan catalogue",
@@ -2231,6 +2232,118 @@
                 { "key": "pageNumber", "value": "1" },
                 { "key": "pageSize", "value": "20" }
               ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Start Base checkout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200 or 400\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 400]); });",
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.set(\"checkoutPaymentId\", pm.response.json().paymentId);",
+                  "  pm.test(\"redirects to the fake checkout\", function () { pm.expect(pm.response.json().redirectUrl.indexOf(\"/student/fake-checkout/\")).to.eql(0); });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/checkout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "checkout"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plan\": \"Base\",\n  \"period\": \"Monthly\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get checkout payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/payments/{{checkoutPaymentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "payments", "{{checkoutPaymentId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Complete fake payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"payment succeeded\", function () { pm.expect(pm.response.json().status).to.eql(\"Succeeded\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/payments/{{checkoutPaymentId}}/fake-completion",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "payments", "{{checkoutPaymentId}}", "fake-completion"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"succeeded\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get my entitlement after payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"tier is Base\", function () { pm.expect(pm.response.json().tier).to.eql(\"Base\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/entitlement",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "entitlement"]
             }
           },
           "response": []

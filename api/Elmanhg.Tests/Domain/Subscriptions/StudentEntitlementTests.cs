@@ -1,3 +1,5 @@
+using Core.Errors;
+using Elmanhg.Domain.SharedKernel.Exceptions;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Tests.Builders;
 using FluentAssertions;
@@ -64,6 +66,52 @@ public sealed class StudentEntitlementTests
         var entitlement = StudentEntitlement.Resolve([monthly, yearly], Now, Grace);
 
         entitlement.BaseSubscription.Should().BeSameAs(yearly);
+    }
+
+    [Fact]
+    public void EnsureCanPurchase_FreeStudentBase_DoesNotThrow()
+    {
+        var act = () => StudentEntitlement.Free.EnsureCanPurchase(SubscriptionPlan.Base);
+
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void EnsureCanPurchase_EntitledBase_ThrowsCheckoutPlanAlreadyActive()
+    {
+        var entitlement = StudentEntitlement.Resolve([Build(SubscriptionPlan.Base)], Now, Grace);
+
+        var act = () => entitlement.EnsureCanPurchase(SubscriptionPlan.Base);
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.CheckoutPlanAlreadyActive);
+    }
+
+    [Fact]
+    public void EnsureCanPurchase_AskTeacherWithoutBase_ThrowsCheckoutRequiresBase()
+    {
+        var act = () => StudentEntitlement.Free.EnsureCanPurchase(SubscriptionPlan.AskTeacher);
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.CheckoutRequiresBase);
+    }
+
+    [Fact]
+    public void EnsureCanPurchase_AskTeacherWithBase_DoesNotThrow()
+    {
+        var entitlement = StudentEntitlement.Resolve([Build(SubscriptionPlan.Base)], Now, Grace);
+
+        var act = () => entitlement.EnsureCanPurchase(SubscriptionPlan.AskTeacher);
+
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void EnsureCanPurchase_AskTeacherAlreadyEntitled_ThrowsCheckoutPlanAlreadyActive()
+    {
+        var entitlement = StudentEntitlement.Resolve([Build(SubscriptionPlan.Base), Build(SubscriptionPlan.AskTeacher)], Now, Grace);
+
+        var act = () => entitlement.EnsureCanPurchase(SubscriptionPlan.AskTeacher);
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.CheckoutPlanAlreadyActive);
     }
 
     private Subscription Build(SubscriptionPlan plan) => new SubscriptionBuilder().ForStudent(_studentId).WithPlan(plan).Build();

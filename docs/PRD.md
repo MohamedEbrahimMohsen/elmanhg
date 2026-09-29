@@ -379,7 +379,7 @@ Prices, billing periods and quotas are configuration (`Subscriptions` section, s
 
 ### 11.2 Paymob integration
 
-- Card and mobile wallet via Paymob checkout.
+- Card and mobile wallet via Paymob checkout. Checkout creates a pending payment and redirects to Paymob's unified checkout; the return page only reads the payment status and never activates a plan. A plan already held cannot be bought again, and Ask a Teacher needs an active Base. Configuration and go-live: `docs/paymob.md`.
 - Subscription state is driven **only by Paymob webhooks** (HMAC-verified). The client never sets entitlement.
 - States: Active · PastDue · Cancelled · Expired (Trialing is not used in v1). Access is derived from state and dates, never stored: Active and PastDue grant access until the end of the paid period plus the grace period; Cancelled grants access until the end of the paid period; Expired grants none. Ask a Teacher grants access only while Base does.
 - Grace period on failed renewal: 3 days, then downgrade to Free.

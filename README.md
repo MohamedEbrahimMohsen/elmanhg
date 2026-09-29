@@ -13,6 +13,7 @@ Arabic-first exam-prep platform for Egyptian Thanaweya Amma students. Students d
 | [docs/claude-design-prompt.md](docs/claude-design-prompt.md) | Brief for Claude Design to build the high-fidelity front end |
 | [docs/backlog.json](docs/backlog.json) | Epics, stories and sub-tasks, imported into the GitHub project |
 | [docs/otp-delivery.md](docs/otp-delivery.md) | OTP delivery channels (WhatsApp, Email, SMS): configuration and go-live steps |
+| [docs/paymob.md](docs/paymob.md) | Paymob checkout: configuration, the fake gateway and go-live steps |
 
 ## Folders
 
@@ -40,6 +41,7 @@ curl http://localhost:5080/health   # → Healthy
 The API docs are at `http://localhost:5080/scalar/v1`. Tests run with `dotnet test api/` (Docker required).
 
 While the OTP channels use `Provider=Fake` (the default), codes are not delivered: `FakeOtpChannel` writes each code to the API console in Development only. See docs/otp-delivery.md to switch on WhatsApp, email or SMS.
+Payments use `Payments:Provider=Fake` by default: checkout opens a simulated Paymob page whose success and failure buttons settle the payment. See docs/paymob.md to switch on Paymob.
 The admin account is seeded on start from `AdminSeed__*` in `.env` (sign in with that email and password).
 
 ## Run the frontend locally

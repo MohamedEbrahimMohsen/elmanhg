@@ -57,4 +57,6 @@ public static class ErrorCodes
     public const string SubscriptionAlreadyExpired = "SUBSCRIPTION_ALREADY_EXPIRED";
     public const string PaymentAmountInvalid = "PAYMENT_AMOUNT_INVALID";
     public const string PaymentNotPending = "PAYMENT_NOT_PENDING";
+    public const string CheckoutPlanAlreadyActive = "CHECKOUT_PLAN_ALREADY_ACTIVE";
+    public const string CheckoutRequiresBase = "CHECKOUT_REQUIRES_BASE";
 }
