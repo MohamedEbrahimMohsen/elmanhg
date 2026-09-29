@@ -2,7 +2,7 @@ using Core.DDD.Entities;
 
 namespace Elmanhg.Domain.TeacherThreads;
 
-public class TeacherThread : AuditEntity
+public partial class TeacherThread : AuditEntity
 {
     public Guid StudentId { get; private set; }
     public Guid SubjectId { get; private set; }
@@ -10,6 +10,8 @@ public class TeacherThread : AuditEntity
     public TeacherThreadStatus Status { get; private set; }
     public DateTimeOffset SubmittedAt { get; private set; }
     public DateTimeOffset SlaDueAt { get; private set; }
+    public Guid? TeacherId { get; private set; }
+    public DateTimeOffset? ClaimedAt { get; private set; }
     public uint Version { get; private set; }
     public List<TeacherMessage> Messages { get; private set; } = [];
 
@@ -34,6 +36,10 @@ public class TeacherThread : AuditEntity
     public TeacherThreadContext ReadContext() => TeacherThreadContext.FromJson(Context);
 
     public bool IsOverdueAt(DateTimeOffset now) => Status == TeacherThreadStatus.Open && now >= SlaDueAt;
+
+    public bool IsClaimedBy(Guid userId) => TeacherId == userId;
+
+    public bool HasUnreadReply() => Messages.Any(x => x.SenderId != StudentId && x.StudentReadAt == null);
 
     // PostgreSQL timestamptz keeps microseconds; truncating keeps the returned result equal to what is stored.
     private static DateTimeOffset ToMicroseconds(DateTimeOffset value) => value.AddTicks(-(value.Ticks % TimeSpan.TicksPerMicrosecond));

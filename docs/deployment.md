@@ -164,6 +164,7 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | `AskTeacher__QuestionTextMaxLength` | `2000` | 1 to 20000 |
 | `AskTeacher__ImageMaxSizeInMb` | `5` | 1 to 20 |
 | `AskTeacher__ThreadListMaxPageSize` | `50` | 1 to 100 |
+| `AskTeacher__ReplyTextMaxLength` | `4000` | 1 to 20000 |
 | `Subscriptions__AskTeacherMonthlyQuestions` / `Subscriptions__AskTeacherReplySlaHours` | `20` / `24` | the add-on's monthly quota and reply SLA ([docs/subscriptions.md](subscriptions.md)) |
 
 Question photos are stored in the `api-media` volume under `teacher-threads/` and are private: the API serves them only to the owning student, a teacher of the subject or an admin. Caddy proxies all of `/api/*` to the API, so never serve `/api/media` straight from the volume at the edge. The media backup (section 9) includes them.

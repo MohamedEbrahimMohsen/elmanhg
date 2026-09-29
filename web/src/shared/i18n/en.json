@@ -227,7 +227,14 @@
     "TEACHER_THREAD_IMAGE_TYPE_INVALID": "The image must be PNG, JPG or WEBP.",
     "TEACHER_THREAD_IMAGE_TOO_LARGE": "The image is too large.",
     "TEACHER_THREAD_PAGE_NUMBER_INVALID": "The page number is not valid.",
-    "TEACHER_THREAD_PAGE_SIZE_INVALID": "The page size is not valid."
+    "TEACHER_THREAD_PAGE_SIZE_INVALID": "The page size is not valid.",
+    "TEACHER_THREAD_ALREADY_CLAIMED": "Another teacher has already claimed this question.",
+    "TEACHER_THREAD_NOT_CLAIMED": "Claim the question before replying.",
+    "TEACHER_THREAD_NOT_AWAITING_REPLY": "This question is not waiting for a reply.",
+    "TEACHER_THREAD_MODIFIED_CONCURRENTLY": "The conversation just changed. Reload it and try again.",
+    "TEACHER_THREAD_REPLY_TEXT_REQUIRED": "Write your reply.",
+    "TEACHER_THREAD_REPLY_TEXT_TOO_LONG": "The reply is too long.",
+    "TEACHER_INBOX_FILTER_INVALID": "The inbox filter is not valid."
   },
   "error": {
     "title": "Something went wrong"

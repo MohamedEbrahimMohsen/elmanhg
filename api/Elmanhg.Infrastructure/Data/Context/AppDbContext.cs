@@ -92,6 +92,10 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         {
             throw new ConflictCoreException(ErrorCodes.SubscriptionModifiedConcurrently, innerException: exception);
         }
+        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is TeacherThread))
+        {
+            throw new ConflictCoreException(ErrorCodes.TeacherThreadModifiedConcurrently, innerException: exception);
+        }
         catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: PaymobTransactionIndex or PaymentRefundTransactionIndex })
         {
             throw new ConflictCoreException(ErrorCodes.PaymentTransactionAlreadyRecorded, innerException: exception);
@@ -383,6 +387,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
             builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.Version).IsRowVersion();
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.TeacherId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
             builder.HasMany(x => x.Messages).WithOne().HasForeignKey(x => x.ThreadId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.StudentId, x.SubmittedAt });

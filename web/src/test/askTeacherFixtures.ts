@@ -42,6 +42,7 @@ export function threadSummary(overrides?: Partial<TeacherThreadSummaryResult>): 
     isOverdue: false,
     submittedAt: '2026-10-01T07:00:00Z',
     slaDueAt: '2026-10-02T07:00:00Z',
+    hasUnreadReply: false,
     ...overrides,
   };
 }
@@ -71,6 +72,7 @@ export function teacherThread(overrides?: Partial<TeacherThreadResult>): Teacher
         createdAt: '2026-10-01T07:00:00Z',
       },
     ],
+    hasUnreadReply: false,
     ...overrides,
   };
 }

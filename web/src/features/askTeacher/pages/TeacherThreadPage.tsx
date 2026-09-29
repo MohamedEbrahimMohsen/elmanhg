@@ -5,6 +5,7 @@ import { ContentErrorState, ContentListSkeleton } from '@/features/content';
 import { useGetMyTeacherThread } from '@/shared/api/generated/teacher-threads/teacher-threads';
 import { ThreadContextCard } from '../components/ThreadContextCard';
 import { ThreadMessage } from '../components/ThreadMessage';
+import { useMarkThreadRead } from '../hooks/useMarkThreadRead';
 
 export interface TeacherThreadPageProps {
   threadId: string;
@@ -13,6 +14,7 @@ export interface TeacherThreadPageProps {
 export function TeacherThreadPage({ threadId }: TeacherThreadPageProps) {
   const { t } = useTranslation('askTeacher');
   const { data, error, isPending, isError, refetch } = useGetMyTeacherThread(threadId);
+  useMarkThreadRead(threadId, data?.hasUnreadReply === true);
 
   if (isPending) {
     return <ContentListSkeleton label={t('thread.loading')} />;

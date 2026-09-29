@@ -6,9 +6,10 @@ import { ThreadImage } from './ThreadImage';
 
 export interface ThreadMessageProps {
   message: TeacherMessageResult;
+  authorLabel?: string;
 }
 
-export function ThreadMessage({ message }: ThreadMessageProps) {
+export function ThreadMessage({ message, authorLabel }: ThreadMessageProps) {
   const { t, i18n } = useTranslation('askTeacher');
   const lng = i18n.resolvedLanguage ?? i18n.language;
   const date = formatDate(new Date(message.createdAt), lng, 'arabic-indic', {
@@ -24,7 +25,7 @@ export function ThreadMessage({ message }: ThreadMessageProps) {
       )}
     >
       <p className="text-caption text-text-muted">
-        {t(message.isFromStudent ? 'thread.you' : 'thread.teacher')} · {date}
+        {authorLabel ?? t(message.isFromStudent ? 'thread.you' : 'thread.teacher')} · {date}
       </p>
       <p className="text-ui whitespace-pre-wrap text-text">{message.text}</p>
       {message.imageUrl ? <ThreadImage url={message.imageUrl} /> : null}
