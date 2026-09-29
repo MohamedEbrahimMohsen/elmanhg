@@ -118,5 +118,34 @@
     "transcriptionFailed": "Automatic transcription failed. Type the reply text yourself.",
     "denied": "Microphone access was not allowed.",
     "unsupported": "This browser cannot record audio."
+  },
+  "followUp": {
+    "title": "Follow-up question (once only)",
+    "label": "Your follow-up",
+    "hint": "Write your follow-up question",
+    "required": "Write your follow-up question first",
+    "send": "Send follow-up",
+    "sent": "Your follow-up was sent."
+  },
+  "rating": {
+    "titleClose": "Rate the answer and close the question",
+    "title": "Rate the answer",
+    "option": "{rating} of 5",
+    "label": "Rating:",
+    "value": "{rating} of 5",
+    "sent": "Thanks for rating the answer."
+  },
+  "reminders": {
+    "title": "Reminders",
+    "intro": "These questions are close to their reply deadline:",
+    "meta": "{subject} / {lesson} · {claim} · {kind}",
+    "kind": {
+      "FirstReminder": "First reminder",
+      "SecondReminder": "Second reminder"
+    }
+  },
+  "realtime": {
+    "newReply": "A teacher replied to your question.",
+    "reminder": "Reminder: a student's question is waiting for your reply."
   }
 }

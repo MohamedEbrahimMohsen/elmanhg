@@ -29,9 +29,11 @@ import type {
 
 import type {
   CreateTeacherThreadBody,
+  FollowUpTeacherThreadRequest,
   GetMyTeacherThreadsParams,
   GetTeacherThreadContextParams,
   PageDataOfTeacherThreadSummaryResult,
+  RateTeacherThreadRequest,
   TeacherThreadContextResult,
   TeacherThreadResult
 } from '../model';
@@ -663,4 +665,168 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getMarkTeacherThreadReadMutationOptions(options), queryClient);
+    }
+    export const getFollowUpTeacherThreadUrl = (threadId: string,) => {
+
+
+
+
+  return `/api/teacher-threads/${threadId}/follow-ups`
+}
+
+export const followUpTeacherThread = async (threadId: string,
+    followUpTeacherThreadRequest: FollowUpTeacherThreadRequest, options?: Parameters<typeof http>[1]): Promise<TeacherThreadResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return http<TeacherThreadResult>(getFollowUpTeacherThreadUrl(threadId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(followUpTeacherThreadRequest)
+  }
+);}
+
+
+
+
+
+export const getFollowUpTeacherThreadMutationKey = () => ['followUpTeacherThread'] as const;
+
+export const getFollowUpTeacherThreadMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof followUpTeacherThread>>, TError,FollowUpTeacherThreadMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof followUpTeacherThread>>, TError,FollowUpTeacherThreadMutationVariables, TContext> => {
+
+const mutationKey = getFollowUpTeacherThreadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof followUpTeacherThread>>, FollowUpTeacherThreadMutationVariables> = (props) => {
+          const {threadId,data} = props ?? {};
+
+          return  followUpTeacherThread(threadId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type FollowUpTeacherThreadMutationResult = NonNullable<Awaited<ReturnType<typeof followUpTeacherThread>>>
+    export type FollowUpTeacherThreadMutationBody = FollowUpTeacherThreadRequest
+    export type FollowUpTeacherThreadMutationError = unknown
+    export type FollowUpTeacherThreadMutationVariables = {threadId: string;data: FollowUpTeacherThreadRequest}
+
+    export const useFollowUpTeacherThread = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof followUpTeacherThread>>, TError,FollowUpTeacherThreadMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof followUpTeacherThread>>,
+        TError,
+        FollowUpTeacherThreadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getFollowUpTeacherThreadMutationOptions(options), queryClient);
+    }
+    export const getRateTeacherThreadUrl = (threadId: string,) => {
+
+
+
+
+  return `/api/teacher-threads/${threadId}/rating`
+}
+
+export const rateTeacherThread = async (threadId: string,
+    rateTeacherThreadRequest: RateTeacherThreadRequest, options?: Parameters<typeof http>[1]): Promise<TeacherThreadResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return http<TeacherThreadResult>(getRateTeacherThreadUrl(threadId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(rateTeacherThreadRequest)
+  }
+);}
+
+
+
+
+
+export const getRateTeacherThreadMutationKey = () => ['rateTeacherThread'] as const;
+
+export const getRateTeacherThreadMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rateTeacherThread>>, TError,RateTeacherThreadMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof rateTeacherThread>>, TError,RateTeacherThreadMutationVariables, TContext> => {
+
+const mutationKey = getRateTeacherThreadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof rateTeacherThread>>, RateTeacherThreadMutationVariables> = (props) => {
+          const {threadId,data} = props ?? {};
+
+          return  rateTeacherThread(threadId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RateTeacherThreadMutationResult = NonNullable<Awaited<ReturnType<typeof rateTeacherThread>>>
+    export type RateTeacherThreadMutationBody = RateTeacherThreadRequest
+    export type RateTeacherThreadMutationError = unknown
+    export type RateTeacherThreadMutationVariables = {threadId: string;data: RateTeacherThreadRequest}
+
+    export const useRateTeacherThread = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rateTeacherThread>>, TError,RateTeacherThreadMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof rateTeacherThread>>,
+        TError,
+        RateTeacherThreadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRateTeacherThreadMutationOptions(options), queryClient);
     }

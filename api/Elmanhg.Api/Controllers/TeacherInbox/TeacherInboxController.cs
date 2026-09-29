@@ -2,6 +2,7 @@ using Core.DDD.Models;
 using Elmanhg.Application.TeacherInbox.ClaimTeacherThread;
 using Elmanhg.Application.TeacherInbox.GetInboxThread;
 using Elmanhg.Application.TeacherInbox.GetTeacherInbox;
+using Elmanhg.Application.TeacherInbox.GetTeacherInboxReminders;
 using Elmanhg.Application.TeacherInbox.GetVoiceDraft;
 using Elmanhg.Application.TeacherInbox.GetVoiceReplySettings;
 using Elmanhg.Application.TeacherInbox.RecordVoiceDraft;
@@ -35,6 +36,15 @@ public class TeacherInboxController(IMediator mediator) : ControllerBase
     public async Task<ActionResult> GetVoiceReplySettings(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetVoiceReplySettingsQuery(), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("reminders", Name = "GetTeacherInboxReminders")]
+    [Authorize(Policy = DefaultCodes.AskTeacherReply)]
+    [ProducesResponseType<List<TeacherInboxReminderResult>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetTeacherInboxReminders(CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetTeacherInboxRemindersQuery(), cancellationToken);
         return Ok(result);
     }
 

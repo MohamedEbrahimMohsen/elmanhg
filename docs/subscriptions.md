@@ -170,7 +170,7 @@ Every gate loads entitlement through `StudentEntitlementLoader.LoadAsync` before
 `AskTeacherGate` (`Application/TeacherThreads/Shared`) guards `POST /api/teacher-threads`, after the entitlement is loaded through `StudentEntitlementLoader`.
 
 - **Gate order:** validation `422` → user `401` → no add-on `403 ASK_TEACHER_REQUIRES_SUBSCRIPTION` → quota `403 ASK_TEACHER_MONTHLY_LIMIT_REACHED` (context `limit`) → context `404`s → the photo is stored → one save. Nothing is stored when a check fails.
-- **What counts:** threads the student submitted in the current calendar month of `DailyQuotaTimeZone` (Africa/Cairo); the month's bounds are converted to UTC. The quota resets on the 1st. A follow-up (#95) does not count. The limit is `AskTeacherMonthlyQuestions`, 0 without the add-on.
+- **What counts:** threads the student submitted in the current calendar month of `DailyQuotaTimeZone` (Africa/Cairo); the month's bounds are converted to UTC. The quota resets on the 1st. A follow-up (#97) does not count. The limit is `AskTeacherMonthlyQuestions`, 0 without the add-on.
 - **Known limit:** the quota is a soft limit, like the quiz quota. Two questions sent in parallel at 19/20 can both pass.
 - See `docs/ask-teacher.md` for the thread model, context rules and photo access.
 

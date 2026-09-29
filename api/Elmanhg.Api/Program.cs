@@ -12,6 +12,7 @@ using Elmanhg.Api.Authorization;
 using Elmanhg.Api.FileStorage;
 using Elmanhg.Api.Hosting;
 using Elmanhg.Api.RateLimiting;
+using Elmanhg.Api.Realtime;
 using Elmanhg.Api.Workers;
 using Elmanhg.Application;
 using Elmanhg.Application.Auth.SeedAdmin;
@@ -84,6 +85,8 @@ builder.Services.AddHostedService<ExpiredExamSubmissionWorker>();
 builder.Services.AddHostedService<SubscriptionLapseWorker>();
 builder.Services.AddHostedService<LessonContentIndexWorker>();
 builder.Services.AddHostedService<TeacherVoiceTranscriptionWorker>();
+builder.Services.AddHostedService<TeacherThreadSlaWorker>();
+builder.Services.AddElmanhgRealtime();
 builder.Services.AddAuthRateLimiting();
 #endregion
 
@@ -158,6 +161,8 @@ app.UseMiddleware<CoreExceptionMiddleware>();
 app.UseRateLimiter();
 
 app.MapControllers();
+
+app.MapElmanhgRealtime();
 
 app.MapHealthChecks("/health").AllowAnonymous();
 

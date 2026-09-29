@@ -42,12 +42,25 @@ export const GetVoiceReplySettingsResponse = zod.object({
   "maxSizeInMb": zod.union([zod.int(),zod.stringFormat('int32', getVoiceReplySettingsResponseMaxSizeInMbRegExpTwo)])
 })
 
+export const GetTeacherInboxRemindersResponseItem = zod.object({
+  "threadId": zod.uuid(),
+  "subjectName": zod.string(),
+  "lessonName": zod.string(),
+  "questionText": zod.string(),
+  "kind": zod.enum(['FirstReminder', 'SecondReminder', 'Breach']),
+  "isClaimedByMe": zod.boolean(),
+  "isOverdue": zod.boolean(),
+  "slaDueAt": zod.iso.datetime({"offset":true})
+})
+export const GetTeacherInboxRemindersResponse = zod.array(GetTeacherInboxRemindersResponseItem)
+
 export const GetInboxThreadParams = zod.object({
   "threadId": zod.uuid()
 })
 
 export const getInboxThreadResponseContextQuestionVersionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const getInboxThreadResponseMessagesItemAudioDurationSecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getInboxThreadResponseRatingRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 
 
 export const GetInboxThreadResponse = zod.object({
@@ -83,7 +96,8 @@ export const GetInboxThreadResponse = zod.object({
   "createdAt": zod.iso.datetime({"offset":true}),
   "audioUrl": zod.string().nullable(),
   "audioDurationSeconds": zod.union([zod.int(),zod.stringFormat('int32', getInboxThreadResponseMessagesItemAudioDurationSecondsRegExpTwo)]).nullable()
-}))
+})),
+  "rating": zod.union([zod.int(),zod.stringFormat('int32', getInboxThreadResponseRatingRegExpTwo)]).nullable()
 })
 
 export const ClaimTeacherThreadParams = zod.object({
@@ -92,6 +106,7 @@ export const ClaimTeacherThreadParams = zod.object({
 
 export const claimTeacherThreadResponseContextQuestionVersionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const claimTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const claimTeacherThreadResponseRatingRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 
 
 export const ClaimTeacherThreadResponse = zod.object({
@@ -127,7 +142,8 @@ export const ClaimTeacherThreadResponse = zod.object({
   "createdAt": zod.iso.datetime({"offset":true}),
   "audioUrl": zod.string().nullable(),
   "audioDurationSeconds": zod.union([zod.int(),zod.stringFormat('int32', claimTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo)]).nullable()
-}))
+})),
+  "rating": zod.union([zod.int(),zod.stringFormat('int32', claimTeacherThreadResponseRatingRegExpTwo)]).nullable()
 })
 
 export const ReplyToTeacherThreadParams = zod.object({
@@ -140,6 +156,7 @@ export const ReplyToTeacherThreadBody = zod.object({
 
 export const replyToTeacherThreadResponseContextQuestionVersionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const replyToTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const replyToTeacherThreadResponseRatingRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 
 
 export const ReplyToTeacherThreadResponse = zod.object({
@@ -175,7 +192,8 @@ export const ReplyToTeacherThreadResponse = zod.object({
   "createdAt": zod.iso.datetime({"offset":true}),
   "audioUrl": zod.string().nullable(),
   "audioDurationSeconds": zod.union([zod.int(),zod.stringFormat('int32', replyToTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo)]).nullable()
-}))
+})),
+  "rating": zod.union([zod.int(),zod.stringFormat('int32', replyToTeacherThreadResponseRatingRegExpTwo)]).nullable()
 })
 
 export const RecordTeacherVoiceDraftParams = zod.object({
@@ -233,6 +251,7 @@ export const SendTeacherVoiceReplyBody = zod.object({
 
 export const sendTeacherVoiceReplyResponseContextQuestionVersionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const sendTeacherVoiceReplyResponseMessagesItemAudioDurationSecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const sendTeacherVoiceReplyResponseRatingRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 
 
 export const SendTeacherVoiceReplyResponse = zod.object({
@@ -268,6 +287,7 @@ export const SendTeacherVoiceReplyResponse = zod.object({
   "createdAt": zod.iso.datetime({"offset":true}),
   "audioUrl": zod.string().nullable(),
   "audioDurationSeconds": zod.union([zod.int(),zod.stringFormat('int32', sendTeacherVoiceReplyResponseMessagesItemAudioDurationSecondsRegExpTwo)]).nullable()
-}))
+})),
+  "rating": zod.union([zod.int(),zod.stringFormat('int32', sendTeacherVoiceReplyResponseRatingRegExpTwo)]).nullable()
 })
 

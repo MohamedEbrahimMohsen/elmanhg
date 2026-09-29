@@ -465,6 +465,128 @@
         }
       }
     },
+    "/api/teacher-threads/{threadId}/follow-ups": {
+      "post": {
+        "tags": [
+          "TeacherThreads"
+        ],
+        "operationId": "FollowUpTeacherThread",
+        "parameters": [
+          {
+            "name": "threadId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FollowUpTeacherThreadRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FollowUpTeacherThreadRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/FollowUpTeacherThreadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherThreadResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherThreadResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherThreadResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher-threads/{threadId}/rating": {
+      "post": {
+        "tags": [
+          "TeacherThreads"
+        ],
+        "operationId": "RateTeacherThread",
+        "parameters": [
+          {
+            "name": "threadId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RateTeacherThreadRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RateTeacherThreadRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RateTeacherThreadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherThreadResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherThreadResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherThreadResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/teachers": {
       "get": {
         "tags": [
@@ -674,6 +796,45 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/VoiceReplySettingsResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher-inbox/reminders": {
+      "get": {
+        "tags": [
+          "TeacherInbox"
+        ],
+        "operationId": "GetTeacherInboxReminders",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TeacherInboxReminderResult"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TeacherInboxReminderResult"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TeacherInboxReminderResult"
+                  }
                 }
               }
             }
@@ -7461,6 +7622,20 @@
           }
         }
       },
+      "FollowUpTeacherThreadRequest": {
+        "required": [
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "FreePlanResult": {
         "required": [
           "dailyQuizQuestions",
@@ -9291,6 +9466,22 @@
           "Rejected"
         ]
       },
+      "RateTeacherThreadRequest": {
+        "required": [
+          "rating"
+        ],
+        "type": "object",
+        "properties": {
+          "rating": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "RecordFunnelEventRequest": {
         "required": [
           "anonymousId",
@@ -10780,6 +10971,47 @@
           }
         }
       },
+      "TeacherInboxReminderResult": {
+        "required": [
+          "threadId",
+          "subjectName",
+          "lessonName",
+          "questionText",
+          "kind",
+          "isClaimedByMe",
+          "isOverdue",
+          "slaDueAt"
+        ],
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "lessonName": {
+            "type": "string"
+          },
+          "questionText": {
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/TeacherThreadSlaEventKind"
+          },
+          "isClaimedByMe": {
+            "type": "boolean"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "slaDueAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "TeacherInboxThreadResult": {
         "required": [
           "id",
@@ -10794,7 +11026,8 @@
           "submittedAt",
           "slaDueAt",
           "claimedAt",
-          "messages"
+          "messages",
+          "rating"
         ],
         "type": "object",
         "properties": {
@@ -10849,6 +11082,15 @@
             "items": {
               "$ref": "#/components/schemas/TeacherMessageResult"
             }
+          },
+          "rating": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -11025,7 +11267,11 @@
           "submittedAt",
           "slaDueAt",
           "messages",
-          "hasUnreadReply"
+          "hasUnreadReply",
+          "rating",
+          "closedAt",
+          "canFollowUp",
+          "canRate"
         ],
         "type": "object",
         "properties": {
@@ -11058,8 +11304,37 @@
           },
           "hasUnreadReply": {
             "type": "boolean"
+          },
+          "rating": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "closedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "canFollowUp": {
+            "type": "boolean"
+          },
+          "canRate": {
+            "type": "boolean"
           }
         }
+      },
+      "TeacherThreadSlaEventKind": {
+        "enum": [
+          "FirstReminder",
+          "SecondReminder",
+          "Breach"
+        ]
       },
       "TeacherThreadStatus": {
         "enum": [

@@ -67,6 +67,7 @@ export const CreateTeacherThreadBody = zod.object({
 
 export const createTeacherThreadResponseContextQuestionVersionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const createTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const createTeacherThreadResponseRatingRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 
 
 export const CreateTeacherThreadResponse = zod.object({
@@ -97,7 +98,11 @@ export const CreateTeacherThreadResponse = zod.object({
   "audioUrl": zod.string().nullable(),
   "audioDurationSeconds": zod.union([zod.int(),zod.stringFormat('int32', createTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo)]).nullable()
 })),
-  "hasUnreadReply": zod.boolean()
+  "hasUnreadReply": zod.boolean(),
+  "rating": zod.union([zod.int(),zod.stringFormat('int32', createTeacherThreadResponseRatingRegExpTwo)]).nullable(),
+  "closedAt": zod.iso.datetime({"offset":true}).nullable(),
+  "canFollowUp": zod.boolean(),
+  "canRate": zod.boolean()
 })
 
 export const GetMyTeacherThreadParams = zod.object({
@@ -106,6 +111,7 @@ export const GetMyTeacherThreadParams = zod.object({
 
 export const getMyTeacherThreadResponseContextQuestionVersionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const getMyTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMyTeacherThreadResponseRatingRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 
 
 export const GetMyTeacherThreadResponse = zod.object({
@@ -136,7 +142,11 @@ export const GetMyTeacherThreadResponse = zod.object({
   "audioUrl": zod.string().nullable(),
   "audioDurationSeconds": zod.union([zod.int(),zod.stringFormat('int32', getMyTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo)]).nullable()
 })),
-  "hasUnreadReply": zod.boolean()
+  "hasUnreadReply": zod.boolean(),
+  "rating": zod.union([zod.int(),zod.stringFormat('int32', getMyTeacherThreadResponseRatingRegExpTwo)]).nullable(),
+  "closedAt": zod.iso.datetime({"offset":true}).nullable(),
+  "canFollowUp": zod.boolean(),
+  "canRate": zod.boolean()
 })
 
 export const MarkTeacherThreadReadParams = zod.object({
@@ -144,4 +154,103 @@ export const MarkTeacherThreadReadParams = zod.object({
 })
 
 export const MarkTeacherThreadReadResponse = zod.unknown()
+
+export const FollowUpTeacherThreadParams = zod.object({
+  "threadId": zod.uuid()
+})
+
+export const FollowUpTeacherThreadBody = zod.object({
+  "text": zod.string().nullable()
+})
+
+export const followUpTeacherThreadResponseContextQuestionVersionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const followUpTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const followUpTeacherThreadResponseRatingRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const FollowUpTeacherThreadResponse = zod.object({
+  "id": zod.uuid(),
+  "context": zod.object({
+  "subjectId": zod.uuid(),
+  "subjectName": zod.string(),
+  "unitId": zod.uuid(),
+  "unitName": zod.string(),
+  "lessonId": zod.uuid(),
+  "lessonName": zod.string(),
+  "questionId": zod.uuid().nullable(),
+  "questionVersion": zod.union([zod.int(),zod.stringFormat('int32', followUpTeacherThreadResponseContextQuestionVersionRegExpTwo)]).nullable(),
+  "questionStem": zod.string().nullable(),
+  "attemptId": zod.uuid().nullable()
+}),
+  "status": zod.enum(['Open', 'Answered', 'Closed']),
+  "isOverdue": zod.boolean(),
+  "submittedAt": zod.iso.datetime({"offset":true}),
+  "slaDueAt": zod.iso.datetime({"offset":true}),
+  "messages": zod.array(zod.object({
+  "id": zod.uuid(),
+  "isFromStudent": zod.boolean(),
+  "kind": zod.enum(['Text', 'Voice']),
+  "text": zod.string(),
+  "imageUrl": zod.string().nullable(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "audioUrl": zod.string().nullable(),
+  "audioDurationSeconds": zod.union([zod.int(),zod.stringFormat('int32', followUpTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo)]).nullable()
+})),
+  "hasUnreadReply": zod.boolean(),
+  "rating": zod.union([zod.int(),zod.stringFormat('int32', followUpTeacherThreadResponseRatingRegExpTwo)]).nullable(),
+  "closedAt": zod.iso.datetime({"offset":true}).nullable(),
+  "canFollowUp": zod.boolean(),
+  "canRate": zod.boolean()
+})
+
+export const RateTeacherThreadParams = zod.object({
+  "threadId": zod.uuid()
+})
+
+export const rateTeacherThreadBodyRatingRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const RateTeacherThreadBody = zod.object({
+  "rating": zod.union([zod.int(),zod.stringFormat('int32', rateTeacherThreadBodyRatingRegExpTwo)])
+})
+
+export const rateTeacherThreadResponseContextQuestionVersionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const rateTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const rateTeacherThreadResponseRatingRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const RateTeacherThreadResponse = zod.object({
+  "id": zod.uuid(),
+  "context": zod.object({
+  "subjectId": zod.uuid(),
+  "subjectName": zod.string(),
+  "unitId": zod.uuid(),
+  "unitName": zod.string(),
+  "lessonId": zod.uuid(),
+  "lessonName": zod.string(),
+  "questionId": zod.uuid().nullable(),
+  "questionVersion": zod.union([zod.int(),zod.stringFormat('int32', rateTeacherThreadResponseContextQuestionVersionRegExpTwo)]).nullable(),
+  "questionStem": zod.string().nullable(),
+  "attemptId": zod.uuid().nullable()
+}),
+  "status": zod.enum(['Open', 'Answered', 'Closed']),
+  "isOverdue": zod.boolean(),
+  "submittedAt": zod.iso.datetime({"offset":true}),
+  "slaDueAt": zod.iso.datetime({"offset":true}),
+  "messages": zod.array(zod.object({
+  "id": zod.uuid(),
+  "isFromStudent": zod.boolean(),
+  "kind": zod.enum(['Text', 'Voice']),
+  "text": zod.string(),
+  "imageUrl": zod.string().nullable(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "audioUrl": zod.string().nullable(),
+  "audioDurationSeconds": zod.union([zod.int(),zod.stringFormat('int32', rateTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo)]).nullable()
+})),
+  "hasUnreadReply": zod.boolean(),
+  "rating": zod.union([zod.int(),zod.stringFormat('int32', rateTeacherThreadResponseRatingRegExpTwo)]).nullable(),
+  "closedAt": zod.iso.datetime({"offset":true}).nullable(),
+  "canFollowUp": zod.boolean(),
+  "canRate": zod.boolean()
+})
 
