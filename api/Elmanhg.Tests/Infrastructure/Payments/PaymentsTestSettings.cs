@@ -16,6 +16,7 @@ public static class PaymentsTestSettings
         options.Paymob.IntegrationIds = [111, 222];
         options.Paymob.RedirectionUrl = "https://app.test/student/checkout-result";
         options.Paymob.NotificationUrl = "https://api.test/api/payments/paymob/webhook";
+        options.Paymob.HmacSecret = "hmac_test";
         return options;
     }
 
@@ -34,6 +35,7 @@ public static class PaymentsTestSettings
             ["Payments:Paymob:NotificationUrl"] = options.Paymob.NotificationUrl,
             ["Payments:Paymob:RedirectionUrl"] = options.Paymob.RedirectionUrl,
             ["Payments:Paymob:BillingCountry"] = options.Paymob.BillingCountry,
+            ["Payments:Paymob:HmacSecret"] = options.Paymob.HmacSecret,
         };
         for (var index = 0; index < options.Paymob.IntegrationIds.Count; index++)
         {

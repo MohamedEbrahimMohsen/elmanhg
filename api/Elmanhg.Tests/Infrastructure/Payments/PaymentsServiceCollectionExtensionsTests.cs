@@ -29,6 +29,14 @@ public sealed class PaymentsServiceCollectionExtensionsTests
     }
 
     [Fact]
+    public void AddPayments_NoConfiguration_ResolvesPaymobNotificationReader()
+    {
+        using var provider = BuildProvider([]);
+
+        provider.GetRequiredService<IPaymentNotificationReader>().Should().BeOfType<PaymobNotificationReader>();
+    }
+
+    [Fact]
     public void AddPayments_PaymobProvider_ResolvesPaymobGateway()
     {
         using var provider = BuildProvider(PaymentsTestSettings.ToConfiguration(PaymentsTestSettings.WithPaymob()));

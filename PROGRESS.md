@@ -1,12 +1,12 @@
 # Elmanhg — autopilot progress
 
-Last updated: laptop session, after story #99 merged (main at `83d420b`).
-**Next story: #100 [E10.S2] Paymob checkout integration**, the first row of "Remaining stories".
+Last updated: laptop session, after story #100 merged (main at `fff7c86`).
+**Next story: #101 [E10.S3] Webhook-driven entitlement**, the first row of "Remaining stories".
 The laptop run did #54–#64; the cloud session did #65–#76 (see "Running in a cloud session" and "Hand-off" below).
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (27 of 60)
+## Finished stories (28 of 60)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -37,17 +37,17 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 25 | #83 [E6.S4] Retakes and best score | #182 | 1 | review completed, no comments | #183 |
 | 26 | #171 [E1.S6] OTP delivery channels: WhatsApp (Meta), Email (Resend), SMS (disabled) | #184 | 1 (+hardening) | skipped (too many files) | #185 |
 | 27 | #99 [E10.S1] Plan catalogue and subscription state | #186 | 1 | skipped (too many files) | #187 |
+| 28 | #100 [E10.S2] Paymob checkout integration | #188 | 2 | 2 comments, fixed (eligibility, polling) | #189 |
 
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (33), in run order
+## Remaining stories (32), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
 | Order | Issue | Story |
 |---|---|---|
-| 18 | #100 | [E10.S2] Paymob checkout integration |
 | 19 | #101 | [E10.S3] Webhook-driven entitlement |
 | 20 | #102 | [E10.S4] Refunds and payment log |
 | 21 | #85 | [E7.S1] Subject, unit and lesson browsing |
@@ -210,4 +210,4 @@ How the next agent resumes, in a cloud session or on the laptop:
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187 · `dev-decision`: none open (#135 and #155 confirmed and closed).
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189 · `dev-decision`: none open (#135 and #155 confirmed and closed).

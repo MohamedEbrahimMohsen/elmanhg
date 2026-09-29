@@ -5,11 +5,11 @@ namespace Elmanhg.Application.Subscriptions.Shared;
 
 public static class EntitlementResultGenerator
 {
-    public static EntitlementResult Generate(StudentEntitlement entitlement, SubscriptionsOptions options)
+    public static EntitlementResult Generate(StudentEntitlement entitlement, SubscriptionsOptions options, DateTimeOffset now)
     {
         var subscriptions = new[] { entitlement.BaseSubscription, entitlement.AskTeacherSubscription }
             .OfType<Subscription>()
-            .Select(x => Map(x, options.GracePeriod))
+            .Select(x => Map(x, entitlement, options, now))
             .ToList();
         return entitlement.Tier switch
         {
@@ -18,5 +18,5 @@ public static class EntitlementResultGenerator
         };
     }
 
-    private static SubscriptionResult Map(Subscription subscription, TimeSpan gracePeriod) => new(subscription.Id, subscription.Plan, subscription.Period, subscription.Status, subscription.CurrentPeriodStart, subscription.CurrentPeriodEnd, subscription.EntitledUntil(gracePeriod) ?? subscription.CurrentPeriodEnd, subscription.CancelledAt);
+    private static SubscriptionResult Map(Subscription subscription, StudentEntitlement entitlement, SubscriptionsOptions options, DateTimeOffset now) => new(subscription.Id, subscription.Plan, subscription.Period, subscription.Status, subscription.CurrentPeriodStart, subscription.CurrentPeriodEnd, subscription.EntitledUntil(options.GracePeriod) ?? subscription.CurrentPeriodEnd, subscription.CancelledAt, subscription.Status is SubscriptionStatus.Active or SubscriptionStatus.PastDue && subscription.CurrentPeriodEnd <= now, entitlement.PurchaseConflict(subscription.Plan, now, options.RenewalWindow) is null);
 }

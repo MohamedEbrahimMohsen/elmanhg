@@ -19,7 +19,15 @@ public sealed class PaymentTests
         var payment = Pending();
 
         (payment.Status, payment.Amount, payment.SubscriptionId).Should().Be((PaymentStatus.Pending, new Money(19900, "EGP"), (Guid?)null));
-        (payment.StudentId, payment.Plan, payment.Period).Should().Be((_studentId, SubscriptionPlan.Base, BillingPeriod.Monthly));
+        (payment.StudentId, payment.Plan, payment.Period, payment.PeriodMonths).Should().Be((_studentId, SubscriptionPlan.Base, BillingPeriod.Monthly, 1));
+    }
+
+    [Fact]
+    public void Create_PeriodMonthsBelowOne_ThrowsPeriodInvalid()
+    {
+        var act = () => Payment.Create(_studentId, SubscriptionPlan.Base, BillingPeriod.Monthly, 0, new Money(19900, "EGP"));
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.SubscriptionPeriodInvalid);
     }
 
     [Theory]
@@ -27,7 +35,7 @@ public sealed class PaymentTests
     [InlineData(-1)]
     public void Create_NonPositiveAmount_ThrowsAmountInvalid(long amountMinor)
     {
-        var act = () => Payment.Create(_studentId, SubscriptionPlan.Base, BillingPeriod.Monthly, new Money(amountMinor, "EGP"));
+        var act = () => Payment.Create(_studentId, SubscriptionPlan.Base, BillingPeriod.Monthly, 1, new Money(amountMinor, "EGP"));
 
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.PaymentAmountInvalid);
     }
@@ -38,7 +46,7 @@ public sealed class PaymentTests
     [InlineData("EGPX")]
     public void Create_InvalidCurrency_ThrowsAmountInvalid(string currency)
     {
-        var act = () => Payment.Create(_studentId, SubscriptionPlan.Base, BillingPeriod.Monthly, new Money(19900, currency));
+        var act = () => Payment.Create(_studentId, SubscriptionPlan.Base, BillingPeriod.Monthly, 1, new Money(19900, currency));
 
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.PaymentAmountInvalid);
     }
@@ -64,16 +72,56 @@ public sealed class PaymentTests
         (payment.Status, payment.SubscriptionId, payment.PaymobTransactionId, payment.RawWebhook, payment.CompletedAt).Should().Be((PaymentStatus.Failed, (Guid?)null, Transaction, Raw, (DateTimeOffset?)CompletedAt));
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void MarkSucceeded_NotPending_ThrowsNotPending(bool previouslySucceeded)
+    [Fact]
+    public void MarkSucceeded_AlreadySucceeded_ThrowsNotPending()
     {
-        var payment = Completed(previouslySucceeded);
+        var payment = Completed(true);
 
         var act = () => payment.MarkSucceeded(Guid.NewGuid(), "txn-2", Raw, CompletedAt);
 
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.PaymentNotPending);
+    }
+
+    [Fact]
+    public void MarkSucceeded_Failed_RecordsSuccessAndNewTransaction()
+    {
+        var payment = Completed(false);
+        var subscriptionId = Guid.NewGuid();
+
+        payment.MarkSucceeded(subscriptionId, "txn-2", Raw, CompletedAt.AddMinutes(1));
+
+        (payment.Status, payment.SubscriptionId, payment.PaymobTransactionId, payment.CompletedAt).Should().Be((PaymentStatus.Succeeded, (Guid?)subscriptionId, "txn-2", (DateTimeOffset?)CompletedAt.AddMinutes(1)));
+    }
+
+    [Fact]
+    public void LinkProviderOrder_Pending_StoresOrderId()
+    {
+        var payment = Pending();
+
+        payment.LinkProviderOrder("217503754");
+
+        payment.ProviderOrderId.Should().Be("217503754");
+    }
+
+    [Fact]
+    public void LinkProviderOrder_NotPending_ThrowsNotPending()
+    {
+        var payment = Completed(false);
+
+        var act = () => payment.LinkProviderOrder("217503754");
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.PaymentNotPending);
+        payment.ProviderOrderId.Should().BeNull();
+    }
+
+    [Fact]
+    public void FlagForReview_SetsReason()
+    {
+        var payment = Pending();
+
+        payment.FlagForReview(PaymentReviewReason.AskTeacherWithoutBase);
+
+        payment.ReviewReason.Should().Be(PaymentReviewReason.AskTeacherWithoutBase);
     }
 
     [Theory]
@@ -88,7 +136,7 @@ public sealed class PaymentTests
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.PaymentNotPending);
     }
 
-    private Payment Pending() => Payment.Create(_studentId, SubscriptionPlan.Base, BillingPeriod.Monthly, new Money(19900, "EGP"));
+    private Payment Pending() => Payment.Create(_studentId, SubscriptionPlan.Base, BillingPeriod.Monthly, 1, new Money(19900, "EGP"));
 
     private Payment Completed(bool succeeded)
     {

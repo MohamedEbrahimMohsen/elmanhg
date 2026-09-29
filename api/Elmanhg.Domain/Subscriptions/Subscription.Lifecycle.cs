@@ -5,19 +5,38 @@ namespace Elmanhg.Domain.Subscriptions;
 
 public partial class Subscription
 {
-    public void Renew(int periodMonths, string? paymobReference)
+    public void Renew(BillingPeriod period, int periodMonths, string? paymobReference, DateTimeOffset renewedAt, TimeSpan gracePeriod)
     {
-        if (Status.HasEnded())
+        if (!IsEntitledAt(renewedAt, gracePeriod))
         {
             throw new BusinessRuleViolationCoreException(ErrorCodes.SubscriptionEnded);
         }
 
         EnsurePeriod(periodMonths);
+        Period = period;
         CurrentPeriodStart = CurrentPeriodEnd;
         CurrentPeriodEnd = CurrentPeriodEnd.AddMonths(periodMonths);
         Status = SubscriptionStatus.Active;
+        CancelledAt = null;
         PaymobReference = paymobReference ?? PaymobReference;
         UpdationDate = DateTimeOffset.UtcNow;
+    }
+
+    public bool Lapse(DateTimeOffset now, TimeSpan gracePeriod)
+    {
+        if (EntitledUntil(gracePeriod) is { } lapsedAt && lapsedAt <= now)
+        {
+            Expire(lapsedAt);
+            return true;
+        }
+
+        if (Status == SubscriptionStatus.Active && CurrentPeriodEnd <= now)
+        {
+            MarkPastDue();
+            return true;
+        }
+
+        return false;
     }
 
     public void MarkPastDue()

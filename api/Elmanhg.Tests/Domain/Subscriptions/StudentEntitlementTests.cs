@@ -10,6 +10,8 @@ public sealed class StudentEntitlementTests
 {
     private static readonly TimeSpan Grace = TimeSpan.FromDays(3);
     private static readonly DateTimeOffset Now = SubscriptionBuilder.DefaultStart.AddDays(10);
+    private static readonly DateTimeOffset InsideRenewalWindow = SubscriptionBuilder.DefaultStart.AddMonths(1).AddDays(-3);
+    private static readonly TimeSpan RenewalWindow = TimeSpan.FromDays(7);
     private readonly Guid _studentId = Guid.NewGuid();
 
     [Fact]
@@ -71,7 +73,7 @@ public sealed class StudentEntitlementTests
     [Fact]
     public void EnsureCanPurchase_FreeStudentBase_DoesNotThrow()
     {
-        var act = () => StudentEntitlement.Free.EnsureCanPurchase(SubscriptionPlan.Base);
+        var act = () => StudentEntitlement.Free.EnsureCanPurchase(SubscriptionPlan.Base, Now, RenewalWindow);
 
         act.Should().NotThrow();
     }
@@ -81,7 +83,7 @@ public sealed class StudentEntitlementTests
     {
         var entitlement = StudentEntitlement.Resolve([Build(SubscriptionPlan.Base)], Now, Grace);
 
-        var act = () => entitlement.EnsureCanPurchase(SubscriptionPlan.Base);
+        var act = () => entitlement.EnsureCanPurchase(SubscriptionPlan.Base, Now, RenewalWindow);
 
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.CheckoutPlanAlreadyActive);
     }
@@ -89,7 +91,7 @@ public sealed class StudentEntitlementTests
     [Fact]
     public void EnsureCanPurchase_AskTeacherWithoutBase_ThrowsCheckoutRequiresBase()
     {
-        var act = () => StudentEntitlement.Free.EnsureCanPurchase(SubscriptionPlan.AskTeacher);
+        var act = () => StudentEntitlement.Free.EnsureCanPurchase(SubscriptionPlan.AskTeacher, Now, RenewalWindow);
 
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.CheckoutRequiresBase);
     }
@@ -99,7 +101,7 @@ public sealed class StudentEntitlementTests
     {
         var entitlement = StudentEntitlement.Resolve([Build(SubscriptionPlan.Base)], Now, Grace);
 
-        var act = () => entitlement.EnsureCanPurchase(SubscriptionPlan.AskTeacher);
+        var act = () => entitlement.EnsureCanPurchase(SubscriptionPlan.AskTeacher, Now, RenewalWindow);
 
         act.Should().NotThrow();
     }
@@ -109,9 +111,41 @@ public sealed class StudentEntitlementTests
     {
         var entitlement = StudentEntitlement.Resolve([Build(SubscriptionPlan.Base), Build(SubscriptionPlan.AskTeacher)], Now, Grace);
 
-        var act = () => entitlement.EnsureCanPurchase(SubscriptionPlan.AskTeacher);
+        var act = () => entitlement.EnsureCanPurchase(SubscriptionPlan.AskTeacher, Now, RenewalWindow);
 
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.CheckoutPlanAlreadyActive);
+    }
+
+    [Fact]
+    public void EnsureCanPurchase_BaseInsideRenewalWindow_DoesNotThrow()
+    {
+        var entitlement = StudentEntitlement.Resolve([Build(SubscriptionPlan.Base)], InsideRenewalWindow, Grace);
+
+        var act = () => entitlement.EnsureCanPurchase(SubscriptionPlan.Base, InsideRenewalWindow, RenewalWindow);
+
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void EnsureCanPurchase_CancelledBaseInsideRenewalWindow_DoesNotThrow()
+    {
+        var cancelled = new SubscriptionBuilder().ForStudent(_studentId).InStatus(SubscriptionStatus.Cancelled).Build();
+        var entitlement = StudentEntitlement.Resolve([cancelled], InsideRenewalWindow, Grace);
+
+        var act = () => entitlement.EnsureCanPurchase(SubscriptionPlan.Base, InsideRenewalWindow, RenewalWindow);
+
+        entitlement.BaseSubscription.Should().BeSameAs(cancelled);
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void EnsureCanPurchase_AskTeacherInsideRenewalWindow_DoesNotThrow()
+    {
+        var entitlement = StudentEntitlement.Resolve([Build(SubscriptionPlan.Base), Build(SubscriptionPlan.AskTeacher)], InsideRenewalWindow, Grace);
+
+        var act = () => entitlement.EnsureCanPurchase(SubscriptionPlan.AskTeacher, InsideRenewalWindow, RenewalWindow);
+
+        act.Should().NotThrow();
     }
 
     private Subscription Build(SubscriptionPlan plan) => new SubscriptionBuilder().ForStudent(_studentId).WithPlan(plan).Build();

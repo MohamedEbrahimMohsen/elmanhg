@@ -191,7 +191,10 @@
     "PAYMENT_NOT_FOUND": "لم يتم العثور على عملية الدفع.",
     "PAYMENT_GATEWAY_UNAVAILABLE": "تعذّر الاتصال ببوابة الدفع. حاول مرة أخرى بعد قليل.",
     "FAKE_CHECKOUT_UNAVAILABLE": "الدفع التجريبي غير متاح.",
-    "PAYMENT_NOT_PENDING": "تمت معالجة هذا الدفع بالفعل."
+    "PAYMENT_NOT_PENDING": "تمت معالجة هذا الدفع بالفعل.",
+    "SUBSCRIPTION_ENDED": "انتهى هذا الاشتراك او تم الغاؤه.",
+    "SUBSCRIPTION_NOT_FOUND": "الاشتراك غير موجود.",
+    "SUBSCRIPTION_MODIFIED_CONCURRENTLY": "تم تعديل هذا الاشتراك بواسطة طلب آخر. حاول مرة أخرى."
   },
   "error": {
     "title": "حدث خطأ"

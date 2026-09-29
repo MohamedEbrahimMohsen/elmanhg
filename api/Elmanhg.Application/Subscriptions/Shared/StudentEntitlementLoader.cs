@@ -9,6 +9,6 @@ public static class StudentEntitlementLoader
     {
         var subscriptions = await subscriptionRepository.FindAsync(SubscriptionEntitlementSpecification.EntitledFor(studentId, now, options.GracePeriod), cancellationToken, asNoTracking: true).ConfigureAwait(false);
         var entitlement = StudentEntitlement.Resolve(subscriptions, now, options.GracePeriod);
-        return EntitlementResultGenerator.Generate(entitlement, options);
+        return EntitlementResultGenerator.Generate(entitlement, options, now);
     }
 }

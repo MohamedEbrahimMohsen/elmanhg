@@ -46,12 +46,12 @@ public sealed class PaymobPaymentGateway(HttpClient httpClient, IOptions<Payment
                 throw new ServiceUnavailableCoreException(ErrorCodes.PaymentGatewayUnavailable);
             }
 
-            var clientSecret = await ReadClientSecretAsync(response, request.PaymentId, cancellationToken).ConfigureAwait(false);
-            return new PaymentCheckout($"{paymob.CheckoutUrl}?publicKey={Uri.EscapeDataString(paymob.PublicKey)}&clientSecret={Uri.EscapeDataString(clientSecret)}");
+            var intention = await ReadIntentionAsync(response, request.PaymentId, cancellationToken).ConfigureAwait(false);
+            return new PaymentCheckout($"{paymob.CheckoutUrl}?publicKey={Uri.EscapeDataString(paymob.PublicKey)}&clientSecret={Uri.EscapeDataString(intention.ClientSecret!)}", ProviderOrderIdFrom(intention));
         }
     }
 
-    private async Task<string> ReadClientSecretAsync(HttpResponseMessage response, Guid paymentId, CancellationToken cancellationToken)
+    private async Task<PaymobIntentionResponse> ReadIntentionAsync(HttpResponseMessage response, Guid paymentId, CancellationToken cancellationToken)
     {
         PaymobIntentionResponse? intention;
         try
@@ -70,6 +70,13 @@ public sealed class PaymobPaymentGateway(HttpClient httpClient, IOptions<Payment
             throw new ServiceUnavailableCoreException(ErrorCodes.PaymentGatewayUnavailable);
         }
 
-        return intention.ClientSecret;
+        return intention;
     }
+
+    private static string? ProviderOrderIdFrom(PaymobIntentionResponse intention) => intention.IntentionOrderId switch
+    {
+        { ValueKind: JsonValueKind.Number } number => number.GetRawText(),
+        { ValueKind: JsonValueKind.String } text when !string.IsNullOrWhiteSpace(text.GetString()) => text.GetString(),
+        _ => null,
+    };
 }

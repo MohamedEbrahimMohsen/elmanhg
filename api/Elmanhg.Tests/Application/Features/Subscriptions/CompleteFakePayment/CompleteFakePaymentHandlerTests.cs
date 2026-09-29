@@ -8,6 +8,7 @@ using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.SharedKernel;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Integration.Subscriptions;
 using FluentAssertions;
 using NSubstitute;
 using System.Linq.Expressions;
@@ -103,15 +104,16 @@ public sealed class CompleteFakePaymentHandlerTests
     }
 
     [Fact]
-    public async Task Handle_SucceededWhileBaseEntitled_MarksFailedAndThrowsCheckoutPlanAlreadyActive()
+    public async Task Handle_SucceededWhileBaseEntitled_RenewsHeldSubscription()
     {
-        _subscriptions.Add(new SubscriptionBuilder().ForStudent(_studentId).WithPlan(SubscriptionPlan.Base).StartingAt(Now.AddDays(-5)).Build());
+        var held = new SubscriptionBuilder().ForStudent(_studentId).WithPlan(SubscriptionPlan.Base).StartingAt(Now.AddDays(-5)).Build();
+        var previousEnd = held.CurrentPeriodEnd;
+        _subscriptions.Add(held);
         var payment = AddPending(_studentId);
 
-        var act = () => Handle(payment.Id, true);
+        var result = await Handle(payment.Id, true);
 
-        (await act.Should().ThrowAsync<BusinessRuleViolationCoreException>()).Which.ErrorCode.Should().Be(DomainErrorCodes.CheckoutPlanAlreadyActive);
-        payment.Status.Should().Be(PaymentStatus.Failed);
+        (result.Status, payment.SubscriptionId, held.CurrentPeriodEnd).Should().Be((PaymentStatus.Succeeded, (Guid?)held.Id, previousEnd.AddMonths(1)));
         await _subscriptionRepository.DidNotReceive().AddAsync(Arg.Any<Subscription>(), Arg.Any<CancellationToken>());
         await _paymentRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
@@ -129,14 +131,26 @@ public sealed class CompleteFakePaymentHandlerTests
     }
 
     [Fact]
-    public async Task Handle_PeriodNoLongerConfigured_ThrowsCheckoutPeriodUnavailable()
+    public async Task Handle_PeriodNoLongerConfigured_SettlesWithSnapshotMonths()
     {
         var payment = AddPending(_studentId, BillingPeriod.Yearly);
 
+        var result = await Handle(payment.Id, true);
+
+        (result.Status, _addedSubscription!.Period, _addedSubscription.CurrentPeriodEnd).Should().Be((PaymentStatus.Succeeded, BillingPeriod.Yearly, Now.AddMonths(12)));
+        await _paymentRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_FailedPaymentSucceeded_ThrowsPaymentNotPending()
+    {
+        var payment = AddPending(_studentId);
+        payment.MarkFailed("txn-1", "{}", Now);
+
         var act = () => Handle(payment.Id, true);
 
-        (await act.Should().ThrowAsync<BadRequestCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.CheckoutPeriodUnavailable);
-        payment.Status.Should().Be(PaymentStatus.Pending);
+        (await act.Should().ThrowAsync<BusinessRuleViolationCoreException>()).Which.ErrorCode.Should().Be(DomainErrorCodes.PaymentNotPending);
+        (payment.Status, payment.PaymobTransactionId).Should().Be((PaymentStatus.Failed, "txn-1"));
         await _subscriptionRepository.DidNotReceive().AddAsync(Arg.Any<Subscription>(), Arg.Any<CancellationToken>());
         await _paymentRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
@@ -145,7 +159,7 @@ public sealed class CompleteFakePaymentHandlerTests
 
     private Payment AddPending(Guid studentId, BillingPeriod period = BillingPeriod.Monthly)
     {
-        var payment = Payment.Create(studentId, SubscriptionPlan.Base, period, new Money(19900, "EGP"));
+        var payment = Payment.Create(studentId, SubscriptionPlan.Base, period, SubscriptionTestData.MonthsFor(period), new Money(19900, "EGP"));
         _payments.Add(payment);
         return payment;
     }

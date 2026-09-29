@@ -4,16 +4,28 @@ namespace Elmanhg.Application.Subscriptions.Shared;
 
 public static class PaymentSettlement
 {
-    public static Subscription? Settle(Payment payment, bool succeeded, string transactionId, string rawNotification, int periodMonths, DateTimeOffset completedAt)
+    public static Subscription? Succeed(Payment payment, StudentEntitlement entitlement, string transactionId, string rawNotification, TimeSpan gracePeriod, DateTimeOffset completedAt)
     {
-        if (!succeeded)
+        var held = entitlement.Held(payment.Plan);
+        Subscription? started = null;
+        if (held is not null)
         {
-            payment.MarkFailed(transactionId, rawNotification, completedAt);
-            return null;
+            payment.MarkSucceeded(held.Id, transactionId, rawNotification, completedAt);
+            held.Renew(payment.Period, payment.PeriodMonths, transactionId, completedAt, gracePeriod);
+        }
+        else
+        {
+            started = Subscription.Start(payment.StudentId, payment.Plan, payment.Period, payment.PeriodMonths, completedAt, transactionId, payment.StudentId);
+            payment.MarkSucceeded(started.Id, transactionId, rawNotification, completedAt);
         }
 
-        var subscription = Subscription.Start(payment.StudentId, payment.Plan, payment.Period, periodMonths, completedAt, transactionId, payment.StudentId);
-        payment.MarkSucceeded(subscription.Id, transactionId, rawNotification, completedAt);
-        return subscription;
+        if (payment.Plan == SubscriptionPlan.AskTeacher && entitlement.BaseSubscription is null)
+        {
+            payment.FlagForReview(PaymentReviewReason.AskTeacherWithoutBase);
+        }
+
+        return started;
     }
+
+    public static void Fail(Payment payment, string transactionId, string rawNotification, DateTimeOffset completedAt) => payment.MarkFailed(transactionId, rawNotification, completedAt);
 }

@@ -88,6 +88,18 @@ public sealed class EntitlementEndpointTests(ApiFactory factory)
         body.GetProperty("tier").GetString().Should().Be("Free");
     }
 
+    [Fact]
+    public async Task Get_BaseInsideRenewalWindow_ReportsCanRenew()
+    {
+        var (student, client) = await SignedInStudentAsync(factory);
+        await SubscriptionTestData.SeedSubscriptionAsync(factory, new SubscriptionBuilder().ForStudent(student.Id).StartingAt(DateTimeOffset.UtcNow.AddMonths(-1).AddDays(3)).Build(), CancellationToken);
+
+        var body = await GetEntitlementAsync(client);
+
+        var subscription = body.GetProperty("subscriptions")[0];
+        (subscription.GetProperty("canRenew").GetBoolean(), subscription.GetProperty("inGracePeriod").GetBoolean()).Should().Be((true, false));
+    }
+
     private static async Task<JsonElement> GetEntitlementAsync(HttpClient client)
     {
         using var response = await client.GetAsync(EntitlementPath, CancellationToken).ConfigureAwait(false);

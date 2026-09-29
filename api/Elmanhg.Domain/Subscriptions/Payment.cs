@@ -17,16 +17,25 @@ public class Payment : AuditEntity, IAuditedEntity
     public string? PaymobTransactionId { get; private set; }
     public string? RawWebhook { get; private set; }
     public DateTimeOffset? CompletedAt { get; private set; }
+    public int PeriodMonths { get; private set; }
+    public string? ProviderOrderId { get; private set; }
+    public PaymentReviewReason? ReviewReason { get; private set; }
+    public uint Version { get; private set; }
 
     public Money Amount => new(AmountMinor, Currency);
 
     private Payment(Guid id, Guid? createdBy) : base(id, createdBy) { }
 
-    public static Payment Create(Guid studentId, SubscriptionPlan plan, BillingPeriod period, Money amount)
+    public static Payment Create(Guid studentId, SubscriptionPlan plan, BillingPeriod period, int periodMonths, Money amount)
     {
         if (amount.AmountMinor <= 0 || amount.Currency.Length != 3 || !amount.Currency.All(char.IsAsciiLetterUpper))
         {
             throw new BusinessRuleViolationCoreException(ErrorCodes.PaymentAmountInvalid);
+        }
+
+        if (periodMonths < 1)
+        {
+            throw new BusinessRuleViolationCoreException(ErrorCodes.SubscriptionPeriodInvalid);
         }
 
         return new Payment(Guid.NewGuid(), studentId)
@@ -34,6 +43,7 @@ public class Payment : AuditEntity, IAuditedEntity
             StudentId = studentId,
             Plan = plan,
             Period = period,
+            PeriodMonths = periodMonths,
             AmountMinor = amount.AmountMinor,
             Currency = amount.Currency,
             Status = PaymentStatus.Pending,
@@ -42,7 +52,11 @@ public class Payment : AuditEntity, IAuditedEntity
 
     public void MarkSucceeded(Guid subscriptionId, string paymobTransactionId, string rawWebhook, DateTimeOffset completedAt)
     {
-        EnsurePending();
+        if (Status == PaymentStatus.Succeeded)
+        {
+            throw new BusinessRuleViolationCoreException(ErrorCodes.PaymentNotPending);
+        }
+
         SubscriptionId = subscriptionId;
         PaymobTransactionId = paymobTransactionId;
         RawWebhook = rawWebhook;
@@ -58,6 +72,19 @@ public class Payment : AuditEntity, IAuditedEntity
         RawWebhook = rawWebhook;
         CompletedAt = completedAt;
         Status = PaymentStatus.Failed;
+        UpdationDate = DateTimeOffset.UtcNow;
+    }
+
+    public void LinkProviderOrder(string providerOrderId)
+    {
+        EnsurePending();
+        ProviderOrderId = providerOrderId;
+        UpdationDate = DateTimeOffset.UtcNow;
+    }
+
+    public void FlagForReview(PaymentReviewReason reason)
+    {
+        ReviewReason = reason;
         UpdationDate = DateTimeOffset.UtcNow;
     }
 

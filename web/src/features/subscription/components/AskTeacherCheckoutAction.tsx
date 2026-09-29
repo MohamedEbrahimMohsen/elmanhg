@@ -3,12 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui/button';
 
 export interface AskTeacherCheckoutActionProps {
+  mode: 'subscribe' | 'renew';
   hasBase: boolean;
   disabled: boolean;
   onCheckout: () => void;
 }
 
-export function AskTeacherCheckoutAction({ hasBase, disabled, onCheckout }: AskTeacherCheckoutActionProps) {
+export function AskTeacherCheckoutAction({ mode, hasBase, disabled, onCheckout }: AskTeacherCheckoutActionProps) {
   const { t } = useTranslation('subscription');
   const hintId = useId();
 
@@ -21,7 +22,7 @@ export function AskTeacherCheckoutAction({ hasBase, disabled, onCheckout }: AskT
         aria-describedby={hasBase ? undefined : hintId}
         onClick={onCheckout}
       >
-        {t('checkout.subscribeAskTeacher')}
+        {mode === 'renew' ? t('checkout.renewAskTeacher') : t('checkout.subscribeAskTeacher')}
       </Button>
       {!hasBase && (
         <p id={hintId} className="text-caption text-text-muted">

@@ -15,6 +15,7 @@ public partial class Subscription : AuditEntity, IAuditedEntity
     public DateTimeOffset? CancelledAt { get; private set; }
     public DateTimeOffset? ExpiredAt { get; private set; }
     public string? PaymobReference { get; private set; }
+    public uint Version { get; private set; }
 
     private Subscription(Guid id, Guid? createdBy) : base(id, createdBy) { }
 
@@ -44,6 +45,8 @@ public partial class Subscription : AuditEntity, IAuditedEntity
     }
 
     public bool IsEntitledAt(DateTimeOffset now, TimeSpan gracePeriod) => EntitledUntil(gracePeriod) > now;
+
+    public bool IsRenewableAt(DateTimeOffset now, TimeSpan renewalWindow) => Status != SubscriptionStatus.Expired && CurrentPeriodEnd - renewalWindow <= now;
 
     private static void EnsurePeriod(int periodMonths)
     {

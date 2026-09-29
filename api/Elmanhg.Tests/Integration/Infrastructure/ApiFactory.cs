@@ -24,6 +24,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     // Keys only the HMAC of OTP codes inside this in-memory host; codes are read back from OtpOutbox.
     private const string TestOtpSecret = "elmanhg-tests-otp-secret";
 
+    // Keys only the HMAC of Paymob notifications posted to this in-memory host.
+    public const string TestPaymobHmacSecret = "elmanhg-tests-paymob-hmac";
+
     private readonly PostgreSqlContainer _database = new PostgreSqlBuilder(PostgresImage).Build();
 
     public OtpOutbox Otp { get; } = new();
@@ -46,6 +49,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("CoreAuditing:Enabled", "true");
         // The sweep would race tests that expire sessions on purpose; AutoSubmitExam is exercised directly through the mediator.
         builder.UseSetting("Exams:AutoSubmitEnabled", "false");
+        // The lapse sweep would race tests that seed ended subscriptions; LapseSubscription is exercised directly through the mediator.
+        builder.UseSetting("Subscriptions:LapseSweepEnabled", "false");
         builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["ConnectionStrings:DbConnectionString"] = _database.GetConnectionString(),
@@ -115,10 +120,14 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Subscriptions:AskTeacherReplySlaHours"] = "24",
             ["Subscriptions:AskTeacherMonthlyPriceMinor"] = "9900",
             ["Subscriptions:PaymentHistoryMaxPageSize"] = "50",
+            ["Subscriptions:RenewalWindowDays"] = "7",
+            ["Subscriptions:LapseSweepIntervalSeconds"] = "300",
+            ["Subscriptions:LapseSweepBatchSize"] = "100",
             ["Payments:Provider"] = "Fake",
             ["Payments:FakeCheckoutPath"] = "/student/fake-checkout",
             ["Payments:AttemptTimeoutSeconds"] = "10",
             ["Payments:TotalTimeoutSeconds"] = "30",
+            ["Payments:Paymob:HmacSecret"] = TestPaymobHmacSecret,
             ["FileStorage:Provider"] = "Local",
             ["FileStorage:LocalRootPath"] = MediaRoot,
             ["FileStorage:PublicBaseUrl"] = "/api/media",

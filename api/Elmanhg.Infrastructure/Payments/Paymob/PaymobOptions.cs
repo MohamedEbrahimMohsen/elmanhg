@@ -10,4 +10,5 @@ public sealed class PaymobOptions
     public string NotificationUrl { get; set; } = string.Empty;
     public string RedirectionUrl { get; set; } = string.Empty;
     public string BillingCountry { get; set; } = "EG";
+    public string HmacSecret { get; set; } = string.Empty;
 }

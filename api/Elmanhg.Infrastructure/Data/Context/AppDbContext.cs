@@ -1,4 +1,5 @@
 using Core.Auditing;
+using Core.EntityFrameworkCore.Auditing;
 using Core.EntityFrameworkCore.Context;
 using Core.Errors;
 using Elmanhg.Application.Exceptions;
@@ -39,6 +40,8 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public const string OneOpenExamIndex = "IX_Sessions_OneOpenExam";
     public const string OpenExamDeadlineIndex = "IX_Sessions_OpenExamDeadline";
     public const string PaymobTransactionIndex = "IX_Payments_PaymobTransactionId";
+    public const string PaymentProviderOrderIndex = "IX_Payments_ProviderOrderId";
+    public const string SubscriptionLapseIndex = "IX_Subscriptions_Status_CurrentPeriodEnd";
 
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<TeacherSubject> TeacherSubjects { get; set; }
@@ -68,6 +71,18 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is Session or QuestionMastery))
         {
             throw new ConflictCoreException(ErrorCodes.SessionModifiedConcurrently, innerException: exception);
+        }
+        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is Payment))
+        {
+            throw new ConflictCoreException(ErrorCodes.PaymentModifiedConcurrently, innerException: exception);
+        }
+        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is Subscription))
+        {
+            throw new ConflictCoreException(ErrorCodes.SubscriptionModifiedConcurrently, innerException: exception);
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: PaymobTransactionIndex })
+        {
+            throw new ConflictCoreException(ErrorCodes.PaymentTransactionAlreadyRecorded, innerException: exception);
         }
         catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, TableName: nameof(QuestionImportBatches) })
         {
@@ -296,8 +311,10 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
             builder.Property(x => x.Period).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.PaymobReference).HasMaxLength(PaymobReferenceMaxLength);
+            builder.Property(x => x.Version).IsRowVersion();
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.StudentId, x.Plan, x.CurrentPeriodEnd });
+            builder.HasIndex(x => new { x.Status, x.CurrentPeriodEnd }, SubscriptionLapseIndex);
         });
         modelBuilder.Entity<Payment>(builder =>
         {
@@ -306,12 +323,16 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
             builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.Currency).IsRequired().HasMaxLength(CurrencyCodeLength);
             builder.Property(x => x.PaymobTransactionId).HasMaxLength(PaymobReferenceMaxLength);
-            builder.Property(x => x.RawWebhook).HasColumnType("jsonb");
+            builder.Property(x => x.ProviderOrderId).HasMaxLength(PaymobReferenceMaxLength);
+            builder.Property(x => x.ReviewReason).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.RawWebhook).HasColumnType("jsonb").HasAnnotation(AuditChangeReader.ExcludedAnnotation, true);
+            builder.Property(x => x.Version).IsRowVersion();
             builder.Ignore(x => x.Amount);
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Subscription>().WithMany().HasForeignKey(x => x.SubscriptionId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.StudentId, x.CreationDate });
             builder.HasIndex(x => x.PaymobTransactionId, PaymobTransactionIndex).IsUnique().HasFilter("\"PaymobTransactionId\" IS NOT NULL");
+            builder.HasIndex(x => x.ProviderOrderId, PaymentProviderOrderIndex).HasFilter("\"ProviderOrderId\" IS NOT NULL");
         });
     }
 

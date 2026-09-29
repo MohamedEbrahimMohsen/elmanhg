@@ -58,7 +58,7 @@ public sealed class GetMyPaymentHandlerTests
 
     private Payment Add(Guid studentId)
     {
-        var payment = Payment.Create(studentId, SubscriptionPlan.Base, BillingPeriod.Monthly, new Money(19900, "EGP"));
+        var payment = Payment.Create(studentId, SubscriptionPlan.Base, BillingPeriod.Monthly, 1, new Money(19900, "EGP"));
         _payments.Add(payment);
         return payment;
     }

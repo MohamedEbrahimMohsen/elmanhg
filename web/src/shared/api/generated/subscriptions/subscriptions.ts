@@ -667,3 +667,70 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getCompleteFakePaymentMutationOptions(options), queryClient);
     }
+    export const getCancelSubscriptionUrl = (subscriptionId: string,) => {
+
+
+
+
+  return `/api/subscriptions/${subscriptionId}/cancel`
+}
+
+export const cancelSubscription = async (subscriptionId: string, options?: Parameters<typeof http>[1]): Promise<EntitlementResult> => {
+
+  return http<EntitlementResult>(getCancelSubscriptionUrl(subscriptionId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getCancelSubscriptionMutationKey = () => ['cancelSubscription'] as const;
+
+export const getCancelSubscriptionMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancelSubscription>>, TError,CancelSubscriptionMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof cancelSubscription>>, TError,CancelSubscriptionMutationVariables, TContext> => {
+
+const mutationKey = getCancelSubscriptionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cancelSubscription>>, CancelSubscriptionMutationVariables> = (props) => {
+          const {subscriptionId} = props ?? {};
+
+          return  cancelSubscription(subscriptionId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CancelSubscriptionMutationResult = NonNullable<Awaited<ReturnType<typeof cancelSubscription>>>
+
+    export type CancelSubscriptionMutationError = unknown
+    export type CancelSubscriptionMutationVariables = {subscriptionId: string}
+
+    export const useCancelSubscription = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancelSubscription>>, TError,CancelSubscriptionMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof cancelSubscription>>,
+        TError,
+        CancelSubscriptionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCancelSubscriptionMutationOptions(options), queryClient);
+    }

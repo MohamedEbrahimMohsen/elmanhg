@@ -191,7 +191,10 @@
     "PAYMENT_NOT_FOUND": "Payment not found.",
     "PAYMENT_GATEWAY_UNAVAILABLE": "The payment service is unavailable. Try again in a moment.",
     "FAKE_CHECKOUT_UNAVAILABLE": "Simulated checkout is not available.",
-    "PAYMENT_NOT_PENDING": "This payment has already been processed."
+    "PAYMENT_NOT_PENDING": "This payment has already been processed.",
+    "SUBSCRIPTION_ENDED": "This subscription has ended or was cancelled.",
+    "SUBSCRIPTION_NOT_FOUND": "Subscription not found.",
+    "SUBSCRIPTION_MODIFIED_CONCURRENTLY": "This subscription was changed by another request. Please try again."
   },
   "error": {
     "title": "Something went wrong"

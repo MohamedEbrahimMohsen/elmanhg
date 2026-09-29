@@ -297,4 +297,12 @@
   <data name="PAYMENT_NOT_FOUND" xml:space="preserve"><value>لم يتم العثور على عملية الدفع.</value></data>
   <data name="PAYMENT_GATEWAY_UNAVAILABLE" xml:space="preserve"><value>تعذّر الاتصال ببوابة الدفع. حاول مرة أخرى بعد قليل.</value></data>
   <data name="FAKE_CHECKOUT_UNAVAILABLE" xml:space="preserve"><value>الدفع التجريبي غير متاح.</value></data>
+  <data name="SUBSCRIPTION_NOT_FOUND" xml:space="preserve"><value>الاشتراك غير موجود.</value></data>
+  <data name="SUBSCRIPTION_ID_REQUIRED" xml:space="preserve"><value>معرف الاشتراك مطلوب.</value></data>
+  <data name="SUBSCRIPTION_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>تم تعديل هذا الاشتراك بواسطة طلب آخر. حاول مرة أخرى.</value></data>
+  <data name="PAYMENT_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>تم تعديل هذا الدفع بواسطة طلب آخر. حاول مرة أخرى.</value></data>
+  <data name="PAYMENT_TRANSACTION_ALREADY_RECORDED" xml:space="preserve"><value>تم تسجيل عملية الدفع هذه بالفعل.</value></data>
+  <data name="PAYMENT_NOTIFICATION_MISMATCH" xml:space="preserve"><value>اشعار الدفع لا يطابق عملية الدفع.</value></data>
+  <data name="PAYMOB_WEBHOOK_SIGNATURE_INVALID" xml:space="preserve"><value>توقيع اشعار الدفع غير صالح.</value></data>
+  <data name="PAYMOB_WEBHOOK_PAYLOAD_INVALID" xml:space="preserve"><value>اشعار الدفع غير صالح.</value></data>
 </root>

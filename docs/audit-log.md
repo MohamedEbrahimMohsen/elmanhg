@@ -43,6 +43,7 @@ An array with one element per changed audited entity. Property keys are camelCas
 
 - `change` is `Created` (added), `Deleted` (removed, or a soft delete: `isDeleted` going `false` to `true`) or `Modified`.
 - Excluded properties: `Id`, `DeletedAt`, `CreatedBy`, `CreationDate`, `UpdatedBy`, `UpdationDate`, shadow properties and concurrency tokens. The row already carries the actor and the time. `IsDeleted` is left out of `Created` and hard `Deleted` entries.
+- Properties carrying the `Core:AuditExcluded` model annotation (`AuditChangeReader.ExcludedAnnotation`, set in `AppDbContext` with `.HasAnnotation(AuditChangeReader.ExcludedAnnotation, true)`) are also left out: `Payment.RawWebhook`, the provider payload with billing PII. The audit diff is widely readable, so such values never reach it.
 - `Modified` keeps only properties whose value actually changed. An entry with nothing left is dropped.
 
 ## Audited commands
@@ -79,7 +80,10 @@ An array with one element per changed audited entity. Property keys are camelCas
 | SaveUnitExamBlueprint | `ExamBlueprint.SaveUnit` | ExamBlueprint | result |
 | DeleteExamBlueprint | `ExamBlueprint.Delete` | ExamBlueprint | command |
 | StartCheckout | `Payment.StartCheckout` | Payment | result (the diff shows the new Pending Payment) |
-| CompleteFakePayment | `Payment.CompleteFake` | Payment | command (the diff shows the Payment status change and, on success, the new Subscription) |
+| CompleteFakePayment | `Payment.CompleteFake` | Payment | command (the diff shows the Payment status change and, on success, the new or renewed Subscription) |
+| ProcessPaymentNotification | `Payment.ProcessNotification` | Payment | result (system actor: the Paymob webhook is anonymous; the diff shows the Payment status and the new or renewed Subscription; an invalid signature leaves a Failure row with no resource id) |
+| CancelSubscription | `Subscription.Cancel` | Subscription | command |
+| LapseSubscription | `Subscription.Lapse` | Subscription | command (system actor: the lapse sweep; the diff shows the status and `expiredAt`) |
 
 Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`, `ExamBlueprint`, `Subscription`, `Payment`.
 

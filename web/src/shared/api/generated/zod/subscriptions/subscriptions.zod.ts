@@ -29,7 +29,9 @@ export const GetMyEntitlementResponse = zod.object({
   "currentPeriodStart": zod.iso.datetime({"offset":true}),
   "currentPeriodEnd": zod.iso.datetime({"offset":true}),
   "entitledUntil": zod.iso.datetime({"offset":true}),
-  "cancelledAt": zod.iso.datetime({"offset":true}).nullable()
+  "cancelledAt": zod.iso.datetime({"offset":true}).nullable(),
+  "inGracePeriod": zod.boolean(),
+  "canRenew": zod.boolean()
 }))
 })
 
@@ -118,5 +120,37 @@ export const CompleteFakePaymentResponse = zod.object({
   "status": zod.enum(['Pending', 'Succeeded', 'Failed']),
   "createdAt": zod.iso.datetime({"offset":true}),
   "completedAt": zod.iso.datetime({"offset":true}).nullable()
+})
+
+export const CancelSubscriptionParams = zod.object({
+  "subscriptionId": zod.uuid()
+})
+
+export const cancelSubscriptionResponseDailyQuizQuestionLimitRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const cancelSubscriptionResponseDailyAvatarMessageLimitRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const cancelSubscriptionResponseOpenLessonsPerUnitRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const cancelSubscriptionResponseMonthlyAskTeacherQuestionLimitRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const CancelSubscriptionResponse = zod.object({
+  "tier": zod.enum(['Free', 'Base']),
+  "hasAskTeacher": zod.boolean(),
+  "canTakeExams": zod.boolean(),
+  "dailyQuizQuestionLimit": zod.union([zod.int(),zod.stringFormat('int32', cancelSubscriptionResponseDailyQuizQuestionLimitRegExpTwo)]).nullable(),
+  "dailyAvatarMessageLimit": zod.union([zod.int(),zod.stringFormat('int32', cancelSubscriptionResponseDailyAvatarMessageLimitRegExpTwo)]),
+  "openLessonsPerUnit": zod.union([zod.int(),zod.stringFormat('int32', cancelSubscriptionResponseOpenLessonsPerUnitRegExpTwo)]).nullable(),
+  "monthlyAskTeacherQuestionLimit": zod.union([zod.int(),zod.stringFormat('int32', cancelSubscriptionResponseMonthlyAskTeacherQuestionLimitRegExpTwo)]),
+  "subscriptions": zod.array(zod.object({
+  "id": zod.uuid(),
+  "plan": zod.enum(['Base', 'AskTeacher']),
+  "period": zod.enum(['Monthly', 'Termly', 'Yearly']),
+  "status": zod.enum(['Active', 'PastDue', 'Cancelled', 'Expired']),
+  "currentPeriodStart": zod.iso.datetime({"offset":true}),
+  "currentPeriodEnd": zod.iso.datetime({"offset":true}),
+  "entitledUntil": zod.iso.datetime({"offset":true}),
+  "cancelledAt": zod.iso.datetime({"offset":true}).nullable(),
+  "inGracePeriod": zod.boolean(),
+  "canRenew": zod.boolean()
+}))
 })
 

@@ -8,6 +8,7 @@ using Elmanhg.Domain.Subscriptions;
 using MediatR;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
+using DomainErrorCodes = Elmanhg.Domain.SharedKernel.Exceptions.ErrorCodes;
 
 namespace Elmanhg.Application.Subscriptions.CompleteFakePayment;
 
@@ -30,28 +31,27 @@ public sealed class CompleteFakePaymentHandler(IPaymentRepository paymentReposit
 
         var userId = currentUserService.UserId.Value;
         var payment = await paymentRepository.FirstOrDefaultAsync(x => x.Id == request.PaymentId && x.StudentId == userId, cancellationToken).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.PaymentNotFound);
-        var options = subscriptionsOptions.Value;
-        var months = options.PriceFor(payment.Plan, payment.Period)?.Months ?? throw new BadRequestCoreException(ErrorCodes.CheckoutPeriodUnavailable);
+        if (payment.Status != PaymentStatus.Pending)
+        {
+            throw new BusinessRuleViolationCoreException(DomainErrorCodes.PaymentNotPending);
+        }
 
         var transactionId = FakeTransactionPrefix + payment.Id.ToString("N");
         var rawNotification = JsonSerializer.Serialize(new { source = FakeNotificationSource, success = request.Succeeded });
         var now = timeProvider.GetUtcNow();
-        if (request.Succeeded)
+        if (!request.Succeeded)
         {
-            var subscriptions = await subscriptionRepository.FindAsync(SubscriptionEntitlementSpecification.EntitledFor(userId, now, options.GracePeriod), cancellationToken, asNoTracking: true).ConfigureAwait(false);
-            var conflict = StudentEntitlement.Resolve(subscriptions, now, options.GracePeriod).PurchaseConflict(payment.Plan);
-            if (conflict is not null)
-            {
-                payment.MarkFailed(transactionId, rawNotification, now);
-                await paymentRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                throw new BusinessRuleViolationCoreException(conflict);
-            }
+            PaymentSettlement.Fail(payment, transactionId, rawNotification, now);
+            await paymentRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            return PaymentResultGenerator.Generate(payment);
         }
 
-        var subscription = PaymentSettlement.Settle(payment, request.Succeeded, transactionId, rawNotification, months, now);
-        if (subscription is not null)
+        var options = subscriptionsOptions.Value;
+        var subscriptions = await subscriptionRepository.FindAsync(SubscriptionEntitlementSpecification.EntitledFor(userId, now, options.GracePeriod), cancellationToken).ConfigureAwait(false);
+        var started = PaymentSettlement.Succeed(payment, StudentEntitlement.Resolve(subscriptions, now, options.GracePeriod), transactionId, rawNotification, options.GracePeriod, now);
+        if (started is not null)
         {
-            await subscriptionRepository.AddAsync(subscription, cancellationToken).ConfigureAwait(false);
+            await subscriptionRepository.AddAsync(started, cancellationToken).ConfigureAwait(false);
         }
 
         await paymentRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

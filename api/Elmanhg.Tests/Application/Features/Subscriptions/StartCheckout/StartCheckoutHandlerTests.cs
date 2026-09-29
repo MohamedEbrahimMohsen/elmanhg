@@ -62,7 +62,7 @@ public sealed class StartCheckoutHandlerTests
     {
         var result = await Handle(SubscriptionPlan.Base, BillingPeriod.Monthly);
 
-        (_added!.Status, _added.Plan, _added.Period, _added.Amount, _added.StudentId).Should().Be((PaymentStatus.Pending, SubscriptionPlan.Base, BillingPeriod.Monthly, new Money(19900, "EGP"), _studentId));
+        (_added!.Status, _added.Plan, _added.Period, _added.Amount, _added.StudentId, _added.PeriodMonths).Should().Be((PaymentStatus.Pending, SubscriptionPlan.Base, BillingPeriod.Monthly, new Money(19900, "EGP"), _studentId, 1));
         await _paymentRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
         result.Amount.Should().Be(new Money(19900, "EGP"));
         result.PaymentId.Should().Be(_added.Id);
@@ -141,6 +141,28 @@ public sealed class StartCheckoutHandlerTests
         (await act.Should().ThrowAsync<ServiceUnavailableCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.PaymentGatewayUnavailable);
         await _paymentRepository.DidNotReceive().AddAsync(Arg.Any<Payment>(), Arg.Any<CancellationToken>());
         await _paymentRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_BaseInsideRenewalWindow_AddsPendingPayment()
+    {
+        _subscriptions.Add(new SubscriptionBuilder().ForStudent(_studentId).WithPlan(SubscriptionPlan.Base).StartingAt(Now.AddMonths(-1).AddDays(3)).Build());
+
+        await Handle(SubscriptionPlan.Base, BillingPeriod.Monthly);
+
+        (_added!.Status, _added.Plan).Should().Be((PaymentStatus.Pending, SubscriptionPlan.Base));
+        await _paymentRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_GatewayReturnsProviderOrder_StoresProviderOrderId()
+    {
+        _paymentGateway.StartCheckoutAsync(Arg.Any<PaymentCheckoutRequest>(), Arg.Any<CancellationToken>()).Returns(new PaymentCheckout(GatewayUrl, "217503754"));
+
+        await Handle(SubscriptionPlan.Base, BillingPeriod.Monthly);
+
+        _added!.ProviderOrderId.Should().Be("217503754");
+        await _paymentRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     private Task<CheckoutResult> Handle(SubscriptionPlan plan, BillingPeriod period) => _handler.Handle(new StartCheckoutCommand(plan, period), TestContext.Current.CancellationToken);

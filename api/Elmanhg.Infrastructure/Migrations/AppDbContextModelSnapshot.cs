@@ -1240,13 +1240,25 @@ namespace Elmanhg.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<int>("PeriodMonths")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Plan")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<string>("ProviderOrderId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<string>("RawWebhook")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasAnnotation("Core:AuditExcluded", true);
+
+                    b.Property<string>("ReviewReason")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1265,6 +1277,12 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("UpdationDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SubscriptionId");
@@ -1274,6 +1292,9 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.HasIndex(new[] { "PaymobTransactionId" }, "IX_Payments_PaymobTransactionId")
                         .IsUnique()
                         .HasFilter("\"PaymobTransactionId\" IS NOT NULL");
+
+                    b.HasIndex(new[] { "ProviderOrderId" }, "IX_Payments_ProviderOrderId")
+                        .HasFilter("\"ProviderOrderId\" IS NOT NULL");
 
                     b.ToTable("Payments");
                 });
@@ -1336,9 +1357,17 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("UpdationDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("Id");
 
                     b.HasIndex("StudentId", "Plan", "CurrentPeriodEnd");
+
+                    b.HasIndex(new[] { "Status", "CurrentPeriodEnd" }, "IX_Subscriptions_Status_CurrentPeriodEnd");
 
                     b.ToTable("Subscriptions");
                 });
