@@ -8,7 +8,7 @@ Students pay for Base and Ask a Teacher through Paymob's **unified checkout** (c
 
 | Value | Adapter | Use |
 |---|---|---|
-| `Fake` (default) | `FakePaymentGateway` | Development, tests, CI and the build-time OpenAPI run. No keys needed. |
+| `Fake` (default) | `FakePaymentGateway` | Development, tests, CI and the build-time OpenAPI run; a non-Production host (staging) only with `AllowFakePayments=true`. No keys needed. |
 | `Paymob` | `PaymobPaymentGateway` | Real payments through the Paymob Intention API, and admin refunds through the Paymob refund API (section 9). |
 
 `Fake` is the default in code, in `appsettings.example.json` and in the test host.
@@ -21,6 +21,7 @@ All keys live under `Payments` (environment variables use `__`, for example `Pay
 |---|---|---|---|
 | `Provider` | `Fake` | no | `Fake` or `Paymob` |
 | `FakeCheckoutPath` | `/student/fake-checkout` | no | Web route of the simulated checkout page; the payment id is appended |
+| `AllowFakePayments` | `false` | no | Lets the fake run outside Development (staging without Paymob keys). Ignored in Production. |
 | `AttemptTimeoutSeconds` | `10` | no | 1–15, per HTTP attempt |
 | `TotalTimeoutSeconds` | `30` | no | 1–120 |
 | `Paymob:BaseUrl` | `https://accept.paymob.com` | no | API host (Egypt) |
@@ -78,7 +79,7 @@ The adapter was built and tested against a stubbed HTTP handler only; no Paymob 
 
 With `Provider=Fake`, checkout returns the in-app path `{FakeCheckoutPath}/{paymentId}`. That page shows the plan and amount and offers **success**, **failure** and **cancel**. Success and failure call `POST /api/subscriptions/payments/{paymentId}/fake-completion { succeeded }`, which runs the same `PaymentSettlement.Succeed` / `Fail` the webhook calls, so the entitlement changes server-side exactly as it does with Paymob. There is no extra re-check: like the webhook, a success for a plan the student already holds extends it. Only a Pending payment can be completed (400 `PAYMENT_NOT_PENDING`).
 
-**Production lock:** in the `Production` environment the fake refuses checkout (503 `PAYMENT_GATEWAY_UNAVAILABLE`) and fake completion (404 `FAKE_CHECKOUT_UNAVAILABLE`), so a misconfigured server can never grant free plans. With `Provider=Paymob`, fake completion is always 404.
+**Environment lock:** the fake works in Development, and in any other non-Production environment only when `Payments:AllowFakePayments=true` (the test host sets it). Otherwise it refuses checkout (503 `PAYMENT_GATEWAY_UNAVAILABLE`) and fake completion (404 `FAKE_CHECKOUT_UNAVAILABLE`), and in `Production` it always refuses, so a misconfigured server can never grant free plans. With `Provider=Paymob`, fake completion is always 404.
 
 ## 7. Going live
 
@@ -87,6 +88,7 @@ With `Provider=Fake`, checkout returns the in-app path `{FakeCheckoutPath}/{paym
 3. Copy the **HMAC** secret.
 4. Set `Payments__Provider=Paymob`, `Payments__Paymob__SecretKey`, `Payments__Paymob__PublicKey`, `Payments__Paymob__HmacSecret`, `Payments__Paymob__IntegrationIds__0`, `Payments__Paymob__IntegrationIds__1`, `Payments__Paymob__RedirectionUrl` (the web `…/student/checkout-result` base) and `Payments__Paymob__NotificationUrl=https://<api>/api/payments/paymob/webhook`.
 5. Work through section 5 with a test-mode payment before taking real money.
+6. Deployment: set these in the host's `api.env` ([docs/deployment.md](deployment.md)).
 
 ## 8. Transaction webhook
 
@@ -137,6 +139,6 @@ Nothing is saved locally unless Paymob confirms the refund. Bodies and keys are 
 
 **No retries.** The refund call is not idempotent at Paymob (no idempotency key is documented), so the typed client keeps `Retry.DisableForUnsafeHttpMethods()`: a POST is sent once. A timeout after Paymob processed the refund leaves the payment Succeeded locally; the signed reversal callback then marks it Refunded.
 
-**The fake.** With `Provider=Fake`, `RefundAsync` returns `fake-refund-{paymentId:N}` at once. In `Production` it refuses with 503 `PAYMENT_GATEWAY_UNAVAILABLE`, like fake checkout.
+**The fake.** With `Provider=Fake`, `RefundAsync` returns `fake-refund-{paymentId:N}` at once. Where the fake is locked (section 6) it refuses with 503 `PAYMENT_GATEWAY_UNAVAILABLE`, like fake checkout.
 
 **Void.** There is no separate void call; see section 5.

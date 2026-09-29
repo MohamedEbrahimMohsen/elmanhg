@@ -26,6 +26,7 @@ public static class PaymentsTestSettings
         {
             ["Payments:Provider"] = options.Provider.ToString(),
             ["Payments:FakeCheckoutPath"] = options.FakeCheckoutPath,
+            ["Payments:AllowFakePayments"] = options.AllowFakePayments.ToString(CultureInfo.InvariantCulture),
             ["Payments:AttemptTimeoutSeconds"] = options.AttemptTimeoutSeconds.ToString(CultureInfo.InvariantCulture),
             ["Payments:TotalTimeoutSeconds"] = options.TotalTimeoutSeconds.ToString(CultureInfo.InvariantCulture),
             ["Payments:Paymob:BaseUrl"] = options.Paymob.BaseUrl,

@@ -18,6 +18,7 @@ using Elmanhg.Infrastructure.AiService;
 using Elmanhg.Infrastructure.Analytics;
 using Elmanhg.Infrastructure.ContentRetrieval;
 using Elmanhg.Infrastructure.ExamBlueprints;
+using Elmanhg.Infrastructure.Hosting;
 using Elmanhg.Infrastructure.Identity;
 using Elmanhg.Infrastructure.Lessons;
 using Elmanhg.Infrastructure.Mastery;
@@ -46,6 +47,8 @@ public static class DependencyInjection
         services.AddPayments();
         services.AddAiService();
         services.AddOptions<FileStorageOptions>().BindConfiguration(FileStorageOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<ReverseProxyOptions>().BindConfiguration(ReverseProxyOptions.SectionName).ValidateOnStart();
+        services.AddSingleton<IValidateOptions<ReverseProxyOptions>, ReverseProxyOptionsValidator>();
         services.AddScoped<LocalDiskFileStorage>();
         services.AddScoped<IFileStorage>(serviceProvider => serviceProvider.GetRequiredService<IOptions<FileStorageOptions>>().Value.Provider switch
         {

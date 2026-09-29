@@ -1,0 +1,14 @@
+# Build context of api/Dockerfile. Allowlist: never let a developer's appsettings.json or .env into an image.
+*
+!global.json
+!api/
+api/**/bin/
+api/**/obj/
+api/**/TestResults/
+api/.vs/
+api/Elmanhg.Tests/
+api/Elmanhg.Api/appsettings.json
+api/Elmanhg.Api/appsettings.Development.json
+api/Elmanhg.Api/appsettings.Production.json
+api/Elmanhg.Api/App_Data/
+api/**/Logs/

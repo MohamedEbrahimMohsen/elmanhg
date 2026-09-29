@@ -105,4 +105,4 @@ Each adapter is a typed `HttpClient` with the standard resilience handler (`Micr
 
 ## 9. Deployment
 
-On the host, set the `OtpDelivery__*` variables for every channel you switch on (section 2), with the secrets from the host's secret store. The production runbook (#112) must link this page.
+On the host, set the `OtpDelivery__*` variables for every channel you switch on (section 2), with the secrets from the host's secret store. On a deployed host these go in `api.env`; the runbook is [docs/deployment.md](deployment.md). A staging host needs at least one real channel (Email through Resend is enough), because the fake logs codes in Development only.
