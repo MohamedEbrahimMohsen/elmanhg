@@ -216,3 +216,25 @@ How the next agent resumes, in a cloud session or on the laptop:
 ## Open issues created by the run
 
 `deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199, #201, #204, #205, #207, #209, #211, #213, #215, #217 · `dev-decision`: none open (#135 and #155 confirmed and closed).
+## Resume notes (safe stop for /compact, 2026-09-30)
+
+**State:** there are no running agents, no open PRs except as listed below, and the heartbeat cron is cancelled.
+
+- **#117** was merged (PR #218) before its CodeRabbit comments were triaged. The triage is in `.process/117-*/06-coderabbit-triage.md`. The valid items (an empty model answer after sanitising, and the essay-grading wording) are folded into **#118's plan**.
+- **#118 [E14.S2] LLM essay grader:** the plan is APPROVED and PARKED on branch `feature/118-llm-essay-grader` (pushed, no PR), with `.process/118-llm-essay-grader/01-plan.md` in place. **Resume here:** check out the branch, `git merge origin/main`, launch `feature-implementer` on the plan, then review, PR, CodeRabbit (read the comments BEFORE merging) and merge.
+- **#114** is being finalised: if it is not merged yet when you read this, see `../elmanhg-wt/114` (PR #219) and finish the merge.
+- **Parallel lanes:** up to 3 at a time (see Conventions). After #118, the remaining stories are:
+  - #119 (essay input, after #118)
+  - #104–#107 dashboards
+  - #109, #110 training data
+  - #115 security (see the security items collected in #205, #197, #191, #211)
+  - #121–#123 math
+  - #125, #126 diagrams
+  - #128 review queue (after #118 and #119)
+  - then `docs/implementation-report.md`.
+- **Dev decisions pending (for the final report):**
+  - #213 (AGPL)
+  - #215 (chat retention)
+  - #222 (SLA pause, refund, escalation)
+  - #209 (out-of-app reply notification)
+  - go-live keys and hosting (#185, #189, #201, #204, #205, #217)
