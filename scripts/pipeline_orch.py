@@ -9,6 +9,8 @@ python orch.py merge <story> <pr>     squash merge, sync main, close story if st
 python orch.py issue <label> <title> <body-file> [story]   open an issue (creates label if needed); prints URL
 python orch.py metric <story> <row>   append a metrics row (pipe-separated cells)
 python orch.py sync                   switch to main and fast-forward (after a merge done outside this script)
+python orch.py wtstart <story>        parallel lane: linked worktree ../elmanhg-wt/<n> on a new branch from origin/main
+                                      (then run every other command from inside that worktree)
 
 Without the gh CLI (e.g. a Claude Code cloud session) the steps that talk to GitHub degrade: `start` reads the
 issue from the public REST API, `pr` pushes and writes the PR body to a temp file, `merge` only pushes the
@@ -17,7 +19,16 @@ remaining artifacts; the orchestrator then opens, polls, merges and closes throu
 import json, os, re, shutil, subprocess, sys, tempfile, time, datetime, pathlib, urllib.request
 
 REPO = "MohamedEbrahimMohsen/elmanhg"
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+def _toplevel():
+    r = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=os.getcwd(), capture_output=True, text=True)
+    return pathlib.Path(r.stdout.strip()) if r.returncode == 0 and r.stdout.strip() else None
+
+
+# Worktree-aware: the repo root is the git top level of the current directory (a linked worktree for parallel
+# stories), falling back to this script's repo. Run this script from the worktree you want to act on.
+ROOT = _toplevel() or pathlib.Path(__file__).resolve().parent.parent
+_gd = subprocess.run(["git", "rev-parse", "--git-dir", "--git-common-dir"], cwd=ROOT, capture_output=True, text=True).stdout.split()
+IS_LINKED = len(_gd) == 2 and pathlib.Path(ROOT, _gd[0]).resolve() != pathlib.Path(ROOT, _gd[1]).resolve()
 HAS_GH = shutil.which("gh") is not None
 ENV = dict(os.environ, GCM_INTERACTIVE="never", GIT_TERMINAL_PROMPT="0")
 AUTOPILOT = ("Dev instruction (2026-09-27): \"this session will be ran once to implement EVERYTHING in this github project "
@@ -76,6 +87,31 @@ def start(n):
     if not (p / "04-metrics.md").exists():
         (p / "04-metrics.md").write_text(f"# Metrics — {d['title']}\n\nBranch: `{branch}` (base `main`)\n\n| # | Stage | Agent | Model | Started | Finished | Duration | Tokens | Tool uses | Outcome |\n|---|-------|-------|-------|---------|----------|----------|--------|-----------|---------|\n", encoding="utf-8")
     print(f"DIR={p.relative_to(ROOT).as_posix()}\nBRANCH={branch}\nKEY={key}\nSTATE={d['state']}")
+
+
+def wtstart(n):
+    """Parallel lane: create ../elmanhg-wt/<n> as a linked worktree on a new story branch cut from origin/main."""
+    d, key, slug = story(n)
+    branch = f"feature/{n}-{slug}"
+    path = ROOT.parent / "elmanhg-wt" / str(n)
+    run("git", "fetch", "-q", "origin", "main")
+    if not path.exists():
+        if run("git", "rev-parse", "--verify", branch, check=False).returncode == 0:
+            run("git", "worktree", "add", str(path), branch)
+        else:
+            run("git", "worktree", "add", "-b", branch, str(path), "origin/main")
+    p = path / ".process" / f"{n}-{slug}"; p.mkdir(parents=True, exist_ok=True)
+    (p / "00-story.md").write_text(f"# {d['title']}\n\nIssue: #{n}\n\n{d['body']}\n", encoding="utf-8")
+    if not (p / "00-acceptance.md").exists():
+        (p / "00-acceptance.md").write_text(
+            f"# Acceptance — {d['title']}\n\n- Date: {now()}\n- Story: #{n} ({key})\n- Mode: autopilot (parallel lane, worktree)\n"
+            f"- {AUTOPILOT}\n- Dev (2026-09-29): run up to 4 independent stories in parallel.\n- Auto-accepted under autopilot.\n", encoding="utf-8")
+    if not (p / "04-metrics.md").exists():
+        (p / "04-metrics.md").write_text(
+            f"# Metrics — {d['title']}\n\nBranch: `{branch}` (base `main`, worktree `{path.as_posix()}`)\n\n"
+            "| # | Stage | Agent | Model | Started | Finished | Duration | Tokens | Tool uses | Outcome |\n"
+            "|---|-------|-------|-------|---------|----------|----------|--------|-----------|---------|\n", encoding="utf-8")
+    print(f"WT={path.as_posix()}\nDIR={p.relative_to(path).as_posix()}\nBRANCH={branch}\nKEY={key}\nSTATE={d['state']}")
 
 
 def verify(n):
@@ -208,11 +244,16 @@ def merge(n, prn):
         time.sleep(20)
     if r.returncode != 0:
         print("MERGE=FAILED\n" + r.stderr[-800:]); return
-    run("git", "switch", "main"); run("git", "pull", "--ff-only")
+    if IS_LINKED:
+        run("git", "fetch", "-q", "origin", "main")
+        head = run("git", "rev-parse", "--short", "origin/main").stdout.strip()
+    else:
+        run("git", "switch", "main"); run("git", "pull", "--ff-only")
+        head = run("git", "rev-parse", "--short", "HEAD").stdout.strip()
     st = json.loads(run("gh", "issue", "view", str(n), "--repo", REPO, "--json", "state").stdout)["state"]
     if st != "CLOSED":
         run("gh", "issue", "close", str(n), "--repo", REPO, "--comment", f"Implemented in #{prn}.")
-    print(f"MERGE=OK main={run('git','rev-parse','--short','HEAD').stdout.strip()}")
+    print(f"MERGE=OK main={head}")
 
 
 def issue(label, title, body_file, n=None):
@@ -245,4 +286,4 @@ def metric(n, row):
 
 if __name__ == "__main__":
     cmd, *a = sys.argv[1:]
-    {"start": start, "verify": verify, "pr": pr, "poll": poll, "push": push, "merge": merge, "issue": issue, "metric": metric, "sync": sync}[cmd](*a)
+    {"start": start, "wtstart": wtstart, "verify": verify, "pr": pr, "poll": poll, "push": push, "merge": merge, "issue": issue, "metric": metric, "sync": sync}[cmd](*a)

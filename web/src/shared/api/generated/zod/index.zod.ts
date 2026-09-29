@@ -2,6 +2,7 @@ export * from './analytics/analytics.zod';
 export * from './audit-logs/audit-logs.zod';
 export * from './auth/auth.zod';
 export * from './browse/browse.zod';
+export * from './content-retrieval/content-retrieval.zod';
 export * from './exam-blueprints/exam-blueprints.zod';
 export * from './exams/exams.zod';
 export * from './lessons/lessons.zod';

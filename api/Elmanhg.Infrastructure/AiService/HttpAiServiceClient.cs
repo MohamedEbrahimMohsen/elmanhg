@@ -15,6 +15,7 @@ namespace Elmanhg.Infrastructure.AiService;
 public sealed class HttpAiServiceClient(HttpClient httpClient, IOptions<AiServiceOptions> aiServiceOptions, ILogger<HttpAiServiceClient> logger) : IAiServiceClient
 {
     private const string ChatPath = "v1/chat";
+    private const string EmbeddingsPath = "v1/embeddings";
     private const string BearerScheme = "Bearer";
 
     private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web)
@@ -25,7 +26,31 @@ public sealed class HttpAiServiceClient(HttpClient httpClient, IOptions<AiServic
 
     public async Task<AiChatReply> ChatAsync(AiChatRequest request, CancellationToken cancellationToken)
     {
-        using var message = new HttpRequestMessage(HttpMethod.Post, ChatPath)
+        var reply = await PostAsync<AiChatRequest, AiChatReply>(ChatPath, request, cancellationToken).ConfigureAwait(false);
+        if (string.IsNullOrWhiteSpace(reply?.Reply))
+        {
+            logger.LogError("AI service returned an empty chat reply.");
+            throw new ServiceUnavailableCoreException(ErrorCodes.AiServiceUnavailable);
+        }
+
+        return reply;
+    }
+
+    public async Task<AiEmbeddingResult> EmbedAsync(AiEmbeddingRequest request, CancellationToken cancellationToken)
+    {
+        var result = await PostAsync<AiEmbeddingRequest, AiEmbeddingResult>(EmbeddingsPath, request, cancellationToken).ConfigureAwait(false);
+        if (result is null || string.IsNullOrWhiteSpace(result.Model) || result.Dimensions <= 0 || result.Embeddings is null || result.Embeddings.Count != request.Texts.Count || result.Embeddings.Any(x => x is null || x.Length != result.Dimensions))
+        {
+            logger.LogError("AI service returned an invalid embeddings reply.");
+            throw new ServiceUnavailableCoreException(ErrorCodes.AiServiceUnavailable);
+        }
+
+        return result;
+    }
+
+    private async Task<TResponse?> PostAsync<TRequest, TResponse>(string path, TRequest request, CancellationToken cancellationToken)
+    {
+        using var message = new HttpRequestMessage(HttpMethod.Post, path)
         {
             Content = JsonContent.Create(request, options: SerializerOptions),
         };
@@ -38,7 +63,7 @@ public sealed class HttpAiServiceClient(HttpClient httpClient, IOptions<AiServic
         }
         catch (Exception exception) when (exception is HttpRequestException or ExecutionRejectedException || (exception is OperationCanceledException && !cancellationToken.IsCancellationRequested))
         {
-            logger.LogError(exception, "AI service chat call failed before a response arrived.");
+            logger.LogError(exception, "AI service call to {Path} failed before a response arrived.", path);
             throw new ServiceUnavailableCoreException(ErrorCodes.AiServiceUnavailable, innerException: exception);
         }
 
@@ -46,33 +71,19 @@ public sealed class HttpAiServiceClient(HttpClient httpClient, IOptions<AiServic
         {
             if (!response.IsSuccessStatusCode)
             {
-                logger.LogError("AI service rejected the chat call with HTTP {StatusCode}.", (int)response.StatusCode);
+                logger.LogError("AI service rejected the call to {Path} with HTTP {StatusCode}.", path, (int)response.StatusCode);
                 throw new ServiceUnavailableCoreException(ErrorCodes.AiServiceUnavailable);
             }
 
-            return await ReadReplyAsync(response, cancellationToken).ConfigureAwait(false);
+            try
+            {
+                return await response.Content.ReadFromJsonAsync<TResponse>(SerializerOptions, cancellationToken).ConfigureAwait(false);
+            }
+            catch (JsonException exception)
+            {
+                logger.LogError(exception, "AI service returned an unreadable reply from {Path}.", path);
+                throw new ServiceUnavailableCoreException(ErrorCodes.AiServiceUnavailable, innerException: exception);
+            }
         }
-    }
-
-    private async Task<AiChatReply> ReadReplyAsync(HttpResponseMessage response, CancellationToken cancellationToken)
-    {
-        AiChatReply? reply;
-        try
-        {
-            reply = await response.Content.ReadFromJsonAsync<AiChatReply>(SerializerOptions, cancellationToken).ConfigureAwait(false);
-        }
-        catch (JsonException exception)
-        {
-            logger.LogError(exception, "AI service returned an unreadable chat reply.");
-            throw new ServiceUnavailableCoreException(ErrorCodes.AiServiceUnavailable, innerException: exception);
-        }
-
-        if (string.IsNullOrWhiteSpace(reply?.Reply))
-        {
-            logger.LogError("AI service returned an empty chat reply.");
-            throw new ServiceUnavailableCoreException(ErrorCodes.AiServiceUnavailable);
-        }
-
-        return reply;
     }
 }

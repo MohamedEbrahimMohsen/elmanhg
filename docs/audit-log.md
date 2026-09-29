@@ -86,6 +86,7 @@ An array with one element per changed audited entity. Property keys are camelCas
 | LapseSubscription | `Subscription.Lapse` | Subscription | command (system actor: the lapse sweep; the diff shows the status and `expiredAt`) |
 | RefundPayment | `Payment.Refund` | Payment | command (the diff shows the status, the refund fields, the review resolution, and the Subscription end/status) |
 | ResolvePaymentReview | `Payment.ResolveReview` | Payment | command |
+| RebuildContentIndex | `ContentIndex.Rebuild` | ContentIndex | none (bulk delete of derived index state; no diff) |
 
 Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`, `ExamBlueprint`, `Subscription`, `Payment`.
 
@@ -100,6 +101,7 @@ Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUni
 - **Review sessions and openings** (`StartReviewSession`, `RecordQuestionOpening`): a reading aid that gates bulk approval, not a content or validation change. `ReviewSession` and `ReviewSessionOpening` are not `IAuditedEntity`; the approvals they enable are audited.
 - **Quiz and exam activity** (`StartQuizSession`, `SubmitAnswer`, `FinishSession`, `StartUnitExam`, `SaveExamAnswer`, `SubmitExam`, `AutoSubmitExam`): student practice, not a content or validation change. Attempts are their own append-only log (`docs/sessions.md`).
 - **Question mastery** (`QuestionMastery`): derived from the append-only attempt log (`docs/mastery.md`); not an `IAuditedEntity`.
+- **Lesson content index** (`ReindexLessonContent`, `LessonContentChunk`, `LessonContentIndex`): derived from Published lessons and servable questions by the index sweep (`docs/content-retrieval.md`); not an `IAuditedEntity`. The admin rebuild that clears it is audited.
 - **PII entities**: `User` is never marked `IAuditedEntity`, so password hashes and phone numbers never reach a diff.
 
 ## Add a new audited command
