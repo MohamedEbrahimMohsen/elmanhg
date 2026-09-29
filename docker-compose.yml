@@ -27,7 +27,7 @@ services:
       ELMANHG_AI_ANTHROPIC_API_KEY: ${ELMANHG_AI_ANTHROPIC_API_KEY:-}
       ELMANHG_AI_CHAT_MODEL: ${ELMANHG_AI_CHAT_MODEL:-claude-sonnet-5}
     ports:
-      - "${AI_PORT:-8000}:8000"
+      - "127.0.0.1:${AI_PORT:-8000}:8000"
     healthcheck:
       test: ["CMD", "python", "-c", "import sys, urllib.request; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3).status == 200 else 1)"]
       interval: 10s

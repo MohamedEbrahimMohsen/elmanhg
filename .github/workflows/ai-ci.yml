@@ -17,6 +17,8 @@ jobs:
       TZ: UTC
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: astral-sh/setup-uv@v10.2.0
         with:
           version: "0.12.17"
@@ -39,5 +41,5 @@ jobs:
       - name: Container becomes ready
         run: |
           docker run -d --name elmanhg-ai -p 8000:8000 -e ELMANHG_AI_SERVICE_TOKEN=ci-only-service-token-not-a-secret-0123 elmanhg-ai:ci
-          for i in $(seq 1 30); do curl -fsS http://localhost:8000/health/ready && exit 0; sleep 1; done
+          for i in $(seq 1 30); do curl -fsS --max-time 2 http://localhost:8000/health/ready && exit 0; sleep 1; done
           docker logs elmanhg-ai; exit 1

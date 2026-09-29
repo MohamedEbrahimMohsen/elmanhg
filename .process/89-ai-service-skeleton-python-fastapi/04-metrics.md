@@ -10,3 +10,5 @@ Branch: `feature/89-ai-service-skeleton-python-fastapi` (base `main`)
 | 4 | Rework r2 | feature-implementer | opus-5.5 medium | 14:57 | 15:02 | 4m 25s | 65,069 | 60 | 3 findings fixed, ai 59/59 |
 | 5 | Review r2 | feature-reviewer | opus-5.5 medium | 15:02 | 15:07 | 5m 13s | 59,592 | 39 | CHANGES_REQUESTED (regex perf) |
 | 6 | Perf fix r3 | feature-implementer | opus-5.5 medium | 15:07 | 15:11 | 3m 37s | 55,064 | 31 | regex linear, ai 60/60 |
+| 7 | CodeRabbit triage | feature-reviewer | opus-5.5 medium | 15:27 | 15:31 | 4m 21s | 76,728 | 18 | 6 fix, 1 reject |
+| 8 | CodeRabbit fix | feature-implementer | opus-5.5 medium | 15:31 | 15:35 | 3m 49s | 50,199 | 43 | 6 fixes, ai 63/63 |

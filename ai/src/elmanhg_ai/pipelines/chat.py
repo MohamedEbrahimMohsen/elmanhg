@@ -1,8 +1,9 @@
+import json
 import re
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Final, Literal
+from typing import Any, Final, Literal
 
 import structlog
 
@@ -66,6 +67,18 @@ def strip_delimiters(text: str) -> str:
     return stripped
 
 
+def _strip_fields(value: Any) -> Any:
+    match value:
+        case str():
+            return strip_delimiters(value)
+        case list():
+            return [_strip_fields(item) for item in value]
+        case dict():
+            return {key: _strip_fields(item) for key, item in value.items()}
+        case _:
+            return value
+
+
 def _limit_errors(chat: ChatIn, context_json: str, settings: Settings) -> list[FieldError]:
     errors: list[FieldError] = []
     if len(chat.history) > settings.chat_max_history_messages:
@@ -74,6 +87,12 @@ def _limit_errors(chat: ChatIn, context_json: str, settings: Settings) -> list[F
     if len(chat.message) > settings.chat_max_message_chars:
         limit = settings.chat_max_message_chars
         errors.append(FieldError("message", "TOO_LONG", f"at most {limit} characters"))
+    for index, turn in enumerate(chat.history):
+        if len(turn.content) > settings.chat_max_message_chars:
+            limit = settings.chat_max_message_chars
+            errors.append(
+                FieldError(f"history[{index}].content", "TOO_LONG", f"at most {limit} characters")
+            )
     if len(context_json) > settings.chat_max_context_chars:
         limit = settings.chat_max_context_chars
         errors.append(FieldError("context", "TOO_LONG", f"at most {limit} characters"))
@@ -87,14 +106,18 @@ async def run(
     errors = _limit_errors(chat, context_json, settings)
     if errors:
         raise ValidationFailedError(errors)
+    context = chat.context.model_dump(mode="json", by_alias=True, exclude_none=True)
+    safe_context = json.dumps(_strip_fields(context), ensure_ascii=False, separators=(",", ":"))
     turn = render(
-        prompts.turn.text,
-        {"context": strip_delimiters(context_json), "message": strip_delimiters(chat.message)},
+        prompts.turn.text, {"context": safe_context, "message": strip_delimiters(chat.message)}
     )
     request = ModelRequest(
         system=prompts.system.text,
         messages=(
-            *(ModelMessage(role=MODEL_ROLES[m.role], content=m.content) for m in chat.history),
+            *(
+                ModelMessage(role=MODEL_ROLES[m.role], content=strip_delimiters(m.content))
+                for m in chat.history
+            ),
             ModelMessage(role="user", content=turn),
         ),
         max_tokens=settings.chat_max_tokens,

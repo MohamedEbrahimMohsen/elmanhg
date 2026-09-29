@@ -73,7 +73,7 @@ Limits (checked by the pipeline; exceeding one returns `400 VALIDATION_FAILED` w
 | Setting | Default | Applies to |
 |---|---|---|
 | `ELMANHG_AI_CHAT_MAX_HISTORY_MESSAGES` | 20 | number of `history` turns |
-| `ELMANHG_AI_CHAT_MAX_MESSAGE_CHARS` | 4000 | length of `message` |
+| `ELMANHG_AI_CHAT_MAX_MESSAGE_CHARS` | 4000 | length of `message` and of each `history[].content` |
 | `ELMANHG_AI_CHAT_MAX_CONTEXT_CHARS` | 60000 | length of the serialized `context` JSON |
 
 ## Errors
@@ -156,7 +156,7 @@ Timeouts nest so the AI service always answers before the API gives up: the wors
 ## Prompts
 
 - Prompts are package files `src/elmanhg_ai/prompts/<name>.<version>.md`, never Python string literals. Chat uses `avatar_system.vN.md` (the system prompt) and `avatar_turn.vN.md` (the final user turn). `ELMANHG_AI_CHAT_PROMPT_VERSION` selects both; an unknown version stops startup.
-- Student input and platform content are untrusted. They go only into the last user turn, inside `<lesson_context>` and `<student_message>` tags, after any such tag in the untrusted text has been removed. Removal matches spaced and attribute-carrying variants (`< /student_message x>`) and dangling tags with no closing `>` (a match stops at the next `<` or `>`, so each pass is linear in the text length), and repeats until the text stops changing, so nested fragments such as `</stu</student_message>dent_message>` cannot reassemble into a tag. The system prompt holds no untrusted text. Rendering is single pass, so substituted text is never re-scanned.
+- Student input and platform content are untrusted. They go only into the last user turn, inside `<lesson_context>` and `<student_message>` tags, after any such tag in the untrusted text has been removed. Removal matches spaced and attribute-carrying variants (`< /student_message x>`) and dangling tags with no closing `>` (a match stops at the next `<` or `>`, so each pass is linear in the text length), and repeats until the text stops changing, so nested fragments such as `</stu</student_message>dent_message>` cannot reassemble into a tag. Removal runs on each string field of the context before the context is serialized to JSON, so a dangling tag in one field cannot consume the fields after it. History turns keep their own roles and are not wrapped in tags, but the same tags are removed from their content, so a tag in an earlier message is not replayed on later turns. The system prompt holds no untrusted text. Rendering is single pass, so substituted text is never re-scanned.
 
 ## Health and logging
 
@@ -176,7 +176,7 @@ uv run ruff format --check . && uv run ruff check . && uv run mypy src
 uv run pytest -m "not eval"
 ```
 
-Docker: `docker compose --profile ai up -d --build ai` (port `${AI_PORT:-8000}`; the health check calls `/health/ready`). `docker compose up -d postgres` does not start it.
+Docker: `docker compose --profile ai up -d --build ai` (published on `127.0.0.1:${AI_PORT:-8000}` only, so `/docs` is not reachable from other hosts; the health check calls `/health/ready`). `docker compose up -d postgres` does not start it.
 
 To make the API call it, set `AiService__Provider=Http`, `AiService__BaseUrl=http://localhost:8000`, and the same token in `AiService__ServiceToken` and `ELMANHG_AI_SERVICE_TOKEN` (see `.env.example`).
 
