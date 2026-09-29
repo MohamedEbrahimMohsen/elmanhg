@@ -10,6 +10,7 @@ using Core.Utilities;
 using DotNetEnv;
 using Elmanhg.Api.Authorization;
 using Elmanhg.Api.FileStorage;
+using Elmanhg.Api.Hosting;
 using Elmanhg.Api.RateLimiting;
 using Elmanhg.Api.Workers;
 using Elmanhg.Application;
@@ -85,6 +86,23 @@ builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
 
 var app = builder.Build();
 
+#region DEPLOY-TIME MIGRATION
+// The compose `migrate` service runs `--MigrateAndExit=true`: apply pending migrations, then exit before the seed and the HTTP pipeline.
+if (MigrationCommand.IsRequested(app.Configuration))
+{
+    try
+    {
+        await MigrationCommand.RunAsync(app.Services, CancellationToken.None);
+    }
+    finally
+    {
+        await Serilog.Log.CloseAndFlushAsync();
+    }
+
+    return;
+}
+#endregion
+
 #region SEED
 if (!isBuildTimeOpenApiGeneration)
 {
@@ -99,7 +117,10 @@ if (!app.Environment.IsProduction())
     app.MapScalarApiReference();
 }
 
-// First, so every downstream middleware and handler resolves in the caller's language.
+// First: every later middleware (logging, rate limits) must see the client IP and scheme Caddy forwarded.
+app.UseReverseProxyForwardedHeaders();
+
+// Right after forwarded headers, so every downstream middleware and handler resolves in the caller's language.
 app.UseCoreLocalization(builder.Configuration);
 
 app.UseMiddleware<CoreRequestLoggingMiddleware>();

@@ -8,11 +8,13 @@ namespace Elmanhg.Infrastructure.Payments;
 
 public sealed class FakePaymentGateway(IOptions<PaymentsOptions> paymentsOptions, IHostEnvironment hostEnvironment) : IPaymentGateway
 {
-    public bool SupportsSimulatedCompletion => !hostEnvironment.IsProduction();
+    public bool SupportsSimulatedCompletion => IsAllowed;
+
+    private bool IsAllowed => !hostEnvironment.IsProduction() && (hostEnvironment.IsDevelopment() || paymentsOptions.Value.AllowFakePayments);
 
     public Task<PaymentCheckout> StartCheckoutAsync(PaymentCheckoutRequest request, CancellationToken cancellationToken)
     {
-        if (hostEnvironment.IsProduction())
+        if (!IsAllowed)
         {
             throw new ServiceUnavailableCoreException(ErrorCodes.PaymentGatewayUnavailable);
         }
@@ -22,7 +24,7 @@ public sealed class FakePaymentGateway(IOptions<PaymentsOptions> paymentsOptions
 
     public Task<PaymentRefund> RefundAsync(PaymentRefundRequest request, CancellationToken cancellationToken)
     {
-        if (hostEnvironment.IsProduction())
+        if (!IsAllowed)
         {
             throw new ServiceUnavailableCoreException(ErrorCodes.PaymentGatewayUnavailable);
         }

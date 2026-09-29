@@ -119,7 +119,7 @@ AI service (`ELMANHG_AI_*` environment variables; `settings.py` is the only plac
 
 | Variable | Default | Notes |
 |---|---|---|
-| `ELMANHG_AI_ENV` | `development` | `development`, `testing` or `production`. Production hides `/docs` and `/openapi.json`. |
+| `ELMANHG_AI_ENV` | `development` | `development`, `testing` or `production`. Production hides `/docs` and `/openapi.json`. Staging and production hosts both use `production`. |
 | `ELMANHG_AI_LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
 | `ELMANHG_AI_LOG_FORMAT` | `json` | `json` or `console` |
 | `ELMANHG_AI_SERVICE_TOKEN` | required | at least 32 characters |
@@ -179,6 +179,8 @@ uv run pytest -m "not eval"
 Docker: `docker compose --profile ai up -d --build ai` (published on `127.0.0.1:${AI_PORT:-8000}` only, so `/docs` is not reachable from other hosts; the health check calls `/health/ready`). `docker compose up -d postgres` does not start it.
 
 To make the API call it, set `AiService__Provider=Http`, `AiService__BaseUrl=http://localhost:8000`, and the same token in `AiService__ServiceToken` and `ELMANHG_AI_SERVICE_TOKEN` (see `.env.example`).
+
+Staging and production: the `ai` compose profile in `deploy/docker-compose.prod.yml`, variables in the host's `ai.env`; see [docs/deployment.md](deployment.md).
 
 ## Go live with Claude
 

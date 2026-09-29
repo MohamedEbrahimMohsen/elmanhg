@@ -132,6 +132,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Subscriptions:PaymentLogReferenceMaxLength"] = "100",
             ["Payments:Provider"] = "Fake",
             ["Payments:FakeCheckoutPath"] = "/student/fake-checkout",
+            ["Payments:AllowFakePayments"] = "true",
             ["Payments:AttemptTimeoutSeconds"] = "10",
             ["Payments:TotalTimeoutSeconds"] = "30",
             ["Payments:Paymob:HmacSecret"] = TestPaymobHmacSecret,
