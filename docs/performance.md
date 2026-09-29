@@ -54,6 +54,7 @@ Budget = measured × 1.05, rounded up to the next 5 KB. They are regression guar
 
 - **KaTeX on demand.** `RichTextViewer` renders HTML without math synchronously. HTML with math shows its text at once, while KaTeX and its CSS load as one lazy chunk (`renderMath`), then re-renders with formulas. Once loaded, later views render at once. KaTeX is no longer on the lesson or quiz critical path; the editor (admin) still bundles it.
 - **Lazy avatar panel.** `AvatarDock` loads `AvatarPanel` (with react-hook-form and the radix dialog) the first time the student opens the assistant, and keeps it mounted afterwards.
+- **Realtime client on connect.** The SignalR client (`@microsoft/signalr`, about 11 KB brotli) loads as its own chunk when the realtime connection starts, so it stays out of the entry bundle.
 - **Lesson data on intent.** Hovering or focusing a lesson link preloads the route and prefetches `GET /api/browse/lessons/{id}` through the route loader, so the click renders from the cache.
 - **Images.** Rich-text images get `decoding="async"`, and every image after the first gets `loading="lazy"`. The editor downscales uploads to WebP with a 1600 px edge ([docs/rich-text.md](rich-text.md)).
 - **Precompression.** `npm run build` writes `.br` (quality 11) and `.gz` (level 9) next to every `.js .css .html .svg .json .txt` file of at least 1 KB, when smaller. Caddy serves them with `file_server { precompressed br gzip }` (it cannot brotli on the fly) and keeps `encode zstd gzip` for API responses. The smoke test asserts `Content-Encoding: br` on an asset.
@@ -186,7 +187,7 @@ With so few samples, the `quiz_start` and `multi_exam_start` p95s are their slow
 
 Levers for the follow-up, in expected order of effect: split the entry bundle (react-dom, router, query, i18n and every locale are in one 584 KB chunk); load fewer font weights, with `font-display: optional` for the rest; start the lesson request during the session restore on a cold load (§9); and measure over HTTPS with HTTP/2 and brotli, as production serves.
 
-**Bundle sizes after this change** (brotli, the `perf:budget` report): entry 199 KB, landing 208 KB, lesson 227 KB, quiz 245 KB. KaTeX (78 KB gzip) and the avatar panel, with react-hook-form and the radix dialog, are no longer on the lesson critical path.
+**Bundle sizes after this change** (brotli, the `perf:budget` report): entry 201 KB, landing 209 KB, lesson 230 KB, quiz 248 KB. KaTeX (78 KB gzip) and the avatar panel, with react-hook-form and the radix dialog, are no longer on the lesson critical path.
 
 ## 9. Levers not yet used
 
