@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { blueprint, servable } from '@/test/blueprintFixtures';
-import { emptyBlueprintValues, findShortfall, toBlueprintInput, toFormValues } from './blueprintValues';
+import {
+  countsFromValues,
+  emptyBlueprintValues,
+  findShortfall,
+  toBlueprintInput,
+  toFormValues,
+} from './blueprintValues';
 
 describe('blueprintValues', () => {
   it('finds the shortfall per type in type order', () => {
@@ -61,5 +67,15 @@ describe('blueprintValues', () => {
       timeLimitMinutes: null,
       passMark: 70,
     });
+  });
+
+  it('counts only the served question types', () => {
+    expect(countsFromValues(emptyBlueprintValues).map((entry) => entry.type)).toEqual([
+      'Mcq',
+      'Multi',
+      'TrueFalse',
+      'Fill',
+      'Short',
+    ]);
   });
 });

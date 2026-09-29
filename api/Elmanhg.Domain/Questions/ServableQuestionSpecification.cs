@@ -6,7 +6,10 @@ namespace Elmanhg.Domain.Questions;
 // PRD §17 rule 1: the single definition of servable; derived, never stored.
 public static class ServableQuestionSpecification
 {
-    public static readonly Expression<Func<Question, bool>> QuestionCondition = x => x.ValidationStatus == QuestionValidationStatus.Approved && x.RetiredAt == null;
+    // #119: essays have no student input yet, so they are never served.
+    public static readonly Expression<Func<Question, bool>> QuestionCondition = x => x.ValidationStatus == QuestionValidationStatus.Approved && x.RetiredAt == null && x.Type != QuestionType.Essay;
+
+    public static IReadOnlyList<QuestionType> ServedTypes { get; } = [QuestionType.Mcq, QuestionType.Multi, QuestionType.TrueFalse, QuestionType.Fill, QuestionType.Short];
 
     public static readonly Expression<Func<Lesson, bool>> LessonCondition = x => x.State == LessonState.Published;
 

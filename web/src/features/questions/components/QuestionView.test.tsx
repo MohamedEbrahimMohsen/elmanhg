@@ -149,4 +149,14 @@ describe('QuestionView', () => {
 
     expect((await axe(container)).violations).toEqual([]);
   });
+
+  it('shows an essay box with a live word count against the limit', async () => {
+    const user = userEvent.setup();
+    const { onChange } = renderView(question({ type: 'Essay', options: [], maxWords: 150 }));
+
+    await user.type(screen.getByRole('textbox', { name: 'Your essay' }), 'one two');
+
+    expect(screen.getByText('2 of 150 words')).toBeInTheDocument();
+    expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ text: 'one two' }));
+  });
 });

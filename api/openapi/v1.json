@@ -9280,7 +9280,8 @@
           "Multi",
           "TrueFalse",
           "Fill",
-          "Short"
+          "Short",
+          "Essay"
         ]
       },
       "QuestionValidationStatus": {

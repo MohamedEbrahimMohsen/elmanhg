@@ -104,4 +104,11 @@ describe('quizItem', () => {
     expect(questionImageSources(quizItem(1))).toEqual([]);
     expect(questionImageSources(quizItem(1, { stem: '<p><img alt="x"></p>', body: {} }))).toEqual([]);
   });
+
+  it('reads essay text and treats blank essays as empty', () => {
+    const essayQuestion = question('Essay');
+
+    expect(fromAnswerPayload(essayQuestion, { text: 'a' }).text).toBe('a');
+    expect(isAnswerEmpty(essayQuestion, { ...emptyAnswer(), text: '  ' })).toBe(true);
+  });
 });

@@ -120,7 +120,7 @@ Transitions: **Publish** Draft or Archived → Published (sets `published_at`). 
 | Field | Values |
 |---|---|
 | Validation status | Pending · Approved · Rejected |
-| Servable (derived, not stored) | `Approved AND lesson.state == Published AND question.not_retired` |
+| Servable (derived, not stored) | `Approved AND lesson.state == Published AND question.not_retired AND type != Essay` (until student essay input ships, E14.S3) |
 
 Rules:
 - A question is created as Pending. Only a Teacher assigned to the question's subject can Approve or Reject.
@@ -528,7 +528,7 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 
 ## 17. Key business rules (single list, for implementation reference)
 
-1. Servable = Approved ∧ Lesson Published ∧ not retired. Derived, never stored.
+1. Servable = Approved ∧ Lesson Published ∧ not retired. Derived, never stored; essays are not servable until student essay input ships.
 2. Content edit on an Approved question → Pending, version + 1. Historical attempts keep the old version.
 3. Only a Teacher assigned to the subject may validate. Admins cannot.
 4. Rejection requires a reason.
@@ -567,7 +567,7 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 4. Should unit-exam access be gated on opening all lessons? (Default: no gate.)
 5. Avatar daily limits for Free vs Base. Configured defaults: Free 5/day, Base 50/day.
 6. Transcription provider for Arabic voice (evaluate quality on Egyptian dialect before committing). The evaluation harness is in `docs/ai-service.md`; the run waits for recorded Egyptian-dialect clips.
-7. v2: essay rubric format — free criteria list, or a fixed platform-wide template?
+7. v2: essay rubric format. Decided (#117): a free criteria list per question; each criterion has points (its weight) and a level scale from 0 to full points; one to three model answers.
 
 ---
 

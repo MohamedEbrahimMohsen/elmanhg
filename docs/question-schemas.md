@@ -11,6 +11,7 @@ The wire names are the `QuestionType` enum values. v1 grading follows PRD §6.
 - `TrueFalse`: a boolean. Exact match.
 - `Fill`: one string per blank. Normalised match (PRD §6.2) against an accepted-answers list per blank; credit per blank.
 - `Short`: a number or a string. Numeric within a tolerance (absolute or percent); text against an accepted list with normalisation.
+- `Essay` (v2): rich-text answer (#119), graded by the AI grader against the rubric and model answers (#118). Not servable until #119.
 
 ## Body vs grading spec
 
@@ -79,6 +80,21 @@ Canonical JSON, exactly as stored. Keys are camelCase; enum values are camelCase
 {"acceptedAnswers":["ماء"],"normalization":{"stripTashkeel":true,"stripTatweel":true,"unifyAlef":true,"unifyTaaMarbuta":true,"unifyAlefMaqsura":true,"convertDigits":true,"collapseWhitespace":true,"foldCase":true}}
 ```
 
+**Essay** (v2): the body holds the optional word limit shown to the student (`{}` without a limit).
+
+```json
+{"maxWords":200}
+```
+```json
+{"criteria":[{"id":"c1","title":"Definition","points":2,"levels":[{"points":0,"description":"Missing"},{"points":1,"description":"Partial"},{"points":2,"description":"Complete"}]}],"modelAnswers":["<p>Inertia is resistance to change in motion.</p>"]}
+```
+
+- **Score**: each criterion's `points` is its weight. The grader (#118) awards each criterion one of its level points or any whole number between them; the question score is (Σ awarded ÷ Σ criterion points) × `maxScore`. `maxScore` stays independent (1 to `Content:QuestionMaxScoreMax`).
+- **Level scale**: each criterion has 2 to `Content:QuestionRubricLevelsMaxCount` levels. Level points are distinct whole numbers from 0 to the criterion's points, and the set includes both 0 and the full points. Levels are stored in ascending points.
+- Criterion `id` uses the id format below (the editor generates `c1`, `c2`, …); the grader reports a score per criterion id.
+- `title`, `description` and level `description` are plain text, trimmed; a blank criterion `description` is omitted. `modelAnswers` are sanitised rich text, like the stem.
+- The grading spec, with its rubric and model answers, is never sent to a student.
+
 `normalization` (PRD §6.2) holds the answer-normalisation rules of fill and text short answers. Each rule can be switched off per question; every rule defaults to `true`:
 
 | Key | Effect when `true` | Default |
@@ -120,8 +136,23 @@ A request whose `body` or `gradingSpec` breaks a rule gets `422` with the code b
 | Short | `answerKind` is present (`numeric` or `text`; any other value is `QUESTION_BODY_INVALID`) | `QUESTION_ANSWER_KIND_REQUIRED` |
 | Short numeric | `value` is present | `QUESTION_NUMERIC_VALUE_REQUIRED` |
 | Short numeric | `tolerance` is present and 0 or more, and `toleranceMode` is present | `QUESTION_TOLERANCE_INVALID` |
+| Essay | `maxWords`, when present, is 1 to `Content:QuestionEssayMaxWordsMax` | `QUESTION_ESSAY_MAX_WORDS_INVALID` |
+| Essay | 1 to `Content:QuestionRubricCriteriaMaxCount` criteria | `QUESTION_RUBRIC_CRITERIA_COUNT_INVALID` |
+| Essay | every criterion id matches the id format | `QUESTION_RUBRIC_CRITERION_ID_INVALID` |
+| Essay | criterion ids are unique | `QUESTION_RUBRIC_CRITERION_ID_DUPLICATE` |
+| Essay | every criterion has a title | `QUESTION_RUBRIC_CRITERION_TITLE_REQUIRED` |
+| Essay | a criterion title or description, or a level description, is at most `Content:QuestionRubricTextMaxLength` after trimming | `QUESTION_RUBRIC_TEXT_TOO_LONG` |
+| Essay | every criterion's `points` is 1 to `Content:QuestionRubricPointsMax` | `QUESTION_RUBRIC_POINTS_INVALID` |
+| Essay | every criterion has 2 to `Content:QuestionRubricLevelsMaxCount` levels | `QUESTION_RUBRIC_LEVELS_COUNT_INVALID` |
+| Essay | every level has a description | `QUESTION_RUBRIC_LEVEL_DESCRIPTION_REQUIRED` |
+| Essay | level points are distinct, from 0 to the criterion's points, and include 0 and the full points | `QUESTION_RUBRIC_LEVEL_POINTS_INVALID` |
+| Essay | 1 to `Content:QuestionModelAnswersMaxCount` model answers | `QUESTION_MODEL_ANSWERS_COUNT_INVALID` |
+| Essay | no model answer is blank | `QUESTION_MODEL_ANSWER_REQUIRED` |
+| Essay | each model answer is at most `Content:QuestionModelAnswerMaxLength` | `QUESTION_MODEL_ANSWER_TOO_LONG` |
 
-- **Id format** (option and blank ids): `^[a-z0-9-]{1,20}$`. Ids are referenced from grading specs and `[[id]]` placeholders, so they stay short, lowercase ASCII.
+A non-integer `maxWords`, criterion `points` or level `points` does not read as the type's shape and fails with `QUESTION_BODY_INVALID` / `QUESTION_GRADING_SPEC_INVALID`.
+
+- **Id format** (option, blank and rubric criterion ids): `^[a-z0-9-]{1,20}$`. Ids are referenced from grading specs and `[[id]]` placeholders, so they stay short, lowercase ASCII.
 - **Fields** outside the body and spec (stem, explanation, difficulty, tags, max score) are checked by `QuestionFieldsValidator`. Caps: `Content:QuestionStemMaxLength`, `Content:QuestionExplanationMaxLength`, `Content:QuestionTagsMaxCount`, `Content:QuestionTagMaxLength`, `Content:QuestionMaxScoreMax` (max score is a whole number from 1).
 
 ## Canonical storage
@@ -160,7 +191,8 @@ A request whose `body` or `gradingSpec` breaks a rule gets `422` with the code b
 
 ## Servable
 
-- Servable = Approved ∧ lesson Published ∧ not retired (PRD §5.3, §17 rule 1). It is derived on every read and never stored.
+- Servable = Approved ∧ lesson Published ∧ not retired ∧ not an essay (essays are excluded until student essay input, #119) (PRD §5.3, §17 rule 1). It is derived on every read and never stored.
+- `ServableQuestionSpecification.ServedTypes` lists the five served v1 types (`Mcq`, `Multi`, `TrueFalse`, `Fill`, `Short`) for per-type listings such as blueprint servable counts. #119 adds `Essay` back to both.
 - `ServableQuestionSpecification` (`Elmanhg.Domain/Questions`) is the only definition. `WhereServable(questions, lessons)` composes the rule into SQL; `IsSatisfiedBy(question, lesson)` runs compiled copies of the same expressions in memory.
 - Every serving query (quizzes, exams, blueprints, anything a student is shown) must filter through `WhereServable`. Admin reads never filter by it: `GET /api/questions` lists every status and annotates each item with `isServable`, and `GET /api/lessons` returns `servableQuestionCount` next to `questionCount`.
 - `GET /api/questions/servable-count` is anonymous and returns `{"count": n}`, the platform-wide total shown on the landing page. It is cached in `IMemoryCache` under `questions:servable-count`.
@@ -201,6 +233,8 @@ A student's answer (and the `answer` of `POST /api/questions/grade-draft`) is a 
 {"text":"9.8"}
 ```
 
+**Essay**: defined by #119.
+
 ## Grading
 
 The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of the stored grading spec, the max score and the answer. `POST /api/questions/grade-draft` (admin, `Content.Manage`) validates an unsaved draft with the same rules as create and update, canonicalises it, and grades the `answer` with the same graders; it saves nothing and is not audited. Attempts reuse the same graders.
@@ -215,6 +249,7 @@ The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of
 - **Fill**: `hits / blanks`. Each blank is compared only with its own accepted answers; it hits when its normalised answer equals any of them. A blank the answer leaves out, or whose text normalises to empty, is a miss. A response whose id is not a blank is ignored; a repeated id uses its first response.
 - **Short numeric** (the spec has `value`): the answer is parsed as a number and is correct when `value − allowed ≤ answer ≤ value + allowed` (both bounds inclusive). `allowed` is `tolerance` (`absolute`) or `|value| × tolerance / 100` (`percent`). A negative `value` gets the same band as its magnitude, and a `value` of 0 with `percent` accepts only 0. A missing or negative tolerance counts as 0 and a missing mode as `absolute` (unreachable after validation). Only the spec takes part in the arithmetic; when a bound would pass the decimal range (±79228162514264337593543950335) it is clamped to that limit, so grading never fails.
 - **Short text**: the normalised answer must equal one of the normalised accepted answers.
+- **Essay** is not graded by these graders; `grade-draft` returns `422 QUESTION_TYPE_NOT_GRADABLE`.
 - An answer that normalises to empty never matches.
 - **Normalisation** (PRD §6.2): the student answer and every accepted answer go through the same steps. Always, in this order: drop unpaired UTF-16 surrogates and the noncharacter U+FFFE (both make NFC fail), and invisible marks (U+061C, U+200B–U+200F, U+202A–U+202E, U+2060, U+2066–U+2069, U+FEFF), so none of them can split a letter from its mark; Unicode NFC (so a decomposed hamza or madda, such as ا + U+0654, becomes أ); map ، (U+060C) to `,` and ی (U+06CC) to ي (U+064A). Then the question's `normalization` rules (see **Fill** and **Short** above), each applied only when on. Finally the answer is always trimmed. With `collapseWhitespace` off, inner whitespace is kept verbatim (tabs and runs included); the ends are still trimmed. Hamza seats (ئ ؤ ء) are never unified.
 - **Numeric parsing**: numeric answers ignore the question's `normalization` rules and use a fixed profile: every rule on except the three letter rules. After normalisation, `٬` (U+066C, the Arabic thousands separator) is removed, then `٫` (U+066B) and `,` become `.`, and `−` (U+2212) becomes `-`; the rest must be a plain decimal number: an optional leading sign, digits and one decimal point (invariant culture). Exponents such as `9.8e0`, inner whitespace, thousands separators other than `٬`, and anything else (such as a trailing unit) do not parse and score 0. `,` always means a decimal point, so `1,000` reads as 1.
@@ -230,4 +265,4 @@ The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of
 
 ## Changing a schema
 
-A new field or rule changes the schema record, its rules, this document and the web editor in the same change. The spreadsheet import (`docs/question-import.md`) builds the same shapes from columns; a schema change updates its columns, parser and template in the same change. Rows already stored in the old shape need a data migration that rewrites them to the new canonical shape.
+A new field or rule changes the schema record, its rules, this document and the web editor in the same change. The spreadsheet import (`docs/question-import.md`) builds the same shapes from columns; a schema change updates its columns, parser and template in the same change. Essay is not importable (PRD §10.1). Rows already stored in the old shape need a data migration that rewrites them to the new canonical shape.

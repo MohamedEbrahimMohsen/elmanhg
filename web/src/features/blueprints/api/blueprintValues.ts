@@ -1,4 +1,4 @@
-import { questionTypes } from '@/features/questions';
+import { servedQuestionTypes } from '@/features/questions';
 import type {
   ExamBlueprintInput,
   ExamBlueprintResult,
@@ -23,14 +23,14 @@ export function findShortfall(
   required: readonly ExamTypeCountResult[],
   available: readonly ExamTypeCountResult[],
 ): TypeShortfall[] {
-  return questionTypes
+  return servedQuestionTypes
     .map((type) => ({ type, required: countOf(required, type), available: countOf(available, type) }))
     .filter((entry) => entry.required > 0 && entry.required > entry.available)
     .map((entry) => ({ ...entry, missing: entry.required - entry.available }));
 }
 
 export function countsFromValues(values: ExamBlueprintValues): ExamTypeCountResult[] {
-  return questionTypes.map((type) => {
+  return servedQuestionTypes.map((type) => {
     const value = values.counts[type];
     return { type, count: digits.test(value) ? Number(value) : 0 };
   });

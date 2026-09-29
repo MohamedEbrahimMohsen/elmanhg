@@ -21,7 +21,7 @@ public static class ServableTypeCounts
 
     public static List<ExamTypeCountResult> ToResults(IReadOnlyDictionary<QuestionType, int> available)
     {
-        return Enum.GetValues<QuestionType>()
+        return ServableQuestionSpecification.ServedTypes
             .Select(x => new ExamTypeCountResult(x, available.GetValueOrDefault(x)))
             .ToList();
     }

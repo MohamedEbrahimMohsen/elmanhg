@@ -4,7 +4,8 @@
     "Multi": "اختيار متعدد الإجابات",
     "TrueFalse": "صح أو خطأ",
     "Fill": "أكمل الفراغ",
-    "Short": "إجابة قصيرة"
+    "Short": "إجابة قصيرة",
+    "Essay": "مقالي"
   },
   "statuses": {
     "Pending": "قيد المراجعة",
@@ -88,7 +89,8 @@
       "noObjective": "بدون هدف",
       "maxScore": "الدرجة",
       "tags": "الوسوم",
-      "tagsHint": "افصل الوسوم بفواصل."
+      "tagsHint": "افصل الوسوم بفواصل.",
+      "typeV2": "{type} (v2)"
     },
     "options": {
       "legend": "الخيارات",
@@ -143,7 +145,36 @@
       "acceptedAnswers": "أضف إجابة مقبولة واحدة على الأقل.",
       "blankPlaceholder": "ضع [[id]] لكل فراغ مرة واحدة فقط في نص السؤال.",
       "number": "اكتب رقمًا.",
-      "tolerance": "اكتب سماحية 0 أو أكثر."
+      "tolerance": "اكتب سماحية 0 أو أكثر.",
+      "maxWords": "اكتب حدًا للكلمات من 1 إلى 2000 أو اتركه فارغًا.",
+      "criteriaCount": "أضف معيارًا واحدًا على الأقل.",
+      "rubricPoints": "اكتب نقاطًا صحيحة من 1 إلى 100.",
+      "levelsCount": "أضف مستويين على الأقل.",
+      "levelPoints": "اكتب نقاطًا صحيحة من 0 إلى نقاط المعيار.",
+      "levelScale": "يجب أن تختلف نقاط المستويات وأن تشمل 0 ونقاط المعيار كاملة.",
+      "modelAnswersCount": "أضف إجابة نموذجية واحدة على الأقل."
+    },
+    "essay": {
+      "maxWords": "الحد الأقصى للكلمات (اختياري)",
+      "maxWordsHint": "يظهر للطالب أسفل مربع الإجابة.",
+      "rubricLegend": "معايير التصحيح",
+      "rubricHint": "مجموع النقاط: {total}. الدرجة = النقاط المحققة ÷ {total} × درجة السؤال.",
+      "criterion": "المعيار {number}",
+      "criterionTitle": "عنوان المعيار {number}",
+      "criterionDescription": "ما يقيسه المعيار {number} (اختياري)",
+      "criterionPoints": "نقاط المعيار {number}",
+      "addCriterion": "إضافة معيار",
+      "removeCriterion": "حذف المعيار {number}",
+      "levelsLegend": "مستويات المعيار {number}",
+      "levelPoints": "نقاط المستوى {level} في المعيار {number}",
+      "levelDescription": "وصف المستوى {level} في المعيار {number}",
+      "addLevel": "إضافة مستوى للمعيار {number}",
+      "removeLevel": "حذف المستوى {level} من المعيار {number}",
+      "modelAnswersLegend": "الإجابات النموذجية",
+      "modelAnswersHint": "يستخدمها مصحح الذكاء الاصطناعي ولا تظهر للطالب.",
+      "modelAnswer": "الإجابة النموذجية {number}",
+      "addModelAnswer": "إضافة إجابة نموذجية",
+      "removeModelAnswer": "حذف الإجابة النموذجية {number}"
     }
   },
   "preview": {
@@ -154,7 +185,8 @@
     "partial": "إجابة صحيحة جزئيًا",
     "incorrect": "إجابة خاطئة",
     "score": "الدرجة {score} / {maxScore}",
-    "gradeFailed": "لا يمكن تصحيح هذه المسودة بعد."
+    "gradeFailed": "لا يمكن تصحيح هذه المسودة بعد.",
+    "essayNotGradable": "تُصحَّح الأسئلة المقالية بمصحح الذكاء الاصطناعي، ولا يدعمها المصحح التجريبي."
   },
   "view": {
     "answerLegend": "إجابتك",
@@ -164,7 +196,11 @@
     "blankMarker": "({number})",
     "yourAnswer": "إجابتك",
     "correctOption": "الإجابة الصحيحة",
-    "wrongOption": "إجابتك، خاطئة"
+    "wrongOption": "إجابتك، خاطئة",
+    "essayLabel": "إجابتك المقالية",
+    "essayPlaceholder": "اكتب إجابتك المقالية",
+    "essayWords": "عدد الكلمات: {count}",
+    "essayWordsOf": "عدد الكلمات: {count} من {max}"
   },
   "import": {
     "title": "استيراد أسئلة",
@@ -261,7 +297,13 @@
       "previousRejection": "سبب الرفض السابق: {reason}",
       "preview": "معاينة كما يراها الطالب",
       "explanation": "الشرح",
-      "gradingSpec": "مواصفات التصحيح (JSON)"
+      "gradingSpec": "مواصفات التصحيح (JSON)",
+      "rubric": "معايير التصحيح",
+      "rubricTotal": "مجموع النقاط: {total}",
+      "criterionPoints": "({points} نقاط)",
+      "level": "{points} نقاط: {description}",
+      "modelAnswers": "الإجابات النموذجية",
+      "modelAnswer": "الإجابة النموذجية {number}"
     },
     "decision": {
       "title": "القرار",

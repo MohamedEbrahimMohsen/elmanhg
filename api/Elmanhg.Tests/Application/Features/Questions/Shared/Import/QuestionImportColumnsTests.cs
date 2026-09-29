@@ -39,4 +39,10 @@ public sealed class QuestionImportColumnsTests
     {
         QuestionImportColumns.TypeForSheet(name).Should().BeNull();
     }
+
+    [Fact]
+    public void TypeForSheet_EssaySheet_ReturnsNull()
+    {
+        QuestionImportColumns.TypeForSheet("Essay").Should().BeNull();
+    }
 }
