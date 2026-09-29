@@ -1,6 +1,7 @@
 using Core.OTP;
 using Core.OTP.Delivery;
 using Core.OTP.Entities;
+using Elmanhg.Application.Shared.Observability;
 using Elmanhg.Infrastructure.OtpDelivery;
 using Elmanhg.Infrastructure.OtpDelivery.Email;
 using Elmanhg.Infrastructure.OtpDelivery.Sms;
@@ -88,6 +89,8 @@ public sealed class OtpDeliveryServiceCollectionExtensionsTests
         services.AddSingleton(Substitute.For<IHostEnvironment>());
         services.AddSingleton<IConfiguration>(new ConfigurationBuilder().AddInMemoryCollection(OtpDeliveryTestSettings.ToConfiguration(options)).Build());
         services.AddOptions<OtpOptions>();
+        services.AddMetrics();
+        services.AddSingleton<ElmanhgMetrics>();
         services.AddOtpDelivery();
         return services.BuildServiceProvider();
     }

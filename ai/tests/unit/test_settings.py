@@ -125,3 +125,32 @@ def test_settings_transcription_max_audio_bytes_above_25mb_raises_validation_err
         Settings(service_token=SecretStr(VALID_TOKEN), transcription_max_audio_bytes=26_214_401)
 
     assert error.value.errors()[0]["loc"] == ("transcription_max_audio_bytes",)
+
+
+def test_settings_blank_otlp_endpoint_is_none() -> None:
+    settings = Settings(service_token=SecretStr(VALID_TOKEN), otlp_endpoint="  ")
+
+    assert settings.otlp_endpoint is None
+
+
+def test_settings_otlp_endpoint_without_http_scheme_raises() -> None:
+    with pytest.raises(ValidationError) as error:
+        Settings(service_token=SecretStr(VALID_TOKEN), otlp_endpoint="otel-collector:4317")
+
+    assert error.value.errors()[0]["loc"] == ("otlp_endpoint",)
+
+
+def test_settings_malformed_otlp_headers_raises() -> None:
+    with pytest.raises(ValidationError) as error:
+        Settings(service_token=SecretStr(VALID_TOKEN), otlp_headers=SecretStr("novalue"))
+
+    message = str(error.value)
+    assert "otlp_headers must be comma-separated key=value pairs" in message
+    assert "novalue" not in message
+
+
+def test_settings_trace_sample_ratio_above_one_raises() -> None:
+    with pytest.raises(ValidationError) as error:
+        Settings(service_token=SecretStr(VALID_TOKEN), trace_sample_ratio=1.5)
+
+    assert error.value.errors()[0]["loc"] == ("trace_sample_ratio",)

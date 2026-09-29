@@ -2,18 +2,29 @@ using Core.Errors;
 using Core.OTP.Delivery;
 using Core.OTP.Entities;
 using Elmanhg.Application.Exceptions;
+using Elmanhg.Application.Shared.Observability;
 using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Infrastructure.OtpDelivery;
 
-public sealed class OtpChannelRouter(IOptions<OtpDeliveryOptions> otpDeliveryOptions, IEnumerable<IOtpChannel> channels) : IOtpSender
+public sealed class OtpChannelRouter(IOptions<OtpDeliveryOptions> otpDeliveryOptions, IEnumerable<IOtpChannel> channels, ElmanhgMetrics metrics) : IOtpSender
 {
     private readonly OtpDeliveryOptions _options = otpDeliveryOptions.Value;
 
     public async Task<OtpChannel> SendAsync(OtpRecipientType recipientType, string recipient, string code, CancellationToken cancellationToken)
     {
         var channel = Resolve(recipientType);
-        await channels.Single(x => x.Channel == channel).SendAsync(recipient, code, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await channels.Single(x => x.Channel == channel).SendAsync(recipient, code, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception) when (!cancellationToken.IsCancellationRequested)
+        {
+            metrics.RecordOtpSend(channel, delivered: false);
+            throw;
+        }
+
+        metrics.RecordOtpSend(channel, delivered: true);
         return channel;
     }
 

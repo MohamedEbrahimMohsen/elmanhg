@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { avatarReply } from '@/test/avatarFixtures';
+import { avatarConversationId, avatarReply } from '@/test/avatarFixtures';
 import { avatarReducer, initialAvatarState, type AvatarState } from './avatarReducer';
 
 const lesson = { entryPoint: 'Lesson', lessonId: 'l1', title: 'Ohm' } as const;
@@ -7,7 +7,7 @@ const lesson = { entryPoint: 'Lesson', lessonId: 'l1', title: 'Ohm' } as const;
 function conversation(): AvatarState {
   const opened = avatarReducer(initialAvatarState, { type: 'open', context: lesson });
   const sent = avatarReducer(opened, { type: 'sent', text: 'q1' });
-  return avatarReducer(sent, { type: 'replied', question: 'q1', reply: avatarReply() });
+  return avatarReducer(sent, { type: 'replied', reply: avatarReply() });
 }
 
 describe('avatarReducer', () => {
@@ -19,7 +19,7 @@ describe('avatarReducer', () => {
     expect(reopened.isOpen).toBe(true);
     expect(reopened.context).toEqual({ entryPoint: 'Global' });
     expect(reopened.messages).toEqual([]);
-    expect(reopened.turns).toEqual([]);
+    expect(reopened.conversationId).toBeNull();
   });
 
   it('keeps the conversation when reopened with the same context', () => {
@@ -30,28 +30,25 @@ describe('avatarReducer', () => {
     expect(closed.isOpen).toBe(false);
     expect(reopened.isOpen).toBe(true);
     expect(reopened.messages).toHaveLength(2);
-    expect(reopened.turns).toHaveLength(2);
+    expect(reopened.conversationId).toBe(avatarConversationId);
   });
 
-  it('records a completed turn when the assistant replies', () => {
+  it('keeps the conversation id when the assistant replies', () => {
     const state = conversation();
 
-    expect(state.turns).toEqual([
-      { role: 'User', content: 'q1' },
-      { role: 'Assistant', content: avatarReply().reply },
-    ]);
+    expect(state.conversationId).toBe(avatarConversationId);
     expect(state.messages).toEqual([
       { id: 'm0', kind: 'student', text: 'q1' },
       { id: 'm1', kind: 'assistant', text: avatarReply().reply, citations: avatarReply().citations },
     ]);
   });
 
-  it('adds a notice without a turn when sending fails', () => {
+  it('adds a notice without changing the conversation when sending fails', () => {
     const sent = avatarReducer(conversation(), { type: 'sent', text: 'q2' });
 
     const failed = avatarReducer(sent, { type: 'failed', notice: 'unavailable' });
 
     expect(failed.messages.at(-1)).toEqual({ id: 'm3', kind: 'notice', notice: 'unavailable' });
-    expect(failed.turns).toHaveLength(2);
+    expect(failed.conversationId).toBe(avatarConversationId);
   });
 });

@@ -314,7 +314,7 @@ An in-app assistant for students, scoped to the platform's content.
 ### 9.3 Limits
 
 - Rate-limited per student per day: Free 5, Base 50 (`Subscriptions` configuration). A message counts once the assistant has replied; the day follows `Subscriptions:DailyQuotaTimeZone`.
-- Model and prompt versions are recorded on every message for later evaluation.
+- Model and prompt versions, tokens and cost are recorded on every reply for later evaluation, with the context bundle and search results that were sent (`docs/avatar.md`, Conversation log).
 
 ---
 
@@ -365,6 +365,10 @@ All charts filterable by date range and subject.
 - Students: search, view profile and progress, suspend, grant complimentary subscription.
 - Teachers: invite, assign/unassign subjects, deactivate.
 - Admins: invite, deactivate. At least one active admin must always remain.
+
+### 10.5 Assistant conversations
+
+Admins see the students' Avatar conversations, most recent first, with search by message text or student name and filters by entry point and date. Each conversation shows every message and, per reply, the model, prompt version, tokens, cost, citations and the context sent. See `docs/avatar.md`.
 
 ---
 
@@ -435,7 +439,7 @@ Exports (admin only): JSONL per source, date-ranged, with PII stripped.
 | Language | Arabic UI, RTL throughout. English only for admin technical fields if needed. |
 | Devices | Mobile-first responsive web. All interactions touch-friendly. v2 canvas and math input must work on phones. |
 | Performance | Lesson page < 2s on 3G-class connections; quiz question transition < 300ms (prefetch next). |
-| Availability | 99.5% monthly. Exam sessions auto-save every answer; a refresh resumes the session. |
+| Availability | 99.5% monthly, measured and alerted as in docs/observability.md. Exam sessions auto-save every answer; a refresh resumes the session. |
 | Security | Role-based authorisation on every endpoint; teacher subject scoping enforced server-side; Paymob webhooks HMAC-verified; rate limits on auth and Avatar. |
 | Privacy | Students identified to teachers by display name only. Training exports strip PII. |
 | Auditability | All content changes and validation decisions logged with actor and timestamp. |
@@ -479,8 +483,8 @@ TeacherThread(id, student_id, teacher_id?, subject_id, context_json, status[Open
 TeacherMessage(id, thread_id, sender_id, kind[Text|Voice], text, image_url?, audio_url?, audio_duration_seconds?, transcript_final bool, student_read_at?, created_at)
 TeacherVoiceDraft(id, thread_id, teacher_id, audio_key, audio_url, audio_duration_seconds, status[Pending|Ready|Failed|Sent], transcript?, transcription_model?, attempts, next_attempt_at?, recorded_at, transcribed_at?, sent_message_id?)  -- transcription job; docs/ask-teacher.md
 
-AvatarConversation(id, student_id, context_json, model, prompt_version, started_at)
-AvatarMessage(id, conversation_id, role, text, created_at)
+AvatarConversation(id, student_id, entry_point, subject_id?, unit_id?, lesson_id?, session_id?, question_id?, started_at, last_message_at, message_count)  -- docs/avatar.md
+AvatarMessage(id, conversation_id, position, role[Student|Assistant], text, created_at, model?, prompt_version?, input_tokens?, output_tokens?, cost_usd?, stop_reason?, history_message_count?, context_json?, citations_json?)  -- append-only; replies carry the context bundle, model and prompt version
 AvatarMessageUsage(id, student_id, entry_point, created_at)  -- daily Avatar quota counter (docs/avatar.md)
 
 LessonContentChunk(id, lesson_id, section[Explanation|Objectives|Summary|QuestionExplanation], section_title?, position, question_id?, question_version?, content, embedding vector(1536), embedding_model, created_at)  -- derived; docs/content-retrieval.md
@@ -515,6 +519,7 @@ AuditLog(id, actor_id, actor_name, actor_role, action, entity, entity_id, outcom
 | Payment log and refunds | – | – | ✓ |
 | Manage users / teachers | – | – | ✓ |
 | View audit log | – | – | ✓ |
+| View Avatar conversations | – | – | ✓ |
 | Export training data | – | – | ✓ |
 
 Admins deliberately cannot approve questions. This keeps the "validated by a real teacher" claim true.
@@ -550,6 +555,7 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 - **Jobs / realtime**: background jobs for grading, transcription, SLA reminders; SignalR for grade results and teacher replies.
 - **Payments**: Paymob, webhook-driven.
 - **Hosting**: Docker Compose on one VPS per environment (staging, production); Caddy (TLS, SPA, /api proxy), images built by CI and pushed to GHCR; PostgreSQL + pgvector. Object storage (from #96) is a managed S3-compatible service (Cloudflare R2 or AWS S3), set by config; local dev and CI use the local-disk store, and there is no object-store container in compose. Runbook: docs/deployment.md.
+- **Observability**: OpenTelemetry traces and metrics (api, ai), JSON logs from every container, self-hosted collector + Prometheus + Loki + Tempo + Grafana + Alertmanager behind the `observability` compose profile; runbook docs/observability.md.
 
 ---
 

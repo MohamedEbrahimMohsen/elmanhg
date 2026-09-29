@@ -51,3 +51,4 @@ ai/requirements-audit.txt
 
 # IDE
 .vs/
+/deploy/alertmanager.yml

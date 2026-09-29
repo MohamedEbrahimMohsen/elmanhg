@@ -7,6 +7,7 @@
 import type { AvatarCitationResult } from './avatarCitationResult';
 
 export interface AvatarReplyResult {
+  conversationId: string;
   reply: string;
   citations: AvatarCitationResult[];
   /** @pattern ^-?(?:0|[1-9]\d*)$ */

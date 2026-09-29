@@ -18,7 +18,9 @@ from elmanhg_ai.settings import Settings
 Handler = Callable[[httpx2.Request], httpx2.Response]
 
 AUDIO = b"\x1a\x45\xdf\xa3voice"
-REQUEST = TranscriptionRequest(audio=AUDIO, content_type="audio/webm", language="ar")
+REQUEST = TranscriptionRequest(
+    audio=AUDIO, content_type="audio/webm", language="ar", duration_seconds=12
+)
 MAX_RETRIES = 2
 
 
@@ -77,7 +79,7 @@ async def test_openai_transcribe_mp4_uses_m4a_file_name() -> None:
     captured: list[httpx2.Request] = []
     client = client_for(ok, captured)
 
-    await client.transcribe(TranscriptionRequest(AUDIO, "audio/mp4", "ar"))
+    await client.transcribe(TranscriptionRequest(AUDIO, "audio/mp4", "ar", 12))
 
     assert b'filename="voice.m4a"' in captured[0].content
 

@@ -37,6 +37,7 @@ export default defineConfig({
           GetMyTeacherThreads: { zod: { generate: { query: false } } },
           GetTeacherInbox: { zod: { generate: { query: false } } },
           GetPaymentLog: { zod: { generate: { query: false } } },
+          GetAvatarConversations: { zod: { generate: { query: false } } },
         },
       },
     },

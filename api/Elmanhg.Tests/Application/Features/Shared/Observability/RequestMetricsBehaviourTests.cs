@@ -1,0 +1,72 @@
+using Core.CQRS.Behaviours;
+using Core.Errors;
+using Elmanhg.Application.Shared.Observability;
+using FluentAssertions;
+using MediatR;
+using Microsoft.Extensions.Diagnostics.Metrics.Testing;
+using System.Diagnostics.Metrics;
+
+namespace Elmanhg.Tests.Application.Features.Shared.Observability;
+
+public sealed record MetricsProbeRequest : IRequest<Unit>;
+
+public sealed class RequestMetricsBehaviourTests : IDisposable
+{
+    private readonly IMeterFactory _meterFactory = MeterFactories.Create();
+    private readonly MetricCollector<long> _requests;
+    private readonly RequestMetricsBehaviour<MetricsProbeRequest, Unit> _behaviour;
+
+    public RequestMetricsBehaviourTests()
+    {
+        _requests = new MetricCollector<long>(_meterFactory, ElmanhgTelemetry.SourceName, "elmanhg.requests");
+        _behaviour = new RequestMetricsBehaviour<MetricsProbeRequest, Unit>(new ElmanhgMetrics(_meterFactory));
+    }
+
+    [Fact]
+    public async Task Handle_NextSucceeds_RecordsSuccessOutcome()
+    {
+        await _behaviour.Handle(new MetricsProbeRequest(), _ => Unit.Task, TestContext.Current.CancellationToken);
+
+        RecordedTags().Should().Contain(ElmanhgMetrics.RequestTag, nameof(MetricsProbeRequest)).And.Contain(ElmanhgMetrics.OutcomeTag, "Success");
+    }
+
+    [Fact]
+    public async Task Handle_ValidationFails_RecordsValidationFailedAndRethrows()
+    {
+        var act = () => _behaviour.Handle(new MetricsProbeRequest(), _ => throw new ValidationBehaviourException(["A", "B"], ["a", "b"]), TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<ValidationBehaviourException>()).Which.ErrorCode.Should().Be("A,B");
+        RecordedTags().Should().Contain(ElmanhgMetrics.OutcomeTag, "VALIDATION_FAILED");
+    }
+
+    [Fact]
+    public async Task Handle_CoreExceptionThrown_RecordsErrorCodeAndRethrows()
+    {
+        var act = () => _behaviour.Handle(new MetricsProbeRequest(), _ => throw new NotFoundCoreException("PROBE_NOT_FOUND"), TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<NotFoundCoreException>()).Which.ErrorCode.Should().Be("PROBE_NOT_FOUND");
+        RecordedTags().Should().Contain(ElmanhgMetrics.OutcomeTag, "PROBE_NOT_FOUND");
+    }
+
+    [Fact]
+    public async Task Handle_UnexpectedException_RecordsUnhandledAndRethrows()
+    {
+        var act = () => _behaviour.Handle(new MetricsProbeRequest(), _ => throw new InvalidOperationException(), TestContext.Current.CancellationToken);
+
+        await act.Should().ThrowAsync<InvalidOperationException>();
+        RecordedTags().Should().Contain(ElmanhgMetrics.OutcomeTag, "UNHANDLED_EXCEPTION");
+    }
+
+    [Fact]
+    public async Task Handle_Cancelled_RecordsCancelledAndRethrows()
+    {
+        var act = () => _behaviour.Handle(new MetricsProbeRequest(), _ => throw new OperationCanceledException(), TestContext.Current.CancellationToken);
+
+        await act.Should().ThrowAsync<OperationCanceledException>();
+        RecordedTags().Should().Contain(ElmanhgMetrics.OutcomeTag, "CANCELLED");
+    }
+
+    public void Dispose() => _requests.Dispose();
+
+    private IReadOnlyDictionary<string, object?> RecordedTags() => _requests.GetMeasurementSnapshot().Should().ContainSingle().Subject.Tags;
+}

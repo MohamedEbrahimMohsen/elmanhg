@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   ListChecks,
   MessageCircleQuestion,
+  MessagesSquare,
   ScrollText,
   Users,
   type LucideIcon,
@@ -134,6 +135,13 @@ export const navByRole: Record<Role, RoleNav> = {
         capability: 'paymentsManage',
       },
       { key: 'audit', to: '/admin/audit', labelKey: 'nav.admin.audit', icon: ScrollText, capability: 'auditLogView' },
+      {
+        key: 'avatarConversations',
+        to: '/admin/avatar-conversations',
+        labelKey: 'nav.admin.avatarConversations',
+        icon: MessagesSquare,
+        capability: 'avatarConversationsView',
+      },
       {
         key: 'export',
         to: '/admin/export',

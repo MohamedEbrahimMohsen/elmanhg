@@ -48,7 +48,9 @@ async def run(
     audio = bytes(payload.audio)
     started = time.perf_counter()
     reply = await client.transcribe(
-        TranscriptionRequest(audio, payload.content_type.value, payload.language)
+        TranscriptionRequest(
+            audio, payload.content_type.value, payload.language, payload.duration_seconds
+        )
     )
     latency_ms = round((time.perf_counter() - started) * 1000)
     text = reply.text.strip()

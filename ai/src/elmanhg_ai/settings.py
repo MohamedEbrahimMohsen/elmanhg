@@ -7,6 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Shared secret strength floor, same as the .NET validator.
 MIN_SERVICE_TOKEN_LENGTH: Final = 32
+OTLP_SCHEMES: Final = ("http://", "https://")
 
 
 class Settings(BaseSettings):
@@ -46,12 +47,40 @@ class Settings(BaseSettings):
     transcription_max_audio_bytes: int = Field(default=10_485_760, ge=1, le=26_214_400)
     transcription_max_duration_seconds: int = Field(default=600, ge=1, le=3600)
     transcription_usd_per_minute: Decimal = Field(default=Decimal("0.006"), ge=0)
+    otlp_endpoint: str | None = None
+    otlp_headers: SecretStr | None = None
+    otel_service_name: str = Field(default="elmanhg-ai", min_length=1)
+    service_version: str = Field(default="dev", min_length=1)
+    trace_sample_ratio: float = Field(default=1.0, ge=0, le=1)
+    metric_export_interval_seconds: int = Field(default=30, ge=5, le=3600)
 
     @field_validator("service_token")
     @classmethod
     def _service_token_long_enough(cls, value: SecretStr) -> SecretStr:
         if len(value.get_secret_value()) < MIN_SERVICE_TOKEN_LENGTH:
             raise ValueError("service_token must be at least 32 characters")
+        return value
+
+    @field_validator("otlp_endpoint")
+    @classmethod
+    def _otlp_endpoint_is_http(cls, value: str | None) -> str | None:
+        endpoint = (value or "").strip()
+        if not endpoint:
+            return None
+        if not endpoint.startswith(OTLP_SCHEMES):
+            raise ValueError("otlp_endpoint must be an http or https URL")
+        return endpoint
+
+    @field_validator("otlp_headers")
+    @classmethod
+    def _otlp_headers_are_pairs(cls, value: SecretStr | None) -> SecretStr | None:
+        headers = value.get_secret_value() if value is not None else ""
+        if not headers.strip():
+            return None
+        for item in headers.split(","):
+            key, separator, _ = item.partition("=")
+            if not separator or not key.strip():
+                raise ValueError("otlp_headers must be comma-separated key=value pairs")
         return value
 
     @model_validator(mode="after")

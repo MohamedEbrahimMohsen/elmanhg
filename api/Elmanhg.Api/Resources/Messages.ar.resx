@@ -359,6 +359,13 @@
   <data name="TEACHER_VOICE_DRAFT_NOT_PENDING" xml:space="preserve"><value>لا ينتظر هذا التسجيل التفريغ.</value></data>
   <data name="FUNNEL_ANONYMOUS_ID_REQUIRED" xml:space="preserve"><value>معرف الزائر مطلوب.</value></data>
   <data name="FUNNEL_EVENT_TYPE_INVALID" xml:space="preserve"><value>نوع الحدث غير صالح.</value></data>
+  <data name="CLIENT_ERROR_MESSAGE_REQUIRED" xml:space="preserve"><value>رسالة الخطأ مطلوبة.</value></data>
+  <data name="CLIENT_ERROR_MESSAGE_TOO_LONG" xml:space="preserve"><value>رسالة الخطأ طويلة جدا.</value></data>
+  <data name="CLIENT_ERROR_NAME_TOO_LONG" xml:space="preserve"><value>اسم الخطأ طويل جدا.</value></data>
+  <data name="CLIENT_ERROR_STACK_TOO_LONG" xml:space="preserve"><value>تفاصيل الخطأ طويلة جدا.</value></data>
+  <data name="CLIENT_ERROR_PATH_TOO_LONG" xml:space="preserve"><value>مسار الصفحة طويل جدا.</value></data>
+  <data name="CLIENT_ERROR_PATH_INVALID" xml:space="preserve"><value>مسار الصفحة غير صالح.</value></data>
+  <data name="CLIENT_ERROR_SOURCE_INVALID" xml:space="preserve"><value>مصدر الخطأ غير صالح.</value></data>
   <data name="USER_NOT_STUDENT" xml:space="preserve"><value>هذا الاجراء للطلاب فقط.</value></data>
   <data name="AVATAR_EXAM_IN_PROGRESS" xml:space="preserve"><value>لا يمكن استخدام المساعد أثناء امتحان جارٍ. سلّم امتحانك أولًا.</value></data>
   <data name="AVATAR_DAILY_LIMIT_REACHED" xml:space="preserve"><value>وصلت إلى الحد اليومي لرسائل المساعد.</value></data>
@@ -366,8 +373,14 @@
   <data name="AVATAR_ENTRY_POINT_INVALID" xml:space="preserve"><value>نقطة فتح المساعد غير صحيحة.</value></data>
   <data name="AVATAR_MESSAGE_REQUIRED" xml:space="preserve"><value>اكتب سؤالك.</value></data>
   <data name="AVATAR_MESSAGE_TOO_LONG" xml:space="preserve"><value>سؤالك طويل جدًا.</value></data>
-  <data name="AVATAR_HISTORY_TOO_LONG" xml:space="preserve"><value>المحادثة السابقة طويلة جدًا.</value></data>
-  <data name="AVATAR_HISTORY_INVALID" xml:space="preserve"><value>المحادثة السابقة غير صحيحة.</value></data>
+  <data name="AVATAR_CONVERSATION_NOT_FOUND" xml:space="preserve"><value>المحادثة غير موجودة.</value></data>
+  <data name="AVATAR_CONVERSATION_CONTEXT_MISMATCH" xml:space="preserve"><value>هذه المحادثة تخص سياقًا آخر. ابدأ محادثة جديدة.</value></data>
+  <data name="AVATAR_CONVERSATION_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>أُرسلت رسالة أخرى في هذه المحادثة في الوقت نفسه. حاول مرة أخرى.</value></data>
+  <data name="AVATAR_CONVERSATIONS_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة يجب أن يكون 1 أو أكثر.</value></data>
+  <data name="AVATAR_CONVERSATIONS_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة غير صالح.</value></data>
+  <data name="AVATAR_CONVERSATIONS_SEARCH_TOO_LONG" xml:space="preserve"><value>نص البحث طويل جدًا.</value></data>
+  <data name="AVATAR_CONVERSATIONS_ENTRY_POINT_INVALID" xml:space="preserve"><value>نقطة الدخول غير معروفة.</value></data>
+  <data name="AVATAR_CONVERSATIONS_DATE_RANGE_INVALID" xml:space="preserve"><value>يجب أن تكون البداية قبل النهاية.</value></data>
   <data name="AI_SERVICE_UNAVAILABLE" xml:space="preserve"><value>المساعد غير متاح الآن. حاول مرة أخرى بعد قليل.</value></data>
   <data name="CONTENT_SEARCH_QUERY_REQUIRED" xml:space="preserve"><value>اكتب نص البحث.</value></data>
   <data name="CONTENT_SEARCH_QUERY_TOO_LONG" xml:space="preserve"><value>نص البحث أطول من المسموح.</value></data>

@@ -50,6 +50,7 @@
     "UNIT_NAME_TOO_LONG": "اسم الوحدة طويل جدا.",
     "UNIT_POSITION_INVALID": "الترتيب يجب ان يكون 1 او اكثر.",
     "LESSON_NOT_FOUND": "الدرس غير موجود.",
+    "AVATAR_CONVERSATION_NOT_FOUND": "المحادثة غير موجودة.",
     "LESSON_NAME_REQUIRED": "اكتب اسم الدرس.",
     "LESSON_NAME_TOO_LONG": "اسم الدرس طويل جدا.",
     "LESSON_EXPLANATION_TOO_LONG": "الشرح طويل جدا.",

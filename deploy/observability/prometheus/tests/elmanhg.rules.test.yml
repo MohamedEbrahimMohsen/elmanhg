@@ -1,0 +1,302 @@
+# promtool test rules (run by deploy/smoke-test.sh): one case per alert behaviour in docs/observability.md, Alerts.
+rule_files: [../rules/elmanhg.rules.yml]
+evaluation_interval: 30s
+
+tests:
+  - name: fast burn fires on 10 % 5xx for 70 minutes
+    interval: 1m
+    input_series:
+      - series: 'http_server_request_duration_seconds_count{job="elmanhg-api",http_route="/api/sessions",http_response_status_code="200"}'
+        values: '0+54x80'
+      - series: 'http_server_request_duration_seconds_count{job="elmanhg-api",http_route="/api/sessions",http_response_status_code="500"}'
+        values: '0+6x80'
+    alert_rule_test:
+      - eval_time: 70m
+        alertname: ApiErrorBudgetFastBurn
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+            exp_annotations:
+              summary: API 5xx ratio burns the 30-day error budget 14.4x too fast (2 % of the budget per hour).
+              runbook: docs/observability.md#alerts
+
+  - name: fast burn stays quiet at 0.1 % 5xx
+    interval: 1m
+    input_series:
+      - series: 'http_server_request_duration_seconds_count{job="elmanhg-api",http_route="/api/sessions",http_response_status_code="200"}'
+        values: '0+999x80'
+      - series: 'http_server_request_duration_seconds_count{job="elmanhg-api",http_route="/api/sessions",http_response_status_code="500"}'
+        values: '0+1x80'
+    alert_rule_test:
+      - eval_time: 70m
+        alertname: ApiErrorBudgetFastBurn
+        exp_alerts: []
+
+  - name: slow burn fires on 4 % 5xx for 7 hours
+    interval: 1m
+    input_series:
+      - series: 'http_server_request_duration_seconds_count{job="elmanhg-api",http_route="/api/sessions",http_response_status_code="200"}'
+        values: '0+96x440'
+      - series: 'http_server_request_duration_seconds_count{job="elmanhg-api",http_route="/api/sessions",http_response_status_code="500"}'
+        values: '0+4x440'
+    alert_rule_test:
+      - eval_time: 7h
+        alertname: ApiErrorBudgetSlowBurn
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+            exp_annotations:
+              summary: API 5xx ratio burns the 30-day error budget 6x too fast (5 % of the budget in 6 hours).
+              runbook: docs/observability.md#alerts
+      - eval_time: 7h
+        alertname: ApiErrorBudgetFastBurn
+        exp_alerts: []
+
+  - name: service down fires after a failing probe
+    interval: 30s
+    input_series:
+      - series: 'probe_success{job="blackbox",target_name="api",instance="http://api:8080/health"}'
+        values: '0x10'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: ServiceDown
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: blackbox
+              target_name: api
+              instance: http://api:8080/health
+            exp_annotations:
+              summary: Probe api (http://api:8080/health) is failing.
+              runbook: docs/observability.md#alerts
+
+  - name: service down stays quiet while probes pass
+    interval: 30s
+    input_series:
+      - series: 'probe_success{job="blackbox",target_name="api",instance="http://api:8080/health"}'
+        values: '1x10'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: ServiceDown
+        exp_alerts: []
+
+  - name: stale job fires when the last success is older than 3 intervals
+    interval: 1m
+    input_series:
+      - series: 'elmanhg_job_last_success_seconds{elmanhg_job="exam-auto-submit"}'
+        values: '0x15'
+      - series: 'elmanhg_job_interval_seconds{elmanhg_job="exam-auto-submit"}'
+        values: '60x15'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: BackgroundJobStale
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              elmanhg_job: exam-auto-submit
+            exp_annotations:
+              summary: Background job exam-auto-submit has not completed a successful sweep for more than 3 intervals.
+              runbook: docs/observability.md#alerts
+
+  - name: fresh job stays quiet
+    interval: 1m
+    input_series:
+      - series: 'elmanhg_job_last_success_seconds{elmanhg_job="exam-auto-submit"}'
+        values: '-60+60x15'
+      - series: 'elmanhg_job_interval_seconds{elmanhg_job="exam-auto-submit"}'
+        values: '60x15'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: BackgroundJobStale
+        exp_alerts: []
+
+  - name: failing job fires on 3 failed sweeps in 15 minutes
+    interval: 1m
+    input_series:
+      - series: 'elmanhg_job_runs_total{elmanhg_job="exam-auto-submit",elmanhg_outcome="Failed"}'
+        values: '0+1x3 3x10'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: BackgroundJobFailing
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              elmanhg_job: exam-auto-submit
+            exp_annotations:
+              summary: Background job exam-auto-submit failed to list its work 3 or more times in 15 minutes.
+              runbook: docs/observability.md#alerts
+
+  - name: otp delivery fires on 5 failed sends in 15 minutes
+    interval: 1m
+    input_series:
+      - series: 'elmanhg_otp_sends_total{elmanhg_channel="WhatsApp",elmanhg_outcome="Failed"}'
+        values: '0+1x5 5x10'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: OtpDeliveryFailing
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+            exp_annotations:
+              summary: OTP delivery failed 5 or more times in 15 minutes; users cannot sign in.
+              runbook: docs/observability.md#alerts
+
+  - name: one unhandled exception fires
+    interval: 1m
+    input_series:
+      - series: 'elmanhg_requests_total{elmanhg_request="SubmitAnswerCommand",elmanhg_outcome="UNHANDLED_EXCEPTION"}'
+        values: '0 1 1 1 1 1'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: ApiUnhandledErrors
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+            exp_annotations:
+              summary: The API raised unhandled exceptions in the last 10 minutes.
+              runbook: docs/observability.md#alerts
+
+  - name: provider unavailable fires per failing provider
+    interval: 1m
+    input_series:
+      - series: 'elmanhg_requests_total{elmanhg_request="SendAvatarMessageCommand",elmanhg_outcome="AI_SERVICE_UNAVAILABLE"}'
+        values: '0+1x5 5x10'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: ProviderUnavailable
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              elmanhg_outcome: AI_SERVICE_UNAVAILABLE
+            exp_annotations:
+              summary: Requests failed with AI_SERVICE_UNAVAILABLE 5 or more times in 15 minutes.
+              runbook: docs/observability.md#alerts
+
+  - name: missing API telemetry fires
+    interval: 1m
+    input_series:
+      - series: 'probe_success{job="blackbox",target_name="api",instance="http://api:8080/health"}'
+        values: '1x25'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: ApiTelemetryMissing
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: elmanhg-api
+            exp_annotations:
+              summary: No API telemetry has arrived for 10 minutes; the collector or the API exporter is down.
+              runbook: docs/observability.md#alerts
+
+  # OTel SDKs export a new counter series at its first value, never at 0: these series start at 1 with no earlier sample.
+  - name: first unhandled exception of a new series fires
+    interval: 1m
+    input_series:
+      - series: 'elmanhg_requests_total{elmanhg_request="SubmitAnswerCommand",elmanhg_outcome="UNHANDLED_EXCEPTION"}'
+        values: '_x2 1 1 1'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: ApiUnhandledErrors
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+            exp_annotations:
+              summary: The API raised unhandled exceptions in the last 10 minutes.
+              runbook: docs/observability.md#alerts
+
+  - name: an old unhandled exception outside the window stays quiet
+    interval: 1m
+    input_series:
+      - series: 'elmanhg_requests_total{elmanhg_request="SubmitAnswerCommand",elmanhg_outcome="UNHANDLED_EXCEPTION"}'
+        values: '_x2 1x30'
+    alert_rule_test:
+      - eval_time: 25m
+        alertname: ApiUnhandledErrors
+        exp_alerts: []
+
+  - name: first flagged payment notification of a new series fires
+    interval: 1m
+    input_series:
+      - series: 'elmanhg_payment_notifications_total{elmanhg_outcome="FlaggedForReview"}'
+        values: '_x2 1 1 1'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: PaymentNotificationNeedsReview
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+            exp_annotations:
+              summary: A payment notification was flagged for review in the last hour.
+              runbook: docs/observability.md#alerts
+
+  - name: five failed otp sends on a new series fire
+    interval: 1m
+    input_series:
+      - series: 'elmanhg_otp_sends_total{elmanhg_channel="WhatsApp",elmanhg_outcome="Failed"}'
+        values: '_x2 1+1x4 5x5'
+    alert_rule_test:
+      - eval_time: 8m
+        alertname: OtpDeliveryFailing
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+            exp_annotations:
+              summary: OTP delivery failed 5 or more times in 15 minutes; users cannot sign in.
+              runbook: docs/observability.md#alerts
+
+  - name: four failed otp sends on a new series stay quiet
+    interval: 1m
+    input_series:
+      - series: 'elmanhg_otp_sends_total{elmanhg_channel="WhatsApp",elmanhg_outcome="Failed"}'
+        values: '_x2 1+1x3 4x5'
+    alert_rule_test:
+      - eval_time: 8m
+        alertname: OtpDeliveryFailing
+        exp_alerts: []
+
+  - name: five provider failures on a new series fire
+    interval: 1m
+    input_series:
+      - series: 'elmanhg_requests_total{elmanhg_request="SendAvatarMessageCommand",elmanhg_outcome="AI_SERVICE_UNAVAILABLE"}'
+        values: '_x2 1+1x4 5x5'
+    alert_rule_test:
+      - eval_time: 8m
+        alertname: ProviderUnavailable
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              elmanhg_outcome: AI_SERVICE_UNAVAILABLE
+            exp_annotations:
+              summary: Requests failed with AI_SERVICE_UNAVAILABLE 5 or more times in 15 minutes.
+              runbook: docs/observability.md#alerts
+
+  - name: five model errors on a new series fire
+    interval: 1m
+    input_series:
+      - series: 'gen_ai_client_operation_duration_seconds_count{job="elmanhg-ai",gen_ai_operation_name="chat",error_type="RateLimitError"}'
+        values: '_x2 1+1x4 5x5'
+    alert_rule_test:
+      - eval_time: 8m
+        alertname: AiModelErrors
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+            exp_annotations:
+              summary: Model or embedding calls failed 5 or more times in 15 minutes.
+              runbook: docs/observability.md#alerts
+
+  - name: three failed sweeps on a new series fire
+    interval: 1m
+    input_series:
+      - series: 'elmanhg_job_runs_total{elmanhg_job="exam-auto-submit",elmanhg_outcome="Failed"}'
+        values: '_x2 1+1x2 3x5'
+    alert_rule_test:
+      - eval_time: 7m
+        alertname: BackgroundJobFailing
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              elmanhg_job: exam-auto-submit
+            exp_annotations:
+              summary: Background job exam-auto-submit failed to list its work 3 or more times in 15 minutes.
+              runbook: docs/observability.md#alerts

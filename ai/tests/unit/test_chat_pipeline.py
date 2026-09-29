@@ -2,6 +2,7 @@ import json
 import re
 import time
 from collections.abc import Callable
+from decimal import Decimal
 from typing import Any
 
 import pytest
@@ -66,7 +67,33 @@ async def test_chat_run_returns_reply_with_model_and_prompt_version(
         input_tokens=0,
         output_tokens=0,
         stop_reason="end_turn",
+        cost_usd=Decimal("0.000000"),
     )
+
+
+async def test_chat_run_returns_cost_usd_from_token_usage(
+    chat_payload: PayloadBuilder, prompts: ChatPrompts, settings: Settings
+) -> None:
+    reply = ModelReply(
+        text="رد",
+        model="claude-sonnet-5",
+        input_tokens=1000,
+        output_tokens=200,
+        stop_reason="end_turn",
+    )
+    priced = settings.model_copy(
+        update={
+            "model_input_usd_per_million_tokens": Decimal("3"),
+            "model_output_usd_per_million_tokens": Decimal("15"),
+        }
+    )
+    payload = ChatIn.model_validate(chat_payload())
+
+    result = await chat.run(
+        payload, model=FakeModelClient([reply]), prompts=prompts, settings=priced
+    )
+
+    assert result.cost_usd == Decimal("0.006000")
 
 
 async def test_chat_run_strips_delimiter_tags_from_untrusted_text(

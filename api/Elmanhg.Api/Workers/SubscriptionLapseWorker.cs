@@ -1,3 +1,4 @@
+using Elmanhg.Application.Shared.Observability;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Subscriptions.GetLapsedSubscriptionIds;
 using Elmanhg.Application.Subscriptions.LapseSubscription;
@@ -6,8 +7,10 @@ using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Api.Workers;
 
-public sealed class SubscriptionLapseWorker(IServiceScopeFactory scopeFactory, IOptions<SubscriptionsOptions> subscriptionsOptions, TimeProvider timeProvider, ILogger<SubscriptionLapseWorker> logger) : BackgroundService
+public sealed class SubscriptionLapseWorker(IServiceScopeFactory scopeFactory, IOptions<SubscriptionsOptions> subscriptionsOptions, TimeProvider timeProvider, ILogger<SubscriptionLapseWorker> logger, BackgroundJobMetrics jobMetrics) : BackgroundService
 {
+    private const string JobName = "subscription-lapse";
+
     // Ids whose lapse failed are left out of later batches until a sweep reaches the end of the backlog, so failing subscriptions cannot hold the head of every batch.
     private readonly HashSet<Guid> _deferredIds = [];
 
@@ -19,6 +22,7 @@ public sealed class SubscriptionLapseWorker(IServiceScopeFactory scopeFactory, I
             return;
         }
 
+        jobMetrics.Register(JobName, TimeSpan.FromSeconds(options.LapseSweepIntervalSeconds));
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(options.LapseSweepIntervalSeconds), timeProvider);
         while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false))
         {
@@ -28,7 +32,14 @@ public sealed class SubscriptionLapseWorker(IServiceScopeFactory scopeFactory, I
 
     private async Task SweepAsync(int batchSize, CancellationToken stoppingToken)
     {
+        using var run = jobMetrics.StartRun(JobName);
         var subscriptionIds = await ListLapsedAsync(stoppingToken).ConfigureAwait(false);
+        if (subscriptionIds is null)
+        {
+            run.MarkListingFailed();
+        }
+
+        subscriptionIds ??= [];
         if (subscriptionIds.Count < batchSize)
         {
             _deferredIds.Clear();
@@ -36,14 +47,18 @@ public sealed class SubscriptionLapseWorker(IServiceScopeFactory scopeFactory, I
 
         foreach (var subscriptionId in subscriptionIds)
         {
-            if (!await LapseAsync(subscriptionId, stoppingToken).ConfigureAwait(false))
+            if (await LapseAsync(subscriptionId, stoppingToken).ConfigureAwait(false))
             {
-                _deferredIds.Add(subscriptionId);
+                run.ItemSucceeded();
+                continue;
             }
+
+            run.ItemFailed();
+            _deferredIds.Add(subscriptionId);
         }
     }
 
-    private async Task<List<Guid>> ListLapsedAsync(CancellationToken stoppingToken)
+    private async Task<List<Guid>?> ListLapsedAsync(CancellationToken stoppingToken)
     {
         try
         {
@@ -53,7 +68,7 @@ public sealed class SubscriptionLapseWorker(IServiceScopeFactory scopeFactory, I
         catch (Exception exception) when (!stoppingToken.IsCancellationRequested)
         {
             logger.LogError(exception, "Listing lapsed subscriptions failed.");
-            return [];
+            return null;
         }
     }
 

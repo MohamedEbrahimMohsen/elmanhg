@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from elmanhg_ai.clients.fake_model import FakeModelClient
 from elmanhg_ai.clients.model import ModelReply
 from elmanhg_ai.eval.avatar_chat import (
@@ -28,6 +30,7 @@ def _result(reply: str, citations: tuple[str, ...]) -> ChatResult:
         input_tokens=1,
         output_tokens=1,
         stop_reason="end_turn",
+        cost_usd=Decimal("0"),
         citations=citations,
     )
 

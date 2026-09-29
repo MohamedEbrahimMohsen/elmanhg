@@ -29,7 +29,9 @@ async def test_eval_transcription_egyptian_dialect_mean_wer_within_threshold() -
     try:
         for case in cases:
             audio = (DATASET / case["audio"]).read_bytes()
-            reply = await client.transcribe(TranscriptionRequest(audio, case["contentType"], "ar"))
+            reply = await client.transcribe(
+                TranscriptionRequest(audio, case["contentType"], "ar", 10)
+            )
             scores[case["audio"]] = score_word_error_rate(case["reference"], reply.text)
     finally:
         await client.aclose()

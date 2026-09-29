@@ -52,11 +52,25 @@ async def test_chat_valid_request_returns_reply(
         "inputTokens",
         "outputTokens",
         "stopReason",
+        "costUsd",
         "citations",
     }
     assert body["promptVersion"] == "v2"
     assert body["citations"] == []
     assert len(fake_model.requests) == 1
+
+
+async def test_chat_valid_request_returns_cost_usd(
+    client: httpx2.AsyncClient,
+    auth_headers: dict[str, str],
+    chat_payload: PayloadBuilder,
+) -> None:
+    response = await client.post("/v1/chat", json=chat_payload(), headers=auth_headers)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert "costUsd" in body
+    assert body["costUsd"] == 0.0
 
 
 async def test_chat_missing_token_returns_401_problem(

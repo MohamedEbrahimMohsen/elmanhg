@@ -50,6 +50,7 @@
     "UNIT_NAME_TOO_LONG": "Unit name is too long.",
     "UNIT_POSITION_INVALID": "Position must be 1 or more.",
     "LESSON_NOT_FOUND": "Lesson not found.",
+    "AVATAR_CONVERSATION_NOT_FOUND": "The conversation was not found.",
     "LESSON_NAME_REQUIRED": "Enter the lesson name.",
     "LESSON_NAME_TOO_LONG": "Lesson name is too long.",
     "LESSON_EXPLANATION_TOO_LONG": "The explanation is too long.",

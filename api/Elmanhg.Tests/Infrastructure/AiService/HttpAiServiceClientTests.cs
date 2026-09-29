@@ -13,7 +13,7 @@ namespace Elmanhg.Tests.Infrastructure.AiService;
 
 public sealed class HttpAiServiceClientTests
 {
-    private const string ReplyBody = "{\"reply\":\"r\",\"model\":\"claude-sonnet-5\",\"promptVersion\":\"v1\",\"inputTokens\":10,\"outputTokens\":5,\"stopReason\":\"end_turn\",\"citations\":[\"explanation-1\"]}";
+    private const string ReplyBody = "{\"reply\":\"r\",\"model\":\"claude-sonnet-5\",\"promptVersion\":\"v1\",\"inputTokens\":10,\"outputTokens\":5,\"stopReason\":\"end_turn\",\"citations\":[\"explanation-1\"],\"costUsd\":0.000105}";
 
     private const string EmbeddingsBody = "{\"model\":\"text-embedding-3-small\",\"dimensions\":2,\"embeddings\":[[0.6,0.8],[1.0,0.0]],\"inputTokens\":4}";
 
@@ -58,6 +58,7 @@ public sealed class HttpAiServiceClientTests
         reply.OutputTokens.Should().Be(5);
         reply.StopReason.Should().Be("end_turn");
         reply.Citations.Should().Equal("explanation-1");
+        reply.CostUsd.Should().Be(0.000105m);
     }
 
     [Fact]

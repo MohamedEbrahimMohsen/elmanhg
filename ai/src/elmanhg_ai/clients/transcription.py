@@ -13,6 +13,7 @@ class TranscriptionRequest:
     audio: bytes
     content_type: str
     language: str
+    duration_seconds: int
 
 
 @dataclass(frozen=True, slots=True)

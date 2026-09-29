@@ -18,7 +18,7 @@ These override the sections below for this repo.
 2. LLM: the Claude API through the `anthropic` SDK (pinned `==`) inside `clients/anthropic_model.py`, behind the `ModelClient` protocol in `clients/model.py`. There is **no LiteLLM**. `FakeModelClient` is the default (`ELMANHG_AI_LLM_PROVIDER=fake`). The anthropic 1.x `messages.create` has no `temperature`, so none is set.
 3. HTTP library: `httpx2` (anthropic's transport). Never add `httpx`, `requests` or `respx`.
 4. No database, SQLAlchemy or Alembic until a story needs one. Ignore §9 until then.
-5. No OpenTelemetry SDK until E13.S2: the trace id comes from the `traceparent` header (`core/middleware.py`).
+5. OpenTelemetry (from E13.S2): `core/telemetry.py` builds the tracer and meter providers (OTLP/gRPC only when `ELMANHG_AI_OTLP_ENDPOINT` is set); FastAPI is instrumented there; model and embedding calls are measured by the `clients/metered.py` wrappers applied in `lifespan`. Do not add OTLP log handlers: logs leave through stdout (docs/observability.md).
 6. No Postman for `ai/`: the service is internal, and the .NET API's Postman collection covers user-facing endpoints.
 7. Evals (`-m eval`) become mandatory from the first story that ships a production prompt against the live model (#91). The `eval` marker is declared now.
 8. Contract: `ai/openapi/v1.json` is regenerated with `uv run python -m elmanhg_ai.openapi_export` and checked by `tests/integration/test_openapi_document.py`. The .NET side of the contract is `api/Elmanhg.Application/Shared/AiService/`, and both must change together (`docs/ai-service.md`).

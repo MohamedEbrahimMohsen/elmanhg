@@ -43,6 +43,7 @@ All state is saved in `localStorage` under the key `elmanhg.v1`. Click **إعا�
     - Blueprint editor refuses to save when there is a shortfall.
     - Users page: suspend students, grant plans, assign subjects to teachers. The last active admin cannot be deactivated.
     - The product also has a payments page (log, needs-review queue, refunds); the prototype does not simulate it.
+    - The product also has an assistant conversations page (list with search, and each conversation with the model, prompt version, tokens, cost and context of every reply); the prototype does not simulate it.
     - Audit log.
     - JSONL training-data export, with student ids hashed.
 

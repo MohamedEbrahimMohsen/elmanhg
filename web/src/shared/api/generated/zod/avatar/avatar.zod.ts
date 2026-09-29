@@ -29,10 +29,7 @@ export const SendAvatarMessageBody = zod.object({
   "lessonId": zod.uuid().nullable(),
   "sessionId": zod.uuid().nullable(),
   "questionId": zod.uuid().nullable(),
-  "history": zod.array(zod.object({
-  "role": zod.enum(['User', 'Assistant']),
-  "content": zod.string()
-})),
+  "conversationId": zod.uuid().nullable(),
   "message": zod.string()
 })
 
@@ -42,6 +39,7 @@ export const sendAvatarMessageResponseMessagesRemainingTodayRegExpTwo = new RegE
 
 
 export const SendAvatarMessageResponse = zod.object({
+  "conversationId": zod.uuid(),
   "reply": zod.string(),
   "citations": zod.array(zod.object({
   "reference": zod.string(),

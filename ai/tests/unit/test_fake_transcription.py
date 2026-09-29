@@ -8,7 +8,9 @@ from elmanhg_ai.clients.fake_transcription import (
 from elmanhg_ai.clients.transcription import TranscriptionReply, TranscriptionRequest
 from elmanhg_ai.core.errors import ModelUnavailableError
 
-REQUEST = TranscriptionRequest(audio=b"\x1a\x45\xdf\xa3", content_type="audio/webm", language="ar")
+REQUEST = TranscriptionRequest(
+    audio=b"\x1a\x45\xdf\xa3", content_type="audio/webm", language="ar", duration_seconds=12
+)
 
 
 async def test_fake_transcription_client_returns_fixed_arabic_text() -> None:

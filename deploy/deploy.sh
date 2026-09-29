@@ -7,6 +7,7 @@ source ./lib.sh
 
 tag=${1:?usage: deploy.sh <image-tag>}
 [[ $tag =~ ^(sha-[0-9a-f]{7,40}|main)$ ]] || fail "image tag must be sha-<7-40 hex> or main, got '$tag'"
+check_observability_config
 grep -q '^IMAGE_TAG=' "$ENV_FILE" || fail "$ENV_FILE has no IMAGE_TAG= line"
 previous=$(grep '^IMAGE_TAG=' "$ENV_FILE" | cut -d= -f2-)
 
@@ -36,6 +37,12 @@ wait_healthy web
 if [ -n "$(compose ps -q ai)" ]; then
   wait_healthy ai
 fi
+# Loki and Tempo images ship no probe tool, so they have no health check to wait for.
+for service in prometheus alertmanager blackbox grafana; do
+  if [ -n "$(compose ps -q "$service")" ]; then
+    wait_healthy "$service"
+  fi
+done
 
 docker image prune -f
 echo "Deployed $tag (previous: $previous)"

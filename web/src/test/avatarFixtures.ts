@@ -1,6 +1,8 @@
 import type { AvatarReplyResult, AvatarStatusResult } from '@/shared/api/generated/model';
 import { browseLessonId } from '@/test/browseFixtures';
 
+export const avatarConversationId = '7d1c2b3a-0000-4000-8000-00000000c0de';
+
 export function avatarStatus(overrides?: Partial<AvatarStatusResult>): AvatarStatusResult {
   return {
     examInProgress: false,
@@ -20,6 +22,7 @@ export function freeAvatarStatus(overrides?: Partial<AvatarStatusResult>): Avata
 
 export function avatarReply(overrides?: Partial<AvatarReplyResult>): AvatarReplyResult {
   return {
+    conversationId: avatarConversationId,
     reply: 'المقاومة = فرق الجهد ÷ شدة التيار.',
     citations: [
       {

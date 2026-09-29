@@ -27,6 +27,7 @@ public static class PermissionMatrixPolicies
             .AddPolicy(DefaultCodes.ProgressViewAny, policy => policy.RequireRole(Admin))
             .AddPolicy(DefaultCodes.SubscriptionManage, policy => policy.RequireRole(Student))
             .AddPolicy(DefaultCodes.AvatarChat, policy => policy.RequireRole(Student))
+            .AddPolicy(DefaultCodes.AvatarConversationsView, policy => policy.RequireRole(Admin))
             .AddPolicy(DefaultCodes.PaymentsManage, policy => policy.RequireRole(Admin))
             .AddPolicy(DefaultCodes.DashboardsView, policy => policy.RequireRole(Admin))
             .AddPolicy(DefaultCodes.TeacherStatsViewOwn, policy => policy.RequireRole(Teacher))

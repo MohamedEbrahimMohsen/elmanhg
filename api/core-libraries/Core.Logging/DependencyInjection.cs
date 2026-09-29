@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Formatting.Compact;
 
 namespace Core.Logging;
 
@@ -61,6 +62,12 @@ public static class DependencyInjection
         if (options.Environments?.Length > 0 &&
             !options.Environments.Contains(environmentName))
             return;
+
+        if (options.Format == ConsoleLogFormat.Json)
+        {
+            config.WriteTo.Async(a => a.Console(new RenderedCompactJsonFormatter(), restrictedToMinimumLevel: options.MinimumLevel));
+            return;
+        }
 
         config.WriteTo.Async(a => a.Console(
             restrictedToMinimumLevel: options.MinimumLevel

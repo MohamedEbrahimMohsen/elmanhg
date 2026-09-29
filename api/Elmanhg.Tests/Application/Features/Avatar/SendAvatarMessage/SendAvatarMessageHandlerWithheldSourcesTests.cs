@@ -84,7 +84,7 @@ public sealed class SendAvatarMessageHandlerWithheldSourcesTests
         var first = QuestionMatch(session.Items[0].QuestionId, 1);
         var second = QuestionMatch(session.Items[1].QuestionId, 1);
         AvatarTestData.StubSearch(_harness.Sender, explanation, first, second);
-        _harness.Ai.ChatAsync(Arg.Any<AiChatRequest>(), Arg.Any<CancellationToken>()).Returns(new AiChatReply("رد", "m", "v2", 1, 1, "end_turn", [explanation.Reference, first.Reference, second.Reference]));
+        _harness.Ai.ChatAsync(Arg.Any<AiChatRequest>(), Arg.Any<CancellationToken>()).Returns(new AiChatReply("رد", "m", "v2", 1, 1, "end_turn", [explanation.Reference, first.Reference, second.Reference], 0m));
         return (explanation, first, second);
     }
 }

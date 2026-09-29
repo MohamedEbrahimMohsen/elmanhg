@@ -3116,6 +3116,39 @@
         }
       }
     },
+    "/api/client-errors": {
+      "post": {
+        "tags": [
+          "ClientErrors"
+        ],
+        "operationId": "ReportClientError",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportClientErrorRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportClientErrorRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportClientErrorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/mastery/overview": {
       "get": {
         "tags": [
@@ -4525,6 +4558,135 @@
         }
       }
     },
+    "/api/avatar/conversations": {
+      "get": {
+        "tags": [
+          "AvatarConversations"
+        ],
+        "operationId": "GetAvatarConversations",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entryPoint",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/AvatarEntryPoint"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfAdminAvatarConversationResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfAdminAvatarConversationResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfAdminAvatarConversationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/avatar/conversations/{conversationId}": {
+      "get": {
+        "tags": [
+          "AvatarConversations"
+        ],
+        "operationId": "GetAvatarConversation",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAvatarConversationDetailResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAvatarConversationDetailResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAvatarConversationDetailResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/otp/send": {
       "post": {
         "tags": [
@@ -5081,6 +5243,345 @@
   },
   "components": {
     "schemas": {
+      "AdminAvatarConversationDetailResult": {
+        "required": [
+          "id",
+          "studentId",
+          "studentName",
+          "entryPoint",
+          "subjectId",
+          "subjectName",
+          "unitId",
+          "unitName",
+          "lessonId",
+          "lessonName",
+          "sessionId",
+          "questionId",
+          "startedAt",
+          "lastMessageAt",
+          "messageCount",
+          "totalInputTokens",
+          "totalOutputTokens",
+          "totalCostUsd",
+          "messages"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "studentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "studentName": {
+            "type": "string"
+          },
+          "entryPoint": {
+            "$ref": "#/components/schemas/AvatarEntryPoint"
+          },
+          "subjectId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "subjectName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "unitId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "unitName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "lessonId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "lessonName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sessionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "questionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastMessageAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "messageCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "totalInputTokens": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "totalOutputTokens": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "totalCostUsd": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminAvatarMessageResult"
+            }
+          }
+        }
+      },
+      "AdminAvatarConversationResult": {
+        "required": [
+          "id",
+          "studentId",
+          "studentName",
+          "entryPoint",
+          "subjectId",
+          "subjectName",
+          "lessonId",
+          "lessonName",
+          "questionId",
+          "startedAt",
+          "lastMessageAt",
+          "messageCount",
+          "firstQuestion"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "studentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "studentName": {
+            "type": "string"
+          },
+          "entryPoint": {
+            "$ref": "#/components/schemas/AvatarEntryPoint"
+          },
+          "subjectId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "subjectName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "lessonId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "lessonName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "questionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastMessageAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "messageCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "firstQuestion": {
+            "type": "string"
+          }
+        }
+      },
+      "AdminAvatarMessageResult": {
+        "required": [
+          "id",
+          "position",
+          "role",
+          "text",
+          "createdAt",
+          "model",
+          "promptVersion",
+          "inputTokens",
+          "outputTokens",
+          "costUsd",
+          "stopReason",
+          "historyMessageCount",
+          "citations",
+          "context"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "position": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "role": {
+            "$ref": "#/components/schemas/AvatarMessageRole"
+          },
+          "text": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "model": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "promptVersion": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "inputTokens": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "outputTokens": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "costUsd": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "stopReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "historyMessageCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "citations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvatarCitationResult"
+            }
+          },
+          "context": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AvatarMessageContext"
+              }
+            ]
+          }
+        }
+      },
       "AdminPaymentResult": {
         "required": [
           "id",
@@ -5208,6 +5709,179 @@
           },
           "canRefund": {
             "type": "boolean"
+          }
+        }
+      },
+      "AiChatEntryPoint": {
+        "enum": [
+          "Lesson",
+          "QuizQuestion",
+          "ExamReview",
+          "Global"
+        ]
+      },
+      "AiChatSource": {
+        "required": [
+          "reference",
+          "title",
+          "content"
+        ],
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          }
+        }
+      },
+      "AiContextBundle": {
+        "required": [
+          "entryPoint",
+          "subject",
+          "unit",
+          "lesson",
+          "question",
+          "subjects"
+        ],
+        "type": "object",
+        "properties": {
+          "entryPoint": {
+            "$ref": "#/components/schemas/AiChatEntryPoint"
+          },
+          "subject": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AiContextReference"
+              }
+            ]
+          },
+          "unit": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AiContextReference"
+              }
+            ]
+          },
+          "lesson": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AiLessonContext"
+              }
+            ]
+          },
+          "question": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AiQuestionContext"
+              }
+            ]
+          },
+          "subjects": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "AiContextReference": {
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "AiLessonContext": {
+        "required": [
+          "id",
+          "name",
+          "explanation",
+          "objectives",
+          "summary"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "objectives": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "summary": {
+            "type": "string"
+          }
+        }
+      },
+      "AiQuestionContext": {
+        "required": [
+          "id",
+          "stem",
+          "studentAnswer",
+          "correctAnswer",
+          "explanation"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stem": {
+            "type": "string"
+          },
+          "studentAnswer": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "correctAnswer": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "explanation": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -5506,8 +6180,33 @@
           "Global"
         ]
       },
+      "AvatarMessageContext": {
+        "required": [
+          "bundle",
+          "sources"
+        ],
+        "type": "object",
+        "properties": {
+          "bundle": {
+            "$ref": "#/components/schemas/AiContextBundle"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiChatSource"
+            }
+          }
+        }
+      },
+      "AvatarMessageRole": {
+        "enum": [
+          "Student",
+          "Assistant"
+        ]
+      },
       "AvatarReplyResult": {
         "required": [
+          "conversationId",
           "reply",
           "citations",
           "dailyMessageLimit",
@@ -5518,6 +6217,10 @@
         ],
         "type": "object",
         "properties": {
+          "conversationId": {
+            "type": "string",
+            "format": "uuid"
+          },
           "reply": {
             "type": "string"
           },
@@ -5619,27 +6322,6 @@
           }
         }
       },
-      "AvatarTurn": {
-        "required": [
-          "role",
-          "content"
-        ],
-        "type": "object",
-        "properties": {
-          "role": {
-            "$ref": "#/components/schemas/AvatarTurnRole"
-          },
-          "content": {
-            "type": "string"
-          }
-        }
-      },
-      "AvatarTurnRole": {
-        "enum": [
-          "User",
-          "Assistant"
-        ]
-      },
       "BasePlanResult": {
         "required": [
           "dailyAvatarMessages",
@@ -5728,6 +6410,13 @@
             "$ref": "#/components/schemas/Money"
           }
         }
+      },
+      "ClientErrorSource": {
+        "enum": [
+          "Window",
+          "UnhandledRejection",
+          "Route"
+        ]
       },
       "CompleteFakePaymentRequest": {
         "required": [
@@ -7688,6 +8377,49 @@
           "Email"
         ]
       },
+      "PageDataOfAdminAvatarConversationResult": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminAvatarConversationResult"
+            }
+          },
+          "pageNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalItems": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
       "PageDataOfAdminPaymentResult": {
         "type": "object",
         "properties": {
@@ -8661,6 +9393,42 @@
           }
         }
       },
+      "ReportClientErrorRequest": {
+        "required": [
+          "message",
+          "errorName",
+          "stack",
+          "source",
+          "path"
+        ],
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "errorName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "stack": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "source": {
+            "$ref": "#/components/schemas/ClientErrorSource"
+          },
+          "path": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "ReviewSessionResult": {
         "required": [
           "reviewSessionId",
@@ -8723,7 +9491,7 @@
           "lessonId",
           "sessionId",
           "questionId",
-          "history",
+          "conversationId",
           "message"
         ],
         "type": "object",
@@ -8752,11 +9520,12 @@
             ],
             "format": "uuid"
           },
-          "history": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AvatarTurn"
-            }
+          "conversationId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           },
           "message": {
             "type": "string"
@@ -11439,6 +12208,9 @@
       "name": "Payments"
     },
     {
+      "name": "ClientErrors"
+    },
+    {
       "name": "Mastery"
     },
     {
@@ -11458,6 +12230,9 @@
     },
     {
       "name": "Avatar"
+    },
+    {
+      "name": "AvatarConversations"
     },
     {
       "name": "Auth"
