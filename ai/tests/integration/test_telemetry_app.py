@@ -131,3 +131,30 @@ async def test_chat_request_records_model_metrics_through_app(
         for point in metric.data.data_points
     ]
     assert "chat" in operations
+
+
+async def test_transcription_request_records_transcription_metrics_through_app(
+    telemetry_client: httpx2.AsyncClient,
+    in_memory_telemetry: InMemoryTelemetry,
+    auth_headers: dict[str, str],
+    transcription_payload: PayloadBuilder,
+) -> None:
+    _, spans, reader = in_memory_telemetry
+
+    response = await telemetry_client.post(
+        "/v1/transcriptions", json=transcription_payload(), headers=auth_headers
+    )
+
+    assert response.status_code == 200
+    data = reader.get_metrics_data()
+    assert data is not None
+    operations = [
+        (point.attributes or {}).get("gen_ai.operation.name")
+        for resource in data.resource_metrics
+        for scope in resource.scope_metrics
+        for metric in scope.metrics
+        if metric.name == "gen_ai.client.operation.duration"
+        for point in metric.data.data_points
+    ]
+    assert "transcription" in operations
+    assert any(span.name.startswith("transcription ") for span in spans.get_finished_spans())

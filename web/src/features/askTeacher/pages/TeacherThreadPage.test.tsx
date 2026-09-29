@@ -87,6 +87,8 @@ describe('TeacherThreadPage', () => {
       text: 'Because F = ma.',
       imageUrl: null,
       createdAt: '2026-10-01T09:00:00Z',
+      audioUrl: null,
+      audioDurationSeconds: null,
     };
     server.use(
       http.get(

@@ -56,6 +56,9 @@ public static class ErrorCodes
     public const string TeacherThreadAlreadyClaimed = "TEACHER_THREAD_ALREADY_CLAIMED";
     public const string TeacherThreadNotClaimed = "TEACHER_THREAD_NOT_CLAIMED";
     public const string TeacherThreadNotAwaitingReply = "TEACHER_THREAD_NOT_AWAITING_REPLY";
+    public const string TeacherVoiceDraftNotReady = "TEACHER_VOICE_DRAFT_NOT_READY";
+    public const string TeacherVoiceDraftAlreadySent = "TEACHER_VOICE_DRAFT_ALREADY_SENT";
+    public const string TeacherVoiceDraftNotPending = "TEACHER_VOICE_DRAFT_NOT_PENDING";
 
     // SUBSCRIPTIONS
     public const string SubscriptionPeriodInvalid = "SUBSCRIPTION_PERIOD_INVALID";

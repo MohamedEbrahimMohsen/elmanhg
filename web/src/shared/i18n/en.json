@@ -235,7 +235,17 @@
     "TEACHER_THREAD_MODIFIED_CONCURRENTLY": "The conversation just changed. Reload it and try again.",
     "TEACHER_THREAD_REPLY_TEXT_REQUIRED": "Write your reply.",
     "TEACHER_THREAD_REPLY_TEXT_TOO_LONG": "The reply is too long.",
-    "TEACHER_INBOX_FILTER_INVALID": "The inbox filter is not valid."
+    "TEACHER_INBOX_FILTER_INVALID": "The inbox filter is not valid.",
+    "TEACHER_VOICE_AUDIO_REQUIRED": "Attach the voice recording.",
+    "TEACHER_VOICE_AUDIO_TYPE_INVALID": "The recording must be WEBM, OGG or M4A.",
+    "TEACHER_VOICE_AUDIO_TOO_LARGE": "The recording is larger than allowed.",
+    "TEACHER_VOICE_DURATION_INVALID": "The recording length is not valid.",
+    "TEACHER_VOICE_DRAFT_ID_REQUIRED": "The recording is required.",
+    "TEACHER_VOICE_DRAFT_NOT_FOUND": "The recording was not found.",
+    "TEACHER_VOICE_AUDIO_NOT_FOUND": "The recording file was not found.",
+    "TEACHER_VOICE_DRAFT_NOT_READY": "The recording is still being transcribed.",
+    "TEACHER_VOICE_DRAFT_ALREADY_SENT": "This recording was already sent.",
+    "TEACHER_VOICE_DRAFT_NOT_PENDING": "This recording is not waiting for transcription."
   },
   "error": {
     "title": "Something went wrong"

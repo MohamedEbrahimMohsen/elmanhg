@@ -14,4 +14,11 @@ export interface TeacherMessageResult {
   /** @nullable */
   imageUrl: string | null;
   createdAt: string;
+  /** @nullable */
+  audioUrl: string | null;
+  /**
+     * @nullable
+     * @pattern ^-?(?:0|[1-9]\d*)$
+     */
+  audioDurationSeconds: number | string | null;
 }

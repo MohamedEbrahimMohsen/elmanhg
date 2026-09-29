@@ -31,6 +31,8 @@
     { "key": "baseSubscriptionId", "value": "" },
     { "key": "teacherThreadId", "value": "" },
     { "key": "inboxThreadId", "value": "" },
+    { "key": "voiceThreadId", "value": "" },
+    { "key": "voiceDraftId", "value": "" },
     { "key": "avatarConversationId", "value": "" },
     { "key": "adminAvatarConversationId", "value": "" }
   ],
@@ -2929,6 +2931,51 @@
           "response": []
         },
         {
+          "name": "Create thread (voice)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200 or 403\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 403]); });",
+                  "if (pm.response.code === 200) { pm.collectionVariables.set(\"voiceThreadId\", pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teacher-threads",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teacher-threads"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "text",
+                  "value": "Can you explain Ohm's law by voice?",
+                  "type": "text"
+                },
+                {
+                  "key": "lessonId",
+                  "value": "{{lessonId}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "List my threads",
           "event": [
             {
@@ -3180,6 +3227,196 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"text\": \"Because force equals mass times acceleration.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Claim thread (voice)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200 or 409\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 409]); });",
+                  "if (pm.response.code === 200) { pm.test(\"claimed by me\", function () { pm.expect(pm.response.json().isClaimedByMe).to.eql(true); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teacher-inbox/{{voiceThreadId}}/claim",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teacher-inbox",
+                "{{voiceThreadId}}",
+                "claim"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get voice reply settings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"has limits\", function () { const body = pm.response.json(); pm.expect(body.maxDurationSeconds).to.be.above(0); pm.expect(body.maxSizeInMb).to.be.above(0); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teacher-inbox/voice-settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teacher-inbox",
+                "voice-settings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Record voice draft",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200, 409 or 422\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 409, 422]); });",
+                  "if (pm.response.code === 200) { pm.collectionVariables.set(\"voiceDraftId\", pm.response.json().id); pm.test(\"pending\", function () { pm.expect(pm.response.json().status).to.eql(\"Pending\"); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teacher-inbox/{{voiceThreadId}}/voice-drafts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teacher-inbox",
+                "{{voiceThreadId}}",
+                "voice-drafts"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "audio",
+                  "type": "file",
+                  "src": "",
+                  "description": "A .webm, .ogg or .m4a voice recording (audio/webm, audio/ogg or audio/mp4)."
+                },
+                {
+                  "key": "durationSeconds",
+                  "value": "12",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get voice draft",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200 or 404\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 404]); });",
+                  "if (pm.response.code === 200) { pm.test(\"has a status\", function () { pm.expect([\"Pending\", \"Ready\", \"Failed\", \"Sent\"]).to.include(pm.response.json().status); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teacher-inbox/{{voiceThreadId}}/voice-drafts/{{voiceDraftId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teacher-inbox",
+                "{{voiceThreadId}}",
+                "voice-drafts",
+                "{{voiceDraftId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send voice reply",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200, 404, 409 or 422\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 404, 409, 422]); });",
+                  "if (pm.response.code === 200) { pm.test(\"answered\", function () { pm.expect(pm.response.json().status).to.eql(\"Answered\"); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/teacher-inbox/{{voiceThreadId}}/voice-replies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teacher-inbox",
+                "{{voiceThreadId}}",
+                "voice-replies"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"draftId\": \"{{voiceDraftId}}\",\n  \"text\": \"Voltage equals current times resistance.\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

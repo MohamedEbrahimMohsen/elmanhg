@@ -13,6 +13,12 @@ from elmanhg_ai.clients.embedding import (
     estimate_embedding_cost_usd,
 )
 from elmanhg_ai.clients.model import ModelClient, ModelReply, ModelRequest, estimate_cost_usd
+from elmanhg_ai.clients.transcription import (
+    TranscriptionClient,
+    TranscriptionReply,
+    TranscriptionRequest,
+    estimate_transcription_cost_usd,
+)
 from elmanhg_ai.core.errors import DomainError
 from elmanhg_ai.settings import Settings
 
@@ -24,7 +30,7 @@ ERROR_TYPE: Final = "error.type"
 USAGE_INPUT_TOKENS: Final = "gen_ai.usage.input_tokens"
 USAGE_OUTPUT_TOKENS: Final = "gen_ai.usage.output_tokens"
 
-Operation = Literal["chat", "embeddings"]
+Operation = Literal["chat", "embeddings", "transcription"]
 
 
 class AiMetrics:
@@ -164,6 +170,53 @@ class MeteredEmbeddingClient:
                 error_type=None,
             )
             span.set_attribute(USAGE_INPUT_TOKENS, reply.input_tokens)
+            return reply
+
+    async def aclose(self) -> None:
+        await self._inner.aclose()
+
+
+class MeteredTranscriptionClient:
+    def __init__(
+        self, inner: TranscriptionClient, *, metrics: AiMetrics, tracer: Tracer, settings: Settings
+    ) -> None:
+        self._inner = inner
+        self._metrics = metrics
+        self._tracer = tracer
+        self._settings = settings
+
+    async def transcribe(self, request: TranscriptionRequest) -> TranscriptionReply:
+        settings = self._settings
+        model = settings.transcription_model
+        with self._tracer.start_as_current_span(
+            f"transcription {model}", kind=SpanKind.CLIENT
+        ) as span:
+            _describe(span, "transcription", settings.transcription_provider, model)
+            started = time.perf_counter()
+            try:
+                reply = await self._inner.transcribe(request)
+            except Exception as error:
+                self._metrics.record(
+                    operation="transcription",
+                    provider=settings.transcription_provider,
+                    model=model,
+                    duration_seconds=time.perf_counter() - started,
+                    input_tokens=None,
+                    output_tokens=None,
+                    cost_usd=None,
+                    error_type=error_type_of(error),
+                )
+                raise
+            self._metrics.record(
+                operation="transcription",
+                provider=settings.transcription_provider,
+                model=model,
+                duration_seconds=time.perf_counter() - started,
+                input_tokens=None,
+                output_tokens=None,
+                cost_usd=estimate_transcription_cost_usd(request.duration_seconds, settings),
+                error_type=None,
+            )
             return reply
 
     async def aclose(self) -> None:

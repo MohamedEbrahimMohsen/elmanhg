@@ -35,6 +35,34 @@ public sealed class AiServiceServiceCollectionExtensionsTests
     }
 
     [Fact]
+    public void AddAiService_Fake_ResolvesFakeTranscriptionClient()
+    {
+        using var provider = BuildProvider([]);
+        using var scope = provider.CreateScope();
+
+        scope.ServiceProvider.GetRequiredService<IAiTranscriptionClient>().Should().BeOfType<FakeAiTranscriptionClient>();
+    }
+
+    [Fact]
+    public void AddAiService_Http_ResolvesHttpTranscriptionClient()
+    {
+        using var provider = BuildProvider(AiServiceTestSettings.ToConfiguration(AiServiceTestSettings.WithHttp()));
+        using var scope = provider.CreateScope();
+
+        scope.ServiceProvider.GetRequiredService<IAiTranscriptionClient>().Should().BeOfType<HttpAiTranscriptionClient>();
+    }
+
+    [Fact]
+    public void AddAiService_Http_TranscriptionClientTimeoutDoesNotCapConfiguredBudget()
+    {
+        using var provider = BuildProvider(AiServiceTestSettings.ToConfiguration(AiServiceTestSettings.WithHttp()));
+
+        var client = provider.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(HttpAiTranscriptionClient));
+
+        client.Timeout.Should().Be(Timeout.InfiniteTimeSpan);
+    }
+
+    [Fact]
     public void AddAiService_HttpWithoutToken_FailsStartupValidation()
     {
         var options = AiServiceTestSettings.WithHttp();

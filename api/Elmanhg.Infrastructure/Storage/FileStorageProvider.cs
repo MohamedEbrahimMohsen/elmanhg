@@ -1,3 +1,3 @@
 namespace Elmanhg.Infrastructure.Storage;
 
-public enum FileStorageProvider { Local }
+public enum FileStorageProvider { Local, S3 }

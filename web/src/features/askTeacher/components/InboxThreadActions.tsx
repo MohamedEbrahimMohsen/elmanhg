@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import type { TeacherInboxThreadResult } from '@/shared/api/generated/model';
 import { Button } from '@/shared/ui/button';
 import { useClaimThread } from '../hooks/useClaimThread';
-import { ReplyForm } from './ReplyForm';
+import { ReplyPanel } from './ReplyPanel';
 
 export interface InboxThreadActionsProps {
   thread: TeacherInboxThreadResult;
@@ -29,7 +29,7 @@ export function InboxThreadActions({ thread }: InboxThreadActionsProps) {
     );
   }
   if (thread.canReply) {
-    return <ReplyForm threadId={thread.id} />;
+    return <ReplyPanel threadId={thread.id} />;
   }
   return <p className="text-caption text-text-muted">{t(noteKey(thread))}</p>;
 }

@@ -66,6 +66,7 @@ export const CreateTeacherThreadBody = zod.object({
 }))
 
 export const createTeacherThreadResponseContextQuestionVersionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const createTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 
 
 export const CreateTeacherThreadResponse = zod.object({
@@ -92,7 +93,9 @@ export const CreateTeacherThreadResponse = zod.object({
   "kind": zod.enum(['Text', 'Voice']),
   "text": zod.string(),
   "imageUrl": zod.string().nullable(),
-  "createdAt": zod.iso.datetime({"offset":true})
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "audioUrl": zod.string().nullable(),
+  "audioDurationSeconds": zod.union([zod.int(),zod.stringFormat('int32', createTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo)]).nullable()
 })),
   "hasUnreadReply": zod.boolean()
 })
@@ -102,6 +105,7 @@ export const GetMyTeacherThreadParams = zod.object({
 })
 
 export const getMyTeacherThreadResponseContextQuestionVersionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMyTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 
 
 export const GetMyTeacherThreadResponse = zod.object({
@@ -128,7 +132,9 @@ export const GetMyTeacherThreadResponse = zod.object({
   "kind": zod.enum(['Text', 'Voice']),
   "text": zod.string(),
   "imageUrl": zod.string().nullable(),
-  "createdAt": zod.iso.datetime({"offset":true})
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "audioUrl": zod.string().nullable(),
+  "audioDurationSeconds": zod.union([zod.int(),zod.stringFormat('int32', getMyTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo)]).nullable()
 })),
   "hasUnreadReply": zod.boolean()
 })

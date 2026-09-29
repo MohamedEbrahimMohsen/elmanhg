@@ -11,6 +11,9 @@ public class TeacherMessage : Entity
     public TeacherMessageKind Kind { get; private set; }
     public string Text { get; private set; } = string.Empty;
     public string? ImageUrl { get; private set; }
+    public string? AudioUrl { get; private set; }
+    public int? AudioDurationSeconds { get; private set; }
+    public bool TranscriptFinal { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset? StudentReadAt { get; private set; }
 
@@ -30,6 +33,28 @@ public class TeacherMessage : Entity
             Kind = TeacherMessageKind.Text,
             Text = text.Trim(),
             ImageUrl = imageUrl,
+            CreatedAt = createdAt,
+        };
+    }
+
+    internal static TeacherMessage CreateVoice(Guid threadId, Guid senderId, string text, string audioUrl, int audioDurationSeconds, DateTimeOffset createdAt)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            throw new BusinessRuleViolationCoreException(ErrorCodes.TeacherMessageTextRequired);
+        }
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(audioUrl);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(audioDurationSeconds);
+        return new TeacherMessage(Guid.NewGuid())
+        {
+            ThreadId = threadId,
+            SenderId = senderId,
+            Kind = TeacherMessageKind.Voice,
+            Text = text.Trim(),
+            AudioUrl = audioUrl,
+            AudioDurationSeconds = audioDurationSeconds,
+            TranscriptFinal = true,
             CreatedAt = createdAt,
         };
     }

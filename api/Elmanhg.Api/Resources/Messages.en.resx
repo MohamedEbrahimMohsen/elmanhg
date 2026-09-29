@@ -347,6 +347,16 @@
   <data name="TEACHER_THREAD_REPLY_TEXT_REQUIRED" xml:space="preserve"><value>Write your reply.</value></data>
   <data name="TEACHER_THREAD_REPLY_TEXT_TOO_LONG" xml:space="preserve"><value>The reply is too long.</value></data>
   <data name="TEACHER_INBOX_FILTER_INVALID" xml:space="preserve"><value>The inbox filter is not valid.</value></data>
+  <data name="TEACHER_VOICE_AUDIO_REQUIRED" xml:space="preserve"><value>Attach the voice recording.</value></data>
+  <data name="TEACHER_VOICE_AUDIO_TYPE_INVALID" xml:space="preserve"><value>The recording must be WEBM, OGG or M4A.</value></data>
+  <data name="TEACHER_VOICE_AUDIO_TOO_LARGE" xml:space="preserve"><value>The recording is larger than allowed.</value></data>
+  <data name="TEACHER_VOICE_DURATION_INVALID" xml:space="preserve"><value>The recording length is not valid.</value></data>
+  <data name="TEACHER_VOICE_DRAFT_ID_REQUIRED" xml:space="preserve"><value>The recording is required.</value></data>
+  <data name="TEACHER_VOICE_DRAFT_NOT_FOUND" xml:space="preserve"><value>The recording was not found.</value></data>
+  <data name="TEACHER_VOICE_AUDIO_NOT_FOUND" xml:space="preserve"><value>The recording file was not found.</value></data>
+  <data name="TEACHER_VOICE_DRAFT_NOT_READY" xml:space="preserve"><value>The recording is still being transcribed.</value></data>
+  <data name="TEACHER_VOICE_DRAFT_ALREADY_SENT" xml:space="preserve"><value>This recording was already sent.</value></data>
+  <data name="TEACHER_VOICE_DRAFT_NOT_PENDING" xml:space="preserve"><value>This recording is not waiting for transcription.</value></data>
   <data name="FUNNEL_ANONYMOUS_ID_REQUIRED" xml:space="preserve"><value>The visitor id is required.</value></data>
   <data name="FUNNEL_EVENT_TYPE_INVALID" xml:space="preserve"><value>The event type is not valid.</value></data>
   <data name="CLIENT_ERROR_MESSAGE_REQUIRED" xml:space="preserve"><value>The error message is required.</value></data>

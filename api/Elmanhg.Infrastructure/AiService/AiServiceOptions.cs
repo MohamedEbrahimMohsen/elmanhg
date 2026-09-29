@@ -18,4 +18,7 @@ public sealed class AiServiceOptions
 
     [Range(1, 120)]
     public int TotalTimeoutSeconds { get; set; } = 50;
+
+    [Range(1, 600)]
+    public int TranscriptionTimeoutSeconds { get; set; } = 150;
 }

@@ -347,6 +347,16 @@
   <data name="TEACHER_THREAD_REPLY_TEXT_REQUIRED" xml:space="preserve"><value>اكتب الرد.</value></data>
   <data name="TEACHER_THREAD_REPLY_TEXT_TOO_LONG" xml:space="preserve"><value>الرد طويل جدا.</value></data>
   <data name="TEACHER_INBOX_FILTER_INVALID" xml:space="preserve"><value>تصفية الأسئلة غير صالحة.</value></data>
+  <data name="TEACHER_VOICE_AUDIO_REQUIRED" xml:space="preserve"><value>أرفق التسجيل الصوتي.</value></data>
+  <data name="TEACHER_VOICE_AUDIO_TYPE_INVALID" xml:space="preserve"><value>التسجيل يجب أن يكون WEBM أو OGG أو M4A.</value></data>
+  <data name="TEACHER_VOICE_AUDIO_TOO_LARGE" xml:space="preserve"><value>حجم التسجيل أكبر من المسموح.</value></data>
+  <data name="TEACHER_VOICE_DURATION_INVALID" xml:space="preserve"><value>مدة التسجيل غير صالحة.</value></data>
+  <data name="TEACHER_VOICE_DRAFT_ID_REQUIRED" xml:space="preserve"><value>التسجيل مطلوب.</value></data>
+  <data name="TEACHER_VOICE_DRAFT_NOT_FOUND" xml:space="preserve"><value>التسجيل غير موجود.</value></data>
+  <data name="TEACHER_VOICE_AUDIO_NOT_FOUND" xml:space="preserve"><value>ملف التسجيل غير موجود.</value></data>
+  <data name="TEACHER_VOICE_DRAFT_NOT_READY" xml:space="preserve"><value>لم ينته تفريغ التسجيل بعد.</value></data>
+  <data name="TEACHER_VOICE_DRAFT_ALREADY_SENT" xml:space="preserve"><value>أرسل هذا التسجيل من قبل.</value></data>
+  <data name="TEACHER_VOICE_DRAFT_NOT_PENDING" xml:space="preserve"><value>لا ينتظر هذا التسجيل التفريغ.</value></data>
   <data name="FUNNEL_ANONYMOUS_ID_REQUIRED" xml:space="preserve"><value>معرف الزائر مطلوب.</value></data>
   <data name="FUNNEL_EVENT_TYPE_INVALID" xml:space="preserve"><value>نوع الحدث غير صالح.</value></data>
   <data name="CLIENT_ERROR_MESSAGE_REQUIRED" xml:space="preserve"><value>رسالة الخطأ مطلوبة.</value></data>

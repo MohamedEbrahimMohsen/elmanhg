@@ -1,3 +1,4 @@
+import base64
 from collections.abc import AsyncIterator, Callable, Iterator
 from pathlib import Path
 from typing import Any, Final
@@ -11,6 +12,7 @@ from structlog.testing import LogCapture
 
 from elmanhg_ai.clients.fake_embedding import FakeEmbeddingClient
 from elmanhg_ai.clients.fake_model import FakeModelClient
+from elmanhg_ai.clients.fake_transcription import FakeTranscriptionClient
 from elmanhg_ai.main import create_app
 from elmanhg_ai.settings import Settings
 
@@ -21,6 +23,7 @@ SUBJECT_ID: Final = "0f5e2a4c-1b3d-4e6f-8a9b-0c1d2e3f4a5b"
 UNIT_ID: Final = "1a2b3c4d-5e6f-4a1b-9c2d-3e4f5a6b7c8d"
 LESSON_ID: Final = "2b3c4d5e-6f7a-4b2c-8d3e-4f5a6b7c8d9e"
 QUESTION_ID: Final = "3c4d5e6f-7a8b-4c3d-9e4f-5a6b7c8d9e0f"
+WEBM_BYTES: Final = bytes([0x1A, 0x45, 0xDF, 0xA3, 0x9F, 0x42, 0x86, 0x81])
 
 
 @pytest.fixture
@@ -44,10 +47,23 @@ def fake_embedding() -> FakeEmbeddingClient:
 
 
 @pytest.fixture
+def fake_transcription() -> FakeTranscriptionClient:
+    return FakeTranscriptionClient()
+
+
+@pytest.fixture
 def app(
-    settings: Settings, fake_model: FakeModelClient, fake_embedding: FakeEmbeddingClient
+    settings: Settings,
+    fake_model: FakeModelClient,
+    fake_embedding: FakeEmbeddingClient,
+    fake_transcription: FakeTranscriptionClient,
 ) -> FastAPI:
-    return create_app(settings, model_client=fake_model, embedding_client=fake_embedding)
+    return create_app(
+        settings,
+        model_client=fake_model,
+        embedding_client=fake_embedding,
+        transcription_client=fake_transcription,
+    )
 
 
 @pytest.fixture
@@ -92,6 +108,20 @@ def chat_payload() -> Callable[..., dict[str, Any]]:
                 {"role": "assistant", "content": "فرق الجهد يساوي التيار في المقاومة."},
             ],
             "message": "لماذا إجابتي خطأ؟",
+        }
+        return payload | overrides
+
+    return build
+
+
+@pytest.fixture
+def transcription_payload() -> Callable[..., dict[str, Any]]:
+    def build(**overrides: Any) -> dict[str, Any]:
+        payload: dict[str, Any] = {
+            "audio": base64.b64encode(WEBM_BYTES).decode("ascii"),
+            "contentType": "audio/webm",
+            "language": "ar",
+            "durationSeconds": 12,
         }
         return payload | overrides
 
