@@ -1,12 +1,12 @@
 # Elmanhg — autopilot progress
 
-Last updated: laptop session, after story #83 merged (main at `a4a91c6`).
-**Next story: #171 [E1.S6] OTP delivery channels: WhatsApp (Meta), Email (Resend), SMS (disabled)**, the first row of "Remaining stories".
+Last updated: laptop session, after story #171 merged (main at `a06ebc1`).
+**Next story: #99 [E10.S1] Plan catalogue and subscription state**, the first row of "Remaining stories".
 The laptop run did #54–#64; the cloud session did #65–#76 (see "Running in a cloud session" and "Hand-off" below).
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (25 of 60)
+## Finished stories (26 of 60)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -35,17 +35,17 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 23 | #81 [E6.S2] Unit exam generation and sitting | #178 | 2 (+1 test fix) | skipped (too many files); 1 web-ci flake, rerun green | #179 |
 | 24 | #82 [E6.S3] Multi-unit exam builder | #180 | 1 (+doc fix) | skipped (too many files) | #181 |
 | 25 | #83 [E6.S4] Retakes and best score | #182 | 1 | review completed, no comments | #183 |
+| 26 | #171 [E1.S6] OTP delivery channels: WhatsApp (Meta), Email (Resend), SMS (disabled) | #184 | 1 (+hardening) | skipped (too many files) | #185 |
 
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (35), in run order
+## Remaining stories (34), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
 | Order | Issue | Story |
 |---|---|---|
-| 16b | #171 | [E1.S6] OTP delivery channels: WhatsApp (Meta), Email (Resend), SMS (disabled) |
 | 17 | #99 | [E10.S1] Plan catalogue and subscription state |
 | 18 | #100 | [E10.S2] Paymob checkout integration |
 | 19 | #101 | [E10.S3] Webhook-driven entitlement |
@@ -210,4 +210,4 @@ How the next agent resumes, in a cloud session or on the laptop:
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183 · `dev-decision`: none open (#135 and #155 confirmed and closed).
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185 · `dev-decision`: none open (#135 and #155 confirmed and closed).

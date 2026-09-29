@@ -1,0 +1,67 @@
+{
+  "header": {
+    "title": "اشترك في المنهج",
+    "taglineWithCount": "{count, number} سؤال معتمد من معلّمين حقيقيين · تدريب لا نهائي · امتحانات وحدات",
+    "tagline": "أسئلة معتمدة من معلّمين حقيقيين · تدريب لا نهائي · امتحانات وحدات"
+  },
+  "page": {
+    "title": "الاشتراك",
+    "loading": "جارٍ تحميل الباقات…",
+    "errorTitle": "تعذّر تحميل الباقات."
+  },
+  "current": {
+    "label": "باقتك الحالية",
+    "free": "مجاني",
+    "base": "الأساسية",
+    "baseWithAskTeacher": "الأساسية + اسأل معلّم"
+  },
+  "plan": {
+    "Free": "مجاني",
+    "Base": "الأساسية",
+    "AskTeacher": "اسأل معلّم"
+  },
+  "status": {
+    "Active": "{plan} — نشطة حتى {date}",
+    "PastDue": "{plan} — الدفع متأخر، متاحة حتى {date}",
+    "Cancelled": "{plan} — ملغاة، متاحة حتى {date}"
+  },
+  "price": {
+    "Monthly": "{price}/شهر",
+    "Termly": "{price}/فصل دراسي",
+    "Yearly": "{price}/سنة"
+  },
+  "features": {
+    "free": {
+      "browse": "تصفح المحتوى",
+      "lessons": "{count, plural, one {الدرس الأول من كل وحدة} other {أول # دروس من كل وحدة}}",
+      "quiz": "{count, number} أسئلة تدريب يوميًا",
+      "avatar": "المساعد: {count, number} رسائل يوميًا"
+    },
+    "base": {
+      "unlimited": "تدريب وامتحانات بلا حدود",
+      "allLessons": "كل الدروس",
+      "progress": "تقدم كامل",
+      "avatar": "المساعد: {count, number} رسالة يوميًا"
+    },
+    "askTeacher": {
+      "requiresBase": "تتطلب الأساسية",
+      "quota": "{count, number} سؤالًا شهريًا",
+      "sla": "رد خلال {hours, number} ساعة"
+    }
+  },
+  "badge": {
+    "active": "مفعّلة"
+  },
+  "payments": {
+    "title": "المدفوعات",
+    "caption": "مدفوعاتك",
+    "loading": "جارٍ تحميل المدفوعات…",
+    "errorTitle": "تعذّر تحميل المدفوعات.",
+    "date": "التاريخ",
+    "plan": "الباقة",
+    "amount": "المبلغ",
+    "status": "الحالة",
+    "Succeeded": "ناجحة",
+    "Failed": "فاشلة"
+  }
+}

@@ -279,4 +279,12 @@
   <data name="MULTI_UNIT_EXAM_UNIT_DUPLICATE" xml:space="preserve"><value>تم اختيار وحدة اكثر من مرة.</value></data>
   <data name="MULTI_UNIT_EXAM_SIZE_INVALID" xml:space="preserve"><value>عدد الاسئلة يجب ان يكون 20 او 40 او 60.</value></data>
   <data name="MULTI_UNIT_EXAM_NO_BLUEPRINT" xml:space="preserve"><value>لا يوجد امتحان لبعض الوحدات المختارة: {units}</value></data>
+  <data name="SUBSCRIPTION_PERIOD_INVALID" xml:space="preserve"><value>مدة الاشتراك غير صالحة.</value></data>
+  <data name="SUBSCRIPTION_NOT_ACTIVE" xml:space="preserve"><value>الاشتراك غير نشط.</value></data>
+  <data name="SUBSCRIPTION_ENDED" xml:space="preserve"><value>انتهى هذا الاشتراك او تم الغاؤه.</value></data>
+  <data name="SUBSCRIPTION_ALREADY_EXPIRED" xml:space="preserve"><value>هذا الاشتراك منته بالفعل.</value></data>
+  <data name="PAYMENT_AMOUNT_INVALID" xml:space="preserve"><value>مبلغ الدفع غير صالح.</value></data>
+  <data name="PAYMENT_NOT_PENDING" xml:space="preserve"><value>تمت معالجة هذا الدفع بالفعل.</value></data>
+  <data name="PAYMENT_HISTORY_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة يجب ان يكون 1 او اكثر.</value></data>
+  <data name="PAYMENT_HISTORY_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة غير صالح.</value></data>
 </root>

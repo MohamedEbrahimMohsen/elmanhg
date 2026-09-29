@@ -49,4 +49,12 @@ public static class ErrorCodes
     // EXAMS
     public const string ExamTimeExpired = "EXAM_TIME_EXPIRED";
     public const string ExamShortfall = "EXAM_SHORTFALL";
+
+    // SUBSCRIPTIONS
+    public const string SubscriptionPeriodInvalid = "SUBSCRIPTION_PERIOD_INVALID";
+    public const string SubscriptionNotActive = "SUBSCRIPTION_NOT_ACTIVE";
+    public const string SubscriptionEnded = "SUBSCRIPTION_ENDED";
+    public const string SubscriptionAlreadyExpired = "SUBSCRIPTION_ALREADY_EXPIRED";
+    public const string PaymentAmountInvalid = "PAYMENT_AMOUNT_INVALID";
+    public const string PaymentNotPending = "PAYMENT_NOT_PENDING";
 }

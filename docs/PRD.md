@@ -375,11 +375,13 @@ All charts filterable by date range and subject.
 | Base (monthly / termly / yearly) | Unlimited quizzes and exams; full progress; Avatar with higher limit |
 | Ask a Teacher (add-on, monthly) | Requires Base. N questions/month (configurable, e.g. 20) with 24-hour reply SLA |
 
+Prices, billing periods and quotas are configuration (`Subscriptions` section, see `docs/subscriptions.md`), not code. Base is sold monthly (1 month), termly (4 months) and yearly (12 months); Ask a Teacher monthly only. Shipped defaults: Free 10 quiz questions/day, 5 Avatar messages/day, first lesson of each unit; Base 50 Avatar messages/day; Ask a Teacher 20 questions/month with a 24-hour SLA. Prices have no default and must be configured; money is stored in minor units (piastres) with an ISO 4217 currency.
+
 ### 11.2 Paymob integration
 
 - Card and mobile wallet via Paymob checkout.
 - Subscription state is driven **only by Paymob webhooks** (HMAC-verified). The client never sets entitlement.
-- States: Trialing (if used) · Active · PastDue · Cancelled · Expired.
+- States: Active · PastDue · Cancelled · Expired (Trialing is not used in v1). Access is derived from state and dates, never stored: Active and PastDue grant access until the end of the paid period plus the grace period; Cancelled grants access until the end of the paid period; Expired grants none. Ask a Teacher grants access only while Base does.
 - Grace period on failed renewal: 3 days, then downgrade to Free.
 - Full transaction log for the admin dashboard; refunds initiated by admin, recorded locally, executed in Paymob.
 
@@ -462,8 +464,8 @@ Attempt(id, session_id, student_id, question_id, question_version,
         grade_json?, time_taken_ms, created_at)  -- append-only
 QuestionMastery(student_id, question_id, mastered bool, latest_attempt_id, latest_normalised_score, latest_attempted_at, previous_attempt_id?, previous_normalised_score?, previous_attempted_at?, updated_at)  -- materialised from the two most recent attempts (docs/mastery.md)
 
-Subscription(id, student_id, plan, status, current_period_end, paymob_ref)
-Payment(id, subscription_id, amount, currency, status, paymob_txn_id, raw_webhook_json, created_at)
+Subscription(id, student_id, plan[Base|AskTeacher], period[Monthly|Termly|Yearly], status[Active|PastDue|Cancelled|Expired], current_period_start, current_period_end, cancelled_at?, expired_at?, paymob_ref?)
+Payment(id, student_id, subscription_id?, plan, period, amount_minor, currency, status[Pending|Succeeded|Failed], paymob_txn_id?, raw_webhook_json?, completed_at?, created_at)  -- docs/subscriptions.md
 
 TeacherThread(id, student_id, teacher_id?, subject_id, context_json, status,
               submitted_at, sla_due_at, closed_at, rating?)
@@ -535,11 +537,11 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 
 ## 19. Open questions (do not block v1 start, but need answers before the related feature is built)
 
-1. Exact plan pricing and the Ask a Teacher monthly quota.
+1. Exact plan pricing and the Ask a Teacher monthly quota. Defaults are configuration (docs/subscriptions.md); final prices are still open.
 2. Whether teachers are paid per reply / per validation (affects the teacher stats card).
 3. Multi-select partial-credit formula: on or off by default?
 4. Should unit-exam access be gated on opening all lessons? (Default: no gate.)
-5. Avatar daily limits for Free vs Base.
+5. Avatar daily limits for Free vs Base. Configured defaults: Free 5/day, Base 50/day.
 6. Transcription provider for Arabic voice (evaluate quality on Egyptian dialect before committing).
 7. v2: essay rubric format — free criteria list, or a fixed platform-wide template?
 

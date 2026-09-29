@@ -31,6 +31,9 @@ public static class DependencyInjection
             .ValidateOnStart();
         services.AddOptions<ExamBlueprintsOptions>().BindConfiguration(ExamBlueprintsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<ExamsOptions>().BindConfiguration(ExamsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<SubscriptionsOptions>().BindConfiguration(SubscriptionsOptions.SectionName).ValidateDataAnnotations()
+            .Validate(x => x.BasePrices.Count > 0 && x.BasePrices.Values.All(price => price.Months is >= 1 and <= 36 && price.AmountMinor > 0), "Subscriptions:BasePrices needs at least one period, each with Months 1-36 and AmountMinor > 0.")
+            .ValidateOnStart();
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton(Random.Shared);
         return services;

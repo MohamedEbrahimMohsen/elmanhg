@@ -468,7 +468,8 @@
           "tasks": [
             "Subscription and Payment entities with states Active, PastDue, Cancelled, Expired",
             "Plan configuration: prices, periods, quotas",
-            "Entitlement query used by the free tier and Ask a Teacher gates"
+            "Entitlement query used by the free tier and Ask a Teacher gates",
+            "Subscription page UI with plan comparison and current status"
           ]
         },
         {
@@ -477,7 +478,7 @@
           "tasks": [
             "Paymob API client: auth token, order registration, payment key, iframe or redirect URL",
             "Checkout initiation command and frontend redirect flow",
-            "Subscription page UI with plan comparison and current status"
+            "Subscribe actions and Paymob checkout modal on the subscription page"
           ]
         },
         {
