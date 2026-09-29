@@ -1,10 +1,10 @@
 # Ask a Teacher
 
-A student who holds the Ask a Teacher add-on (on top of an entitled Base plan) sends a written question, with its context attached and an optional photo, to the teachers of a subject (PRD §12). #94 creates the thread and the student's side. Teacher claiming and replies come with #95, voice with #96 and SLA reminders with #97.
+A student who holds the Ask a Teacher add-on (on top of an entitled Base plan) sends a written question, with its context attached and an optional photo, to the teachers of a subject (PRD §12). #94 creates the thread and the student's side. #95 adds the teacher inbox, claiming, text replies and the student's new-reply mark. Voice arrives with #96. Follow-up, rating, closing, reminders and realtime push arrive with #97.
 
 ## Model
 
-Both tables map to PRD §15. #94 ships only the columns it writes; later stories add theirs in their own migrations (migration `AddTeacherThreads`).
+Both tables map to PRD §15. #94 ships only the columns it writes; later stories add theirs in their own migrations (migrations `AddTeacherThreads` and `AddTeacherThreadClaims`).
 
 ### TeacherThread (aggregate root)
 
@@ -17,6 +17,8 @@ Both tables map to PRD §15. #94 ships only the columns it writes; later stories
 | `Status` | `status` | `Open`, `Answered`, `Closed`, stored as a string. #94 only creates `Open`. |
 | `SubmittedAt` | `submitted_at` | Truncated to microseconds so the create response equals later reads. |
 | `SlaDueAt` | `sla_due_at` | `SubmittedAt + Subscriptions:AskTeacherReplySlaHours` (24). |
+| `TeacherId` | `teacher_id?` | FK `Users`, restrict. The teacher (or admin) who claimed the thread; null until claimed (#95). |
+| `ClaimedAt` | `claimed_at?` | Set by the first claim, truncated to microseconds (#95). |
 | `Version` | — | `xmin` row version; no DDL. |
 
 Indexes: `(StudentId, SubmittedAt)` for the student's list and the quota count, `(SubjectId, Status, SubmittedAt)` for the teacher inbox.
@@ -32,14 +34,29 @@ Indexes: `(StudentId, SubmittedAt)` for the student's list and the quota count, 
 | `Text` | `text` | Required, trimmed. A blank text is `TEACHER_MESSAGE_TEXT_REQUIRED`. |
 | `ImageUrl` | `image_url?` | The stored photo, see Image. |
 | `CreatedAt` | `created_at` | Equals `SubmittedAt` for the first message. |
+| `StudentReadAt` | `student_read_at?` | Set when the student opens the thread; null for student messages. Kept on the messages so a read never changes the thread's `xmin` under a teacher's in-flight reply (#95). |
 
 Indexes: `(ThreadId, CreatedAt)` and a filtered index on `ImageUrl` for the photo access check.
 
 Both entities are in the global soft-delete filter. A thread always has at least one message, and the first is the student's.
 
-**Status machine** (owned by #95): `Open` → `Answered` (teacher reply) → `Open` (the one follow-up) → `Answered` → `Closed` (rating). The server computes `isOverdue = Status == Open && now >= SlaDueAt`; the web never compares clocks for it.
+**Status machine:** #95: `Open` → `Answered` when the claiming teacher replies. #97: the one follow-up (`Answered` → `Open`), the second reply and `Closed` (rating). The server computes `isOverdue = Status == Open && now >= SlaDueAt`; the web never compares clocks for it.
 
 Threads are not audited: a student question is activity, and the row itself is the record (PRD §14).
+
+## Teacher inbox
+
+- **Scope.** A teacher sees the threads of the subjects they are assigned to (`TeacherSubject`). No assignment means an empty list (fail closed). Opening, claiming or replying to a thread of another subject is `403 SUBJECT_OUT_OF_SCOPE`. An admin sees every subject and may claim and reply like a teacher (PRD §16); there is no admin inbox screen yet.
+- **Filters.** `filter=All` (default), `Unclaimed` (no teacher yet) or `Mine` (claimed by the caller). An unknown value is refused by model binding with `400`.
+- **Order.** `Open` threads first, then by `SlaDueAt` ascending, then by id. Paged with `pageNumber` / `pageSize` (max `AskTeacher:ThreadListMaxPageSize`, 50; `422 TEACHER_THREAD_PAGE_NUMBER_INVALID` / `PAGE_SIZE_INVALID`).
+- **Identity.** The teacher sees the student's display name only, and the claimer's display name (PRD §8.4, §14).
+- **Claim.** The first claim wins. Claiming a thread you already own changes nothing. Claiming a thread owned by someone else is `409 TEACHER_THREAD_ALREADY_CLAIMED`. Two claims at the same moment race on the thread's `xmin`: the loser gets `409 TEACHER_THREAD_MODIFIED_CONCURRENTLY` (mapped once in `AppDbContext.SaveChangesAsync`).
+- **Reply.** Only the claiming user may reply, and only while the thread is `Open`. Unclaimed is `409 TEACHER_THREAD_NOT_CLAIMED`, claimed by someone else is `409 TEACHER_THREAD_ALREADY_CLAIMED` (the claim check runs first), not `Open` is `409 TEACHER_THREAD_NOT_AWAITING_REPLY`. The text is required and at most `AskTeacher:ReplyTextMaxLength` (4000) (`422 TEACHER_THREAD_REPLY_TEXT_REQUIRED` / `TOO_LONG`). A reply is a `Text` message from the teacher and moves the thread to `Answered`.
+- Claims and replies are not audited; `TeacherId`, `ClaimedAt` and the message rows are the record. The question, its context ids and the teacher's final reply text stay in `TeacherThread.Context` and `TeacherMessage`, which #109 turns into training records.
+
+## Student notification
+
+In-app only. A thread with a teacher message whose `StudentReadAt` is null reports `hasUnreadReply` in the student's list and thread results, and the list shows «رد جديد». Opening the thread calls `POST /api/teacher-threads/{threadId}/read`, which stamps the teacher's messages (the first read time is kept). #95 sends no WhatsApp or Email; #97 adds realtime push.
 
 ## Context
 
@@ -74,11 +91,11 @@ The snapshot (`TeacherThreadContext`) keeps `subjectId`, `subjectName`, `unitId`
 
 ## Options
 
-`AskTeacherOptions` (section `AskTeacher`, validated on start): `QuestionTextMaxLength` 2000, `ImageMaxSizeInMb` 5, `ThreadListMaxPageSize` 50. The quota and the SLA stay in `SubscriptionsOptions`.
+`AskTeacherOptions` (section `AskTeacher`, validated on start): `QuestionTextMaxLength` 2000, `ImageMaxSizeInMb` 5, `ThreadListMaxPageSize` 50, `ReplyTextMaxLength` 4000. The quota and the SLA stay in `SubscriptionsOptions`.
 
 ## API
 
-All four endpoints use `DefaultCodes.AskTeacherSubmit` (Student only). Reads are owner-scoped.
+The student endpoints use `DefaultCodes.AskTeacherSubmit` (Student only). Reads are owner-scoped.
 
 | Method | Route | Response | Errors |
 |---|---|---|---|
@@ -86,23 +103,38 @@ All four endpoints use `DefaultCodes.AskTeacherSubmit` (Student only). Reads are
 | POST | `/api/teacher-threads` (multipart: `text`, one context id, optional `image`) | `TeacherThreadResult` | `422 TEACHER_THREAD_TEXT_REQUIRED` / `TEXT_TOO_LONG` / `CONTEXT_INVALID` / `IMAGE_TYPE_INVALID` / `IMAGE_TOO_LARGE`; `403 ASK_TEACHER_REQUIRES_SUBSCRIPTION` / `ASK_TEACHER_MONTHLY_LIMIT_REACHED`; context `404`s; `409 TEACHER_THREAD_EXAM_IN_PROGRESS` |
 | GET | `/api/teacher-threads?pageNumber&pageSize` | `PageData<TeacherThreadSummaryResult>`, newest first, with the first student message as `questionText` | `422 TEACHER_THREAD_PAGE_NUMBER_INVALID` / `PAGE_SIZE_INVALID` |
 | GET | `/api/teacher-threads/{threadId}` | `TeacherThreadResult` with the context and the messages (`isFromStudent`) | `404 TEACHER_THREAD_NOT_FOUND` (also for another student's thread) |
+| POST | `/api/teacher-threads/{threadId}/read` | empty `200`; marks the teacher's replies read | `404 TEACHER_THREAD_NOT_FOUND` (also for another student's thread) |
 | GET | `/api/media/teacher-threads/{file}` | the photo bytes | empty `404` for everyone but the owner, a teacher of the subject or an admin |
+
+The teacher endpoints use `DefaultCodes.AskTeacherReply` (a Teacher assigned to the thread's subject, or an Admin).
+
+| Method | Route | Response | Errors |
+|---|---|---|---|
+| GET | `/api/teacher-inbox?filter&pageNumber&pageSize` | `PageData<TeacherInboxItemResult>` (question, subject / lesson, `studentName`, `teacherName?`, `isClaimedByMe`, status, `isOverdue`, dates) | `400` unknown filter; `422 TEACHER_THREAD_PAGE_NUMBER_INVALID` / `PAGE_SIZE_INVALID` |
+| GET | `/api/teacher-inbox/{threadId}` | `TeacherInboxThreadResult` (context, names, `isClaimedByMe`, `canClaim`, `canReply`, `claimedAt`, messages) | `404 TEACHER_THREAD_NOT_FOUND`; `403 SUBJECT_OUT_OF_SCOPE` |
+| POST | `/api/teacher-inbox/{threadId}/claim` | `TeacherInboxThreadResult` | `404`; `403 SUBJECT_OUT_OF_SCOPE`; `409 TEACHER_THREAD_ALREADY_CLAIMED` / `TEACHER_THREAD_MODIFIED_CONCURRENTLY` |
+| POST | `/api/teacher-inbox/{threadId}/replies` (`{ "text" }`) | `TeacherInboxThreadResult` | `422 TEACHER_THREAD_REPLY_TEXT_REQUIRED` / `TOO_LONG`; `404`; `403 SUBJECT_OUT_OF_SCOPE`; `409 TEACHER_THREAD_NOT_CLAIMED` / `ALREADY_CLAIMED` / `NOT_AWAITING_REPLY` / `MODIFIED_CONCURRENTLY` |
+
+`canClaim` is `TeacherId == null && Status != Closed`; `canReply` is "claimed by the caller and `Open`". The web holds no rules of its own.
 
 ## Web
 
 - `/student/ask`: the threads list (newest first, paged with `?page=`), each with its question, subject / lesson / date and a badge: «بانتظار الرد · متبقٍ N ساعة», «متأخر», «تم الرد» or «مغلق». The allowance line «الرصيد الشهري: X / N» and «سؤال جديد». Without the add-on: the upsell «هذه الخدمة إضافة مدفوعة وتتطلب الباقة الأساسية.» with «الاشتراك». Loading, empty, error-with-retry states.
 - `/student/ask-new?lessonId=|questionId=|attemptId=`: the attached context (with the question stem when there is one), the question text, the optional photo, the SLA note from the plan catalogue and «إرسال». Without a context the student picks a subject and then a lesson (grouped by unit). A used-up quota shows a notice instead of the form. On success the thread view opens.
-- `/student/thread/$threadId`: the context card with the reply-due time and badge, then the messages; the photo is fetched with the session.
+- `/student/thread/$threadId`: the context card with the reply-due time and badge, then the messages; the photo is fetched with the session. Opening a thread with an unread reply marks it read, and the list's «رد جديد» disappears.
+- `/teacher/inbox` «أسئلة الطلاب»: pill tabs الكل / غير مُستلمة / الخاصة بي (`?filter=Unclaimed|Mine`, changing the tab clears `?page=`), then the threads, each with its question, «subject / lesson · student · date», who claimed it («غير مُستلم», «مستلم بواسطتك» or «المعلّم: …») and the SLA badge. Loading, empty, error-with-retry states, paged.
+- `/teacher/thread/$threadId`: the context card with «الطالب: … · المعلّم: …», the messages (the student's labelled with their display name), then «استلام السؤال» for an unclaimed thread, the text reply form («الرد», «ردّك», «إرسال الرد») for the claimer, or a note: «هذه المحادثة مستلمة بواسطة معلّم آخر.», «تم الرد على هذا السؤال.» or «أُغلق هذا السؤال.». A lost claim race shows «استلم معلم آخر هذا السؤال.» and refreshes the thread. A thread outside the teacher's subjects shows the `SUBJECT_OUT_OF_SCOPE` error.
 - Entry points: «اسأل معلّم» on an unlocked lesson page (`lessonId`) and in the quiz feedback next to «اسأل المساعد» (`attemptId`).
 
 ## For later stories
 
-- **#95:** `TeacherId`, `ClaimedAt`, `ClosedAt`, `Rating`; claim concurrency maps `DbUpdateConcurrencyException` on `TeacherThread` to 409; teacher reads go through `SubjectScopeBehaviour`. Teacher photo access already works through `CanViewTeacherThreadImageQuery`.
-- **#96:** `AudioUrl`, `TranscriptFinal` and the S3-compatible storage adapter (private bucket, presigned GET URLs), which will replace the Local provider's guarded path.
-- **#97:** an index on `(Status, SlaDueAt)` for the reminder sweep, and a follow-up that resets `SlaDueAt`.
+- **#96:** `AudioUrl`, `TranscriptFinal` and the S3-compatible storage adapter (private bucket, presigned GET URLs), which will replace the Local provider's guarded path. `ReplyWithVoice` reuses the claim and status guards.
+- **#97:** `ClosedAt`, `Rating`, the follow-up (`Answered` → `Open`, resets `SlaDueAt`), closing after the second reply, the `(Status, SlaDueAt)` index, reminders and realtime push.
 
 ## Known limits
 
 - The quota is a soft limit: two questions sent in parallel at 19/20 can both pass.
 - The photo is written just before the save; a failed save leaves an orphan file (no cleanup job).
 - The photo access check looks the file up by its URL on every request (indexed).
+- A teacher unassigned from a subject loses access to threads they claimed there.
+- Admins can claim and reply through the API; there is no admin inbox screen yet.

@@ -12,6 +12,7 @@ public class TeacherMessage : Entity
     public string Text { get; private set; } = string.Empty;
     public string? ImageUrl { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
+    public DateTimeOffset? StudentReadAt { get; private set; }
 
     private TeacherMessage(Guid id) : base(id) { }
 
@@ -32,4 +33,6 @@ public class TeacherMessage : Entity
             CreatedAt = createdAt,
         };
     }
+
+    internal void MarkReadByStudent(DateTimeOffset readAt) => StudentReadAt ??= readAt;
 }

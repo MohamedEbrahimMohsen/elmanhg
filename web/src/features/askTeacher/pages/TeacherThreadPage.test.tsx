@@ -3,8 +3,13 @@ import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Language } from '@/app/i18n';
-import { getGetMyTeacherThreadMockHandler } from '@/shared/api/generated/teacher-threads/teacher-threads.msw';
-import { teacherThread, threadId } from '@/test/askTeacherFixtures';
+import { getGetMyUsageMockHandler } from '@/shared/api/generated/subscriptions/subscriptions.msw';
+import {
+  getGetMyTeacherThreadMockHandler,
+  getGetMyTeacherThreadsMockHandler,
+  getMarkTeacherThreadReadMockHandler,
+} from '@/shared/api/generated/teacher-threads/teacher-threads.msw';
+import { askTeacherUsage, teacherThread, threadId, threadSummary, threadsPage } from '@/test/askTeacherFixtures';
 import { server } from '@/test/msw/server';
 import { renderApp } from '@/test/renderWithProviders';
 import { testSessions } from '@/test/sessions';
@@ -70,6 +75,53 @@ describe('TeacherThreadPage', () => {
     await user.click(within(alert).getByRole('button', { name: 'Retry' }));
 
     expect(await screen.findByText('Why is F = ma?')).toBeInTheDocument();
+  });
+
+  it('clears the new-reply mark after the student opens the thread', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime.bind(vi) });
+    let read = false;
+    const reply = {
+      id: 'f3f3f3f3-f3f3-4f3f-8f3f-f3f3f3f3f3f3',
+      isFromStudent: false,
+      kind: 'Text' as const,
+      text: 'Because F = ma.',
+      imageUrl: null,
+      createdAt: '2026-10-01T09:00:00Z',
+    };
+    server.use(
+      http.get(
+        '*/api/media/teacher-threads/:file',
+        () => new HttpResponse(pngBytes, { headers: { 'Content-Type': 'image/png' } }),
+      ),
+      getGetMyTeacherThreadMockHandler(() =>
+        teacherThread({
+          status: 'Answered',
+          hasUnreadReply: !read,
+          messages: [...teacherThread().messages, reply],
+        }),
+      ),
+      getMarkTeacherThreadReadMockHandler(() => {
+        read = true;
+      }),
+      getGetMyUsageMockHandler(askTeacherUsage()),
+      getGetMyTeacherThreadsMockHandler(() =>
+        threadsPage([threadSummary({ status: 'Answered', hasUnreadReply: !read })]),
+      ),
+    );
+    const { router } = renderApp(`/student/thread/${threadId}`, { session: testSessions.student });
+    await router.loadRouteChunk(router.routesById['/student/thread/$threadId']);
+    await router.loadRouteChunk(router.routesById['/student/ask']);
+
+    expect(await screen.findByText('Because F = ma.')).toBeInTheDocument();
+    await vi.waitFor(() => {
+      expect(read).toBe(true);
+    });
+    const breadcrumb = screen.getByRole('navigation', { name: 'Breadcrumb' });
+    await user.click(within(breadcrumb).getByRole('link', { name: 'Ask a teacher' }));
+
+    const item = await screen.findByRole('link', { name: /Why is F = ma\?/ });
+    expect(within(item).getByText('Answered')).toBeInTheDocument();
+    expect(within(item).queryByText('New reply')).toBeNull();
   });
 
   it('renders right to left in Arabic', async () => {

@@ -15,4 +15,5 @@ export interface TeacherThreadSummaryResult {
   isOverdue: boolean;
   submittedAt: string;
   slaDueAt: string;
+  hasUnreadReply: boolean;
 }

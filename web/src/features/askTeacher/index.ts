@@ -1,6 +1,9 @@
 export { AskTeacherListPage } from './pages/AskTeacherListPage';
 export { AskTeacherNewPage } from './pages/AskTeacherNewPage';
 export { TeacherThreadPage } from './pages/TeacherThreadPage';
+export { TeacherInboxPage } from './pages/TeacherInboxPage';
+export { InboxThreadPage } from './pages/InboxThreadPage';
 export { AskTeacherLink } from './components/AskTeacherLink';
 export { askTeacherListSearchSchema } from './schemas/askTeacherListSearchSchema';
 export { askTeacherNewSearchSchema } from './schemas/askTeacherNewSearchSchema';
+export { teacherInboxSearchSchema } from './schemas/teacherInboxSearchSchema';

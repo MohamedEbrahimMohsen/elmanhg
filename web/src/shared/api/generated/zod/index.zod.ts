@@ -16,6 +16,7 @@ export * from './sessions/sessions.zod';
 export * from './students/students.zod';
 export * from './subjects/subjects.zod';
 export * from './subscriptions/subscriptions.zod';
+export * from './teacher-inbox/teacher-inbox.zod';
 export * from './teacher-threads/teacher-threads.zod';
 export * from './teachers/teachers.zod';
 export * from './units/units.zod';

@@ -17,7 +17,8 @@
     "closed": "مغلق",
     "overdue": "متأخر",
     "awaiting": "بانتظار الرد · متبقٍ {hours, plural, zero {أقل من ساعة} one {ساعة واحدة} two {ساعتان} few {# ساعات} many {# ساعة} other {# ساعة}}",
-    "answered": "تم الرد"
+    "answered": "تم الرد",
+    "newReply": "رد جديد"
   },
   "new": {
     "title": "سؤال جديد للمعلّم",
@@ -61,5 +62,35 @@
     "imageError": "تعذّر تحميل الصورة",
     "loading": "جارٍ تحميل المحادثة…",
     "errorTitle": "تعذّر تحميل المحادثة"
+  },
+  "inbox": {
+    "title": "أسئلة الطلاب",
+    "filters": {
+      "label": "تصفية الأسئلة",
+      "All": "الكل",
+      "Unclaimed": "غير مُستلمة",
+      "Mine": "الخاصة بي"
+    },
+    "loading": "جارٍ تحميل أسئلة الطلاب…",
+    "errorTitle": "تعذّر تحميل أسئلة الطلاب",
+    "empty": "لا توجد أسئلة.",
+    "meta": "{subject} / {lesson} · {student} · {date}",
+    "unclaimed": "غير مُستلم",
+    "claimedByMe": "مستلم بواسطتك",
+    "claimedBy": "المعلّم: {teacher}"
+  },
+  "inboxThread": {
+    "people": "الطالب: {student} · المعلّم: {teacher}",
+    "claim": "استلام السؤال",
+    "claimed": "تم استلام السؤال.",
+    "claimedByOther": "هذه المحادثة مستلمة بواسطة معلّم آخر.",
+    "replyTitle": "الرد",
+    "replyLabel": "ردّك",
+    "replyHint": "اكتب ردك",
+    "replyRequired": "اكتب الرد",
+    "send": "إرسال الرد",
+    "sent": "تم إرسال الرد.",
+    "answered": "تم الرد على هذا السؤال.",
+    "closed": "أُغلق هذا السؤال."
   }
 }

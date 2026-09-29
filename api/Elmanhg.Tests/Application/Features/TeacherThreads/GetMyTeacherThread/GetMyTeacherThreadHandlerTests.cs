@@ -60,4 +60,16 @@ public sealed class GetMyTeacherThreadHandlerTests
 
         (await act.Should().ThrowAsync<NotFoundCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.TeacherThreadNotFound);
     }
+
+    [Fact]
+    public async Task Handle_ThreadWithUnreadReply_ReportsHasUnreadReply()
+    {
+        var answered = new TeacherThreadBuilder().ForStudent(_studentId).AnsweredBy(Guid.NewGuid()).Build();
+        _teacherThreadRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<TeacherThread, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<TeacherThread>, IQueryable<TeacherThread>>?>(), Arg.Any<Func<IQueryable<TeacherThread>, IOrderedQueryable<TeacherThread>>?>(), Arg.Any<bool>())
+            .Returns(answered);
+
+        var result = await _handler.Handle(new GetMyTeacherThreadQuery(answered.Id), TestContext.Current.CancellationToken);
+
+        (result.HasUnreadReply, result.Status, result.Messages.Count).Should().Be((true, TeacherThreadStatus.Answered, 2));
+    }
 }

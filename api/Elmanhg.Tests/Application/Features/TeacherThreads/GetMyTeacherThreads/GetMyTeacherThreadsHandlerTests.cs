@@ -50,4 +50,17 @@ public sealed class GetMyTeacherThreadsHandlerTests
         (summary.Id, summary.SubjectName, summary.LessonName, summary.QuestionText, summary.Status, summary.IsOverdue).Should().Be((thread.Id, "Physics", "Newton's laws", "Why is F = ma?", TeacherThreadStatus.Open, true));
         (result.PageNumber, result.PageSize, result.TotalItems, result.TotalPages).Should().Be((2, 5, 6, 2));
     }
+
+    [Fact]
+    public async Task Handle_ThreadWithUnreadReply_ReportsHasUnreadReply()
+    {
+        var answered = new TeacherThreadBuilder().ForStudent(_studentId).AnsweredBy(Guid.NewGuid()).Build();
+        var open = new TeacherThreadBuilder().ForStudent(_studentId).Build();
+        _teacherThreadRepository.FindPaginatedAsync(1, 20, Arg.Any<CancellationToken>(), Arg.Any<Expression<Func<TeacherThread, bool>>?>(), Arg.Any<Func<IQueryable<TeacherThread>, IQueryable<TeacherThread>>?>(), Arg.Any<Func<IQueryable<TeacherThread>, IOrderedQueryable<TeacherThread>>?>(), Arg.Any<bool>())
+            .Returns(new PageData<TeacherThread> { Items = [answered, open], PageNumber = 1, PageSize = 20, TotalItems = 2, TotalPages = 1 });
+
+        var result = await _handler.Handle(new GetMyTeacherThreadsQuery(), TestContext.Current.CancellationToken);
+
+        result.Items.Select(x => (x.Id, x.HasUnreadReply)).Should().Equal((answered.Id, true), (open.Id, false));
+    }
 }

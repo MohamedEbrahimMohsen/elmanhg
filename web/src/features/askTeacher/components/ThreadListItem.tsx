@@ -29,7 +29,14 @@ export function ThreadListItem({ thread }: ThreadListItemProps) {
             {t('list.meta', { subject: thread.subjectName, lesson: thread.lessonName, date })}
           </span>
         </span>
-        <ThreadStatusBadge thread={thread} />
+        <span className="flex shrink-0 flex-col items-end gap-1">
+          {thread.hasUnreadReply ? (
+            <span className="inline-flex rounded-pill bg-accent px-2.5 py-0.5 text-micro font-semibold text-surface">
+              {t('badge.newReply')}
+            </span>
+          ) : null}
+          <ThreadStatusBadge thread={thread} />
+        </span>
       </Link>
     </li>
   );

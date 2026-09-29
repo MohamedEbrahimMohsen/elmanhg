@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RichTextViewer } from '@/features/content';
 import type { TeacherThreadResult } from '@/shared/api/generated/model';
@@ -5,10 +6,11 @@ import { formatDate } from '@/shared/lib/format';
 import { ThreadStatusBadge } from './ThreadStatusBadge';
 
 export interface ThreadContextCardProps {
-  thread: TeacherThreadResult;
+  thread: Pick<TeacherThreadResult, 'context' | 'slaDueAt' | 'status' | 'isOverdue'>;
+  children?: ReactNode;
 }
 
-export function ThreadContextCard({ thread }: ThreadContextCardProps) {
+export function ThreadContextCard({ thread, children }: ThreadContextCardProps) {
   const { t, i18n } = useTranslation('askTeacher');
   const lng = i18n.resolvedLanguage ?? i18n.language;
   const { context } = thread;
@@ -31,6 +33,7 @@ export function ThreadContextCard({ thread }: ThreadContextCardProps) {
         <p className="text-caption text-text-muted">{t('thread.due', { date: due })}</p>
         <ThreadStatusBadge thread={thread} />
       </div>
+      {children}
     </div>
   );
 }

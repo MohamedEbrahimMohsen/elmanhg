@@ -229,6 +229,10 @@ public static class ErrorCodes
     public const string TeacherThreadImageTooLarge = "TEACHER_THREAD_IMAGE_TOO_LARGE";
     public const string TeacherThreadPageNumberInvalid = "TEACHER_THREAD_PAGE_NUMBER_INVALID";
     public const string TeacherThreadPageSizeInvalid = "TEACHER_THREAD_PAGE_SIZE_INVALID";
+    public const string TeacherThreadModifiedConcurrently = "TEACHER_THREAD_MODIFIED_CONCURRENTLY";
+    public const string TeacherThreadReplyTextRequired = "TEACHER_THREAD_REPLY_TEXT_REQUIRED";
+    public const string TeacherThreadReplyTextTooLong = "TEACHER_THREAD_REPLY_TEXT_TOO_LONG";
+    public const string TeacherInboxFilterInvalid = "TEACHER_INBOX_FILTER_INVALID";
 
     // ANALYTICS
     public const string FunnelAnonymousIdRequired = "FUNNEL_ANONYMOUS_ID_REQUIRED";
