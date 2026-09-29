@@ -167,6 +167,19 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 
 The sweep calls the embeddings endpoint, so with `AiService__Provider=Http` the `ai` profile must be on (`COMPOSE_PROFILES=ai`); otherwise failed lessons are logged as warnings and retried by later sweeps.
 
+### AI Avatar (`api.env`, [docs/avatar.md](avatar.md))
+
+None is a secret; the baked defaults suit staging and production. Validated at startup, so a value out of range stops the API.
+
+| Variable | Default | Notes |
+|---|---|---|
+| `Avatar__MessageMaxLength` | `2000` | 1 to 4000; at most `ELMANHG_AI_CHAT_MAX_MESSAGE_CHARS` |
+| `Avatar__HistoryTurnMaxLength` | `4000` | 1 to 4000 |
+| `Avatar__MaxHistoryMessages` | `10` | 0 to 20, even; at most `ELMANHG_AI_CHAT_MAX_HISTORY_MESSAGES` |
+| `Avatar__ContextFieldMaxLength` | `8000` | 500 to 8000; keeps the context bundle under `ELMANHG_AI_CHAT_MAX_CONTEXT_CHARS` |
+
+The daily message limits (Free 5, Base 50) are `Subscriptions__FreeDailyAvatarMessages` and `Subscriptions__BaseDailyAvatarMessages`.
+
 ### Ask a Teacher (`api.env`, [docs/ask-teacher.md](ask-teacher.md))
 
 None is a secret; the baked defaults suit staging and production. Validated at startup, so a value out of range stops the API.
@@ -176,6 +189,7 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | `AskTeacher__QuestionTextMaxLength` | `2000` | 1 to 20000 |
 | `AskTeacher__ImageMaxSizeInMb` | `5` | 1 to 20 |
 | `AskTeacher__ThreadListMaxPageSize` | `50` | 1 to 100 |
+| `AskTeacher__ReplyTextMaxLength` | `4000` | 1 to 20000 |
 | `Subscriptions__AskTeacherMonthlyQuestions` / `Subscriptions__AskTeacherReplySlaHours` | `20` / `24` | the add-on's monthly quota and reply SLA ([docs/subscriptions.md](subscriptions.md)) |
 
 Question photos are stored in the `api-media` volume under `teacher-threads/` and are private: the API serves them only to the owning student, a teacher of the subject or an admin. Caddy proxies all of `/api/*` to the API, so never serve `/api/media` straight from the volume at the edge. The media backup (section 9) includes them.
@@ -189,7 +203,8 @@ Question photos are stored in the `api-media` volume under `teacher-threads/` an
 | `ELMANHG_AI_ANTHROPIC_API_KEY` | unset | secret; required for `anthropic` |
 | `ELMANHG_AI_CHAT_MODEL` | `claude-sonnet-5` | |
 | `ELMANHG_AI_LOG_LEVEL` / `ELMANHG_AI_LOG_FORMAT` | `INFO` / `json` | |
-| `ELMANHG_AI_CHAT_PROMPT_VERSION` | `v1` | |
+| `ELMANHG_AI_CHAT_PROMPT_VERSION` | `v2` | the production Avatar prompt; `v1` is kept for history |
+| `ELMANHG_AI_CHAT_MAX_SOURCES` / `ELMANHG_AI_CHAT_MAX_SOURCE_CHARS` | `20` / `8000` | retrieved lesson chunks per message / per chunk |
 | `ELMANHG_AI_CHAT_MAX_TOKENS` / `_MAX_HISTORY_MESSAGES` / `_MAX_MESSAGE_CHARS` / `_MAX_CONTEXT_CHARS` | `1024` / `20` / `4000` / `60000` | |
 | `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` / `ELMANHG_AI_MODEL_MAX_RETRIES` | `20` / `1` | |
 | `ELMANHG_AI_MODEL_INPUT_USD_PER_MILLION_TOKENS` / `_OUTPUT_USD_PER_MILLION_TOKENS` | `3` / `15` | cost logging only |

@@ -16,4 +16,5 @@ export interface TeacherThreadResult {
   submittedAt: string;
   slaDueAt: string;
   messages: TeacherMessageResult[];
+  hasUnreadReply: boolean;
 }

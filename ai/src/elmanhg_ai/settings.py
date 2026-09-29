@@ -22,11 +22,13 @@ class Settings(BaseSettings):
     llm_provider: Literal["fake", "anthropic"] = "fake"
     anthropic_api_key: SecretStr | None = None
     chat_model: str = Field(default="claude-sonnet-5", min_length=1)
-    chat_prompt_version: str = Field(default="v1", pattern=r"^v[0-9]+$")
+    chat_prompt_version: str = Field(default="v2", pattern=r"^v[0-9]+$")
     chat_max_tokens: int = Field(default=1024, ge=1, le=8192)
     chat_max_history_messages: int = Field(default=20, ge=0, le=100)
     chat_max_message_chars: int = Field(default=4000, ge=1)
     chat_max_context_chars: int = Field(default=60000, ge=1)
+    chat_max_sources: int = Field(default=20, ge=0, le=50)
+    chat_max_source_chars: int = Field(default=8000, ge=1)
     model_timeout_seconds: float = Field(default=20.0, gt=0, le=120)
     model_max_retries: int = Field(default=1, ge=0, le=5)
     model_input_usd_per_million_tokens: Decimal = Field(default=Decimal("3"), ge=0)

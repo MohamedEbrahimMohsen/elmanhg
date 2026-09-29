@@ -597,3 +597,70 @@ export function useGetMyTeacherThreadSuspense<TData = Awaited<ReturnType<typeof 
 
 
 
+export const getMarkTeacherThreadReadUrl = (threadId: string,) => {
+
+
+
+
+  return `/api/teacher-threads/${threadId}/read`
+}
+
+export const markTeacherThreadRead = async (threadId: string, options?: Parameters<typeof http>[1]): Promise<void> => {
+
+  return http<void>(getMarkTeacherThreadReadUrl(threadId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getMarkTeacherThreadReadMutationKey = () => ['markTeacherThreadRead'] as const;
+
+export const getMarkTeacherThreadReadMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markTeacherThreadRead>>, TError,MarkTeacherThreadReadMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof markTeacherThreadRead>>, TError,MarkTeacherThreadReadMutationVariables, TContext> => {
+
+const mutationKey = getMarkTeacherThreadReadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markTeacherThreadRead>>, MarkTeacherThreadReadMutationVariables> = (props) => {
+          const {threadId} = props ?? {};
+
+          return  markTeacherThreadRead(threadId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkTeacherThreadReadMutationResult = NonNullable<Awaited<ReturnType<typeof markTeacherThreadRead>>>
+
+    export type MarkTeacherThreadReadMutationError = unknown
+    export type MarkTeacherThreadReadMutationVariables = {threadId: string}
+
+    export const useMarkTeacherThreadRead = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markTeacherThreadRead>>, TError,MarkTeacherThreadReadMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof markTeacherThreadRead>>,
+        TError,
+        MarkTeacherThreadReadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getMarkTeacherThreadReadMutationOptions(options), queryClient);
+    }

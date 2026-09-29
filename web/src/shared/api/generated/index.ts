@@ -1,6 +1,7 @@
 export * from './analytics/analytics';
 export * from './audit-logs/audit-logs';
 export * from './auth/auth';
+export * from './avatar/avatar';
 export * from './browse/browse';
 export * from './client-errors/client-errors';
 export * from './content-retrieval/content-retrieval';
@@ -17,6 +18,7 @@ export * from './sessions/sessions';
 export * from './students/students';
 export * from './subjects/subjects';
 export * from './subscriptions/subscriptions';
+export * from './teacher-inbox/teacher-inbox';
 export * from './teacher-threads/teacher-threads';
 export * from './teachers/teachers';
 export * from './units/units';

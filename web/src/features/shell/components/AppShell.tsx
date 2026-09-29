@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Outlet } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import type { Role } from '@/features/session';
@@ -6,9 +7,10 @@ import { TabBar } from './TabBar';
 
 export interface AppShellProps {
   role: Role;
+  assistant?: ReactNode;
 }
 
-export function AppShell({ role }: AppShellProps) {
+export function AppShell({ role, assistant }: AppShellProps) {
   const { t } = useTranslation('shell');
 
   return (
@@ -24,6 +26,7 @@ export function AppShell({ role }: AppShellProps) {
         <Outlet />
       </main>
       <TabBar role={role} />
+      {assistant}
     </div>
   );
 }

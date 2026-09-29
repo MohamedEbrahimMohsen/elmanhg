@@ -306,14 +306,14 @@ An in-app assistant for students, scoped to the platform's content.
 ### 9.2 Behaviour
 
 - Answers in Egyptian-friendly Modern Standard Arabic; short, step-based.
-- Grounded on lesson content via retrieval (embeddings over explanation/summary/explanation-of-questions). Cites the lesson section it drew from.
-- Will not reveal correct answers for an **in-progress exam**. Will explain freely after submission or in quizzes.
+- Grounded on lesson content via retrieval (embeddings over explanation/summary/explanation-of-questions). Cites the lesson section it drew from (each reply lists its sources, which link to the lesson tab).
+- While the student has an exam in progress (open, and not past its deadline plus the grace period), the avatar refuses every message without calling the model. It explains freely after submission and in quizzes.
 - Refuses off-curriculum requests politely and redirects.
 - Every conversation is stored (§13) with the context bundle.
 
 ### 9.3 Limits
 
-- Rate-limited per student per day (configurable; higher for paid).
+- Rate-limited per student per day: Free 5, Base 50 (`Subscriptions` configuration). A message counts once the assistant has replied; the day follows `Subscriptions:DailyQuotaTimeZone`.
 - Model and prompt versions are recorded on every message for later evaluation.
 
 ---
@@ -475,11 +475,12 @@ QuestionMastery(student_id, question_id, mastered bool, latest_attempt_id, lates
 Subscription(id, student_id, plan[Base|AskTeacher], period[Monthly|Termly|Yearly], status[Active|PastDue|Cancelled|Expired], current_period_start, current_period_end, cancelled_at?, expired_at?, paymob_ref?)
 Payment(id, student_id, subscription_id?, plan, period, period_months, amount_minor, currency, status[Pending|Succeeded|Failed|Refunded], paymob_txn_id?, provider_order_id?, raw_webhook_json?, completed_at?, review_reason?, review_resolved_at?, review_resolved_by?, refunded_at?, refunded_by?, refund_reason?, refund_transaction_id?, refund_idempotency_key?, created_at)  -- docs/subscriptions.md
 
-TeacherThread(id, student_id, teacher_id?, subject_id, context_json, status[Open|Answered|Closed], submitted_at, sla_due_at, closed_at?, rating?)  -- docs/ask-teacher.md
-TeacherMessage(id, thread_id, sender_id, kind[Text|Voice], text, image_url?, audio_url?, transcript_final bool, created_at)
+TeacherThread(id, student_id, teacher_id?, subject_id, context_json, status[Open|Answered|Closed], submitted_at, sla_due_at, claimed_at?, closed_at?, rating?)  -- docs/ask-teacher.md
+TeacherMessage(id, thread_id, sender_id, kind[Text|Voice], text, image_url?, audio_url?, transcript_final bool, student_read_at?, created_at)
 
 AvatarConversation(id, student_id, context_json, model, prompt_version, started_at)
 AvatarMessage(id, conversation_id, role, text, created_at)
+AvatarMessageUsage(id, student_id, entry_point, created_at)  -- daily Avatar quota counter (docs/avatar.md)
 
 LessonContentChunk(id, lesson_id, section[Explanation|Objectives|Summary|QuestionExplanation], section_title?, position, question_id?, question_version?, content, embedding vector(1536), embedding_model, created_at)  -- derived; docs/content-retrieval.md
 LessonContentIndex(id, lesson_id, source_updated_at, questions_updated_at?, chunk_count, embedding_model?, indexed_at)
@@ -504,6 +505,7 @@ AuditLog(id, actor_id, actor_name, actor_role, action, entity, entity_id, outcom
 | Manage blueprints | – | – | ✓ |
 | Reply to Ask a Teacher | – | ✓ (assigned subjects) | ✓ |
 | Ask a Teacher (submit) | ✓ | – | – |
+| Use the AI Avatar | ✓ | – | – |
 | Override AI grade (v2) | – | ✓ (assigned subjects) | ✓ |
 | View own progress | ✓ | – | – |
 | View any student's progress | – | – | ✓ |

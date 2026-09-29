@@ -227,7 +227,14 @@
     "TEACHER_THREAD_IMAGE_TYPE_INVALID": "الصورة يجب أن تكون PNG أو JPG أو WEBP.",
     "TEACHER_THREAD_IMAGE_TOO_LARGE": "حجم الصورة أكبر من المسموح.",
     "TEACHER_THREAD_PAGE_NUMBER_INVALID": "رقم الصفحة غير صالح.",
-    "TEACHER_THREAD_PAGE_SIZE_INVALID": "حجم الصفحة غير صالح."
+    "TEACHER_THREAD_PAGE_SIZE_INVALID": "حجم الصفحة غير صالح.",
+    "TEACHER_THREAD_ALREADY_CLAIMED": "استلم معلم آخر هذا السؤال.",
+    "TEACHER_THREAD_NOT_CLAIMED": "استلم السؤال أولا قبل الرد.",
+    "TEACHER_THREAD_NOT_AWAITING_REPLY": "هذا السؤال لا ينتظر ردا الآن.",
+    "TEACHER_THREAD_MODIFIED_CONCURRENTLY": "تغيرت المحادثة للتو. أعد تحميلها ثم حاول مرة أخرى.",
+    "TEACHER_THREAD_REPLY_TEXT_REQUIRED": "اكتب الرد.",
+    "TEACHER_THREAD_REPLY_TEXT_TOO_LONG": "الرد طويل جدا.",
+    "TEACHER_INBOX_FILTER_INVALID": "تصفية الأسئلة غير صالحة."
   },
   "error": {
     "title": "حدث خطأ"

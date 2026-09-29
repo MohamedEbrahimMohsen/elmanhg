@@ -26,6 +26,7 @@ class FakeModelClient:
             input_tokens=0,
             output_tokens=0,
             stop_reason="end_turn",
+            citations=(request.sources[0].reference,) if request.sources else (),
         )
 
     async def aclose(self) -> None:

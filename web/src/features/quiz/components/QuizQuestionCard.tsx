@@ -73,7 +73,17 @@ export function QuizQuestionCard({
         </p>
       ) : null}
       {attempt ? (
-        <FeedbackPanel item={item} attempt={attempt} question={question}>
+        <FeedbackPanel
+          item={item}
+          attempt={attempt}
+          question={question}
+          ask={{
+            entryPoint: 'QuizQuestion',
+            sessionId,
+            questionId: item.questionId,
+            title: t('avatar.questionTitle', { position }),
+          }}
+        >
           <AskTeacherLink attemptId={attempt.id} />
         </FeedbackPanel>
       ) : null}

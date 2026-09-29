@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
+import { AskAvatarButton, type AvatarContextInput } from '@/features/avatar';
 import { RichTextViewer } from '@/features/content';
 import { emptyAnswer, QuestionView } from '@/features/questions';
 import { choiceReview, CorrectAnswer, describeCorrectAnswer, QuizReviewItem, toQuizQuestion } from '@/features/quiz';
@@ -7,14 +8,21 @@ import type { ExamItemResult } from '@/shared/api/generated/model';
 
 export interface ExamReviewItemProps {
   item: ExamItemResult;
+  sessionId: string;
 }
 
-export function ExamReviewItem({ item }: ExamReviewItemProps) {
+export function ExamReviewItem({ item, sessionId }: ExamReviewItemProps) {
   const { t } = useTranslation('exam');
   const headingId = useId();
+  const ask: AvatarContextInput = {
+    entryPoint: 'ExamReview',
+    sessionId,
+    questionId: item.questionId,
+    title: t('result.avatarTitle', { position: Number(item.position) }),
+  };
 
   if (item.attempt) {
-    return <QuizReviewItem item={item} attempt={item.attempt} />;
+    return <QuizReviewItem item={item} attempt={item.attempt} ask={ask} />;
   }
   const question = toQuizQuestion(item);
   const correct = describeCorrectAnswer(question, item.correctAnswer);
@@ -41,6 +49,7 @@ export function ExamReviewItem({ item }: ExamReviewItemProps) {
         </div>
       ) : null}
       {item.explanation ? <RichTextViewer html={item.explanation} /> : null}
+      <AskAvatarButton context={ask} />
     </article>
   );
 }

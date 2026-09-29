@@ -44,7 +44,8 @@ export const GetMyTeacherThreadsResponse = zod.object({
   "status": zod.enum(['Open', 'Answered', 'Closed']),
   "isOverdue": zod.boolean(),
   "submittedAt": zod.iso.datetime({"offset":true}),
-  "slaDueAt": zod.iso.datetime({"offset":true})
+  "slaDueAt": zod.iso.datetime({"offset":true}),
+  "hasUnreadReply": zod.boolean()
 })).optional(),
   "pageNumber": zod.union([zod.int(),zod.stringFormat('int64', getMyTeacherThreadsResponsePageNumberRegExpTwo)]).optional(),
   "pageSize": zod.union([zod.int(),zod.stringFormat('int64', getMyTeacherThreadsResponsePageSizeRegExpTwo)]).optional(),
@@ -92,7 +93,8 @@ export const CreateTeacherThreadResponse = zod.object({
   "text": zod.string(),
   "imageUrl": zod.string().nullable(),
   "createdAt": zod.iso.datetime({"offset":true})
-}))
+})),
+  "hasUnreadReply": zod.boolean()
 })
 
 export const GetMyTeacherThreadParams = zod.object({
@@ -127,6 +129,13 @@ export const GetMyTeacherThreadResponse = zod.object({
   "text": zod.string(),
   "imageUrl": zod.string().nullable(),
   "createdAt": zod.iso.datetime({"offset":true})
-}))
+})),
+  "hasUnreadReply": zod.boolean()
 })
+
+export const MarkTeacherThreadReadParams = zod.object({
+  "threadId": zod.uuid()
+})
+
+export const MarkTeacherThreadReadResponse = zod.unknown()
 

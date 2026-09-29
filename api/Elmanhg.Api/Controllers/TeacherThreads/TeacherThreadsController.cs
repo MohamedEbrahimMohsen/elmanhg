@@ -3,6 +3,7 @@ using Elmanhg.Application.TeacherThreads.CreateTeacherThread;
 using Elmanhg.Application.TeacherThreads.GetMyTeacherThread;
 using Elmanhg.Application.TeacherThreads.GetMyTeacherThreads;
 using Elmanhg.Application.TeacherThreads.GetTeacherThreadContext;
+using Elmanhg.Application.TeacherThreads.MarkTeacherThreadRead;
 using Elmanhg.Application.TeacherThreads.Shared;
 using Elmanhg.Domain.SharedKernel;
 using MediatR;
@@ -41,6 +42,15 @@ public class TeacherThreadsController(IMediator mediator) : ControllerBase
     {
         var result = await mediator.Send(new GetMyTeacherThreadQuery(threadId), cancellationToken);
         return Ok(result);
+    }
+
+    [HttpPost("{threadId:guid}/read", Name = "MarkTeacherThreadRead")]
+    [Authorize(Policy = DefaultCodes.AskTeacherSubmit)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> MarkTeacherThreadRead([FromRoute] Guid threadId, CancellationToken cancellationToken)
+    {
+        await mediator.Send(new MarkTeacherThreadReadCommand(threadId), cancellationToken);
+        return Ok();
     }
 
     [HttpPost(Name = "CreateTeacherThread")]

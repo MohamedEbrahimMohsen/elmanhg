@@ -49,6 +49,7 @@ import { Route as StudentSubjectSubjectIdRouteImport } from './routes/student/su
 import { Route as StudentThreadThreadIdRouteImport } from './routes/student/thread.$threadId'
 import { Route as StudentUnitUnitIdRouteImport } from './routes/student/unit.$unitId'
 import { Route as TeacherQQuestionIdRouteImport } from './routes/teacher/q.$questionId'
+import { Route as TeacherThreadThreadIdRouteImport } from './routes/teacher/thread.$threadId'
 import { Route as AdminQuestionImportLessonIdRouteImport } from './routes/admin/question.import.$lessonId'
 import { Route as AdminQuestionNewLessonIdRouteImport } from './routes/admin/question.new.$lessonId'
 import { Route as StudentLessonLessonIdIndexRouteImport } from './routes/student/lesson.$lessonId.index'
@@ -260,6 +261,11 @@ const TeacherQQuestionIdRoute = TeacherQQuestionIdRouteImport.update({
   path: '/q/$questionId',
   getParentRoute: () => TeacherRouteRoute,
 } as any)
+const TeacherThreadThreadIdRoute = TeacherThreadThreadIdRouteImport.update({
+  id: '/thread/$threadId',
+  path: '/thread/$threadId',
+  getParentRoute: () => TeacherRouteRoute,
+} as any)
 const AdminQuestionImportLessonIdRoute =
   AdminQuestionImportLessonIdRouteImport.update({
     id: '/question/import/$lessonId',
@@ -338,6 +344,7 @@ export interface FileRoutesByFullPath {
   '/student/thread/$threadId': typeof StudentThreadThreadIdRoute
   '/student/unit/$unitId': typeof StudentUnitUnitIdRoute
   '/teacher/q/$questionId': typeof TeacherQQuestionIdRoute
+  '/teacher/thread/$threadId': typeof TeacherThreadThreadIdRoute
   '/admin/question/import/$lessonId': typeof AdminQuestionImportLessonIdRoute
   '/admin/question/new/$lessonId': typeof AdminQuestionNewLessonIdRoute
   '/student/lesson/$lessonId/objectives': typeof StudentLessonLessonIdObjectivesRoute
@@ -382,6 +389,7 @@ export interface FileRoutesByTo {
   '/student/thread/$threadId': typeof StudentThreadThreadIdRoute
   '/student/unit/$unitId': typeof StudentUnitUnitIdRoute
   '/teacher/q/$questionId': typeof TeacherQQuestionIdRoute
+  '/teacher/thread/$threadId': typeof TeacherThreadThreadIdRoute
   '/admin/question/import/$lessonId': typeof AdminQuestionImportLessonIdRoute
   '/admin/question/new/$lessonId': typeof AdminQuestionNewLessonIdRoute
   '/student/lesson/$lessonId/objectives': typeof StudentLessonLessonIdObjectivesRoute
@@ -431,6 +439,7 @@ export interface FileRoutesById {
   '/student/thread/$threadId': typeof StudentThreadThreadIdRoute
   '/student/unit/$unitId': typeof StudentUnitUnitIdRoute
   '/teacher/q/$questionId': typeof TeacherQQuestionIdRoute
+  '/teacher/thread/$threadId': typeof TeacherThreadThreadIdRoute
   '/admin/question/import/$lessonId': typeof AdminQuestionImportLessonIdRoute
   '/admin/question/new/$lessonId': typeof AdminQuestionNewLessonIdRoute
   '/student/lesson/$lessonId/objectives': typeof StudentLessonLessonIdObjectivesRoute
@@ -481,6 +490,7 @@ export interface FileRouteTypes {
     | '/student/thread/$threadId'
     | '/student/unit/$unitId'
     | '/teacher/q/$questionId'
+    | '/teacher/thread/$threadId'
     | '/admin/question/import/$lessonId'
     | '/admin/question/new/$lessonId'
     | '/student/lesson/$lessonId/objectives'
@@ -525,6 +535,7 @@ export interface FileRouteTypes {
     | '/student/thread/$threadId'
     | '/student/unit/$unitId'
     | '/teacher/q/$questionId'
+    | '/teacher/thread/$threadId'
     | '/admin/question/import/$lessonId'
     | '/admin/question/new/$lessonId'
     | '/student/lesson/$lessonId/objectives'
@@ -573,6 +584,7 @@ export interface FileRouteTypes {
     | '/student/thread/$threadId'
     | '/student/unit/$unitId'
     | '/teacher/q/$questionId'
+    | '/teacher/thread/$threadId'
     | '/admin/question/import/$lessonId'
     | '/admin/question/new/$lessonId'
     | '/student/lesson/$lessonId/objectives'
@@ -873,6 +885,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherQQuestionIdRouteImport
       parentRoute: typeof TeacherRouteRoute
     }
+    '/teacher/thread/$threadId': {
+      id: '/teacher/thread/$threadId'
+      path: '/thread/$threadId'
+      fullPath: '/teacher/thread/$threadId'
+      preLoaderRoute: typeof TeacherThreadThreadIdRouteImport
+      parentRoute: typeof TeacherRouteRoute
+    }
     '/admin/question/import/$lessonId': {
       id: '/admin/question/import/$lessonId'
       path: '/question/import/$lessonId'
@@ -1024,6 +1043,7 @@ interface TeacherRouteRouteChildren {
   TeacherStatsRoute: typeof TeacherStatsRoute
   TeacherIndexRoute: typeof TeacherIndexRoute
   TeacherQQuestionIdRoute: typeof TeacherQQuestionIdRoute
+  TeacherThreadThreadIdRoute: typeof TeacherThreadThreadIdRoute
 }
 
 const TeacherRouteRouteChildren: TeacherRouteRouteChildren = {
@@ -1031,6 +1051,7 @@ const TeacherRouteRouteChildren: TeacherRouteRouteChildren = {
   TeacherStatsRoute: TeacherStatsRoute,
   TeacherIndexRoute: TeacherIndexRoute,
   TeacherQQuestionIdRoute: TeacherQQuestionIdRoute,
+  TeacherThreadThreadIdRoute: TeacherThreadThreadIdRoute,
 }
 
 const TeacherRouteRouteWithChildren = TeacherRouteRoute._addFileChildren(

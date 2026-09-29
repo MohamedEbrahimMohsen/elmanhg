@@ -1,5 +1,6 @@
 import { setupServer } from 'msw/node';
 import { getRecordFunnelEventMockHandler } from '@/shared/api/generated/analytics/analytics.msw';
+import { getGetAvatarStatusMockHandler } from '@/shared/api/generated/avatar/avatar.msw';
 import {
   getGetStudentLessonMockHandler,
   getRecordLessonOpeningMockHandler,
@@ -10,6 +11,7 @@ import {
   getGetUnitExamAttemptsMockHandler,
 } from '@/shared/api/generated/exams/exams.msw';
 import { getGetMyUsageMockHandler } from '@/shared/api/generated/subscriptions/subscriptions.msw';
+import { avatarStatus } from '@/test/avatarFixtures';
 import { studentLesson } from '@/test/browseFixtures';
 import { noExamAttempts } from '@/test/examFixtures';
 import { baseUsage } from '@/test/subscriptionFixtures';
@@ -22,4 +24,5 @@ export const server = setupServer(
   getRecordFunnelEventMockHandler(),
   getReportClientErrorMockHandler(),
   getGetMyUsageMockHandler(baseUsage()),
+  getGetAvatarStatusMockHandler(avatarStatus()),
 );

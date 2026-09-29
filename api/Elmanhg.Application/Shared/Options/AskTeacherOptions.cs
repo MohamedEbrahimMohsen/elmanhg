@@ -14,4 +14,7 @@ public sealed class AskTeacherOptions
 
     [Range(1, 100)]
     public int ThreadListMaxPageSize { get; set; } = 50;
+
+    [Range(1, 20000)]
+    public int ReplyTextMaxLength { get; set; } = 4000;
 }

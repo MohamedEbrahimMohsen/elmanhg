@@ -207,4 +207,4 @@ History: `GET /api/progress/sessions` (`docs/progress.md`).
 - The correct answer and explanation shown after "تحقّق" come from the submit-answer response (see What is revealed).
 - The client reports `timeTakenMilliseconds` from the moment the question was shown to "تحقّق".
 - "تدريب جديد" starts the smallest of 5/10/20 that is at least the number of questions served.
-- "اسأل المساعد" is shown disabled with "متاح قريبًا" until the AI Avatar (E8) ships.
+- "اسأل المساعد" opens the avatar panel with the answered question as its context ([avatar.md](avatar.md)).

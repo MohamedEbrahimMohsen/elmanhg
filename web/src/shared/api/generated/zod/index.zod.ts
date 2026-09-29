@@ -1,6 +1,7 @@
 export * from './analytics/analytics.zod';
 export * from './audit-logs/audit-logs.zod';
 export * from './auth/auth.zod';
+export * from './avatar/avatar.zod';
 export * from './browse/browse.zod';
 export * from './client-errors/client-errors.zod';
 export * from './content-retrieval/content-retrieval.zod';
@@ -17,6 +18,7 @@ export * from './sessions/sessions.zod';
 export * from './students/students.zod';
 export * from './subjects/subjects.zod';
 export * from './subscriptions/subscriptions.zod';
+export * from './teacher-inbox/teacher-inbox.zod';
 export * from './teacher-threads/teacher-threads.zod';
 export * from './teachers/teachers.zod';
 export * from './units/units.zod';

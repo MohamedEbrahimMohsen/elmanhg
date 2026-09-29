@@ -5,7 +5,7 @@
 The AI avatar answers "grounded on lesson content via retrieval (embeddings over explanation/summary/explanation-of-questions)" (PRD §9.2). This feature keeps a vector index of every Published lesson and returns the chunks of one lesson that best match a text, each with a section reference the avatar can cite.
 
 - The .NET API owns the chunks, the vectors (PostgreSQL `pgvector`) and the search. The AI service only turns text into vectors (`POST /v1/embeddings`, [ai-service.md](ai-service.md)).
-- The consumer is the avatar chat (#91), which sends `SearchLessonContentQuery` in-process after it has checked the student's access. It falls back to the full context bundle (PRD §9.1) when a lesson has no index yet.
+- The consumer is the avatar chat (#91), which sends `SearchLessonContentQuery` in-process after it has checked the student's access. The query is the student's message (for the question entry points, the question stem, a new line, then the message), with `includeQuestionExplanations: true` and the default `top`. The avatar then drops the chunks of every question whose explanation the student cannot see yet (an unanswered item of an open quiz, or an item of an unsubmitted exam), so a question's explanation never reaches the student before the quiz reveals it. The remaining matches go to the AI service as citable sources, and the lesson explanation and summary are sent in full (as plain text) only when there are no matches, for example when a lesson has no index yet. See [avatar.md](avatar.md).
 - Admins can run the same search over HTTP to check grounding, and can force a full re-index.
 
 ## What is indexed

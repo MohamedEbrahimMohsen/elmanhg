@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
+import { getSendAvatarMessageMockHandler } from '@/shared/api/generated/avatar/avatar.msw';
 import type { ExamSessionResult } from '@/shared/api/generated/model';
 import {
   getGetExamSessionMockHandler,
@@ -9,6 +10,7 @@ import {
   getPreviewMultiUnitExamMockHandler,
 } from '@/shared/api/generated/exams/exams.msw';
 import { getGetSubjectsMockHandler } from '@/shared/api/generated/subjects/subjects.msw';
+import { avatarReply } from '@/test/avatarFixtures';
 import { axe } from '@/test/axe';
 import {
   examItem,
@@ -146,5 +148,27 @@ describe('ExamResultPage', () => {
     expect(await screen.findByRole('checkbox', { name: 'Mechanics' })).toBeChecked();
     expect(screen.getByRole('checkbox', { name: 'Waves' })).toBeChecked();
     expect(screen.getByRole('radio', { name: '20 questions' })).toBeChecked();
+  });
+
+  it('opens the assistant for an exam question review', async () => {
+    let body: unknown;
+    server.use(
+      getSendAvatarMessageMockHandler(async ({ request }) => {
+        body = await request.json();
+        return avatarReply({ citations: [] });
+      }),
+    );
+    const user = userEvent.setup();
+    openResult(submittedExam([examItem(1), examItem(2)]));
+
+    const [first] = await screen.findAllByRole('button', { name: 'Ask the assistant' });
+    if (!first) throw new Error('No assistant button.');
+    await user.click(first);
+    const panel = await screen.findByRole('dialog', { name: 'AI assistant' });
+    await user.type(await within(panel).findByRole('textbox', { name: 'Your question' }), 'Explain the solution');
+    await user.click(within(panel).getByRole('button', { name: 'Send' }));
+
+    expect(await within(panel).findByText(avatarReply().reply)).toBeInTheDocument();
+    expect(body).toMatchObject({ entryPoint: 'ExamReview', sessionId: examSessionId });
   });
 });

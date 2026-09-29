@@ -7,13 +7,15 @@ VALID_TOKEN = "a" * 32
 SECRET_TOKEN = "real-secret-QZX-service-token-0123456789"
 
 
-def test_settings_defaults_select_fake_provider_and_v1_prompt() -> None:
+def test_settings_defaults_select_fake_provider_and_v2_prompt() -> None:
     settings = Settings(service_token=SecretStr(VALID_TOKEN))
 
     assert settings.llm_provider == "fake"
     assert settings.chat_model == "claude-sonnet-5"
-    assert settings.chat_prompt_version == "v1"
+    assert settings.chat_prompt_version == "v2"
     assert settings.chat_max_tokens == 1024
+    assert settings.chat_max_sources == 20
+    assert settings.chat_max_source_chars == 8000
 
 
 def test_settings_short_service_token_raises_validation_error() -> None:

@@ -29,7 +29,8 @@
     { "key": "secondUnitId", "value": "" },
     { "key": "checkoutPaymentId", "value": "" },
     { "key": "baseSubscriptionId", "value": "" },
-    { "key": "teacherThreadId", "value": "" }
+    { "key": "teacherThreadId", "value": "" },
+    { "key": "inboxThreadId", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -2649,6 +2650,94 @@
       ]
     },
     {
+      "name": "Avatar",
+      "description": "Student-only (Avatar.Chat). Status returns examInProgress, today's message counter (Free 5, Base 50) and the input limits. A message is refused with 403 AVATAR_EXAM_IN_PROGRESS while the student has an exam in progress, and 403 AVATAR_DAILY_LIMIT_REACHED at the daily limit. The lesson request needs a Published lesson in {{lessonId}} that is open for the student; Global needs no ids. See docs/avatar.md.",
+      "item": [
+        {
+          "name": "Get avatar status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/avatar/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "avatar", "status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send avatar message (lesson)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/avatar/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "avatar", "messages"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entryPoint\": \"Lesson\",\n  \"lessonId\": \"{{lessonId}}\",\n  \"history\": [],\n  \"message\": \"ما هو قانون أوم؟\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send avatar message (global)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/avatar/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "avatar", "messages"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entryPoint\": \"Global\",\n  \"history\": [],\n  \"message\": \"كيف أذاكر الفيزياء؟\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "AskTeacher",
       "item": [
         {
@@ -2805,6 +2894,241 @@
                 "api",
                 "teacher-threads",
                 "{{teacherThreadId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark my thread read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teacher-threads/{{teacherThreadId}}/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teacher-threads",
+                "{{teacherThreadId}}",
+                "read"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "TeacherInbox",
+      "description": "Teacher (assigned to the subject) or Admin. Sign in as the teacher so accessToken is set; Get inbox fills inboxThreadId from the first unclaimed item.",
+      "item": [
+        {
+          "name": "Get inbox",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const items = pm.response.json().items;",
+                  "if (items.length > 0) { pm.collectionVariables.set(\"inboxThreadId\", items[0].id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teacher-inbox?filter=Unclaimed&pageNumber=1&pageSize=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teacher-inbox"
+              ],
+              "query": [
+                {
+                  "key": "filter",
+                  "value": "Unclaimed"
+                },
+                {
+                  "key": "pageNumber",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get inbox thread",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns the student name\", function () { pm.expect(pm.response.json()).to.have.property(\"studentName\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teacher-inbox/{{inboxThreadId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teacher-inbox",
+                "{{inboxThreadId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Claim thread",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200 or 409\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 409]); });",
+                  "if (pm.response.code === 200) { pm.test(\"claimed by me\", function () { pm.expect(pm.response.json().isClaimedByMe).to.eql(true); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teacher-inbox/{{inboxThreadId}}/claim",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teacher-inbox",
+                "{{inboxThreadId}}",
+                "claim"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reply to thread",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200 or 409\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 409]); });",
+                  "if (pm.response.code === 200) { pm.test(\"answered\", function () { pm.expect(pm.response.json().status).to.eql(\"Answered\"); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/teacher-inbox/{{inboxThreadId}}/replies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teacher-inbox",
+                "{{inboxThreadId}}",
+                "replies"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Because force equals mass times acceleration.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get inbox (mine)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns items\", function () { pm.expect(pm.response.json().items).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teacher-inbox?filter=Mine&pageNumber=1&pageSize=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teacher-inbox"
+              ],
+              "query": [
+                {
+                  "key": "filter",
+                  "value": "Mine"
+                },
+                {
+                  "key": "pageNumber",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
               ]
             }
           },

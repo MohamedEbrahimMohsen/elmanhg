@@ -52,8 +52,10 @@ async def test_chat_valid_request_returns_reply(
         "inputTokens",
         "outputTokens",
         "stopReason",
+        "citations",
     }
-    assert body["promptVersion"] == "v1"
+    assert body["promptVersion"] == "v2"
+    assert body["citations"] == []
     assert len(fake_model.requests) == 1
 
 
@@ -147,3 +149,34 @@ async def test_chat_without_startup_returns_503_problem(
 
     assert_problem(response, 503, "SERVICE_NOT_READY")
     assert fake_model.requests == []
+
+
+async def test_chat_with_sources_returns_citations(
+    client: httpx2.AsyncClient, auth_headers: dict[str, str], chat_payload: PayloadBuilder
+) -> None:
+    sources = [
+        {"reference": "explanation-1", "title": "الشرح — قانون أوم", "content": "V = I R"},
+        {"reference": "summary-1", "title": "الملخص", "content": "R = V / I"},
+    ]
+
+    response = await client.post(
+        "/v1/chat", json=chat_payload(sources=sources), headers=auth_headers
+    )
+
+    assert response.status_code == 200
+    assert response.json()["citations"] == ["explanation-1"]
+
+
+async def test_chat_duplicate_source_references_returns_400_problem(
+    client: httpx2.AsyncClient, auth_headers: dict[str, str], chat_payload: PayloadBuilder
+) -> None:
+    sources = [
+        {"reference": "summary-1", "title": "الملخص", "content": "a"},
+        {"reference": "summary-1", "title": "الملخص", "content": "b"},
+    ]
+
+    response = await client.post(
+        "/v1/chat", json=chat_payload(sources=sources), headers=auth_headers
+    )
+
+    assert_problem(response, 400, "VALIDATION_FAILED")

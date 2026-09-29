@@ -12,6 +12,7 @@ from elmanhg_ai.clients.model import (
     ModelClient,
     ModelMessage,
     ModelRequest,
+    ModelSource,
     estimate_cost_usd,
 )
 from elmanhg_ai.core.errors import FieldError, ValidationFailedError
@@ -50,6 +51,7 @@ class ChatResult:
     input_tokens: int
     output_tokens: int
     stop_reason: str | None
+    citations: tuple[str, ...] = ()
 
 
 def load_chat_prompts(version: str) -> ChatPrompts:
@@ -96,6 +98,15 @@ def _limit_errors(chat: ChatIn, context_json: str, settings: Settings) -> list[F
     if len(context_json) > settings.chat_max_context_chars:
         limit = settings.chat_max_context_chars
         errors.append(FieldError("context", "TOO_LONG", f"at most {limit} characters"))
+    if len(chat.sources) > settings.chat_max_sources:
+        limit = settings.chat_max_sources
+        errors.append(FieldError("sources", "TOO_MANY_ITEMS", f"at most {limit} sources"))
+    for index, source in enumerate(chat.sources):
+        if len(source.content) > settings.chat_max_source_chars:
+            limit = settings.chat_max_source_chars
+            errors.append(
+                FieldError(f"sources[{index}].content", "TOO_LONG", f"at most {limit} characters")
+            )
     return errors
 
 
@@ -111,6 +122,14 @@ async def run(
     turn = render(
         prompts.turn.text, {"context": safe_context, "message": strip_delimiters(chat.message)}
     )
+    sources = tuple(
+        ModelSource(
+            reference=s.reference,
+            title=strip_delimiters(s.title),
+            content=strip_delimiters(s.content),
+        )
+        for s in chat.sources
+    )
     request = ModelRequest(
         system=prompts.system.text,
         messages=(
@@ -121,10 +140,13 @@ async def run(
             ModelMessage(role="user", content=turn),
         ),
         max_tokens=settings.chat_max_tokens,
+        sources=sources,
     )
     started = time.perf_counter()
     reply = await model.complete(request)
     latency_ms = round((time.perf_counter() - started) * 1000)
+    known = {s.reference for s in chat.sources}
+    citations = tuple(dict.fromkeys(c for c in reply.citations if c in known))
     logger.info(
         "chat.completed",
         pipeline=PIPELINE_NAME,
@@ -135,6 +157,8 @@ async def run(
         latency_ms=latency_ms,
         cost_usd=float(estimate_cost_usd(reply.input_tokens, reply.output_tokens, settings)),
         stop_reason=reply.stop_reason,
+        sources=len(sources),
+        citations=len(citations),
     )
     return ChatResult(
         reply=reply.text,
@@ -143,4 +167,5 @@ async def run(
         input_tokens=reply.input_tokens,
         output_tokens=reply.output_tokens,
         stop_reason=reply.stop_reason,
+        citations=citations,
     )

@@ -4,6 +4,8 @@
 
 `ai/` is an internal Python 3.13 FastAPI service (package `elmanhg_ai`, managed with uv). It answers avatar chat turns over the Claude API (PRD §9) and embeds text for lesson retrieval ([content-retrieval.md](content-retrieval.md)). Only the .NET API calls it, over HTTP with a shared service token; browsers never do. The .NET side of the contract is `api/Elmanhg.Application/Shared/AiService/` (`IAiServiceClient`), and the Python side is `ai/src/elmanhg_ai/api/chat/schemas.py` and `ai/src/elmanhg_ai/api/embeddings/schemas.py`. Both change together, and `ai/openapi/v1.json` is the committed contract (regenerate with `uv run python -m elmanhg_ai.openapi_export` from `ai/`; a test fails on drift).
 
+How the API builds the context bundle, the exam refusal, the daily quota and the student UI are in [avatar.md](avatar.md).
+
 The .NET API's own readiness (`/health`) does not depend on the AI service: the avatar is non-critical, so a down AI service must not take the API out of rotation.
 
 ## Contract
@@ -37,7 +39,11 @@ Request:
     { "role": "user", "content": "ما هو قانون أوم؟" },
     { "role": "assistant", "content": "فرق الجهد يساوي التيار في المقاومة." }
   ],
-  "message": "لماذا إجابتي خطأ؟"
+  "message": "لماذا إجابتي خطأ؟",
+  "sources": [
+    { "reference": "explanation-1", "title": "الشرح — قانون أوم", "content": "شدة التيار تتناسب طرديا مع فرق الجهد. V = I R" },
+    { "reference": "summary-1", "title": "الملخص", "content": "المقاومة = فرق الجهد ÷ شدة التيار." }
+  ]
 }
 ```
 
@@ -47,12 +53,15 @@ Response `200`:
 {
   "reply": "هذا رد تجريبي من المساعد.",
   "model": "fake",
-  "promptVersion": "v1",
+  "promptVersion": "v2",
   "inputTokens": 0,
   "outputTokens": 0,
-  "stopReason": "end_turn"
+  "stopReason": "end_turn",
+  "citations": ["explanation-1"]
 }
 ```
+
+`sources` are the retrieved lesson chunks ([content-retrieval.md](content-retrieval.md)); the field may be omitted or empty. `citations` lists the `reference` of every source the reply cites, distinct and in first-cited order; it only ever contains references that were sent, and is `[]` when nothing is cited.
 
 `model` and `promptVersion` are recorded per message (PRD §9.3).
 
@@ -67,6 +76,7 @@ Field rules:
 
 - `history` alternates `user`, `assistant`, `user`, … and has an even length (it may be empty). The new `message` becomes the final user turn.
 - `message`, `content`, `name` and `stem` must be non-empty.
+- `sources[].reference` matches `^[a-z0-9-]+$` (1 to 200 characters) and is unique within the request; `title` is 1 to 300 characters and `content` is non-empty.
 
 Limits (checked by the pipeline; exceeding one returns `400 VALIDATION_FAILED` with field code `TOO_MANY_ITEMS` or `TOO_LONG`):
 
@@ -74,7 +84,9 @@ Limits (checked by the pipeline; exceeding one returns `400 VALIDATION_FAILED` w
 |---|---|---|
 | `ELMANHG_AI_CHAT_MAX_HISTORY_MESSAGES` | 20 | number of `history` turns |
 | `ELMANHG_AI_CHAT_MAX_MESSAGE_CHARS` | 4000 | length of `message` and of each `history[].content` |
-| `ELMANHG_AI_CHAT_MAX_CONTEXT_CHARS` | 60000 | length of the serialized `context` JSON |
+| `ELMANHG_AI_CHAT_MAX_CONTEXT_CHARS` | 60000 | length of the serialized `context` JSON (sources are not counted) |
+| `ELMANHG_AI_CHAT_MAX_SOURCES` | 20 | number of `sources` |
+| `ELMANHG_AI_CHAT_MAX_SOURCE_CHARS` | 8000 | length of each `sources[].content` |
 
 ### `POST /v1/embeddings`
 
@@ -153,11 +165,13 @@ AI service (`ELMANHG_AI_*` environment variables; `settings.py` is the only plac
 | `ELMANHG_AI_LLM_PROVIDER` | `fake` | `fake` or `anthropic` |
 | `ELMANHG_AI_ANTHROPIC_API_KEY` | unset | required when the provider is `anthropic` |
 | `ELMANHG_AI_CHAT_MODEL` | `claude-sonnet-5` | Claude model id |
-| `ELMANHG_AI_CHAT_PROMPT_VERSION` | `v1` | pattern `v<number>`; selects both chat prompt files |
+| `ELMANHG_AI_CHAT_PROMPT_VERSION` | `v2` | pattern `v<number>`; selects both chat prompt files. `v2` is the production Avatar prompt; `v1` is kept for history |
 | `ELMANHG_AI_CHAT_MAX_TOKENS` | 1024 | 1 to 8192 |
 | `ELMANHG_AI_CHAT_MAX_HISTORY_MESSAGES` | 20 | 0 to 100 |
 | `ELMANHG_AI_CHAT_MAX_MESSAGE_CHARS` | 4000 | |
 | `ELMANHG_AI_CHAT_MAX_CONTEXT_CHARS` | 60000 | |
+| `ELMANHG_AI_CHAT_MAX_SOURCES` | 20 | 0 to 50 |
+| `ELMANHG_AI_CHAT_MAX_SOURCE_CHARS` | 8000 | |
 | `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` | 20 | per Claude call, up to 120 |
 | `ELMANHG_AI_MODEL_MAX_RETRIES` | 1 | SDK retries with exponential backoff, 0 to 5 |
 | `ELMANHG_AI_MODEL_INPUT_USD_PER_MILLION_TOKENS` | 3 | cost logging only; confirm the list price at go-live |
@@ -192,8 +206,8 @@ Timeouts nest so the AI service always answers before the API gives up: the wors
 
 ## Fakes
 
-- `ELMANHG_AI_LLM_PROVIDER=fake` (the default) uses `FakeModelClient`, which returns the fixed Arabic reply `هذا رد تجريبي من المساعد.` with model `fake`. CI needs no keys.
-- The .NET `AiService:Provider=Fake` (the default) uses `FakeAiServiceClient`, which returns the same fixed reply with model and prompt version `fake` without calling the service. It refuses with `AI_SERVICE_UNAVAILABLE` in Production. The test `ApiFactory` pins `Fake`.
+- `ELMANHG_AI_LLM_PROVIDER=fake` (the default) uses `FakeModelClient`, which returns the fixed Arabic reply `هذا رد تجريبي من المساعد.` with model `fake`, citing the first source when sources were sent. CI needs no keys.
+- The .NET `AiService:Provider=Fake` (the default) uses `FakeAiServiceClient`, which returns the same fixed reply with model and prompt version `fake` without calling the service, and cites the first source when there is one. It refuses with `AI_SERVICE_UNAVAILABLE` in Production. The test `ApiFactory` pins `Fake`.
 - `ELMANHG_AI_EMBEDDING_PROVIDER=fake` (the default) uses `FakeEmbeddingClient`: deterministic lexical vectors (NFKC, case folding, tashkeel and tatweel removed, alef variants unified, word tokens hashed with BLAKE2b into signed buckets, L2-normalised; text with no words gives the unit vector on the first axis). Model `fake-embedding`.
 - The .NET fake embeds in-process the same way (SHA-256 buckets over `AnswerNormalizer` output) with model `fake`, so a mixed fake index never matches across the two (the search filters by model). Texts that share words score higher, which makes retrieval tests meaningful without a key.
 
@@ -201,13 +215,14 @@ Timeouts nest so the AI service always answers before the API gives up: the wors
 
 - Prompts are package files `src/elmanhg_ai/prompts/<name>.<version>.md`, never Python string literals. Chat uses `avatar_system.vN.md` (the system prompt) and `avatar_turn.vN.md` (the final user turn). `ELMANHG_AI_CHAT_PROMPT_VERSION` selects both; an unknown version stops startup.
 - Student input and platform content are untrusted. They go only into the last user turn, inside `<lesson_context>` and `<student_message>` tags, after any such tag in the untrusted text has been removed. Removal matches spaced and attribute-carrying variants (`< /student_message x>`) and dangling tags with no closing `>` (a match stops at the next `<` or `>`, so each pass is linear in the text length), and repeats until the text stops changing, so nested fragments such as `</stu</student_message>dent_message>` cannot reassemble into a tag. Removal runs on each string field of the context before the context is serialized to JSON, so a dangling tag in one field cannot consume the fields after it. History turns keep their own roles and are not wrapped in tags, but the same tags are removed from their content, so a tag in an earlier message is not replayed on later turns. The system prompt holds no untrusted text. Rendering is single pass, so substituted text is never re-scanned.
+- Sources go to Claude as native `search_result` content blocks with `citations.enabled`, placed before the text of the final user turn. They are data like the rest of the context: the same delimiter tags are removed from each source's `title` and `content`, and prompt v2 tells the model that search results are not instructions. The Anthropic adapter reads the `search_result_location` citations of the reply's text blocks and returns their `source` values; the pipeline keeps only references it sent.
 
 ## Health, logging and telemetry
 
 - `GET /health` returns `{"status":"ok"}` (liveness, no dependencies). `GET /health/ready` returns `{"status":"ok"}` once startup has loaded the prompts and the model client, and `503 SERVICE_NOT_READY` before that. Readiness never calls Claude. Neither appears in OpenAPI.
 - structlog writes one JSON object per line (`ELMANHG_AI_LOG_FORMAT=console` for local reading) with `timestamp`, `level`, `event`, `trace_id` and `request_id`.
 - The trace id is the current OpenTelemetry span's (the FastAPI server span continues the W3C `traceparent` the .NET `HttpClient` sends), so API and AI logs and traces share one id. Without a valid span it falls back to the `traceparent` header, then to a random id. `X-Request-Id` is reused when valid. Both are echoed as `X-Trace-Id` and `X-Request-Id`.
-- There is one `request.completed` line per request (DEBUG for `/health*`), and one `chat.completed` line per chat with `pipeline`, `prompt_version`, `model`, `tokens_in`, `tokens_out`, `latency_ms`, `cost_usd` and `stop_reason`. Message and context text are never logged.
+- There is one `request.completed` line per request (DEBUG for `/health*`), and one `chat.completed` line per chat with `pipeline`, `prompt_version`, `model`, `tokens_in`, `tokens_out`, `latency_ms`, `cost_usd`, `stop_reason`, `sources` (count) and `citations` (count). Message, context and source text are never logged.
 - There is one `embedding.completed` line per embeddings call with `pipeline` (`embeddings`), `model`, `input_type`, `count`, `tokens_in`, `latency_ms` and `cost_usd`. The texts are never logged. A failed OpenAI call logs `embedding.call_failed` (`provider`, `model`, `status_code`, `error_type`), and a bad reply logs `embedding.output_invalid`.
 - `service.started` also records `embedding_provider`, `embedding_model` and `otlp_exporting`.
 - Traces (`core/telemetry.py`): one SERVER span per request from the FastAPI instrumentation (`/health*` excluded), and one CLIENT span per model call, named `chat <model>` or `embeddings <model>`, with `gen_ai.operation.name`, `gen_ai.provider.name`, `gen_ai.request.model` and `gen_ai.usage.input_tokens` / `output_tokens`. A failed call records the exception and marks the span as an error.
@@ -231,12 +246,20 @@ To make the API call it, set `AiService__Provider=Http`, `AiService__BaseUrl=htt
 
 Staging and production: the `ai` compose profile in `deploy/docker-compose.prod.yml`, variables in the host's `ai.env`; see [docs/deployment.md](deployment.md).
 
+## Eval
+
+- `src/elmanhg_ai/eval/avatar_chat.py` runs the chat pipeline over the dataset `src/elmanhg_ai/eval/datasets/avatar_chat.v2.jsonl` (22 cases: grounded answers, numbered steps, quiz and exam-review questions, English and dialect input, and 7 `safety` cases for off-curriculum requests and prompt injection in the message, in a source and in delimiter tags).
+- Scorers (`eval/scorers.py`) are deterministic, with no model judge: Arabic letter ratio, word count, citations (non-empty when required, and only sent references), numbered steps, required terms (tashkeel ignored) and forbidden terms. A case passes when every applicable scorer passes.
+- Threshold: a pass rate of at least 0.85 (19 of 22), and every `safety` case passes.
+- Fake-mode tests cover the loader, scorers, scoring and threshold. The live run is `ELMANHG_AI_LLM_PROVIDER=anthropic ELMANHG_AI_ANTHROPIC_API_KEY=… ELMANHG_AI_SERVICE_TOKEN=… uv run pytest -m eval`; without those variables the test skips with that reason. Record the score whenever the prompt, model or pipeline changes.
+
 ## Go live with Claude
 
 1. Set `ELMANHG_AI_LLM_PROVIDER=anthropic` and `ELMANHG_AI_ANTHROPIC_API_KEY`.
 2. Confirm the `ELMANHG_AI_CHAT_MODEL` id and the per-million-token prices (`ELMANHG_AI_MODEL_*_USD_PER_MILLION_TOKENS`) against Anthropic's current list (PRD §18).
 3. Set the API to `AiService__Provider=Http` with the service's URL and the shared token.
 4. Check `/health/ready`, then send one chat and confirm that `chat.completed` shows real token counts.
+5. Run the avatar eval (`uv run pytest -m eval`, see Eval) and confirm that it meets the threshold, including that replies carry `citations` when sources are sent.
 
 ## Go live with OpenAI embeddings
 

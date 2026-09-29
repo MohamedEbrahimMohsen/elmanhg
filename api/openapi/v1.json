@@ -441,6 +441,30 @@
         }
       }
     },
+    "/api/teacher-threads/{threadId}/read": {
+      "post": {
+        "tags": [
+          "TeacherThreads"
+        ],
+        "operationId": "MarkTeacherThreadRead",
+        "parameters": [
+          {
+            "name": "threadId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/teachers": {
       "get": {
         "tags": [
@@ -557,6 +581,215 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/teacher-inbox": {
+      "get": {
+        "tags": [
+          "TeacherInbox"
+        ],
+        "operationId": "GetTeacherInbox",
+        "parameters": [
+          {
+            "name": "filter",
+            "in": "query",
+            "schema": {
+              "default": "All",
+              "$ref": "#/components/schemas/TeacherInboxFilter"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfTeacherInboxItemResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfTeacherInboxItemResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfTeacherInboxItemResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher-inbox/{threadId}": {
+      "get": {
+        "tags": [
+          "TeacherInbox"
+        ],
+        "operationId": "GetInboxThread",
+        "parameters": [
+          {
+            "name": "threadId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher-inbox/{threadId}/claim": {
+      "post": {
+        "tags": [
+          "TeacherInbox"
+        ],
+        "operationId": "ClaimTeacherThread",
+        "parameters": [
+          {
+            "name": "threadId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher-inbox/{threadId}/replies": {
+      "post": {
+        "tags": [
+          "TeacherInbox"
+        ],
+        "operationId": "ReplyToTeacherThread",
+        "parameters": [
+          {
+            "name": "threadId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplyToTeacherThreadRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplyToTeacherThreadRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplyToTeacherThreadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherInboxThreadResult"
+                }
+              }
+            }
           }
         }
       }
@@ -4030,6 +4263,86 @@
         }
       }
     },
+    "/api/avatar/status": {
+      "get": {
+        "tags": [
+          "Avatar"
+        ],
+        "operationId": "GetAvatarStatus",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarStatusResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarStatusResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarStatusResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/avatar/messages": {
+      "post": {
+        "tags": [
+          "Avatar"
+        ],
+        "operationId": "SendAvatarMessage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendAvatarMessageCommand"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendAvatarMessageCommand"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendAvatarMessageCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarReplyResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarReplyResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarReplyResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/otp/send": {
       "post": {
         "tags": [
@@ -4967,6 +5280,183 @@
             "type": "boolean"
           }
         }
+      },
+      "AvatarCitationResult": {
+        "required": [
+          "reference",
+          "section",
+          "sectionTitle",
+          "lessonId",
+          "questionId"
+        ],
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "string"
+          },
+          "section": {
+            "$ref": "#/components/schemas/LessonContentSection"
+          },
+          "sectionTitle": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "lessonId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "questionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          }
+        }
+      },
+      "AvatarEntryPoint": {
+        "enum": [
+          "Lesson",
+          "QuizQuestion",
+          "ExamReview",
+          "Global"
+        ]
+      },
+      "AvatarReplyResult": {
+        "required": [
+          "reply",
+          "citations",
+          "dailyMessageLimit",
+          "messagesUsedToday",
+          "messagesRemainingToday",
+          "model",
+          "promptVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "reply": {
+            "type": "string"
+          },
+          "citations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvatarCitationResult"
+            }
+          },
+          "dailyMessageLimit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "messagesUsedToday": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "messagesRemainingToday": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "model": {
+            "type": "string"
+          },
+          "promptVersion": {
+            "type": "string"
+          }
+        }
+      },
+      "AvatarStatusResult": {
+        "required": [
+          "examInProgress",
+          "tier",
+          "dailyMessageLimit",
+          "messagesUsedToday",
+          "messagesRemainingToday",
+          "messageMaxLength",
+          "maxHistoryMessages"
+        ],
+        "type": "object",
+        "properties": {
+          "examInProgress": {
+            "type": "boolean"
+          },
+          "tier": {
+            "$ref": "#/components/schemas/PlanTier"
+          },
+          "dailyMessageLimit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "messagesUsedToday": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "messagesRemainingToday": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "messageMaxLength": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "maxHistoryMessages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "AvatarTurn": {
+        "required": [
+          "role",
+          "content"
+        ],
+        "type": "object",
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/AvatarTurnRole"
+          },
+          "content": {
+            "type": "string"
+          }
+        }
+      },
+      "AvatarTurnRole": {
+        "enum": [
+          "User",
+          "Assistant"
+        ]
       },
       "BasePlanResult": {
         "required": [
@@ -7238,6 +7728,49 @@
           }
         }
       },
+      "PageDataOfTeacherInboxItemResult": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeacherInboxItemResult"
+            }
+          },
+          "pageNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalItems": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
       "PageDataOfTeacherThreadSummaryResult": {
         "type": "object",
         "properties": {
@@ -7939,6 +8472,20 @@
           }
         }
       },
+      "ReplyToTeacherThreadRequest": {
+        "required": [
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "ReportClientErrorRequest": {
         "required": [
           "message",
@@ -8028,6 +8575,52 @@
               "null",
               "boolean"
             ]
+          }
+        }
+      },
+      "SendAvatarMessageCommand": {
+        "required": [
+          "entryPoint",
+          "lessonId",
+          "sessionId",
+          "questionId",
+          "history",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "entryPoint": {
+            "$ref": "#/components/schemas/AvatarEntryPoint"
+          },
+          "lessonId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "sessionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "questionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvatarTurn"
+            }
+          },
+          "message": {
+            "type": "string"
           }
         }
       },
@@ -9195,6 +9788,142 @@
           "Expired"
         ]
       },
+      "TeacherInboxFilter": {
+        "enum": [
+          "All",
+          "Unclaimed",
+          "Mine"
+        ]
+      },
+      "TeacherInboxItemResult": {
+        "required": [
+          "id",
+          "subjectName",
+          "lessonName",
+          "questionText",
+          "studentName",
+          "teacherName",
+          "isClaimedByMe",
+          "status",
+          "isOverdue",
+          "submittedAt",
+          "slaDueAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectName": {
+            "type": "string"
+          },
+          "lessonName": {
+            "type": "string"
+          },
+          "questionText": {
+            "type": "string"
+          },
+          "studentName": {
+            "type": "string"
+          },
+          "teacherName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isClaimedByMe": {
+            "type": "boolean"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TeacherThreadStatus"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "slaDueAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TeacherInboxThreadResult": {
+        "required": [
+          "id",
+          "context",
+          "studentName",
+          "teacherName",
+          "isClaimedByMe",
+          "canClaim",
+          "canReply",
+          "status",
+          "isOverdue",
+          "submittedAt",
+          "slaDueAt",
+          "claimedAt",
+          "messages"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "context": {
+            "$ref": "#/components/schemas/TeacherThreadContextResult"
+          },
+          "studentName": {
+            "type": "string"
+          },
+          "teacherName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isClaimedByMe": {
+            "type": "boolean"
+          },
+          "canClaim": {
+            "type": "boolean"
+          },
+          "canReply": {
+            "type": "boolean"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TeacherThreadStatus"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "slaDueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "claimedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeacherMessageResult"
+            }
+          }
+        }
+      },
       "TeacherMessageKind": {
         "enum": [
           "Text",
@@ -9350,7 +10079,8 @@
           "isOverdue",
           "submittedAt",
           "slaDueAt",
-          "messages"
+          "messages",
+          "hasUnreadReply"
         ],
         "type": "object",
         "properties": {
@@ -9380,6 +10110,9 @@
             "items": {
               "$ref": "#/components/schemas/TeacherMessageResult"
             }
+          },
+          "hasUnreadReply": {
+            "type": "boolean"
           }
         }
       },
@@ -9399,7 +10132,8 @@
           "status",
           "isOverdue",
           "submittedAt",
-          "slaDueAt"
+          "slaDueAt",
+          "hasUnreadReply"
         ],
         "type": "object",
         "properties": {
@@ -9429,6 +10163,9 @@
           "slaDueAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "hasUnreadReply": {
+            "type": "boolean"
           }
         }
       },
@@ -10411,6 +11148,9 @@
       "name": "Teachers"
     },
     {
+      "name": "TeacherInbox"
+    },
+    {
       "name": "Plans"
     },
     {
@@ -10460,6 +11200,9 @@
     },
     {
       "name": "Browse"
+    },
+    {
+      "name": "Avatar"
     },
     {
       "name": "Auth"

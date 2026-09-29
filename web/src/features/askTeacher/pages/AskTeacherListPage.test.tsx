@@ -93,6 +93,19 @@ describe('AskTeacherListPage', () => {
     expect(main().getByText('Closed')).toBeInTheDocument();
   });
 
+  it('marks a thread with a new teacher reply', async () => {
+    await openList(() =>
+      threadsPage([
+        threadSummary({ status: 'Answered', hasUnreadReply: true }),
+        threadSummary({ id: olderId, questionText: 'What is inertia?' }),
+      ]),
+    );
+
+    await threadLinks();
+    expect(within(main().getByRole('link', { name: /Why is F = ma\?/ })).getByText('New reply')).toBeInTheDocument();
+    expect(within(main().getByRole('link', { name: /What is inertia\?/ })).queryByText('New reply')).toBeNull();
+  });
+
   it('shows the empty state when there are no threads', async () => {
     await openList(() => threadsPage([]));
 

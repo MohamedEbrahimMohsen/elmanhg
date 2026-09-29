@@ -17,7 +17,8 @@
     "closed": "Closed",
     "overdue": "Overdue",
     "awaiting": "Awaiting reply · {hours, plural, one {# hour} other {# hours}} left",
-    "answered": "Answered"
+    "answered": "Answered",
+    "newReply": "New reply"
   },
   "new": {
     "title": "New question for a teacher",
@@ -61,5 +62,35 @@
     "imageError": "Could not load the photo",
     "loading": "Loading the conversation…",
     "errorTitle": "Could not load the conversation"
+  },
+  "inbox": {
+    "title": "Student questions",
+    "filters": {
+      "label": "Filter questions",
+      "All": "All",
+      "Unclaimed": "Unclaimed",
+      "Mine": "Mine"
+    },
+    "loading": "Loading student questions…",
+    "errorTitle": "Could not load student questions",
+    "empty": "No questions.",
+    "meta": "{subject} / {lesson} · {student} · {date}",
+    "unclaimed": "Unclaimed",
+    "claimedByMe": "Claimed by you",
+    "claimedBy": "Teacher: {teacher}"
+  },
+  "inboxThread": {
+    "people": "Student: {student} · Teacher: {teacher}",
+    "claim": "Claim question",
+    "claimed": "Question claimed.",
+    "claimedByOther": "Another teacher has claimed this conversation.",
+    "replyTitle": "Reply",
+    "replyLabel": "Your reply",
+    "replyHint": "Write your reply",
+    "replyRequired": "Write your reply",
+    "send": "Send reply",
+    "sent": "Reply sent.",
+    "answered": "This question has been answered.",
+    "closed": "This question is closed."
   }
 }
