@@ -11,16 +11,15 @@ public static class MultiUnitExamDraw
 {
     public static async Task<Session> StartAsync(Guid userId, MultiUnitExamUnits selection, MultiUnitExamPlan plan, int size, bool isTestMode, DateTimeOffset now, ILessonRepository lessonRepository, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, Random random, CancellationToken cancellationToken)
     {
-        Dictionary<Guid, List<ExamCandidate>> candidatesByUnit = [];
-        foreach (var unit in selection.Units)
-        {
-            candidatesByUnit[unit.Id] = await questionRepository.GetServableExamCandidatesAsync([unit.Id], cancellationToken).ConfigureAwait(false);
-        }
-
-        var candidates = candidatesByUnit.Values
-            .SelectMany(x => x)
-            .DistinctBy(x => x.QuestionId)
+        var unitIds = selection.Units
+            .Select(x => x.Id)
             .ToList();
+        var unitLessons = await lessonRepository.FindAsync(x => unitIds.Contains(x.UnitId), cancellationToken, asNoTracking: true).ConfigureAwait(false);
+        var unitIdByLessonId = unitLessons.ToDictionary(x => x.Id, x => x.UnitId);
+        var candidates = await questionRepository.GetServableExamCandidatesAsync(unitIds, cancellationToken).ConfigureAwait(false);
+        var candidatesByUnit = selection.Units.ToDictionary(unit => unit.Id, unit => candidates
+            .Where(x => unitIdByLessonId.GetValueOrDefault(x.LessonId) == unit.Id)
+            .ToList());
         plan.EnsureServable(candidates.GroupBy(x => x.Type).ToDictionary(x => x.Key, x => x.Count()));
         var candidateIds = candidates
             .Select(x => x.QuestionId)
@@ -38,9 +37,10 @@ public static class MultiUnitExamDraw
             .ToList();
         var lessonIds = questions
             .Select(x => x.LessonId)
-            .Distinct()
+            .ToHashSet();
+        var lessons = unitLessons
+            .Where(x => lessonIds.Contains(x.Id))
             .ToList();
-        var lessons = await lessonRepository.FindAsync(x => lessonIds.Contains(x.Id), cancellationToken, asNoTracking: true).ConfigureAwait(false);
         return Session.StartMultiUnitExam(userId, selection.Subject.Id, selection.Units, plan, size, questions, lessons, isTestMode, now);
     }
 }

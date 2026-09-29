@@ -50,8 +50,15 @@ public static class ExamBreakdown
 
     private static int UnitPosition(IReadOnlyList<Guid> unitOrder, Guid unitId)
     {
-        var index = unitOrder.ToList().IndexOf(unitId);
-        return index < 0 ? int.MaxValue : index;
+        for (var index = 0; index < unitOrder.Count; index++)
+        {
+            if (unitOrder[index] == unitId)
+            {
+                return index;
+            }
+        }
+
+        return int.MaxValue;
     }
 
     private static List<Row> Rows(Session session, IReadOnlyCollection<ExamItemPlacement> placements)

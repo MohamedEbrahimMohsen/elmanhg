@@ -99,6 +99,7 @@
   <data name="PASSWORD_MUST_CONTAIN_DIGIT" xml:space="preserve"><value>يجب ان تحتوي كلمة المرور على رقم.</value></data>
   <data name="TOO_MANY_REQUESTS" xml:space="preserve"><value>طلبات كثيرة. انتظر قليلا وحاول مرة اخرى.</value></data>
   <data name="ADMIN_SEED_FAILED" xml:space="preserve"><value>تعذر انشاء حساب المدير.</value></data>
+  <data name="LOAD_TEST_SEED_FAILED" xml:space="preserve"><value>تعذر تجهيز بيانات اختبار الأداء.</value></data>
   <data name="VALIDATION_PHONE_NUMBER_IS_REQUIRED" xml:space="preserve"><value>ادخل رقم الموبايل.</value></data>
   <data name="VALIDATION_PHONE_NUMBER_MUST_BE_ONLY_DIGITS" xml:space="preserve"><value>رقم الموبايل يجب ان يحتوي على ارقام فقط.</value></data>
   <data name="VALIDATION_PHONE_NUMBER_MUST_BE_X_DIGITS" xml:space="preserve"><value>رقم الموبايل يجب ان يكون 11 رقما.</value></data>

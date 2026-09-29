@@ -40,6 +40,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
 
     public const string InProgressSessionIndex = "IX_Sessions_InProgressScope";
     public const string AttemptPerQuestionIndex = "IX_Attempts_SessionId_QuestionId";
+    public const string AttemptStudentCreatedAtIndex = "IX_Attempts_StudentId_CreatedAt";
     public const string QuestionMasteryPerStudentIndex = "IX_QuestionMasteries_StudentId_QuestionId";
     public const string LessonOpeningPerStudentIndex = "IX_LessonOpenings_StudentId_LessonId";
     public const string SubjectDefaultBlueprintIndex = "IX_ExamBlueprints_SubjectDefault";
@@ -326,6 +327,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Question>().WithMany().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.StudentId, x.QuestionId, x.CreatedAt });
+            builder.HasIndex(x => new { x.StudentId, x.CreatedAt }, AttemptStudentCreatedAtIndex);
             builder.HasIndex(x => new { x.SessionId, x.QuestionId }).IsUnique().HasDatabaseName(AttemptPerQuestionIndex);
         });
     }

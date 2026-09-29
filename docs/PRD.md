@@ -438,7 +438,7 @@ Exports (admin only): JSONL per source, date-ranged, with PII stripped.
 |---|---|
 | Language | Arabic UI, RTL throughout. English only for admin technical fields if needed. |
 | Devices | Mobile-first responsive web. All interactions touch-friendly. v2 canvas and math input must work on phones. |
-| Performance | Lesson page < 2s on 3G-class connections; quiz question transition < 300ms (prefetch next). |
+| Performance | Lesson page < 2s on 3G-class connections; quiz question transition < 300ms (prefetch next). Budgets and how they are measured: docs/performance.md. |
 | Availability | 99.5% monthly, measured and alerted as in docs/observability.md. Exam sessions auto-save every answer; a refresh resumes the session. |
 | Security | Role-based authorisation on every endpoint; teacher subject scoping enforced server-side; Paymob webhooks HMAC-verified; rate limits on auth and Avatar. |
 | Privacy | Students identified to teachers by display name only. Training exports strip PII. |

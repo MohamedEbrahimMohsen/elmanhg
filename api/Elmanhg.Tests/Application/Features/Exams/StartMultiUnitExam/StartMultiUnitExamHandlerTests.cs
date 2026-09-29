@@ -189,6 +189,18 @@ public sealed class StartMultiUnitExamHandlerTests
         await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
+    [Fact]
+    public async Task Handle_TwoUnits_LoadsExamCandidatesInOneQuery()
+    {
+        var unitIds = UnitIds();
+
+        await _handler.Handle(Command(), TestContext.Current.CancellationToken);
+
+        await _questionRepository.Received(1).GetServableExamCandidatesAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>());
+        await _questionRepository.Received(1).GetServableExamCandidatesAsync(Arg.Is<IReadOnlyCollection<Guid>>(x => x.Count == unitIds.Count && unitIds.All(x.Contains)), Arg.Any<CancellationToken>());
+        await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
     private void FillPool(int perUnit) => _pool.AddRange(Enumerable.Range(0, 2).SelectMany(index => Enumerable.Range(0, perUnit).Select(_ => _builder.Approved(index))));
 
     private Guid UnitOf(Question question) => _builder.Lessons.Single(x => x.Id == question.LessonId).UnitId;

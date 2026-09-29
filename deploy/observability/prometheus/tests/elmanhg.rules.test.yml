@@ -300,3 +300,63 @@ tests:
             exp_annotations:
               summary: Background job exam-auto-submit failed to list its work 3 or more times in 15 minutes.
               runbook: docs/observability.md#alerts
+
+  - name: hot path slow fires when a sessions route p95 stays above 1 s
+    interval: 1m
+    input_series:
+      - series: 'http_server_request_duration_seconds_bucket{job="elmanhg-api",http_route="api/sessions/{sessionId:guid}/answers",le="0.25"}'
+        values: '0x40'
+      - series: 'http_server_request_duration_seconds_bucket{job="elmanhg-api",http_route="api/sessions/{sessionId:guid}/answers",le="1"}'
+        values: '0x40'
+      - series: 'http_server_request_duration_seconds_bucket{job="elmanhg-api",http_route="api/sessions/{sessionId:guid}/answers",le="2.5"}'
+        values: '0+60x40'
+      - series: 'http_server_request_duration_seconds_bucket{job="elmanhg-api",http_route="api/sessions/{sessionId:guid}/answers",le="+Inf"}'
+        values: '0+60x40'
+      - series: 'http_server_request_duration_seconds_count{job="elmanhg-api",http_route="api/sessions/{sessionId:guid}/answers"}'
+        values: '0+60x40'
+    alert_rule_test:
+      - eval_time: 35m
+        alertname: ApiHotPathSlow
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              http_route: api/sessions/{sessionId:guid}/answers
+            exp_annotations:
+              summary: API route api/sessions/{sessionId:guid}/answers p95 is above 1 s for 15 minutes (budgets in docs/performance.md).
+              runbook: docs/observability.md#alerts
+
+  - name: hot path slow stays quiet when the route is fast
+    interval: 1m
+    input_series:
+      - series: 'http_server_request_duration_seconds_bucket{job="elmanhg-api",http_route="api/sessions/{sessionId:guid}/answers",le="0.25"}'
+        values: '0+60x40'
+      - series: 'http_server_request_duration_seconds_bucket{job="elmanhg-api",http_route="api/sessions/{sessionId:guid}/answers",le="1"}'
+        values: '0+60x40'
+      - series: 'http_server_request_duration_seconds_bucket{job="elmanhg-api",http_route="api/sessions/{sessionId:guid}/answers",le="2.5"}'
+        values: '0+60x40'
+      - series: 'http_server_request_duration_seconds_bucket{job="elmanhg-api",http_route="api/sessions/{sessionId:guid}/answers",le="+Inf"}'
+        values: '0+60x40'
+      - series: 'http_server_request_duration_seconds_count{job="elmanhg-api",http_route="api/sessions/{sessionId:guid}/answers"}'
+        values: '0+60x40'
+    alert_rule_test:
+      - eval_time: 35m
+        alertname: ApiHotPathSlow
+        exp_alerts: []
+
+  - name: hot path slow stays quiet on a trickle of slow requests
+    interval: 1m
+    input_series:
+      - series: 'http_server_request_duration_seconds_bucket{job="elmanhg-api",http_route="api/sessions/{sessionId:guid}/answers",le="0.25"}'
+        values: '0x89'
+      - series: 'http_server_request_duration_seconds_bucket{job="elmanhg-api",http_route="api/sessions/{sessionId:guid}/answers",le="1"}'
+        values: '0x89'
+      - series: 'http_server_request_duration_seconds_bucket{job="elmanhg-api",http_route="api/sessions/{sessionId:guid}/answers",le="2.5"}'
+        values: '1x9 2x9 3x9 4x9 5x9 6x9 7x9 8x9 9x9'
+      - series: 'http_server_request_duration_seconds_bucket{job="elmanhg-api",http_route="api/sessions/{sessionId:guid}/answers",le="+Inf"}'
+        values: '1x9 2x9 3x9 4x9 5x9 6x9 7x9 8x9 9x9'
+      - series: 'http_server_request_duration_seconds_count{job="elmanhg-api",http_route="api/sessions/{sessionId:guid}/answers"}'
+        values: '1x9 2x9 3x9 4x9 5x9 6x9 7x9 8x9 9x9'
+    alert_rule_test:
+      - eval_time: 80m
+        alertname: ApiHotPathSlow
+        exp_alerts: []

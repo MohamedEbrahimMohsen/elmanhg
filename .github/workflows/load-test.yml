@@ -1,0 +1,32 @@
+name: load-test
+
+# Manual full load run (docs/performance.md §5): 50 concurrent students against the production stack on the runner.
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: Load profile
+        type: choice
+        options: [full, smoke]
+        default: full
+
+permissions:
+  contents: read
+
+jobs:
+  load-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Load test (${{ inputs.profile }})
+        run: bash deploy/load-test.sh
+        env:
+          LOAD_PROFILE: ${{ inputs.profile }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: load-test-${{ inputs.profile }}
+          path: deploy/.loadtest-results

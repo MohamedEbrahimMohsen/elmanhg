@@ -68,6 +68,7 @@ Prometheus receives OTLP from the collector (`--web.enable-otlp-receiver`). Name
 | `elmanhg.job.last_success` | gauge | s (unix time) | `elmanhg.job` | `BackgroundJobMetrics` | `elmanhg_job_last_success_seconds` |
 | `elmanhg.job.interval` | gauge | s | `elmanhg.job` | `BackgroundJobMetrics` | `elmanhg_job_interval_seconds` |
 | `http.server.request.duration` | histogram | s | `http.route`, `http.request.method`, `http.response.status_code` | ASP.NET Core (api), FastAPI (ai) | `http_server_request_duration_seconds_*` |
+| (recording rule) | p95 per route | s | `http_route` | Prometheus, over sessions, exams and browse routes of the API | `elmanhg:api_route_latency_p95:rate15m` |
 | `http.client.request.duration` | histogram | s | `server.address`, `http.response.status_code` | HttpClient (api) | `http_client_request_duration_seconds_*` |
 | `System.Runtime` meter | various | | | .NET runtime (GC, memory, thread pool) | `dotnet_*` |
 | `gen_ai.client.operation.duration` | histogram | s | `gen_ai.operation.name` (`chat`, `embeddings`), `gen_ai.provider.name`, `gen_ai.request.model`, `error.type` on failure | `clients/metered.py` (ai) | `gen_ai_client_operation_duration_seconds_*` |
@@ -146,6 +147,7 @@ Rules live in `deploy/observability/prometheus/rules/elmanhg.rules.yml`, and eac
 | `AiModelErrors` | ≥ 5 failed model or embedding calls in 15 m | warning | Business → AI calls shows the `error.type`; check the Anthropic or OpenAI key and status |
 | `ClientErrorSpike` | ≥ 50 browser errors in 15 m | warning | Loki: `{service_name="elmanhg-api"} |= "Client error from"`; usually a bad web deploy |
 | `PaymentNotificationNeedsReview` | any `FlaggedForReview` notification in 1 h | warning | Resolve it in the admin payment log ([docs/paymob.md](paymob.md)) |
+| `ApiHotPathSlow` | p95 of a sessions/exams/browse route > 1 s over 15 m with > 0.05 rps, for 15 m | warning | Service health → API p95 by route; compare with the [docs/performance.md](performance.md) budgets; check the DB ([docs/performance.md](performance.md) §6) and recent deploys |
 
 Every alert carries `summary` and `runbook` annotations.
 

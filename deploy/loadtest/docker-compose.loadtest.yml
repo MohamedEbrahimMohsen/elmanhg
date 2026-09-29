@@ -1,0 +1,15 @@
+# Load-test runner, layered on docker-compose.prod.yml by deploy/load-test.sh (docs/performance.md §5).
+# Relative paths resolve from deploy/, the directory of the first compose file.
+services:
+  k6:
+    profiles: ["loadtest"]
+    # One pinned image for the API and the browser scripts; bump it as in docs/deployment.md section 5.
+    image: grafana/k6:2.3.0-with-browser@sha256:fd3bc5d244f87e7d05152ede97b99813a381a83b639a4e43e1939b56460544ee
+    # Headless Chromium needs more shared memory than Docker's 64 MB default.
+    shm_size: 1gb
+    volumes:
+      - ./loadtest:/scripts:ro
+      - ./.loadtest-results:/results
+    environment:
+      BASE_URL: http://web
+      K6_BROWSER_HEADLESS: "true"

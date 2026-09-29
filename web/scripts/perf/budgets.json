@@ -1,0 +1,25 @@
+{
+  "pages": [
+    { "name": "entry", "entries": ["index.html"], "maxKb": 210 },
+    { "name": "landing", "entries": ["index.html", "src/routes/index.tsx?tsr-split=component"], "maxKb": 220 },
+    {
+      "name": "lesson",
+      "entries": [
+        "index.html",
+        "src/routes/student/route.tsx?tsr-split=component",
+        "src/routes/student/lesson.$lessonId.tsx?tsr-split=component",
+        "src/routes/student/lesson.$lessonId.index.tsx?tsr-split=component"
+      ],
+      "maxKb": 240
+    },
+    {
+      "name": "quiz",
+      "entries": [
+        "index.html",
+        "src/routes/student/route.tsx?tsr-split=component",
+        "src/routes/student/quiz.$sessionId.tsx?tsr-split=component"
+      ],
+      "maxKb": 255
+    }
+  ]
+}

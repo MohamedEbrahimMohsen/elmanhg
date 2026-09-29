@@ -8,18 +8,20 @@ using Elmanhg.Application.Questions.ResubmitQuestion;
 using Elmanhg.Application.Questions.RetireQuestion;
 using Elmanhg.Application.Questions.Shared;
 using Elmanhg.Application.Questions.UpdateQuestion;
+using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.SharedKernel;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Api.Controllers.Questions;
 
 [ApiController]
 [Route("api/questions")]
 [Authorize]
-public class QuestionsController(IMediator mediator) : ControllerBase
+public class QuestionsController(IMediator mediator, IOptions<ContentOptions> contentOptions) : ControllerBase
 {
     [HttpPost(Name = "CreateQuestion")]
     [Authorize(Policy = DefaultCodes.ContentManage)]
@@ -37,6 +39,7 @@ public class QuestionsController(IMediator mediator) : ControllerBase
     public async Task<ActionResult> GetServableQuestionCount(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetServableQuestionCountQuery(), cancellationToken);
+        Response.Headers.CacheControl = $"public, max-age={contentOptions.Value.ServableCountCacheSeconds}";
         return Ok(result);
     }
 

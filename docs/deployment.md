@@ -111,6 +111,7 @@ A story that adds an options section holding a secret or a per-host value must a
 | `CoreOtp__Secret` | yes | empty | secret; HMAC key of OTP codes |
 | `AdminSeed__Email` / `AdminSeed__Password` / `AdminSeed__DisplayName` | first start | empty | the admin is created on the first start when missing; an empty email skips the seed |
 | `CoreLogging__Trace__Cluster` | no | `Local` | log label, for example `production` |
+| `LoadTestSeed__Key` / `LoadTestSeed__StudentCount` / `LoadTestSeed__StudentPassword` | load-test stacks only | `loadtest` / `60` / empty | read only by `--SeedLoadTestAndExit=true`, which `deploy/load-test.sh` runs and which refuses Production ([docs/performance.md](performance.md) §5); never set them on a real host |
 
 ### OTP delivery (`api.env`, [docs/otp-delivery.md](otp-delivery.md))
 
@@ -357,6 +358,8 @@ Caddy terminates TLS and, with no `trusted_proxies` setting, replaces any client
 | `SMOKE_OBSERVABILITY` | `1` | `0` skips the observability profile and its assertions (Docker Desktop may not expose `/var/lib/docker/containers`; CI on Linux is authoritative) |
 | `SMOKE_GRAFANA_PORT` | `3300` | loopback port for Grafana during the smoke test |
 
+`bash deploy/load-test.sh` runs the same stack with seeded load-test data, then the pinned k6 API load and the throttled lesson-page browser run against Caddy, and saves the k6 summaries and the EXPLAIN plans in `deploy/.loadtest-results`. It fails when an API budget or the quiz-transition budget is exceeded; the lesson-page budget is advisory (a `::warning::`) until the #114 follow-up meets it. Its knobs, profiles and CI placement are in [docs/performance.md](performance.md) §5.
+
 ## 13. Not done yet
 
 | Item | Status |
@@ -366,5 +369,5 @@ Caddy terminates TLS and, with no `trusted_proxies` setting, replaces any client
 | Staging OTP | needs real Resend (or WhatsApp) keys, because the fake logs codes in Development only |
 | Object storage (#96) | a managed S3-compatible service (Cloudflare R2 or AWS S3), set by config; no object-store container in compose |
 | Observability (#113) | done ([docs/observability.md](observability.md)); an external uptime monitor, a vendor error tracker (Sentry) and live alert receivers are deferred |
-| Performance (#114) | tuning |
+| Performance (#114) | done ([docs/performance.md](performance.md)); CDN deferred until the live domain |
 | Security headers (#115) | HSTS and CSP; the request log still trusts `CF-Connecting-IP` |

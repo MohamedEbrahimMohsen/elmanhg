@@ -1,11 +1,17 @@
 import { Sparkles } from 'lucide-react';
+import { lazy, Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAvatar } from '../hooks/useAvatar';
-import { AvatarPanel } from './AvatarPanel';
+
+const AvatarPanel = lazy(() => import('./AvatarPanel').then((module) => ({ default: module.AvatarPanel })));
 
 export function AvatarDock() {
   const { t } = useTranslation('avatar');
   const { state, open } = useAvatar();
+  const [mounted, setMounted] = useState(state.isOpen);
+  if (state.isOpen && !mounted) {
+    setMounted(true);
+  }
 
   return (
     <>
@@ -21,7 +27,11 @@ export function AvatarDock() {
           {t('dock.open')}
         </button>
       )}
-      <AvatarPanel />
+      {mounted ? (
+        <Suspense fallback={null}>
+          <AvatarPanel />
+        </Suspense>
+      ) : null}
     </>
   );
 }

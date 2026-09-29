@@ -107,6 +107,23 @@ if (MigrationCommand.IsRequested(app.Configuration))
 }
 #endregion
 
+#region LOAD-TEST SEED
+// deploy/load-test.sh runs `migrate --SeedLoadTestAndExit=true`: seed the load-test curriculum and students, then exit before the HTTP pipeline.
+if (LoadTestSeedCommand.IsRequested(app.Configuration))
+{
+    try
+    {
+        Environment.ExitCode = await LoadTestSeedCommand.RunAsync(app.Services, app.Configuration, app.Environment, CancellationToken.None);
+    }
+    finally
+    {
+        await Serilog.Log.CloseAndFlushAsync();
+    }
+
+    return;
+}
+#endregion
+
 #region SEED
 if (!isBuildTimeOpenApiGeneration)
 {

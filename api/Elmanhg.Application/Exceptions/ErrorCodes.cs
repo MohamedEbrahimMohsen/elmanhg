@@ -274,4 +274,5 @@ public static class ErrorCodes
     // PLATFORM
     public const string TooManyRequests = "TOO_MANY_REQUESTS";
     public const string AdminSeedFailed = "ADMIN_SEED_FAILED";
+    public const string LoadTestSeedFailed = "LOAD_TEST_SEED_FAILED";
 }
