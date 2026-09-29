@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Usage: bash deploy/smoke-test.sh — builds the images and runs the whole production stack locally and in CI:
-# migrate, serve, backup and a restore drill (docs/deployment.md, Run the production stack locally).
+# migrate, serve, backup and a restore drill, plus the observability stack end to end (docs/observability.md).
+# SMOKE_OBSERVABILITY=0 skips the observability part (Docker Desktop may not expose /var/lib/docker/containers).
 set -euo pipefail
 cd "$(dirname "$0")"
 # shellcheck source=lib.sh disable=SC1091
@@ -9,6 +10,10 @@ source ./lib.sh
 export ENV_FILE=.smoke/.env BACKUP_DIR=.smoke/backups
 port=${SMOKE_HTTP_PORT:-8088}
 base="http://localhost:$port"
+observability=${SMOKE_OBSERVABILITY:-1}
+image_tag=${SMOKE_IMAGE_TAG:-smoke}
+grafana_port=${SMOKE_GRAFANA_PORT:-3300}
+grafana_password=smokegrafanapasswordnotasecret
 
 rm -rf .smoke && mkdir -p .smoke
 cp .env.example .smoke/.env
@@ -27,7 +32,7 @@ set_env() {
 set_env "$ENV_FILE" COMPOSE_PROJECT_NAME "${SMOKE_PROJECT_NAME:-elmanhg-smoke}"
 set_env "$ENV_FILE" COMPOSE_PROFILES ai
 set_env "$ENV_FILE" IMAGE_REGISTRY local
-set_env "$ENV_FILE" IMAGE_TAG smoke
+set_env "$ENV_FILE" IMAGE_TAG "$image_tag"
 set_env "$ENV_FILE" SITE_ADDRESS :80
 set_env "$ENV_FILE" HTTP_PORT "$port"
 set_env "$ENV_FILE" HTTPS_PORT "${SMOKE_HTTPS_PORT:-8443}"
@@ -35,6 +40,15 @@ set_env "$ENV_FILE" DOCKER_SUBNET "${SMOKE_DOCKER_SUBNET:-172.30.250.0/24}"
 set_env "$ENV_FILE" API_ENV_FILE .smoke/api.env
 set_env "$ENV_FILE" AI_ENV_FILE .smoke/ai.env
 set_env "$ENV_FILE" POSTGRES_PASSWORD smokepostgrespasswordnotasecret
+if [ "$observability" = 1 ]; then
+  set_env "$ENV_FILE" COMPOSE_PROFILES ai,observability
+  set_env "$ENV_FILE" OTLP_ENDPOINT http://otel-collector:4317
+  set_env "$ENV_FILE" GRAFANA_ADMIN_PASSWORD "$grafana_password"
+  set_env "$ENV_FILE" GRAFANA_PORT "$grafana_port"
+  set_env "$ENV_FILE" ALERTMANAGER_CONFIG_FILE .smoke/alertmanager.yml
+  cp observability/alertmanager/alertmanager.example.yml .smoke/alertmanager.yml
+  check_observability_config
+fi
 
 cleanup() {
   local status=$?
@@ -50,9 +64,17 @@ cleanup() {
 trap cleanup EXIT
 
 if [ "${SMOKE_SKIP_BUILD:-}" != 1 ]; then
-  docker build -f ../api/Dockerfile -t local/elmanhg-api:smoke ..
-  docker build -t local/elmanhg-web:smoke ../web
-  docker build -t local/elmanhg-ai:smoke ../ai
+  docker build -f ../api/Dockerfile -t "local/elmanhg-api:$image_tag" ..
+  docker build -t "local/elmanhg-web:$image_tag" ../web
+  docker build -t "local/elmanhg-ai:$image_tag" ../ai
+fi
+
+compose run --rm --no-deps --entrypoint caddy web validate --config /etc/caddy/Caddyfile --adapter caddyfile
+if [ "$observability" = 1 ]; then
+  compose run --rm --no-deps --entrypoint promtool prometheus check config /etc/prometheus/prometheus.yml
+  compose run --rm --no-deps --entrypoint promtool prometheus test rules /etc/prometheus/tests/elmanhg.rules.test.yml
+  compose run --rm --no-deps --entrypoint amtool alertmanager check-config /etc/alertmanager/alertmanager.yml
+  compose run --rm --no-deps otel-collector validate --config=/etc/otelcol-contrib/config.yaml
 fi
 
 compose up -d
@@ -60,6 +82,11 @@ wait_healthy postgres
 wait_healthy api 300
 wait_healthy web
 wait_healthy ai
+if [ "$observability" = 1 ]; then
+  for service in prometheus alertmanager blackbox grafana; do
+    wait_healthy "$service"
+  done
+fi
 [ "$(migrate_exit_code)" = 0 ] || fail "migrate exited with $(migrate_exit_code)"
 
 # Whole responses are read into variables: no curl -o /dev/null (Git Bash hands the path unconverted to the native
@@ -76,6 +103,91 @@ asset=$(grep -o '/assets/[^"]*\.js' <<< "$shell" | head -1)
 [ -n "$asset" ] || fail "no /assets/*.js referenced by the SPA shell"
 asset_headers=$(curl -fsSI "$base$asset")
 grep -i 'cache-control:.*immutable' <<< "$asset_headers" > /dev/null || fail "$asset is not cached as immutable"
+
+# Signals the observability assertions below look for; the public checks run with or without the profile.
+health=$(curl -fsS "$base/api/health") || fail "/api/health is not served"
+[ "$health" = Healthy ] || fail "/api/health answered '$health', not Healthy"
+api_headers=$(curl -fsS -D - "$base/api/questions/servable-count") || fail "servable-count failed"
+trace_id=$(grep -i '^x-trace-id:' <<< "$api_headers" | head -1 | cut -d: -f2 | tr -d ' \r')
+[[ $trace_id =~ ^[0-9a-f]{32}$ ]] || fail "no W3C trace id in X-Trace-Id (got '$trace_id')"
+client_error=$(curl -sS -w '\n%{http_code}' -X POST -H 'Content-Type: application/json' \
+  -d '{"message":"smoke client error","source":"Window","path":"/smoke"}' "$base/api/client-errors")
+[ "$(tail -1 <<< "$client_error")" = 200 ] || fail "POST /api/client-errors answered '$client_error'"
+redaction_probe=$(curl -fsS "$base/smoke-redaction/mona@example.com") || fail "redaction probe request failed"
+[[ $redaction_probe == *'id="root"'* ]] || fail "redaction probe did not reach the SPA fallback"
+ai_token=$(grep '^ELMANHG_AI_SERVICE_TOKEN=' .smoke/ai.env | cut -d= -f2-)
+embeddings=$(compose exec -T api curl -fsS -X POST -H "Authorization: Bearer $ai_token" -H 'Content-Type: application/json' \
+  -d '{"inputType":"query","texts":["smoke"]}' http://ai:8000/v1/embeddings) || fail "AI embeddings call failed"
+[[ $embeddings == *'"embeddings":[['* ]] || fail "AI embeddings answered without vectors"
+
+if [ "$observability" = 1 ]; then
+  eventually() {
+    local description=$1 waited=0
+    shift
+    until "$@"; do
+      [ "$waited" -ge 180 ] && fail "observability: $description not seen after 180s"
+      sleep 5
+      waited=$((waited + 5))
+    done
+    echo "observability: $description"
+  }
+  in_prometheus() {
+    compose exec -T prometheus wget -qO- "$@"
+  }
+  has_series() {
+    local body
+    body=$(in_prometheus "http://localhost:9090/api/v1/query?query=$1") || return 1
+    [[ $body == *'"result":[{'* ]]
+  }
+  prometheus_contains() {
+    local body
+    body=$(in_prometheus "$1") || return 1
+    [[ $body == *"$2"* ]]
+  }
+  tempo_has_trace() {
+    local body
+    body=$(in_prometheus --header 'Accept: application/json' "http://tempo:3200/api/traces/$trace_id") || return 1
+    [[ $body == *elmanhg-api* ]]
+  }
+  loki_query() {
+    in_prometheus "http://loki:3100/loki/api/v1/query_range?limit=1000&since=1h&query=$1"
+  }
+  loki_has_api_trace() {
+    local body
+    body=$(loki_query "%7Bservice_name%3D%22elmanhg-api%22%7D%20%7C%20trace_id%3D%22$trace_id%22") || return 1
+    [[ $body == *"$trace_id"* ]]
+  }
+  loki_redacts_web() {
+    local body
+    body=$(loki_query '%7Bservice_name%3D%22elmanhg-web%22%7D%20%7C%3D%20%22smoke-redaction%22') || return 1
+    [[ $body == *'[redacted-email]'* && $body != *'mona@example.com'* ]]
+  }
+  alertmanager_ready() {
+    local body
+    body=$(in_prometheus http://alertmanager:9093/-/ready) || return 1
+    [ -n "$body" ]
+  }
+  grafana_has_dashboards() {
+    local uid board
+    for uid in elmanhg-service-health elmanhg-background-jobs elmanhg-business; do
+      board=$(curl -fsS -u "admin:$grafana_password" "http://localhost:$grafana_port/api/dashboards/uid/$uid") || return 1
+      [[ $board == *"\"uid\":\"$uid\""* ]] || return 1
+    done
+  }
+
+  eventually "API request metrics" has_series elmanhg_requests_total
+  eventually "API HTTP server metrics" has_series 'http_server_request_duration_seconds_count%7Bjob%3D%22elmanhg-api%22%7D'
+  eventually "AI model metrics" has_series 'gen_ai_client_operation_duration_seconds_count%7Bjob%3D%22elmanhg-ai%22%7D'
+  eventually "client error metric" has_series elmanhg_client_errors_total
+  eventually "background job metrics" has_series elmanhg_job_interval_seconds
+  eventually "edge probe up" has_series 'probe_success%7Btarget_name%3D%22edge%22%7D%3D%3D1'
+  eventually "alert rules loaded" prometheus_contains http://localhost:9090/api/v1/rules ApiErrorBudgetFastBurn
+  eventually "API trace in Tempo" tempo_has_trace
+  eventually "API logs linked to the trace" loki_has_api_trace
+  eventually "Caddy access log redacted" loki_redacts_web
+  eventually "Grafana dashboards provisioned" grafana_has_dashboards
+  eventually "Alertmanager ready" alertmanager_ready
+fi
 
 compose run --rm migrate || fail "a second migrate run failed"
 

@@ -5,6 +5,7 @@ import {
   getGetStudentLessonMockHandler,
   getRecordLessonOpeningMockHandler,
 } from '@/shared/api/generated/browse/browse.msw';
+import { getReportClientErrorMockHandler } from '@/shared/api/generated/client-errors/client-errors.msw';
 import {
   getGetExamAttemptsMockHandler,
   getGetUnitExamAttemptsMockHandler,
@@ -21,6 +22,7 @@ export const server = setupServer(
   getGetStudentLessonMockHandler(studentLesson()),
   getRecordLessonOpeningMockHandler(),
   getRecordFunnelEventMockHandler(),
+  getReportClientErrorMockHandler(),
   getGetMyUsageMockHandler(baseUsage()),
   getGetAvatarStatusMockHandler(avatarStatus()),
 );

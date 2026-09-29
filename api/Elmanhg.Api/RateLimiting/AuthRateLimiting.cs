@@ -27,6 +27,7 @@ public static class AuthRateLimiting
         });
 
         services.AddOptions<RateLimiterOptions>().Configure<IOptions<AnalyticsOptions>>((rateLimiter, analyticsOptions) => rateLimiter.AddPolicy(AnalyticsRateLimitPolicies.FunnelEvents, httpContext => CreateFixedWindow(httpContext, analyticsOptions.Value.FunnelEventPermitLimit, analyticsOptions.Value.FunnelEventWindowSeconds)));
+        services.AddOptions<RateLimiterOptions>().Configure<IOptions<ClientErrorsOptions>>((rateLimiter, clientErrorsOptions) => rateLimiter.AddPolicy(ObservabilityRateLimitPolicies.ClientErrors, httpContext => CreateFixedWindow(httpContext, clientErrorsOptions.Value.PermitLimit, clientErrorsOptions.Value.WindowSeconds)));
 
         return services;
     }

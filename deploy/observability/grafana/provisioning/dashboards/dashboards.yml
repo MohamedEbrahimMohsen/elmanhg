@@ -1,0 +1,11 @@
+# The three Elmanhg dashboards, read-only from deploy/observability/grafana/dashboards (docs/observability.md, Dashboards).
+apiVersion: 1
+
+providers:
+  - name: elmanhg
+    folder: Elmanhg
+    type: file
+    disableDeletion: true
+    allowUiUpdates: false
+    options:
+      path: /etc/grafana/dashboards

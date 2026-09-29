@@ -1,12 +1,18 @@
 import { useRouter, type ErrorComponentProps } from '@tanstack/react-router';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApiError, unhandledErrorCode } from '@/shared/lib/apiError';
+import { clientErrorReporter } from '@/shared/lib/clientErrorReporter';
 import { Button } from '@/shared/ui/button';
 
 export function RouteError({ error, reset }: ErrorComponentProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const code = error instanceof ApiError ? error.code : unhandledErrorCode;
+
+  useEffect(() => {
+    clientErrorReporter.report(error, 'Route');
+  }, [error]);
 
   return (
     <section role="alert" className="mx-auto max-w-layout px-4 py-6">

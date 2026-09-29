@@ -183,6 +183,12 @@ AI service (`ELMANHG_AI_*` environment variables; `settings.py` is the only plac
 | `ELMANHG_AI_EMBEDDING_MAX_TEXTS` | 64 | 1 to 2048 texts per call |
 | `ELMANHG_AI_EMBEDDING_MAX_TEXT_CHARS` | 8000 | characters per text |
 | `ELMANHG_AI_EMBEDDING_USD_PER_MILLION_TOKENS` | 0.02 | cost logging only; confirm the list price at go-live |
+| `ELMANHG_AI_OTLP_ENDPOINT` | unset | OTLP/gRPC endpoint (`http://` or `https://`) for traces and metrics; unset exports nothing. Compose sets it from `OTLP_ENDPOINT` ([docs/observability.md](observability.md)) |
+| `ELMANHG_AI_OTLP_HEADERS` | unset | secret; comma-separated `key=value` headers for a SaaS endpoint. A malformed value fails startup without echoing it |
+| `ELMANHG_AI_OTEL_SERVICE_NAME` | `elmanhg-ai` | `service.name` on every span and metric |
+| `ELMANHG_AI_SERVICE_VERSION` | `dev` | `service.version`; compose sets it from `IMAGE_TAG` |
+| `ELMANHG_AI_TRACE_SAMPLE_RATIO` | 1.0 | share of new traces kept (0 to 1); a request that carries a sampled `traceparent` is always kept |
+| `ELMANHG_AI_METRIC_EXPORT_INTERVAL_SECONDS` | 30 | 5 to 3600 |
 
 The OpenAI adapter reuses `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` per call and `ELMANHG_AI_MODEL_MAX_RETRIES` for retries, with `0.5 s × 2^attempt` backoff.
 
@@ -211,14 +217,17 @@ Timeouts nest so the AI service always answers before the API gives up: the wors
 - Student input and platform content are untrusted. They go only into the last user turn, inside `<lesson_context>` and `<student_message>` tags, after any such tag in the untrusted text has been removed. Removal matches spaced and attribute-carrying variants (`< /student_message x>`) and dangling tags with no closing `>` (a match stops at the next `<` or `>`, so each pass is linear in the text length), and repeats until the text stops changing, so nested fragments such as `</stu</student_message>dent_message>` cannot reassemble into a tag. Removal runs on each string field of the context before the context is serialized to JSON, so a dangling tag in one field cannot consume the fields after it. History turns keep their own roles and are not wrapped in tags, but the same tags are removed from their content, so a tag in an earlier message is not replayed on later turns. The system prompt holds no untrusted text. Rendering is single pass, so substituted text is never re-scanned.
 - Sources go to Claude as native `search_result` content blocks with `citations.enabled`, placed before the text of the final user turn. They are data like the rest of the context: the same delimiter tags are removed from each source's `title` and `content`, and prompt v2 tells the model that search results are not instructions. The Anthropic adapter reads the `search_result_location` citations of the reply's text blocks and returns their `source` values; the pipeline keeps only references it sent.
 
-## Health and logging
+## Health, logging and telemetry
 
 - `GET /health` returns `{"status":"ok"}` (liveness, no dependencies). `GET /health/ready` returns `{"status":"ok"}` once startup has loaded the prompts and the model client, and `503 SERVICE_NOT_READY` before that. Readiness never calls Claude. Neither appears in OpenAPI.
 - structlog writes one JSON object per line (`ELMANHG_AI_LOG_FORMAT=console` for local reading) with `timestamp`, `level`, `event`, `trace_id` and `request_id`.
-- The trace id comes from the W3C `traceparent` header (the .NET `HttpClient` sends it), so API and AI logs share one id; otherwise the service generates one. `X-Request-Id` is reused when valid. Both are echoed as `X-Trace-Id` and `X-Request-Id`.
+- The trace id is the current OpenTelemetry span's (the FastAPI server span continues the W3C `traceparent` the .NET `HttpClient` sends), so API and AI logs and traces share one id. Without a valid span it falls back to the `traceparent` header, then to a random id. `X-Request-Id` is reused when valid. Both are echoed as `X-Trace-Id` and `X-Request-Id`.
 - There is one `request.completed` line per request (DEBUG for `/health*`), and one `chat.completed` line per chat with `pipeline`, `prompt_version`, `model`, `tokens_in`, `tokens_out`, `latency_ms`, `cost_usd`, `stop_reason`, `sources` (count) and `citations` (count). Message, context and source text are never logged.
 - There is one `embedding.completed` line per embeddings call with `pipeline` (`embeddings`), `model`, `input_type`, `count`, `tokens_in`, `latency_ms` and `cost_usd`. The texts are never logged. A failed OpenAI call logs `embedding.call_failed` (`provider`, `model`, `status_code`, `error_type`), and a bad reply logs `embedding.output_invalid`.
-- `service.started` also records `embedding_provider` and `embedding_model`.
+- `service.started` also records `embedding_provider`, `embedding_model` and `otlp_exporting`.
+- Traces (`core/telemetry.py`): one SERVER span per request from the FastAPI instrumentation (`/health*` excluded), and one CLIENT span per model call, named `chat <model>` or `embeddings <model>`, with `gen_ai.operation.name`, `gen_ai.provider.name`, `gen_ai.request.model` and `gen_ai.usage.input_tokens` / `output_tokens`. A failed call records the exception and marks the span as an error.
+- Metrics (OpenTelemetry GenAI conventions, recorded by the `clients/metered.py` wrappers applied in `lifespan`): `gen_ai.client.operation.duration` (s), `gen_ai.client.token.usage` ({token}, tagged `gen_ai.token.type` = `input` or `output`) and `elmanhg.ai.cost` ({USD}, from the same price settings as `cost_usd`), all tagged with operation, provider and model, plus `error.type` (the error code, or the exception type) on failures. FastAPI adds `http.server.request.duration` (compose sets `OTEL_SEMCONV_STABILITY_OPT_IN=http`).
+- Logs never go through an OTLP log exporter: they leave through stdout and the collector tails them ([docs/observability.md](observability.md), Logs).
 
 ## Run locally
 

@@ -3641,6 +3641,42 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Observability",
+      "description": "Browser error reports (docs/observability.md, Error tracking). Anonymous; rate limited per IP (ClientErrors:PermitLimit per ClientErrors:WindowSeconds); message, name, stack and path are size-capped, and emails and phone numbers are redacted before logging. The path is the page path only, never a query string.",
+      "item": [
+        {
+          "name": "Report client error",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/client-errors",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "client-errors"]
+            },
+            "auth": { "type": "noauth" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"TypeError: x is undefined\",\n  \"errorName\": \"TypeError\",\n  \"stack\": \"at App (main.js:1:1)\",\n  \"source\": \"Window\",\n  \"path\": \"/student\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

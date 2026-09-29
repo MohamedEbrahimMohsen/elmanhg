@@ -144,6 +144,7 @@ public sealed class ProvisioningOptions
 - **`Elmanhg.Infrastructure`** — ONE `AppDbContext` (named private config methods, global soft-delete filters, no `ApplyConfigurationsFromAssembly`), repositories (`Repository<T>` base, never saving), external provider adapters.
 - **`Elmanhg.Tests`** — xUnit + NSubstitute + FluentAssertions per `conventions/dotnet-testing.md`: entity branches, every handler branch, every validator rule; repos/controllers out of scope.
 - Errors: no `try`/`catch` in handlers — throw `Core.Errors` exceptions; `Core.Exceptions` middleware formats responses. Never invent an exception type for a covered status code.
+- Observability: telemetry is wired only in `Elmanhg.Api/Hosting/ObservabilityExtensions.cs` and `ai/src/elmanhg_ai/core/telemetry.py`; business metrics go through `ElmanhgMetrics`/`BackgroundJobMetrics` or a pipeline behaviour, never ad-hoc `Meter`s; logs, span attributes and metric tags never carry phone numbers, emails, OTP codes, tokens or payment payloads, and metric tags carry no ids (docs/observability.md).
 - One `SaveChangesAsync` per handler, at the end. Full backend detail: `.claude/skills/dotnet-feature/SKILL.md`.
 
 ---

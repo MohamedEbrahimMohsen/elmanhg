@@ -1,13 +1,17 @@
 using Elmanhg.Api.Workers;
+using Elmanhg.Application.Shared.Observability;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Tests.Application.Features.Shared.Observability;
 using Elmanhg.Application.Subscriptions.GetLapsedSubscriptionIds;
 using Elmanhg.Application.Subscriptions.LapseSubscription;
 using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.Metrics.Testing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using System.Diagnostics.Metrics;
 
 namespace Elmanhg.Tests.Api.Workers;
 
@@ -17,6 +21,7 @@ public sealed class SubscriptionLapseWorkerTests
     private readonly ISender _sender = Substitute.For<ISender>();
     private readonly ILogger<SubscriptionLapseWorker> _logger = Substitute.For<ILogger<SubscriptionLapseWorker>>();
     private readonly ManualTimeProvider _time = new();
+    private readonly IMeterFactory _meterFactory = MeterFactories.Create();
     private readonly TaskCompletionSource _done = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     [Fact]
@@ -91,7 +96,7 @@ public sealed class SubscriptionLapseWorkerTests
     [Fact]
     public async Task Execute_Disabled_EndsWithoutSweeping()
     {
-        using var worker = new SubscriptionLapseWorker(ScopeFactory(), Options.Create(new SubscriptionsOptions { LapseSweepEnabled = false }), _time, _logger);
+        using var worker = new SubscriptionLapseWorker(ScopeFactory(), Options.Create(new SubscriptionsOptions { LapseSweepEnabled = false }), _time, _logger, new BackgroundJobMetrics(_meterFactory, _time));
 
         await worker.StartAsync(TestContext.Current.CancellationToken);
         await worker.ExecuteTask!.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
@@ -100,9 +105,63 @@ public sealed class SubscriptionLapseWorkerTests
         _sender.ReceivedCalls().Should().BeEmpty();
     }
 
+    [Fact]
+    public async Task Sweep_AllLapsed_RecordsSucceededRunWithItemCount()
+    {
+        Guid[] ids = [Guid.CreateVersion7(), Guid.CreateVersion7()];
+        using var runs = new MetricCollector<long>(_meterFactory, ElmanhgTelemetry.SourceName, "elmanhg.job.runs");
+        using var items = new MetricCollector<long>(_meterFactory, ElmanhgTelemetry.SourceName, "elmanhg.job.items");
+        _sender.Send(Arg.Any<GetLapsedSubscriptionIdsQuery>(), Arg.Any<CancellationToken>()).Returns(Task.FromResult<List<Guid>>([.. ids]));
+        _sender.Send(Arg.Is<LapseSubscriptionCommand>(x => x.SubscriptionId == ids[0]), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
+        _sender.Send(Arg.Is<LapseSubscriptionCommand>(x => x.SubscriptionId == ids[1]), Arg.Any<CancellationToken>()).Returns(_ =>
+        {
+            Complete();
+            return Task.CompletedTask;
+        });
+
+        using var worker = await RunAsync(new SubscriptionsOptions());
+        await runs.WaitForMeasurementsAsync(1, WaitLimit);
+
+        runs.LastMeasurement!.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "subscription-lapse").And.Contain(BackgroundJobMetrics.OutcomeTag, "Succeeded");
+        items.GetMeasurementSnapshot().Should().ContainSingle().Which.Should().Match<CollectedMeasurement<long>>(x => x.Value == ids.Length && Equals(x.Tags[BackgroundJobMetrics.OutcomeTag], "Succeeded"));
+    }
+
+    [Fact]
+    public async Task Sweep_ListingFails_RecordsFailedRun()
+    {
+        using var runs = new MetricCollector<long>(_meterFactory, ElmanhgTelemetry.SourceName, "elmanhg.job.runs");
+        _sender.Send(Arg.Any<GetLapsedSubscriptionIdsQuery>(), Arg.Any<CancellationToken>()).Returns(_ =>
+        {
+            Complete();
+            return Task.FromException<List<Guid>>(new InvalidOperationException());
+        });
+
+        using var worker = await RunAsync(new SubscriptionsOptions());
+        await runs.WaitForMeasurementsAsync(1, WaitLimit);
+
+        runs.LastMeasurement!.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "subscription-lapse").And.Contain(BackgroundJobMetrics.OutcomeTag, "Failed");
+    }
+
+    [Fact]
+    public async Task Execute_Enabled_RegistersJobInterval()
+    {
+        using var interval = new MetricCollector<double>(_meterFactory, ElmanhgTelemetry.SourceName, "elmanhg.job.interval");
+        _sender.Send(Arg.Any<GetLapsedSubscriptionIdsQuery>(), Arg.Any<CancellationToken>()).Returns(_ =>
+        {
+            Complete();
+            return Task.FromResult<List<Guid>>([]);
+        });
+
+        using var worker = await RunAsync(new SubscriptionsOptions { LapseSweepIntervalSeconds = 45 });
+        interval.RecordObservableInstruments();
+
+        interval.LastMeasurement!.Value.Should().Be(45);
+        interval.LastMeasurement.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "subscription-lapse");
+    }
+
     private async Task<SubscriptionLapseWorker> RunAsync(SubscriptionsOptions options)
     {
-        var worker = new SubscriptionLapseWorker(ScopeFactory(), Options.Create(options), _time, _logger);
+        var worker = new SubscriptionLapseWorker(ScopeFactory(), Options.Create(options), _time, _logger, new BackgroundJobMetrics(_meterFactory, _time));
         await worker.StartAsync(TestContext.Current.CancellationToken);
         await _time.TimerCreated.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
         _time.Tick();
