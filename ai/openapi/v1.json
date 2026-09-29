@@ -176,10 +176,105 @@
           }
         ]
       }
+    },
+    "/v1/transcriptions": {
+      "post": {
+        "tags": [
+          "transcriptions"
+        ],
+        "summary": "Create Transcription",
+        "operationId": "transcriptions_create_transcription",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranscriptionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TranscriptionOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
     }
   },
   "components": {
     "schemas": {
+      "AudioContentType": {
+        "type": "string",
+        "enum": [
+          "audio/webm",
+          "audio/ogg",
+          "audio/mp4"
+        ],
+        "title": "AudioContentType"
+      },
       "ChatEntryPoint": {
         "type": "string",
         "enum": [
@@ -669,6 +764,62 @@
           "stem"
         ],
         "title": "QuestionContextIn"
+      },
+      "TranscriptionIn": {
+        "properties": {
+          "audio": {
+            "type": "string",
+            "format": "base64",
+            "contentMediaType": "application/octet-stream",
+            "title": "Audio"
+          },
+          "contentType": {
+            "$ref": "#/components/schemas/AudioContentType"
+          },
+          "language": {
+            "type": "string",
+            "pattern": "^[a-z]{2}$",
+            "title": "Language",
+            "default": "ar"
+          },
+          "durationSeconds": {
+            "type": "integer",
+            "maximum": 3600.0,
+            "minimum": 1.0,
+            "title": "Durationseconds"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "audio",
+          "contentType",
+          "durationSeconds"
+        ],
+        "title": "TranscriptionIn"
+      },
+      "TranscriptionOut": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "model",
+          "language"
+        ],
+        "title": "TranscriptionOut"
       },
       "ValidationError": {
         "properties": {

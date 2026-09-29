@@ -39,6 +39,13 @@ class Settings(BaseSettings):
     embedding_max_texts: int = Field(default=64, ge=1, le=2048)
     embedding_max_text_chars: int = Field(default=8000, ge=1)
     embedding_usd_per_million_tokens: Decimal = Field(default=Decimal("0.02"), ge=0)
+    transcription_provider: Literal["fake", "openai"] = "fake"
+    transcription_model: str = Field(default="whisper-1", min_length=1)
+    transcription_timeout_seconds: float = Field(default=60.0, gt=0, le=300)
+    # OpenAI's 25 MB upload cap.
+    transcription_max_audio_bytes: int = Field(default=10_485_760, ge=1, le=26_214_400)
+    transcription_max_duration_seconds: int = Field(default=600, ge=1, le=3600)
+    transcription_usd_per_minute: Decimal = Field(default=Decimal("0.006"), ge=0)
 
     @field_validator("service_token")
     @classmethod
@@ -61,6 +68,15 @@ class Settings(BaseSettings):
             key is None or not key.get_secret_value().strip()
         ):
             raise ValueError("openai_api_key is required when embedding_provider is openai")
+        return self
+
+    @model_validator(mode="after")
+    def _openai_transcription_needs_key(self) -> Self:
+        key = self.openai_api_key
+        if self.transcription_provider == "openai" and (
+            key is None or not key.get_secret_value().strip()
+        ):
+            raise ValueError("openai_api_key is required when transcription_provider is openai")
         return self
 
 

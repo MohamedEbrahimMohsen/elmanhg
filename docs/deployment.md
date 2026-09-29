@@ -14,7 +14,7 @@ How Elmanhg runs on a server: one Docker Compose stack per environment, one envi
 
 Traffic: browser → Caddy `:443` → `/api/*` → `api:8080`; every other path → the SPA (`index.html` fallback). The API calls `ai:8000` with the shared service token. Postgres and the AI service are never public, and the API's `/health` is not proxied.
 
-Object storage (from #96) is a managed S3-compatible service (Cloudflare R2 or AWS S3), set by config. It is never a container in this stack. Local dev and CI use the local-disk store, and media lives in the `api-media` volume until #96 lands.
+Object storage is available from #96: a managed S3-compatible service (Cloudflare R2 or AWS S3), switched on with `FileStorage__Provider=S3` and the S3 keys in `api.env` (section 4, Object storage). It is never a container in this stack. The default is `Local`: local dev, CI and a host without S3 keys keep media in the `api-media` volume.
 
 ## 2. Environments
 
@@ -178,9 +178,31 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | `AskTeacher__ImageMaxSizeInMb` | `5` | 1 to 20 |
 | `AskTeacher__ThreadListMaxPageSize` | `50` | 1 to 100 |
 | `AskTeacher__ReplyTextMaxLength` | `4000` | 1 to 20000 |
+| `AskTeacher__VoiceMaxSizeInMb` / `AskTeacher__VoiceMaxDurationSeconds` | `5` / `180` | 1 to 25 / 10 to 600 |
+| `AskTeacher__TranscriptionLanguage` | `ar` | two lower-case letters |
+| `AskTeacher__TranscriptionSweepEnabled` | `true` | the voice transcription worker |
+| `AskTeacher__TranscriptionSweepIntervalSeconds` / `AskTeacher__TranscriptionSweepBatchSize` | `5` / `5` | 1 to 3600 / 1 to 100 |
+| `AskTeacher__TranscriptionMaxAttempts` / `AskTeacher__TranscriptionRetryBaseDelaySeconds` | `4` / `15` | 1 to 10 / 1 to 3600 (retries at 15, 30, 60 s) |
+| `AiService__TranscriptionTimeoutSeconds` | `150` | 1 to 600; above the AI service's worst case (about 121 s) |
 | `Subscriptions__AskTeacherMonthlyQuestions` / `Subscriptions__AskTeacherReplySlaHours` | `20` / `24` | the add-on's monthly quota and reply SLA ([docs/subscriptions.md](subscriptions.md)) |
 
-Question photos are stored in the `api-media` volume under `teacher-threads/` and are private: the API serves them only to the owning student, a teacher of the subject or an admin. Caddy proxies all of `/api/*` to the API, so never serve `/api/media` straight from the volume at the edge. The media backup (section 9) includes them.
+Question photos and teachers' voice replies are stored under `teacher-threads/` (in the `api-media` volume with `Local`, in the bucket with `S3`) and are private: the API serves them only to the owning student, a teacher of the subject or an admin. Caddy proxies all of `/api/*` to the API, so never serve `/api/media` straight from the volume or the bucket at the edge. With `Local`, the media backup (section 9) includes them. Voice replies are transcribed by the API's background worker through the AI service, so with `AiService__Provider=Http` the `ai` profile must be on; otherwise the drafts fail after their retries and the teacher types the text.
+
+### Object storage (`api.env`, R2 or S3)
+
+| Variable | Default | Notes |
+|---|---|---|
+| `FileStorage__Provider` | `Local` | `S3` to use the bucket |
+| `FileStorage__S3ServiceUrl` | empty | the S3 endpoint, an absolute `https` URL, e.g. `https://<account>.r2.cloudflarestorage.com` for R2; empty for AWS S3 (the region picks the endpoint) |
+| `FileStorage__S3Region` | `auto` | `auto` for R2; the bucket's region (e.g. `eu-central-1`) for AWS |
+| `FileStorage__S3BucketName` | empty | required for `S3` |
+| `FileStorage__S3AccessKeyId` / `FileStorage__S3SecretAccessKey` | empty | secrets; required for `S3`. Give the key read and write access to this bucket only |
+| `FileStorage__S3ForcePathStyle` | `true` | path-style addressing, which R2 and MinIO expect |
+
+- The API checks these at startup, so a missing key stops it.
+- The bucket stays **fully private**: no public access, no public bucket URL and no CORS rules. Every read goes through the API (`/api/media/...`), which checks access for private media and streams public lesson images with a one-year cache header. There are no presigned URLs.
+- Switching an existing host from `Local` to `S3`: stop the API, copy `App_Data/media` from the `api-media` volume into the bucket with the same keys (for example `aws s3 sync` or `rclone copy`), set the variables, then `up -d`. Stored URLs (`/api/media/...`) do not change, so no data migration is needed.
+- Turn on bucket versioning where the provider supports it; it is the recovery path for deleted or overwritten objects.
 
 ### AI service (`ai.env`, [docs/ai-service.md](ai-service.md))
 
@@ -202,6 +224,11 @@ Question photos are stored in the `api-media` volume under `teacher-threads/` an
 | `ELMANHG_AI_EMBEDDING_DIMENSIONS` | `1536` | keep `1536`: it is the width of the API's `vector(1536)` column |
 | `ELMANHG_AI_EMBEDDING_MAX_TEXTS` / `ELMANHG_AI_EMBEDDING_MAX_TEXT_CHARS` | `64` / `8000` | per call / per text |
 | `ELMANHG_AI_EMBEDDING_USD_PER_MILLION_TOKENS` | `0.02` | cost logging only |
+| `ELMANHG_AI_TRANSCRIPTION_PROVIDER` | `fake` | `openai` (Whisper) to go live; needs `ELMANHG_AI_OPENAI_API_KEY` |
+| `ELMANHG_AI_TRANSCRIPTION_MODEL` | `whisper-1` | |
+| `ELMANHG_AI_TRANSCRIPTION_TIMEOUT_SECONDS` | `60` | per call; with one retry it stays under `AiService__TranscriptionTimeoutSeconds` |
+| `ELMANHG_AI_TRANSCRIPTION_MAX_AUDIO_BYTES` / `ELMANHG_AI_TRANSCRIPTION_MAX_DURATION_SECONDS` | `10485760` / `600` | per recording |
+| `ELMANHG_AI_TRANSCRIPTION_USD_PER_MINUTE` | `0.006` | cost logging only |
 | `ELMANHG_AI_ENV` | set by compose | from `.env` |
 
 Switching the embedding provider or model (for example `fake` to `openai`) needs a re-index: after `up -d`, call `POST /api/content-index/rebuild` as an admin (Postman, `ContentRetrieval` folder). Until each lesson is re-embedded by the sweep, its search returns no matches, because old-model chunks are never compared with a new-model query ([docs/content-retrieval.md](content-retrieval.md), Rebuild).
@@ -213,7 +240,9 @@ Switching the embedding provider or model (for example `fake` to `openai`) needs
 | `ASPNETCORE_ENVIRONMENT` | from `.env` |
 | `ConnectionStrings__DbConnectionString` | `Host=postgres;…` built from the `POSTGRES_*` values |
 | `ReverseProxy__TrustedNetworks__0` | `DOCKER_SUBNET` |
-| `FileStorage__Provider` / `FileStorage__LocalRootPath` / `FileStorage__PublicBaseUrl` | `Local` / `/app/App_Data/media` / `/api/media` |
+| `FileStorage__LocalRootPath` / `FileStorage__PublicBaseUrl` | `/app/App_Data/media` / `/api/media` |
+
+`FileStorage__Provider` is not set by compose, so `api.env` can switch it to `S3`; the baked default is `Local`.
 
 Every other key in `appsettings.example.json` can be overridden in `api.env` as `Section__Key`.
 
@@ -290,7 +319,7 @@ The workflow has not run against a live host yet: there is no VPS, domain or SSH
 - Monthly restore drill: `bash restore.sh backups/postgres-<stamp>.dump elmanhg_restore_drill`. It restores into a scratch database, checks that it has as many migrations as the live one, and drops it (`KEEP_RESTORE_DB=1` keeps it). CI runs the same drill on every pull request.
 - Live restore: `CONFIRM_LIVE_RESTORE=yes bash restore.sh backups/postgres-<stamp>.dump elmanhg`. It stops `api`, restores in one transaction (`--clean --if-exists`), starts `api` and waits for it to be healthy.
 - Media restore: `docker compose -f docker-compose.prod.yml exec -T api tar -xzf - -C /app/App_Data < backups/media-<stamp>.tar.gz`.
-- Object storage data (from #96) lives in the managed provider (R2 or S3), outside these backups; its durability and versioning are settled with #96.
+- With `FileStorage__Provider=S3`, media lives in the managed provider (R2 or S3), outside these backups: `backup.sh` still archives the local volume, but the bucket's objects are not in it. Rely on the provider's durability and turn on bucket versioning (section 4, Object storage).
 
 ## 10. Health checks
 
@@ -328,7 +357,8 @@ Caddy terminates TLS and, with no `trusted_proxies` setting, replaces any client
 | First live deploy | needs a VPS, a domain, DNS and the deploy secrets |
 | Off-site backup copy | needs an off-host bucket and credentials; backups stay on the VPS disk |
 | Staging OTP | needs real Resend (or WhatsApp) keys, because the fake logs codes in Development only |
-| Object storage (#96) | a managed S3-compatible service (Cloudflare R2 or AWS S3), set by config; no object-store container in compose |
+| Object storage | built (#96): `FileStorage__Provider=S3` with an R2 or S3 bucket; not yet checked against a live bucket (needs credentials) |
+| Voice transcription | built (#96): `ELMANHG_AI_TRANSCRIPTION_PROVIDER=openai`; not yet checked against Whisper (needs a key), and the Egyptian-dialect evaluation waits for recorded clips |
 | Observability (#113) | structured logs, metrics, alerting, uptime checks |
 | Performance (#114) | tuning |
 | Security headers (#115) | HSTS and CSP; the request log still trusts `CF-Connecting-IP` |

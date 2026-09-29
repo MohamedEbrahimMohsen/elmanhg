@@ -1,6 +1,5 @@
 using Elmanhg.Application.Shared.RichText;
 using Elmanhg.Application.Shared.Spreadsheets;
-using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.Analytics;
 using Elmanhg.Domain.Avatar;
 using Elmanhg.Domain.ContentRetrieval;
@@ -50,15 +49,9 @@ public static class DependencyInjection
         services.AddOtpDelivery();
         services.AddPayments();
         services.AddAiService();
-        services.AddOptions<FileStorageOptions>().BindConfiguration(FileStorageOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddFileStorage();
         services.AddOptions<ReverseProxyOptions>().BindConfiguration(ReverseProxyOptions.SectionName).ValidateOnStart();
         services.AddSingleton<IValidateOptions<ReverseProxyOptions>, ReverseProxyOptionsValidator>();
-        services.AddScoped<LocalDiskFileStorage>();
-        services.AddScoped<IFileStorage>(serviceProvider => serviceProvider.GetRequiredService<IOptions<FileStorageOptions>>().Value.Provider switch
-        {
-            FileStorageProvider.Local => serviceProvider.GetRequiredService<LocalDiskFileStorage>(),
-            _ => throw new InvalidOperationException("Unsupported FileStorage:Provider."),
-        });
         services.AddSingleton<IRichTextSanitizer, RichTextSanitizer>();
         services.AddSingleton<IRichTextExtractor, RichTextExtractor>();
         services.AddSingleton<ISpreadsheetReader, ClosedXmlSpreadsheetReader>();
@@ -78,6 +71,7 @@ public static class DependencyInjection
         services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
         services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<ITeacherThreadRepository, TeacherThreadRepository>();
+        services.AddScoped<ITeacherVoiceDraftRepository, TeacherVoiceDraftRepository>();
         services.AddScoped<IFunnelEventRepository, FunnelEventRepository>();
         services.AddScoped<ILessonContentChunkRepository, LessonContentChunkRepository>();
         services.AddScoped<ILessonContentIndexRepository, LessonContentIndexRepository>();

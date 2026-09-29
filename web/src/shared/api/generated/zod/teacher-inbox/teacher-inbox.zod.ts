@@ -33,11 +33,21 @@ export const GetTeacherInboxResponse = zod.object({
   "totalPages": zod.union([zod.int(),zod.stringFormat('int64', getTeacherInboxResponseTotalPagesRegExpTwo)]).optional()
 })
 
+export const getVoiceReplySettingsResponseMaxDurationSecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getVoiceReplySettingsResponseMaxSizeInMbRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const GetVoiceReplySettingsResponse = zod.object({
+  "maxDurationSeconds": zod.union([zod.int(),zod.stringFormat('int32', getVoiceReplySettingsResponseMaxDurationSecondsRegExpTwo)]),
+  "maxSizeInMb": zod.union([zod.int(),zod.stringFormat('int32', getVoiceReplySettingsResponseMaxSizeInMbRegExpTwo)])
+})
+
 export const GetInboxThreadParams = zod.object({
   "threadId": zod.uuid()
 })
 
 export const getInboxThreadResponseContextQuestionVersionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getInboxThreadResponseMessagesItemAudioDurationSecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 
 
 export const GetInboxThreadResponse = zod.object({
@@ -70,7 +80,9 @@ export const GetInboxThreadResponse = zod.object({
   "kind": zod.enum(['Text', 'Voice']),
   "text": zod.string(),
   "imageUrl": zod.string().nullable(),
-  "createdAt": zod.iso.datetime({"offset":true})
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "audioUrl": zod.string().nullable(),
+  "audioDurationSeconds": zod.union([zod.int(),zod.stringFormat('int32', getInboxThreadResponseMessagesItemAudioDurationSecondsRegExpTwo)]).nullable()
 }))
 })
 
@@ -79,6 +91,7 @@ export const ClaimTeacherThreadParams = zod.object({
 })
 
 export const claimTeacherThreadResponseContextQuestionVersionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const claimTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 
 
 export const ClaimTeacherThreadResponse = zod.object({
@@ -111,7 +124,9 @@ export const ClaimTeacherThreadResponse = zod.object({
   "kind": zod.enum(['Text', 'Voice']),
   "text": zod.string(),
   "imageUrl": zod.string().nullable(),
-  "createdAt": zod.iso.datetime({"offset":true})
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "audioUrl": zod.string().nullable(),
+  "audioDurationSeconds": zod.union([zod.int(),zod.stringFormat('int32', claimTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo)]).nullable()
 }))
 })
 
@@ -124,6 +139,7 @@ export const ReplyToTeacherThreadBody = zod.object({
 })
 
 export const replyToTeacherThreadResponseContextQuestionVersionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const replyToTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 
 
 export const ReplyToTeacherThreadResponse = zod.object({
@@ -156,7 +172,102 @@ export const ReplyToTeacherThreadResponse = zod.object({
   "kind": zod.enum(['Text', 'Voice']),
   "text": zod.string(),
   "imageUrl": zod.string().nullable(),
-  "createdAt": zod.iso.datetime({"offset":true})
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "audioUrl": zod.string().nullable(),
+  "audioDurationSeconds": zod.union([zod.int(),zod.stringFormat('int32', replyToTeacherThreadResponseMessagesItemAudioDurationSecondsRegExpTwo)]).nullable()
+}))
+})
+
+export const RecordTeacherVoiceDraftParams = zod.object({
+  "threadId": zod.uuid()
+})
+
+export const recordTeacherVoiceDraftBodyTwoDurationSecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const RecordTeacherVoiceDraftBody = zod.object({
+  "audio": zod.instanceof(Blob).optional()
+}).and(zod.object({
+  "durationSeconds": zod.union([zod.int(),zod.stringFormat('int32', recordTeacherVoiceDraftBodyTwoDurationSecondsRegExpTwo)]).optional()
+}))
+
+export const recordTeacherVoiceDraftResponseAudioDurationSecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const RecordTeacherVoiceDraftResponse = zod.object({
+  "id": zod.uuid(),
+  "threadId": zod.uuid(),
+  "status": zod.enum(['Pending', 'Ready', 'Failed', 'Sent']),
+  "transcript": zod.string().nullable(),
+  "audioDurationSeconds": zod.union([zod.int(),zod.stringFormat('int32', recordTeacherVoiceDraftResponseAudioDurationSecondsRegExpTwo)]),
+  "recordedAt": zod.iso.datetime({"offset":true}),
+  "transcribedAt": zod.iso.datetime({"offset":true}).nullable()
+})
+
+export const GetTeacherVoiceDraftParams = zod.object({
+  "threadId": zod.uuid(),
+  "draftId": zod.uuid()
+})
+
+export const getTeacherVoiceDraftResponseAudioDurationSecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const GetTeacherVoiceDraftResponse = zod.object({
+  "id": zod.uuid(),
+  "threadId": zod.uuid(),
+  "status": zod.enum(['Pending', 'Ready', 'Failed', 'Sent']),
+  "transcript": zod.string().nullable(),
+  "audioDurationSeconds": zod.union([zod.int(),zod.stringFormat('int32', getTeacherVoiceDraftResponseAudioDurationSecondsRegExpTwo)]),
+  "recordedAt": zod.iso.datetime({"offset":true}),
+  "transcribedAt": zod.iso.datetime({"offset":true}).nullable()
+})
+
+export const SendTeacherVoiceReplyParams = zod.object({
+  "threadId": zod.uuid()
+})
+
+export const SendTeacherVoiceReplyBody = zod.object({
+  "draftId": zod.uuid(),
+  "text": zod.string().nullable()
+})
+
+export const sendTeacherVoiceReplyResponseContextQuestionVersionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const sendTeacherVoiceReplyResponseMessagesItemAudioDurationSecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const SendTeacherVoiceReplyResponse = zod.object({
+  "id": zod.uuid(),
+  "context": zod.object({
+  "subjectId": zod.uuid(),
+  "subjectName": zod.string(),
+  "unitId": zod.uuid(),
+  "unitName": zod.string(),
+  "lessonId": zod.uuid(),
+  "lessonName": zod.string(),
+  "questionId": zod.uuid().nullable(),
+  "questionVersion": zod.union([zod.int(),zod.stringFormat('int32', sendTeacherVoiceReplyResponseContextQuestionVersionRegExpTwo)]).nullable(),
+  "questionStem": zod.string().nullable(),
+  "attemptId": zod.uuid().nullable()
+}),
+  "studentName": zod.string(),
+  "teacherName": zod.string().nullable(),
+  "isClaimedByMe": zod.boolean(),
+  "canClaim": zod.boolean(),
+  "canReply": zod.boolean(),
+  "status": zod.enum(['Open', 'Answered', 'Closed']),
+  "isOverdue": zod.boolean(),
+  "submittedAt": zod.iso.datetime({"offset":true}),
+  "slaDueAt": zod.iso.datetime({"offset":true}),
+  "claimedAt": zod.iso.datetime({"offset":true}).nullable(),
+  "messages": zod.array(zod.object({
+  "id": zod.uuid(),
+  "isFromStudent": zod.boolean(),
+  "kind": zod.enum(['Text', 'Voice']),
+  "text": zod.string(),
+  "imageUrl": zod.string().nullable(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "audioUrl": zod.string().nullable(),
+  "audioDurationSeconds": zod.union([zod.int(),zod.stringFormat('int32', sendTeacherVoiceReplyResponseMessagesItemAudioDurationSecondsRegExpTwo)]).nullable()
 }))
 })
 

@@ -61,7 +61,12 @@
     "imageLoading": "Loading the photo…",
     "imageError": "Could not load the photo",
     "loading": "Loading the conversation…",
-    "errorTitle": "Could not load the conversation"
+    "errorTitle": "Could not load the conversation",
+    "voiceLabel": "Voice reply",
+    "transcriptLabel": "Voice transcript:",
+    "audioLoading": "Loading the recording…",
+    "audioError": "Could not load the recording",
+    "duration": "Length: {duration}"
   },
   "inbox": {
     "title": "Student questions",
@@ -92,5 +97,26 @@
     "sent": "Reply sent.",
     "answered": "This question has been answered.",
     "closed": "This question is closed."
+  },
+  "replyKind": {
+    "label": "Reply type",
+    "text": "Text",
+    "voice": "Voice"
+  },
+  "voice": {
+    "record": "Record",
+    "stop": "Stop",
+    "reRecord": "Record again",
+    "limit": "Maximum length {max}",
+    "recording": "Recording · {elapsed} / {max}",
+    "preview": "Recording preview",
+    "uploading": "Uploading the recording…",
+    "transcribing": "Transcribing the recording…",
+    "transcriptLabel": "Voice transcript (you can correct it before sending)",
+    "transcriptHint": "Check the text before sending",
+    "transcriptRequired": "Write the reply text",
+    "transcriptionFailed": "Automatic transcription failed. Type the reply text yourself.",
+    "denied": "Microphone access was not allowed.",
+    "unsupported": "This browser cannot record audio."
   }
 }

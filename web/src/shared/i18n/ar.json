@@ -234,7 +234,17 @@
     "TEACHER_THREAD_MODIFIED_CONCURRENTLY": "تغيرت المحادثة للتو. أعد تحميلها ثم حاول مرة أخرى.",
     "TEACHER_THREAD_REPLY_TEXT_REQUIRED": "اكتب الرد.",
     "TEACHER_THREAD_REPLY_TEXT_TOO_LONG": "الرد طويل جدا.",
-    "TEACHER_INBOX_FILTER_INVALID": "تصفية الأسئلة غير صالحة."
+    "TEACHER_INBOX_FILTER_INVALID": "تصفية الأسئلة غير صالحة.",
+    "TEACHER_VOICE_AUDIO_REQUIRED": "أرفق التسجيل الصوتي.",
+    "TEACHER_VOICE_AUDIO_TYPE_INVALID": "التسجيل يجب أن يكون WEBM أو OGG أو M4A.",
+    "TEACHER_VOICE_AUDIO_TOO_LARGE": "حجم التسجيل أكبر من المسموح.",
+    "TEACHER_VOICE_DURATION_INVALID": "مدة التسجيل غير صالحة.",
+    "TEACHER_VOICE_DRAFT_ID_REQUIRED": "التسجيل مطلوب.",
+    "TEACHER_VOICE_DRAFT_NOT_FOUND": "التسجيل غير موجود.",
+    "TEACHER_VOICE_AUDIO_NOT_FOUND": "ملف التسجيل غير موجود.",
+    "TEACHER_VOICE_DRAFT_NOT_READY": "لم ينته تفريغ التسجيل بعد.",
+    "TEACHER_VOICE_DRAFT_ALREADY_SENT": "أرسل هذا التسجيل من قبل.",
+    "TEACHER_VOICE_DRAFT_NOT_PENDING": "لا ينتظر هذا التسجيل التفريغ."
   },
   "error": {
     "title": "حدث خطأ"

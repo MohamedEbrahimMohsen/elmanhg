@@ -14,7 +14,6 @@ x-api-environment: &api-environment
   ConnectionStrings__DbConnectionString: Host=postgres;Port=5432;Database=${POSTGRES_DB:?set POSTGRES_DB in .env};Username=${POSTGRES_USER:?set POSTGRES_USER in .env};Password=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
   ReverseProxy__TrustedNetworks__0: ${DOCKER_SUBNET:-172.30.0.0/24}
   AiService__BaseUrl: http://ai:8000
-  FileStorage__Provider: Local
   FileStorage__LocalRootPath: /app/App_Data/media
   FileStorage__PublicBaseUrl: /api/media
 

@@ -30,8 +30,12 @@ import type {
 import type {
   GetTeacherInboxParams,
   PageDataOfTeacherInboxItemResult,
+  RecordTeacherVoiceDraftBody,
   ReplyToTeacherThreadRequest,
-  TeacherInboxThreadResult
+  SendVoiceReplyRequest,
+  TeacherInboxThreadResult,
+  TeacherVoiceDraftResult,
+  VoiceReplySettingsResult
 } from '../model';
 
 import { http } from '../../../lib/http';
@@ -198,6 +202,152 @@ export function useGetTeacherInboxSuspense<TData = Awaited<ReturnType<typeof get
  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTeacherInboxSuspenseQueryOptions(params,options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetVoiceReplySettingsUrl = () => {
+
+
+
+
+  return `/api/teacher-inbox/voice-settings`
+}
+
+export const getVoiceReplySettings = async ( options?: Parameters<typeof http>[1]): Promise<VoiceReplySettingsResult> => {
+
+  return http<VoiceReplySettingsResult>(getGetVoiceReplySettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetVoiceReplySettingsQueryKey = () => {
+    return [
+    `/api/teacher-inbox/voice-settings`
+    ] as const;
+    }
+
+
+export const getGetVoiceReplySettingsQueryOptions = <TData = Awaited<ReturnType<typeof getVoiceReplySettings>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVoiceReplySettings>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetVoiceReplySettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getVoiceReplySettings>>> = ({ signal }) => getVoiceReplySettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getVoiceReplySettings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetVoiceReplySettingsQueryResult = NonNullable<Awaited<ReturnType<typeof getVoiceReplySettings>>>
+export type GetVoiceReplySettingsQueryError = unknown
+
+
+export function useGetVoiceReplySettings<TData = Awaited<ReturnType<typeof getVoiceReplySettings>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVoiceReplySettings>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getVoiceReplySettings>>,
+          TError,
+          Awaited<ReturnType<typeof getVoiceReplySettings>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetVoiceReplySettings<TData = Awaited<ReturnType<typeof getVoiceReplySettings>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVoiceReplySettings>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getVoiceReplySettings>>,
+          TError,
+          Awaited<ReturnType<typeof getVoiceReplySettings>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetVoiceReplySettings<TData = Awaited<ReturnType<typeof getVoiceReplySettings>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVoiceReplySettings>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetVoiceReplySettings<TData = Awaited<ReturnType<typeof getVoiceReplySettings>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVoiceReplySettings>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetVoiceReplySettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetVoiceReplySettingsSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getVoiceReplySettings>>, TError = unknown>( options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getVoiceReplySettings>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetVoiceReplySettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getVoiceReplySettings>>> = ({ signal }) => getVoiceReplySettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getVoiceReplySettings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetVoiceReplySettingsSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getVoiceReplySettings>>>
+export type GetVoiceReplySettingsSuspenseQueryError = unknown
+
+
+export function useGetVoiceReplySettingsSuspense<TData = Awaited<ReturnType<typeof getVoiceReplySettings>>, TError = unknown>(
+  options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getVoiceReplySettings>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetVoiceReplySettingsSuspense<TData = Awaited<ReturnType<typeof getVoiceReplySettings>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getVoiceReplySettings>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetVoiceReplySettingsSuspense<TData = Awaited<ReturnType<typeof getVoiceReplySettings>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getVoiceReplySettings>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetVoiceReplySettingsSuspense<TData = Awaited<ReturnType<typeof getVoiceReplySettings>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getVoiceReplySettings>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetVoiceReplySettingsSuspenseQueryOptions(options)
 
   const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -503,4 +653,321 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getReplyToTeacherThreadMutationOptions(options), queryClient);
+    }
+    export const getRecordTeacherVoiceDraftUrl = (threadId: string,) => {
+
+
+
+
+  return `/api/teacher-inbox/${threadId}/voice-drafts`
+}
+
+export const recordTeacherVoiceDraft = async (threadId: string,
+    recordTeacherVoiceDraftBody: RecordTeacherVoiceDraftBody, options?: Parameters<typeof http>[1]): Promise<TeacherVoiceDraftResult> => {
+    const formData = new FormData();
+if(recordTeacherVoiceDraftBody.audio !== undefined) {
+ formData.append(`audio`, recordTeacherVoiceDraftBody.audio);
+ }
+
+if(recordTeacherVoiceDraftBody.durationSeconds !== undefined) {
+ formData.append(`durationSeconds`, recordTeacherVoiceDraftBody.durationSeconds.toString())
+ }
+
+  return http<TeacherVoiceDraftResult>(getRecordTeacherVoiceDraftUrl(threadId),
+  {
+    ...options,
+    method: 'POST'
+    ,
+    body: formData
+  }
+);}
+
+
+
+
+
+export const getRecordTeacherVoiceDraftMutationKey = () => ['recordTeacherVoiceDraft'] as const;
+
+export const getRecordTeacherVoiceDraftMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordTeacherVoiceDraft>>, TError,RecordTeacherVoiceDraftMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof recordTeacherVoiceDraft>>, TError,RecordTeacherVoiceDraftMutationVariables, TContext> => {
+
+const mutationKey = getRecordTeacherVoiceDraftMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof recordTeacherVoiceDraft>>, RecordTeacherVoiceDraftMutationVariables> = (props) => {
+          const {threadId,data} = props ?? {};
+
+          return  recordTeacherVoiceDraft(threadId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RecordTeacherVoiceDraftMutationResult = NonNullable<Awaited<ReturnType<typeof recordTeacherVoiceDraft>>>
+    export type RecordTeacherVoiceDraftMutationBody = RecordTeacherVoiceDraftBody
+    export type RecordTeacherVoiceDraftMutationError = unknown
+    export type RecordTeacherVoiceDraftMutationVariables = {threadId: string;data: RecordTeacherVoiceDraftBody}
+
+    export const useRecordTeacherVoiceDraft = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordTeacherVoiceDraft>>, TError,RecordTeacherVoiceDraftMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof recordTeacherVoiceDraft>>,
+        TError,
+        RecordTeacherVoiceDraftMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRecordTeacherVoiceDraftMutationOptions(options), queryClient);
+    }
+    export const getGetTeacherVoiceDraftUrl = (threadId: string,
+    draftId: string,) => {
+
+
+
+
+  return `/api/teacher-inbox/${threadId}/voice-drafts/${draftId}`
+}
+
+export const getTeacherVoiceDraft = async (threadId: string,
+    draftId: string, options?: Parameters<typeof http>[1]): Promise<TeacherVoiceDraftResult> => {
+
+  return http<TeacherVoiceDraftResult>(getGetTeacherVoiceDraftUrl(threadId,draftId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTeacherVoiceDraftQueryKey = (threadId: string,
+    draftId: string,) => {
+    return [
+    `/api/teacher-inbox/${threadId}/voice-drafts/${draftId}`
+    ] as const;
+    }
+
+
+export const getGetTeacherVoiceDraftQueryOptions = <TData = Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError = unknown>(threadId: string,
+    draftId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTeacherVoiceDraftQueryKey(threadId,draftId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeacherVoiceDraft>>> = ({ signal }) => getTeacherVoiceDraft(threadId,draftId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: threadId !== null && threadId !== undefined && draftId !== null && draftId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTeacherVoiceDraftQueryResult = NonNullable<Awaited<ReturnType<typeof getTeacherVoiceDraft>>>
+export type GetTeacherVoiceDraftQueryError = unknown
+
+
+export function useGetTeacherVoiceDraft<TData = Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError = unknown>(
+ threadId: string,
+    draftId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeacherVoiceDraft>>,
+          TError,
+          Awaited<ReturnType<typeof getTeacherVoiceDraft>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeacherVoiceDraft<TData = Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError = unknown>(
+ threadId: string,
+    draftId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeacherVoiceDraft>>,
+          TError,
+          Awaited<ReturnType<typeof getTeacherVoiceDraft>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeacherVoiceDraft<TData = Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError = unknown>(
+ threadId: string,
+    draftId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetTeacherVoiceDraft<TData = Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError = unknown>(
+ threadId: string,
+    draftId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTeacherVoiceDraftQueryOptions(threadId,draftId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetTeacherVoiceDraftSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError = unknown>(threadId: string,
+    draftId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTeacherVoiceDraftQueryKey(threadId,draftId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeacherVoiceDraft>>> = ({ signal }) => getTeacherVoiceDraft(threadId,draftId, { signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetTeacherVoiceDraftSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getTeacherVoiceDraft>>>
+export type GetTeacherVoiceDraftSuspenseQueryError = unknown
+
+
+export function useGetTeacherVoiceDraftSuspense<TData = Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError = unknown>(
+ threadId: string,
+    draftId: string, options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeacherVoiceDraftSuspense<TData = Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError = unknown>(
+ threadId: string,
+    draftId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeacherVoiceDraftSuspense<TData = Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError = unknown>(
+ threadId: string,
+    draftId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetTeacherVoiceDraftSuspense<TData = Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError = unknown>(
+ threadId: string,
+    draftId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTeacherVoiceDraft>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTeacherVoiceDraftSuspenseQueryOptions(threadId,draftId,options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getSendTeacherVoiceReplyUrl = (threadId: string,) => {
+
+
+
+
+  return `/api/teacher-inbox/${threadId}/voice-replies`
+}
+
+export const sendTeacherVoiceReply = async (threadId: string,
+    sendVoiceReplyRequest: SendVoiceReplyRequest, options?: Parameters<typeof http>[1]): Promise<TeacherInboxThreadResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return http<TeacherInboxThreadResult>(getSendTeacherVoiceReplyUrl(threadId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(sendVoiceReplyRequest)
+  }
+);}
+
+
+
+
+
+export const getSendTeacherVoiceReplyMutationKey = () => ['sendTeacherVoiceReply'] as const;
+
+export const getSendTeacherVoiceReplyMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendTeacherVoiceReply>>, TError,SendTeacherVoiceReplyMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof sendTeacherVoiceReply>>, TError,SendTeacherVoiceReplyMutationVariables, TContext> => {
+
+const mutationKey = getSendTeacherVoiceReplyMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendTeacherVoiceReply>>, SendTeacherVoiceReplyMutationVariables> = (props) => {
+          const {threadId,data} = props ?? {};
+
+          return  sendTeacherVoiceReply(threadId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SendTeacherVoiceReplyMutationResult = NonNullable<Awaited<ReturnType<typeof sendTeacherVoiceReply>>>
+    export type SendTeacherVoiceReplyMutationBody = SendVoiceReplyRequest
+    export type SendTeacherVoiceReplyMutationError = unknown
+    export type SendTeacherVoiceReplyMutationVariables = {threadId: string;data: SendVoiceReplyRequest}
+
+    export const useSendTeacherVoiceReply = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendTeacherVoiceReply>>, TError,SendTeacherVoiceReplyMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof sendTeacherVoiceReply>>,
+        TError,
+        SendTeacherVoiceReplyMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSendTeacherVoiceReplyMutationOptions(options), queryClient);
     }

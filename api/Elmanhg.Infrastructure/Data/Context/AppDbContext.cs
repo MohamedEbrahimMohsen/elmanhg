@@ -35,6 +35,10 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     private const int CurrencyCodeLength = 3;
     // Paymob ids and references are short numeric strings; a schema invariant.
     private const int PaymobReferenceMaxLength = 100;
+    // PublicBaseUrl + folder + 32-hex name + extension; a schema invariant.
+    private const int MediaUrlMaxLength = 400;
+    // Provider model ids are short identifiers; a schema invariant.
+    private const int TranscriptionModelMaxLength = 100;
 
     public const string InProgressSessionIndex = "IX_Sessions_InProgressScope";
     public const string AttemptPerQuestionIndex = "IX_Attempts_SessionId_QuestionId";
@@ -71,6 +75,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public DbSet<Payment> Payments { get; set; }
     public DbSet<TeacherThread> TeacherThreads { get; set; }
     public DbSet<TeacherMessage> TeacherMessages { get; set; }
+    public DbSet<TeacherVoiceDraft> TeacherVoiceDrafts { get; set; }
     public DbSet<FunnelEvent> FunnelEvents { get; set; }
     public DbSet<LessonContentChunk> LessonContentChunks { get; set; }
     public DbSet<LessonContentIndex> LessonContentIndexes { get; set; }
@@ -150,6 +155,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         ConfigureExamBlueprints(modelBuilder);
         ConfigureSubscriptions(modelBuilder);
         ConfigureTeacherThreads(modelBuilder);
+        ConfigureTeacherVoiceDrafts(modelBuilder);
         ConfigureTeacherSubjects(modelBuilder);
         ConfigureFunnelEvents(modelBuilder);
         ConfigureContentRetrieval(modelBuilder);
@@ -404,6 +410,24 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.SenderId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.ThreadId, x.CreatedAt });
             builder.HasIndex(x => x.ImageUrl).HasFilter("\"ImageUrl\" IS NOT NULL");
+            builder.Property(x => x.AudioUrl).HasMaxLength(MediaUrlMaxLength);
+            builder.HasIndex(x => x.AudioUrl).HasFilter("\"AudioUrl\" IS NOT NULL");
+            builder.Property(x => x.TranscriptFinal).HasDefaultValue(false);
+        });
+    }
+
+    private static void ConfigureTeacherVoiceDrafts(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TeacherVoiceDraft>(builder =>
+        {
+            builder.Property(x => x.AudioKey).IsRequired().HasMaxLength(MediaUrlMaxLength);
+            builder.Property(x => x.AudioUrl).IsRequired().HasMaxLength(MediaUrlMaxLength);
+            builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.TranscriptionModel).HasMaxLength(TranscriptionModelMaxLength);
+            builder.HasOne<TeacherThread>().WithMany().HasForeignKey(x => x.ThreadId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.TeacherId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.ThreadId, x.TeacherId });
+            builder.HasIndex(x => x.NextAttemptAt).HasFilter("\"Status\" = 'Pending'");
         });
     }
 
@@ -488,6 +512,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         modelBuilder.Entity<Payment>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<TeacherThread>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<TeacherMessage>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<TeacherVoiceDraft>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<FunnelEvent>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<LessonContentChunk>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<LessonContentIndex>().HasQueryFilter(x => !x.IsDeleted);

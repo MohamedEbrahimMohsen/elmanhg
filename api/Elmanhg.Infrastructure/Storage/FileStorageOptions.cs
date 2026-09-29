@@ -14,4 +14,16 @@ public sealed class FileStorageOptions
 
     [Required]
     public string PublicBaseUrl { get; set; } = string.Empty;
+
+    public string S3ServiceUrl { get; set; } = string.Empty;
+
+    public string S3Region { get; set; } = "auto";
+
+    public string S3BucketName { get; set; } = string.Empty;
+
+    public string S3AccessKeyId { get; set; } = string.Empty;
+
+    public string S3SecretAccessKey { get; set; } = string.Empty;
+
+    public bool S3ForcePathStyle { get; set; } = true;
 }

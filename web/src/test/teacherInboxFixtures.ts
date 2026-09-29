@@ -2,6 +2,9 @@ import type {
   PageDataOfTeacherInboxItemResult,
   TeacherInboxItemResult,
   TeacherInboxThreadResult,
+  TeacherVoiceDraftResult,
+  TeacherVoiceDraftStatus,
+  VoiceReplySettingsResult,
 } from '@/shared/api/generated/model';
 import { teacherThread, threadContext, threadId } from './askTeacherFixtures';
 
@@ -72,7 +75,27 @@ export function answeredInboxThread(): TeacherInboxThreadResult {
         text: 'Because F = ma.',
         imageUrl: null,
         createdAt: '2026-10-01T09:00:00Z',
+        audioUrl: null,
+        audioDurationSeconds: null,
       },
     ],
   });
+}
+
+export const voiceDraftId = 'd1d1d1d1-d1d1-4d1d-8d1d-d1d1d1d1d1d1';
+
+export function voiceSettings(): VoiceReplySettingsResult {
+  return { maxDurationSeconds: 180, maxSizeInMb: 5 };
+}
+
+export function voiceDraft(status: TeacherVoiceDraftStatus, transcript: string | null = null): TeacherVoiceDraftResult {
+  return {
+    id: voiceDraftId,
+    threadId,
+    status,
+    transcript,
+    audioDurationSeconds: 3,
+    recordedAt: '2026-10-02T02:00:00Z',
+    transcribedAt: status === 'Pending' ? null : '2026-10-02T02:00:05Z',
+  };
 }

@@ -22,11 +22,33 @@ public static class AiServiceServiceCollectionExtensions
                 resilience.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(aiService.AttemptTimeoutSeconds * 2);
                 resilience.Retry.DisableForUnsafeHttpMethods();
             });
+        services.AddHttpClient<HttpAiTranscriptionClient>((serviceProvider, client) =>
+            {
+                client.BaseAddress = new Uri(Options(serviceProvider).BaseUrl.TrimEnd('/') + "/");
+                // HttpClient.Timeout wraps the resilience pipeline, so it stays infinite and the pipeline owns the transcription budget.
+                client.Timeout = Timeout.InfiniteTimeSpan;
+            })
+            .AddStandardResilienceHandler()
+            .Configure((resilience, serviceProvider) =>
+            {
+                var timeout = TimeSpan.FromSeconds(Options(serviceProvider).TranscriptionTimeoutSeconds);
+                resilience.AttemptTimeout.Timeout = timeout;
+                resilience.TotalRequestTimeout.Timeout = timeout;
+                resilience.CircuitBreaker.SamplingDuration = timeout * 2;
+                resilience.Retry.DisableForUnsafeHttpMethods();
+            });
         services.AddScoped<FakeAiServiceClient>();
+        services.AddScoped<FakeAiTranscriptionClient>();
         services.AddScoped<IAiServiceClient>(serviceProvider => Options(serviceProvider).Provider switch
         {
             AiServiceProvider.Fake => serviceProvider.GetRequiredService<FakeAiServiceClient>(),
             AiServiceProvider.Http => serviceProvider.GetRequiredService<HttpAiServiceClient>(),
+            _ => throw new InvalidOperationException("Unsupported AiService:Provider."),
+        });
+        services.AddScoped<IAiTranscriptionClient>(serviceProvider => Options(serviceProvider).Provider switch
+        {
+            AiServiceProvider.Fake => serviceProvider.GetRequiredService<FakeAiTranscriptionClient>(),
+            AiServiceProvider.Http => serviceProvider.GetRequiredService<HttpAiTranscriptionClient>(),
             _ => throw new InvalidOperationException("Unsupported AiService:Provider."),
         });
         return services;

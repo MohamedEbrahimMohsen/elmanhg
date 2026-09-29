@@ -61,7 +61,12 @@
     "imageLoading": "جارٍ تحميل الصورة…",
     "imageError": "تعذّر تحميل الصورة",
     "loading": "جارٍ تحميل المحادثة…",
-    "errorTitle": "تعذّر تحميل المحادثة"
+    "errorTitle": "تعذّر تحميل المحادثة",
+    "voiceLabel": "الرد الصوتي",
+    "transcriptLabel": "نص التفريغ الصوتي:",
+    "audioLoading": "جارٍ تحميل التسجيل…",
+    "audioError": "تعذّر تحميل التسجيل",
+    "duration": "المدة: {duration}"
   },
   "inbox": {
     "title": "أسئلة الطلاب",
@@ -92,5 +97,26 @@
     "sent": "تم إرسال الرد.",
     "answered": "تم الرد على هذا السؤال.",
     "closed": "أُغلق هذا السؤال."
+  },
+  "replyKind": {
+    "label": "نوع الرد",
+    "text": "نص",
+    "voice": "صوت"
+  },
+  "voice": {
+    "record": "تسجيل",
+    "stop": "إيقاف",
+    "reRecord": "إعادة التسجيل",
+    "limit": "الحد الأقصى للتسجيل {max}",
+    "recording": "جارٍ التسجيل · {elapsed} / {max}",
+    "preview": "معاينة التسجيل",
+    "uploading": "جارٍ رفع التسجيل…",
+    "transcribing": "جارٍ تفريغ التسجيل…",
+    "transcriptLabel": "نص التفريغ الصوتي (يمكنك تصحيحه قبل الإرسال)",
+    "transcriptHint": "راجع النص قبل الإرسال",
+    "transcriptRequired": "اكتب نص الرد",
+    "transcriptionFailed": "تعذّر التفريغ التلقائي. اكتب نص الرد يدويًا.",
+    "denied": "لم يُسمح بالوصول إلى الميكروفون.",
+    "unsupported": "المتصفح لا يدعم التسجيل الصوتي."
   }
 }

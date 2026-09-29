@@ -476,7 +476,8 @@ Subscription(id, student_id, plan[Base|AskTeacher], period[Monthly|Termly|Yearly
 Payment(id, student_id, subscription_id?, plan, period, period_months, amount_minor, currency, status[Pending|Succeeded|Failed|Refunded], paymob_txn_id?, provider_order_id?, raw_webhook_json?, completed_at?, review_reason?, review_resolved_at?, review_resolved_by?, refunded_at?, refunded_by?, refund_reason?, refund_transaction_id?, refund_idempotency_key?, created_at)  -- docs/subscriptions.md
 
 TeacherThread(id, student_id, teacher_id?, subject_id, context_json, status[Open|Answered|Closed], submitted_at, sla_due_at, claimed_at?, closed_at?, rating?)  -- docs/ask-teacher.md
-TeacherMessage(id, thread_id, sender_id, kind[Text|Voice], text, image_url?, audio_url?, transcript_final bool, student_read_at?, created_at)
+TeacherMessage(id, thread_id, sender_id, kind[Text|Voice], text, image_url?, audio_url?, audio_duration_seconds?, transcript_final bool, student_read_at?, created_at)
+TeacherVoiceDraft(id, thread_id, teacher_id, audio_key, audio_url, audio_duration_seconds, status[Pending|Ready|Failed|Sent], transcript?, transcription_model?, attempts, next_attempt_at?, recorded_at, transcribed_at?, sent_message_id?)  -- transcription job; docs/ask-teacher.md
 
 AvatarConversation(id, student_id, context_json, model, prompt_version, started_at)
 AvatarMessage(id, conversation_id, role, text, created_at)
@@ -541,11 +542,11 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 ## 18. Recommended technical shape (for the implementation workflow to adopt or adjust)
 
 - **Backend**: .NET 10, DDD/CQRS, PostgreSQL (JSONB for question bodies; pgvector for Avatar retrieval).
-- **AI/grading service**: Python FastAPI — LLM grading (v2), SymPy CAS checks (v2), Avatar embeddings + generation (v1). Retrieval search itself runs in the .NET API over pgvector (see `docs/content-retrieval.md`), transcription orchestration (v1).
+- **AI/grading service**: Python FastAPI — LLM grading (v2), SymPy CAS checks (v2), Avatar embeddings + generation (v1). Retrieval search itself runs in the .NET API over pgvector (see `docs/content-retrieval.md`), speech-to-text through OpenAI Whisper (v1; the API's background worker schedules and retries it).
 - **LLM**: Claude API. Confirm current model IDs and pricing at build time.
 - **Embeddings**: OpenAI text-embedding-3-small (1536) through the AI service; Anthropic has no embeddings API. Fake by default.
 - **Frontend**: React + TypeScript, shadcn/ui, i18next RTL. v2 adds a math input with LaTeX preview, a drag-and-drop canvas, and a rich Arabic editor.
-- **Media**: S3-compatible object storage for images and audio.
+- **Media**: S3-compatible object storage for images and audio; private media (question photos, voice replies) is served only through the API after an access check.
 - **Jobs / realtime**: background jobs for grading, transcription, SLA reminders; SignalR for grade results and teacher replies.
 - **Payments**: Paymob, webhook-driven.
 - **Hosting**: Docker Compose on one VPS per environment (staging, production); Caddy (TLS, SPA, /api proxy), images built by CI and pushed to GHCR; PostgreSQL + pgvector. Object storage (from #96) is a managed S3-compatible service (Cloudflare R2 or AWS S3), set by config; local dev and CI use the local-disk store, and there is no object-store container in compose. Runbook: docs/deployment.md.
@@ -559,7 +560,7 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 3. Multi-select partial-credit formula: on or off by default?
 4. Should unit-exam access be gated on opening all lessons? (Default: no gate.)
 5. Avatar daily limits for Free vs Base. Configured defaults: Free 5/day, Base 50/day.
-6. Transcription provider for Arabic voice (evaluate quality on Egyptian dialect before committing).
+6. Transcription provider for Arabic voice (evaluate quality on Egyptian dialect before committing). The evaluation harness is in `docs/ai-service.md`; the run waits for recorded Egyptian-dialect clips.
 7. v2: essay rubric format — free criteria list, or a fixed platform-wide template?
 
 ---

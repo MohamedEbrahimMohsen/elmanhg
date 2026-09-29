@@ -81,6 +81,7 @@ builder.Services.AddInfrastructure();
 builder.Services.AddHostedService<ExpiredExamSubmissionWorker>();
 builder.Services.AddHostedService<SubscriptionLapseWorker>();
 builder.Services.AddHostedService<LessonContentIndexWorker>();
+builder.Services.AddHostedService<TeacherVoiceTranscriptionWorker>();
 builder.Services.AddAuthRateLimiting();
 #endregion
 
@@ -129,7 +130,7 @@ app.UseMiddleware<CoreRequestLoggingMiddleware>();
 
 app.UseHttpsRedirection();
 
-app.UseLocalFileStorage();
+app.UseMediaStorage();
 
 app.UseAuthorization();
 

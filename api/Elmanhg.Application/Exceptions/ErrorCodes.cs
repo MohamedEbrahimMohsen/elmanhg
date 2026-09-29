@@ -233,6 +233,13 @@ public static class ErrorCodes
     public const string TeacherThreadReplyTextRequired = "TEACHER_THREAD_REPLY_TEXT_REQUIRED";
     public const string TeacherThreadReplyTextTooLong = "TEACHER_THREAD_REPLY_TEXT_TOO_LONG";
     public const string TeacherInboxFilterInvalid = "TEACHER_INBOX_FILTER_INVALID";
+    public const string TeacherVoiceAudioRequired = "TEACHER_VOICE_AUDIO_REQUIRED";
+    public const string TeacherVoiceAudioTypeInvalid = "TEACHER_VOICE_AUDIO_TYPE_INVALID";
+    public const string TeacherVoiceAudioTooLarge = "TEACHER_VOICE_AUDIO_TOO_LARGE";
+    public const string TeacherVoiceDurationInvalid = "TEACHER_VOICE_DURATION_INVALID";
+    public const string TeacherVoiceDraftIdRequired = "TEACHER_VOICE_DRAFT_ID_REQUIRED";
+    public const string TeacherVoiceDraftNotFound = "TEACHER_VOICE_DRAFT_NOT_FOUND";
+    public const string TeacherVoiceAudioNotFound = "TEACHER_VOICE_AUDIO_NOT_FOUND";
 
     // ANALYTICS
     public const string FunnelAnonymousIdRequired = "FUNNEL_ANONYMOUS_ID_REQUIRED";

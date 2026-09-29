@@ -70,11 +70,34 @@ export function teacherThread(overrides?: Partial<TeacherThreadResult>): Teacher
         text: 'Why is F = ma?',
         imageUrl: threadImageUrl,
         createdAt: '2026-10-01T07:00:00Z',
+        audioUrl: null,
+        audioDurationSeconds: null,
       },
     ],
     hasUnreadReply: false,
     ...overrides,
   };
+}
+
+export const voiceReplyUrl = '/api/media/teacher-threads/voice01.webm';
+
+export function voiceAnsweredThread(): TeacherThreadResult {
+  return teacherThread({
+    status: 'Answered',
+    messages: [
+      ...teacherThread().messages,
+      {
+        id: 'f4f4f4f4-f4f4-4f4f-8f4f-f4f4f4f4f4f4',
+        isFromStudent: false,
+        kind: 'Voice',
+        text: 'Force equals mass times acceleration.',
+        imageUrl: null,
+        createdAt: '2026-10-01T09:00:00Z',
+        audioUrl: voiceReplyUrl,
+        audioDurationSeconds: 42,
+      },
+    ],
+  });
 }
 
 export function askTeacherUsage(overrides?: Partial<UsageResult>): UsageResult {

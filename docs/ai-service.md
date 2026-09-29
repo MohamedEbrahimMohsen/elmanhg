@@ -2,7 +2,7 @@
 
 ## Role
 
-`ai/` is an internal Python 3.13 FastAPI service (package `elmanhg_ai`, managed with uv). It answers avatar chat turns over the Claude API (PRD §9) and embeds text for lesson retrieval ([content-retrieval.md](content-retrieval.md)). Only the .NET API calls it, over HTTP with a shared service token; browsers never do. The .NET side of the contract is `api/Elmanhg.Application/Shared/AiService/` (`IAiServiceClient`), and the Python side is `ai/src/elmanhg_ai/api/chat/schemas.py` and `ai/src/elmanhg_ai/api/embeddings/schemas.py`. Both change together, and `ai/openapi/v1.json` is the committed contract (regenerate with `uv run python -m elmanhg_ai.openapi_export` from `ai/`; a test fails on drift).
+`ai/` is an internal Python 3.13 FastAPI service (package `elmanhg_ai`, managed with uv). It answers avatar chat turns over the Claude API (PRD §9) embeds text for lesson retrieval ([content-retrieval.md](content-retrieval.md)), and transcribes teachers' voice replies (speech to text, [ask-teacher.md](ask-teacher.md)). Only the .NET API calls it, over HTTP with a shared service token; browsers never do. The .NET side of the contract is `api/Elmanhg.Application/Shared/AiService/` (`IAiServiceClient`, and `IAiTranscriptionClient` for transcription), and the Python side is `ai/src/elmanhg_ai/api/chat/schemas.py`, `ai/src/elmanhg_ai/api/embeddings/schemas.py` and `ai/src/elmanhg_ai/api/transcriptions/schemas.py`. Both change together, and `ai/openapi/v1.json` is the committed contract (regenerate with `uv run python -m elmanhg_ai.openapi_export` from `ai/`; a test fails on drift).
 
 How the API builds the context bundle, the exam refusal, the daily quota and the student UI are in [avatar.md](avatar.md).
 
@@ -115,6 +115,33 @@ Limits (`400 VALIDATION_FAILED`, field code `TOO_MANY_ITEMS` on `texts` or `TOO_
 | `ELMANHG_AI_EMBEDDING_MAX_TEXTS` | 64 | number of `texts` (the API sends at most `ContentRetrieval:EmbeddingBatchSize`, 32) |
 | `ELMANHG_AI_EMBEDDING_MAX_TEXT_CHARS` | 8000 | length of each text |
 
+### `POST /v1/transcriptions`
+
+operationId `transcriptions_create_transcription`. Turns a teacher's voice reply into text. Only the API's background worker calls it (`TeacherVoiceTranscriptionWorker`, see [ask-teacher.md](ask-teacher.md)); the API owns the job, its retries and its backoff.
+
+Request (the audio is base64 in JSON, so the contract stays JSON and the service needs no storage credentials):
+
+```json
+{ "audio": "GkXfo59ChoEBQveB…", "contentType": "audio/webm", "language": "ar", "durationSeconds": 42 }
+```
+
+Response `200`:
+
+```json
+{ "text": "خلينا نراجع قانون أوم خطوة بخطوة.", "model": "whisper-1", "language": "ar" }
+```
+
+- `audio` is base64 and must decode. `contentType` is `audio/webm`, `audio/ogg` or `audio/mp4`. `language` is two lower-case letters (default `ar`). `durationSeconds` is 1 to 3600 and only feeds the limit check and cost logging.
+- `text` is trimmed and may be empty (silence). `model` is the configured model id, because the provider's reply has none.
+
+Limits (`400 VALIDATION_FAILED`):
+
+| Setting | Default | Field code |
+|---|---|---|
+| — | — | `TOO_SHORT` on `audio` when it decodes to zero bytes |
+| `ELMANHG_AI_TRANSCRIPTION_MAX_AUDIO_BYTES` | 10485760 (10 MB; at most OpenAI's 25 MB upload cap) | `TOO_LARGE` on `audio` |
+| `ELMANHG_AI_TRANSCRIPTION_MAX_DURATION_SECONDS` | 600 | `TOO_LONG` on `durationSeconds` |
+
 ## Errors
 
 Every error is RFC 9457 `application/problem+json`. `detail` is omitted when the status is 500 or above, and `errors` appears only for `VALIDATION_FAILED`. Titles are English only: the one caller, the .NET API, maps any failure to its own localised `AI_SERVICE_UNAVAILABLE` (503).
@@ -138,8 +165,8 @@ Every error is RFC 9457 `application/problem+json`. `detail` is omitted when the
 | `UNAUTHENTICATED` | 401 | Missing or wrong service token (`WWW-Authenticate: Bearer`) |
 | `NOT_FOUND` | 404 | Unknown route |
 | `METHOD_NOT_ALLOWED` | 405 | Wrong method |
-| `MODEL_OUTPUT_INVALID` | 502 | The model returned no text, or an embeddings reply was unreadable or had the wrong vector count or width |
-| `DEPENDENCY_UNAVAILABLE` | 503 | The Claude API failed (any SDK error, after SDK retries), or the OpenAI embeddings call failed (after retries for 429, 5xx and transport errors; any other 4xx is not retried) |
+| `MODEL_OUTPUT_INVALID` | 502 | The model returned no text, an embeddings reply was unreadable or had the wrong vector count or width, or a transcription reply had no `text` |
+| `DEPENDENCY_UNAVAILABLE` | 503 | The Claude API failed (any SDK error, after SDK retries), or an OpenAI embeddings or transcription call failed (after retries for 429, 5xx and transport errors; any other 4xx is not retried) |
 | `SERVICE_NOT_READY` | 503 | Startup has not finished |
 | `INTERNAL_ERROR` | 500 | Anything unexpected (logged, never echoed) |
 
@@ -183,8 +210,14 @@ AI service (`ELMANHG_AI_*` environment variables; `settings.py` is the only plac
 | `ELMANHG_AI_EMBEDDING_MAX_TEXTS` | 64 | 1 to 2048 texts per call |
 | `ELMANHG_AI_EMBEDDING_MAX_TEXT_CHARS` | 8000 | characters per text |
 | `ELMANHG_AI_EMBEDDING_USD_PER_MILLION_TOKENS` | 0.02 | cost logging only; confirm the list price at go-live |
+| `ELMANHG_AI_TRANSCRIPTION_PROVIDER` | `fake` | `fake` or `openai` (Whisper); `openai` needs `ELMANHG_AI_OPENAI_API_KEY` |
+| `ELMANHG_AI_TRANSCRIPTION_MODEL` | `whisper-1` | OpenAI transcription model id (`gpt-4o-transcribe` also works) |
+| `ELMANHG_AI_TRANSCRIPTION_TIMEOUT_SECONDS` | 60 | per call, above 0 and at most 300 |
+| `ELMANHG_AI_TRANSCRIPTION_MAX_AUDIO_BYTES` | 10485760 | 1 to 26214400 (OpenAI's 25 MB cap) |
+| `ELMANHG_AI_TRANSCRIPTION_MAX_DURATION_SECONDS` | 600 | 1 to 3600 |
+| `ELMANHG_AI_TRANSCRIPTION_USD_PER_MINUTE` | 0.006 | cost logging only; confirm the list price at go-live |
 
-The OpenAI adapter reuses `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` per call and `ELMANHG_AI_MODEL_MAX_RETRIES` for retries, with `0.5 s × 2^attempt` backoff.
+The OpenAI embeddings adapter reuses `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` per call and `ELMANHG_AI_MODEL_MAX_RETRIES` for retries, with `0.5 s × 2^attempt` backoff. The Whisper adapter uses `ELMANHG_AI_TRANSCRIPTION_TIMEOUT_SECONDS` per call with the same retries and backoff (`clients/openai_http.py`); it sends `model`, `language` and `response_format=json`, with no prompt in v1.
 
 .NET API (`AiService` section; environment form `AiService__*`):
 
@@ -195,14 +228,16 @@ The OpenAI adapter reuses `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` per call and `ELMAN
 | `AiService:ServiceToken` | empty | at least 32 characters when `Http` |
 | `AiService:AttemptTimeoutSeconds` | 45 | 1 to 60; must not exceed the total |
 | `AiService:TotalTimeoutSeconds` | 50 | 1 to 120 |
+| `AiService:TranscriptionTimeoutSeconds` | 150 | 1 to 600; the attempt and total timeout of the separate transcription client |
 
-Timeouts nest so the AI service always answers before the API gives up: the worst case in Python is about 41 s (20 s × 2 attempts), and the API waits up to 45 s per attempt, 50 s in total. The API never retries the POST.
+Timeouts nest so the AI service always answers before the API gives up: the worst case in Python is about 41 s (20 s × 2 attempts), and the API waits up to 45 s per attempt, 50 s in total. Transcription nests the same way: at most about 121 s in Python (60 s × 2 attempts), under the API's 150 s. The API never retries the POST; a failed transcription is retried later by the worker.
 
 ## Fakes
 
 - `ELMANHG_AI_LLM_PROVIDER=fake` (the default) uses `FakeModelClient`, which returns the fixed Arabic reply `هذا رد تجريبي من المساعد.` with model `fake`, citing the first source when sources were sent. CI needs no keys.
 - The .NET `AiService:Provider=Fake` (the default) uses `FakeAiServiceClient`, which returns the same fixed reply with model and prompt version `fake` without calling the service, and cites the first source when there is one. It refuses with `AI_SERVICE_UNAVAILABLE` in Production. The test `ApiFactory` pins `Fake`.
 - `ELMANHG_AI_EMBEDDING_PROVIDER=fake` (the default) uses `FakeEmbeddingClient`: deterministic lexical vectors (NFKC, case folding, tashkeel and tatweel removed, alef variants unified, word tokens hashed with BLAKE2b into signed buckets, L2-normalised; text with no words gives the unit vector on the first axis). Model `fake-embedding`.
+- `ELMANHG_AI_TRANSCRIPTION_PROVIDER=fake` (the default) uses `FakeTranscriptionClient`, which returns the fixed text `هذا تفريغ تجريبي للرد الصوتي.` with model `fake-transcription`. The .NET `FakeAiTranscriptionClient` (selected by `AiService:Provider=Fake`) returns the same text with model `fake` without calling the service, and refuses with `AI_SERVICE_UNAVAILABLE` in Production.
 - The .NET fake embeds in-process the same way (SHA-256 buckets over `AnswerNormalizer` output) with model `fake`, so a mixed fake index never matches across the two (the search filters by model). Texts that share words score higher, which makes retrieval tests meaningful without a key.
 
 ## Prompts
@@ -218,6 +253,7 @@ Timeouts nest so the AI service always answers before the API gives up: the wors
 - The trace id comes from the W3C `traceparent` header (the .NET `HttpClient` sends it), so API and AI logs share one id; otherwise the service generates one. `X-Request-Id` is reused when valid. Both are echoed as `X-Trace-Id` and `X-Request-Id`.
 - There is one `request.completed` line per request (DEBUG for `/health*`), and one `chat.completed` line per chat with `pipeline`, `prompt_version`, `model`, `tokens_in`, `tokens_out`, `latency_ms`, `cost_usd`, `stop_reason`, `sources` (count) and `citations` (count). Message, context and source text are never logged.
 - There is one `embedding.completed` line per embeddings call with `pipeline` (`embeddings`), `model`, `input_type`, `count`, `tokens_in`, `latency_ms` and `cost_usd`. The texts are never logged. A failed OpenAI call logs `embedding.call_failed` (`provider`, `model`, `status_code`, `error_type`), and a bad reply logs `embedding.output_invalid`.
+- There is one `transcription.completed` line per transcription with `pipeline` (`transcription`), `model`, `language`, `duration_seconds`, `audio_bytes`, `text_chars`, `latency_ms` and `cost_usd` (`duration × ELMANHG_AI_TRANSCRIPTION_USD_PER_MINUTE / 60`). The transcript is never logged. A failed Whisper call logs `transcription.call_failed`, and a bad reply logs `transcription.output_invalid`.
 - `service.started` also records `embedding_provider` and `embedding_model`.
 
 ## Run locally
@@ -244,6 +280,14 @@ Staging and production: the `ai` compose profile in `deploy/docker-compose.prod.
 - Threshold: a pass rate of at least 0.85 (19 of 22), and every `safety` case passes.
 - Fake-mode tests cover the loader, scorers, scoring and threshold. The live run is `ELMANHG_AI_LLM_PROVIDER=anthropic ELMANHG_AI_ANTHROPIC_API_KEY=… ELMANHG_AI_SERVICE_TOKEN=… uv run pytest -m eval`; without those variables the test skips with that reason. Record the score whenever the prompt, model or pipeline changes.
 
+### Evaluate transcription (Egyptian dialect)
+
+- The scorer is `src/elmanhg_ai/eval/transcription.py`: word error rate (word-level Levenshtein distance ÷ reference words) after normalisation (NFKC, case folding, tashkeel and tatweel removed, أ/إ/آ → ا, ى → ي, ة → ه, punctuation removed).
+- Threshold: a mean WER of at most 0.35 over the clips.
+- Dataset: `ai/tests/fixtures/transcription/eval/manifest.jsonl`, one line per clip, `{"audio": "clip01.webm", "contentType": "audio/webm", "durationSeconds": 12, "reference": "…"}`, with the audio files beside it. At least 20 clips of real teachers speaking Egyptian Arabic about lessons, with hand-written reference transcripts.
+- Run: `ELMANHG_AI_OPENAI_API_KEY=… uv run pytest -m eval tests/eval/test_eval_transcription.py`. The test skips with a reason when the manifest or the key is missing; the assertion message lists the WER of every clip.
+- **Pending:** the clips have not been recorded yet, so PRD §19 Q6 stays open until the first run.
+
 ## Go live with Claude
 
 1. Set `ELMANHG_AI_LLM_PROVIDER=anthropic` and `ELMANHG_AI_ANTHROPIC_API_KEY`.
@@ -259,3 +303,11 @@ Staging and production: the `ai` compose profile in `deploy/docker-compose.prod.
 3. Set the API to `AiService__Provider=Http` (the same switch as chat), restart both, and check `/health/ready`.
 4. As an admin, call `POST /api/content-index/rebuild`. The index sweep then re-embeds every Published lesson with the new model; until a lesson is re-embedded, its search returns no matches, because chunks of the old model are never compared with a query of the new one.
 5. Confirm that `embedding.completed` shows the OpenAI model and real token counts, then run a search from Postman (`ContentRetrieval` folder).
+
+## Go live with Whisper
+
+1. Set `ELMANHG_AI_TRANSCRIPTION_PROVIDER=openai` and `ELMANHG_AI_OPENAI_API_KEY` (the same key as embeddings).
+2. Confirm `ELMANHG_AI_TRANSCRIPTION_MODEL` and `ELMANHG_AI_TRANSCRIPTION_USD_PER_MINUTE` against OpenAI's current list.
+3. Set the API to `AiService__Provider=Http` (the same switch as chat), keep `AskTeacher__TranscriptionSweepEnabled=true`, restart both, and check `/health/ready`.
+4. As a teacher, record a short voice reply on a claimed thread, and confirm that the draft turns `Ready` and `transcription.completed` shows the Whisper model and cost.
+5. Run the Egyptian-dialect eval (see Evaluate transcription) once the clips exist, and record the score.
