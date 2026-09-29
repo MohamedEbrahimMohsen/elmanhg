@@ -1,4 +1,4 @@
-# Recording and alert rules for the 99.5 % SLO, uptime, background jobs and provider errors (docs/observability.md, Alerts).
+# Recording and alert rules for the 99.5 % SLO, hot-path latency, uptime, background jobs and provider errors (docs/observability.md, Alerts).
 # Counter alerts count increase() for series older than the window plus the whole value of series born inside it:
 # OTel SDKs export a new series at its first value (1, never 0), and increase() alone reads that first event as 0.
 groups:
@@ -115,6 +115,18 @@ groups:
           severity: warning
         annotations:
           summary: 'A payment notification was flagged for review in the last hour.'
+          runbook: docs/observability.md#alerts
+  - name: elmanhg-latency
+    rules:
+      - record: elmanhg:api_route_latency_p95:rate15m
+        expr: histogram_quantile(0.95, sum by (le, http_route) (rate(http_server_request_duration_seconds_bucket{job="elmanhg-api",http_route=~"/?api/(sessions|exams|browse)/.*"}[15m])))
+      - alert: ApiHotPathSlow
+        expr: 'elmanhg:api_route_latency_p95:rate15m > 1 and on (http_route) sum by (http_route) (rate(http_server_request_duration_seconds_count{job="elmanhg-api",http_route=~"/?api/(sessions|exams|browse)/.*"}[15m])) > 0.05'
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'API route {{ $labels.http_route }} p95 is above 1 s for 15 minutes (budgets in docs/performance.md).'
           runbook: docs/observability.md#alerts
   - name: elmanhg-ask-teacher
     rules:

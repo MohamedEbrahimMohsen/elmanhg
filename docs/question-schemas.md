@@ -198,6 +198,7 @@ A non-integer `maxWords`, criterion `points` or level `points` does not read as 
 - `GET /api/questions/servable-count` is anonymous and returns `{"count": n}`, the platform-wide total shown on the landing page. It is cached in `IMemoryCache` under `questions:servable-count`.
 - The cache entry is removed on every event that can change the total: `LessonPublished`, `LessonUnpublished`, `LessonArchived`, `QuestionApproved`, `QuestionRejected`, `QuestionReturnedToPending` (a content edit on an Approved question) and `QuestionRetired`. Creating, importing, metadata-only edits and resubmitting (Rejected → Pending) cannot change the total and do not invalidate.
 - The entry also expires after `Content:ServableCountCacheSeconds` (default 60). Domain events are published before the transaction commits, so a read that lands between the invalidation and the commit can re-cache the old value; the expiry bounds that staleness.
+- The response carries `Cache-Control: public, max-age=<Content:ServableCountCacheSeconds>`, so browsers and shared caches may also keep a count for up to that window after an invalidation ([docs/performance.md](performance.md) §4).
 
 ## Answer shapes
 

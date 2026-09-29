@@ -1384,6 +1384,8 @@ namespace Elmanhg.Infrastructure.Migrations
 
                     b.HasIndex("StudentId", "QuestionId", "CreatedAt");
 
+                    b.HasIndex(new[] { "StudentId", "CreatedAt" }, "IX_Attempts_StudentId_CreatedAt");
+
                     b.ToTable("Attempts");
                 });
 

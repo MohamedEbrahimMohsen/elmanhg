@@ -34,6 +34,18 @@ public sealed class ServableQuestionCountEndpointTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task Get_Anonymous_ReturnsPublicCacheControlOfTheCacheTtl()
+    {
+        using var anonymous = factory.CreateClient();
+
+        using var response = await anonymous.GetAsync(Route, TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Headers.CacheControl!.Public.Should().BeTrue();
+        response.Headers.CacheControl.MaxAge.Should().Be(TimeSpan.FromSeconds(60));
+    }
+
+    [Fact]
     public async Task Get_AfterLessonPublished_CountsItsApprovedQuestions()
     {
         var cancellationToken = TestContext.Current.CancellationToken;

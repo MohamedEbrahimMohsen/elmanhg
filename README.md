@@ -18,6 +18,7 @@ Arabic-first exam-prep platform for Egyptian Thanaweya Amma students. Students d
 | [docs/content-retrieval.md](docs/content-retrieval.md) | Lesson content retrieval: chunking, re-indexing, search, rebuild |
 | [docs/avatar.md](docs/avatar.md) | AI Avatar: entry points, context bundles, exam refusal, quota, citations, eval |
 | [docs/deployment.md](docs/deployment.md) | Hosting, environments, config and secrets, deploys, migrations, backups |
+| [docs/performance.md](docs/performance.md) | Performance targets, budgets, load tests, query plans |
 
 ## Folders
 

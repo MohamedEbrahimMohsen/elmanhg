@@ -8,7 +8,8 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/perf/compressCli.ts",
+    "perf:budget": "node scripts/perf/budgetCli.ts",
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "lint": "eslint . --max-warnings=0",
@@ -81,6 +82,11 @@
     "vite": "8.3.1",
     "vitest": "4.1.11",
     "vitest-axe": "0.1.0"
+  },
+  "overrides": {
+    "@scalar/json-magic": {
+      "undici": "7.29.1"
+    }
   },
   "sideEffects": [
     "**/*.css"

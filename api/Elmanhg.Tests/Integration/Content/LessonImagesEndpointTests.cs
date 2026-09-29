@@ -34,6 +34,25 @@ public sealed class LessonImagesEndpointTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task Get_UploadedImage_IsCachedAsImmutable()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var (_, lessonId) = await SeedLessonAsync();
+        using var admin = await AdminClientAsync();
+        using var form = ImageForm("diagram.png", "image/png");
+        using var uploaded = await admin.PostAsync(Route(lessonId), form, cancellationToken);
+        var url = (await uploaded.Content.ReadFromJsonAsync<JsonElement>(cancellationToken)).GetProperty("url").GetString();
+
+        using var served = await admin.GetAsync(url, cancellationToken);
+
+        served.StatusCode.Should().Be(HttpStatusCode.OK);
+        var cacheControl = served.Headers.CacheControl!;
+        cacheControl.Public.Should().BeTrue();
+        cacheControl.MaxAge.Should().Be(TimeSpan.FromSeconds(31536000));
+        cacheControl.Extensions.Should().ContainSingle(x => x.Name == "immutable");
+    }
+
+    [Fact]
     public async Task Post_SvgFile_Returns422LessonImageTypeInvalid()
     {
         var (_, lessonId) = await SeedLessonAsync();

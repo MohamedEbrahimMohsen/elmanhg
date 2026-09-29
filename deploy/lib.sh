@@ -17,6 +17,15 @@ fail() {
   exit 1
 }
 
+set_env() {
+  local file=$1 key=$2 value=$3
+  if grep -q "^$key=" "$file"; then
+    sed -i "s|^$key=.*|$key=$value|" "$file"
+  else
+    printf '%s=%s\n' "$key" "$value" >> "$file"
+  fi
+}
+
 wait_healthy() {
   local service=$1 timeout=${2:-180} waited=0 id status
   id=$(compose ps -q "$service")

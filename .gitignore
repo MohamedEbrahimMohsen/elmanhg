@@ -47,6 +47,8 @@ ai/requirements-audit.txt
 /deploy/ai.env
 /deploy/backups/
 /deploy/.smoke/
+/deploy/.loadtest/
+/deploy/.loadtest-results/
 .claude/pipeline.local.yml
 
 # IDE
