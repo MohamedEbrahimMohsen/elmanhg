@@ -69,4 +69,25 @@ describe('ValidationQuestionPage math with steps', () => {
     expect(await preview.findByRole('group', { name: 'Your solution' })).toBeInTheDocument();
     expect(preview.getByRole('group', { name: 'Final answer' })).toBeInTheDocument();
   });
+
+  it('shows the model solution and steps weight to the teacher', async () => {
+    server.use(
+      getGetValidationQuestionMockHandler({
+        ...math,
+        gradingSpec: {
+          acceptedAnswers: ['(x+1)^2'],
+          form: 'factored',
+          modelSolution: ['x^2 + 2x + 1'],
+          stepsWeight: 50,
+        },
+      }),
+    );
+    const rendered = renderApp(`/teacher/q/${questionId}`, { session: testSessions.teacher });
+    await rendered.router.loadRouteChunk(rendered.router.routesById['/teacher/q/$questionId']);
+
+    const rules = within(await screen.findByRole('region', { name: 'Final answer check' }));
+    expect(rules.getByRole('heading', { name: 'Model solution' })).toBeInTheDocument();
+    expect(rules.getByRole('group', { name: 'Step 1' })).toBeInTheDocument();
+    expect(rules.getByText('Steps weight: 50%')).toBeInTheDocument();
+  });
 });

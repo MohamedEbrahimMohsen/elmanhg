@@ -18,6 +18,8 @@ public static class MathStepsAnswerRules
         return QuestionSchemaReader.Serialize(new MathStepsAnswer(steps, (math.FinalAnswer ?? string.Empty).Trim()));
     }
 
+    public static bool HasFinalAnswer(JsonElement answer) => !string.IsNullOrWhiteSpace(QuestionSchemaReader.Read<MathStepsAnswer>(answer).FinalAnswer);
+
     public static bool ExceedsLimits(JsonElement answer, SessionsOptions options)
     {
         var math = QuestionSchemaReader.Read<MathStepsAnswer>(answer);

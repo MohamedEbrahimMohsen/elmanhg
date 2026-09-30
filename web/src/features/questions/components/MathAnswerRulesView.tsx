@@ -7,11 +7,20 @@ export interface MathAnswerRulesViewProps {
   form: QuestionValues['mathForm'];
   tolerance: string;
   toleranceMode: QuestionValues['mathToleranceMode'];
+  solution: QuestionValues['mathSolution'];
+  stepsWeight: string;
 }
 
 const cardClassName = 'flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5';
 
-export function MathAnswerRulesView({ answers, form, tolerance, toleranceMode }: MathAnswerRulesViewProps) {
+export function MathAnswerRulesView({
+  answers,
+  form,
+  tolerance,
+  toleranceMode,
+  solution,
+  stepsWeight,
+}: MathAnswerRulesViewProps) {
   const { t } = useTranslation('questions');
   const trimmed = tolerance.trim();
 
@@ -40,6 +49,26 @@ export function MathAnswerRulesView({ answers, form, tolerance, toleranceMode }:
           )}
         </p>
       )}
+      <p>
+        {Number(stepsWeight) > 0
+          ? t('validation.detail.mathStepsWeight', { weight: stepsWeight })
+          : t('validation.detail.mathFinalOnly')}
+      </p>
+      {solution.length > 0 ? (
+        <>
+          <h3 className="text-body font-semibold">{t('validation.detail.mathSolution')}</h3>
+          <ol className="flex flex-col gap-2">
+            {solution.map((step, index) => {
+              const number = index + 1;
+              return (
+                <li key={`step-${String(number)}`}>
+                  <MathPreview latex={step.latex} label={t('editor.math.solutionStep', { number })} />
+                </li>
+              );
+            })}
+          </ol>
+        </>
+      ) : null}
     </section>
   );
 }

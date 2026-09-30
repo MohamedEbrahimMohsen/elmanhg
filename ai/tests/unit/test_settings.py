@@ -177,3 +177,19 @@ def test_settings_essay_grading_timeout_above_300_raises_validation_error() -> N
         Settings(service_token=SecretStr(VALID_TOKEN), essay_grading_timeout_seconds=301)
 
     assert error.value.errors()[0]["loc"] == ("essay_grading_timeout_seconds",)
+
+
+def test_settings_math_step_grading_defaults() -> None:
+    settings = Settings(service_token=SecretStr(VALID_TOKEN))
+
+    assert settings.math_step_grading_model == "claude-sonnet-5"
+    assert settings.math_step_grading_prompt_version == "v1"
+    assert settings.math_step_grading_max_tokens == 2048
+    assert settings.math_step_grading_timeout_seconds == 45.0
+    assert (settings.math_step_grading_max_steps, settings.math_step_grading_max_step_chars) == (
+        20,
+        500,
+    )
+    assert settings.math_step_grading_max_accepted_answers == 20
+    assert settings.math_step_grading_max_field_chars == 20000
+    assert settings.math_step_grading_max_objectives == 20

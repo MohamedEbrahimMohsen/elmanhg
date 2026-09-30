@@ -5,6 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { EssayGradeDetailResult } from './essayGradeDetailResult';
+import type { MathStepGradeDetailResult } from './mathStepGradeDetailResult';
 
 export interface QuestionGradeResult {
   /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
@@ -17,4 +18,5 @@ export interface QuestionGradeResult {
   /** @nullable */
   feedback: string | null;
   essay?: null | EssayGradeDetailResult;
+  mathSteps?: null | MathStepGradeDetailResult;
 }

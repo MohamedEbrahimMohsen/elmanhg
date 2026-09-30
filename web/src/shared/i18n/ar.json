@@ -301,7 +301,12 @@
     "QUESTION_MATH_FORM_INVALID": "اختر صورة مطلوبة صحيحة.",
     "QUESTION_MATH_TOLERANCE_INVALID": "اكتب هامش خطا صفرا او اكثر مع قيمة مطلقة او نسبة مئوية، او اتركهما فارغين.",
     "QUESTION_MATH_TOLERANCE_FORM_CONFLICT": "هامش الخطا يعمل مع قاعدة اي صورة مكافئة فقط.",
-    "MATH_CHECK_UNAVAILABLE": "تعذر تصحيح الاجابة النهائية الان. حاول مرة اخرى بعد قليل."
+    "MATH_CHECK_UNAVAILABLE": "تعذر تصحيح الاجابة النهائية الان. حاول مرة اخرى بعد قليل.",
+    "QUESTION_MATH_MODEL_SOLUTION_INVALID": "اكتب خطوات الحل النموذجي بحيث لا تكون أي خطوة فارغة أو طويلة جدًا، وبما لا يتجاوز الحد المسموح.",
+    "QUESTION_MATH_MODEL_SOLUTION_REQUIRED": "أضف خطوة واحدة على الأقل للحل النموذجي عندما يكون وزن الخطوات أكبر من صفر.",
+    "QUESTION_MATH_STEPS_WEIGHT_INVALID": "وزن الخطوات عدد صحيح من 0 إلى 100.",
+    "MATH_STEP_GRADING_UNAVAILABLE": "مصحح خطوات الحل غير متاح الآن. حاول مرة أخرى بعد قليل.",
+    "MATH_STEP_GRADE_NOT_FOUND": "لا يوجد تصحيح لخطوات هذه الإجابة."
   },
   "error": {
     "title": "حدث خطأ"

@@ -12,3 +12,6 @@ export { EssayReviewItem } from './components/EssayReviewItem';
 export { essayAnswerText, hasPendingEssay, isWrittenEssay } from './api/essayItem';
 export { countAwaitingReview } from './api/pendingGrades';
 export { ProvisionalScoreNotes } from './components/ProvisionalScoreNotes';
+export { MathStepsReviewItem } from './components/MathStepsReviewItem';
+export { MathStepGradeStatus } from './components/MathStepGradeStatus';
+export { isPendingMathSteps, hasPendingMathSteps } from './api/mathStepsItem';

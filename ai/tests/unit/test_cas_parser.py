@@ -23,6 +23,7 @@ LIMITS: Final = CasLimits(
     max_number_digits=30,
     max_exponent=1000,
     max_magnitude=10000,
+    max_expansion_terms=500,
 )
 X: Final = sympy.Symbol("x")
 TOWER: Final = "((9^{999})^{999})^{999}"
@@ -107,7 +108,7 @@ def test_parse_power_tower_raises() -> None:
         "((9^{999})^{999})^{999}",
         "(9^{999})^{999}",
         r"(2^{999}\cdot 3)^{999}",
-        "((x+1)^{999})^{999}",
+        "((x+1)^{400})^{999}",
         r"\sqrt[0.001]{\sqrt[0.001]{\sqrt[0.001]{9}}}",
         r"\sqrt[\frac{1}{999}]{\sqrt[\frac{1}{999}]{\sqrt[\frac{1}{999}]{9}}}",
         r"\sqrt[0.001]{9^{999}}",
@@ -141,6 +142,42 @@ def test_evaluate_compounded_power_is_unreadable_without_evaluation() -> None:
     started = time.perf_counter()
 
     outcome = evaluate(CasRequest(TOWER, ("1",), AnswerForm.EQUIVALENT, None, LIMITS))
+
+    assert outcome.verdict == Verdict.UNREADABLE
+    assert time.perf_counter() - started < 1.0
+
+
+def test_parse_symbolic_expansion_blowup_raises() -> None:
+    with pytest.raises(MathParseError, match="expansion too large"):
+        parse_answer("(x+y+z+w)^{999}", LIMITS)
+
+
+def test_parse_product_of_large_expansions_raises() -> None:
+    with pytest.raises(MathParseError, match="expansion too large"):
+        parse_answer("(x+y+z)^{30}(x+y+z)^{30}", LIMITS)
+
+
+@pytest.mark.parametrize(
+    "text",
+    ["x=(x+y+z)^{90}", "x=(x+y+z+w)^{20}", "(a+b+c+d+e)^{9}"],
+    ids=["cubic", "quartic", "quintic"],
+)
+def test_parse_expansion_past_the_timeout_budget_raises(text: str) -> None:
+    with pytest.raises(MathParseError, match="expansion too large"):
+        parse_answer(text, LIMITS)
+
+
+@pytest.mark.parametrize(
+    "text", ["(x+1)^{10}", "(a+b)^{100}", "(x+1)^2(x+2)^3"], ids=["tenth", "hundredth", "product"]
+)
+def test_parse_modest_expansion_accepted(text: str) -> None:
+    assert len(parse_answer(text, LIMITS)) == 1
+
+
+def test_evaluate_expansion_blowup_is_unreadable_without_evaluation() -> None:
+    started = time.perf_counter()
+
+    outcome = evaluate(CasRequest("(x+y+z+w)^{999}", ("1",), AnswerForm.EQUIVALENT, None, LIMITS))
 
     assert outcome.verdict == Verdict.UNREADABLE
     assert time.perf_counter() - started < 1.0

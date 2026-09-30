@@ -157,7 +157,11 @@
       "modelAnswersCount": "Add at least one model answer.",
       "mathAnswersCount": "Add at least one accepted answer.",
       "mathAnswerLength": "An answer can be at most 200 characters.",
-      "mathToleranceForm": "A tolerance works only with “Any equivalent form”."
+      "mathToleranceForm": "A tolerance works only with “Any equivalent form”.",
+      "mathStepsWeight": "The steps weight is a whole number from 0 to 100.",
+      "mathSolutionCount": "At most 20 steps.",
+      "mathSolutionStepLength": "A step is longer than 500 characters.",
+      "mathSolutionRequired": "Add at least one model solution step."
     },
     "essay": {
       "maxWords": "Word limit (optional)",
@@ -199,7 +203,15 @@
       "tolerance": "Numeric tolerance (optional)",
       "toleranceHint": "Accepts a numeric answer this close. Works only with “Any equivalent form”.",
       "toleranceMode": "Tolerance type",
-      "stepsNote": "The student's steps are saved with the answer and graded later."
+      "stepsNote": "When the steps weight is above 0, the AI grader marks the student's steps against the model solution.",
+      "solutionLegend": "Model solution",
+      "solutionHint": "Write the solution steps in order, in LaTeX. The AI grader compares the student's steps with them.",
+      "solutionStep": "Step {number}",
+      "solutionStepPreview": "Preview of step {number}",
+      "addSolutionStep": "Add step",
+      "removeSolutionStep": "Remove step {number}",
+      "stepsWeight": "Steps weight (%)",
+      "stepsWeightHint": "0 grades the final answer only. A higher value gives this share of the score to the solution steps."
     }
   },
   "preview": {
@@ -218,6 +230,18 @@
       "justification": "AI justification",
       "confidence": "Confidence: {confidence}%",
       "model": "Model {model} · prompt {promptVersion}"
+    },
+    "mathStepsGradingHint": "\"Try the answer\" sends the steps to the AI grader. It can take up to a minute.",
+    "mathStepsGrading": "The AI grader is marking the steps…",
+    "mathSteps": {
+      "verdict": "Final answer: {verdict}",
+      "verdicts": {
+        "Equivalent": "correct",
+        "NotEquivalent": "incorrect",
+        "WrongForm": "not in the required form",
+        "Unreadable": "unreadable",
+        "Unchecked": "not checked"
+      }
     }
   },
   "essayGrade": {
@@ -350,7 +374,10 @@
       "mathAccepted": "Accepted answers",
       "mathForm": "Required form: {form}",
       "mathTolerance": "Tolerance: ±{tolerance}",
-      "mathTolerancePercent": "Tolerance: ±{tolerance}%"
+      "mathTolerancePercent": "Tolerance: ±{tolerance}%",
+      "mathSolution": "Model solution",
+      "mathStepsWeight": "Steps weight: {weight}%",
+      "mathFinalOnly": "Only the final answer is graded."
     },
     "decision": {
       "title": "Decision",
@@ -378,5 +405,10 @@
       "noActor": "—",
       "difficultyChanged": "Difficulty changed from {from} to {to}"
     }
+  },
+  "mathStepGrade": {
+    "steps": "Marks per step",
+    "step": "Step {number}",
+    "stepPoints": "{points} / {maxPoints}"
   }
 }

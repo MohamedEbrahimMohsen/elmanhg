@@ -16,6 +16,31 @@ describe('mathStepsValues', () => {
       mathForm: 'factored',
       mathTolerance: '0.01',
       mathToleranceMode: 'absolute',
+      mathSolution: [],
+      mathStepsWeight: '0',
+    });
+  });
+
+  it('reads a model solution and weight', () => {
+    const values = readMathSteps({ acceptedAnswers: ['x = 2'], modelSolution: ['2x = 4', 'x = 2'], stepsWeight: 40 });
+
+    expect(values.mathSolution).toEqual([{ latex: '2x = 4' }, { latex: 'x = 2' }]);
+    expect(values.mathStepsWeight).toBe('40');
+  });
+
+  it('writes a model solution and weight when set', () => {
+    const values = {
+      ...emptyQuestionValues('MathSteps'),
+      mathAnswers: [{ latex: 'x = 2' }],
+      mathSolution: [{ latex: ' 2x = 4 ' }, { latex: 'x = 2' }],
+      mathStepsWeight: '50',
+    };
+
+    expect(toMathStepsContent(values).gradingSpec).toEqual({
+      acceptedAnswers: ['x = 2'],
+      form: 'equivalent',
+      modelSolution: ['2x = 4', 'x = 2'],
+      stepsWeight: 50,
     });
   });
 

@@ -9,7 +9,7 @@ public partial class Session
 
     public List<Attempt> SubmitExam(IReadOnlyDictionary<Guid, QuestionGrade> grades, DateTimeOffset now) => SubmitExam(grades, new HashSet<Guid>(), now);
 
-    public List<Attempt> SubmitExam(IReadOnlyDictionary<Guid, QuestionGrade> grades, IReadOnlySet<Guid> essayQuestionIds, DateTimeOffset now)
+    public List<Attempt> SubmitExam(IReadOnlyDictionary<Guid, QuestionGrade> grades, IReadOnlySet<Guid> deferredQuestionIds, DateTimeOffset now)
     {
         if (!IsExam)
         {
@@ -22,7 +22,7 @@ public partial class Session
         }
 
         var answered = Items
-            .Where(x => x.SavedAnswer is not null && !essayQuestionIds.Contains(x.QuestionId))
+            .Where(x => x.SavedAnswer is not null && !deferredQuestionIds.Contains(x.QuestionId))
             .OrderBy(x => x.Position)
             .ToList();
         if (answered.Any(x => !grades.ContainsKey(x.QuestionId)))

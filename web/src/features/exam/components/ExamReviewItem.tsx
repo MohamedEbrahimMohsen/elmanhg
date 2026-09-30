@@ -9,7 +9,9 @@ import {
   CorrectAnswer,
   describeCorrectAnswer,
   EssayReviewItem,
+  isPendingMathSteps,
   isWrittenEssay,
+  MathStepsReviewItem,
   QuizReviewItem,
   toQuizQuestion,
 } from '@/features/quiz';
@@ -36,6 +38,18 @@ export function ExamReviewItem({ item, sessionId }: ExamReviewItemProps) {
   if (isWrittenEssay(item)) {
     return (
       <EssayReviewItem
+        sessionId={sessionId}
+        item={item}
+        onGraded={() => {
+          void queryClient.invalidateQueries({ queryKey: getGetExamSessionQueryKey(sessionId) });
+          void invalidateExamViews(queryClient);
+        }}
+      />
+    );
+  }
+  if (isPendingMathSteps(item)) {
+    return (
+      <MathStepsReviewItem
         sessionId={sessionId}
         item={item}
         onGraded={() => {

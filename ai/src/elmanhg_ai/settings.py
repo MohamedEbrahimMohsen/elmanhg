@@ -38,6 +38,15 @@ class Settings(BaseSettings):
     essay_grading_max_criteria: int = Field(default=10, ge=1, le=50)
     essay_grading_max_model_answers: int = Field(default=3, ge=1, le=10)
     essay_grading_max_objectives: int = Field(default=20, ge=0, le=100)
+    math_step_grading_model: str = Field(default="claude-sonnet-5", min_length=1)
+    math_step_grading_prompt_version: str = Field(default="v1", pattern=r"^v[0-9]+$")
+    math_step_grading_max_tokens: int = Field(default=2048, ge=1, le=8192)
+    math_step_grading_timeout_seconds: float = Field(default=45.0, gt=0, le=300)
+    math_step_grading_max_steps: int = Field(default=20, ge=1, le=100)
+    math_step_grading_max_step_chars: int = Field(default=500, ge=1, le=5000)
+    math_step_grading_max_accepted_answers: int = Field(default=20, ge=1, le=100)
+    math_step_grading_max_field_chars: int = Field(default=20000, ge=1)
+    math_step_grading_max_objectives: int = Field(default=20, ge=0, le=100)
     model_timeout_seconds: float = Field(default=20.0, gt=0, le=120)
     model_max_retries: int = Field(default=1, ge=0, le=5)
     model_input_usd_per_million_tokens: Decimal = Field(default=Decimal("3"), ge=0)
@@ -75,6 +84,8 @@ class Settings(BaseSettings):
     cas_max_number_digits: int = Field(default=30, ge=1, le=1000)
     cas_max_exponent: int = Field(default=1000, ge=1, le=100000)
     cas_max_magnitude: int = Field(default=10000, ge=10, le=1000000)
+    cas_max_expansion_terms: int = Field(default=500, ge=10, le=1_000_000)
+    cas_warm_on_start: bool = True
 
     @field_validator("service_token")
     @classmethod

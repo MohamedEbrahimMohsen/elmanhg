@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { invalidateMastery } from '@/features/mastery';
 import { clearMathDraft, type MathDraftOwner } from '@/features/mathSteps';
 import { emptyAnswer, toAnswerPayload, type QuestionAnswer, type StudentQuestion } from '@/features/questions';
 import type { PaywallReason } from '@/features/subscription';
 import type { SessionItemResult } from '@/shared/api/generated/model';
+import { getGetSessionQueryKey } from '@/shared/api/generated/sessions/sessions';
 import { isAnswerEmpty } from '../api/quizItem';
 import { useQuizSubmit } from './useQuizSubmit';
 
@@ -14,6 +17,7 @@ export interface QuizAnswerState {
   showRequired: boolean;
   paywall: PaywallReason | null;
   closePaywall: () => void;
+  refreshSession: () => void;
 }
 
 export function useQuizAnswer(
@@ -22,11 +26,12 @@ export function useQuizAnswer(
   question: StudentQuestion,
   draftOwner?: MathDraftOwner,
 ): QuizAnswerState {
+  const queryClient = useQueryClient();
   const [answer, setAnswerState] = useState(emptyAnswer);
   const [shownAt] = useState(() => Date.now());
   const [showRequired, setShowRequired] = useState(false);
   const submitter = useQuizSubmit(sessionId);
-  const isRecorded = item.attempt !== null;
+  const isRecorded = item.attempt !== null || item.pendingAnswer !== null;
   const mathOwner = question.type === 'MathSteps' ? draftOwner : undefined;
 
   useEffect(() => {
@@ -56,5 +61,9 @@ export function useQuizAnswer(
     showRequired,
     paywall: submitter.paywall,
     closePaywall: submitter.closePaywall,
+    refreshSession: () => {
+      void queryClient.invalidateQueries({ queryKey: getGetSessionQueryKey(sessionId) });
+      void invalidateMastery(queryClient);
+    },
   };
 }

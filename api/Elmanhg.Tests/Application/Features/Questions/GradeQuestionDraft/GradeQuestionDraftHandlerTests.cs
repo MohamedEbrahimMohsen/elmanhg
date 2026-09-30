@@ -36,7 +36,7 @@ public sealed class GradeQuestionDraftHandlerTests
     public GradeQuestionDraftHandlerTests()
     {
         _richTextSanitizer.Sanitize(Arg.Any<string?>()).Returns(x => x.Arg<string?>() ?? string.Empty);
-        _handler = new GradeQuestionDraftHandler(_richTextSanitizer, new RichTextExtractor(), _lessonRepository, _unitRepository, _subjectRepository, _essayGradingClient, Options.Create(new EssayGradingOptions()), _localizer, _mathCheckClient, Options.Create(new SessionsOptions()));
+        _handler = new GradeQuestionDraftHandler(_richTextSanitizer, new RichTextExtractor(), _lessonRepository, _unitRepository, _subjectRepository, _essayGradingClient, Options.Create(new EssayGradingOptions()), _localizer, _mathCheckClient, Options.Create(new SessionsOptions()), Substitute.For<IAiMathStepGradingClient>(), Options.Create(new MathStepGradingOptions()));
     }
 
     [Fact]

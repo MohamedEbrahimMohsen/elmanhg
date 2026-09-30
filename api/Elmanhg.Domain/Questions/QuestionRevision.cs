@@ -30,6 +30,12 @@ public class QuestionRevision : Entity
         return QuestionGrader.GradeEssay(snapshot.GradingSpec?.ToJsonString() ?? "{}", snapshot.MaxScore, awards);
     }
 
+    public QuestionGrade GradeMathSteps(MathAnswerVerdict verdict, IReadOnlyList<MathStepAward>? awards)
+    {
+        var snapshot = ReadSnapshot();
+        return QuestionGrader.GradeMathStepsCombined(snapshot.GradingSpec?.ToJsonString() ?? "{}", snapshot.MaxScore, verdict, awards);
+    }
+
     internal static QuestionRevision Create(Question question, Guid editedBy)
     {
         var snapshot = new QuestionRevisionSnapshot(question.Type, question.Stem, JsonNode.Parse(question.Body), JsonNode.Parse(question.GradingSpec), question.Explanation, question.MaxScore);
