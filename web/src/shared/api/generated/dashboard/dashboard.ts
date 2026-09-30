@@ -36,6 +36,8 @@ import type {
   GetDashboardSubscribersParams,
   GetDashboardSuccessRateParams,
   GetDashboardValidationParams,
+  GetMyTeacherStatsParams,
+  MyTeacherStatsResult,
   PaymentMetricsResult,
   SolveRateMetricsResult,
   StudentMetricsResult,
@@ -1432,6 +1434,159 @@ export function useGetDashboardFunnelSuspense<TData = Awaited<ReturnType<typeof 
  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetDashboardFunnelSuspenseQueryOptions(params,options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetMyTeacherStatsUrl = (params?: GetMyTeacherStatsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/dashboard/my-stats?${stringifiedParams}` : `/api/dashboard/my-stats`
+}
+
+export const getMyTeacherStats = async (params?: GetMyTeacherStatsParams, options?: Parameters<typeof http>[1]): Promise<MyTeacherStatsResult> => {
+
+  return http<MyTeacherStatsResult>(getGetMyTeacherStatsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyTeacherStatsQueryKey = (params?: GetMyTeacherStatsParams,) => {
+    return [
+    `/api/dashboard/my-stats`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetMyTeacherStatsQueryOptions = <TData = Awaited<ReturnType<typeof getMyTeacherStats>>, TError = unknown>(params?: GetMyTeacherStatsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeacherStats>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyTeacherStatsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyTeacherStats>>> = ({ signal }) => getMyTeacherStats(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyTeacherStats>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMyTeacherStatsQueryResult = NonNullable<Awaited<ReturnType<typeof getMyTeacherStats>>>
+export type GetMyTeacherStatsQueryError = unknown
+
+
+export function useGetMyTeacherStats<TData = Awaited<ReturnType<typeof getMyTeacherStats>>, TError = unknown>(
+ params: undefined |  GetMyTeacherStatsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeacherStats>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyTeacherStats>>,
+          TError,
+          Awaited<ReturnType<typeof getMyTeacherStats>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyTeacherStats<TData = Awaited<ReturnType<typeof getMyTeacherStats>>, TError = unknown>(
+ params?: GetMyTeacherStatsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeacherStats>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyTeacherStats>>,
+          TError,
+          Awaited<ReturnType<typeof getMyTeacherStats>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyTeacherStats<TData = Awaited<ReturnType<typeof getMyTeacherStats>>, TError = unknown>(
+ params?: GetMyTeacherStatsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeacherStats>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetMyTeacherStats<TData = Awaited<ReturnType<typeof getMyTeacherStats>>, TError = unknown>(
+ params?: GetMyTeacherStatsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTeacherStats>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMyTeacherStatsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetMyTeacherStatsSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getMyTeacherStats>>, TError = unknown>(params?: GetMyTeacherStatsParams, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyTeacherStats>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyTeacherStatsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyTeacherStats>>> = ({ signal }) => getMyTeacherStats(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyTeacherStats>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetMyTeacherStatsSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getMyTeacherStats>>>
+export type GetMyTeacherStatsSuspenseQueryError = unknown
+
+
+export function useGetMyTeacherStatsSuspense<TData = Awaited<ReturnType<typeof getMyTeacherStats>>, TError = unknown>(
+ params: undefined |  GetMyTeacherStatsParams, options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyTeacherStats>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyTeacherStatsSuspense<TData = Awaited<ReturnType<typeof getMyTeacherStats>>, TError = unknown>(
+ params?: GetMyTeacherStatsParams, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyTeacherStats>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyTeacherStatsSuspense<TData = Awaited<ReturnType<typeof getMyTeacherStats>>, TError = unknown>(
+ params?: GetMyTeacherStatsParams, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyTeacherStats>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetMyTeacherStatsSuspense<TData = Awaited<ReturnType<typeof getMyTeacherStats>>, TError = unknown>(
+ params?: GetMyTeacherStatsParams, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyTeacherStats>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMyTeacherStatsSuspenseQueryOptions(params,options)
 
   const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

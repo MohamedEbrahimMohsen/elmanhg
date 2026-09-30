@@ -6,7 +6,8 @@
     "Fill": "Fill in the blank",
     "Short": "Short answer",
     "Essay": "Essay",
-    "MathSteps": "Math with steps"
+    "MathSteps": "Math with steps",
+    "DragDrop": "Drag and drop"
   },
   "statuses": {
     "Pending": "Pending review",

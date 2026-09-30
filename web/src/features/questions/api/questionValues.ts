@@ -7,6 +7,7 @@ import type {
 import type { QuestionValues } from '../schemas/questionEditorSchema';
 import { type NormalizationRule, optionIdAlphabet, toQuestionDifficulty, toQuestionType } from './questionOptions';
 import * as contentSchemas from '../schemas/questionContentSchemas';
+import { emptyDiagramImage, readDragDrop, toDragDropContent } from './dragDropValues';
 import { emptyCriterion, readEssay, toEssayContent } from './essayValues';
 import { readMathSteps, toMathStepsContent } from './mathStepsValues';
 
@@ -53,6 +54,9 @@ export function emptyQuestionValues(type: QuestionType): QuestionValues {
     mathToleranceMode: 'absolute',
     mathSolution: [],
     mathStepsWeight: '0',
+    diagramImage: emptyDiagramImage(),
+    diagramZones: [],
+    diagramItems: [{ id: 'i1', text: '' }],
   };
 }
 
@@ -128,6 +132,8 @@ function readQuestionContent(type: QuestionValues['type'], body: JsonElement, sp
       return readEssay(body, spec);
     case 'MathSteps':
       return readMathSteps(spec);
+    case 'DragDrop':
+      return readDragDrop(body, spec);
   }
 }
 
@@ -188,6 +194,8 @@ function toContent(values: QuestionValues): Pick<UpdateQuestionRequest, 'body' |
       return toEssayContent(values);
     case 'MathSteps':
       return toMathStepsContent(values);
+    case 'DragDrop':
+      return toDragDropContent(values);
   }
 }
 

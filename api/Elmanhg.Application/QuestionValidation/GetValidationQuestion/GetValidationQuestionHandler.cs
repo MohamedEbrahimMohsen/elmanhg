@@ -2,6 +2,7 @@ using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.QuestionValidation.Shared;
+using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
@@ -13,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Application.QuestionValidation.GetValidationQuestion;
 
-public sealed class GetValidationQuestionHandler(IQuestionRepository questionRepository, ITeacherSubjectRepository teacherSubjectRepository, ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IUserRepository userRepository, ICurrentUserService currentUserService) : IRequestHandler<GetValidationQuestionQuery, ValidationQuestionDetailResult>
+public sealed class GetValidationQuestionHandler(IQuestionRepository questionRepository, ITeacherSubjectRepository teacherSubjectRepository, ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IUserRepository userRepository, IFileStorage fileStorage, ICurrentUserService currentUserService) : IRequestHandler<GetValidationQuestionQuery, ValidationQuestionDetailResult>
 {
     public async Task<ValidationQuestionDetailResult> Handle(GetValidationQuestionQuery request, CancellationToken cancellationToken)
     {
@@ -49,6 +50,6 @@ public sealed class GetValidationQuestionHandler(IQuestionRepository questionRep
         var deciders = await userRepository.FindAsync(x => deciderIds.Contains(x.Id), cancellationToken, asNoTracking: true).ConfigureAwait(false);
         var deciderNames = deciders.ToDictionary(x => x.Id, x => x.DisplayName);
 
-        return ValidationResultGenerator.GenerateDetail(question, subject, unit, lesson, deciderNames);
+        return ValidationResultGenerator.GenerateDetail(question, subject, unit, lesson, deciderNames, fileStorage);
     }
 }

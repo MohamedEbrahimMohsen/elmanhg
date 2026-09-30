@@ -1,6 +1,7 @@
 using Elmanhg.Application.Dashboard.GetAskTeacherMetrics;
 using Elmanhg.Application.Dashboard.GetContentMetrics;
 using Elmanhg.Application.Dashboard.GetFunnelMetrics;
+using Elmanhg.Application.Dashboard.GetMyTeacherStats;
 using Elmanhg.Application.Dashboard.GetPaymentMetrics;
 using Elmanhg.Application.Dashboard.GetSolveRateMetrics;
 using Elmanhg.Application.Dashboard.GetStudentMetrics;
@@ -97,6 +98,15 @@ public class DashboardController(IMediator mediator) : ControllerBase
     public async Task<ActionResult> GetFunnel([FromQuery] DateOnly? from, [FromQuery] DateOnly? to, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetFunnelMetricsQuery(from, to), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("my-stats", Name = "GetMyTeacherStats")]
+    [Authorize(Policy = DefaultCodes.TeacherStatsViewOwn)]
+    [ProducesResponseType<MyTeacherStatsResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetMyTeacherStats([FromQuery] DateOnly? from, [FromQuery] DateOnly? to, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetMyTeacherStatsQuery(from, to), cancellationToken);
         return Ok(result);
     }
 }

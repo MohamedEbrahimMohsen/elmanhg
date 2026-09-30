@@ -30,6 +30,7 @@ public sealed class ResubmitQuestionHandler(IQuestionRepository questionReposito
             throw new NotFoundCoreException(ErrorCodes.LessonNotFound);
         }
 
+        QuestionBodyMedia.EnsureLessonMedia(request.Question, lesson.Id);
         var content = QuestionContentFactory.CreateContent(request.Question, richTextSanitizer);
         var metadata = QuestionContentFactory.CreateMetadata(request.Question);
         question.Resubmit(request.Question.Type.GetValueOrDefault(), content, metadata, lesson, currentUserService.UserId.Value);

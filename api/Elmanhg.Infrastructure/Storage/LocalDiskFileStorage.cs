@@ -13,8 +13,10 @@ public sealed class LocalDiskFileStorage(IOptions<FileStorageOptions> fileStorag
         await using var file = new FileStream(path, new FileStreamOptions { Mode = FileMode.CreateNew, Access = FileAccess.Write, Options = FileOptions.Asynchronous });
         await content.CopyToAsync(file, cancellationToken).ConfigureAwait(false);
 
-        return $"{fileStorageOptions.Value.PublicBaseUrl.TrimEnd('/')}/{key}";
+        return GetPublicUrl(key);
     }
+
+    public string GetPublicUrl(string key) => $"{fileStorageOptions.Value.PublicBaseUrl.TrimEnd('/')}/{key}";
 
     public Task<StoredFile?> OpenReadAsync(string key, CancellationToken cancellationToken)
     {

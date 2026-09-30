@@ -22,7 +22,7 @@ The template's Instructions sheet is written in the request language (`Accept-La
 
 ## Workbook
 
-- One sheet per v1 type, named exactly `Mcq`, `Multi`, `TrueFalse`, `Fill`, `Short` (case-insensitive). Any other sheet, including `Instructions`, is ignored. `Essay` (v2) is authored in the editor only; an `Essay` sheet is ignored. `MathSteps` (v2) is authored in the editor only.
+- One sheet per v1 type, named exactly `Mcq`, `Multi`, `TrueFalse`, `Fill`, `Short` (case-insensitive). Any other sheet, including `Instructions`, is ignored. `Essay` (v2) is authored in the editor only; an `Essay` sheet is ignored. `DragDrop` (v2) is authored in the editor only; a `DragDrop` sheet is ignored. `MathSteps` (v2) is authored in the editor only.
 - Row 1 holds the column keys below, in any order, matched trimmed and case-insensitive. An empty header cell makes its column ignored. An unknown header is reported as `QUESTION_IMPORT_COLUMN_UNKNOWN` on row 1; a repeated header as `QUESTION_IMPORT_COLUMN_DUPLICATE`. A missing column reads as empty.
 - Every row below is one question. Rows whose cells are all blank are skipped.
 - `row` in the report is the Excel row number (the header is row 1).

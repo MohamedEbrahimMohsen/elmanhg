@@ -12,6 +12,34 @@ const mcq = (overrides: Partial<QuestionValues> = {}): QuestionValues => ({
   ...overrides,
 });
 
+type Zone = QuestionValues['diagramZones'][number];
+
+const diagramZone = (overrides: Partial<Zone> = {}): Zone => ({
+  id: 'z1',
+  x: '10',
+  y: '10',
+  width: '20',
+  height: '15',
+  capacity: '1',
+  ordered: false,
+  itemIds: ['i1'],
+  ...overrides,
+});
+
+const dragDrop = (overrides: Partial<QuestionValues> = {}): QuestionValues => ({
+  ...emptyQuestionValues('DragDrop'),
+  stem: '<p>Label the plant cell.</p>',
+  diagramImage: { key: 'question-diagrams/x/y.png', url: '/api/media/x/y.png', width: 800, height: 600, alt: 'Cell' },
+  diagramZones: [diagramZone()],
+  diagramItems: [
+    { id: 'i1', text: 'Nucleus' },
+    { id: 'i2', text: 'Engine' },
+  ],
+  ...overrides,
+});
+
+const zoneIssues = (overrides: Partial<Zone>) => issues(dragDrop({ diagramZones: [diagramZone(overrides)] }));
+
 const issues = (values: QuestionValues) =>
   (questionEditorSchema.safeParse(values).error?.issues ?? []).map((issue) => ({
     path: issue.path.join('.'),
@@ -208,6 +236,90 @@ describe('questionEditorSchema', () => {
     expect(issues(essay({ modelAnswers: [{ text: '<p></p>' }] }))).toContainEqual({
       path: 'modelAnswers.0.text',
       message: 'validation.required',
+    });
+  });
+
+  it('accepts a complete drag-and-drop question', () => {
+    expect(questionEditorSchema.safeParse(dragDrop()).success).toBe(true);
+  });
+
+  it('requires a diagram image, its description, a zone and an item', () => {
+    const values = dragDrop({
+      diagramImage: { key: '', url: '', width: 0, height: 0, alt: ' ' },
+      diagramZones: [],
+      diagramItems: [],
+    });
+
+    expect(issues(values)).toEqual(
+      expect.arrayContaining([
+        { path: 'diagramImage', message: 'questionsDiagram:editor.errors.diagramImage' },
+        { path: 'diagramImage.alt', message: 'validation.required' },
+        { path: 'diagramZones', message: 'questionsDiagram:editor.errors.zonesCount' },
+        { path: 'diagramItems', message: 'questionsDiagram:editor.errors.itemsCount' },
+      ]),
+    );
+  });
+
+  it('flags a zone outside the image or below the minimum size', () => {
+    expect(zoneIssues({ x: '101' })).toContainEqual({
+      path: 'diagramZones.0.x',
+      message: 'questionsDiagram:editor.errors.zonePosition',
+    });
+    expect(zoneIssues({ width: '1' })).toContainEqual({
+      path: 'diagramZones.0.width',
+      message: 'questionsDiagram:editor.errors.zoneSize',
+    });
+    expect(zoneIssues({ x: '90', width: '20' })).toContainEqual({
+      path: 'diagramZones.0.width',
+      message: 'questionsDiagram:editor.errors.zoneSize',
+    });
+    expect(zoneIssues({ y: '1.234' })).toContainEqual({
+      path: 'diagramZones.0.y',
+      message: 'questionsDiagram:editor.errors.zonePosition',
+    });
+  });
+
+  it('flags zone capacity and more correct items than a zone holds', () => {
+    expect(zoneIssues({ capacity: '0' })).toContainEqual({
+      path: 'diagramZones.0.capacity',
+      message: 'questionsDiagram:editor.errors.zoneCapacity',
+    });
+    expect(zoneIssues({ capacity: '1', itemIds: ['i1', 'i2'] })).toContainEqual({
+      path: 'diagramZones.0.capacity',
+      message: 'questionsDiagram:editor.errors.zoneOverCapacity',
+    });
+  });
+
+  it('flags an ordered zone with fewer than two correct items', () => {
+    expect(zoneIssues({ ordered: true })).toContainEqual({
+      path: 'diagramZones.0.ordered',
+      message: 'questionsDiagram:editor.errors.zoneOrder',
+    });
+  });
+
+  it('flags overlapping zones', () => {
+    const values = dragDrop({
+      diagramZones: [diagramZone(), diagramZone({ id: 'z2', x: '25', y: '20', itemIds: [] })],
+    });
+
+    expect(issues(values)).toContainEqual({
+      path: 'diagramZones',
+      message: 'questionsDiagram:editor.errors.zonesOverlap',
+    });
+  });
+
+  it('requires a placed item and item text within the limit', () => {
+    expect(zoneIssues({ itemIds: [] })).toContainEqual({
+      path: 'diagramZones',
+      message: 'questionsDiagram:editor.errors.keyEmpty',
+    });
+    expect(issues(dragDrop({ diagramItems: [{ id: 'i1', text: '' }] }))).toContainEqual({
+      path: 'diagramItems.0.text',
+      message: 'validation.required',
+    });
+    expect(issues(dragDrop({ diagramItems: [{ id: 'i1', text: 'a'.repeat(101) }] }))).toContainEqual({
+      path: 'diagramItems.0.text',
+      message: 'questionsDiagram:editor.errors.itemText',
     });
   });
 });

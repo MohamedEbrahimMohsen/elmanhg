@@ -7,3 +7,4 @@ export { ContentListSkeleton } from './components/ContentListSkeleton';
 export { ContentEmptyState } from './components/ContentEmptyState';
 export { contentLocales } from './locales';
 export { toSafeVideoUrl } from './api/lessonValues';
+export { optimizeImage } from './api/optimizeImage';

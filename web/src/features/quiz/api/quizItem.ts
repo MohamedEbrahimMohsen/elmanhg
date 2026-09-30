@@ -59,6 +59,8 @@ export function fromAnswerPayload(question: StudentQuestion, payload: unknown): 
       return { ...answer, text: text ?? '' };
     case 'MathSteps':
       return { ...answer, math: { steps: steps ?? [], finalAnswer: finalAnswer ?? '' } };
+    case 'DragDrop':
+      return answer;
   }
 }
 
@@ -77,6 +79,8 @@ export function isAnswerEmpty(question: StudentQuestion, answer: QuestionAnswer)
       return answer.text.trim() === '';
     case 'MathSteps':
       return answer.math.finalAnswer.trim() === '';
+    case 'DragDrop':
+      return true;
   }
 }
 

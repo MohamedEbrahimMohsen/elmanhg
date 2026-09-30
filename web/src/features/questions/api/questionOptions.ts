@@ -8,6 +8,7 @@ export const questionTypes = [
   'Short',
   'Essay',
   'MathSteps',
+  'DragDrop',
 ] as const satisfies readonly QuestionType[];
 
 export const servedQuestionTypes = [
@@ -76,6 +77,24 @@ export const mathSolutionStepsMax = 20;
 export const mathSolutionStepMaxLength = 500;
 
 export const mathStepsWeightMax = 100;
+
+// mirrors Content:QuestionDiagramZonesMaxCount
+export const diagramZonesMax = 20;
+
+// mirrors Content:QuestionDiagramItemsMaxCount
+export const diagramItemsMax = 30;
+
+// mirrors Content:QuestionDiagramZoneCapacityMax
+export const diagramZoneCapacityMax = 10;
+
+// mirrors Content:QuestionDiagramZoneMinSizePercent
+export const diagramZoneMinSize = 2;
+
+// mirrors Content:QuestionDiagramItemTextMaxLength
+export const diagramItemTextMax = 100;
+
+// mirrors TeacherThreadImageFormats (diagram uploads)
+export const acceptedDiagramImageTypes = 'image/png,image/jpeg,image/webp';
 
 // mirrors Content:QuestionFilterMaxLength
 export const questionFilterMaxLength = 200;

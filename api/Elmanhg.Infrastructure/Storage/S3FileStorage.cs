@@ -21,8 +21,10 @@ public sealed class S3FileStorage(IAmazonS3 s3, IOptions<FileStorageOptions> fil
             DisablePayloadSigning = true,
         };
         await s3.PutObjectAsync(request, cancellationToken).ConfigureAwait(false);
-        return $"{options.PublicBaseUrl.TrimEnd('/')}/{key}";
+        return GetPublicUrl(key);
     }
+
+    public string GetPublicUrl(string key) => $"{fileStorageOptions.Value.PublicBaseUrl.TrimEnd('/')}/{key}";
 
     public async Task<StoredFile?> OpenReadAsync(string key, CancellationToken cancellationToken)
     {

@@ -18,7 +18,7 @@ def test_settings_cas_defaults() -> None:
     assert (settings.cas_max_tokens, settings.cas_max_depth) == (300, 30)
     assert (settings.cas_max_number_digits, settings.cas_max_exponent) == (30, 1000)
     assert settings.cas_max_magnitude == 10000
-    assert (settings.cas_max_expansion_terms, settings.cas_warm_on_start) == (5000, True)
+    assert (settings.cas_max_expansion_terms, settings.cas_warm_on_start) == (500, True)
 
 
 @pytest.mark.parametrize(

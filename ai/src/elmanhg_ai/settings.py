@@ -84,7 +84,7 @@ class Settings(BaseSettings):
     cas_max_number_digits: int = Field(default=30, ge=1, le=1000)
     cas_max_exponent: int = Field(default=1000, ge=1, le=100000)
     cas_max_magnitude: int = Field(default=10000, ge=10, le=1000000)
-    cas_max_expansion_terms: int = Field(default=5000, ge=10, le=1_000_000)
+    cas_max_expansion_terms: int = Field(default=500, ge=10, le=1_000_000)
     cas_warm_on_start: bool = True
 
     @field_validator("service_token")

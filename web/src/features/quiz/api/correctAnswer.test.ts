@@ -100,4 +100,11 @@ describe('correctAnswer', () => {
     expect(describeCorrectAnswer(essay, {})).toBeNull();
     expect(choiceReview(essay, {})).toBeUndefined();
   });
+
+  it('describes no correct answer or choice review for drag-and-drop', () => {
+    const dragDrop = question('DragDrop');
+
+    expect(describeCorrectAnswer(dragDrop, { zones: [] })).toBeNull();
+    expect(choiceReview(dragDrop, { zones: [] })).toBeUndefined();
+  });
 });

@@ -1,3 +1,4 @@
+using Elmanhg.Application.Dashboard.GetMyTeacherStats;
 using Elmanhg.Application.Dashboard.Shared;
 using Elmanhg.Application.Shared.Options;
 using FluentAssertions;
@@ -72,6 +73,18 @@ public sealed class DashboardCacheBehaviourTests : IDisposable
         await behaviour.Handle(new PlainProbeRequest(), Next, TestContext.Current.CancellationToken);
 
         await behaviour.Handle(new PlainProbeRequest(), Next, TestContext.Current.CancellationToken);
+
+        _nextCalls.Should().Be(2);
+        _memoryCache.Count.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Handle_TeacherStatsQuery_IsNeverCached()
+    {
+        var behaviour = Behaviour<GetMyTeacherStatsQuery>();
+        await behaviour.Handle(new GetMyTeacherStatsQuery(null, null), Next, TestContext.Current.CancellationToken);
+
+        await behaviour.Handle(new GetMyTeacherStatsQuery(null, null), Next, TestContext.Current.CancellationToken);
 
         _nextCalls.Should().Be(2);
         _memoryCache.Count.Should().Be(0);

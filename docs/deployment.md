@@ -292,7 +292,7 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | `ELMANHG_AI_ESSAY_GRADING_MODEL` | `claude-sonnet-5` | essay grading uses the Claude provider and key above |
 | `ELMANHG_AI_ESSAY_GRADING_TIMEOUT_SECONDS` | `45` | per call; with one retry (about 91 s) it stays under `AiService__EssayGradingTimeoutSeconds` |
 | `ELMANHG_AI_MATH_STEP_GRADING_MODEL` / `ELMANHG_AI_MATH_STEP_GRADING_TIMEOUT_SECONDS` | `claude-sonnet-5` / `45` | math step grading uses the Claude provider and key above; with one retry it stays under `AiService__MathStepGradingTimeoutSeconds` (100) |
-| `ELMANHG_AI_CAS_MAX_EXPANSION_TERMS` | `5000` | the CAS rejects an answer whose expansion would exceed this many terms as unreadable ([docs/math-cas.md](math-cas.md)) |
+| `ELMANHG_AI_CAS_MAX_EXPANSION_TERMS` | `500` | the CAS rejects an answer whose expansion would exceed this many terms as unreadable ([docs/math-cas.md](math-cas.md)) |
 | `ELMANHG_AI_CAS_TIMEOUT_SECONDS` | `5` | hard timeout of one SymPy check; on a timeout only the offending worker slot is killed and restarted in the background, and the other slots are untouched ([docs/math-cas.md](math-cas.md)) |
 | `ELMANHG_AI_CAS_WORKERS` / `ELMANHG_AI_CAS_WORKER_MEMORY_MB` | `2` / `1024` | CAS worker processes and their address-space cap (POSIX) |
 | `ELMANHG_AI_ENV` | set by compose | from `.env` |

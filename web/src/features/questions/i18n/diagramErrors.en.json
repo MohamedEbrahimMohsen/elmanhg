@@ -1,0 +1,25 @@
+{
+  "errors": {
+    "QUESTION_TYPE_NOT_GRADABLE": "The test grader does not grade this question type yet.",
+    "QUESTION_DIAGRAM_IMAGE_TYPE_INVALID": "Use a PNG, JPEG or WebP image.",
+    "QUESTION_DIAGRAM_IMAGE_INVALID": "Upload the diagram image again: it is missing or invalid.",
+    "QUESTION_DIAGRAM_IMAGE_ALT_REQUIRED": "Describe the diagram image.",
+    "QUESTION_DIAGRAM_IMAGE_ALT_TOO_LONG": "The image description is too long.",
+    "QUESTION_DIAGRAM_ZONES_COUNT_INVALID": "Draw at least one drop zone, up to the allowed maximum.",
+    "QUESTION_DIAGRAM_ZONE_ID_INVALID": "Each zone id must be 1 to 20 lowercase letters, digits or dashes.",
+    "QUESTION_DIAGRAM_ZONE_ID_DUPLICATE": "Zone ids must be unique.",
+    "QUESTION_DIAGRAM_ZONE_BOUNDS_INVALID": "Each zone must lie inside the image and be at least the minimum size.",
+    "QUESTION_DIAGRAM_ZONES_OVERLAP": "Drop zones must not overlap.",
+    "QUESTION_DIAGRAM_ZONE_CAPACITY_INVALID": "Each zone holds from one item up to the allowed maximum.",
+    "QUESTION_DIAGRAM_ITEMS_COUNT_INVALID": "Add at least one item, up to the allowed maximum.",
+    "QUESTION_DIAGRAM_ITEM_ID_INVALID": "Each item id must be 1 to 20 lowercase letters, digits or dashes.",
+    "QUESTION_DIAGRAM_ITEM_ID_DUPLICATE": "Item ids must be unique.",
+    "QUESTION_DIAGRAM_ITEM_TEXT_REQUIRED": "Give every item a text.",
+    "QUESTION_DIAGRAM_ITEM_TEXT_TOO_LONG": "An item text is too long.",
+    "QUESTION_DIAGRAM_KEY_ZONES_MISMATCH": "The answer key must list every zone once, and only those zones.",
+    "QUESTION_DIAGRAM_KEY_ITEM_INVALID": "The answer key places an unknown item, or one item more than once.",
+    "QUESTION_DIAGRAM_ZONE_OVER_CAPACITY": "A zone has more correct items than it holds.",
+    "QUESTION_DIAGRAM_KEY_EMPTY": "Place at least one item in a zone.",
+    "QUESTION_DIAGRAM_ORDER_INVALID": "An ordered zone needs at least two correct items."
+  }
+}

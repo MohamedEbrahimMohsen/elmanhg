@@ -10,6 +10,7 @@ using Elmanhg.Tests.Application.Features.Questions.Shared;
 using Elmanhg.Tests.Builders;
 using FluentAssertions;
 using NSubstitute;
+using static Elmanhg.Tests.Builders.QuestionBuilder;
 using DomainErrorCodes = Elmanhg.Domain.SharedKernel.Exceptions.ErrorCodes;
 
 namespace Elmanhg.Tests.Application.Features.Questions.CreateQuestion;
@@ -78,6 +79,29 @@ public sealed class CreateQuestionHandlerTests
         var act = () => _handler.Handle(command, TestContext.Current.CancellationToken);
 
         (await act.Should().ThrowAsync<BusinessRuleViolationCoreException>()).Which.ErrorCode.Should().Be(DomainErrorCodes.QuestionObjectiveNotInLesson);
+        await _questionRepository.DidNotReceive().AddAsync(Arg.Any<Question>(), Arg.Any<CancellationToken>());
+        await _questionRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_DragDropImageInLesson_AddsQuestion()
+    {
+        var fields = DragDropFields() with { Body = Json(ForLesson(DragDropBodyJson, _builder.Lesson.Id)) };
+
+        await _handler.Handle(new CreateQuestionCommand(_builder.Lesson.Id, fields), TestContext.Current.CancellationToken);
+
+        await _questionRepository.Received(1).AddAsync(Arg.Is<Question>(x => x.Type == QuestionType.DragDrop), Arg.Any<CancellationToken>());
+        await _questionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_DragDropImageFromAnotherLesson_ThrowsQuestionDiagramImageInvalid()
+    {
+        var fields = DragDropFields() with { Body = Json(ForLesson(DragDropBodyJson, Guid.NewGuid())) };
+
+        var act = () => _handler.Handle(new CreateQuestionCommand(_builder.Lesson.Id, fields), TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<ApplicationValidationCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.QuestionDiagramImageInvalid);
         await _questionRepository.DidNotReceive().AddAsync(Arg.Any<Question>(), Arg.Any<CancellationToken>());
         await _questionRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }

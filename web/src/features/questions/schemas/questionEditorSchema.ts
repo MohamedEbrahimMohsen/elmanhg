@@ -8,6 +8,7 @@ import {
 } from '../api/questionOptions';
 import { splitLines } from '../api/questionValues';
 import { countOccurrences, hasRichTextContent } from '../api/richTextContent';
+import { addDragDropIssues } from './dragDropRules';
 import { addEssayIssues } from './essayRules';
 import { addMathStepsIssues } from './mathStepsRules';
 
@@ -62,6 +63,26 @@ export const questionEditorSchema = z
     mathToleranceMode: z.enum(['absolute', 'percent']),
     mathSolution: z.array(z.object({ latex: z.string() })),
     mathStepsWeight: z.string(),
+    diagramImage: z.object({
+      key: z.string(),
+      url: z.string(),
+      width: z.number(),
+      height: z.number(),
+      alt: z.string(),
+    }),
+    diagramZones: z.array(
+      z.object({
+        id: z.string(),
+        x: z.string(),
+        y: z.string(),
+        width: z.string(),
+        height: z.string(),
+        capacity: z.string(),
+        ordered: z.boolean(),
+        itemIds: z.array(z.string()),
+      }),
+    ),
+    diagramItems: z.array(z.object({ id: z.string(), text: z.string() })),
   })
   .superRefine((values, context) => {
     const issue = (path: (string | number)[], message: string) => {
@@ -123,6 +144,9 @@ export const questionEditorSchema = z
     }
     if (values.type === 'MathSteps') {
       addMathStepsIssues(values, issue);
+    }
+    if (values.type === 'DragDrop') {
+      addDragDropIssues(values, issue);
     }
   });
 

@@ -186,6 +186,27 @@
   <data name="QUESTION_MODEL_ANSWERS_COUNT_INVALID" xml:space="preserve"><value>اضف اجابة نموذجية واحدة على الاقل وبما لا يتجاوز الحد المسموح.</value></data>
   <data name="QUESTION_MODEL_ANSWER_REQUIRED" xml:space="preserve"><value>لا يمكن ان تكون الاجابة النموذجية فارغة.</value></data>
   <data name="QUESTION_MODEL_ANSWER_TOO_LONG" xml:space="preserve"><value>الاجابة النموذجية اطول من المسموح.</value></data>
+  <data name="QUESTION_TYPE_NOT_GRADABLE" xml:space="preserve"><value>لا يصحح المصحح التجريبي هذا النوع من الاسئلة بعد.</value></data>
+  <data name="QUESTION_DIAGRAM_IMAGE_TYPE_INVALID" xml:space="preserve"><value>استخدم صورة PNG او JPEG او WebP.</value></data>
+  <data name="QUESTION_DIAGRAM_IMAGE_INVALID" xml:space="preserve"><value>ارفع صورة الرسم مرة اخرى: الصورة غير موجودة او غير صالحة.</value></data>
+  <data name="QUESTION_DIAGRAM_IMAGE_ALT_REQUIRED" xml:space="preserve"><value>اكتب وصفا لصورة الرسم.</value></data>
+  <data name="QUESTION_DIAGRAM_IMAGE_ALT_TOO_LONG" xml:space="preserve"><value>وصف الصورة اطول من المسموح.</value></data>
+  <data name="QUESTION_DIAGRAM_ZONES_COUNT_INVALID" xml:space="preserve"><value>ارسم منطقة افلات واحدة على الاقل وبما لا يتجاوز الحد المسموح.</value></data>
+  <data name="QUESTION_DIAGRAM_ZONE_ID_INVALID" xml:space="preserve"><value>معرف كل منطقة من 1 الى 20 حرفا لاتينيا صغيرا او رقما او شرطة.</value></data>
+  <data name="QUESTION_DIAGRAM_ZONE_ID_DUPLICATE" xml:space="preserve"><value>يجب الا يتكرر معرف المنطقة.</value></data>
+  <data name="QUESTION_DIAGRAM_ZONE_BOUNDS_INVALID" xml:space="preserve"><value>يجب ان تقع كل منطقة داخل الصورة والا تقل عن الحد الادنى للمقاس.</value></data>
+  <data name="QUESTION_DIAGRAM_ZONES_OVERLAP" xml:space="preserve"><value>يجب الا تتداخل مناطق الافلات.</value></data>
+  <data name="QUESTION_DIAGRAM_ZONE_CAPACITY_INVALID" xml:space="preserve"><value>تتسع كل منطقة لعنصر واحد على الاقل وبما لا يتجاوز الحد المسموح.</value></data>
+  <data name="QUESTION_DIAGRAM_ITEMS_COUNT_INVALID" xml:space="preserve"><value>اضف عنصرا واحدا على الاقل وبما لا يتجاوز الحد المسموح.</value></data>
+  <data name="QUESTION_DIAGRAM_ITEM_ID_INVALID" xml:space="preserve"><value>معرف كل عنصر من 1 الى 20 حرفا لاتينيا صغيرا او رقما او شرطة.</value></data>
+  <data name="QUESTION_DIAGRAM_ITEM_ID_DUPLICATE" xml:space="preserve"><value>يجب الا يتكرر معرف العنصر.</value></data>
+  <data name="QUESTION_DIAGRAM_ITEM_TEXT_REQUIRED" xml:space="preserve"><value>اكتب نصا لكل عنصر.</value></data>
+  <data name="QUESTION_DIAGRAM_ITEM_TEXT_TOO_LONG" xml:space="preserve"><value>نص العنصر اطول من المسموح.</value></data>
+  <data name="QUESTION_DIAGRAM_KEY_ZONES_MISMATCH" xml:space="preserve"><value>يجب ان يذكر مفتاح الاجابة كل منطقة مرة واحدة ولا شيء غيرها.</value></data>
+  <data name="QUESTION_DIAGRAM_KEY_ITEM_INVALID" xml:space="preserve"><value>مفتاح الاجابة يضع عنصرا غير موجود او يضع العنصر نفسه اكثر من مرة.</value></data>
+  <data name="QUESTION_DIAGRAM_ZONE_OVER_CAPACITY" xml:space="preserve"><value>في احدى المناطق عناصر صحيحة اكثر مما تتسع له.</value></data>
+  <data name="QUESTION_DIAGRAM_KEY_EMPTY" xml:space="preserve"><value>ضع عنصرا واحدا على الاقل في منطقة.</value></data>
+  <data name="QUESTION_DIAGRAM_ORDER_INVALID" xml:space="preserve"><value>المنطقة المرتبة تحتاج عنصرين صحيحين على الاقل.</value></data>
   <data name="QUESTION_ESSAY_ANSWER_TOO_LONG" xml:space="preserve"><value>المقال اطول من المسموح.</value></data>
   <data name="QUESTION_OBJECTIVE_NOT_IN_LESSON" xml:space="preserve"><value>هذا الهدف لا ينتمي الى درس السؤال.</value></data>
   <data name="QUESTION_TYPE_IMMUTABLE" xml:space="preserve"><value>لا يمكن تغيير نوع السؤال. انشئ سؤالا جديدا بدلا من ذلك.</value></data>

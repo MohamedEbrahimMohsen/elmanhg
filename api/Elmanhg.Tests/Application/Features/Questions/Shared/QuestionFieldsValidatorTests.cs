@@ -116,6 +116,14 @@ public sealed class QuestionFieldsValidatorTests
         errors.Should().ContainSingle(x => x.ErrorCode == ErrorCodes.QuestionModelAnswersCountInvalid && x.PropertyName == nameof(QuestionFields.Body));
     }
 
+    [Fact]
+    public void Validate_DragDropWithEmptyKey_ReturnsCodeOnBody()
+    {
+        var errors = _validator.Validate(DragDropFields() with { GradingSpec = Json("{}") }).Errors;
+
+        errors.Should().Contain(x => x.ErrorCode == ErrorCodes.QuestionDiagramKeyEmpty && x.PropertyName == nameof(QuestionFields.Body));
+    }
+
     private List<string> Codes(QuestionFields fields)
     {
         return _validator.Validate(fields).Errors

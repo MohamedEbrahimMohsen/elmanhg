@@ -16,4 +16,5 @@ export const QuestionType = {
   Short: 'Short',
   Essay: 'Essay',
   MathSteps: 'MathSteps',
+  DragDrop: 'DragDrop',
 } as const;

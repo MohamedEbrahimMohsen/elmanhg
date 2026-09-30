@@ -354,7 +354,7 @@ AI service (`ELMANHG_AI_*` environment variables; `settings.py` is the only plac
 | `ELMANHG_AI_CAS_MAX_ANSWER_CHARS` / `ELMANHG_AI_CAS_MAX_EXPECTED` / `ELMANHG_AI_CAS_MAX_EXPECTED_CHARS` | 500 / 20 / 500 | request limits |
 | `ELMANHG_AI_CAS_MAX_ELEMENTS` / `ELMANHG_AI_CAS_MAX_TOKENS` / `ELMANHG_AI_CAS_MAX_DEPTH` | 10 / 300 / 30 | parser limits |
 | `ELMANHG_AI_CAS_MAX_NUMBER_DIGITS` / `ELMANHG_AI_CAS_MAX_EXPONENT` / `ELMANHG_AI_CAS_MAX_MAGNITUDE` | 30 / 1000 / 10000 | parser limits ([math-cas.md](math-cas.md)) |
-| `ELMANHG_AI_CAS_MAX_EXPANSION_TERMS` | 5000 | upper bound on the terms of the fully expanded answer, 10 to 1 000 000 ([math-cas.md](math-cas.md)) |
+| `ELMANHG_AI_CAS_MAX_EXPANSION_TERMS` | 500 | upper bound on the terms of the fully expanded answer, 10 to 1 000 000 ([math-cas.md](math-cas.md)) |
 | `ELMANHG_AI_CAS_WARM_ON_START` | `true` | warm every CAS worker slot in the lifespan before the service is ready; a failed warm-up stops startup |
 | `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` | 20 | per Claude call, up to 120 |
 | `ELMANHG_AI_MODEL_MAX_RETRIES` | 1 | SDK retries with exponential backoff, 0 to 5 |
