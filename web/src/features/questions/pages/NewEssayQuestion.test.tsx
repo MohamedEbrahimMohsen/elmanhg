@@ -7,7 +7,9 @@ import type { LessonDetailResult } from '@/shared/api/generated/model';
 import {
   getCreateQuestionMockHandler,
   getGetQuestionMockHandler,
+  getGradeQuestionDraftMockHandler,
 } from '@/shared/api/generated/questions/questions.msw';
+import { essayDraftGrade } from '@/test/essayGradeFixtures';
 import { server } from '@/test/msw/server';
 import { renderApp } from '@/test/renderWithProviders';
 import { testSessions } from '@/test/sessions';
@@ -167,15 +169,63 @@ describe('NewQuestionPage essay', () => {
     ).toBeInTheDocument();
   });
 
-  it('explains that essays are not test-graded in the preview', async () => {
+  it('explains that the AI grader marks essays in the preview', async () => {
     const user = userEvent.setup();
     await openEssayEditor(user);
 
     const preview = within(await screen.findByRole('region', { name: 'Student preview' }));
-    expect(preview.queryByRole('button', { name: 'Try the answer' })).not.toBeInTheDocument();
     expect(
-      preview.getByText('Essays are graded by the AI grader; the test grader does not cover them.'),
+      preview.getByText(
+        '"Try the answer" sends the essay to the AI grader, which marks each rubric criterion. It can take up to a minute.',
+      ),
     ).toBeInTheDocument();
+    expect(preview.getByRole('button', { name: 'Try the answer' })).toBeInTheDocument();
     expect(preview.getByRole('textbox', { name: 'Your essay' })).toBeInTheDocument();
+  });
+
+  it('grades an essay in the preview with the AI grader', async () => {
+    const user = userEvent.setup();
+    let body: unknown = null;
+    server.use(
+      getGradeQuestionDraftMockHandler(async ({ request }) => {
+        body = await request.json();
+        return essayDraftGrade;
+      }),
+    );
+    await openEssayEditor(user);
+    await fillEssay(user);
+    const preview = within(screen.getByRole('region', { name: 'Student preview' }));
+
+    await user.type(preview.getByRole('textbox', { name: 'Your essay' }), 'Inertia resists change.');
+    await user.click(preview.getByRole('button', { name: 'Try the answer' }));
+
+    expect(await preview.findByText('Partially correct')).toBeInTheDocument();
+    expect(body).toEqual(expect.objectContaining({ lessonId, answer: { text: 'Inertia resists change.' } }));
+    expect(preview.getByText('Score 2.5 / 5')).toBeInTheDocument();
+    const criteria = preview.getByRole('list', { name: 'Marks per criterion' });
+    expect(within(criteria).getByText('Definition')).toBeInTheDocument();
+    expect(within(criteria).getByText('1 / 2')).toBeInTheDocument();
+    expect(within(criteria).getByText('Partly correct.')).toBeInTheDocument();
+    expect(preview.getByText('Good definition; add an example.')).toBeInTheDocument();
+    expect(preview.getByText('Confidence: 62%')).toBeInTheDocument();
+  });
+
+  it('shows the AI grader error when essay grading fails', async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.post('*/api/questions/grade-draft', () =>
+        HttpResponse.json({ code: 'ESSAY_GRADING_UNAVAILABLE' }, { status: 503 }),
+      ),
+    );
+    await openEssayEditor(user);
+    await fillEssay(user);
+    const preview = within(screen.getByRole('region', { name: 'Student preview' }));
+
+    await user.type(preview.getByRole('textbox', { name: 'Your essay' }), 'Inertia resists change.');
+    await user.click(preview.getByRole('button', { name: 'Try the answer' }));
+
+    expect(await preview.findByRole('alert')).toHaveTextContent(
+      'The AI grader is unavailable right now. Try again in a moment.',
+    );
   });
 });

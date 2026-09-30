@@ -3,6 +3,7 @@ using Elmanhg.Application.Shared.Spreadsheets;
 using Elmanhg.Domain.Analytics;
 using Elmanhg.Domain.Avatar;
 using Elmanhg.Domain.ContentRetrieval;
+using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
@@ -19,6 +20,7 @@ using Elmanhg.Infrastructure.AiService;
 using Elmanhg.Infrastructure.Analytics;
 using Elmanhg.Infrastructure.Avatar;
 using Elmanhg.Infrastructure.ContentRetrieval;
+using Elmanhg.Infrastructure.EssayGrading;
 using Elmanhg.Infrastructure.ExamBlueprints;
 using Elmanhg.Infrastructure.Hosting;
 using Elmanhg.Infrastructure.Identity;
@@ -79,6 +81,7 @@ public static class DependencyInjection
         services.AddScoped<ILessonContentIndexRepository, LessonContentIndexRepository>();
         services.AddScoped<IAvatarMessageUsageRepository, AvatarMessageUsageRepository>();
         services.AddScoped<IAvatarConversationRepository, AvatarConversationRepository>();
+        services.AddScoped<IEssayGradeRepository, EssayGradeRepository>();
         return services;
     }
 }

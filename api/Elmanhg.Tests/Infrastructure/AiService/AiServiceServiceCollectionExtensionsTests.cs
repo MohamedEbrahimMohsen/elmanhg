@@ -63,6 +63,24 @@ public sealed class AiServiceServiceCollectionExtensionsTests
     }
 
     [Fact]
+    public void AddAiService_FakeProvider_ResolvesFakeEssayGradingClient()
+    {
+        using var provider = BuildProvider([]);
+        using var scope = provider.CreateScope();
+
+        scope.ServiceProvider.GetRequiredService<IAiEssayGradingClient>().Should().BeOfType<FakeAiEssayGradingClient>();
+    }
+
+    [Fact]
+    public void AddAiService_HttpProvider_ResolvesHttpEssayGradingClient()
+    {
+        using var provider = BuildProvider(AiServiceTestSettings.ToConfiguration(AiServiceTestSettings.WithHttp()));
+        using var scope = provider.CreateScope();
+
+        scope.ServiceProvider.GetRequiredService<IAiEssayGradingClient>().Should().BeOfType<HttpAiEssayGradingClient>();
+    }
+
+    [Fact]
     public void AddAiService_HttpWithoutToken_FailsStartupValidation()
     {
         var options = AiServiceTestSettings.WithHttp();

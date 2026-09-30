@@ -6,3 +6,4 @@ export { toQuizQuestion, fromAnswerPayload, isAnswerEmpty } from './api/quizItem
 export { choiceReview, describeCorrectAnswer } from './api/correctAnswer';
 export { CorrectAnswer } from './components/CorrectAnswer';
 export { QuizReviewItem } from './components/QuizReviewItem';
+export { EssayGradeStatus } from './components/EssayGradeStatus';

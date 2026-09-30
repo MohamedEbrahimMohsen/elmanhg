@@ -1,3 +1,4 @@
+using Core.Errors;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Questions.Shared;
 using Elmanhg.Application.Shared.Options;
@@ -191,6 +192,49 @@ public sealed class EssayQuestionRulesTests
         var (body, _) = EssayQuestionRules.Normalize(Json("""{"maxWords":null}"""), Json(EssaySpecJson), Sanitizer());
 
         body.Should().Be("{}");
+    }
+
+    [Theory]
+    [InlineData("<p></p>")]
+    [InlineData("<p>&nbsp;</p>")]
+    [InlineData("<p> <br></p>")]
+    public void Validate_EmptyRichTextModelAnswer_ReturnsQuestionModelAnswerRequired(string answer)
+    {
+        Errors(Spec($"[{Criterion()}]", $"[\"{answer}\"]")).Should().Contain(ErrorCodes.QuestionModelAnswerRequired);
+    }
+
+    [Fact]
+    public void Validate_ImageOnlyModelAnswerWithAlt_ReturnsNoErrors()
+    {
+        Errors(Spec($"[{Criterion()}]", """["<p><img src=\"/api/media/a.png\" alt=\"Graph\"></p>"]""")).Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Validate_ImageOnlyModelAnswerWithoutAlt_ReturnsQuestionModelAnswerRequired()
+    {
+        Errors(Spec($"[{Criterion()}]", """["<p><img src=\"/api/media/a.png\" alt=\"\"></p>"]""")).Should().Contain(ErrorCodes.QuestionModelAnswerRequired);
+    }
+
+    [Fact]
+    public void Normalize_ModelAnswerImageWithoutAltAfterSanitising_ThrowsQuestionModelAnswerRequired()
+    {
+        var sanitizer = Substitute.For<IRichTextSanitizer>();
+        sanitizer.Sanitize(Arg.Any<string?>()).Returns("""<p><img src="/api/media/a.png" alt=""></p>""");
+
+        var act = () => EssayQuestionRules.Normalize(Json(Body), Json(EssaySpecJson), sanitizer);
+
+        act.Should().Throw<ApplicationValidationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.QuestionModelAnswerRequired);
+    }
+
+    [Fact]
+    public void Normalize_ModelAnswerEmptyAfterSanitising_ThrowsQuestionModelAnswerRequired()
+    {
+        var sanitizer = Substitute.For<IRichTextSanitizer>();
+        sanitizer.Sanitize(Arg.Any<string?>()).Returns("<p></p>");
+
+        var act = () => EssayQuestionRules.Normalize(Json(Body), Json(EssaySpecJson), sanitizer);
+
+        act.Should().Throw<ApplicationValidationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.QuestionModelAnswerRequired);
     }
 
     private static string Criterion(string id = "c1", string title = "Def", int points = 2, string levels = Levels)

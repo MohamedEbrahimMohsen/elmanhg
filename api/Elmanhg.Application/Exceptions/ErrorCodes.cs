@@ -100,7 +100,6 @@ public static class ErrorCodes
     public const string QuestionAnswerKindRequired = "QUESTION_ANSWER_KIND_REQUIRED";
     public const string QuestionNumericValueRequired = "QUESTION_NUMERIC_VALUE_REQUIRED";
     public const string QuestionToleranceInvalid = "QUESTION_TOLERANCE_INVALID";
-    public const string QuestionTypeNotGradable = "QUESTION_TYPE_NOT_GRADABLE";
     public const string QuestionEssayMaxWordsInvalid = "QUESTION_ESSAY_MAX_WORDS_INVALID";
     public const string QuestionRubricCriteriaCountInvalid = "QUESTION_RUBRIC_CRITERIA_COUNT_INVALID";
     public const string QuestionRubricCriterionIdInvalid = "QUESTION_RUBRIC_CRITERION_ID_INVALID";
@@ -114,6 +113,7 @@ public static class ErrorCodes
     public const string QuestionModelAnswersCountInvalid = "QUESTION_MODEL_ANSWERS_COUNT_INVALID";
     public const string QuestionModelAnswerRequired = "QUESTION_MODEL_ANSWER_REQUIRED";
     public const string QuestionModelAnswerTooLong = "QUESTION_MODEL_ANSWER_TOO_LONG";
+    public const string QuestionEssayAnswerTooLong = "QUESTION_ESSAY_ANSWER_TOO_LONG";
     public const string QuestionAnswerInvalid = "QUESTION_ANSWER_INVALID";
     public const string QuestionPageNumberInvalid = "QUESTION_PAGE_NUMBER_INVALID";
     public const string QuestionPageSizeInvalid = "QUESTION_PAGE_SIZE_INVALID";
@@ -287,6 +287,10 @@ public static class ErrorCodes
 
     // AI SERVICE
     public const string AiServiceUnavailable = "AI_SERVICE_UNAVAILABLE";
+
+    // ESSAY GRADING
+    public const string EssayGradeNotFound = "ESSAY_GRADE_NOT_FOUND";
+    public const string EssayGradingUnavailable = "ESSAY_GRADING_UNAVAILABLE";
 
     // CONTENT RETRIEVAL
     public const string ContentSearchQueryRequired = "CONTENT_SEARCH_QUERY_REQUIRED";

@@ -83,15 +83,67 @@ public sealed class EssayQuestionEndpointTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task PostGradeDraft_Essay_Returns422QuestionTypeNotGradable()
+    public async Task PostGradeDraft_Essay_ReturnsAiGradeWithCriteria()
     {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var (_, lessonId) = await SeedLessonAsync();
         using var admin = await AdminClientAsync();
-        var request = new { type = "Essay", stem = "<p>Explain inertia.</p>", body = Json("""{"maxWords":200}"""), gradingSpec = Json(EssaySpecJson), difficulty = "Medium", maxScore = 5, answer = Json("{}") };
 
-        using var response = await admin.PostAsJsonAsync($"{Route}/grade-draft", request, TestContext.Current.CancellationToken);
+        using var response = await admin.PostAsJsonAsync($"{Route}/grade-draft", GradeDraftRequest(lessonId, Json("""{"text":"Inertia is resistance to change."}""")), cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken);
+        (body.GetProperty("score").GetDecimal(), body.GetProperty("outcome").GetString()).Should().Be((5m, "Correct"));
+        var essay = body.GetProperty("essay");
+        (essay.GetProperty("criteria")[0].GetProperty("points").GetInt32(), essay.GetProperty("model").GetString()).Should().Be((2, "fake"));
+    }
+
+    [Fact]
+    public async Task PostGradeDraft_EssayWithoutText_Returns422QuestionAnswerInvalid()
+    {
+        var (_, lessonId) = await SeedLessonAsync();
+        using var admin = await AdminClientAsync();
+
+        using var response = await admin.PostAsJsonAsync($"{Route}/grade-draft", GradeDraftRequest(lessonId, Json("{}")), TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
-        (await ReadCodeAsync(response)).Should().Be("QUESTION_TYPE_NOT_GRADABLE");
+        (await ReadCodeAsync(response)).Should().Be("QUESTION_ANSWER_INVALID");
+    }
+
+    [Fact]
+    public async Task Post_EssayEmptyModelAnswer_Returns422QuestionModelAnswerRequired()
+    {
+        var (_, lessonId) = await SeedLessonAsync();
+        using var admin = await AdminClientAsync();
+
+        using var response = await admin.PostAsJsonAsync(Route, EssayRequest(lessonId, ModelAnswerSpec("<p></p>")), TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await ReadCodeAsync(response)).Should().Be("QUESTION_MODEL_ANSWER_REQUIRED");
+        (await CountQuestionsAsync(lessonId)).Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Post_EssayModelAnswerEmptyAfterSanitising_Returns422QuestionModelAnswerRequired()
+    {
+        var (_, lessonId) = await SeedLessonAsync();
+        using var admin = await AdminClientAsync();
+
+        using var response = await admin.PostAsJsonAsync(Route, EssayRequest(lessonId, ModelAnswerSpec("<p><script>x</script></p>")), TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await ReadCodeAsync(response)).Should().Be("QUESTION_MODEL_ANSWER_REQUIRED");
+        (await CountQuestionsAsync(lessonId)).Should().Be(0);
+    }
+
+    private static object GradeDraftRequest(Guid lessonId, JsonElement answer)
+    {
+        return new { type = "Essay", stem = "<p>Explain inertia.</p>", body = Json("""{"maxWords":200}"""), gradingSpec = Json(EssaySpecJson), difficulty = "Medium", maxScore = 5, lessonId, answer };
+    }
+
+    private static string ModelAnswerSpec(string modelAnswer)
+    {
+        return $$"""{"criteria":[{"id":"c1","title":"Definition","points":2,"levels":[{"points":0,"description":"Missing"},{"points":2,"description":"Complete"}]}],"modelAnswers":["{{modelAnswer}}"]}""";
     }
 
     private static object EssayRequest(Guid lessonId, string gradingSpec)

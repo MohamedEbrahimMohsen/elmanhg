@@ -9,6 +9,7 @@ from fastapi.routing import APIRoute
 from elmanhg_ai.api import health
 from elmanhg_ai.api.chat import router as chat_router
 from elmanhg_ai.api.embeddings import router as embeddings_router
+from elmanhg_ai.api.essay_grades import router as essay_grades_router
 from elmanhg_ai.api.transcriptions import router as transcriptions_router
 from elmanhg_ai.clients.embedding import EmbeddingClient, build_embedding_client
 from elmanhg_ai.clients.metered import (
@@ -24,6 +25,7 @@ from elmanhg_ai.core.middleware import RequestContextMiddleware
 from elmanhg_ai.core.problems import register_problem_handlers
 from elmanhg_ai.core.telemetry import Telemetry, build_telemetry, instrument_app
 from elmanhg_ai.pipelines.chat import load_chat_prompts
+from elmanhg_ai.pipelines.essay_grading import load_essay_grading_prompts
 from elmanhg_ai.settings import Settings, get_settings
 
 logger: Final = structlog.stdlib.get_logger(__name__)
@@ -35,6 +37,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings: Settings = app.state.settings
     telemetry: Telemetry = app.state.telemetry
     app.state.chat_prompts = load_chat_prompts(settings.chat_prompt_version)
+    app.state.essay_grading_prompts = load_essay_grading_prompts(
+        settings.essay_grading_prompt_version
+    )
     model_client: ModelClient = app.state.injected_model_client or build_model_client(settings)
     embedding_client: EmbeddingClient = (
         app.state.injected_embedding_client or build_embedding_client(settings)
@@ -59,6 +64,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         llm_provider=settings.llm_provider,
         chat_model=settings.chat_model,
         prompt_version=settings.chat_prompt_version,
+        essay_grading_model=settings.essay_grading_model,
+        essay_grading_prompt_version=settings.essay_grading_prompt_version,
         embedding_provider=settings.embedding_provider,
         embedding_model=settings.embedding_model,
         transcription_provider=settings.transcription_provider,
@@ -111,4 +118,5 @@ def create_app(
     app.include_router(chat_router.router)
     app.include_router(embeddings_router.router)
     app.include_router(transcriptions_router.router)
+    app.include_router(essay_grades_router.router)
     return app

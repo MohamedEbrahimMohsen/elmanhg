@@ -58,6 +58,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("ContentRetrieval:IndexSweepEnabled", "false");
         // The sweep would race tests that transcribe through the mediator.
         builder.UseSetting("AskTeacher:TranscriptionSweepEnabled", "false");
+        builder.UseSetting("EssayGrading:SweepEnabled", "false");
         // The sweep would race tests that record SLA events through the mediator.
         builder.UseSetting("AskTeacher:SlaSweepEnabled", "false");
         builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
@@ -100,6 +101,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Content:QuestionRubricTextMaxLength"] = "1000",
             ["Content:QuestionModelAnswersMaxCount"] = "3",
             ["Content:QuestionModelAnswerMaxLength"] = "20000",
+            ["Content:QuestionEssayAnswerMaxLength"] = "20000",
             ["QuestionValidation:QueueMaxPageSize"] = "100",
             ["QuestionValidation:QueueMaxAgeDays"] = "365",
             ["QuestionValidation:RejectionReasonMaxLength"] = "1000",

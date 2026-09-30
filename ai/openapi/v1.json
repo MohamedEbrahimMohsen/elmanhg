@@ -262,6 +262,92 @@
           }
         ]
       }
+    },
+    "/v1/essay-grades": {
+      "post": {
+        "tags": [
+          "grading"
+        ],
+        "summary": "Create Essay Grade",
+        "operationId": "grading_create_essay_grade",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EssayGradeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EssayGradeOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -514,6 +600,29 @@
         ],
         "title": "ContextRefIn"
       },
+      "CriterionGradeOut": {
+        "properties": {
+          "criterionId": {
+            "type": "string",
+            "title": "Criterionid"
+          },
+          "points": {
+            "type": "integer",
+            "title": "Points"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          }
+        },
+        "type": "object",
+        "required": [
+          "criterionId",
+          "points",
+          "justification"
+        ],
+        "title": "CriterionGradeOut"
+      },
       "EmbeddingInputType": {
         "type": "string",
         "enum": [
@@ -578,6 +687,137 @@
           "inputTokens"
         ],
         "title": "EmbeddingsOut"
+      },
+      "EssayGradeIn": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Question"
+          },
+          "criteria": {
+            "items": {
+              "$ref": "#/components/schemas/RubricCriterionIn"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Criteria"
+          },
+          "modelAnswers": {
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Modelanswers"
+          },
+          "essay": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Essay"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject"
+          },
+          "objectives": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Objectives"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "question",
+          "criteria",
+          "modelAnswers",
+          "essay"
+        ],
+        "title": "EssayGradeIn"
+      },
+      "EssayGradeOut": {
+        "properties": {
+          "criteria": {
+            "items": {
+              "$ref": "#/components/schemas/CriterionGradeOut"
+            },
+            "type": "array",
+            "title": "Criteria"
+          },
+          "totalPoints": {
+            "type": "integer",
+            "title": "Totalpoints"
+          },
+          "maxPoints": {
+            "type": "integer",
+            "title": "Maxpoints"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "promptVersion": {
+            "type": "string",
+            "title": "Promptversion"
+          },
+          "inputTokens": {
+            "type": "integer",
+            "title": "Inputtokens"
+          },
+          "outputTokens": {
+            "type": "integer",
+            "title": "Outputtokens"
+          },
+          "stopReason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stopreason"
+          },
+          "costUsd": {
+            "type": "number",
+            "title": "Costusd"
+          }
+        },
+        "type": "object",
+        "required": [
+          "criteria",
+          "totalPoints",
+          "maxPoints",
+          "justification",
+          "confidence",
+          "model",
+          "promptVersion",
+          "inputTokens",
+          "outputTokens",
+          "stopReason",
+          "costUsd"
+        ],
+        "title": "EssayGradeOut"
       },
       "HTTPValidationError": {
         "properties": {
@@ -769,6 +1009,74 @@
           "stem"
         ],
         "title": "QuestionContextIn"
+      },
+      "RubricCriterionIn": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{1,20}$",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "points": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Points"
+          },
+          "levels": {
+            "items": {
+              "$ref": "#/components/schemas/RubricLevelIn"
+            },
+            "type": "array",
+            "minItems": 2,
+            "title": "Levels"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "points",
+          "levels"
+        ],
+        "title": "RubricCriterionIn"
+      },
+      "RubricLevelIn": {
+        "properties": {
+          "points": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Points"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Description"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "points",
+          "description"
+        ],
+        "title": "RubricLevelIn"
       },
       "TranscriptionIn": {
         "properties": {

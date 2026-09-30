@@ -7,3 +7,5 @@ public sealed record RubricLevel(int? Points, string? Description);
 public sealed record RubricCriterion(string? Id, string? Title, string? Description, int? Points, List<RubricLevel>? Levels);
 
 public sealed record EssayGradingSpec(List<RubricCriterion>? Criteria, List<string>? ModelAnswers);
+
+public sealed record EssayAnswer(string? Text);

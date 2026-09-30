@@ -19,6 +19,8 @@ public static class QuestionGrader
         return QuestionGrade.FromNormalised(grade, maxScore);
     }
 
+    public static QuestionGrade GradeEssay(string gradingSpec, int maxScore, IReadOnlyList<EssayCriterionAward> awards) => QuestionGrade.FromNormalised(EssayGrader.Grade(ReadSpec<EssayGradingSpec>(gradingSpec), awards), maxScore);
+
     private static T ReadSpec<T>(string json) where T : class
     {
         var value = JsonSerializer.Deserialize<T>(json, QuestionJson.SerializerOptions);

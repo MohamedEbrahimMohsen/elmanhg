@@ -53,6 +53,7 @@ public static class DependencyInjection
             .Validate(x => x.DefaultTopK <= x.MaxTopK, "ContentRetrieval:DefaultTopK must not exceed MaxTopK.")
             .ValidateOnStart();
         services.AddOptions<AvatarOptions>().BindConfiguration(AvatarOptions.SectionName).ValidateDataAnnotations().Validate(x => x.MaxHistoryMessages % 2 == 0, "Avatar:MaxHistoryMessages must be even.").ValidateOnStart();
+        services.AddOptions<EssayGradingOptions>().BindConfiguration(EssayGradingOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton(Random.Shared);
         return services;

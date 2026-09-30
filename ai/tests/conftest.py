@@ -129,6 +129,43 @@ def transcription_payload() -> Callable[..., dict[str, Any]]:
 
 
 @pytest.fixture
+def essay_payload() -> Callable[..., dict[str, Any]]:
+    def build(**overrides: Any) -> dict[str, Any]:
+        payload: dict[str, Any] = {
+            "question": "اشرح مفهوم القصور الذاتي مع ذكر مثال.",
+            "criteria": [
+                {
+                    "id": "c1",
+                    "title": "التعريف",
+                    "points": 2,
+                    "levels": [
+                        {"points": 0, "description": "لا يوجد تعريف"},
+                        {"points": 1, "description": "تعريف ناقص"},
+                        {"points": 2, "description": "تعريف صحيح"},
+                    ],
+                },
+                {
+                    "id": "c2",
+                    "title": "المثال",
+                    "points": 3,
+                    "levels": [
+                        {"points": 0, "description": "لا يوجد مثال"},
+                        {"points": 1, "description": "مثال غير مشروح"},
+                        {"points": 3, "description": "مثال صحيح مشروح"},
+                    ],
+                },
+            ],
+            "modelAnswers": ["القصور الذاتي هو ممانعة الجسم لتغيير حالته الحركية أو السكونية."],
+            "essay": "القصور الذاتي ممانعة الجسم لتغيير حالته، مثل اندفاع الركاب عند توقف الحافلة.",
+            "subject": "الفيزياء",
+            "objectives": ["يعرّف القصور الذاتي"],
+        }
+        return payload | overrides
+
+    return build
+
+
+@pytest.fixture
 def log_capture(app: FastAPI) -> Iterator[LogCapture]:
     capture = LogCapture()
     structlog.configure(processors=[structlog.contextvars.merge_contextvars, capture])

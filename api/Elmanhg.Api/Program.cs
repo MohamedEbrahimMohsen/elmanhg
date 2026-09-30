@@ -85,6 +85,7 @@ builder.Services.AddHostedService<ExpiredExamSubmissionWorker>();
 builder.Services.AddHostedService<SubscriptionLapseWorker>();
 builder.Services.AddHostedService<LessonContentIndexWorker>();
 builder.Services.AddHostedService<TeacherVoiceTranscriptionWorker>();
+builder.Services.AddHostedService<EssayGradingWorker>();
 builder.Services.AddHostedService<TeacherThreadSlaWorker>();
 builder.Services.AddElmanhgRealtime();
 builder.Services.AddAuthRateLimiting();

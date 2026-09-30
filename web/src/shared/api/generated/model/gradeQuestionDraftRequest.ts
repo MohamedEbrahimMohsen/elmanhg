@@ -27,4 +27,6 @@ export interface GradeQuestionDraftRequest {
      */
   maxScore: number | string | null;
   answer: JsonElement;
+  /** @nullable */
+  lessonId?: string | null;
 }
