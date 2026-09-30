@@ -1,0 +1,119 @@
+{
+  "page": {
+    "title": "Dashboard",
+    "intro": "Platform figures for the chosen period, in Cairo days. Figures can be up to a minute old."
+  },
+  "filters": {
+    "label": "Dashboard filters",
+    "subject": "Subject",
+    "allSubjects": "All subjects",
+    "period": "Period",
+    "periods": { "7": "Last 7 days", "14": "Last 14 days", "30": "Last 30 days" },
+    "range": "From {from} to {to}"
+  },
+  "card": {
+    "loading": "Loading {title}",
+    "error": "Could not load {title}",
+    "noSubject": "Not filtered by subject",
+    "snapshot": "Current snapshot, not filtered by period"
+  },
+  "students": {
+    "title": "Students",
+    "caption": "Total students",
+    "newInRange": "New in period: {count}",
+    "newThisWeek": "New this week: {count}",
+    "activeToday": "Active today (DAU): {count}",
+    "activeThisMonth": "Active this month (MAU): {count}"
+  },
+  "subscribers": {
+    "title": "Subscribers",
+    "caption": "Active subscriptions",
+    "plan": "{plan}: {count}",
+    "plans": { "Base": "Base", "AskTeacher": "Ask a Teacher" },
+    "churnedInRange": "Churned in period: {count}",
+    "churnedThisMonth": "Churned this month: {count}",
+    "mrr": "MRR: {amount}"
+  },
+  "content": {
+    "title": "Content",
+    "caption": "Servable questions (the marketed number)",
+    "structure": "Subjects: {subjects} · Units: {units}",
+    "lessons": "Lessons: published {published} · draft {draft} · archived {archived}",
+    "questions": "Questions: pending {pending} · approved {approved} · rejected {rejected} · retired {retired}",
+    "byType": "Questions by type",
+    "typeCount": "{type}: {count}"
+  },
+  "solveRate": {
+    "title": "Solve rate",
+    "caption": "Attempts per active student per day",
+    "attempts": "Attempts: {count}",
+    "studentDays": "Active student-days: {count}"
+  },
+  "successRate": {
+    "title": "Success rate",
+    "caption": "Correct attempts out of all attempts",
+    "correct": "Correct: {correct} of {attempts}"
+  },
+  "validation": {
+    "title": "Validation",
+    "caption": "Questions pending review",
+    "approved": "Approved in period: {count}",
+    "rejected": "Rejected in period: {count}",
+    "median": "Median time to decision: {duration}",
+    "teacher": "{name}: {approved} approved · {rejected} rejected"
+  },
+  "askTeacher": {
+    "title": "Ask a Teacher",
+    "caption": "Open threads",
+    "awaiting": "Awaiting a reply: {count}",
+    "overdue": "Overdue now: {count}",
+    "breaches": "SLA breaches in period: {count}",
+    "replies": "Replies in period: {count} ({within} within SLA)",
+    "compliance": "SLA compliance: {rate}",
+    "median": "Median reply time: {duration}"
+  },
+  "payments": {
+    "title": "Payments",
+    "caption": "Revenue in period",
+    "succeeded": "Successful: {count}",
+    "failed": "Failed: {count}",
+    "refunds": "Refunds: {count} ({amount})",
+    "net": "Net revenue: {amount}"
+  },
+  "funnel": {
+    "title": "Sign-up funnel",
+    "caption": "Visitors who reached a first answer",
+    "step": "{step}: {visitors}",
+    "stepConversion": "{step}: {visitors} ({rate})",
+    "steps": {
+      "LandingViewed": "Landing viewed",
+      "SignUpStarted": "Sign-up started",
+      "SignUpCompleted": "Account created",
+      "OnboardingCompleted": "Onboarding done",
+      "FirstQuizAnswered": "First quiz answer"
+    },
+    "median": "Median landing to first answer: {duration}"
+  },
+  "breakdown": {
+    "title": "Success rate by curriculum",
+    "levelLabel": "Group by",
+    "levels": { "subject": "Subjects", "unit": "Units", "lesson": "Lessons" },
+    "name": "Name",
+    "attempts": "Attempts",
+    "correct": "Correct",
+    "rate": "Success rate",
+    "empty": "No attempts in this period.",
+    "chooseSubject": "Choose a subject to see lessons."
+  },
+  "charts": {
+    "attempts": "Attempts per day",
+    "revenue": "Revenue per day",
+    "decisions": "Validation decisions per day",
+    "date": "Date",
+    "value": "Value",
+    "peak": "Peak: {value}",
+    "emptyAttempts": "No attempts in this period.",
+    "emptyRevenue": "No revenue in this period.",
+    "emptyDecisions": "No decisions in this period."
+  }
+}

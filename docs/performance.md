@@ -43,10 +43,11 @@ Also: `http_req_failed` < 1 % and `checks` > 99 %. The answer check is the only 
 
 | Page | Entries | Measured (KB br) | Budget (KB br) |
 |---|---|---|---|
-| `entry` | `index.html` | 197 | 210 |
-| `landing` | + `routes/index` | 205 | 220 |
-| `lesson` | + `student/route`, `student/lesson.$lessonId`, `lesson.$lessonId.index` | 224 | 240 |
-| `quiz` | + `student/route`, `student/quiz.$sessionId` | 242 | 255 |
+| `entry` | `index.html` | 201 | 210 |
+| `landing` | + `routes/index` | 210 | 220 |
+| `lesson` | + `student/route`, `student/lesson.$lessonId`, `lesson.$lessonId.index` | 231 | 240 |
+| `quiz` | + `student/route`, `student/quiz.$sessionId` | 249 | 255 |
+| `admin-dashboard` | + `admin/route`, `admin/index` | 219 | 230 |
 
 Budget = measured × 1.05, rounded up to the next 5 KB. They are regression guards; the 2 s browser gate is the real target. When a change legitimately grows a page, raise its budget in the same pull request and say why.
 
@@ -55,6 +56,8 @@ Budget = measured × 1.05, rounded up to the next 5 KB. They are regression guar
 - **KaTeX on demand.** `RichTextViewer` renders HTML without math synchronously. HTML with math shows its text at once, while KaTeX and its CSS load as one lazy chunk (`renderMath`), then re-renders with formulas. Once loaded, later views render at once. KaTeX is no longer on the lesson or quiz critical path; the editor (admin) still bundles it.
 - **Lazy avatar panel.** `AvatarDock` loads `AvatarPanel` (with react-hook-form and the radix dialog) the first time the student opens the assistant, and keeps it mounted afterwards.
 - **Realtime client on connect.** The SignalR client (`@microsoft/signalr`, about 11 KB brotli) loads as its own chunk when the realtime connection starts, so it stays out of the entry bundle.
+- **Dashboard charts without a library.** The admin dashboard's three daily charts are plain SVG (`DailyBarChart`), so no chart library ships; the page is the auto-split `/admin/` chunk and has its own budget.
+- **Admin-only strings on demand.** The `dashboard` i18n namespace is not in `app/i18n.ts`. `DashboardPage` registers it with `addResourceBundle` when its `/admin/` chunk loads, before the first render, so student pages do not download admin copy.
 - **Lesson data on intent.** Hovering or focusing a lesson link preloads the route and prefetches `GET /api/browse/lessons/{id}` through the route loader, so the click renders from the cache.
 - **Images.** Rich-text images get `decoding="async"`, and every image after the first gets `loading="lazy"`. The editor downscales uploads to WebP with a 1600 px edge ([docs/rich-text.md](rich-text.md)).
 - **Precompression.** `npm run build` writes `.br` (quality 11) and `.gz` (level 9) next to every `.js .css .html .svg .json .txt` file of at least 1 KB, when smaller. Caddy serves them with `file_server { precompressed br gzip }` (it cannot brotli on the fly) and keeps `encode zstd gzip` for API responses. The smoke test asserts `Content-Encoding: br` on an asset.
