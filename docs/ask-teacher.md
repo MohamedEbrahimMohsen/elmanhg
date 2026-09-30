@@ -120,6 +120,7 @@ The snapshot (`TeacherThreadContext`) keeps `subjectId`, `subjectName`, `unitId`
 - The limit is `Subscriptions:AskTeacherMonthlyQuestions` (20) with the add-on, 0 without it.
 - A thread counts in the calendar month of `Subscriptions:DailyQuotaTimeZone` (Africa/Cairo) in which it was submitted. The month's bounds are converted to UTC (`AskTeacherGate.CurrentQuotaMonth`). A follow-up (#97) does not count.
 - Gate order on create: validation `422` → user `401` → no add-on `403 ASK_TEACHER_REQUIRES_SUBSCRIPTION` → quota `403 ASK_TEACHER_MONTHLY_LIMIT_REACHED` (context `limit`) → context `404`s / `409 TEACHER_THREAD_EXAM_IN_PROGRESS` → store the photo → one save. The context preview applies the same add-on check (`403 ASK_TEACHER_REQUIRES_SUBSCRIPTION`) before it resolves anything; it does not check the quota.
+- Create and follow-up are rate-limited per student: `RateLimiting:AskTeacherSubmissionPermitLimit` per `RateLimiting:AskTeacherSubmissionWindowSeconds` (10 per 600 s, shared by both), and one request in flight per student (`RateLimiting:StudentConcurrentRequestLimit`); both answer `429 TOO_MANY_REQUESTS` ([security.md](security.md) §3).
 - `GET /api/subscriptions/usage` exposes `monthlyAskTeacherQuestionLimit`, `askTeacherQuestionsUsedThisMonth` and `askTeacherQuestionsRemainingThisMonth` (never below 0). See `docs/subscriptions.md`.
 
 ## Private media
@@ -205,7 +206,7 @@ The SignalR hub `/api/hubs/notifications` (#97) requires any signed-in user (JWT
 
 ## Known limits
 
-- The quota is a soft limit: two questions sent in parallel at 19/20 can both pass.
+- The quota is a soft limit: two questions sent in parallel at 19/20 can both pass only across several API instances; one instance serves one request per student at a time.
 - The photo is written just before the save; a failed save leaves an orphan file (no cleanup job).
 - The photo access check looks the file up by its URL on every request (indexed).
 - A teacher unassigned from a subject loses access to threads they claimed there.

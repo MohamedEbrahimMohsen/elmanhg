@@ -1,3 +1,4 @@
+using Elmanhg.Application.Auth.Shared;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Users.CheckUserActive;
 using Elmanhg.Domain.Identity;
@@ -27,8 +28,8 @@ public sealed class CheckUserActiveHandlerTests : IDisposable
         var user = Seed(suspended: false);
         var handler = Handler(cacheSeconds: 30);
 
-        var first = await handler.Handle(new CheckUserActiveQuery(user.Id), TestContext.Current.CancellationToken);
-        var second = await handler.Handle(new CheckUserActiveQuery(user.Id), TestContext.Current.CancellationToken);
+        var first = await handler.Handle(new CheckUserActiveQuery(user.Id, SecurityStampClaim.Fingerprint(user.SecurityStamp)), TestContext.Current.CancellationToken);
+        var second = await handler.Handle(new CheckUserActiveQuery(user.Id, SecurityStampClaim.Fingerprint(user.SecurityStamp)), TestContext.Current.CancellationToken);
 
         (first, second).Should().Be((true, true));
         await _userRepository.Received(1).FirstOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<User>, IQueryable<User>>?>(), Arg.Any<Func<IQueryable<User>, IOrderedQueryable<User>>?>(), Arg.Any<bool>());
@@ -39,7 +40,20 @@ public sealed class CheckUserActiveHandlerTests : IDisposable
     {
         var user = Seed(suspended: true);
 
-        var active = await Handler(cacheSeconds: 30).Handle(new CheckUserActiveQuery(user.Id), TestContext.Current.CancellationToken);
+        var active = await Handler(cacheSeconds: 30).Handle(new CheckUserActiveQuery(user.Id, SecurityStampClaim.Fingerprint(user.SecurityStamp)), TestContext.Current.CancellationToken);
+
+        active.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Handle_TokenMintedBeforeStampChanged_ReturnsFalse()
+    {
+        var user = Seed(suspended: false);
+        user.SecurityStamp = "stamp-before-suspension";
+        var staleFingerprint = SecurityStampClaim.Fingerprint(user.SecurityStamp);
+        user.SecurityStamp = "stamp-after-reactivation";
+
+        var active = await Handler(cacheSeconds: 0).Handle(new CheckUserActiveQuery(user.Id, staleFingerprint), TestContext.Current.CancellationToken);
 
         active.Should().BeFalse();
     }
@@ -49,7 +63,7 @@ public sealed class CheckUserActiveHandlerTests : IDisposable
     {
         Seed(suspended: false);
 
-        var active = await Handler(cacheSeconds: 30).Handle(new CheckUserActiveQuery(Guid.NewGuid()), TestContext.Current.CancellationToken);
+        var active = await Handler(cacheSeconds: 30).Handle(new CheckUserActiveQuery(Guid.NewGuid(), SecurityStampClaim.Fingerprint(null)), TestContext.Current.CancellationToken);
 
         active.Should().BeFalse();
     }
@@ -60,8 +74,8 @@ public sealed class CheckUserActiveHandlerTests : IDisposable
         var user = Seed(suspended: false);
         var handler = Handler(cacheSeconds: 0);
 
-        await handler.Handle(new CheckUserActiveQuery(user.Id), TestContext.Current.CancellationToken);
-        await handler.Handle(new CheckUserActiveQuery(user.Id), TestContext.Current.CancellationToken);
+        await handler.Handle(new CheckUserActiveQuery(user.Id, SecurityStampClaim.Fingerprint(user.SecurityStamp)), TestContext.Current.CancellationToken);
+        await handler.Handle(new CheckUserActiveQuery(user.Id, SecurityStampClaim.Fingerprint(user.SecurityStamp)), TestContext.Current.CancellationToken);
 
         await _userRepository.Received(2).FirstOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<User>, IQueryable<User>>?>(), Arg.Any<Func<IQueryable<User>, IOrderedQueryable<User>>?>(), Arg.Any<bool>());
     }

@@ -109,12 +109,25 @@ public sealed class QuestionImportEndpointTests(ApiFactory factory)
     {
         var lessonId = await SeedLessonAsync();
         using var admin = await AdminClientAsync();
-        using var form = Form(lessonId, Encoding.UTF8.GetBytes("not a workbook"));
+        using var form = Form(lessonId, [0x50, 0x4B, 0x03, 0x04, .. Encoding.UTF8.GetBytes("not a workbook")]);
 
         using var response = await admin.PostAsync($"{Route}/preview", form, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         (await ReadCodeAsync(response)).Should().Be("SPREADSHEET_UNREADABLE");
+    }
+
+    [Fact]
+    public async Task PostPreview_NonZipBytes_Returns422FileTypeInvalid()
+    {
+        var lessonId = await SeedLessonAsync();
+        using var admin = await AdminClientAsync();
+        using var form = Form(lessonId, Encoding.UTF8.GetBytes("not a workbook"));
+
+        using var response = await admin.PostAsync($"{Route}/preview", form, TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await ReadCodeAsync(response)).Should().Contain("QUESTION_IMPORT_FILE_TYPE_INVALID");
     }
 
     [Fact]

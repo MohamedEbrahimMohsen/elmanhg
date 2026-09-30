@@ -84,6 +84,7 @@ public class AuthController(IMediator mediator, IOptions<AuthOptions> authOption
 
     [HttpPost("refresh", Name = "RefreshAccessToken")]
     [AllowAnonymous]
+    [EnableRateLimiting(AuthRateLimitPolicies.Refresh)]
     [ProducesResponseType<AuthResult>(StatusCodes.Status200OK)]
     public Task<ActionResult> RefreshAccessToken(CancellationToken cancellationToken) => SendWithRefreshCookie(new RefreshAccessTokenCommand(Request.Cookies[authOptions.Value.RefreshTokenCookieName] ?? string.Empty), cancellationToken);
 

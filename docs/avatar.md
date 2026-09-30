@@ -53,7 +53,8 @@ Citations are structure from the API, not parsed model text, so the model cannot
 - The limit is the entitlement's `DailyAvatarMessageLimit`: Free 5 (`Subscriptions:FreeDailyAvatarMessages`), Base 50 (`Subscriptions:BaseDailyAvatarMessages`) ([subscriptions.md](subscriptions.md)).
 - Before calling the model, the handler counts today's messages, where the day follows `Subscriptions:DailyQuotaTimeZone` (Africa/Cairo). At the limit it returns `403 AVATAR_DAILY_LIMIT_REACHED` with context `limit`.
 - A message counts only after a successful reply: a refusal, a validation error or an AI failure uses nothing.
-- It is a soft limit: the count is read before the model call and the row is written after it, so every request sent while others are still waiting for a reply passes the check. Any number of parallel requests can pass, and the count can end above the limit by up to that number minus one (for example, five requests sent together at 0 of 5 all pass, and so do five sent at 4 of 5, ending at 9). Hardening is tracked for #115.
+- One message is in flight per student (`RateLimiting:StudentConcurrentRequestLimit`, 1): a second message sent while the first still waits for its reply gets `429 TOO_MANY_REQUESTS`, so the count read before the model call is exact on one API instance (the single-VPS topology). The cap is in memory, so several API instances would each allow one ([security.md](security.md) §3).
+- A burst limit sits in front of the quota: `RateLimiting:AvatarMessagePermitLimit` messages per `RateLimiting:AvatarMessageWindowSeconds` per student (20 per 60 s), `429 TOO_MANY_REQUESTS` above it.
 - Storage: table `AvatarMessageUsages` (`Id`, `StudentId`, `EntryPoint`, `CreatedAt`, `IsDeleted`, `DeletedAt`) with an index on `(StudentId, CreatedAt)`. It stores no text, model or prompt; the messages are in the [Conversation log](#conversation-log).
 
 ## HTTP
@@ -182,5 +183,5 @@ There is no streaming: each message gets one JSON reply, and the panel shows «�
 ## Not in this story
 
 - A student history view, and a retention purge (#215).
-- A per-student concurrency cap on avatar calls (#115).
+- A per-student concurrency cap on avatar calls: added by #115 (see Daily quota).
 - Ask a Teacher (E9).

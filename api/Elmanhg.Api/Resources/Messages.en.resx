@@ -89,6 +89,7 @@
   <data name="REFRESH_TOKEN_IS_REQUIRED" xml:space="preserve"><value>Your session has ended. Sign in again.</value></data>
   <data name="REFRESH_TOKEN_IS_EXPIRED" xml:space="preserve"><value>Your session has ended. Sign in again.</value></data>
   <data name="REFRESH_TOKEN_USER_NOT_FOUND" xml:space="preserve"><value>Your session has ended. Sign in again.</value></data>
+  <data name="REFRESH_TOKEN_REVOKED" xml:space="preserve"><value>Your session was ended for your security. Sign in again.</value></data>
   <data name="DISPLAY_NAME_REQUIRED" xml:space="preserve"><value>Enter your name.</value></data>
   <data name="DISPLAY_NAME_TOO_LONG" xml:space="preserve"><value>Name is too long.</value></data>
   <data name="EMAIL_REQUIRED" xml:space="preserve"><value>Enter your email.</value></data>

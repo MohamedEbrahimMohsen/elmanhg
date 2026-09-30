@@ -1,6 +1,7 @@
 using Elmanhg.Tests.Integration.Auth;
 using Elmanhg.Tests.Integration.Authorization;
 using Elmanhg.Tests.Integration.Infrastructure;
+using Elmanhg.Tests.Integration.TeacherThreads;
 using FluentAssertions;
 using System.Net;
 using System.Net.Http.Headers;
@@ -11,7 +12,7 @@ namespace Elmanhg.Tests.Integration.Content;
 
 public sealed class LessonImagesEndpointTests(ApiFactory factory)
 {
-    private static readonly byte[] PngBytes = [0x89, 0x50, 0x4E, 0x47];
+    private static readonly byte[] PngBytes = TeacherThreadTestData.PngBytes;
 
     [Fact]
     public async Task Post_Admin_StoresServesAndAuditsImage()
@@ -66,6 +67,19 @@ public sealed class LessonImagesEndpointTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task Post_PngExtensionWithHtmlBytes_Returns422LessonImageTypeInvalid()
+    {
+        var (_, lessonId) = await SeedLessonAsync();
+        using var admin = await AdminClientAsync();
+        using var form = ImageForm("diagram.png", "image/png", "<html><script>alert(1)</script></html>"u8.ToArray());
+
+        using var response = await admin.PostAsync(Route(lessonId), form, TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await ReadCodeAsync(response)).Should().Contain("LESSON_IMAGE_TYPE_INVALID");
+    }
+
+    [Fact]
     public async Task Post_UnknownLesson_Returns404LessonNotFound()
     {
         using var admin = await AdminClientAsync();
@@ -105,9 +119,9 @@ public sealed class LessonImagesEndpointTests(ApiFactory factory)
 
     private static string Route(Guid lessonId) => $"/api/lessons/{lessonId}/images";
 
-    private static MultipartFormDataContent ImageForm(string fileName, string contentType)
+    private static MultipartFormDataContent ImageForm(string fileName, string contentType, byte[]? bytes = null)
     {
-        var file = new ByteArrayContent([0x89, 0x50, 0x4E, 0x47]);
+        var file = new ByteArrayContent(bytes ?? PngBytes);
         file.Headers.ContentType = new MediaTypeHeaderValue(contentType);
         return new MultipartFormDataContent { { file, "file", fileName } };
     }

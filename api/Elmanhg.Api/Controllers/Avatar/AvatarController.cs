@@ -1,3 +1,4 @@
+using Elmanhg.Api.RateLimiting;
 using Elmanhg.Application.Avatar.GetAvatarStatus;
 using Elmanhg.Application.Avatar.SendAvatarMessage;
 using Elmanhg.Application.Avatar.Shared;
@@ -5,6 +6,7 @@ using Elmanhg.Domain.SharedKernel;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Elmanhg.Api.Controllers.Avatar;
 
@@ -24,6 +26,7 @@ public class AvatarController(IMediator mediator) : ControllerBase
 
     [HttpPost("messages", Name = "SendAvatarMessage")]
     [Authorize(Policy = DefaultCodes.AvatarChat)]
+    [EnableRateLimiting(StudentRateLimitPolicies.AvatarMessages)]
     [ProducesResponseType<AvatarReplyResult>(StatusCodes.Status200OK)]
     public async Task<ActionResult> SendMessage([FromBody] SendAvatarMessageCommand command, CancellationToken cancellationToken)
     {

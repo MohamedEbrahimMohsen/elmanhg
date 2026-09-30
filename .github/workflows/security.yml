@@ -1,0 +1,63 @@
+name: security
+
+# Secret scan on every change, plus a weekly audit of all three stacks: new CVEs land without code changes (docs/security.md §6-§7).
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  secret-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install gitleaks 8.30.1
+        env:
+          GITLEAKS_VERSION: 8.30.1
+          GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+        run: |
+          curl -fsSL -o gitleaks.tar.gz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf gitleaks.tar.gz gitleaks && sudo install -m 755 gitleaks /usr/local/bin/gitleaks
+      - name: Scan the full git history
+        run: gitleaks git --config .gitleaks.toml --redact --no-banner --exit-code 1 .
+
+  dependency-audit:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Restore
+        run: dotnet restore api/
+      - name: api vulnerable packages
+        run: dotnet list api/ package --vulnerable --include-transitive 2>&1 | tee vulnerable.txt && ! grep -q 'has the following vulnerable' vulnerable.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: web/.nvmrc
+      - name: web vulnerable packages
+        working-directory: web
+        run: npm audit --audit-level=high --package-lock-only
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          version: "0.12.17"
+      - name: ai vulnerable packages
+        working-directory: ai
+        run: uv export --frozen --no-dev --no-hashes --no-emit-project -o requirements-audit.txt && uvx pip-audit==2.10.1 -r requirements-audit.txt

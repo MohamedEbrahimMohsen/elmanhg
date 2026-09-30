@@ -1,0 +1,13 @@
+# Triaged gitleaks false positives (docs/security.md §6): one fingerprint per line, each preceded by a comment with the reason.
+# A test constant: the hex digits 0-9a-f repeated, used as a valid-length training student-id hash key in a validator test.
+bad2c0aaa673269f2d9bcecde49e41d827a98218:api/Elmanhg.Tests/Infrastructure/TrainingData/TrainingDataOptionsValidatorTests.cs:generic-api-key:11
+# The same test constant, in the feature-branch commit that was squash-merged as bad2c0a.
+f0f29e183b87ef9dec72b7a48dd33508a4dfcd29:api/Elmanhg.Tests/Infrastructure/TrainingData/TrainingDataOptionsValidatorTests.cs:generic-api-key:11
+# A Prometheus rule-test series label (job="elmanhg-api", http_route=...), not a credential.
+61b128117a033d64afcb5db9e976bea95d387a44:deploy/observability/prometheus/tests/elmanhg.rules.test.yml:generic-api-key:307
+# A Prometheus rule-test series label (job="elmanhg-api", http_route=...), not a credential.
+61b128117a033d64afcb5db9e976bea95d387a44:deploy/observability/prometheus/tests/elmanhg.rules.test.yml:generic-api-key:322
+# The same Prometheus series labels, in the feature-branch commit that was squash-merged as 61b1281.
+f104adcdbb9109ca8147030208090e1f8ec15c06:deploy/observability/prometheus/tests/elmanhg.rules.test.yml:generic-api-key:307
+# The same Prometheus series labels, in the feature-branch commit that was squash-merged as 61b1281.
+f104adcdbb9109ca8147030208090e1f8ec15c06:deploy/observability/prometheus/tests/elmanhg.rules.test.yml:generic-api-key:322

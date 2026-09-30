@@ -15,6 +15,7 @@ public static class UserClaimsExtensions
             new(CurrentUserService.Constants.UserNameClaimType, user.UserName ?? string.Empty),
             new(CurrentUserService.Constants.CreatedAtUnixTimeSecondsClaimType, user.CreationDate.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture)),
             new(ClaimTypes.Role, user.Role.ToString()),
+            new(SecurityStampClaim.ClaimType, SecurityStampClaim.Fingerprint(user.SecurityStamp)),
         ];
 
         if (!string.IsNullOrWhiteSpace(user.PhoneNumber))

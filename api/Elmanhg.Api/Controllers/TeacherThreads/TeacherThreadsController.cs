@@ -1,4 +1,5 @@
 using Core.DDD.Models;
+using Elmanhg.Api.RateLimiting;
 using Elmanhg.Application.TeacherThreads.CreateTeacherThread;
 using Elmanhg.Application.TeacherThreads.FollowUpTeacherThread;
 using Elmanhg.Application.TeacherThreads.GetMyTeacherThread;
@@ -11,6 +12,7 @@ using Elmanhg.Domain.SharedKernel;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Elmanhg.Api.Controllers.TeacherThreads;
 
@@ -57,6 +59,7 @@ public class TeacherThreadsController(IMediator mediator) : ControllerBase
 
     [HttpPost("{threadId:guid}/follow-ups", Name = "FollowUpTeacherThread")]
     [Authorize(Policy = DefaultCodes.AskTeacherSubmit)]
+    [EnableRateLimiting(StudentRateLimitPolicies.AskTeacherSubmissions)]
     [ProducesResponseType<TeacherThreadResult>(StatusCodes.Status200OK)]
     public async Task<ActionResult> FollowUpTeacherThread([FromRoute] Guid threadId, [FromBody] FollowUpTeacherThreadRequest request, CancellationToken cancellationToken)
     {
@@ -75,6 +78,7 @@ public class TeacherThreadsController(IMediator mediator) : ControllerBase
 
     [HttpPost(Name = "CreateTeacherThread")]
     [Authorize(Policy = DefaultCodes.AskTeacherSubmit)]
+    [EnableRateLimiting(StudentRateLimitPolicies.AskTeacherSubmissions)]
     [Consumes("multipart/form-data")]
     [ProducesResponseType<TeacherThreadResult>(StatusCodes.Status200OK)]
     public async Task<ActionResult> CreateTeacherThread([FromForm] string? text, [FromForm] Guid? lessonId, [FromForm] Guid? questionId, [FromForm] Guid? attemptId, IFormFile? image, CancellationToken cancellationToken)

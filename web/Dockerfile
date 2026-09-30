@@ -8,7 +8,7 @@ RUN --mount=type=cache,target=/root/.npm npm ci
 COPY . .
 RUN npm run build && rm -rf dist/.vite
 
-FROM caddy:2.10-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d
+FROM caddy:2.11-alpine@sha256:6aeddd44c3078b0f9a35206472a11420648a79c184603ef95957d0a20044cb2b
 # The official caddy binary carries cap_net_bind_service, so a non-root user can still bind 80 and 443.
 RUN addgroup -S -g 10001 caddy && adduser -S -D -H -u 10001 -G caddy caddy && chown -R caddy:caddy /data /config
 COPY --from=build /app/dist /srv

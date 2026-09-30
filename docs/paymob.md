@@ -102,6 +102,7 @@ Paymob posts the transaction-processed callback to `POST /api/payments/paymob/we
 - The digest is lower-case hex. The provided signature is trimmed and lower-cased, then compared in constant time (`CryptographicOperations.FixedTimeEquals`).
 - **Uncertain:** the `null` formatting and the `created_at` text are unverified against a live account (section 5).
 - The signature is read from the `hmac` query parameter; when that is absent, from a top-level `hmac` string in the body.
+- The endpoint is rate-limited per client IP (`RateLimiting:PaymentWebhookPermitLimit` per `RateLimiting:PaymentWebhookWindowSeconds`, 300 per 60 s); over the limit it answers 429 `TOO_MANY_REQUESTS` and Paymob retries. The limit caps floods of unsigned posts, each of which writes an audit row.
 - **Fail closed:** an empty `HmacSecret`, a missing signature or a mismatch is 401 `PAYMOB_WEBHOOK_SIGNATURE_INVALID`, nothing changes, and the audit log records a Failure row. The secret and the raw payload are never logged.
 
 **Classification** (signed fields only; the comment in `PaymobNotificationReader.KindOf` states why): `has_parent_transaction` true and `is_capture` false → `Reversal` (a refund or void child transaction); `has_parent_transaction` true and `is_capture` true → `Other`; no parent but `is_refunded` or `is_voided` true → `Other` (the parent's update; the child carries the reversal); otherwise `Charge`. The unsigned `is_refund` / `is_void` flags are never read: they could be added to a replayed signed body.

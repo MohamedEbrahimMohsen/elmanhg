@@ -70,6 +70,12 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         // The sweep would race tests that record SLA events through the mediator.
         builder.UseSetting("AskTeacher:SlaSweepEnabled", "false");
         builder.UseSetting("TrainingData:StudentIdHashKey", TestStudentIdHashKey);
+        // Parallel tests share this host and the "unknown" client partition; RateLimiting tests set their own limits.
+        builder.UseSetting("RateLimiting:AuthRefreshPermitLimit", "100000");
+        builder.UseSetting("RateLimiting:PublicReadPermitLimit", "100000");
+        builder.UseSetting("RateLimiting:PaymentWebhookPermitLimit", "100000");
+        builder.UseSetting("RateLimiting:AvatarMessagePermitLimit", "100000");
+        builder.UseSetting("RateLimiting:AskTeacherSubmissionPermitLimit", "100000");
         builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
             // UseVector() makes EF build an NpgsqlDataSource, whose connection string drops the password unless it is persisted; tests that open raw connections read it back through DbContext.
@@ -213,6 +219,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Auth:OtpRequestWindowSeconds"] = "600",
             ["Auth:CredentialPermitLimit"] = "1000",
             ["Auth:CredentialWindowSeconds"] = "60",
+            ["Auth:RefreshTokenReuseGraceSeconds"] = "10",
             ["Students:SubjectInterestsMaxCount"] = "50",
             ["Users:ListMaxPageSize"] = "100",
             ["Users:SearchMaxLength"] = "256",

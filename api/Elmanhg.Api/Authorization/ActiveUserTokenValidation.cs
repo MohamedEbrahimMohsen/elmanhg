@@ -1,4 +1,5 @@
 using Core.Identity.Tokens.CurrentUser;
+using Elmanhg.Application.Auth.Shared;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Users.CheckUserActive;
 using MediatR;
@@ -18,18 +19,20 @@ public static class ActiveUserTokenValidation
         return services;
     }
 
-    // JWTs outlive a suspension; this refuses a suspended or deleted user's access token on its next request.
+    // JWTs outlive a suspension; this refuses a suspended or deleted user's access token, and one minted before the user's
+    // security stamp last changed (suspension, sign-out), on its next request.
     public static async Task OnTokenValidated(TokenValidatedContext context)
     {
         var claim = context.Principal?.FindFirst(CurrentUserService.Constants.UserIdClaimType)?.Value;
-        if (!Guid.TryParse(claim, out var userId))
+        var securityStampFingerprint = context.Principal?.FindFirst(SecurityStampClaim.ClaimType)?.Value;
+        if (!Guid.TryParse(claim, out var userId) || string.IsNullOrEmpty(securityStampFingerprint))
         {
             context.Fail(ErrorCodes.UserNotAuthenticated);
             return;
         }
 
         var sender = context.HttpContext.RequestServices.GetRequiredService<ISender>();
-        if (!await sender.Send(new CheckUserActiveQuery(userId), context.HttpContext.RequestAborted).ConfigureAwait(false))
+        if (!await sender.Send(new CheckUserActiveQuery(userId, securityStampFingerprint), context.HttpContext.RequestAborted).ConfigureAwait(false))
         {
             context.Fail(ErrorCodes.UserSuspended);
         }
