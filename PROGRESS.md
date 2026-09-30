@@ -1,12 +1,12 @@
 # Elmanhg — autopilot progress
 
-Last updated: laptop session, after story #106 merged (main at `28528a6`).
-**Next story: #107 [E11.S4] Teacher personal stats card**, the first row of "Remaining stories".
+Last updated: laptop session, after story #107 merged (main at `483dd1d`).
+**Next story: #115 [E13.S4] Security hardening**, the first row of "Remaining stories".
 The laptop run did #54–#64; the cloud session did #65–#76 (see "Running in a cloud session" and "Hand-off" below).
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (53 of 60)
+## Finished stories (54 of 60)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -63,17 +63,17 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 51 | #110 [E12.S2] JSONL export | #234 | 2 | skipped (too many files) | #235 |
 | 52 | #122 [E15.S2] CAS final answer check (v2) | #236 | 2 | skipped (too many files); +r3 security fix, +main integration | #237 |
 | 53 | #106 [E11.S3] Student and teacher administration | #239 | 1 | skipped (too many files) | #240 |
+| 54 | #107 [E11.S4] Teacher personal stats card | #238 | 1 | no actionable comments | — |
 
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (7), in run order
+## Remaining stories (6), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
 | Order | Issue | Story |
 |---|---|---|
-| 35 | #107 | [E11.S4] Teacher personal stats card |
 | 41 | #115 | [E13.S4] Security hardening |
 | 42 | #117 | [E14.S1] Essay question authoring with rubric (v2) |
 | 47 | #123 | [E15.S3] LLM step grading (v2) |
