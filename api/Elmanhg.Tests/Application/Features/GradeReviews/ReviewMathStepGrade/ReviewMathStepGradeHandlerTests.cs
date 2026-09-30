@@ -98,6 +98,19 @@ public sealed class ReviewMathStepGradeHandlerTests
     }
 
     [Fact]
+    public async Task Handle_TestModeSession_ThrowsGradeReviewNotFound()
+    {
+        var (session, grade) = Seed(verdict: null, isTestMode: true);
+        grade.FailAttempt("MATH_CHECK_UNAVAILABLE", Now.AddMinutes(-30), 1, TimeSpan.FromSeconds(30));
+
+        var act = () => Handle(grade, GradeReviewDecision.Overridden, 2m, "Correct method.");
+
+        (await act.Should().ThrowAsync<NotFoundCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.GradeReviewNotFound);
+        session.Attempts.Should().BeEmpty();
+        await _mathStepGradeRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task Handle_NotInReview_ThrowsGradeNotInReview()
     {
         var (_, grade) = Seed();
@@ -127,17 +140,18 @@ public sealed class ReviewMathStepGradeHandlerTests
         return (session, grade);
     }
 
-    private (Session Session, MathStepGrade Grade) Seed(MathAnswerVerdict? verdict = MathAnswerVerdict.Equivalent)
+    private (Session Session, MathStepGrade Grade) Seed(MathAnswerVerdict? verdict = MathAnswerVerdict.Equivalent, bool isTestMode = false)
     {
         var mcq = _builder.Questions.Approved().Build();
         var math = _builder.Questions.MathSteps().Approved().Build();
         _questions.AddRange([mcq, math]);
-        var session = Session.StartQuiz(_builder.StudentId, _builder.Questions.Lesson, [mcq, math], false);
+        var session = Session.StartQuiz(_builder.StudentId, _builder.Questions.Lesson, [mcq, math], isTestMode);
         var item = session.Items[1];
         session.SubmitForAiGrading(item, MathStepGradeBuilder.DefaultAnswer, 0);
         var grade = new MathStepGradeBuilder().ForStudent(_builder.StudentId).ForSession(session.Id).ForQuestion(item.QuestionId, item.QuestionVersion).WithVerdict(verdict).Build();
         _grades.Add(grade);
         SessionRepositoryStub.StubFind(_sessionRepository, session);
+        SessionRepositoryStub.StubCount(_sessionRepository, session);
         return (session, grade);
     }
 

@@ -109,7 +109,9 @@ describe('StudentRealtimeListener', () => {
 
     expect(await screen.findByText(reviewedToastText)).toBeInTheDocument();
     expect(await within(article).findByText('Partially correct')).toBeInTheDocument();
-    expect(within(article).getByRole('note')).toHaveTextContent('Your teacher reviewed this grade and accepted it.');
+    expect(await within(article).findByRole('note')).toHaveTextContent(
+      'Your teacher reviewed this grade and accepted it.',
+    );
   });
 
   it('ignores a malformed grade-reviewed event', async () => {

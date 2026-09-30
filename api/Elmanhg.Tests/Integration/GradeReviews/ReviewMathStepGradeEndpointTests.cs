@@ -52,4 +52,23 @@ public sealed class ReviewMathStepGradeEndpointTests(ApiFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         (await response.Content.ReadFromJsonAsync<JsonElement>(CancellationToken)).GetProperty("code").GetString().Should().Be("GRADE_REVIEW_NOT_FOUND");
     }
+
+    [Fact]
+    public async Task GetAndPost_TestModeGrades_Return404()
+    {
+        var subjectId = await ScopeTestData.SeedSubjectAsync(factory, "Physics", CancellationToken);
+        var (essayId, _, _, _) = await SeedInReviewEssayAsync(factory, subjectId, isTestMode: true);
+        var (mathId, mathSessionId, _, _) = await SeedInReviewMathStepAsync(factory, subjectId, isTestMode: true);
+        var (_, client) = await ReviewClientAsync(factory, subjectId);
+
+        using var essayDetail = await client.GetAsync(EssayRoute(subjectId, essayId), CancellationToken);
+        using var mathDetail = await client.GetAsync(MathStepsRoute(subjectId, mathId), CancellationToken);
+        using var essayReview = await client.PostAsJsonAsync(EssayRoute(subjectId, essayId), new { decision = "Accepted" }, CancellationToken);
+        using var mathReview = await client.PostAsJsonAsync(MathStepsRoute(subjectId, mathId), new { decision = "Overridden", score = 2, comment = "Correct method." }, CancellationToken);
+
+        new[] { essayDetail.StatusCode, mathDetail.StatusCode, essayReview.StatusCode, mathReview.StatusCode }.Should().AllBeEquivalentTo(HttpStatusCode.NotFound);
+        (await mathReview.Content.ReadFromJsonAsync<JsonElement>(CancellationToken)).GetProperty("code").GetString().Should().Be("GRADE_REVIEW_NOT_FOUND");
+        using var scope = factory.Services.CreateScope();
+        (await scope.ServiceProvider.GetRequiredService<AppDbContext>().Attempts.CountAsync(x => x.SessionId == mathSessionId, CancellationToken)).Should().Be(0);
+    }
 }

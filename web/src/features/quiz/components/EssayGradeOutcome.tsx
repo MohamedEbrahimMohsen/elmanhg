@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { CircleAlert, CircleCheck, CircleX } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { EssayCriteriaList } from '@/features/questions';
@@ -61,7 +62,11 @@ export function EssayGradeOutcome({ grade }: EssayGradeOutcomeProps) {
           <p className="text-ui text-text-muted">{grade.justification}</p>
         </div>
       ) : null}
-      {grade.review ? <TeacherReviewNote review={grade.review} /> : null}
+      {grade.review ? (
+        <Suspense fallback={null}>
+          <TeacherReviewNote review={grade.review} />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

@@ -5,7 +5,9 @@ using Elmanhg.Application.GradeReviews.Shared;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.MathStepGrading;
 using Elmanhg.Domain.Questions;
+using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Units;
+using Elmanhg.Tests.Application.Features.Sessions;
 using Elmanhg.Tests.Builders;
 using FluentAssertions;
 using NSubstitute;
@@ -16,6 +18,7 @@ namespace Elmanhg.Tests.Application.Features.GradeReviews.GetMathStepGradeReview
 public sealed class GetMathStepGradeReviewHandlerTests
 {
     private readonly IMathStepGradeRepository _mathStepGradeRepository = Substitute.For<IMathStepGradeRepository>();
+    private readonly ISessionRepository _sessionRepository = Substitute.For<ISessionRepository>();
     private readonly IQuestionRepository _questionRepository = Substitute.For<IQuestionRepository>();
     private readonly ILessonRepository _lessonRepository = Substitute.For<ILessonRepository>();
     private readonly ICurriculumUnitRepository _unitRepository = Substitute.For<ICurriculumUnitRepository>();
@@ -59,13 +62,25 @@ public sealed class GetMathStepGradeReviewHandlerTests
         (await act.Should().ThrowAsync<NotFoundCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.GradeReviewNotFound);
     }
 
-    private MathStepGrade SeedUnchecked()
+    [Fact]
+    public async Task Handle_TestModeSession_ThrowsGradeReviewNotFound()
     {
-        var grade = new MathStepGradeBuilder().ForQuestion(_question.Id, _question.Version).WithVerdict(null).Build();
+        var session = new SessionBuilder().Build(isTestMode: true);
+        SessionRepositoryStub.StubCount(_sessionRepository, session);
+        var grade = SeedUnchecked(session.Id);
+
+        var act = () => Handle(grade.SubjectId, grade);
+
+        (await act.Should().ThrowAsync<NotFoundCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.GradeReviewNotFound);
+    }
+
+    private MathStepGrade SeedUnchecked(Guid? sessionId = null)
+    {
+        var grade = new MathStepGradeBuilder().ForSession(sessionId ?? Guid.NewGuid()).ForQuestion(_question.Id, _question.Version).WithVerdict(null).Build();
         grade.FailAttempt("MATH_CHECK_UNAVAILABLE", MathStepGradeBuilder.DefaultRequestedAt.AddSeconds(5), 1, TimeSpan.FromSeconds(30));
         _grades.Add(grade);
         return grade;
     }
 
-    private Task<GradeReviewDetailResult> Handle(Guid subjectId, MathStepGrade grade) => new GetMathStepGradeReviewHandler(_mathStepGradeRepository, _questionRepository, _lessonRepository, _unitRepository).Handle(new GetMathStepGradeReviewQuery(subjectId, grade.Id), TestContext.Current.CancellationToken);
+    private Task<GradeReviewDetailResult> Handle(Guid subjectId, MathStepGrade grade) => new GetMathStepGradeReviewHandler(_mathStepGradeRepository, _sessionRepository, _questionRepository, _lessonRepository, _unitRepository).Handle(new GetMathStepGradeReviewQuery(subjectId, grade.Id), TestContext.Current.CancellationToken);
 }

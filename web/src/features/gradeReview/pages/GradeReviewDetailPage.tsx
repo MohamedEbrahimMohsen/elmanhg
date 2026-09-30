@@ -12,6 +12,9 @@ import { GradeReviewForm } from '../components/GradeReviewForm';
 import { ReviewedCard } from '../components/ReviewedCard';
 import { StudentAnswerCard } from '../components/StudentAnswerCard';
 import { useReviewGrade } from '../hooks/useReviewGrade';
+import { registerGradeReviewLocales } from '../locales';
+
+registerGradeReviewLocales();
 
 const routeApi = getRouteApi('/teacher/grade/$subjectId/$kind/$gradeId');
 

@@ -7,7 +7,9 @@ using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Questions.Grading;
+using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Units;
+using Elmanhg.Tests.Application.Features.Sessions;
 using Elmanhg.Tests.Builders;
 using FluentAssertions;
 using NSubstitute;
@@ -19,6 +21,7 @@ public sealed class GetEssayGradeReviewHandlerTests
 {
     private const string EditedStem = "<p>Explain inertia with an example.</p>";
     private readonly IEssayGradeRepository _essayGradeRepository = Substitute.For<IEssayGradeRepository>();
+    private readonly ISessionRepository _sessionRepository = Substitute.For<ISessionRepository>();
     private readonly IQuestionRepository _questionRepository = Substitute.For<IQuestionRepository>();
     private readonly ILessonRepository _lessonRepository = Substitute.For<ILessonRepository>();
     private readonly ICurriculumUnitRepository _unitRepository = Substitute.For<ICurriculumUnitRepository>();
@@ -83,6 +86,18 @@ public sealed class GetEssayGradeReviewHandlerTests
     }
 
     [Fact]
+    public async Task Handle_TestModeSession_ThrowsGradeReviewNotFound()
+    {
+        var session = new SessionBuilder().BuildWithEssay(isTestMode: true);
+        SessionRepositoryStub.StubCount(_sessionRepository, session);
+        var grade = Seed(EssayGradeBuilder.InReview(Builder(_question.Version).ForSession(session.Id)));
+
+        var act = () => Handle(grade);
+
+        (await act.Should().ThrowAsync<NotFoundCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.GradeReviewNotFound);
+    }
+
+    [Fact]
     public async Task Handle_RevisionMissing_ThrowsQuestionNotFound()
     {
         var grade = Seed(EssayGradeBuilder.InReview(Builder(9)));
@@ -100,5 +115,5 @@ public sealed class GetEssayGradeReviewHandlerTests
         return grade;
     }
 
-    private Task<GradeReviewDetailResult> Handle(EssayGrade grade) => new GetEssayGradeReviewHandler(_essayGradeRepository, _questionRepository, _lessonRepository, _unitRepository).Handle(new GetEssayGradeReviewQuery(grade.SubjectId, grade.Id), TestContext.Current.CancellationToken);
+    private Task<GradeReviewDetailResult> Handle(EssayGrade grade) => new GetEssayGradeReviewHandler(_essayGradeRepository, _sessionRepository, _questionRepository, _lessonRepository, _unitRepository).Handle(new GetEssayGradeReviewQuery(grade.SubjectId, grade.Id), TestContext.Current.CancellationToken);
 }

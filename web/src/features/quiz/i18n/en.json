@@ -92,10 +92,5 @@
       "Unreadable": "unreadable"
     },
     "justification": "Grader's comment"
-  },
-  "teacherReview": {
-    "accepted": "Your teacher reviewed this grade and accepted it.",
-    "overridden": "Your teacher reviewed this answer and set its score.",
-    "comment": "Teacher's note: {comment}"
   }
 }

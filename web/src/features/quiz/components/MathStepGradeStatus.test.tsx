@@ -90,7 +90,7 @@ describe('MathStepGradeStatus', () => {
     expect(group.getByRole('status')).toHaveTextContent('Score 2 / 2');
     expect(group.queryByText('Final answer:')).not.toBeInTheDocument();
     expect(group.queryByRole('region', { name: 'Marks per step' })).not.toBeInTheDocument();
-    expect(group.getByRole('note')).toHaveTextContent("Teacher's note: Correct method.");
+    expect(await group.findByRole('note')).toHaveTextContent("Teacher's note: Correct method.");
   });
 
   it('hides the outcome header but keeps step marks when showOutcome is false', async () => {

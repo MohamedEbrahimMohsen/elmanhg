@@ -8,7 +8,7 @@ Teachers review AI grades that wait in review, in the subjects they are assigned
 
 - `EssayGrade` rows with `Status = InReview`: reason `LowConfidence` or `GradingFailed` ([essay-grading.md](essay-grading.md)).
 - `MathStepGrade` rows with `Status = InReview`: reason `LowConfidence`, `GradingFailed` or `FinalAnswerUnchecked` ([math-step-grading.md](math-step-grading.md)).
-- Grades from admin test-mode sessions are never listed or counted.
+- Grades from admin test-mode sessions are never listed or counted, and opening or reviewing one directly returns 404 `GRADE_REVIEW_NOT_FOUND`.
 - Routing to review uses the existing thresholds `EssayGrading:ReviewConfidenceThreshold` and `MathStepGrading:ReviewConfidenceThreshold` (0.7). They are applied when the grade completes; review adds no threshold of its own.
 - Legacy `mathUnchecked` attempts written before #123 are not listed ([math-cas.md](math-cas.md)).
 - One list per subject and kind (`Essay` or `MathSteps`), oldest first (`RequestedAt`, then `Id`), paged.
@@ -32,7 +32,7 @@ Both `EssayGrades` and `MathStepGrades` gain nullable columns: `ReviewDecision` 
 
 ## API
 
-Controller `GradeReviewsController`; every action has policy `AiGrades.Override` (Teacher, Admin). Every request except the summary carries `subjectId` in the route and is an `ISubjectScopedRequest`: an unassigned teacher gets 403 `SUBJECT_OUT_OF_SCOPE`; an Admin is never scoped. A grade id from another subject, or a grade that was never in review, is 404 `GRADE_REVIEW_NOT_FOUND`. Results never carry student identity.
+Controller `GradeReviewsController`; every action has policy `AiGrades.Override` (Teacher, Admin). Every request except the summary carries `subjectId` in the route and is an `ISubjectScopedRequest`: an unassigned teacher gets 403 `SUBJECT_OUT_OF_SCOPE`; an Admin is never scoped. A grade id from another subject, a grade that was never in review, or a grade from an admin test-mode session is 404 `GRADE_REVIEW_NOT_FOUND`. Results never carry student identity.
 
 | Method | Route | Result |
 |---|---|---|
@@ -77,7 +77,7 @@ After the commit the API sends `gradeReviewed { sessionId, questionId }` to the 
 
 ## Web
 
-- `/teacher/grades?subjectId&kind&page` «مراجعة التصحيح»: subject pills with counts, kind tabs, the list (question excerpt, unit › lesson, reason, waiting time, AI score or «بدون درجة آلية», confidence), paging. States: loading, error with retry, no subjects, nothing waiting.
+- `/teacher/grades?subjectId&kind&page` «مراجعة التصحيح»: subject pills with counts (a missing or unassigned `subjectId` opens the first assigned subject), kind tabs, the list (question excerpt, unit › lesson, reason, waiting time, AI score or «بدون درجة آلية», confidence), paging. States: loading, error with retry, no subjects, nothing waiting.
 - `/teacher/grade/$subjectId/$kind/$gradeId` (`essay` or `math-steps`): the question, the grading key, the student's answer, the AI grading, then the decision form (accept disabled without an AI score; score and note for an override) or, once reviewed, the reviewed card. States: loading, error with retry, not found. A save returns to the list; a 409 toasts that another teacher reviewed it.
 - The teacher tab bar is three tabs (review queue, AI grades, student questions) plus «المزيد» (`/teacher/more`: stats).
 - Student: `TeacherReviewNote` under the essay and math grade results.

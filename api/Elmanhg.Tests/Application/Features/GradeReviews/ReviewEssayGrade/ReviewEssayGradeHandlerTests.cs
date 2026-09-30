@@ -97,14 +97,16 @@ public sealed class ReviewEssayGradeHandlerTests
     }
 
     [Fact]
-    public async Task Handle_TestModeSession_RecordsAttemptWithoutMastery()
+    public async Task Handle_TestModeSession_ThrowsGradeReviewNotFound()
     {
         var (session, grade) = Seed(isTestMode: true);
 
-        await Handle(grade, GradeReviewDecision.Accepted, null, null);
+        var act = () => Handle(grade, GradeReviewDecision.Accepted, null, null);
 
-        session.Attempts.Should().ContainSingle().Which.GradedBy.Should().Be(AttemptGrader.Teacher);
-        await _questionMasteryRepository.DidNotReceive().AddAsync(Arg.Any<QuestionMastery>(), Arg.Any<CancellationToken>());
+        (await act.Should().ThrowAsync<NotFoundCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.GradeReviewNotFound);
+        (grade.Status, session.Attempts.Count).Should().Be((EssayGradeStatus.InReview, 0));
+        await _essayGradeRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+        await _notifier.DidNotReceive().NotifyReviewedAsync(Arg.Any<Guid>(), Arg.Any<Guid>(), Arg.Any<Guid>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -179,6 +181,7 @@ public sealed class ReviewEssayGradeHandlerTests
         var grade = gradingFailed ? EssayGradeBuilder.GradingFailed(builder) : EssayGradeBuilder.InReview(builder);
         _grades.Add(grade);
         SessionRepositoryStub.StubFind(_sessionRepository, session);
+        SessionRepositoryStub.StubCount(_sessionRepository, session);
         return (session, grade);
     }
 

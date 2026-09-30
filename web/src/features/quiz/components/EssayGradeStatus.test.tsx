@@ -131,7 +131,7 @@ describe('EssayGradeStatus', () => {
 
     const group = await screen.findByRole('group', { name: 'Essay grade' });
     expect(within(group).getByRole('status')).toHaveTextContent('Score 4 / 5');
-    const note = within(group).getByRole('note');
+    const note = await within(group).findByRole('note');
     expect(note).toHaveTextContent('Your teacher reviewed this answer and set its score.');
     expect(note).toHaveTextContent("Teacher's note: Good example; full marks for the definition.");
     expect(within(group).queryByRole('list', { name: 'Marks per criterion' })).not.toBeInTheDocument();
@@ -143,8 +143,9 @@ describe('EssayGradeStatus', () => {
 
     const group = await screen.findByRole('group', { name: 'Essay grade' });
     expect(within(group).getByRole('list', { name: 'Marks per criterion' })).toBeInTheDocument();
-    expect(within(group).getByRole('note')).toHaveTextContent('Your teacher reviewed this grade and accepted it.');
-    expect(within(group).getByRole('note')).not.toHaveTextContent("Teacher's note");
+    const note = await within(group).findByRole('note');
+    expect(note).toHaveTextContent('Your teacher reviewed this grade and accepted it.');
+    expect(note).not.toHaveTextContent("Teacher's note");
   });
 
   it('shows an error with retry when the grade fails to load', async () => {

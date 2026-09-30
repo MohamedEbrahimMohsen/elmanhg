@@ -8,13 +8,16 @@ import { GradeReviewList } from '../components/GradeReviewList';
 import { GradeReviewSubjectPicker } from '../components/GradeReviewSubjectPicker';
 import { useGradeReviewQueue } from '../hooks/useGradeReviewQueue';
 import { useGradeReviewSearch } from '../hooks/useGradeReviewSearch';
+import { registerGradeReviewLocales } from '../locales';
+
+registerGradeReviewLocales();
 
 export function GradeReviewQueuePage() {
   const { t } = useTranslation('gradeReview');
   const { search, selectSubject, selectKind, setPage } = useGradeReviewSearch();
   const subjects = useGetGradeReviewSubjects();
-  const subjectId = search.subjectId ?? subjects.data?.[0]?.subjectId;
-  const queue = useGradeReviewQueue(subjectId, search.kind, search.page);
+  const assigned = subjects.data?.find((subject) => subject.subjectId === search.subjectId) ?? subjects.data?.[0];
+  const queue = useGradeReviewQueue(assigned?.subjectId, search.kind, search.page);
   const now = new Date();
 
   const renderQueue = (selectedId: string) => {
@@ -62,20 +65,19 @@ export function GradeReviewQueuePage() {
     if (subjects.isPending) {
       return <ContentListSkeleton label={t('queue.loading')} />;
     }
-    const selected = subjects.data.find((subject) => subject.subjectId === subjectId);
-    if (subjectId === undefined || selected === undefined) {
+    if (assigned === undefined) {
       return <GradeReviewEmptyState messageKey="queue.empty.noSubjects" />;
     }
     return (
       <>
-        <GradeReviewSubjectPicker subjects={subjects.data} selectedId={subjectId} onSelect={selectSubject} />
+        <GradeReviewSubjectPicker subjects={subjects.data} selectedId={assigned.subjectId} onSelect={selectSubject} />
         <GradeReviewKindTabs
           kind={search.kind}
-          essayCount={Number(selected.essayCount)}
-          mathStepsCount={Number(selected.mathStepsCount)}
+          essayCount={Number(assigned.essayCount)}
+          mathStepsCount={Number(assigned.mathStepsCount)}
           onSelect={selectKind}
         />
-        {renderQueue(subjectId)}
+        {renderQueue(assigned.subjectId)}
       </>
     );
   };

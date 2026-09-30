@@ -31,11 +31,13 @@ async function openQueue({
   respond = byKind,
   lng = 'en',
   failFirst = false,
+  path = '/teacher/grades',
 }: {
   subjects?: GradeReviewSubjectResult[];
   respond?: (request: Request) => PageDataOfGradeReviewItemResult;
   lng?: Language;
   failFirst?: boolean;
+  path?: string;
 } = {}) {
   server.use(
     getGetGradeReviewSubjectsMockHandler(subjects),
@@ -55,7 +57,7 @@ async function openQueue({
       ),
     );
   }
-  const rendered = renderApp('/teacher/grades', { session: testSessions.teacher, lng });
+  const rendered = renderApp(path, { session: testSessions.teacher, lng });
   await rendered.router.loadRouteChunk(rendered.router.routesById['/teacher/grades']);
   return rendered;
 }
@@ -113,6 +115,23 @@ describe('GradeReviewQueuePage', () => {
 
     expect(await screen.findByText('No answers are waiting for review.')).toBeInTheDocument();
     expect(router.state.location.search).toMatchObject({ subjectId: otherSubjectId, kind: 'Essay' });
+  });
+
+  it('falls back to the first subject when the URL names an unassigned one', async () => {
+    const unassignedId = '9f1c2d3e-4b5a-4c6d-8e7f-001122334455';
+    const requested: string[] = [];
+    await openQueue({
+      path: `/teacher/grades?subjectId=${unassignedId}`,
+      respond: (request) => {
+        requested.push(request.url);
+        return queuePage([essayQueueItem]);
+      },
+    });
+
+    expect(await screen.findByRole('link', { name: 'Explain inertia.' })).toBeInTheDocument();
+    expect(main().getByRole('button', { name: 'Physics · 3' })).toHaveAttribute('aria-pressed', 'true');
+    expect(requested.some((url) => url.includes(unassignedId))).toBe(false);
+    expect(requested.every((url) => url.includes(reviewSubjectId))).toBe(true);
   });
 
   it('shows the empty state when nothing waits', async () => {

@@ -28,6 +28,7 @@ public sealed class ReviewMathStepGradeHandler(IMathStepGradeRepository mathStep
 
         var userId = currentUserService.UserId.Value;
         var grade = await mathStepGradeRepository.FirstOrDefaultAsync(x => x.Id == request.MathStepGradeId && x.SubjectId == request.SubjectId, cancellationToken).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.GradeReviewNotFound);
+        await GradeReviewSessionGuard.EnsureNotTestModeAsync(grade.SessionId, sessionRepository, cancellationToken).ConfigureAwait(false);
         var now = timeProvider.GetUtcNow();
         if (request.Decision == GradeReviewDecision.Accepted)
         {

@@ -28,6 +28,7 @@ public sealed class ReviewEssayGradeHandler(IEssayGradeRepository essayGradeRepo
 
         var userId = currentUserService.UserId.Value;
         var grade = await essayGradeRepository.FirstOrDefaultAsync(x => x.Id == request.EssayGradeId && x.SubjectId == request.SubjectId, cancellationToken).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.GradeReviewNotFound);
+        await GradeReviewSessionGuard.EnsureNotTestModeAsync(grade.SessionId, sessionRepository, cancellationToken).ConfigureAwait(false);
         var now = timeProvider.GetUtcNow();
         if (request.Decision == GradeReviewDecision.Accepted)
         {
