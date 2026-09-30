@@ -6,6 +6,14 @@ export { EssayCriteriaList } from './components/EssayCriteriaList';
 export { MathStepScoreList } from './components/MathStepScoreList';
 export { MathStepsReadOnly } from './components/MathStepsReadOnly';
 export { questionListSearchSchema, type QuestionListSearch } from './schemas/questionListSearchSchema';
+export { LazyDragDropCorrectAnswer } from './components/LazyDragDropCorrectAnswer';
+export {
+  studentDiagramBodySchema,
+  diagramKeySchema,
+  type StudentDiagram,
+  type DiagramKey,
+} from './schemas/studentDiagramSchema';
+export { fromPlacementsPayload, type DiagramPlacements } from './api/diagramPlacement';
 export {
   emptyAnswer,
   toAnswerPayload,

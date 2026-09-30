@@ -49,6 +49,14 @@ public sealed class GradeFeedbackTextTests
     }
 
     [Fact]
+    public void Localize_PlacementTally_PassesRightWrongAndTotal()
+    {
+        _localizer.GetMessage(GradeFeedbackKeys.PlacementTally, Arg.Any<string?>(), Arg.Is<Dictionary<string, object>?>(x => x != null && x["right"].Equals(3) && x["wrong"].Equals(1) && x["total"].Equals(4))).Returns("placements");
+
+        GradeFeedbackText.Localize(GradeFeedback.PlacementTally(3, 1, 4), _localizer).Should().Be("placements");
+    }
+
+    [Fact]
     public void Localize_NotANumber_UsesNotANumberKey()
     {
         _localizer.GetMessage(GradeFeedbackKeys.NotANumber, Arg.Any<string?>(), Arg.Any<Dictionary<string, object>?>()).Returns("nan");

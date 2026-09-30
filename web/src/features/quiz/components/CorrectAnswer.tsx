@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { RichTextViewer } from '@/features/content';
 import { MathPreview } from '@/features/mathSteps';
+import { LazyDragDropCorrectAnswer } from '@/features/questions';
 import { formatNumber } from '@/shared/lib/format';
 import type { CorrectAnswerView } from '../api/correctAnswer';
 
@@ -59,5 +60,7 @@ export function CorrectAnswer({ view }: CorrectAnswerProps) {
       );
     case 'math':
       return <MathPreview latex={view.latex} label={t('feedback.mathAnswer')} />;
+    case 'diagram':
+      return <LazyDragDropCorrectAnswer diagram={view.diagram} diagramKey={view.diagramKey} />;
   }
 }

@@ -47,12 +47,10 @@
     }
   },
   "preview": {
-    "showKey": "إظهار الأماكن الصحيحة",
-    "dragDropGradingHint": "«جرّب الإجابة» غير متاح بعد لأسئلة السحب والإفلات."
+    "showKey": "إظهار الأماكن الصحيحة"
   },
   "view": {
     "diagramMissing": "لم تُرفع صورة الرسم بعد.",
-    "diagramBank": "عناصر للوضع",
     "diagramKeyTitle": "الأماكن الصحيحة",
     "diagramKeyZone": "المنطقة {number}: {items}",
     "diagramKeyOrdered": "المنطقة {number} بالترتيب: {items}",

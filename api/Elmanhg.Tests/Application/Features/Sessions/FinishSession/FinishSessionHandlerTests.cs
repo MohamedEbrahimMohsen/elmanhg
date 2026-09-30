@@ -3,6 +3,7 @@ using Core.Identity.Tokens.CurrentUser;
 using Core.Localization;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Sessions.FinishSession;
+using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
@@ -28,7 +29,7 @@ public sealed class FinishSessionHandlerTests
         _session = Session.StartQuiz(_builder.StudentId, _builder.Questions.Lesson, questions, isTestMode: false);
         SessionRepositoryStub.StubFind(_sessionRepository, _session);
         _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(questions.SelectMany(x => x.Revisions).ToList());
-        _handler = new FinishSessionHandler(_sessionRepository, _questionRepository, _currentUserService, Substitute.For<ILocalizer>());
+        _handler = new FinishSessionHandler(_sessionRepository, _questionRepository, _currentUserService, Substitute.For<ILocalizer>(), Substitute.For<IFileStorage>());
     }
 
     [Fact]

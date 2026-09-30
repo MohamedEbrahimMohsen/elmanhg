@@ -5,6 +5,7 @@ using Elmanhg.Application.Exams.SubmitExam;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.MathStepGrading;
 using Elmanhg.Domain.ExamBlueprints;
@@ -59,7 +60,7 @@ public sealed class SubmitExamHandlerTests
             .Returns(call => _masteries.Where(call.Arg<Expression<Func<QuestionMastery, bool>>>().Compile()).ToList());
         _unitRepository.GetByIdAsync(_builder.Questions.Unit.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<CurriculumUnit>, IQueryable<CurriculumUnit>>?>(), Arg.Any<bool>()).Returns(_builder.Questions.Unit);
         _subjectRepository.GetByIdAsync(_builder.Questions.Subject.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Subject>, IQueryable<Subject>>?>(), Arg.Any<bool>()).Returns(_builder.Questions.Subject);
-        _handler = new SubmitExamHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _essayGradeRepository, _mathStepGradeRepository, _lessonRepository, _unitRepository, _subjectRepository, Options.Create(new ExamsOptions()), Options.Create(new MasteryOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), _mathCheckClient);
+        _handler = new SubmitExamHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _essayGradeRepository, _mathStepGradeRepository, _lessonRepository, _unitRepository, _subjectRepository, Options.Create(new ExamsOptions()), Options.Create(new MasteryOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), _mathCheckClient, Substitute.For<IFileStorage>());
     }
 
     private Guid QuestionId => _questions[0].Id;

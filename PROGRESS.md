@@ -1,12 +1,12 @@
 # Elmanhg — autopilot progress
 
-Last updated: laptop session, after story #107 merged (main at `483dd1d`).
-**Next story: #115 [E13.S4] Security hardening**, the first row of "Remaining stories".
+Last updated: laptop session, after story #115 merged (main at `66b18ae`).
+**Next story: #117 [E14.S1] Essay question authoring with rubric (v2)**, the first row of "Remaining stories".
 The laptop run did #54–#64; the cloud session did #65–#76 (see "Running in a cloud session" and "Hand-off" below).
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (54 of 60)
+## Finished stories (57 of 60)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -64,20 +64,20 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 52 | #122 [E15.S2] CAS final answer check (v2) | #236 | 2 | skipped (too many files); +r3 security fix, +main integration | #237 |
 | 53 | #106 [E11.S3] Student and teacher administration | #239 | 1 | skipped (too many files) | #240 |
 | 54 | #107 [E11.S4] Teacher personal stats card | #238 | 1 | no actionable comments | — |
+| 55 | #125 [E16.S1] Admin diagram authoring tool (v2) | #241 | 2 | skipped (too many files); +2 main merges | #242 |
+| 56 | #123 [E15.S3] LLM step grading (v2) | #244 | 1 | skipped (too many files); +main merge | #245 |
+| 57 | #115 [E13.S4] Security hardening | #243 | 1 | 3 comments, fixed (gitleaks, Npgsql password, atomic refresh) + Trivy caddy bump | #247 |
 
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (6), in run order
+## Remaining stories (3), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
 | Order | Issue | Story |
 |---|---|---|
-| 41 | #115 | [E13.S4] Security hardening |
 | 42 | #117 | [E14.S1] Essay question authoring with rubric (v2) |
-| 47 | #123 | [E15.S3] LLM step grading (v2) |
-| 48 | #125 | [E16.S1] Admin diagram authoring tool (v2) |
 | 49 | #126 | [E16.S2] Student canvas and grading (v2) |
 | 50 | #128 | [E17.S1] Review queue and override (v2) |
 
@@ -215,7 +215,7 @@ How the next agent resumes, in a cloud session or on the laptop:
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199, #201, #204, #205, #207, #209, #211, #213, #215, #217, #222, #220, #224, #228, #229, #231, #233, #235, #237, #240 · `dev-decision`: none open (#135 and #155 confirmed and closed).
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199, #201, #204, #205, #207, #209, #211, #213, #215, #217, #222, #220, #224, #228, #229, #231, #233, #235, #237, #240, #242, #245, #247 · `dev-decision`: none open (#135 and #155 confirmed and closed).
 ## Resume notes (safe stop for /compact, 2026-09-30)
 
 **State:** there are no running agents, no open PRs except as listed below, and the heartbeat cron is cancelled.

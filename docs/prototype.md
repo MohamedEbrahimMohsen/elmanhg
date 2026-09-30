@@ -69,6 +69,6 @@ Essay and math-with-steps questions are marked **v2**:
 
 The built app replaces the prototype's essay keyword list with a rubric (criteria, points, levels) and model answers (#117); essays are served since #119, and students write them in an RTL plain-text editor. The built app grades essays with Claude against the rubric (#118) instead of the keyword heuristic.
 
-The prototype has no drag-and-drop type. The built app authors diagram questions (image, drop zones, items, correct zones, zone order) with a student preview (#125); they are not served until the student canvas (#126).
+The prototype has no drag-and-drop type. The built app authors diagram questions (image, drop zones, items, correct zones, zone order) with a student preview (#125); they are served since #126: students place items on a canvas and are graded per item.
 
 For console testing, `window.ElmanhgTest` exposes `grade`, `normAr`, `servable`, `selectQuiz`, `mergeBlueprints` and `state()`.

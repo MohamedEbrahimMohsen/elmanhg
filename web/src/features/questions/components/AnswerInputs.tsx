@@ -10,6 +10,11 @@ const MathStepsAnswerInput = lazy(async () => {
   return { default: module.MathStepsAnswerInput };
 });
 
+const DragDropAnswerInput = lazy(async () => {
+  const module = await import('./DragDropAnswerInput');
+  return { default: module.DragDropAnswerInput };
+});
+
 export interface AnswerInputsProps {
   question: StudentQuestion;
   answer: QuestionAnswer;
@@ -57,6 +62,18 @@ export function AnswerInputs({
             onAnswerChange={onAnswerChange}
             disabled={disabled}
             draftOwner={mathDraftOwner}
+          />
+        </Suspense>
+      );
+    case 'DragDrop':
+      return (
+        <Suspense fallback={<div aria-busy="true" className="min-h-11" />}>
+          <DragDropAnswerInput
+            question={question}
+            answer={answer}
+            onAnswerChange={onAnswerChange}
+            disabled={disabled}
+            review={review}
           />
         </Suspense>
       );

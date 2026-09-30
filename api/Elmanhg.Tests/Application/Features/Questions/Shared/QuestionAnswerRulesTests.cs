@@ -116,6 +116,31 @@ public sealed class QuestionAnswerRulesTests
         QuestionAnswerRules.IsRawAnswerTooLong(QuestionType.MathSteps, answer, options).Should().Be(expected);
     }
 
+    [Fact]
+    public void IsRawAnswerTooLong_DragDropUsesDragDropCap()
+    {
+        var options = new SessionsOptions { AnswerMaxLength = 4000, DragDropAnswerMaxLength = 50 };
+        var answer = Json("""{"placements":[{"zoneId":"z1","itemIds":["i1","i2","i30"]}]}""");
+        answer.GetRawText().Length.Should().Be(60);
+
+        var dragDrop = QuestionAnswerRules.IsRawAnswerTooLong(QuestionType.DragDrop, answer, options);
+        var mcq = QuestionAnswerRules.IsRawAnswerTooLong(QuestionType.Mcq, answer, options);
+
+        (dragDrop, mcq).Should().Be((true, false));
+    }
+
+    [Fact]
+    public void ExceedsLimits_DragDrop_AppliesPlacementCaps()
+    {
+        var options = new SessionsOptions { DragDropPlacementsMaxCount = 1 };
+        var answer = Json("""{"placements":[{"zoneId":"z1","itemIds":["i1"]},{"zoneId":"z2","itemIds":["i4"]}]}""");
+
+        var dragDrop = QuestionAnswerRules.ExceedsLimits(QuestionType.DragDrop, answer, options);
+        var mcq = QuestionAnswerRules.ExceedsLimits(QuestionType.Mcq, answer, options);
+
+        (dragDrop, mcq).Should().Be((true, false));
+    }
+
     private static JsonElement MathStepsAnswerOfRawLength(int rawLength)
     {
         const string Prefix = "{\"steps\":[\"";

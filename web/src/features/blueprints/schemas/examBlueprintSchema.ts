@@ -26,6 +26,7 @@ export const examBlueprintSchema = z
       Short: z.string(),
       Essay: z.string(),
       MathSteps: z.string(),
+      DragDrop: z.string(),
     }),
     timeLimitMinutes: z.string(),
     passMark: z.string(),

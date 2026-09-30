@@ -124,17 +124,17 @@ public sealed class ServableQuestionSpecificationTests
     }
 
     [Fact]
-    public void IsSatisfiedBy_ApprovedDragDropInPublishedLesson_ReturnsFalse()
+    public void IsSatisfiedBy_ApprovedDragDropInPublishedLesson_ReturnsTrue()
     {
         _builder.Lesson.Publish(Guid.NewGuid());
         var question = _builder.DragDrop().Approved().Build();
 
-        ServableQuestionSpecification.IsSatisfiedBy(question, _builder.Lesson).Should().BeFalse();
+        ServableQuestionSpecification.IsSatisfiedBy(question, _builder.Lesson).Should().BeTrue();
     }
 
     [Fact]
-    public void ServedTypes_EveryTypeExceptDragDrop()
+    public void ServedTypes_EveryQuestionType()
     {
-        ServableQuestionSpecification.ServedTypes.Should().Equal(Enum.GetValues<QuestionType>().Where(x => x != QuestionType.DragDrop));
+        ServableQuestionSpecification.ServedTypes.Should().Equal(Enum.GetValues<QuestionType>());
     }
 }

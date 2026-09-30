@@ -1,4 +1,5 @@
 import {
+  diagramKeySchema,
   fillSpecSchema,
   mathStepsSpecSchema,
   mcqSpecSchema,
@@ -7,6 +8,8 @@ import {
   shortTextSpecSchema,
   trueFalseSpecSchema,
   type ChoiceReview,
+  type DiagramKey,
+  type StudentDiagram,
   type StudentQuestion,
 } from '@/features/questions';
 
@@ -16,7 +19,8 @@ export type CorrectAnswerView =
   | { kind: 'blanks'; answers: { id: string; text: string }[] }
   | { kind: 'numeric'; value: number; tolerance: number; toleranceMode: 'absolute' | 'percent' }
   | { kind: 'text'; text: string }
-  | { kind: 'math'; latex: string };
+  | { kind: 'math'; latex: string }
+  | { kind: 'diagram'; diagram: StudentDiagram; diagramKey: DiagramKey };
 
 function describeShort(question: StudentQuestion, correctAnswer: unknown): CorrectAnswerView | null {
   if (question.answerKind === 'numeric') {
@@ -69,8 +73,12 @@ export function describeCorrectAnswer(question: StudentQuestion, correctAnswer: 
       const latex = spec.success ? spec.data.acceptedAnswers[0] : undefined;
       return latex ? { kind: 'math', latex } : null;
     }
-    case 'DragDrop':
-      return null;
+    case 'DragDrop': {
+      const spec = diagramKeySchema.safeParse(correctAnswer);
+      return spec.success && question.diagram
+        ? { kind: 'diagram', diagram: question.diagram, diagramKey: spec.data.zones }
+        : null;
+    }
   }
 }
 
@@ -92,7 +100,10 @@ export function choiceReview(question: StudentQuestion, correctAnswer: unknown):
     case 'Short':
     case 'Essay':
     case 'MathSteps':
-    case 'DragDrop':
       return undefined;
+    case 'DragDrop': {
+      const spec = diagramKeySchema.safeParse(correctAnswer);
+      return spec.success ? { correctKeys: [], diagramKey: spec.data.zones } : undefined;
+    }
   }
 }

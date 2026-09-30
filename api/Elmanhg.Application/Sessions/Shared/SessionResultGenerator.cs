@@ -1,5 +1,7 @@
 using Core.Localization;
+using Elmanhg.Application.Questions.Shared;
 using Elmanhg.Application.Questions.Shared.Grading;
+using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
 using System.Text.Json;
@@ -9,23 +11,23 @@ namespace Elmanhg.Application.Sessions.Shared;
 
 public static class SessionResultGenerator
 {
-    public static SessionResult Generate(Session session, IReadOnlyCollection<QuestionRevision> revisions, ILocalizer localizer)
+    public static SessionResult Generate(Session session, IReadOnlyCollection<QuestionRevision> revisions, ILocalizer localizer, IFileStorage fileStorage)
     {
         var items = session.Items
             .OrderBy(x => x.Position)
-            .Select(item => GenerateItem(session, item, FindRevision(revisions, item), localizer))
+            .Select(item => GenerateItem(session, item, FindRevision(revisions, item), localizer, fileStorage))
             .ToList();
         return new SessionResult(session.Id, session.Kind.ToString(), Parse(session.Scope), session.IsTestMode, session.StartedAt, session.SubmittedAt, session.ScorePercent, session.TotalTimeTakenMilliseconds, session.CurrentPosition, items);
     }
 
-    public static SessionItemResult GenerateItem(Session session, SessionItem item, QuestionRevision revision, ILocalizer localizer)
+    public static SessionItemResult GenerateItem(Session session, SessionItem item, QuestionRevision revision, ILocalizer localizer, IFileStorage fileStorage)
     {
         var snapshot = revision.ReadSnapshot();
         var attempt = session.FindAttempt(item.QuestionId);
         var pendingAnswer = session.FindPendingEssayAnswer(item);
         var reveal = attempt is not null || pendingAnswer is not null || session.IsSubmitted;
         var attemptResult = attempt is null ? null : new AttemptResult(attempt.Id, Parse(attempt.Answer), attempt.Score, attempt.NormalisedScore, attempt.Outcome.ToString(), attempt.AwaitsReview, GradeFeedbackText.Localize(attempt.ReadFeedback(), localizer), attempt.TimeTakenMilliseconds, attempt.CreatedAt);
-        return new SessionItemResult(item.Position, item.QuestionId, item.QuestionVersion, snapshot.Type.ToString(), snapshot.Stem, ToElement(snapshot.Body), item.MaxScore, attemptResult, reveal ? ToElement(snapshot.GradingSpec) : null, reveal ? snapshot.Explanation : null, pendingAnswer is null ? null : Parse(pendingAnswer));
+        return new SessionItemResult(item.Position, item.QuestionId, item.QuestionVersion, snapshot.Type.ToString(), snapshot.Stem, QuestionBodyMedia.Resolve(snapshot.Type, snapshot.Body?.ToJsonString() ?? "{}", fileStorage), item.MaxScore, attemptResult, reveal ? ToElement(snapshot.GradingSpec) : null, reveal ? snapshot.Explanation : null, pendingAnswer is null ? null : Parse(pendingAnswer));
     }
 
     private static QuestionRevision FindRevision(IReadOnlyCollection<QuestionRevision> revisions, SessionItem item)
