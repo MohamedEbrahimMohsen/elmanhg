@@ -1,3 +1,4 @@
+import dataclasses
 import json
 from collections.abc import Callable
 
@@ -182,3 +183,60 @@ async def test_anthropic_complete_with_citations_maps_sources_in_order_distinct(
 
     assert reply.citations == ("explanation-2", "explanation-1")
     assert reply.text == "1. المقاومة = فرق الجهد ÷ شدة التيار. 2. إذن R = 4 أوم."
+
+
+async def test_anthropic_complete_with_output_schema_sends_output_config_json_schema(
+    anthropic_fixture: Callable[[str], str],
+) -> None:
+    captured: list[httpx2.Request] = []
+    model = client_for(respond_with(anthropic_fixture("message_structured_grade.json"), captured))
+    schema = '{"type":"object","additionalProperties":false,"properties":{}}'
+
+    await model.complete(dataclasses.replace(REQUEST, output_schema=schema))
+
+    body = json.loads(captured[0].content)
+    assert body["output_config"]["format"] == {"type": "json_schema", "schema": json.loads(schema)}
+
+
+async def test_anthropic_complete_without_output_schema_omits_output_config(
+    anthropic_fixture: Callable[[str], str],
+) -> None:
+    captured: list[httpx2.Request] = []
+    model = client_for(respond_with(anthropic_fixture("message_success.json"), captured))
+
+    await model.complete(REQUEST)
+
+    assert "output_config" not in json.loads(captured[0].content)
+
+
+async def test_anthropic_complete_with_model_override_sends_that_model(
+    anthropic_fixture: Callable[[str], str],
+) -> None:
+    captured: list[httpx2.Request] = []
+    model = client_for(respond_with(anthropic_fixture("message_success.json"), captured))
+
+    await model.complete(dataclasses.replace(REQUEST, model="claude-opus-5"))
+
+    assert json.loads(captured[0].content)["model"] == "claude-opus-5"
+
+
+async def test_anthropic_complete_with_timeout_sets_request_read_timeout(
+    anthropic_fixture: Callable[[str], str],
+) -> None:
+    captured: list[httpx2.Request] = []
+    model = client_for(respond_with(anthropic_fixture("message_success.json"), captured))
+
+    await model.complete(dataclasses.replace(REQUEST, timeout_seconds=45.0))
+
+    assert captured[0].extensions["timeout"]["read"] == 45.0
+
+
+async def test_anthropic_complete_structured_reply_returns_json_text(
+    anthropic_fixture: Callable[[str], str],
+) -> None:
+    model = client_for(respond_with(anthropic_fixture("message_structured_grade.json")))
+
+    reply = await model.complete(REQUEST)
+
+    assert json.loads(reply.text)["confidence"] == 0.82
+    assert (reply.input_tokens, reply.output_tokens) == (900, 150)

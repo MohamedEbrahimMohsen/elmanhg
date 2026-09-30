@@ -43,3 +43,13 @@ def score_includes_any(reply: str, groups: Sequence[Sequence[str]]) -> bool:
 def score_excludes(reply: str, terms: Sequence[str]) -> bool:
     normalised = _normalise(reply)
     return not any(_normalise(term) in normalised for term in terms)
+
+
+def score_total_error(awarded: int, reference: int, max_points: int) -> float:
+    if max_points <= 0:
+        raise ValueError("max_points must be positive")
+    return abs(awarded - reference) / max_points
+
+
+def score_within(awarded: int, reference: int, tolerance: int) -> bool:
+    return abs(awarded - reference) <= tolerance

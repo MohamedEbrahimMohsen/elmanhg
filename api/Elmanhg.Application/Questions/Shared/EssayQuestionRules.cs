@@ -1,3 +1,4 @@
+using Core.Errors;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.RichText;
@@ -24,7 +25,7 @@ public static class EssayQuestionRules
         EssayRubricRules.AddErrors(errors, spec!.Criteria, options);
         var answers = spec.ModelAnswers ?? [];
         QuestionSchemaReader.AddIf(errors, answers.Count < 1 || answers.Count > options.QuestionModelAnswersMaxCount, ErrorCodes.QuestionModelAnswersCountInvalid);
-        QuestionSchemaReader.AddIf(errors, answers.Any(string.IsNullOrWhiteSpace), ErrorCodes.QuestionModelAnswerRequired);
+        QuestionSchemaReader.AddIf(errors, answers.Any(x => !RichTextContent.HasGradableText(x)), ErrorCodes.QuestionModelAnswerRequired);
         QuestionSchemaReader.AddIf(errors, answers.Any(x => x is not null && x.Length > options.QuestionModelAnswerMaxLength), ErrorCodes.QuestionModelAnswerTooLong);
         return errors;
     }
@@ -39,6 +40,11 @@ public static class EssayQuestionRules
         var modelAnswers = spec.ModelAnswers!
             .Select(sanitizer.Sanitize)
             .ToList();
+        if (modelAnswers.Any(x => !RichTextContent.HasGradableText(x)))
+        {
+            throw new ApplicationValidationCoreException(ErrorCodes.QuestionModelAnswerRequired);
+        }
+
         return (QuestionSchemaReader.Serialize(new EssayBody(read.MaxWords)), QuestionSchemaReader.Serialize(new EssayGradingSpec(criteria, modelAnswers)));
     }
 

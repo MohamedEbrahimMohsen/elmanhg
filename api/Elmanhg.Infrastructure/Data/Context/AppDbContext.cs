@@ -6,6 +6,7 @@ using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Analytics;
 using Elmanhg.Domain.Avatar;
 using Elmanhg.Domain.ContentRetrieval;
+using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
@@ -57,6 +58,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public const string PaymentOpenReviewIndex = "IX_Payments_OpenReview";
     public const string SubscriptionLapseIndex = "IX_Subscriptions_Status_CurrentPeriodEnd";
     public const string AvatarMessagePositionIndex = "IX_AvatarMessages_ConversationId_Position";
+    public const string EssayGradePerQuestionIndex = "IX_EssayGrades_SessionId_QuestionId";
 
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<TeacherSubject> TeacherSubjects { get; set; }
@@ -87,6 +89,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public DbSet<AvatarMessageUsage> AvatarMessageUsages { get; set; }
     public DbSet<AvatarConversation> AvatarConversations { get; set; }
     public DbSet<AvatarMessage> AvatarMessages { get; set; }
+    public DbSet<EssayGrade> EssayGrades { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
@@ -176,6 +179,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         ConfigureFunnelEvents(modelBuilder);
         ConfigureContentRetrieval(modelBuilder);
         ConfigureAvatar(modelBuilder);
+        ConfigureEssayGrades(modelBuilder);
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
 
@@ -546,6 +550,32 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         });
     }
 
+    private static void ConfigureEssayGrades(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<EssayGrade>(builder =>
+        {
+            builder.Property(x => x.Answer).IsRequired().HasColumnType("jsonb");
+            builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.ReviewReason).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.Criteria).HasColumnType("jsonb");
+            builder.Property(x => x.Score).HasPrecision(9, 2);
+            builder.Property(x => x.NormalisedScore).HasPrecision(5, 4);
+            builder.Property(x => x.Confidence).HasPrecision(5, 4);
+            builder.Property(x => x.Model).HasMaxLength(AiIdentifierMaxLength);
+            builder.Property(x => x.PromptVersion).HasMaxLength(AiIdentifierMaxLength);
+            builder.Property(x => x.LastErrorCode).HasMaxLength(AiIdentifierMaxLength);
+            builder.Property(x => x.CostUsd).HasPrecision(12, 6);
+            builder.Property(x => x.Version).IsRowVersion();
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Session>().WithMany().HasForeignKey(x => x.SessionId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Question>().WithMany().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.SessionId, x.QuestionId }).IsUnique().HasDatabaseName(EssayGradePerQuestionIndex);
+            builder.HasIndex(x => x.NextAttemptAt).HasFilter("\"Status\" = 'Pending'");
+            builder.HasIndex(x => new { x.SubjectId, x.Status });
+        });
+    }
+
     private static void ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>().HasQueryFilter(x => !x.IsDeleted);
@@ -578,5 +608,6 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         modelBuilder.Entity<AvatarMessageUsage>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<AvatarConversation>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<AvatarMessage>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<EssayGrade>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

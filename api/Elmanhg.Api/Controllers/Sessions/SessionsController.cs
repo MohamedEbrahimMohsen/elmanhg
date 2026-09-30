@@ -1,3 +1,5 @@
+using Elmanhg.Application.EssayGrading.GetEssayGrade;
+using Elmanhg.Application.EssayGrading.Shared;
 using Elmanhg.Application.Sessions.FinishSession;
 using Elmanhg.Application.Sessions.GetSession;
 using Elmanhg.Application.Sessions.Shared;
@@ -48,6 +50,15 @@ public class SessionsController(IMediator mediator) : ControllerBase
     public async Task<ActionResult> FinishSession([FromRoute] Guid sessionId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new FinishSessionCommand(sessionId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("{sessionId:guid}/questions/{questionId:guid}/essay-grade", Name = "GetEssayGrade")]
+    [Authorize(Policy = DefaultCodes.AssessmentsTake)]
+    [ProducesResponseType<EssayGradeResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetEssayGrade([FromRoute] Guid sessionId, [FromRoute] Guid questionId, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetEssayGradeQuery(sessionId, questionId), cancellationToken);
         return Ok(result);
     }
 }

@@ -27,6 +27,9 @@ class ModelRequest:
     messages: tuple[ModelMessage, ...]
     max_tokens: int
     sources: tuple[ModelSource, ...] = ()
+    model: str | None = None
+    timeout_seconds: float | None = None
+    output_schema: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

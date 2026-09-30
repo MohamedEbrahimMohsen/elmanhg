@@ -31,6 +31,17 @@
     "tolerance": "{value} (± {tolerance})",
     "tolerancePercent": "{value} (± {tolerance}%)"
   },
+  "essayGrade": {
+    "label": "Essay grade",
+    "loading": "Loading the grade…",
+    "error": "Could not load the grade.",
+    "retry": "Try again",
+    "pending": "Grading your essay…",
+    "pendingHint": "The AI grader is marking your answer against the rubric. This usually takes under a minute.",
+    "inReview": "Under review",
+    "inReviewHint": "A teacher will review your grade before it is final.",
+    "justification": "Grader's comment"
+  },
   "avatar": {
     "questionTitle": "Question {position}"
   },

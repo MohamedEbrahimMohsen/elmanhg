@@ -21,6 +21,7 @@ async def live() -> HealthOut:
 @router.get("/health/ready")
 async def ready(request: Request) -> HealthOut:
     state = request.app.state
-    if getattr(state, "model_client", None) is None or getattr(state, "chat_prompts", None) is None:
+    required = ("model_client", "chat_prompts", "essay_grading_prompts")
+    if any(getattr(state, name, None) is None for name in required):
         raise ServiceNotReadyError()
     return HealthOut(status="ok")

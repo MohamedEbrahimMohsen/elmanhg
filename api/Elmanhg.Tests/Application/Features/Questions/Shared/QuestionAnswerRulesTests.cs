@@ -27,4 +27,27 @@ public sealed class QuestionAnswerRulesTests
 
         QuestionJson.AreEquivalent(canonical, expected).Should().BeTrue();
     }
+
+    [Fact]
+    public void CanRead_EssayWithText_ReturnsTrue()
+    {
+        QuestionAnswerRules.CanRead(QuestionType.Essay, Json("""{"text":"a"}""")).Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData("{}")]
+    [InlineData("""{"text":5}""")]
+    [InlineData("[]")]
+    public void CanRead_EssayWithoutText_ReturnsFalse(string answer)
+    {
+        QuestionAnswerRules.CanRead(QuestionType.Essay, Json(answer)).Should().BeFalse();
+    }
+
+    [Fact]
+    public void Canonicalize_Essay_TrimsTextAndDropsUnknownProperties()
+    {
+        var canonical = QuestionAnswerRules.Canonicalize(QuestionType.Essay, Json("""{"text":"  a b ","x":1}"""));
+
+        canonical.Should().Be("""{"text":"a b"}""");
+    }
 }

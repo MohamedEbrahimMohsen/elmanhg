@@ -1,4 +1,5 @@
 import importlib.resources
+import json
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -23,6 +24,16 @@ def load_prompt(name: str, version: str) -> Prompt:
     if not resource.is_file():
         raise PromptNotFoundError(f"prompt {name}.{version} not found")
     return Prompt(name=name, version=version, text=resource.read_text(encoding="utf-8"))
+
+
+def load_output_schema(name: str, version: str) -> str:
+    resource = importlib.resources.files("elmanhg_ai.prompts") / f"{name}.{version}.json"
+    if not resource.is_file():
+        raise PromptNotFoundError(f"output schema {name}.{version} not found")
+    text = resource.read_text(encoding="utf-8")
+    if not isinstance(json.loads(text), dict):
+        raise TypeError(f"output schema {name}.{version} is not a JSON object")
+    return text
 
 
 def render(template: str, values: Mapping[str, str]) -> str:

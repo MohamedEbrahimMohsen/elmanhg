@@ -68,7 +68,7 @@ export function QuestionEditorForm({ lesson, question }: QuestionEditorFormProps
         <QuestionRichTextField name="explanation" label={t('editor.fields.explanation')} onUploadImage={upload} />
         <SubmitButton>{submitLabel}</SubmitButton>
       </div>
-      <QuestionPreviewPanel />
+      <QuestionPreviewPanel lessonId={lesson.id} />
     </Form>
   );
 }

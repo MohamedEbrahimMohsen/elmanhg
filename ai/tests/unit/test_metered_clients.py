@@ -1,3 +1,4 @@
+import dataclasses
 from collections.abc import Iterator
 from dataclasses import dataclass
 
@@ -261,3 +262,17 @@ async def test_metered_clients_aclose_closes_inner(
 
     assert model.closed is True
     assert embedding.closed is True
+
+
+async def test_metered_model_request_model_override_labels_span_and_metrics(
+    instruments: Instruments, settings: Settings
+) -> None:
+    client = metered_model(FakeModelClient([REPLY]), instruments, settings)
+
+    await client.complete(dataclasses.replace(REQUEST, model="claude-grader"))
+
+    [span] = instruments.spans.get_finished_spans()
+    assert span.name == "chat claude-grader"
+    assert (span.attributes or {})["gen_ai.request.model"] == "claude-grader"
+    [cost] = instruments.points("elmanhg.ai.cost")
+    assert (cost.attributes or {})["gen_ai.request.model"] == "claude-grader"

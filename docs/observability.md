@@ -79,7 +79,7 @@ Prometheus receives OTLP from the collector (`--web.enable-otlp-receiver`). Name
 
 Request outcomes (`elmanhg.outcome` on `elmanhg.requests`): `Success`; `VALIDATION_FAILED` for any validation failure; `CANCELLED` when the caller went away; the error code of any other core exception (for example `SESSION_NOT_FOUND`, `AI_SERVICE_UNAVAILABLE`); `UNHANDLED_EXCEPTION` otherwise. Every tag value is a type name, an enum name or an error code, never an id or user data.
 
-Background jobs (`elmanhg.job`): `exam-auto-submit`, `subscription-lapse`, `lesson-content-index`, `teacher-voice-transcription`, `ask-teacher-sla`. A job registers when its worker starts (last success = now). Each sweep records one run: `Failed` when listing the work threw, `PartiallyFailed` when at least one item failed, `Succeeded` otherwise. Only a sweep that is not `Failed` advances the last success.
+Background jobs (`elmanhg.job`): `exam-auto-submit`, `subscription-lapse`, `lesson-content-index`, `teacher-voice-transcription`, `ask-teacher-sla`, `essay-grading`. A job registers when its worker starts (last success = now). Each sweep records one run: `Failed` when listing the work threw, `PartiallyFailed` when at least one item failed, `Succeeded` otherwise. Only a sweep that is not `Failed` advances the last success.
 
 ## 5. Logs
 
@@ -141,7 +141,7 @@ Rules live in `deploy/observability/prometheus/rules/elmanhg.rules.yml`, and eac
 | `ApiTelemetryMissing` | no `target_info{job="elmanhg-api"}` for 10 m, for 5 m | warning | Is `OTLP_ENDPOINT` set, and is `otel-collector` running (`docker compose logs otel-collector`)? |
 | `BackgroundJobStale` | now − last success > 3 × interval, for 5 m | warning | Background jobs → Worker logs; restart `api` if the worker loop stopped |
 | `BackgroundJobFailing` | ≥ 3 `Failed` sweeps in 15 m | warning | The listing query failed: check the database and the API logs |
-| `BackgroundJobItemsFailing` | ≥ 10 failed items in 30 m | warning | Worker logs show the failing ids; fix the data or the dependency (the AI service for `lesson-content-index` and `teacher-voice-transcription`) |
+| `BackgroundJobItemsFailing` | ≥ 10 failed items in 30 m | warning | Worker logs show the failing ids; fix the data or the dependency (the AI service for `lesson-content-index`, `teacher-voice-transcription` and `essay-grading`) |
 | `ApiUnhandledErrors` | any `UNHANDLED_EXCEPTION` in 10 m | warning | Errors across services; find the trace by its id and fix the bug |
 | `ProviderUnavailable` | ≥ 5 `AI_SERVICE_UNAVAILABLE`, `OTP_CHANNEL_UNAVAILABLE` or `PAYMENT_GATEWAY_UNAVAILABLE` in 15 m | warning | Check the provider's status page and the matching `*.env` keys |
 | `OtpDeliveryFailing` | ≥ 5 failed OTP sends in 15 m | critical | Nobody can sign in: check the WhatsApp or Resend credentials and quotas ([docs/otp-delivery.md](otp-delivery.md)) |

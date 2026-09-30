@@ -1,12 +1,12 @@
 # Elmanhg — autopilot progress
 
-Last updated: laptop session, after story #114 merged (main at `64424c5`).
+Last updated: laptop session, after story #121 merged (main at `e578e9a`).
 **Next story: #104 [E11.S1] Dashboard metrics queries**, the first row of "Remaining stories".
 The laptop run did #54–#64; the cloud session did #65–#76 (see "Running in a cloud session" and "Hand-off" below).
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (44 of 60)
+## Finished stories (45 of 60)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -54,11 +54,12 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 42 | #96 [E9.S3] Voice replies with transcription | #216 | 2 (+main merge) | skipped (too many files) | #217 |
 | 43 | #97 [E9.S4] SLA timers, reminders and follow-up rules | #221 | 1 (+hardening, main merge) | skipped (too many files) | #222 |
 | 44 | #114 [E13.S3] Performance targets | #219 | 2 (+CodeRabbit, CI fix) | 9 comments: 4 fixed, 5 rejected | #220 |
+| 45 | #121 [E15.S1] Math step input component (v2) | #223 | 1 | 1 comment, fixed (draft status on flush) | #224 |
 
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (16), in run order
+## Remaining stories (15), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
@@ -74,7 +75,6 @@ Stories run in dependency order, not issue order. E10 (payments) comes before E7
 | 42 | #117 | [E14.S1] Essay question authoring with rubric (v2) |
 | 43 | #118 | [E14.S2] LLM essay grader (v2) |
 | 44 | #119 | [E14.S3] Student essay input (v2) |
-| 45 | #121 | [E15.S1] Math step input component (v2) |
 | 46 | #122 | [E15.S2] CAS final answer check (v2) |
 | 47 | #123 | [E15.S3] LLM step grading (v2) |
 | 48 | #125 | [E16.S1] Admin diagram authoring tool (v2) |
@@ -215,7 +215,7 @@ How the next agent resumes, in a cloud session or on the laptop:
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199, #201, #204, #205, #207, #209, #211, #213, #215, #217, #222, #220 · `dev-decision`: none open (#135 and #155 confirmed and closed).
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199, #201, #204, #205, #207, #209, #211, #213, #215, #217, #222, #220, #224 · `dev-decision`: none open (#135 and #155 confirmed and closed).
 ## Resume notes (safe stop for /compact, 2026-09-30)
 
 **State:** there are no running agents, no open PRs except as listed below, and the heartbeat cron is cancelled.

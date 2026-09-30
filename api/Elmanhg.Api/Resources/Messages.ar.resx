@@ -173,7 +173,6 @@
   <data name="QUESTION_ANSWER_KIND_REQUIRED" xml:space="preserve"><value>اختر اجابة رقمية او نصية.</value></data>
   <data name="QUESTION_NUMERIC_VALUE_REQUIRED" xml:space="preserve"><value>اكتب الرقم الصحيح.</value></data>
   <data name="QUESTION_TOLERANCE_INVALID" xml:space="preserve"><value>اكتب هامش خطا صفرا او اكثر واختر قيمة مطلقة او نسبة مئوية.</value></data>
-  <data name="QUESTION_TYPE_NOT_GRADABLE" xml:space="preserve"><value>هذا النوع من الاسئلة يصححه مصحح الذكاء الاصطناعي وليس المصحح التجريبي.</value></data>
   <data name="QUESTION_ESSAY_MAX_WORDS_INVALID" xml:space="preserve"><value>اكتب حدا للكلمات رقما صحيحا في النطاق المسموح او اتركه فارغا.</value></data>
   <data name="QUESTION_RUBRIC_CRITERIA_COUNT_INVALID" xml:space="preserve"><value>اضف معيارا واحدا على الاقل وبما لا يتجاوز الحد المسموح.</value></data>
   <data name="QUESTION_RUBRIC_CRITERION_ID_INVALID" xml:space="preserve"><value>معرف كل معيار من 1 الى 20 حرفا لاتينيا صغيرا او رقما او شرطة.</value></data>
@@ -187,6 +186,7 @@
   <data name="QUESTION_MODEL_ANSWERS_COUNT_INVALID" xml:space="preserve"><value>اضف اجابة نموذجية واحدة على الاقل وبما لا يتجاوز الحد المسموح.</value></data>
   <data name="QUESTION_MODEL_ANSWER_REQUIRED" xml:space="preserve"><value>لا يمكن ان تكون الاجابة النموذجية فارغة.</value></data>
   <data name="QUESTION_MODEL_ANSWER_TOO_LONG" xml:space="preserve"><value>الاجابة النموذجية اطول من المسموح.</value></data>
+  <data name="QUESTION_ESSAY_ANSWER_TOO_LONG" xml:space="preserve"><value>المقال اطول من المسموح.</value></data>
   <data name="QUESTION_OBJECTIVE_NOT_IN_LESSON" xml:space="preserve"><value>هذا الهدف لا ينتمي الى درس السؤال.</value></data>
   <data name="QUESTION_TYPE_IMMUTABLE" xml:space="preserve"><value>لا يمكن تغيير نوع السؤال. انشئ سؤالا جديدا بدلا من ذلك.</value></data>
   <data name="QUESTION_NOT_PENDING" xml:space="preserve"><value>لا يمكن اعتماد الا سؤال قيد المراجعة.</value></data>
@@ -401,6 +401,9 @@
   <data name="AVATAR_CONVERSATIONS_ENTRY_POINT_INVALID" xml:space="preserve"><value>نقطة الدخول غير معروفة.</value></data>
   <data name="AVATAR_CONVERSATIONS_DATE_RANGE_INVALID" xml:space="preserve"><value>يجب أن تكون البداية قبل النهاية.</value></data>
   <data name="AI_SERVICE_UNAVAILABLE" xml:space="preserve"><value>المساعد غير متاح الآن. حاول مرة أخرى بعد قليل.</value></data>
+  <data name="ESSAY_GRADE_NOT_FOUND" xml:space="preserve"><value>لم يتم العثور على تصحيح هذا المقال.</value></data>
+  <data name="ESSAY_GRADING_UNAVAILABLE" xml:space="preserve"><value>مصحح الذكاء الاصطناعي غير متاح الان. حاول مرة اخرى بعد قليل.</value></data>
+  <data name="ESSAY_GRADE_NOT_PENDING" xml:space="preserve"><value>هذا المقال لم يعد بانتظار مصحح الذكاء الاصطناعي.</value></data>
   <data name="CONTENT_SEARCH_QUERY_REQUIRED" xml:space="preserve"><value>اكتب نص البحث.</value></data>
   <data name="CONTENT_SEARCH_QUERY_TOO_LONG" xml:space="preserve"><value>نص البحث أطول من المسموح.</value></data>
   <data name="CONTENT_SEARCH_TOP_INVALID" xml:space="preserve"><value>عدد النتائج المطلوبة غير صالح.</value></data>

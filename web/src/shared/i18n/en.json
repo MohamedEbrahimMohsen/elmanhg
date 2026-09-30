@@ -105,7 +105,6 @@
     "QUESTION_ANSWER_KIND_REQUIRED": "Choose a numeric or a text answer.",
     "QUESTION_NUMERIC_VALUE_REQUIRED": "Enter the correct number.",
     "QUESTION_TOLERANCE_INVALID": "Enter a tolerance of zero or more and choose absolute or percent.",
-    "QUESTION_TYPE_NOT_GRADABLE": "This question type is graded by the AI grader, not the test grader.",
     "QUESTION_ESSAY_MAX_WORDS_INVALID": "Enter a whole-number word limit within the allowed range, or leave it empty.",
     "QUESTION_RUBRIC_CRITERIA_COUNT_INVALID": "Add at least one criterion, up to the allowed maximum.",
     "QUESTION_RUBRIC_CRITERION_ID_INVALID": "Each criterion id must be 1 to 20 lowercase letters, digits or dashes.",
@@ -119,6 +118,7 @@
     "QUESTION_MODEL_ANSWERS_COUNT_INVALID": "Add at least one model answer, up to the allowed maximum.",
     "QUESTION_MODEL_ANSWER_REQUIRED": "A model answer cannot be empty.",
     "QUESTION_MODEL_ANSWER_TOO_LONG": "A model answer is too long.",
+    "QUESTION_ESSAY_ANSWER_TOO_LONG": "The essay is longer than allowed.",
     "QUESTION_OBJECTIVE_NOT_IN_LESSON": "This objective does not belong to the question's lesson.",
     "QUESTION_TYPE_IMMUTABLE": "A question's type cannot be changed. Create a new question instead.",
     "QUESTION_NOT_PENDING": "Only a pending question can be approved.",
@@ -263,7 +263,10 @@
     "TEACHER_THREAD_FOLLOW_UP_NOT_ALLOWED": "You can't send a follow-up on this question now.",
     "TEACHER_THREAD_NOT_ANSWERED": "The teacher has not answered this question yet.",
     "TEACHER_THREAD_ALREADY_RATED": "You have already rated this answer.",
-    "TEACHER_THREAD_RATING_INVALID": "Choose a rating from 1 to 5."
+    "TEACHER_THREAD_RATING_INVALID": "Choose a rating from 1 to 5.",
+    "ESSAY_GRADE_NOT_FOUND": "This essay grade was not found.",
+    "ESSAY_GRADING_UNAVAILABLE": "The AI grader is unavailable right now. Try again in a moment.",
+    "ESSAY_GRADE_NOT_PENDING": "This essay is no longer waiting for the AI grader."
   },
   "error": {
     "title": "Something went wrong"

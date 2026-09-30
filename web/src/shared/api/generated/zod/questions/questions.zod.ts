@@ -153,12 +153,17 @@ export const GradeQuestionDraftBody = zod.object({
   "objectiveId": zod.uuid().nullable(),
   "tags": zod.array(zod.string()).nullable(),
   "maxScore": zod.union([zod.int(),zod.stringFormat('int32', gradeQuestionDraftBodyMaxScoreRegExpTwo)]).nullable(),
-  "answer": zod.unknown()
+  "answer": zod.unknown(),
+  "lessonId": zod.uuid().nullish()
 })
 
 export const gradeQuestionDraftResponseScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
 export const gradeQuestionDraftResponseNormalisedScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
 export const gradeQuestionDraftResponseMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const gradeQuestionDraftResponseEssayTwoCriteriaItemPointsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const gradeQuestionDraftResponseEssayTwoCriteriaItemMaxPointsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const gradeQuestionDraftResponseEssayTwoConfidenceRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const gradeQuestionDraftResponseEssayTwoCostUsdRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
 
 
 export const GradeQuestionDraftResponse = zod.object({
@@ -166,6 +171,20 @@ export const GradeQuestionDraftResponse = zod.object({
   "normalisedScore": zod.union([zod.number(),zod.stringFormat('double', gradeQuestionDraftResponseNormalisedScoreRegExpTwo)]),
   "outcome": zod.string(),
   "maxScore": zod.union([zod.int(),zod.stringFormat('int32', gradeQuestionDraftResponseMaxScoreRegExpTwo)]),
-  "feedback": zod.string().nullable()
+  "feedback": zod.string().nullable(),
+  "essay": zod.union([zod.null(),zod.object({
+  "criteria": zod.array(zod.object({
+  "criterionId": zod.string(),
+  "title": zod.string(),
+  "points": zod.union([zod.int(),zod.stringFormat('int32', gradeQuestionDraftResponseEssayTwoCriteriaItemPointsRegExpTwo)]),
+  "maxPoints": zod.union([zod.int(),zod.stringFormat('int32', gradeQuestionDraftResponseEssayTwoCriteriaItemMaxPointsRegExpTwo)]),
+  "justification": zod.string()
+})),
+  "justification": zod.string(),
+  "confidence": zod.union([zod.number(),zod.stringFormat('double', gradeQuestionDraftResponseEssayTwoConfidenceRegExpTwo)]),
+  "model": zod.string(),
+  "promptVersion": zod.string(),
+  "costUsd": zod.union([zod.number(),zod.stringFormat('double', gradeQuestionDraftResponseEssayTwoCostUsdRegExpTwo)])
+})]).optional()
 })
 

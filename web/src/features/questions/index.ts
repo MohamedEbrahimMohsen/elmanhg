@@ -2,6 +2,7 @@ export { QuestionListPage } from './pages/QuestionListPage';
 export { QuestionEditorPage } from './pages/QuestionEditorPage';
 export { NewQuestionPage } from './pages/NewQuestionPage';
 export { QuestionView } from './components/QuestionView';
+export { EssayCriteriaList } from './components/EssayCriteriaList';
 export { questionListSearchSchema, type QuestionListSearch } from './schemas/questionListSearchSchema';
 export {
   emptyAnswer,

@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["criteria", "justification", "confidence"],
+  "properties": {
+    "criteria": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["criterionId", "justification", "points"],
+        "properties": {
+          "criterionId": { "type": "string" },
+          "justification": { "type": "string" },
+          "points": { "type": "integer" }
+        }
+      }
+    },
+    "justification": { "type": "string" },
+    "confidence": { "type": "number" }
+  }
+}

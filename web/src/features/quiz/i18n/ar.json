@@ -31,6 +31,17 @@
     "tolerance": "{value} (± {tolerance})",
     "tolerancePercent": "{value} (± {tolerance}٪)"
   },
+  "essayGrade": {
+    "label": "تصحيح المقال",
+    "loading": "جارٍ تحميل التصحيح…",
+    "error": "تعذّر تحميل التصحيح.",
+    "retry": "إعادة المحاولة",
+    "pending": "جارٍ تصحيح إجابتك…",
+    "pendingHint": "يصحّح مصحح الذكاء الاصطناعي إجابتك وفق معايير التصحيح، ويستغرق ذلك عادةً أقل من دقيقة.",
+    "inReview": "قيد المراجعة",
+    "inReviewHint": "سيراجع المعلم تصحيح إجابتك قبل اعتماد الدرجة.",
+    "justification": "تعليق المصحح"
+  },
   "avatar": {
     "questionTitle": "سؤال {position}"
   },

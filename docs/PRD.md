@@ -172,6 +172,7 @@ Answer shapes and the exact grading rules (normalisation, numeric parsing, round
 - Output is structured JSON: per-criterion score, total, one-paragraph Arabic justification, confidence.
 - Low-confidence grades (below a configurable threshold) are queued for teacher review before the score is final. The student sees "قيد المراجعة" in the meantime.
 - A teacher may override any AI grade. Overrides are training data (§13).
+- Decided (#118): the threshold is `EssayGrading:ReviewConfidenceThreshold` (default 0.7); a grade the AI cannot produce after `EssayGrading:MaxAttempts` also goes to teacher review; grading is a background job with retries; the admin test grader grades essays synchronously ([essay-grading.md](essay-grading.md)).
 
 ### 6.2 Answer normalisation (Arabic)
 
@@ -553,7 +554,7 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 - **Embeddings**: OpenAI text-embedding-3-small (1536) through the AI service; Anthropic has no embeddings API. Fake by default.
 - **Frontend**: React + TypeScript, shadcn/ui, i18next RTL. v2 adds a math input with LaTeX preview, a drag-and-drop canvas, and a rich Arabic editor.
 - **Media**: S3-compatible object storage for images and audio; private media (question photos, voice replies) is served only through the API after an access check.
-- **Jobs / realtime**: background jobs for grading, transcription, SLA reminders; SignalR for grade results and teacher replies.
+- **Jobs / realtime**: background jobs for grading, transcription, SLA reminders; the web polls for essay grade results (#118); SignalR for teacher replies.
 - **Payments**: Paymob, webhook-driven.
 - **Hosting**: Docker Compose on one VPS per environment (staging, production); Caddy (TLS, SPA, /api proxy), images built by CI and pushed to GHCR; PostgreSQL + pgvector. Object storage (from #96) is a managed S3-compatible service (Cloudflare R2 or AWS S3), set by config; local dev and CI use the local-disk store, and there is no object-store container in compose. Runbook: docs/deployment.md.
 - **Observability**: OpenTelemetry traces and metrics (api, ai), JSON logs from every container, self-hosted collector + Prometheus + Loki + Tempo + Grafana + Alertmanager behind the `observability` compose profile; runbook docs/observability.md.

@@ -144,5 +144,13 @@ public sealed class QuestionGraderTests
         act.Should().Throw<InvalidOperationException>();
     }
 
+    [Fact]
+    public void GradeEssay_PartialAward_ScalesToMaxScore()
+    {
+        var grade = QuestionGrader.GradeEssay(EssaySpecJson, 5, [new EssayCriterionAward("c1", 1)]);
+
+        grade.Should().Be(new QuestionGrade(2.50m, 0.5m, GradeOutcome.Partial, null));
+    }
+
     private const string PartialNormalizationSpec = """{"blanks":[{"id":"1","acceptedAnswers":["القاهرة"]}],"normalization":{"unifyTaaMarbuta":false}}""";
 }

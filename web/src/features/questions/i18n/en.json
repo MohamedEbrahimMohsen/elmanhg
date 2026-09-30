@@ -186,7 +186,18 @@
     "incorrect": "Incorrect",
     "score": "Score {score} / {maxScore}",
     "gradeFailed": "This draft cannot be graded yet.",
-    "essayNotGradable": "Essays are graded by the AI grader; the test grader does not cover them."
+    "essayGradingHint": "\"Try the answer\" sends the essay to the AI grader, which marks each rubric criterion. It can take up to a minute.",
+    "essayGrading": "The AI grader is marking the essay…",
+    "essay": {
+      "title": "AI grading details",
+      "justification": "AI justification",
+      "confidence": "Confidence: {confidence}%",
+      "model": "Model {model} · prompt {promptVersion}"
+    }
+  },
+  "essayGrade": {
+    "criteria": "Marks per criterion",
+    "criterionPoints": "{points} / {maxPoints}"
   },
   "view": {
     "answerLegend": "Your answer",

@@ -52,11 +52,27 @@ public sealed class GradeQuestionDraftValidatorTests
     }
 
     [Fact]
-    public void Validate_Essay_ReturnsQuestionTypeNotGradableOnly()
+    public void Validate_EssayWithText_HasNoErrors()
     {
-        var codes = Codes(new GradeQuestionDraftQuery(EssayFields(), Json("{}")));
+        _validator.Validate(new GradeQuestionDraftQuery(EssayFields(), Json("""{"text":"Inertia"}"""))).IsValid.Should().BeTrue();
+    }
 
-        codes.Should().Contain(ErrorCodes.QuestionTypeNotGradable).And.NotContain(ErrorCodes.QuestionAnswerInvalid);
+    [Fact]
+    public void Validate_EssayWithoutText_HasQuestionAnswerInvalid()
+    {
+        Codes(new GradeQuestionDraftQuery(EssayFields(), Json("{}"))).Should().Contain(ErrorCodes.QuestionAnswerInvalid);
+    }
+
+    [Fact]
+    public void Validate_EssayTooLong_HasQuestionEssayAnswerTooLong()
+    {
+        var validator = new GradeQuestionDraftValidator(Options.Create(new ContentOptions { SubjectNameMaxLength = 100, UnitNameMaxLength = 100, LessonNameMaxLength = 100, LessonExplanationMaxLength = 100000, LessonSummaryMaxLength = 20000, LessonObjectiveMaxLength = 300, LessonObjectivesMaxCount = 20, LessonVideoUrlMaxLength = 2048, LessonImageMaxSizeInMb = 5, QuestionStemMaxLength = 20000, QuestionExplanationMaxLength = 20000, QuestionOptionsMaxCount = 10, QuestionOptionTextMaxLength = 2000, QuestionBlanksMaxCount = 10, QuestionAcceptedAnswersMaxCount = 20, QuestionAnswerMaxLength = 200, QuestionTagsMaxCount = 10, QuestionTagMaxLength = 50, QuestionMaxScoreMax = 100, QuestionListMaxPageSize = 100, QuestionFilterMaxLength = 200, QuestionEssayAnswerMaxLength = 5 }));
+
+        var codes = validator.Validate(new GradeQuestionDraftQuery(EssayFields(), Json("""{"text":"abcdef"}"""))).Errors
+            .Select(x => x.ErrorCode)
+            .ToList();
+
+        codes.Should().Equal(ErrorCodes.QuestionEssayAnswerTooLong);
     }
 
     private List<string> Codes(GradeQuestionDraftQuery query)

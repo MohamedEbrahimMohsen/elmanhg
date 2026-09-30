@@ -7,6 +7,7 @@ from elmanhg_ai.clients.model import ModelClient
 from elmanhg_ai.clients.transcription import TranscriptionClient
 from elmanhg_ai.core.errors import ServiceNotReadyError
 from elmanhg_ai.pipelines.chat import ChatPrompts
+from elmanhg_ai.pipelines.essay_grading import EssayGradingPrompts
 from elmanhg_ai.settings import Settings
 
 
@@ -45,8 +46,16 @@ def chat_prompts_from_app(request: Request) -> ChatPrompts:
     return chat_prompts
 
 
+def essay_grading_prompts_from_app(request: Request) -> EssayGradingPrompts:
+    prompts: EssayGradingPrompts | None = getattr(request.app.state, "essay_grading_prompts", None)
+    if prompts is None:
+        raise ServiceNotReadyError()
+    return prompts
+
+
 SettingsDep = Annotated[Settings, Depends(settings_from_app)]
 ModelClientDep = Annotated[ModelClient, Depends(model_client_from_app)]
 ChatPromptsDep = Annotated[ChatPrompts, Depends(chat_prompts_from_app)]
+EssayGradingPromptsDep = Annotated[EssayGradingPrompts, Depends(essay_grading_prompts_from_app)]
 EmbeddingClientDep = Annotated[EmbeddingClient, Depends(embedding_client_from_app)]
 TranscriptionClientDep = Annotated[TranscriptionClient, Depends(transcription_client_from_app)]
