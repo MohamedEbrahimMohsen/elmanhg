@@ -96,6 +96,7 @@ Arabic body text never below 15 px. Fonts: Google Fonts `Readex Pro:wght@500;600
 | KpiCard | — | — | Card with type.caption label, type.stat value, type.caption sub-line |
 | EmptyState | no-data, no-results | — | icon, one line, primary CTA; no-results offers "مسح الفلاتر" |
 | Skeleton | — | loading | soft blocks with radius of the element they replace |
+| MathInput | step, final | default, focus, disabled, keypad open (inputmode none) | textarea like Input but type.mono family at type.body size (16 px, avoids iOS zoom), dir="ltr"; preview box surface + border, radius.sm, min height 44; keypad 6×6 keys (surface, border.strong, radius.sm, ≥44px) on soft panel radius.md, dir="ltr", under the active field; step row surface + border radius.md with move up/down (ghost) and remove (danger) icon buttons ≥44px |
 
 ## Rules
 1. Blue = action or link. Green = correct. Red = wrong. Amber = partial / pending. Nothing else is coloured.
