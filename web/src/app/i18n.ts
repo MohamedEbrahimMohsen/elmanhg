@@ -11,6 +11,7 @@ import { contentLocales } from '@/features/content/locales';
 import { examLocales } from '@/features/exam/locales';
 import { landingLocales } from '@/features/landing/locales';
 import { masteryLocales } from '@/features/mastery/locales';
+import { mathStepsLocales } from '@/features/mathSteps/locales';
 import { onboardingLocales } from '@/features/onboarding/locales';
 import { paymentsLocales } from '@/features/payments/locales';
 import { progressLocales } from '@/features/progress/locales';
@@ -41,6 +42,7 @@ const resources = {
     questions: questionsLocales.ar,
     quiz: quizLocales.ar,
     mastery: masteryLocales.ar,
+    mathSteps: mathStepsLocales.ar,
     progress: progressLocales.ar,
     blueprints: blueprintsLocales.ar,
     exam: examLocales.ar,
@@ -62,6 +64,7 @@ const resources = {
     questions: questionsLocales.en,
     quiz: quizLocales.en,
     mastery: masteryLocales.en,
+    mathSteps: mathStepsLocales.en,
     progress: progressLocales.en,
     blueprints: blueprintsLocales.en,
     exam: examLocales.en,
@@ -104,6 +107,7 @@ export function initI18n(lng: Language = defaultLanguage): void {
         'questions',
         'quiz',
         'mastery',
+        'mathSteps',
         'progress',
         'blueprints',
         'exam',

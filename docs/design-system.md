@@ -173,6 +173,10 @@ Slide-in sheet from the start edge, `--surface`, `--shadow-2`, `--r-lg` on the o
 
 Centered, max 420 px, `--r-lg`, `--shadow-2`, overlay `rgba(29,29,31,.35)`.
 
+### 5.12 Math input
+
+The math-with-steps answer ([math-input.md](math-input.md)). Each LaTeX field is white, `--r-sm`, `--border-strong`, in the system monospace at 16 px (not the 12 px mono size: smaller text makes iOS zoom on focus), `direction: ltr`. A preview box sits under each field: white, hairline border, `--r-sm`, at least 44 px tall, with horizontal scroll inside. The touch keypad is a 6×6 grid of keys, each white, `--r-sm`, `--border-strong` and at least 44 px tall, on a `--soft` panel with `--r-md`, laid out left to right. It opens under the active field. Step rows are white `--r-md` hairline cards with icon buttons for move up, move down and remove (Danger), each at least 44 px.
+
 ## 6. Layout and RTL
 
 - `dir="rtl"` on `html`. Logical properties only (`margin-inline-start`, `padding-inline`), never left/right.
