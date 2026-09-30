@@ -68,6 +68,7 @@ A deferred quiz answer is saved on the item (`SavedAnswer`), and the response ha
 | `InputTokens`, `OutputTokens`, `CostUsd` (12,6) | | the successful call's usage and cost |
 | `TimeTakenMilliseconds` | int | the quiz answer time measured at submission; 0 for exam answers |
 | `AppliedAt` | timestamptz, null | when a `Graded` grade was applied to its session |
+| `ReviewDecision`, `ReviewedBy`, `ReviewedAt`, `ReviewComment`, `ReviewedScore` (9,2), `ReviewedNormalisedScore` (5,4) | null until reviewed | the teacher review (#128); the AI `Score` is never overwritten ([grade-review.md](grade-review.md)) |
 
 Indexes: unique `(SessionId, QuestionId)` (`IX_MathStepGrades_SessionId_QuestionId`), `NextAttemptAt` filtered to `Pending`, `GradedAt` filtered to `Graded` with a null `AppliedAt`, and `(SubjectId, Status)`. The row version is PostgreSQL `xmin`.
 
@@ -79,7 +80,7 @@ Indexes: unique `(SessionId, QuestionId)` (`IX_MathStepGrades_SessionId_Question
 - **Grade:** a due grade with a verdict calls the step grader when step grading is needed, and completes the grade with the combined score (`Complete`). A final-only or no-steps grade completes without an AI call. `Graded`, or `InReview` / `LowConfidence` when the AI's confidence is below `ReviewConfidenceThreshold`.
 - **Apply:** a `Graded` grade with a null `AppliedAt` writes the session's `Attempt` (`GradedBy = AI`, `CreatedAt = RequestedAt`, the stored feedback), updates mastery (not in test mode), recomputes `ScorePercent` when the session is finished, and stamps `AppliedAt`. The attempt raises `AttemptsRecorded`, so its training row is written in the same save ([training-data.md](training-data.md)).
 - **Failure:** the worker logs a warning and sends `FailMathStepGradeCommand` with the exception's error code (or its type name). The next try is at `RetryBaseDelaySeconds × 2^(attempt − 1)`. After `MaxAttempts` the grade becomes `InReview` with reason `FinalAnswerUnchecked` when there is still no verdict, else `GradingFailed`.
-- Only `Pending` grades are checked, graded or failed (`MATH_STEP_GRADE_NOT_PENDING` otherwise). `Graded` is final; `InReview` waits for #128.
+- Only `Pending` grades are checked, graded or failed (`MATH_STEP_GRADE_NOT_PENDING` otherwise). `Graded` is final; `InReview` waits for a teacher review, which sets `Graded`.
 - Kill switch: `MathStepGrading:SweepEnabled=false` stops the worker (the test host sets it).
 
 ## What the grader receives
@@ -106,7 +107,7 @@ Quiz MathSteps answers with a non-blank final answer are limited per student (`M
 
 ## Student API
 
-`GET /api/sessions/{sessionId}/questions/{questionId}/math-step-grade` (policy `Assessments.Take`) returns the caller's own grade as `MathStepGradeResult`: `id`, `status`, `maxScore`, `requestedAt`, and, only when the status is `Graded`, `gradedAt`, `score`, `normalisedScore`, `outcome`, `finalAnswerVerdict`, `justification` and `steps`. A grade that is `Graded` but not yet applied reads `Pending`. Another student's grade, or a missing one (a final-only answer graded at once), returns `404 MATH_STEP_GRADE_NOT_FOUND`.
+`GET /api/sessions/{sessionId}/questions/{questionId}/math-step-grade` (policy `Assessments.Take`) returns the caller's own grade as `MathStepGradeResult`: `id`, `status`, `maxScore`, `requestedAt`, and, only when the status is `Graded`, `gradedAt`, `score`, `normalisedScore`, `outcome`, `finalAnswerVerdict`, `justification` and `steps`, plus `review` (`{ decision, comment, reviewedAt }`, or null). A grade that is `Graded` but not yet applied reads `Pending`. Another student's grade, or a missing one (a final-only answer graded at once), returns `404 MATH_STEP_GRADE_NOT_FOUND`.
 
 The web polls it every 2 s while `Pending` (`useMathStepGrade`). `MathStepGradeStatus` shows «جارٍ تصحيح إجابتك…», «قيد المراجعة» or the verdict with the final-answer verdict, the marks per step and the justification, and renders nothing on a 404. In the quiz card a pending answer is shown read-only; once applied, the normal feedback panel shows the score and the step marks follow it.
 
@@ -145,6 +146,12 @@ With `AiService:Provider=Fake` (the default), `FakeAiMathStepGradingClient` awar
 | `MATH_STEP_GRADING_UNAVAILABLE` | 503 | the step grader failed, timed out or returned an invalid reply; the fake in Production |
 | `MATH_STEP_GRADE_NOT_PENDING` | 409 | the worker tried to change a grade that is no longer pending (worker only) |
 
-## What #128 adds
+## Teacher review (#128)
 
-The teacher review queue for `InReview` math step grades (scoped by `SubjectId`, with the review reason), and legacy `mathUnchecked` attempts from before this story.
+`InReview` math step grades are listed in the teacher review queue, scoped by `SubjectId` and shown with their reason. See [grade-review.md](grade-review.md).
+
+- **Accept** is allowed only when the AI produced a score (`LowConfidence`). `GradingFailed` and `FinalAnswerUnchecked` grades can only be overridden (400 `GRADE_REVIEW_NO_AI_SCORE`).
+- **Override** takes a total score from 0 to the max score (2 decimals) and a required note. There are no per-step marks.
+- The review writes the attempt in the same save, with `GradedBy = Teacher`, mastery and `ScorePercent`. An accepted grade keeps its stored feedback; an overridden one has none.
+- Student result: after an override, `steps` is `[]`, `justification` is null, and `finalAnswerVerdict` is null if the CAS never checked the answer. An accepted grade keeps the AI detail. Both carry `review`.
+- Legacy `mathUnchecked` attempts from before #123 are not reviewed (no live deploy; [math-cas.md](math-cas.md)).

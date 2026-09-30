@@ -72,13 +72,13 @@ public partial class MathStepGrade
 
     public QuestionGrade ToQuestionGrade()
     {
-        if (Status != MathStepGradeStatus.Graded || Score is null || NormalisedScore is null)
+        if (Status != MathStepGradeStatus.Graded || FinalScore is null || FinalNormalisedScore is null)
         {
             throw new InvalidOperationException("Only a graded math answer has a final score.");
         }
 
-        var feedback = Feedback is null ? null : JsonSerializer.Deserialize<GradeFeedback>(Feedback, QuestionJson.SerializerOptions);
-        return new QuestionGrade(Score.Value, NormalisedScore.Value, QuestionGrade.ToOutcome(NormalisedScore.Value), feedback);
+        var feedback = ReviewDecision == GradeReviewDecision.Overridden || Feedback is null ? null : JsonSerializer.Deserialize<GradeFeedback>(Feedback, QuestionJson.SerializerOptions);
+        return new QuestionGrade(FinalScore.Value, FinalNormalisedScore.Value, QuestionGrade.ToOutcome(FinalNormalisedScore.Value), feedback);
     }
 
     public void MarkApplied(DateTimeOffset appliedAt)

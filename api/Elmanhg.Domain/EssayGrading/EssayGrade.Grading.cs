@@ -55,12 +55,12 @@ public partial class EssayGrade
 
     public QuestionGrade ToQuestionGrade()
     {
-        if (Status != EssayGradeStatus.Graded || Score is null || NormalisedScore is null)
+        if (Status != EssayGradeStatus.Graded || FinalScore is null || FinalNormalisedScore is null)
         {
             throw new InvalidOperationException("Only a graded essay has a final score.");
         }
 
-        return new QuestionGrade(Score.Value, NormalisedScore.Value, QuestionGrade.ToOutcome(NormalisedScore.Value), null);
+        return new QuestionGrade(FinalScore.Value, FinalNormalisedScore.Value, QuestionGrade.ToOutcome(FinalNormalisedScore.Value), null);
     }
 
     public void MarkApplied(DateTimeOffset appliedAt)

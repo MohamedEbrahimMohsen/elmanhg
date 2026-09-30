@@ -14,7 +14,8 @@
     "teacher": {
       "queue": "Review queue",
       "inbox": "Student questions",
-      "stats": "My stats"
+      "stats": "My stats",
+      "gradeReviews": "AI grades"
     },
     "admin": {
       "dashboard": "Dashboard",

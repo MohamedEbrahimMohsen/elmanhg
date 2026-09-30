@@ -10,6 +10,7 @@ public partial class AppDbContext
     public const string TeacherThreadTrainingRecordsTable = "TeacherThreadTrainingRecords";
     public const string EssayGradeTrainingRecordsTable = "EssayGradeTrainingRecords";
     public const string TeacherThreadTrainingTriggerIndex = "IX_TeacherThreadTrainingRecords_ThreadId_Trigger";
+    public const string EssayGradeTrainingTriggerIndex = "IX_EssayGradeTrainingRecords_EssayGradeId_Trigger";
 
     public DbSet<AttemptTrainingRecord> AttemptTrainingRecords { get; set; }
     public DbSet<AvatarTrainingRecord> AvatarTrainingRecords { get; set; }
@@ -76,7 +77,11 @@ public partial class AppDbContext
             builder.Property(x => x.Confidence).HasPrecision(5, 4);
             builder.Property(x => x.Model).IsRequired().HasMaxLength(AiIdentifierMaxLength);
             builder.Property(x => x.PromptVersion).IsRequired().HasMaxLength(AiIdentifierMaxLength);
-            builder.HasIndex(x => x.EssayGradeId).IsUnique();
+            builder.Property(x => x.Trigger).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.ReviewDecision).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.ReviewedScore).HasPrecision(9, 2);
+            builder.Property(x => x.ReviewedNormalisedScore).HasPrecision(5, 4);
+            builder.HasIndex(x => new { x.EssayGradeId, x.Trigger }).IsUnique().HasDatabaseName(EssayGradeTrainingTriggerIndex);
             builder.HasIndex(x => x.OccurredAt);
             builder.HasIndex(x => x.StudentHash);
         });

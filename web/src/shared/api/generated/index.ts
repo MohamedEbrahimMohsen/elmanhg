@@ -9,6 +9,7 @@ export * from './content-retrieval/content-retrieval';
 export * from './dashboard/dashboard';
 export * from './exam-blueprints/exam-blueprints';
 export * from './exams/exams';
+export * from './grade-reviews/grade-reviews';
 export * from './lessons/lessons';
 export * from './mastery/mastery';
 export * from './payments/payments';

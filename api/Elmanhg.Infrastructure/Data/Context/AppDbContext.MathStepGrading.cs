@@ -30,6 +30,9 @@ public partial class AppDbContext
             builder.Property(x => x.Model).HasMaxLength(AiIdentifierMaxLength);
             builder.Property(x => x.PromptVersion).HasMaxLength(AiIdentifierMaxLength);
             builder.Property(x => x.LastErrorCode).HasMaxLength(AiIdentifierMaxLength);
+            builder.Property(x => x.ReviewDecision).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.ReviewedScore).HasPrecision(9, 2);
+            builder.Property(x => x.ReviewedNormalisedScore).HasPrecision(5, 4);
             builder.Property(x => x.Version).IsRowVersion();
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Session>().WithMany().HasForeignKey(x => x.SessionId).OnDelete(DeleteBehavior.Restrict);

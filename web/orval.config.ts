@@ -41,6 +41,7 @@ export default defineConfig({
           GetTrainingExports: { zod: { generate: { query: false } } },
           GetUsers: { zod: { generate: { query: false } } },
           GetStudentSessionHistory: { zod: { generate: { query: false } } },
+          GetGradeReviewQueue: { zod: { generate: { query: false } } },
         },
       },
     },

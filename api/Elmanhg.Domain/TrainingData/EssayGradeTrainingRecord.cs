@@ -1,11 +1,12 @@
 using Core.DDD.Entities;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.Questions;
+using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Sessions;
 
 namespace Elmanhg.Domain.TrainingData;
 
-public class EssayGradeTrainingRecord : Entity
+public partial class EssayGradeTrainingRecord : Entity
 {
     public string StudentHash { get; private set; } = string.Empty;
     public Guid EssayGradeId { get; private set; }
@@ -27,6 +28,12 @@ public class EssayGradeTrainingRecord : Entity
     public string PromptVersion { get; private set; } = string.Empty;
     public DateTimeOffset OccurredAt { get; private set; }
     public DateTimeOffset RecordedAt { get; private set; }
+    public EssayGradeTrainingTrigger Trigger { get; private set; }
+    public GradeReviewDecision? ReviewDecision { get; private set; }
+    public decimal? ReviewedScore { get; private set; }
+    public decimal? ReviewedNormalisedScore { get; private set; }
+    public string? ReviewComment { get; private set; }
+    public DateTimeOffset? ReviewedAt { get; private set; }
 
     private EssayGradeTrainingRecord(Guid id) : base(id) { }
 
@@ -65,6 +72,7 @@ public class EssayGradeTrainingRecord : Entity
             PromptVersion = promptVersion,
             OccurredAt = gradedAt,
             RecordedAt = recordedAt,
+            Trigger = EssayGradeTrainingTrigger.Completed,
         };
     }
 }

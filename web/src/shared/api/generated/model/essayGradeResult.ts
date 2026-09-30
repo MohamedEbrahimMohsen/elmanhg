@@ -5,6 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { EssayCriterionResult } from './essayCriterionResult';
+import type { GradeReviewNoteResult } from './gradeReviewNoteResult';
 
 export interface EssayGradeResult {
   id: string;
@@ -29,4 +30,5 @@ export interface EssayGradeResult {
   /** @nullable */
   justification: string | null;
   criteria: EssayCriterionResult[];
+  review: null | GradeReviewNoteResult;
 }

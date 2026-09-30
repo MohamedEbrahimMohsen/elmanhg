@@ -6,10 +6,12 @@ import type { EssayGradeResult } from '@/shared/api/generated/model';
 import { getGetEssayGradeMockHandler } from '@/shared/api/generated/sessions/sessions.msw';
 import { axe } from '@/test/axe';
 import {
+  acceptedEssayGrade,
   essayQuestionId,
   essaySessionId,
   gradedEssayGrade,
   inReviewEssayGrade,
+  overriddenEssayGrade,
   pendingEssayGrade,
 } from '@/test/essayGradeFixtures';
 import { server } from '@/test/msw/server';
@@ -122,6 +124,28 @@ describe('EssayGradeStatus', () => {
     expect(within(criteria).getByText('Partly correct.')).toBeInTheDocument();
     expect(within(group).getByRole('heading', { name: "Grader's comment" })).toBeInTheDocument();
     expect(within(group).getByText('Good definition; add an example.')).toBeInTheDocument();
+  });
+
+  it('shows the teacher note and comment without AI criteria when overridden', async () => {
+    renderStatus(overriddenEssayGrade);
+
+    const group = await screen.findByRole('group', { name: 'Essay grade' });
+    expect(within(group).getByRole('status')).toHaveTextContent('Score 4 / 5');
+    const note = await within(group).findByRole('note');
+    expect(note).toHaveTextContent('Your teacher reviewed this answer and set its score.');
+    expect(note).toHaveTextContent("Teacher's note: Good example; full marks for the definition.");
+    expect(within(group).queryByRole('list', { name: 'Marks per criterion' })).not.toBeInTheDocument();
+    expect(within(group).queryByRole('heading', { name: "Grader's comment" })).not.toBeInTheDocument();
+  });
+
+  it('shows the criteria and the accepted note when accepted', async () => {
+    renderStatus(acceptedEssayGrade);
+
+    const group = await screen.findByRole('group', { name: 'Essay grade' });
+    expect(within(group).getByRole('list', { name: 'Marks per criterion' })).toBeInTheDocument();
+    const note = await within(group).findByRole('note');
+    expect(note).toHaveTextContent('Your teacher reviewed this grade and accepted it.');
+    expect(note).not.toHaveTextContent("Teacher's note");
   });
 
   it('shows an error with retry when the grade fails to load', async () => {

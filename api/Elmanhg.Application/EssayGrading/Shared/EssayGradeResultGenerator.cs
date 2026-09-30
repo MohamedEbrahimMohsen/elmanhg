@@ -1,3 +1,4 @@
+using Elmanhg.Application.GradeReviews.Shared;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.Questions.Grading;
 
@@ -9,18 +10,22 @@ public static class EssayGradeResultGenerator
     {
         if (grade.IsAwaitingApplication)
         {
-            return new EssayGradeResult(grade.Id, nameof(EssayGradeStatus.Pending), grade.MaxScore, grade.RequestedAt, null, null, null, null, null, []);
+            return new EssayGradeResult(grade.Id, nameof(EssayGradeStatus.Pending), grade.MaxScore, grade.RequestedAt, null, null, null, null, null, [], null);
         }
 
         if (grade.Status != EssayGradeStatus.Graded)
         {
-            return new EssayGradeResult(grade.Id, grade.Status.ToString(), grade.MaxScore, grade.RequestedAt, null, null, null, null, null, []);
+            return new EssayGradeResult(grade.Id, grade.Status.ToString(), grade.MaxScore, grade.RequestedAt, null, null, null, null, null, [], null);
         }
 
-        var criteria = grade.ReadCriteria()
-            .Select(Criterion)
-            .ToList();
-        return new EssayGradeResult(grade.Id, grade.Status.ToString(), grade.MaxScore, grade.RequestedAt, grade.GradedAt, grade.Score, grade.NormalisedScore, QuestionGrade.ToOutcome(grade.NormalisedScore!.Value).ToString(), grade.Justification, criteria);
+        var overridden = grade.ReviewDecision == GradeReviewDecision.Overridden;
+        List<EssayCriterionResult> criteria = overridden
+            ? []
+            : grade.ReadCriteria()
+                .Select(Criterion)
+                .ToList();
+        var review = GradeReviewResultGenerator.Note(grade.ReviewDecision, grade.ReviewComment, grade.ReviewedAt);
+        return new EssayGradeResult(grade.Id, grade.Status.ToString(), grade.MaxScore, grade.RequestedAt, grade.GradedAt, grade.FinalScore, grade.FinalNormalisedScore, QuestionGrade.ToOutcome(grade.FinalNormalisedScore!.Value).ToString(), overridden ? null : grade.Justification, criteria, review);
     }
 
     public static EssayGradeDetailResult Detail(EssayAssessment assessment)

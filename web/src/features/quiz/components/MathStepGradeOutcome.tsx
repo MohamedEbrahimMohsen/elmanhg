@@ -1,9 +1,11 @@
+import { Suspense } from 'react';
 import { CircleAlert, CircleCheck, CircleX } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { MathStepScoreList } from '@/features/questions';
 import type { MathStepGradeResult } from '@/shared/api/generated/model';
 import { formatNumber } from '@/shared/lib/format';
 import { cn } from '@/shared/lib/utils';
+import { TeacherReviewNote } from './TeacherReviewNote';
 
 export interface MathStepGradeOutcomeProps {
   grade: MathStepGradeResult;
@@ -59,7 +61,7 @@ export function MathStepGradeOutcome({ grade, showOutcome }: MathStepGradeOutcom
           </div>
         </div>
       ) : null}
-      {grade.finalAnswerVerdict ? (
+      {grade.finalAnswerVerdict !== null ? (
         <p className="text-ui text-text">
           <span className="font-semibold">{t('mathStepGrade.finalAnswer')}</span>{' '}
           {t(`mathStepGrade.verdicts.${grade.finalAnswerVerdict}`, { defaultValue: grade.finalAnswerVerdict })}
@@ -71,6 +73,11 @@ export function MathStepGradeOutcome({ grade, showOutcome }: MathStepGradeOutcom
           <h3 className="text-caption font-semibold text-text">{t('mathStepGrade.justification')}</h3>
           <p className="text-ui text-text-muted">{grade.justification}</p>
         </div>
+      ) : null}
+      {grade.review ? (
+        <Suspense fallback={null}>
+          <TeacherReviewNote review={grade.review} />
+        </Suspense>
       ) : null}
     </div>
   );

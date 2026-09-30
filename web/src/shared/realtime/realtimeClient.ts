@@ -1,4 +1,4 @@
-export const realtimeEventNames = ['teacherReplyReceived', 'teacherThreadReminder'] as const;
+export const realtimeEventNames = ['teacherReplyReceived', 'teacherThreadReminder', 'gradeReviewed'] as const;
 
 export type RealtimeEventName = (typeof realtimeEventNames)[number];
 

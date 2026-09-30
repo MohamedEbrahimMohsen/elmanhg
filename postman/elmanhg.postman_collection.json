@@ -39,6 +39,8 @@
     { "key": "avatarConversationId", "value": "" },
     { "key": "adminAvatarConversationId", "value": "" },
     { "key": "trainingExportId", "value": "" },
+    { "key": "reviewEssayGradeId", "value": "" },
+    { "key": "reviewMathStepGradeId", "value": "" },
     { "key": "studentId", "value": "" },
     { "key": "invitedUserId", "value": "" },
     { "key": "invitedEmail", "value": "invited.teacher@elmanhg.local" },
@@ -4474,6 +4476,198 @@
                   "language": "json"
                 }
               }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "GradeReviews",
+      "description": "Teacher (assigned to the subject) or Admin (AiGrades.Override). Sign in as the teacher so accessToken is set. The queue requests fill reviewEssayGradeId and reviewMathStepGradeId from the first item. An in-review grade needs a real grader (low confidence, grading failed, or an unchecked final answer) or a seeded row: the fake grader never scores below the 0.7 review threshold. A math grade can be accepted only when the AI produced a score (400 GRADE_REVIEW_NO_AI_SCORE otherwise); a second decision returns 409 GRADE_NOT_IN_REVIEW. See docs/grade-review.md.",
+      "item": [
+        {
+          "name": "Get review subjects",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns an array\", function () { pm.expect(Array.isArray(pm.response.json())).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/grade-reviews/subjects",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "grade-reviews", "subjects"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get essay review queue",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const first = pm.response.json().items[0];",
+                  "if (first) { pm.collectionVariables.set(\"reviewEssayGradeId\", first.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/subjects/{{subjectId}}/grade-reviews?kind=Essay&pageNumber=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subjects", "{{subjectId}}", "grade-reviews"],
+              "query": [{ "key": "kind", "value": "Essay" }, { "key": "pageNumber", "value": "1" }, { "key": "pageSize", "value": "20" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get math steps review queue",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const first = pm.response.json().items[0];",
+                  "if (first) { pm.collectionVariables.set(\"reviewMathStepGradeId\", first.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/subjects/{{subjectId}}/grade-reviews?kind=MathSteps&pageNumber=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subjects", "{{subjectId}}", "grade-reviews"],
+              "query": [{ "key": "kind", "value": "MathSteps" }, { "key": "pageNumber", "value": "1" }, { "key": "pageSize", "value": "20" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get essay grade review",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200 or 404\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 404]); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/subjects/{{subjectId}}/grade-reviews/essays/{{reviewEssayGradeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subjects", "{{subjectId}}", "grade-reviews", "essays", "{{reviewEssayGradeId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Override essay grade",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200, 404 or 409\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 404, 409]); });",
+                  "if (pm.response.code === 200) { pm.test(\"reviewed\", function () { pm.expect(pm.response.json().review.decision).to.eql(\"Overridden\"); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/subjects/{{subjectId}}/grade-reviews/essays/{{reviewEssayGradeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subjects", "{{subjectId}}", "grade-reviews", "essays", "{{reviewEssayGradeId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"Overridden\",\n  \"score\": 3.5,\n  \"comment\": \"Clear definition; add an example next time.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get math step grade review",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200 or 404\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 404]); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/subjects/{{subjectId}}/grade-reviews/math-steps/{{reviewMathStepGradeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subjects", "{{subjectId}}", "grade-reviews", "math-steps", "{{reviewMathStepGradeId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Accept math step grade",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200, 400, 404 or 409\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 400, 404, 409]); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/subjects/{{subjectId}}/grade-reviews/math-steps/{{reviewMathStepGradeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subjects", "{{subjectId}}", "grade-reviews", "math-steps", "{{reviewMathStepGradeId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"Accepted\",\n  \"score\": null,\n  \"comment\": null\n}",
+              "options": { "raw": { "language": "json" } }
             }
           },
           "response": []

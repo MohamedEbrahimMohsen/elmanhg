@@ -1,0 +1,81 @@
+{
+  "queue": {
+    "title": "مراجعة تصحيح الذكاء الاصطناعي",
+    "caption": "إجابات صحّحها الذكاء الاصطناعي بثقة منخفضة أو تعذّر تصحيحها. اعتمد الدرجة أو عدّلها لتصبح نهائية.",
+    "subjects": "المواد",
+    "subjectPill": "{name} · {count}",
+    "kinds": {
+      "Essay": "المقالات ({count})",
+      "MathSteps": "خطوات الرياضيات ({count})"
+    },
+    "listLabel": "إجابات بانتظار المراجعة",
+    "loading": "جارٍ تحميل قائمة المراجعة…",
+    "errorTitle": "تعذّر تحميل قائمة المراجعة.",
+    "age": "بانتظار المراجعة منذ {age}",
+    "aiScore": "الذكاء الاصطناعي: {score} من {maxScore}",
+    "noAiScore": "بدون درجة آلية",
+    "confidence": "الثقة {percent}٪",
+    "empty": {
+      "noSubjects": "لا توجد مواد مسندة إليك.",
+      "noItems": "لا توجد إجابات بانتظار المراجعة."
+    }
+  },
+  "reasons": {
+    "LowConfidence": "ثقة منخفضة",
+    "GradingFailed": "تعذّر التصحيح الآلي",
+    "FinalAnswerUnchecked": "تعذّر التحقق من الإجابة النهائية"
+  },
+  "detail": {
+    "title": "مراجعة الإجابة",
+    "back": "العودة إلى مراجعة التصحيح",
+    "question": "السؤال",
+    "answer": "إجابة الطالب",
+    "ai": "تصحيح الذكاء الاصطناعي",
+    "aiScore": "الدرجة المقترحة: {score} من {maxScore}",
+    "confidence": "الثقة: {percent}٪",
+    "verdict": "الإجابة النهائية: {verdict}",
+    "noAiScore": "لم يتمكن الذكاء الاصطناعي من إعطاء درجة لهذه الإجابة.",
+    "reviewed": "تمت المراجعة",
+    "finalScore": "الدرجة النهائية: {score} من {maxScore}",
+    "reviewedAt": "رُوجعت في {date}",
+    "saved": "حُفظ القرار، وأصبحت الدرجة نهائية.",
+    "conflict": "راجع معلّم آخر هذه الإجابة للتو.",
+    "saveFailed": "تعذّر حفظ القرار.",
+    "notFound": "لم يتم العثور على هذه الإجابة.",
+    "loading": "جارٍ تحميل الإجابة…",
+    "errorTitle": "تعذّر تحميل الإجابة."
+  },
+  "decisions": {
+    "Accepted": "اعتُمدت درجة الذكاء الاصطناعي",
+    "Overridden": "عُدّلت الدرجة"
+  },
+  "verdicts": {
+    "Equivalent": "صحيحة",
+    "NotEquivalent": "غير صحيحة",
+    "WrongForm": "بصورة غير مطلوبة",
+    "Unreadable": "غير مقروءة",
+    "Unchecked": "لم يُتحقق منها"
+  },
+  "form": {
+    "decision": "قرارك",
+    "accept": "اعتماد الدرجة المقترحة ({score} من {maxScore})",
+    "acceptUnavailable": "لا توجد درجة مقترحة لاعتمادها.",
+    "override": "تحديد الدرجة بنفسي",
+    "score": "الدرجة (من {maxScore})",
+    "commentRequiredLabel": "ملاحظة للطالب",
+    "commentOptionalLabel": "ملاحظة للطالب (اختيارية)",
+    "commentHint": "حتى {max} حرف، ويراها الطالب.",
+    "submit": "حفظ القرار",
+    "scoreRequired": "أدخل الدرجة.",
+    "scoreRange": "أدخل رقمًا من 0 حتى الدرجة الكاملة بمنزلتين عشريتين على الأكثر.",
+    "commentRequired": "اكتب ملاحظة توضّح الدرجة.",
+    "commentTooLong": "الملاحظة أطول من المسموح."
+  },
+  "errors": {
+    "GRADE_REVIEW_SCORE_REQUIRED": "حدد الدرجة.",
+    "GRADE_REVIEW_SCORE_INVALID": "الدرجة يجب أن تكون رقمًا غير سالب بمنزلتين عشريتين على الأكثر.",
+    "GRADE_REVIEW_SCORE_OUT_OF_RANGE": "الدرجة يجب أن تكون بين صفر والدرجة الكاملة للسؤال.",
+    "GRADE_REVIEW_COMMENT_REQUIRED": "اكتب ملاحظة للطالب توضّح الدرجة.",
+    "GRADE_REVIEW_COMMENT_TOO_LONG": "الملاحظة أطول من المسموح."
+  }
+}

@@ -47,7 +47,7 @@ The served questions are chosen and written when the session starts and never ch
 | `Answer` | `answer_json` | jsonb, the canonical form of the typed answer (unknown properties dropped). |
 | `Score` | `score` | numeric(9,2) |
 | `NormalisedScore` | `normalised_score` | numeric(5,4), 0 to 1 |
-| `GradedBy` | `graded_by` | `Auto`, `AI`, `Teacher`. Every deterministic type (the v1 types and drag-and-drop) and a blank essay are `Auto`; a written essay (#119) and a deferred MathSteps answer (#123) are `AI`. |
+| `GradedBy` | `graded_by` | `Auto`, `AI`, `Teacher`. Every deterministic type (the v1 types and drag-and-drop) and a blank essay are `Auto`; a written essay (#119) and a deferred MathSteps answer (#123) are `AI`; `Teacher` = a grade finalised by a teacher review (#128, [grade-review.md](grade-review.md)). |
 | `Grade` | `grade_json?` | jsonb, the serialised `GradeFeedback` (null when the grader gives none). |
 | `TimeTakenMilliseconds` | `time_taken_ms` | See Time taken. |
 | `CreatedAt` | `created_at` | |
@@ -99,7 +99,7 @@ Grading loads the `QuestionRevision` at `item.QuestionVersion` and calls `Questi
 
 Written essays are graded asynchronously by the AI grader against the served revision (`EssayGrade`, [essay-grading.md](essay-grading.md)); the attempt is written when the grade is applied. A blank essay is graded at once by `QuestionGrader` as Unanswered.
 
-A MathSteps answer goes through `AnswerGrader.DecideAsync`: the final answer is checked by the AI service's CAS ([math-cas.md](math-cas.md)); every other type is graded locally by `QuestionGrader`. A step-graded answer, or one whose verdict is `unchecked` (the AI service cannot be reached), is deferred to a `MathStepGrade` that the background worker checks, grades and applies ([math-step-grading.md](math-step-grading.md)). Attempts graded `unchecked` before #123 keep their provisional 0 and wait for teacher review (#128).
+A MathSteps answer goes through `AnswerGrader.DecideAsync`: the final answer is checked by the AI service's CAS ([math-cas.md](math-cas.md)); every other type is graded locally by `QuestionGrader`. A step-graded answer, or one whose verdict is `unchecked` (the AI service cannot be reached), is deferred to a `MathStepGrade` that the background worker checks, grades and applies ([math-step-grading.md](math-step-grading.md)). Attempts graded `unchecked` before #123 keep their provisional 0; the teacher review queue (#128) does not list them.
 
 The validator checks that the answer is a JSON object no longer than the largest of `Sessions:AnswerMaxLength`, `Sessions:EssayAnswerMaxLength`, `Sessions:MathStepsAnswerMaxLength` and `Sessions:DragDropAnswerMaxLength`. The handler then checks the shape for the served type (422 `QUESTION_ANSWER_INVALID`), the raw length for that type (422 `ATTEMPT_ANSWER_TOO_LONG`: `EssayAnswerMaxLength` for an essay, `MathStepsAnswerMaxLength` for a MathSteps answer, `DragDropAnswerMaxLength` for a drag-and-drop answer, `AnswerMaxLength` for every other type), the MathSteps step and final-answer caps and the drag-and-drop placement caps (422 `ATTEMPT_ANSWER_TOO_LONG`) and, for an essay, the text length (422 `QUESTION_ESSAY_ANSWER_TOO_LONG` over `Content:QuestionEssayAnswerMaxLength`), so a malformed answer never reaches the grader.
 

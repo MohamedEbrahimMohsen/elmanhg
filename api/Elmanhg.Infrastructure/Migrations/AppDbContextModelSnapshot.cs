@@ -742,9 +742,30 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("RequestedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("ReviewComment")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ReviewDecision")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<string>("ReviewReason")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<DateTimeOffset?>("ReviewedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ReviewedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("ReviewedNormalisedScore")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)");
+
+                    b.Property<decimal?>("ReviewedScore")
+                        .HasPrecision(9, 2)
+                        .HasColumnType("numeric(9,2)");
 
                     b.Property<decimal?>("Score")
                         .HasPrecision(9, 2)
@@ -1331,9 +1352,30 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("RequestedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("ReviewComment")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ReviewDecision")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<string>("ReviewReason")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<DateTimeOffset?>("ReviewedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ReviewedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("ReviewedNormalisedScore")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)");
+
+                    b.Property<decimal?>("ReviewedScore")
+                        .HasPrecision(9, 2)
+                        .HasColumnType("numeric(9,2)");
 
                     b.Property<decimal?>("Score")
                         .HasPrecision(9, 2)
@@ -2678,6 +2720,24 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("RecordedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("ReviewComment")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ReviewDecision")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTimeOffset?>("ReviewedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal?>("ReviewedNormalisedScore")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)");
+
+                    b.Property<decimal?>("ReviewedScore")
+                        .HasPrecision(9, 2)
+                        .HasColumnType("numeric(9,2)");
+
                     b.Property<decimal>("Score")
                         .HasPrecision(9, 2)
                         .HasColumnType("numeric(9,2)");
@@ -2695,17 +2755,23 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<Guid>("SubjectId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Trigger")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<Guid>("UnitId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EssayGradeId")
-                        .IsUnique();
-
                     b.HasIndex("OccurredAt");
 
                     b.HasIndex("StudentHash");
+
+                    b.HasIndex("EssayGradeId", "Trigger")
+                        .IsUnique()
+                        .HasDatabaseName("IX_EssayGradeTrainingRecords_EssayGradeId_Trigger");
 
                     b.ToTable("EssayGradeTrainingRecords", (string)null);
                 });

@@ -126,6 +126,10 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         {
             throw new ConflictCoreException(ErrorCodes.TrainingExportModifiedConcurrently, innerException: exception);
         }
+        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is EssayGrade or MathStepGrade))
+        {
+            throw new ConflictCoreException(ErrorCodes.GradeModifiedConcurrently, innerException: exception);
+        }
         catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: PaymobTransactionIndex or PaymentRefundTransactionIndex })
         {
             throw new ConflictCoreException(ErrorCodes.PaymentTransactionAlreadyRecorded, innerException: exception);
@@ -167,6 +171,10 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         {
             // EF inserts the training row before the stale thread UPDATE, so a lost close/rate race surfaces here, not as a concurrency exception.
             throw new ConflictCoreException(ErrorCodes.TeacherThreadModifiedConcurrently, innerException: exception);
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: EssayGradeTrainingTriggerIndex })
+        {
+            throw new ConflictCoreException(ErrorCodes.GradeModifiedConcurrently, innerException: exception);
         }
     }
 
@@ -601,6 +609,9 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.Property(x => x.PromptVersion).HasMaxLength(AiIdentifierMaxLength);
             builder.Property(x => x.LastErrorCode).HasMaxLength(AiIdentifierMaxLength);
             builder.Property(x => x.CostUsd).HasPrecision(12, 6);
+            builder.Property(x => x.ReviewDecision).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.ReviewedScore).HasPrecision(9, 2);
+            builder.Property(x => x.ReviewedNormalisedScore).HasPrecision(5, 4);
             builder.Property(x => x.Version).IsRowVersion();
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Session>().WithMany().HasForeignKey(x => x.SessionId).OnDelete(DeleteBehavior.Restrict);

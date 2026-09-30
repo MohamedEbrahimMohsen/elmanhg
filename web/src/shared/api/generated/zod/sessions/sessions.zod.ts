@@ -234,7 +234,12 @@ export const GetEssayGradeResponse = zod.object({
   "points": zod.union([zod.int(),zod.stringFormat('int32', getEssayGradeResponseCriteriaItemPointsRegExpTwo)]),
   "maxPoints": zod.union([zod.int(),zod.stringFormat('int32', getEssayGradeResponseCriteriaItemMaxPointsRegExpTwo)]),
   "justification": zod.string()
-}))
+})),
+  "review": zod.union([zod.null(),zod.object({
+  "decision": zod.string(),
+  "comment": zod.string().nullable(),
+  "reviewedAt": zod.iso.datetime({"offset":true})
+})])
 })
 
 export const GetMathStepGradeParams = zod.object({
@@ -267,6 +272,11 @@ export const GetMathStepGradeResponse = zod.object({
   "points": zod.union([zod.int(),zod.stringFormat('int32', getMathStepGradeResponseStepsItemPointsRegExpTwo)]),
   "maxPoints": zod.union([zod.int(),zod.stringFormat('int32', getMathStepGradeResponseStepsItemMaxPointsRegExpTwo)]),
   "justification": zod.string()
-}))
+})),
+  "review": zod.union([zod.null(),zod.object({
+  "decision": zod.string(),
+  "comment": zod.string().nullable(),
+  "reviewedAt": zod.iso.datetime({"offset":true})
+})])
 })
 

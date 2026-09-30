@@ -4443,6 +4443,356 @@
         }
       }
     },
+    "/api/grade-reviews/subjects": {
+      "get": {
+        "tags": [
+          "GradeReviews"
+        ],
+        "operationId": "GetGradeReviewSubjects",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GradeReviewSubjectResult"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GradeReviewSubjectResult"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GradeReviewSubjectResult"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/subjects/{subjectId}/grade-reviews": {
+      "get": {
+        "tags": [
+          "GradeReviews"
+        ],
+        "operationId": "GetGradeReviewQueue",
+        "parameters": [
+          {
+            "name": "subjectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "schema": {
+              "default": "Essay",
+              "$ref": "#/components/schemas/GradeReviewKind"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfGradeReviewItemResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfGradeReviewItemResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfGradeReviewItemResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/subjects/{subjectId}/grade-reviews/essays/{essayGradeId}": {
+      "get": {
+        "tags": [
+          "GradeReviews"
+        ],
+        "operationId": "GetEssayGradeReview",
+        "parameters": [
+          {
+            "name": "subjectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "essayGradeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradeReviewDetailResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradeReviewDetailResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradeReviewDetailResult"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "GradeReviews"
+        ],
+        "operationId": "ReviewEssayGrade",
+        "parameters": [
+          {
+            "name": "subjectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "essayGradeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewGradeRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewGradeRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewGradeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradeReviewDetailResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradeReviewDetailResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradeReviewDetailResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/subjects/{subjectId}/grade-reviews/math-steps/{mathStepGradeId}": {
+      "get": {
+        "tags": [
+          "GradeReviews"
+        ],
+        "operationId": "GetMathStepGradeReview",
+        "parameters": [
+          {
+            "name": "subjectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "mathStepGradeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradeReviewDetailResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradeReviewDetailResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradeReviewDetailResult"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "GradeReviews"
+        ],
+        "operationId": "ReviewMathStepGrade",
+        "parameters": [
+          {
+            "name": "subjectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "mathStepGradeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewGradeRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewGradeRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewGradeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradeReviewDetailResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradeReviewDetailResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradeReviewDetailResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/exams/units/{unitId}": {
       "get": {
         "tags": [
@@ -8444,7 +8794,8 @@
           "normalisedScore",
           "outcome",
           "justification",
-          "criteria"
+          "criteria",
+          "review"
         ],
         "type": "object",
         "properties": {
@@ -8509,6 +8860,16 @@
             "items": {
               "$ref": "#/components/schemas/EssayCriterionResult"
             }
+          },
+          "review": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/GradeReviewNoteResult"
+              }
+            ]
           }
         }
       },
@@ -9639,6 +10000,300 @@
           }
         }
       },
+      "GradeReviewDecision": {
+        "enum": [
+          "Accepted",
+          "Overridden"
+        ]
+      },
+      "GradeReviewDetailResult": {
+        "required": [
+          "id",
+          "kind",
+          "subjectId",
+          "questionId",
+          "questionVersion",
+          "questionType",
+          "stem",
+          "body",
+          "gradingSpec",
+          "unitName",
+          "lessonName",
+          "answer",
+          "maxScore",
+          "status",
+          "reviewReason",
+          "requestedAt",
+          "aiScore",
+          "confidence",
+          "justification",
+          "criteria",
+          "steps",
+          "finalAnswerVerdict",
+          "finalScore",
+          "review"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "questionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "questionVersion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "questionType": {
+            "type": "string"
+          },
+          "stem": {
+            "type": "string"
+          },
+          "body": {
+            "$ref": "#/components/schemas/JsonElement"
+          },
+          "gradingSpec": {
+            "$ref": "#/components/schemas/JsonElement"
+          },
+          "unitName": {
+            "type": "string"
+          },
+          "lessonName": {
+            "type": "string"
+          },
+          "answer": {
+            "$ref": "#/components/schemas/JsonElement"
+          },
+          "maxScore": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "status": {
+            "type": "string"
+          },
+          "reviewReason": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "aiScore": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "confidence": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "justification": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EssayCriterionResult"
+            }
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MathStepScoreResult"
+            }
+          },
+          "finalAnswerVerdict": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "finalScore": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "review": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/GradeReviewNoteResult"
+              }
+            ]
+          }
+        }
+      },
+      "GradeReviewItemResult": {
+        "required": [
+          "id",
+          "kind",
+          "questionId",
+          "stem",
+          "unitName",
+          "lessonName",
+          "reviewReason",
+          "maxScore",
+          "aiScore",
+          "confidence",
+          "requestedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "questionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stem": {
+            "type": "string"
+          },
+          "unitName": {
+            "type": "string"
+          },
+          "lessonName": {
+            "type": "string"
+          },
+          "reviewReason": {
+            "type": "string"
+          },
+          "maxScore": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "aiScore": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "confidence": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "GradeReviewKind": {
+        "enum": [
+          "Essay",
+          "MathSteps"
+        ]
+      },
+      "GradeReviewNoteResult": {
+        "required": [
+          "decision",
+          "comment",
+          "reviewedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string"
+          },
+          "comment": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "reviewedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "GradeReviewSubjectResult": {
+        "required": [
+          "subjectId",
+          "name",
+          "essayCount",
+          "mathStepsCount"
+        ],
+        "type": "object",
+        "properties": {
+          "subjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "essayCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "mathStepsCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "GrantComplimentarySubscriptionRequest": {
         "required": [
           "plan",
@@ -10271,7 +10926,8 @@
           "outcome",
           "finalAnswerVerdict",
           "justification",
-          "steps"
+          "steps",
+          "review"
         ],
         "type": "object",
         "properties": {
@@ -10342,6 +10998,16 @@
             "items": {
               "$ref": "#/components/schemas/MathStepScoreResult"
             }
+          },
+          "review": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/GradeReviewNoteResult"
+              }
+            ]
           }
         }
       },
@@ -10773,6 +11439,49 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AuditLogResult"
+            }
+          },
+          "pageNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalItems": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "PageDataOfGradeReviewItemResult": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GradeReviewItemResult"
             }
           },
           "pageNumber": {
@@ -11991,6 +12700,34 @@
               "string"
             ],
             "format": "uuid"
+          }
+        }
+      },
+      "ReviewGradeRequest": {
+        "required": [
+          "decision",
+          "score",
+          "comment"
+        ],
+        "type": "object",
+        "properties": {
+          "decision": {
+            "$ref": "#/components/schemas/GradeReviewDecision"
+          },
+          "score": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "comment": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -15671,6 +16408,9 @@
     },
     {
       "name": "Lessons"
+    },
+    {
+      "name": "GradeReviews"
     },
     {
       "name": "Exams"

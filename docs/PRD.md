@@ -178,6 +178,7 @@ Answer shapes and the exact grading rules (normalisation, numeric parsing, round
 - A teacher may override any AI grade. Overrides are training data (§13).
 - Decided (#118): the threshold is `EssayGrading:ReviewConfidenceThreshold` (default 0.7); a grade the AI cannot produce after `EssayGrading:MaxAttempts` also goes to teacher review; grading is a background job with retries; the admin test grader grades essays synchronously ([essay-grading.md](essay-grading.md)).
 - Decided (#123): math step grading returns 0–2 points per model-solution step with a justification each, a one-paragraph justification and a confidence; the threshold is `MathStepGrading:ReviewConfidenceThreshold` (default 0.7); grading and failed final-answer checks are retried in the background (`MathStepGrading:MaxAttempts`, 4) before going to teacher review; the admin test grader grades steps synchronously ([math-step-grading.md](math-step-grading.md)).
+- Decided (#128): teachers accept or override the AI grades that land in review (§8.3); a grade the AI applied directly is final and is not re-opened, because attempts are append-only. Accept and override both write the attempt with `graded_by = Teacher` ([grade-review.md](grade-review.md)).
 
 ### 6.2 Answer normalisation (Arabic)
 
@@ -285,9 +286,12 @@ The headline counter is shown on Home as "متبقّي لك X سؤال من 100,
 
 ### 8.3 AI grade review queue (v2)
 
-- Low-confidence AI grades for the teacher's subjects.
-- MathSteps step grades in review (`MathStepGrades` `InReview`: low confidence, grading failed, or a final answer the CAS still could not check after the retries) are listed with their reason and can be scored by the teacher. Legacy MathSteps attempts graded `unchecked` before #123 (feedback kind `mathUnchecked`) are listed too. Until then the student sees «قيد المراجعة» instead of a verdict (docs/math-step-grading.md, docs/math-cas.md).
-- Teacher sees student answer, AI score and justification; can accept or override with a score and comment.
+- The queue lists, per assigned subject, essay grades and math step grades in review: low confidence, grading failed, or final answer unchecked after retries. Test-mode sessions are excluded, and grades are shown oldest first.
+- The teacher sees the question (served version), the grading key, the answer, and the AI score, confidence and reasons. No student identity is shown.
+- Accept is possible only when the AI produced a score. Override takes a score from 0 to full marks (2 decimals) and a required note.
+- The decision is final. It writes the attempt (`graded_by = Teacher`), mastery and the session score, and the student sees the note. Until then the student sees «قيد المراجعة» instead of a verdict.
+- Legacy `mathUnchecked` attempts from before #123 are not reviewed (no live deploy).
+- Details: `docs/grade-review.md`.
 
 ### 8.4 Teacher visibility limits
 
@@ -441,7 +445,7 @@ Everything below is written to append-only tables, keyed by anonymised student i
 | AI grading (v2) | Student answer, rubric, AI score + justification, teacher override (if any) |
 | Attempts | Every answer, score, time taken — for difficulty calibration |
 
-The anonymised id is an HMAC-SHA256 of the student id under a server secret. Admin test-mode sessions are not recorded. AI grades are recorded when the grader completes (`EssayGradeTrainingRecords`); teacher overrides arrive with E17. Tables, triggers and the privacy checklist: `docs/training-data.md`.
+The anonymised id is an HMAC-SHA256 of the student id under a server secret. Admin test-mode sessions are not recorded. AI grades are recorded when the grader completes (`EssayGradeTrainingRecords`); a teacher review adds a `TeacherReviewed` row (#128). Tables, triggers and the privacy checklist: `docs/training-data.md`.
 
 Exports (admin only): JSONL per source, date-ranged, optionally per subject, with PII stripped (contact data masked in texts, raw source ids never exported). An export is prepared in the background, downloaded only by an admin through the audited API, and its file is deleted after a configurable retention (7 days by default).
 
@@ -505,7 +509,7 @@ AvatarMessageUsage(id, student_id, entry_point, created_at)  -- daily Avatar quo
 AttemptTrainingRecord(id, student_hash, attempt_id, question_id, question_version, subject_id, unit_id, lesson_id, session_kind, answer_json, score, normalised_score, graded_by, grade_json?, time_taken_ms, occurred_at, recorded_at)  -- append-only; docs/training-data.md
 AvatarTrainingRecord(id, student_hash, conversation_id, student_message_id, assistant_message_id, student_message_position, entry_point, subject_id?, unit_id?, lesson_id?, question_id?, student_text, assistant_text, model, prompt_version, context_json, asked_at, occurred_at, recorded_at)  -- append-only
 TeacherThreadTrainingRecord(id, student_hash, thread_id, trigger[Closed|RatedAfterClose], subject_id, unit_id, lesson_id, question_id?, question_version?, attempt_id?, context_json, messages_json, rating?, submitted_at, occurred_at, recorded_at)  -- append-only; one per trigger
-EssayGradeTrainingRecord(id, student_hash, essay_grade_id, question_id, question_version, subject_id, unit_id, lesson_id, session_kind, answer_json, max_score, score, normalised_score, criteria_json, justification, confidence, outcome[Graded|InReview], model, prompt_version, occurred_at, recorded_at)  -- append-only; one per AI grade
+EssayGradeTrainingRecord(id, student_hash, essay_grade_id, question_id, question_version, subject_id, unit_id, lesson_id, session_kind, answer_json, max_score, score, normalised_score, criteria_json, justification, confidence, outcome[Graded|InReview], model, prompt_version, trigger[Completed|TeacherReviewed], review_decision?, reviewed_score?, reviewed_normalised_score?, review_comment?, reviewed_at?, occurred_at, recorded_at)  -- append-only; one per AI grade and trigger
 TrainingExport(id, source[Attempts|Avatar|TeacherThreads|EssayGrades], from, to, subject_id?, status[Pending|Completed|Failed|Expired], attempts, next_attempt_at?, last_error_code?, requested_at, completed_at?, expires_at?, file_key?, row_count?, file_size_bytes?, sha256?, created_by)  -- JSONL export job; docs/training-data.md
 
 LessonContentChunk(id, lesson_id, section[Explanation|Objectives|Summary|QuestionExplanation], section_title?, position, question_id?, question_version?, content, embedding vector(1536), embedding_model, created_at)  -- derived; docs/content-retrieval.md

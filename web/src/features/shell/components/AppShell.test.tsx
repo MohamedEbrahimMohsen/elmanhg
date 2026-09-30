@@ -35,13 +35,12 @@ describe('AppShell', () => {
     expect(linkNames(nav)).toEqual(['Home', 'My progress', 'Ask a teacher', 'More']);
   });
 
-  it('shows the three teacher tabs without More', async () => {
+  it('shows three teacher tabs and More', async () => {
     renderApp('/teacher', { session: testSessions.teacher });
 
     const nav = await screen.findByRole('navigation', { name: 'Bottom navigation' });
 
-    expect(linkNames(nav)).toEqual(['Review queue', 'Student questions', 'My stats']);
-    expect(within(nav).queryByRole('link', { name: 'More' })).toBeNull();
+    expect(linkNames(nav)).toEqual(['Review queue', 'AI grades', 'Student questions', 'More']);
   });
 
   it('shows only teacher destinations in the top tabs', async () => {
@@ -49,7 +48,7 @@ describe('AppShell', () => {
 
     const nav = await screen.findByRole('navigation', { name: 'Main navigation' });
 
-    expect(linkNames(nav)).toEqual(['Review queue', 'Student questions', 'My stats']);
+    expect(linkNames(nav)).toEqual(['Review queue', 'AI grades', 'Student questions', 'My stats']);
   });
 
   it('marks the current destination as the current page', async () => {
