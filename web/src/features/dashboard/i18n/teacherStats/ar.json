@@ -1,0 +1,16 @@
+{
+  "page": { "title": "إحصائياتي", "intro": "قراراتك في المراجعة وردودك على الطلاب، بأيام القاهرة." },
+  "card": {
+    "title": "مراجعاتي وردودي",
+    "loading": "جارٍ تحميل {title}",
+    "error": "تعذّر تحميل {title}",
+    "caption": "قرارات المراجعة من {from} إلى {to}",
+    "empty": "لا توجد قرارات أو ردود في هذه الفترة.",
+    "approved": "معتمد: {count}",
+    "rejected": "مرفوض: {count}",
+    "medianDecision": "وسيط زمن القرار: {duration}",
+    "compliance": "الالتزام بمهلة الرد: {rate}",
+    "replies": "الردود: {count} ({within} خلال المهلة)",
+    "medianReply": "وسيط زمن الرد: {duration}"
+  }
+}
