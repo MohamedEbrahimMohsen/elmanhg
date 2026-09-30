@@ -1,12 +1,12 @@
 # Elmanhg — autopilot progress
 
-Last updated: laptop session, after story #121 merged (main at `e578e9a`).
-**Next story: #104 [E11.S1] Dashboard metrics queries**, the first row of "Remaining stories".
+Last updated: laptop session, after story #104 merged (main at `dce990d`).
+**Next story: #105 [E11.S2] Dashboard UI**, the first row of "Remaining stories".
 The laptop run did #54–#64; the cloud session did #65–#76 (see "Running in a cloud session" and "Hand-off" below).
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (45 of 60)
+## Finished stories (46 of 60)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -55,17 +55,17 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 43 | #97 [E9.S4] SLA timers, reminders and follow-up rules | #221 | 1 (+hardening, main merge) | skipped (too many files) | #222 |
 | 44 | #114 [E13.S3] Performance targets | #219 | 2 (+CodeRabbit, CI fix) | 9 comments: 4 fixed, 5 rejected | #220 |
 | 45 | #121 [E15.S1] Math step input component (v2) | #223 | 1 | 1 comment, fixed (draft status on flush) | #224 |
+| 46 | #104 [E11.S1] Dashboard metrics queries | #226 | 2 | skipped (too many files) | — |
 
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (15), in run order
+## Remaining stories (14), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
 | Order | Issue | Story |
 |---|---|---|
-| 32 | #104 | [E11.S1] Dashboard metrics queries |
 | 33 | #105 | [E11.S2] Dashboard UI |
 | 34 | #106 | [E11.S3] Student and teacher administration |
 | 35 | #107 | [E11.S4] Teacher personal stats card |
