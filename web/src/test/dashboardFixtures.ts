@@ -8,11 +8,13 @@ import {
   getGetDashboardSubscribersMockHandler,
   getGetDashboardSuccessRateMockHandler,
   getGetDashboardValidationMockHandler,
+  getGetMyTeacherStatsMockHandler,
 } from '@/shared/api/generated/dashboard/dashboard.msw';
 import type {
   AskTeacherMetricsResult,
   ContentMetricsResult,
   FunnelMetricsResult,
+  MyTeacherStatsResult,
   PaymentMetricsResult,
   SolveRateMetricsResult,
   StudentMetricsResult,
@@ -183,6 +185,22 @@ export function funnelMetrics(overrides: Partial<FunnelMetricsResult> = {}): Fun
   };
 }
 
+export function teacherStats(overrides: Partial<MyTeacherStatsResult> = {}): MyTeacherStatsResult {
+  return {
+    from: '2026-09-01',
+    to: '2026-09-30',
+    approved: 12,
+    rejected: 3,
+    medianSecondsToDecision: 7200,
+    replies: 40,
+    repliedWithinSla: 37,
+    slaComplianceRate: 0.925,
+    medianReplySeconds: 5400,
+    generatedAt: '2026-09-30T10:00:00Z',
+    ...overrides,
+  };
+}
+
 export function dashboardHandlers() {
   return [
     getGetDashboardStudentsMockHandler(studentMetrics()),
@@ -194,5 +212,6 @@ export function dashboardHandlers() {
     getGetDashboardAskTeacherMockHandler(askTeacherMetrics()),
     getGetDashboardPaymentsMockHandler(paymentMetrics()),
     getGetDashboardFunnelMockHandler(funnelMetrics()),
+    getGetMyTeacherStatsMockHandler(teacherStats()),
   ];
 }

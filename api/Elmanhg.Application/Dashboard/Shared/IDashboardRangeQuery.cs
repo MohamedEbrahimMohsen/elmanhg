@@ -1,7 +1,5 @@
 namespace Elmanhg.Application.Dashboard.Shared;
 
-public interface IDashboardRangeQuery : IDashboardQuery
+public interface IDashboardRangeQuery : IDashboardQuery, IDashboardRange
 {
-    DateOnly? From { get; }
-    DateOnly? To { get; }
 }

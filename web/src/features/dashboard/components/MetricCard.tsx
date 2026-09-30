@@ -7,11 +7,12 @@ export interface MetricCardProps<T> {
   title: string;
   query: UseQueryResult<T, unknown>;
   variant?: 'kpi' | 'panel';
+  ns?: 'dashboard' | 'teacherStats';
   children: (data: T) => ReactNode;
 }
 
-export function MetricCard<T>({ title, query, variant = 'kpi', children }: MetricCardProps<T>) {
-  const { t } = useTranslation('dashboard');
+export function MetricCard<T>({ title, query, variant = 'kpi', ns = 'dashboard', children }: MetricCardProps<T>) {
+  const { t } = useTranslation(ns);
   const id = useId();
 
   return (

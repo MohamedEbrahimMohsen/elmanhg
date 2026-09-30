@@ -1,6 +1,6 @@
 # Admin dashboard metrics
 
-The admin dashboard (PRD §10.3) reads one endpoint per card under `GET /api/dashboard/*`. This document is the contract for every number on it: the filters, the exact definition of each field, how activity is tracked for DAU/MAU, and the cache. #105 draws the cards; #107 reuses the validation and reply statistics per teacher.
+The admin dashboard (PRD §10.3) reads one endpoint per card under `GET /api/dashboard/*`. This document is the contract for every number on it: the filters, the exact definition of each field, how activity is tracked for DAU/MAU, and the cache. #105 draws the cards; #107's teacher stats card reuses the validation and reply statistics for the signed-in teacher (see Teacher personal stats).
 
 ## Filters
 
@@ -105,6 +105,17 @@ The same attempts as Solve rate. An attempt is correct when its normalised score
 
 As `docs/analytics.md`: distinct visitors per step inside the range in step order, `conversionFromPrevious` (`null` for the first step and after a step with 0 visitors), `completedJourneys` (visitors with a landing and a first answer at or after it, both in the range) and the median seconds between them.
 
+### Teacher personal stats — `GET /api/dashboard/my-stats?from&to`
+
+The signed-in teacher's own numbers, shown on the teacher home and «إحصائياتي». The teacher id comes from the token only; there is no `teacherId` or `subjectId` parameter. It counts all of the caller's own decisions and replies in the range, whatever their current subject assignments. The web sends no range, so it gets the default 30 days.
+
+| Field | Definition |
+|---|---|
+| `approved` / `rejected` | The caller's decisions in the range. |
+| `medianSecondsToDecision` | As in Validation, over the caller's decisions. |
+| `replies` | Teacher messages the caller sent in the range. |
+| `repliedWithinSla` / `slaComplianceRate` / `medianReplySeconds` | As in Ask a Teacher, over the caller's replies. |
+
 ## Activity tracking (DAU/MAU)
 
 - Table `UserActivityDays(Id, UserId, Day, FirstSeenAt)`: at most one row per user per Cairo day (unique index `IX_UserActivityDays_UserId_Day`).
@@ -115,6 +126,8 @@ As `docs/analytics.md`: distinct visitors per step inside the range in step orde
 ## Caching
 
 Every card is cached in memory for `Dashboard:CacheSeconds` (60), keyed by card, range and subject as sent. There is no invalidation: a number can be up to a minute old, and a default-range entry may be served for up to a minute past midnight. `0` disables the cache (the test host does this).
+
+The teacher stats card is not cached: the cache key comes from the request, which carries no caller, so caching would share one teacher's numbers with another.
 
 ## Endpoints
 
@@ -129,6 +142,7 @@ Every card is cached in memory for `Dashboard:CacheSeconds` (60), keyed by card,
 | GET | `/api/dashboard/ask-teacher` | same | `from`, `to`, `subjectId` |
 | GET | `/api/dashboard/payments` | same | `from`, `to` |
 | GET | `/api/dashboard/funnel` | same | `from`, `to` |
+| GET | `/api/dashboard/my-stats` | `TeacherStats.ViewOwn` (Teacher) | `from`, `to` |
 
 ## Config
 

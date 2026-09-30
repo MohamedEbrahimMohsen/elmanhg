@@ -312,3 +312,30 @@ export const GetDashboardFunnelResponse = zod.object({
   "generatedAt": zod.iso.datetime({"offset":true})
 })
 
+export const GetMyTeacherStatsQueryParams = zod.object({
+  "from": zod.iso.date().optional(),
+  "to": zod.iso.date().optional()
+})
+
+export const getMyTeacherStatsResponseApprovedRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMyTeacherStatsResponseRejectedRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMyTeacherStatsResponseMedianSecondsToDecisionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMyTeacherStatsResponseRepliesRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMyTeacherStatsResponseRepliedWithinSlaRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMyTeacherStatsResponseSlaComplianceRateRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const getMyTeacherStatsResponseMedianReplySecondsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const GetMyTeacherStatsResponse = zod.object({
+  "from": zod.iso.date(),
+  "to": zod.iso.date(),
+  "approved": zod.union([zod.int(),zod.stringFormat('int32', getMyTeacherStatsResponseApprovedRegExpTwo)]),
+  "rejected": zod.union([zod.int(),zod.stringFormat('int32', getMyTeacherStatsResponseRejectedRegExpTwo)]),
+  "medianSecondsToDecision": zod.union([zod.int(),zod.stringFormat('int64', getMyTeacherStatsResponseMedianSecondsToDecisionRegExpTwo)]).nullable(),
+  "replies": zod.union([zod.int(),zod.stringFormat('int32', getMyTeacherStatsResponseRepliesRegExpTwo)]),
+  "repliedWithinSla": zod.union([zod.int(),zod.stringFormat('int32', getMyTeacherStatsResponseRepliedWithinSlaRegExpTwo)]),
+  "slaComplianceRate": zod.union([zod.number(),zod.stringFormat('double', getMyTeacherStatsResponseSlaComplianceRateRegExpTwo)]).nullable(),
+  "medianReplySeconds": zod.union([zod.int(),zod.stringFormat('int64', getMyTeacherStatsResponseMedianReplySecondsRegExpTwo)]).nullable(),
+  "generatedAt": zod.iso.datetime({"offset":true})
+})
+

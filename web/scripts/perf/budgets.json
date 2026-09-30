@@ -38,6 +38,15 @@
         "src/routes/admin/users.tsx?tsr-split=component"
       ],
       "maxKb": 270
+    },
+    {
+      "name": "teacher-home",
+      "entries": [
+        "index.html",
+        "src/routes/teacher/route.tsx?tsr-split=component",
+        "src/routes/teacher/index.tsx?tsr-split=component"
+      ],
+      "maxKb": 265
     }
   ]
 }
