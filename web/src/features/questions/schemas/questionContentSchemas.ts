@@ -65,4 +65,6 @@ export const mathStepsSpecSchema = z.object({
   form: z.enum(mathAnswerForms).optional(),
   tolerance: z.number().optional(),
   toleranceMode: z.enum(['absolute', 'percent']).optional(),
+  modelSolution: z.array(z.string()).optional(),
+  stepsWeight: z.number().optional(),
 });

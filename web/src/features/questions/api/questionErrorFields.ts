@@ -38,4 +38,7 @@ export const questionErrorFields: ServerErrorFields<QuestionValues> = {
   QUESTION_MATH_FORM_INVALID: 'mathForm',
   QUESTION_MATH_TOLERANCE_INVALID: 'mathTolerance',
   QUESTION_MATH_TOLERANCE_FORM_CONFLICT: 'mathTolerance',
+  QUESTION_MATH_MODEL_SOLUTION_INVALID: 'mathSolution',
+  QUESTION_MATH_MODEL_SOLUTION_REQUIRED: 'mathSolution',
+  QUESTION_MATH_STEPS_WEIGHT_INVALID: 'mathStepsWeight',
 };

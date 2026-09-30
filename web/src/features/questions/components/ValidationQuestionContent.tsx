@@ -38,6 +38,8 @@ export function ValidationQuestionContent({ question, values }: ValidationQuesti
           form={values.mathForm}
           tolerance={values.mathTolerance}
           toleranceMode={values.mathToleranceMode}
+          solution={values.mathSolution}
+          stepsWeight={values.mathStepsWeight}
         />
       ) : null}
       <section aria-label={t('validation.detail.explanation')} className={cardClassName}>

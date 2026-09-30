@@ -7,10 +7,18 @@ import { useTestGrade } from '../hooks/useTestGrade';
 import type { QuestionValues } from '../schemas/questionEditorSchema';
 import { EssayGradeDetails } from './EssayGradeDetails';
 import { GradeResultPanel } from './GradeResultPanel';
+import { MathStepGradeDetails } from './MathStepGradeDetails';
 import { QuestionView } from './QuestionView';
 
 export interface QuestionPreviewPanelProps {
   lessonId: string;
+}
+
+function pendingLabel(isEssay: boolean, isStepGraded: boolean): string {
+  if (isEssay) {
+    return 'preview.essayGrading';
+  }
+  return isStepGraded ? 'preview.mathStepsGrading' : 'preview.grading';
 }
 
 export function QuestionPreviewPanel({ lessonId }: QuestionPreviewPanelProps) {
@@ -21,6 +29,7 @@ export function QuestionPreviewPanel({ lessonId }: QuestionPreviewPanelProps) {
   const { getValues } = useFormContext<QuestionValues>();
   const { grade, result, errorCode, isPending } = useTestGrade(lessonId);
   const isEssay = values.type === 'Essay';
+  const isStepGraded = values.type === 'MathSteps' && Number(values.mathStepsWeight) > 0;
 
   return (
     <section
@@ -30,6 +39,7 @@ export function QuestionPreviewPanel({ lessonId }: QuestionPreviewPanelProps) {
       <h2 className="font-display text-h2 font-bold">{t('preview.title')}</h2>
       <QuestionView question={question} answer={answer} onAnswerChange={setAnswer} />
       {isEssay ? <p className="text-caption text-text-muted">{t('preview.essayGradingHint')}</p> : null}
+      {isStepGraded ? <p className="text-caption text-text-muted">{t('preview.mathStepsGradingHint')}</p> : null}
       <div>
         <Button
           variant="secondary"
@@ -38,7 +48,7 @@ export function QuestionPreviewPanel({ lessonId }: QuestionPreviewPanelProps) {
             grade(getValues(), answer);
           }}
         >
-          {isPending ? t(isEssay ? 'preview.essayGrading' : 'preview.grading') : t('preview.tryAnswer')}
+          {isPending ? t(pendingLabel(isEssay, isStepGraded)) : t('preview.tryAnswer')}
         </Button>
       </div>
       {errorCode ? (
@@ -51,6 +61,7 @@ export function QuestionPreviewPanel({ lessonId }: QuestionPreviewPanelProps) {
       ) : null}
       {result ? <GradeResultPanel result={result} /> : null}
       {result?.essay ? <EssayGradeDetails essay={result.essay} /> : null}
+      {result?.mathSteps ? <MathStepGradeDetails mathSteps={result.mathSteps} /> : null}
     </section>
   );
 }

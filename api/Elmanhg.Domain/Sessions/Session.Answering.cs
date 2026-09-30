@@ -11,6 +11,25 @@ public partial class Session
 
     public Attempt? FindAttempt(Guid questionId) => Attempts.FirstOrDefault(x => x.QuestionId == questionId);
 
+    // True for an equivalent resubmission; throws for a different answer or a submitted session.
+    public bool IsReplay(SessionItem item, string answer)
+    {
+        EnsureOwnItem(item);
+        var submitted = FindAttempt(item.QuestionId)?.Answer ?? FindPendingEssayAnswer(item);
+        if (submitted is null)
+        {
+            EnsureNotSubmitted();
+            return false;
+        }
+
+        if (QuestionJson.AreEquivalent(submitted, answer))
+        {
+            return true;
+        }
+
+        throw new ConflictCoreException(ErrorCodes.SessionQuestionAlreadyAnswered);
+    }
+
     public Attempt RecordAttempt(SessionItem item, string answer, QuestionGrade grade, int? reportedTimeTakenMilliseconds)
     {
         if (IsExam)

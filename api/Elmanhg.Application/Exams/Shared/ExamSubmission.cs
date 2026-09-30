@@ -3,20 +3,17 @@ using Elmanhg.Application.Questions.Shared.Grading;
 using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.Mastery;
+using Elmanhg.Domain.MathStepGrading;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Sessions;
-using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
 namespace Elmanhg.Application.Exams.Shared;
 
 public static class ExamSubmission
 {
-    // Exam questions share one page, so an exam essay has no observable writing time (like every exam attempt).
-    private const int ExamEssayTimeTakenMilliseconds = 0;
-
-    public static async Task SubmitAsync(Session session, IReadOnlyCollection<QuestionRevision> revisions, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, IEssayGradeRepository essayGradeRepository, IAiMathCheckClient mathCheckClient, decimal correctThreshold, DateTimeOffset now, CancellationToken cancellationToken)
+    public static async Task SubmitAsync(Session session, IReadOnlyCollection<QuestionRevision> revisions, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, IEssayGradeRepository essayGradeRepository, IMathStepGradeRepository mathStepGradeRepository, IAiMathCheckClient mathCheckClient, decimal correctThreshold, DateTimeOffset now, CancellationToken cancellationToken)
     {
         if (session.IsSubmitted)
         {
@@ -32,22 +29,27 @@ public static class ExamSubmission
             .Select(x => x.Item.QuestionId)
             .ToHashSet();
         Dictionary<Guid, QuestionGrade> grades = [];
+        List<(SessionItem Item, MathAnswerVerdict? Verdict)> mathSteps = [];
         foreach (var item in session.Items.Where(x => x.SavedAnswer is not null && !essayIds.Contains(x.QuestionId)))
         {
-            grades[item.QuestionId] = await GradeAsync(FindRevision(revisions, item), item.SavedAnswer!, mathCheckClient, cancellationToken).ConfigureAwait(false);
+            var decision = await DecideAsync(FindRevision(revisions, item), item.SavedAnswer!, mathCheckClient, cancellationToken).ConfigureAwait(false);
+            if (decision.Grade is null)
+            {
+                mathSteps.Add((item, decision.Verdict));
+            }
+            else
+            {
+                grades[item.QuestionId] = decision.Grade;
+            }
         }
 
-        var attempts = session.SubmitExam(grades, essayIds, now)
+        var deferredIds = essayIds
+            .Concat(mathSteps.Select(x => x.Item.QuestionId))
+            .ToHashSet();
+        var attempts = session.SubmitExam(grades, deferredIds, now)
             .Where(x => !grades[x.QuestionId].AwaitsReview)
             .ToList();
-        if (written.Count > 0)
-        {
-            var questions = await questionRepository.FindAsync(x => essayIds.Contains(x.Id), cancellationToken, include: query => query.IgnoreQueryFilters(), asNoTracking: true).ConfigureAwait(false);
-            var requested = written
-                .Select(x => EssayGrade.Request(session.StudentId, session.Id, questions.First(question => question.Id == x.Item.QuestionId).SubjectId, x.Item.QuestionId, x.Item.QuestionVersion, x.Item.MaxScore, x.Text!, session.SubmittedAt!.Value, ExamEssayTimeTakenMilliseconds))
-                .ToList();
-            await essayGradeRepository.AddRangeAsync(requested, cancellationToken).ConfigureAwait(false);
-        }
+        await ExamDeferredGrading.RequestAsync(session, written.Select(x => (x.Item, x.Text!)).ToList(), mathSteps, questionRepository, essayGradeRepository, mathStepGradeRepository, cancellationToken).ConfigureAwait(false);
 
         if (session.IsTestMode || attempts.Count == 0)
         {
@@ -91,9 +93,9 @@ public static class ExamSubmission
         return QuestionAnswerRules.TryReadWrittenEssay(revision.ReadSnapshot().Type, document.RootElement, out var text) ? text : null;
     }
 
-    private static async Task<QuestionGrade> GradeAsync(QuestionRevision revision, string answer, IAiMathCheckClient mathCheckClient, CancellationToken cancellationToken)
+    private static async Task<AnswerDecision> DecideAsync(QuestionRevision revision, string answer, IAiMathCheckClient mathCheckClient, CancellationToken cancellationToken)
     {
         using var document = JsonDocument.Parse(answer);
-        return await AnswerGrader.GradeAsync(revision, document.RootElement, mathCheckClient, cancellationToken).ConfigureAwait(false);
+        return await AnswerGrader.DecideAsync(revision, document.RootElement, mathCheckClient, cancellationToken).ConfigureAwait(false);
     }
 }

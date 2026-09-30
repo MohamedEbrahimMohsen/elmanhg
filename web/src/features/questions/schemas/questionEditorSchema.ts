@@ -60,6 +60,8 @@ export const questionEditorSchema = z
     mathForm: z.enum(mathAnswerForms),
     mathTolerance: z.string(),
     mathToleranceMode: z.enum(['absolute', 'percent']),
+    mathSolution: z.array(z.object({ latex: z.string() })),
+    mathStepsWeight: z.string(),
   })
   .superRefine((values, context) => {
     const issue = (path: (string | number)[], message: string) => {

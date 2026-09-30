@@ -142,6 +142,9 @@ public static class ErrorCodes
     public const string QuestionMathFormInvalid = "QUESTION_MATH_FORM_INVALID";
     public const string QuestionMathToleranceInvalid = "QUESTION_MATH_TOLERANCE_INVALID";
     public const string QuestionMathToleranceFormConflict = "QUESTION_MATH_TOLERANCE_FORM_CONFLICT";
+    public const string QuestionMathModelSolutionInvalid = "QUESTION_MATH_MODEL_SOLUTION_INVALID";
+    public const string QuestionMathModelSolutionRequired = "QUESTION_MATH_MODEL_SOLUTION_REQUIRED";
+    public const string QuestionMathStepsWeightInvalid = "QUESTION_MATH_STEPS_WEIGHT_INVALID";
 
     // REVIEW SESSIONS
     public const string ReviewSessionNotFound = "REVIEW_SESSION_NOT_FOUND";
@@ -313,6 +316,10 @@ public static class ErrorCodes
     // ESSAY GRADING
     public const string EssayGradeNotFound = "ESSAY_GRADE_NOT_FOUND";
     public const string EssayGradingUnavailable = "ESSAY_GRADING_UNAVAILABLE";
+
+    // MATH STEP GRADING
+    public const string MathStepGradeNotFound = "MATH_STEP_GRADE_NOT_FOUND";
+    public const string MathStepGradingUnavailable = "MATH_STEP_GRADING_UNAVAILABLE";
 
     // CONTENT RETRIEVAL
     public const string ContentSearchQueryRequired = "CONTENT_SEARCH_QUERY_REQUIRED";

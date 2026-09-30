@@ -18,7 +18,7 @@ public sealed class MathStepsQuestionEndpointTests(ApiFactory factory)
     private const string Route = "/api/questions";
     private const string MessySpec = """{"acceptedAnswers":["  x = 2 ","2"],"form":"equivalent","tolerance":0.01,"toleranceMode":"absolute"}""";
     private const string CanonicalSpec = """{"acceptedAnswers":["x = 2","2"],"form":"equivalent","tolerance":0.01,"toleranceMode":"absolute"}""";
-    private const string FinalOnlyFeedback = "صُحّحت الإجابة النهائية فقط، وتُصحَّح الخطوات لاحقًا.";
+    private const string FinalOnlyFeedback = "صُحّحت الإجابة النهائية فقط.";
 
     [Fact]
     public async Task Post_MathStepsQuestion_StoresCanonicalSpec()
@@ -47,6 +47,34 @@ public sealed class MathStepsQuestionEndpointTests(ApiFactory factory)
 
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
         (await ReadCodeAsync(response)).Should().Be("QUESTION_MATH_TOLERANCE_FORM_CONFLICT");
+        (await CountQuestionsAsync(lessonId)).Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Post_MathQuestionWithModelSolution_StoresCanonicalSpec()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var (_, lessonId) = await SeedLessonAsync();
+        using var admin = await AdminClientAsync();
+
+        using var response = await admin.PostAsJsonAsync(Route, MathRequest(lessonId, """{"acceptedAnswers":["x = 2"],"modelSolution":["  2x = 4 ","x = 2  "],"stepsWeight":50}"""), cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var id = (await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken)).GetProperty("id").GetGuid();
+        var question = await QuestionTestData.ReadQuestionAsync(factory, id, cancellationToken);
+        JsonNode.DeepEquals(JsonNode.Parse(question.GradingSpec), JsonNode.Parse("""{"acceptedAnswers":["x = 2"],"form":"equivalent","modelSolution":["2x = 4","x = 2"],"stepsWeight":50}""")).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Post_WeightWithoutSolution_Returns422()
+    {
+        var (_, lessonId) = await SeedLessonAsync();
+        using var admin = await AdminClientAsync();
+
+        using var response = await admin.PostAsJsonAsync(Route, MathRequest(lessonId, """{"acceptedAnswers":["x = 2"],"stepsWeight":50}"""), TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await ReadCodeAsync(response)).Should().Be("QUESTION_MATH_MODEL_SOLUTION_REQUIRED");
         (await CountQuestionsAsync(lessonId)).Should().Be(0);
     }
 

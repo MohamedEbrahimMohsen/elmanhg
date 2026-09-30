@@ -10,6 +10,7 @@ import { mathDraftOwnerFor } from '../api/mathDraftOwner';
 import { fromAnswerPayload, toQuizQuestion } from '../api/quizItem';
 import { useQuizAnswer } from '../hooks/useQuizAnswer';
 import { FeedbackPanel } from './FeedbackPanel';
+import { MathStepGradeStatus } from './MathStepGradeStatus';
 import { QuizQuestionActions } from './QuizQuestionActions';
 import { QuizQuestionHeading } from './QuizQuestionHeading';
 
@@ -38,7 +39,12 @@ export function QuizQuestionCard({
   const draftOwner = mathDraftOwnerFor(useSession()?.userId, sessionId, item.questionId);
   const quiz = useQuizAnswer(sessionId, item, question, draftOwner);
   const attempt = item.attempt;
-  const answer = attempt ? fromAnswerPayload(question, attempt.answer) : quiz.answer;
+  const pending = question.type === 'MathSteps' && attempt === null && item.pendingAnswer !== null;
+  const answer = attempt
+    ? fromAnswerPayload(question, attempt.answer)
+    : pending
+      ? fromAnswerPayload(question, item.pendingAnswer)
+      : quiz.answer;
 
   return (
     <article
@@ -56,7 +62,7 @@ export function QuizQuestionCard({
         question={question}
         answer={answer}
         onAnswerChange={quiz.setAnswer}
-        disabled={attempt !== null || quiz.isChecking}
+        disabled={attempt !== null || pending || quiz.isChecking}
         review={attempt ? choiceReview(question, item.correctAnswer) : undefined}
         mathDraftOwner={draftOwner}
       />
@@ -80,9 +86,17 @@ export function QuizQuestionCard({
           <AskTeacherLink attemptId={attempt.id} />
         </FeedbackPanel>
       ) : null}
+      {question.type === 'MathSteps' && (attempt !== null || pending) ? (
+        <MathStepGradeStatus
+          sessionId={sessionId}
+          questionId={item.questionId}
+          onGraded={quiz.refreshSession}
+          showOutcome={attempt === null}
+        />
+      ) : null}
       <QuizQuestionActions
         sessionId={sessionId}
-        answered={attempt !== null}
+        answered={attempt !== null || pending}
         isLast={isLast}
         isChecking={quiz.isChecking}
         onCheck={quiz.check}

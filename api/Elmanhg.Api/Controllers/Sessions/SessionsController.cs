@@ -1,5 +1,7 @@
 using Elmanhg.Application.EssayGrading.GetEssayGrade;
 using Elmanhg.Application.EssayGrading.Shared;
+using Elmanhg.Application.MathStepGrading.GetMathStepGrade;
+using Elmanhg.Application.MathStepGrading.Shared;
 using Elmanhg.Application.Sessions.FinishSession;
 using Elmanhg.Application.Sessions.GetSession;
 using Elmanhg.Application.Sessions.Shared;
@@ -59,6 +61,15 @@ public class SessionsController(IMediator mediator) : ControllerBase
     public async Task<ActionResult> GetEssayGrade([FromRoute] Guid sessionId, [FromRoute] Guid questionId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetEssayGradeQuery(sessionId, questionId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("{sessionId:guid}/questions/{questionId:guid}/math-step-grade", Name = "GetMathStepGrade")]
+    [Authorize(Policy = DefaultCodes.AssessmentsTake)]
+    [ProducesResponseType<MathStepGradeResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetMathStepGrade([FromRoute] Guid sessionId, [FromRoute] Guid questionId, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetMathStepGradeQuery(sessionId, questionId), cancellationToken);
         return Ok(result);
     }
 }

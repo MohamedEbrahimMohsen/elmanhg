@@ -9,6 +9,7 @@ import {
   getGetQuestionMockHandler,
   getGradeQuestionDraftMockHandler,
 } from '@/shared/api/generated/questions/questions.msw';
+import { mathStepsDraftGradeResult } from '@/test/mathStepGradeFixtures';
 import { server } from '@/test/msw/server';
 import { renderApp } from '@/test/renderWithProviders';
 import { testSessions } from '@/test/sessions';
@@ -109,6 +110,69 @@ describe('NewQuestionPage math with steps', () => {
 
     expect(await preview.findByText('Final answer checked.')).toBeInTheDocument();
     expect(body).toEqual(expect.objectContaining({ answer: { steps: [], finalAnswer: 'x=2' } }));
+  });
+
+  it('creates a math question with a model solution and steps weight', async () => {
+    const user = userEvent.setup();
+    await openMathEditor(user);
+
+    await fillMath(user);
+    const weight = screen.getByLabelText('Steps weight (%)');
+    await user.clear(weight);
+    await user.type(weight, '50');
+    const solution = within(screen.getByRole('group', { name: 'Model solution' }));
+    await user.click(solution.getByRole('button', { name: 'Add step' }));
+    await user.type(solution.getByRole('textbox', { name: 'Step 1' }), '2x = 4');
+    await user.click(solution.getByRole('button', { name: 'Add step' }));
+    await user.type(solution.getByRole('textbox', { name: 'Step 2' }), 'x = 2');
+    await user.click(screen.getByRole('button', { name: 'Create question' }));
+
+    expect(await screen.findByText('Question created.')).toBeInTheDocument();
+    expect(created).toEqual([
+      expect.objectContaining({
+        gradingSpec: {
+          acceptedAnswers: ['x = 2'],
+          form: 'equivalent',
+          modelSolution: ['2x = 4', 'x = 2'],
+          stepsWeight: 50,
+        },
+      }),
+    ]);
+  });
+
+  it('shows step marks, justification and confidence from the draft grader', async () => {
+    server.use(getGradeQuestionDraftMockHandler(mathStepsDraftGradeResult));
+    const user = userEvent.setup();
+    await openMathEditor(user);
+    await fillMath(user);
+    const preview = within(screen.getByRole('region', { name: 'Student preview' }));
+
+    await user.type(preview.getByRole('textbox', { name: 'Final answer' }), 'x=2');
+    await user.click(preview.getByRole('button', { name: 'Try the answer' }));
+
+    const marks = within(await preview.findByRole('region', { name: 'Marks per step' }));
+    expect(marks.getAllByText('Step 1')[0]).toBeInTheDocument();
+    expect(marks.getByText('2 / 2')).toBeInTheDocument();
+    expect(preview.getByText('Final answer: correct')).toBeInTheDocument();
+    expect(preview.getByText('Good working; finish the division.')).toBeInTheDocument();
+    expect(preview.getByText('Confidence: 90%')).toBeInTheDocument();
+  });
+
+  it('shows the server model-solution error under the solution field', async () => {
+    server.use(
+      http.post('*/api/questions', () =>
+        HttpResponse.json({ code: 'QUESTION_MATH_MODEL_SOLUTION_REQUIRED' }, { status: 422 }),
+      ),
+    );
+    const user = userEvent.setup();
+    await openMathEditor(user);
+
+    await fillMath(user);
+    await user.click(screen.getByRole('button', { name: 'Create question' }));
+
+    expect(
+      await screen.findByText('Add at least one model solution step when the steps weight is above 0.'),
+    ).toBeInTheDocument();
   });
 
   it('shows the server tolerance-form conflict under the tolerance field', async () => {

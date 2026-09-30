@@ -27,4 +27,7 @@ public sealed class AiServiceOptions
 
     [Range(1, 120)]
     public int MathCheckTimeoutSeconds { get; set; } = 15;
+
+    [Range(1, 600)]
+    public int MathStepGradingTimeoutSeconds { get; set; } = 100;
 }

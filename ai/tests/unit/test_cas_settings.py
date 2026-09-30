@@ -18,6 +18,7 @@ def test_settings_cas_defaults() -> None:
     assert (settings.cas_max_tokens, settings.cas_max_depth) == (300, 30)
     assert (settings.cas_max_number_digits, settings.cas_max_exponent) == (30, 1000)
     assert settings.cas_max_magnitude == 10000
+    assert (settings.cas_max_expansion_terms, settings.cas_warm_on_start) == (5000, True)
 
 
 @pytest.mark.parametrize(
@@ -27,8 +28,9 @@ def test_settings_cas_defaults() -> None:
         {"cas_workers": 0},
         {"cas_worker_memory_mb": 100},
         {"cas_max_magnitude": 1},
+        {"cas_max_expansion_terms": 1},
     ],
-    ids=["zero-timeout", "no-workers", "too-little-memory", "tiny-magnitude"],
+    ids=["zero-timeout", "no-workers", "too-little-memory", "tiny-magnitude", "tiny-expansion"],
 )
 def test_settings_cas_out_of_range_rejected(overrides: dict[str, Any]) -> None:
     with pytest.raises(ValidationError) as error:

@@ -89,6 +89,7 @@ builder.Services.AddHostedService<SubscriptionLapseWorker>();
 builder.Services.AddHostedService<LessonContentIndexWorker>();
 builder.Services.AddHostedService<TeacherVoiceTranscriptionWorker>();
 builder.Services.AddHostedService<EssayGradingWorker>();
+builder.Services.AddHostedService<MathStepGradingWorker>();
 builder.Services.AddHostedService<TeacherThreadSlaWorker>();
 builder.Services.AddHostedService<TrainingExportWorker>();
 builder.Services.AddHostedService<TrainingExportRetentionWorker>();

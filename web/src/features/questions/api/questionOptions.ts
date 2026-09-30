@@ -69,6 +69,14 @@ export const mathAnswersMax = 20;
 // mirrors Content:QuestionAnswerMaxLength
 export const mathAnswerMaxLength = 200;
 
+// mirrors Content:QuestionModelSolutionStepsMaxCount
+export const mathSolutionStepsMax = 20;
+
+// mirrors Content:QuestionModelSolutionStepMaxLength
+export const mathSolutionStepMaxLength = 500;
+
+export const mathStepsWeightMax = 100;
+
 // mirrors Content:QuestionFilterMaxLength
 export const questionFilterMaxLength = 200;
 

@@ -67,10 +67,27 @@ public static class AiServiceServiceCollectionExtensions
                 resilience.CircuitBreaker.SamplingDuration = timeout * 2;
                 resilience.Retry.DisableForUnsafeHttpMethods();
             });
+        services.AddHttpClient<HttpAiMathStepGradingClient>((serviceProvider, client) =>
+            {
+                client.BaseAddress = new Uri(Options(serviceProvider).BaseUrl.TrimEnd('/') + "/");
+                // HttpClient.Timeout wraps the resilience pipeline, so it stays infinite and the pipeline owns the grading budget.
+                client.Timeout = Timeout.InfiniteTimeSpan;
+            })
+            .AddStandardResilienceHandler()
+            .Configure((resilience, serviceProvider) =>
+            {
+                var timeout = TimeSpan.FromSeconds(Options(serviceProvider).MathStepGradingTimeoutSeconds);
+                resilience.AttemptTimeout.Timeout = timeout;
+                resilience.TotalRequestTimeout.Timeout = timeout;
+                resilience.CircuitBreaker.SamplingDuration = timeout * 2;
+                resilience.Retry.DisableForUnsafeHttpMethods();
+            });
         services.AddScoped<FakeAiServiceClient>();
         services.AddScoped<FakeAiTranscriptionClient>();
         services.AddScoped<FakeAiEssayGradingClient>();
         services.AddScoped<FakeAiMathCheckClient>();
+        services.AddScoped<FakeAiMathStepGradingClient>();
+        services.AddSingleton<IMathCheckRateLimiter, MathCheckRateLimiter>();
         services.AddScoped<IAiServiceClient>(serviceProvider => Options(serviceProvider).Provider switch
         {
             AiServiceProvider.Fake => serviceProvider.GetRequiredService<FakeAiServiceClient>(),
@@ -93,6 +110,12 @@ public static class AiServiceServiceCollectionExtensions
         {
             AiServiceProvider.Fake => serviceProvider.GetRequiredService<FakeAiMathCheckClient>(),
             AiServiceProvider.Http => serviceProvider.GetRequiredService<HttpAiMathCheckClient>(),
+            _ => throw new InvalidOperationException("Unsupported AiService:Provider."),
+        });
+        services.AddScoped<IAiMathStepGradingClient>(serviceProvider => Options(serviceProvider).Provider switch
+        {
+            AiServiceProvider.Fake => serviceProvider.GetRequiredService<FakeAiMathStepGradingClient>(),
+            AiServiceProvider.Http => serviceProvider.GetRequiredService<HttpAiMathStepGradingClient>(),
             _ => throw new InvalidOperationException("Unsupported AiService:Provider."),
         });
         return services;

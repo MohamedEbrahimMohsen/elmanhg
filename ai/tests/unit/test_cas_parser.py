@@ -23,6 +23,7 @@ LIMITS: Final = CasLimits(
     max_number_digits=30,
     max_exponent=1000,
     max_magnitude=10000,
+    max_expansion_terms=5000,
 )
 X: Final = sympy.Symbol("x")
 TOWER: Final = "((9^{999})^{999})^{999}"
@@ -141,6 +142,32 @@ def test_evaluate_compounded_power_is_unreadable_without_evaluation() -> None:
     started = time.perf_counter()
 
     outcome = evaluate(CasRequest(TOWER, ("1",), AnswerForm.EQUIVALENT, None, LIMITS))
+
+    assert outcome.verdict == Verdict.UNREADABLE
+    assert time.perf_counter() - started < 1.0
+
+
+def test_parse_symbolic_expansion_blowup_raises() -> None:
+    with pytest.raises(MathParseError, match="expansion too large"):
+        parse_answer("(x+y+z+w)^{999}", LIMITS)
+
+
+def test_parse_product_of_large_expansions_raises() -> None:
+    with pytest.raises(MathParseError, match="expansion too large"):
+        parse_answer("(x+y+z)^{30}(x+y+z)^{30}", LIMITS)
+
+
+@pytest.mark.parametrize(
+    "text", ["(x+1)^{10}", "(a+b)^{100}", "(x+1)^2(x+2)^3"], ids=["tenth", "hundredth", "product"]
+)
+def test_parse_modest_expansion_accepted(text: str) -> None:
+    assert len(parse_answer(text, LIMITS)) == 1
+
+
+def test_evaluate_expansion_blowup_is_unreadable_without_evaluation() -> None:
+    started = time.perf_counter()
+
+    outcome = evaluate(CasRequest("(x+y+z+w)^{999}", ("1",), AnswerForm.EQUIVALENT, None, LIMITS))
 
     assert outcome.verdict == Verdict.UNREADABLE
     assert time.perf_counter() - started < 1.0

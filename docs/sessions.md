@@ -33,8 +33,8 @@ All three tables map one to one to PRD §15. Names follow constitution §3 (no a
 | `QuestionId` | FK `Questions`, restrict. Unique `(SessionId, QuestionId)`: a question never appears twice in one session (PRD §7.2). |
 | `QuestionVersion` | The version the student saw. |
 | `MaxScore` | Copied from the served version. |
-| `SavedAnswer` | jsonb. Exams: the canonical draft answer, overwritten by each save until submission (`docs/exams.md`). Quizzes: a written essay awaiting its AI grade (with `AnswerSavedAt` = the submission time); it stays after the attempt is written. |
-| `AnswerSavedAt` | Exams: when the draft was last saved. Quizzes: when a written essay was submitted. |
+| `SavedAnswer` | jsonb. Exams: the canonical draft answer, overwritten by each save until submission (`docs/exams.md`). Quizzes: a written essay or a deferred MathSteps answer awaiting its AI grade (with `AnswerSavedAt` = the submission time); it stays after the attempt is written. |
+| `AnswerSavedAt` | Exams: when the draft was last saved. Quizzes: when a written essay or a deferred MathSteps answer was submitted. |
 
 The served questions are chosen and written when the session starts and never change afterwards; an exam item's saved answer does, until submission.
 
@@ -47,7 +47,7 @@ The served questions are chosen and written when the session starts and never ch
 | `Answer` | `answer_json` | jsonb, the canonical form of the typed answer (unknown properties dropped). |
 | `Score` | `score` | numeric(9,2) |
 | `NormalisedScore` | `normalised_score` | numeric(5,4), 0 to 1 |
-| `GradedBy` | `graded_by` | `Auto`, `AI`, `Teacher`. Every v1 type and a blank essay are `Auto`; a written essay is `AI` (#119). |
+| `GradedBy` | `graded_by` | `Auto`, `AI`, `Teacher`. Every v1 type and a blank essay are `Auto`; a written essay (#119) and a deferred MathSteps answer (#123) are `AI`. |
 | `Grade` | `grade_json?` | jsonb, the serialised `GradeFeedback` (null when the grader gives none). |
 | `TimeTakenMilliseconds` | `time_taken_ms` | See Time taken. |
 | `CreatedAt` | `created_at` | |
@@ -61,9 +61,10 @@ The served questions are chosen and written when the session starts and never ch
    - Otherwise up to `questionCount` (default `Sessions:DefaultQuizSize`) questions are chosen by adaptive selection (see Selection) from the lesson's **servable** questions (`ServableQuestionSpecification`, #67). The domain re-checks each question with `ServableQuestionSpecification.IsSatisfiedBy`. A lesson with fewer servable questions gives a shorter quiz; none gives 400 `SESSION_NO_SERVABLE_QUESTIONS`.
 2. **Answer** — `POST /api/sessions/{id}/answers { questionId, answer, timeTakenMilliseconds? }`. One answer per question, graded at once and saved immediately. There is no draft state for quizzes. A new attempt in a non-test session also updates the student's `QuestionMastery` row in the same save (`docs/mastery.md`); a replayed answer does not.
    - **Essay:** a written essay is not graded at once. It is saved on the item (`SavedAnswer`), an `EssayGrade` is requested with the measured time, and the response has `attempt: null` and `pendingAnswer: { text }`. The attempt (`GradedBy = AI`, created at the submission time) and the mastery update are written when the AI grade is applied ([essay-grading.md](essay-grading.md)). The same essay again is a replay; a different one, or any answer to that item, is 409 `SESSION_QUESTION_ALREADY_ANSWERED`. A blank essay is graded at once as Unanswered (score 0).
+   - **MathSteps (#123):** an answer that needs step grading (steps weight above 0, a model solution and written steps), or whose final-answer check came back `unchecked`, is deferred like an essay: it is saved on the item, a `MathStepGrade` is requested, and the response has `attempt: null` and `pendingAnswer: { steps, finalAnswer }`. The attempt and mastery are written when the grade is applied ([math-step-grading.md](math-step-grading.md)). Every other MathSteps answer is graded at once. Quiz answers with a final answer are rate-limited per student (429 `TOO_MANY_REQUESTS`, nothing stored); a replay of the same answer never calls the CAS or the limiter.
    - **Free tier:** a new attempt or essay in a non-test session re-checks the lesson lock (403 `LESSON_LOCKED`, which covers a quiz started while subscribed and continued after a lapse) and then the daily quota (403 `QUIZ_DAILY_LIMIT_REACHED`); nothing is stored when refused. A replayed identical answer and a test-mode session are not gated. The quota is a soft limit: two parallel answers at 9/10 can both pass.
 3. **Finish** — `POST /api/sessions/{id}/finish`. Allowed at any time, including mid-quiz. Nothing finishes a session automatically.
-4. **Read** — `GET /api/sessions/{id}` returns the items, the saved attempts and `currentPosition`: the lowest position with no attempt and no pending essay, or null when every item is answered or the session is finished.
+4. **Read** — `GET /api/sessions/{id}` returns the items, the saved attempts and `currentPosition`: the lowest position with no attempt and no pending essay or MathSteps answer, or null when every item is answered or the session is finished.
 
 The answer and finish endpoints serve quizzes only: an exam session id returns 404 `SESSION_NOT_FOUND`, and the domain refuses `RecordAttempt` and `Submit()` on an exam. Exams save drafts and submit through `/api/exams` (`docs/exams.md`).
 
@@ -98,7 +99,7 @@ Grading loads the `QuestionRevision` at `item.QuestionVersion` and calls `Questi
 
 Written essays are graded asynchronously by the AI grader against the served revision (`EssayGrade`, [essay-grading.md](essay-grading.md)); the attempt is written when the grade is applied. A blank essay is graded at once by `QuestionGrader` as Unanswered.
 
-A MathSteps answer goes through `AnswerGrader`: the final answer is checked by the AI service's CAS ([math-cas.md](math-cas.md)); every other type is graded locally by `QuestionGrader`. If the AI service cannot be reached, the verdict is `unchecked` (provisional score 0, feedback kind `mathUnchecked`): the attempt is still recorded, is left out of mastery, and waits for teacher review (#128).
+A MathSteps answer goes through `AnswerGrader.DecideAsync`: the final answer is checked by the AI service's CAS ([math-cas.md](math-cas.md)); every other type is graded locally by `QuestionGrader`. A step-graded answer, or one whose verdict is `unchecked` (the AI service cannot be reached), is deferred to a `MathStepGrade` that the background worker checks, grades and applies ([math-step-grading.md](math-step-grading.md)). Attempts graded `unchecked` before #123 keep their provisional 0 and wait for teacher review (#128).
 
 The validator checks that the answer is a JSON object no longer than the largest of `Sessions:AnswerMaxLength`, `Sessions:EssayAnswerMaxLength` and `Sessions:MathStepsAnswerMaxLength`. The handler then checks the shape for the served type (422 `QUESTION_ANSWER_INVALID`), the raw length for that type (422 `ATTEMPT_ANSWER_TOO_LONG`: `EssayAnswerMaxLength` for an essay, `MathStepsAnswerMaxLength` for a MathSteps answer, `AnswerMaxLength` for every other type), the MathSteps step and final-answer caps (422 `ATTEMPT_ANSWER_TOO_LONG`) and, for an essay, the text length (422 `QUESTION_ESSAY_ANSWER_TOO_LONG` over `Content:QuestionEssayAnswerMaxLength`), so a malformed answer never reaches the grader.
 
@@ -118,11 +119,11 @@ The client may report `timeTakenMilliseconds`. The server measures `elapsed = no
 
 ## Scoring
 
-`ScorePercent = round(Σ attempt.Score / Σ item.MaxScore × 100, 2)`. Unanswered items count 0. Exams use the same formula (`docs/exams.md`). A written essay counts once its grade is applied; applying it to a finished session recomputes `ScorePercent`, so the score is provisional while an essay is pending.
+`ScorePercent = round(Σ attempt.Score / Σ item.MaxScore × 100, 2)`. Unanswered items count 0. Exams use the same formula (`docs/exams.md`). A written essay or a deferred MathSteps answer counts once its grade is applied; applying it to a finished session recomputes `ScorePercent`, so the score is provisional while one is pending.
 
 ## What is revealed
 
-Each item carries the served `type`, `stem`, `body` and `maxScore`. `correctAnswer` (the served grading spec) and `explanation` are returned only when the item has an attempt or a pending essay, or the session is finished, so unanswered keys never leak while a quiz is open.
+Each item carries the served `type`, `stem`, `body` and `maxScore`. `correctAnswer` (the served grading spec) and `explanation` are returned only when the item has an attempt or a pending essay or MathSteps answer, or the session is finished, so unanswered keys never leak while a quiz is open.
 
 ## Append-only enforcement
 
@@ -185,8 +186,8 @@ The app fails to start unless `MinQuizSize <= DefaultQuizSize <= MaxQuizSize`.
 History: `GET /api/progress/sessions` (`docs/progress.md`).
 
 `SessionResult { id, kind, scope, isTestMode, startedAt, submittedAt?, scorePercent?, timeTakenMilliseconds, currentPosition?, items[] }`
-`SessionItemResult { position, questionId, questionVersion, type, stem, body, maxScore, attempt?, correctAnswer?, explanation?, pendingAnswer? }` — `pendingAnswer` is the submitted essay (`{ text }`) while it waits for its grade, else null.
-`AttemptResult { id, answer, score, normalisedScore, outcome, awaitsReview, feedback?, timeTakenMilliseconds, createdAt }`. `awaitsReview` is true for a MathSteps attempt graded `unchecked`: its score is a provisional 0 and the UI shows «قيد المراجعة» instead of the verdict ([math-cas.md](math-cas.md)).
+`SessionItemResult { position, questionId, questionVersion, type, stem, body, maxScore, attempt?, correctAnswer?, explanation?, pendingAnswer? }` — `pendingAnswer` is the submitted essay (`{ text }`) or deferred MathSteps answer (`{ steps, finalAnswer }`) while it waits for its grade, else null.
+`AttemptResult { id, answer, score, normalisedScore, outcome, awaitsReview, feedback?, timeTakenMilliseconds, createdAt }`. `awaitsReview` is true for a legacy MathSteps attempt graded `unchecked` before #123: its score is a provisional 0 and the UI shows «قيد المراجعة» instead of the verdict ([math-cas.md](math-cas.md)). New `unchecked` answers are deferred instead and never produce it.
 
 ## Error codes
 
@@ -199,7 +200,8 @@ History: `GET /api/progress/sessions` (`docs/progress.md`).
 | `SESSION_ALREADY_IN_PROGRESS` | 409 | A concurrent start for the same lesson won the race; retry to resume. |
 | `ATTEMPT_ANSWER_TOO_LONG` | 422 | The answer JSON is over its type's cap (`EssayAnswerMaxLength` for an essay, `MathStepsAnswerMaxLength` for MathSteps, else `AnswerMaxLength`), or a MathSteps answer is over one of the `Math*` caps. |
 | `QUESTION_ESSAY_ANSWER_TOO_LONG` | 422 | An essay is longer than `Content:QuestionEssayAnswerMaxLength`. |
-| `MATH_CHECK_UNAVAILABLE` | 503 | Only when the .NET math-check fake runs in Production (a misconfiguration); an unreachable AI service grades `unchecked` instead. |
+| `MATH_CHECK_UNAVAILABLE` | 503 | Only when the .NET math-check fake runs in Production (a misconfiguration); an unreachable AI service defers the answer instead. |
+| `TOO_MANY_REQUESTS` | 429 | A quiz MathSteps answer over the per-student check limit (`MathStepGrading:CheckPermitLimit` per `CheckWindowSeconds`); nothing is stored. |
 | `ATTEMPT_TIME_TAKEN_INVALID` | 422 | Negative `timeTakenMilliseconds`. |
 | `SESSION_NO_SERVABLE_QUESTIONS` | 400 | The lesson has no servable questions. |
 | `SESSION_QUESTION_NOT_SERVABLE` | 400 | A drawn question is not servable (a guard; the draw already filters). |
@@ -221,4 +223,5 @@ History: `GET /api/progress/sessions` (`docs/progress.md`).
 - "تدريب جديد" starts the smallest of 5/10/20 that is at least the number of questions served.
 - "اسأل المساعد" opens the avatar panel with the answered question as its context ([avatar.md](avatar.md)).
 - **Essay card (#119):** a plain-text RTL editor with a live word count against `maxWords` (over-limit state), characters left near 20 000 and a 20 000 cap. The draft autosaves to the device (`localStorage` key `elmanhg.essayDraft.<studentId>.<sessionId>.<questionId>`, 800 ms after the last change and when the page is hidden or left, kept 7 days) and is restored with «استعدنا مسودتك المحفوظة.». «أرسل الإجابة» is blocked for an empty essay or one over the word limit; a successful submit removes the draft. The submitted essay is shown read-only with the grade status («جارٍ تصحيح إجابتك…», «قيد المراجعة» or the verdict with criterion marks and justification) and the explanation. When the grade lands, the session and mastery queries are refreshed.
-- The result page counts written essays as answered, reviews them with their grade status, and notes that the score is provisional while any essay is being graded.
+- **MathSteps card (#123):** after «تحقق» a deferred answer is shown read-only with «جارٍ تصحيح إجابتك…», then «قيد المراجعة» or the per-step marks, final-answer verdict and justification (`MathStepGradeStatus`); the correct answer is hidden until the grade is applied, and «التالي» stays available. When the grade lands, the session and mastery queries are refreshed and the normal feedback panel appears, followed by the step marks.
+- The result page counts written essays as answered, reviews them with their grade status, and notes that the score is provisional while any essay is being graded. Pending MathSteps answers are reviewed read-only with their grade status, with the note «بعض إجابات الرياضيات ما زالت قيد التصحيح، وستتحدّث الدرجة عند اكتمالها.».

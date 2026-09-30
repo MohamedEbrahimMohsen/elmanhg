@@ -100,6 +100,9 @@ class _ElementParser:
             right = self.expr()
         if self._peek() is not None:
             raise MathParseError("unexpected token")
+        nodes.check_expansion(left, self.limits)
+        if right is not None:
+            nodes.check_expansion(right, self.limits)
         return ParsedElement.build(
             operator, left, right, self.has_decimal, self.has_unreduced_fraction
         )

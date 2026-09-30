@@ -18,16 +18,16 @@ public sealed class AnswerGraderTests
     private readonly IAiMathCheckClient _mathCheckClient = Substitute.For<IAiMathCheckClient>();
 
     [Fact]
-    public async Task GradeAsync_NonMathType_UsesDeterministicGraderWithoutClient()
+    public async Task DecideAsync_NonMathType_GradesWithoutClient()
     {
-        var grade = await AnswerGrader.GradeAsync(QuestionType.Mcq, """{"correctOptionId":"b"}""", 1, Json("""{"optionId":"b"}"""), _mathCheckClient, TestContext.Current.CancellationToken);
+        var decision = await AnswerGrader.DecideAsync(QuestionType.Mcq, """{"correctOptionId":"b"}""", 1, Json("""{"optionId":"b"}"""), _mathCheckClient, TestContext.Current.CancellationToken);
 
-        grade.Outcome.Should().Be(GradeOutcome.Correct);
+        decision.Grade!.Outcome.Should().Be(GradeOutcome.Correct);
         await _mathCheckClient.DidNotReceive().CheckAsync(Arg.Any<AiMathCheckRequest>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task GradeAsync_BlankFinalAnswer_ReturnsUnansweredWithoutClient()
+    public async Task DecideAsync_BlankFinalAnswer_ReturnsUnansweredWithoutClient()
     {
         var grade = await Grade(MathStepsSpecJson, """{"steps":["x"],"finalAnswer":"  "}""");
 
@@ -36,7 +36,7 @@ public sealed class AnswerGraderTests
     }
 
     [Fact]
-    public async Task GradeAsync_MathAnswer_SendsTrimmedFinalAnswerAndRules()
+    public async Task DecideAsync_MathAnswer_SendsTrimmedFinalAnswerAndRules()
     {
         Reply(MathAnswerVerdict.Equivalent);
 
@@ -47,7 +47,7 @@ public sealed class AnswerGraderTests
     }
 
     [Fact]
-    public async Task GradeAsync_WrongFormVerdict_ReturnsZeroWithWrongFormFeedback()
+    public async Task DecideAsync_WrongFormVerdict_ReturnsZeroWithWrongFormFeedback()
     {
         Reply(MathAnswerVerdict.WrongForm);
 
@@ -57,7 +57,7 @@ public sealed class AnswerGraderTests
     }
 
     [Fact]
-    public async Task GradeAsync_ClientUnavailable_Propagates()
+    public async Task DecideAsync_ClientUnavailable_Propagates()
     {
         _mathCheckClient.CheckAsync(Arg.Any<AiMathCheckRequest>(), Arg.Any<CancellationToken>()).ThrowsAsync(new ServiceUnavailableCoreException(ErrorCodes.MathCheckUnavailable));
 
@@ -68,5 +68,37 @@ public sealed class AnswerGraderTests
 
     private void Reply(MathAnswerVerdict verdict) => _mathCheckClient.CheckAsync(Arg.Any<AiMathCheckRequest>(), Arg.Any<CancellationToken>()).Returns(new AiMathCheckResult(verdict, null, []));
 
-    private Task<QuestionGrade> Grade(string spec, string answer) => AnswerGrader.GradeAsync(QuestionType.MathSteps, spec, 2, Json(answer), _mathCheckClient, TestContext.Current.CancellationToken);
+    [Fact]
+    public async Task DecideAsync_UncheckedVerdict_DefersWithoutVerdict()
+    {
+        Reply(MathAnswerVerdict.Unchecked);
+
+        var decision = await Decide(MathStepsSpecJson, """{"steps":["2x = 4"],"finalAnswer":"x = 2"}""");
+
+        decision.Should().Be(AnswerDecision.Deferred(null));
+    }
+
+    [Fact]
+    public async Task DecideAsync_StepGradedWithSteps_DefersWithVerdict()
+    {
+        Reply(MathAnswerVerdict.Equivalent);
+
+        var decision = await Decide(MathStepsGradedSpecJson, """{"steps":["2x = 4"],"finalAnswer":"x = 2"}""");
+
+        (decision.Grade, decision.Verdict).Should().Be(((QuestionGrade?)null, (MathAnswerVerdict?)MathAnswerVerdict.Equivalent));
+    }
+
+    [Fact]
+    public async Task DecideAsync_StepGradedWithoutSteps_GradesWithZeroStepCredit()
+    {
+        Reply(MathAnswerVerdict.Equivalent);
+
+        var grade = await Grade(MathStepsGradedSpecJson, """{"steps":["  "],"finalAnswer":"x = 2"}""");
+
+        grade.Should().Be(new QuestionGrade(1m, 0.5m, GradeOutcome.Partial, GradeFeedback.MathStepTally(0, 2)));
+    }
+
+    private Task<AnswerDecision> Decide(string spec, string answer) => AnswerGrader.DecideAsync(QuestionType.MathSteps, spec, 2, Json(answer), _mathCheckClient, TestContext.Current.CancellationToken);
+
+    private async Task<QuestionGrade> Grade(string spec, string answer) => (await Decide(spec, answer).ConfigureAwait(false)).Grade!;
 }

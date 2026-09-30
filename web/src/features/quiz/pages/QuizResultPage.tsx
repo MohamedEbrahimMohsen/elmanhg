@@ -6,8 +6,10 @@ import { invalidateMastery } from '@/features/mastery';
 import { getGetSessionQueryKey, useGetSession } from '@/shared/api/generated/sessions/sessions';
 import { Button } from '@/shared/ui/button';
 import { isWrittenEssay } from '../api/essayItem';
+import { isPendingMathSteps } from '../api/mathStepsItem';
 import { lessonIdOf, sortedItems } from '../api/quizSession';
 import { EssayReviewItem } from '../components/EssayReviewItem';
+import { MathStepsReviewItem } from '../components/MathStepsReviewItem';
 import { NewPracticeButton } from '../components/NewPracticeButton';
 import { QuizResultSummary } from '../components/QuizResultSummary';
 import { QuizReviewItem } from '../components/QuizReviewItem';
@@ -39,7 +41,9 @@ export function QuizResultPage({ sessionId }: QuizResultPageProps) {
     return <Navigate to="/student/quiz/$sessionId" params={{ sessionId }} replace />;
   }
 
-  const reviewed = sortedItems(data).filter((item) => item.attempt !== null || isWrittenEssay(item));
+  const reviewed = sortedItems(data).filter(
+    (item) => item.attempt !== null || isWrittenEssay(item) || isPendingMathSteps(item),
+  );
   const refreshSession = () => {
     void queryClient.invalidateQueries({ queryKey: getGetSessionQueryKey(sessionId) });
     void invalidateMastery(queryClient);
@@ -52,8 +56,10 @@ export function QuizResultPage({ sessionId }: QuizResultPageProps) {
       <h2 className="font-display text-h2 font-bold lg:text-h2-desktop">{t('result.review')}</h2>
       {reviewed.length > 0 ? (
         reviewed.map((item) =>
-          item.attempt === null || isWrittenEssay(item) ? (
+          isWrittenEssay(item) ? (
             <EssayReviewItem key={item.questionId} sessionId={sessionId} item={item} onGraded={refreshSession} />
+          ) : item.attempt === null ? (
+            <MathStepsReviewItem key={item.questionId} sessionId={sessionId} item={item} onGraded={refreshSession} />
           ) : (
             <QuizReviewItem
               key={item.questionId}

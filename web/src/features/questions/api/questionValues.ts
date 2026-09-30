@@ -51,6 +51,8 @@ export function emptyQuestionValues(type: QuestionType): QuestionValues {
     mathForm: 'equivalent',
     mathTolerance: '',
     mathToleranceMode: 'absolute',
+    mathSolution: [],
+    mathStepsWeight: '0',
   };
 }
 

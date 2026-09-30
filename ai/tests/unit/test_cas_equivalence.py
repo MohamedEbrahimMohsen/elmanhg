@@ -20,6 +20,7 @@ LIMITS: Final = CasLimits(
     max_number_digits=30,
     max_exponent=1000,
     max_magnitude=10000,
+    max_expansion_terms=5000,
 )
 EQ: Final = Verdict.EQUIVALENT
 NOT: Final = Verdict.NOT_EQUIVALENT

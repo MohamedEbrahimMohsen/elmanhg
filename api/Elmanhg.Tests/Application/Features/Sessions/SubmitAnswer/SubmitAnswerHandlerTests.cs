@@ -2,6 +2,7 @@ using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Core.Localization;
 using Elmanhg.Application.Exceptions;
+using Elmanhg.Application.Sessions.Shared;
 using Elmanhg.Application.Sessions.SubmitAnswer;
 using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
@@ -9,6 +10,7 @@ using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
+using Elmanhg.Domain.MathStepGrading;
 using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Questions.Schemas;
 using Elmanhg.Domain.Questions;
@@ -34,6 +36,8 @@ public sealed class SubmitAnswerHandlerTests
     private readonly IQuestionRepository _questionRepository = Substitute.For<IQuestionRepository>();
     private readonly IQuestionMasteryRepository _questionMasteryRepository = Substitute.For<IQuestionMasteryRepository>();
     private readonly IEssayGradeRepository _essayGradeRepository = Substitute.For<IEssayGradeRepository>();
+    private readonly IMathStepGradeRepository _mathStepGradeRepository = Substitute.For<IMathStepGradeRepository>();
+    private readonly IMathCheckRateLimiter _mathCheckRateLimiter = Substitute.For<IMathCheckRateLimiter>();
     private readonly ILessonRepository _lessonRepository = Substitute.For<ILessonRepository>();
     private readonly ISubscriptionRepository _subscriptionRepository = Substitute.For<ISubscriptionRepository>();
     private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
@@ -51,8 +55,9 @@ public sealed class SubmitAnswerHandlerTests
         SessionRepositoryStub.StubFind(_sessionRepository, _session);
         _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(_questions[0].Revisions);
         _timeProvider.GetUtcNow().Returns(T0);
+        _mathCheckRateLimiter.TryAcquire(Arg.Any<Guid>()).Returns(true);
         SubscriptionRepositoryStub.Stub(_subscriptionRepository, SubscriptionRepositoryStub.EntitledBase(_builder.StudentId, T0));
-        _handler = new SubmitAnswerHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _lessonRepository, _subscriptionRepository, _essayGradeRepository, Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), Options.Create(new ContentOptions { QuestionEssayAnswerMaxLength = 20000 }), Options.Create(new SessionsOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), _mathCheckClient);
+        _handler = new SubmitAnswerHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _lessonRepository, _subscriptionRepository, _essayGradeRepository, _mathStepGradeRepository, Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), Options.Create(new ContentOptions { QuestionEssayAnswerMaxLength = 20000 }), Options.Create(new SessionsOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), _mathCheckClient, _mathCheckRateLimiter);
     }
 
     private Guid QuestionId => _questions[0].Id;
@@ -310,25 +315,92 @@ public sealed class SubmitAnswerHandlerTests
     }
 
     [Fact]
-    public async Task Handle_MathCheckUnchecked_RecordsAttemptForReviewWithoutMastery()
+    public async Task Handle_MathCheckUnchecked_DefersToMathStepGradeWithoutAttempt()
     {
         var (session, math) = StartMathQuiz();
         ReplyMath(MathAnswerVerdict.Unchecked);
 
-        var result = await _handler.Handle(MathCommand(session, math, """{"steps":["2x = 4"],"finalAnswer":"x = 2"}"""), TestContext.Current.CancellationToken);
+        var result = await _handler.Handle(MathCommand(session, math, MathAnswer), TestContext.Current.CancellationToken);
 
-        (result.Attempt!.Score, result.Attempt.AwaitsReview).Should().Be((0m, true));
-        session.Attempts.Single().ReadFeedback().Should().Be(GradeFeedback.MathUnchecked);
+        (result.Attempt, result.PendingAnswer.HasValue).Should().Be(((AttemptResult?)null, true));
+        session.Attempts.Should().BeEmpty();
+        await _mathStepGradeRepository.Received(1).AddAsync(Arg.Is<MathStepGrade>(x => x.QuestionId == math.Id && x.FinalAnswerVerdict == null && x.Status == MathStepGradeStatus.Pending), Arg.Any<CancellationToken>());
         await _questionMasteryRepository.DidNotReceive().AddAsync(Arg.Any<QuestionMastery>(), Arg.Any<CancellationToken>());
         await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
-    private (Session Session, Question Math) StartMathQuiz()
+    [Fact]
+    public async Task Handle_StepGradedAnswer_DefersWithVerdict()
     {
-        var math = _builder.Questions.MathSteps().Approved().Build();
+        var (session, math) = StartMathQuiz(stepGraded: true);
+        ReplyMath(MathAnswerVerdict.Equivalent);
+
+        var result = await _handler.Handle(MathCommand(session, math, """{"steps":[" 2x = 4 ",""],"finalAnswer":" x = 2 "}"""), TestContext.Current.CancellationToken);
+
+        result.Attempt.Should().BeNull();
+        session.Attempts.Should().BeEmpty();
+        await _mathStepGradeRepository.Received(1).AddAsync(Arg.Is<MathStepGrade>(x => x.StudentId == _builder.StudentId && x.SessionId == session.Id && x.SubjectId == math.SubjectId && x.QuestionVersion == 1 && x.MaxScore == 2 && x.FinalAnswerVerdict == MathAnswerVerdict.Equivalent && x.TimeTakenMilliseconds <= 1000 && QuestionJson.AreEquivalent(x.Answer, MathAnswer)), Arg.Any<CancellationToken>());
+        await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_StepGradedReplay_CallsNeitherCheckNorLimiterAgain()
+    {
+        var (session, math) = StartMathQuiz(stepGraded: true);
+        ReplyMath(MathAnswerVerdict.Equivalent);
+        await _handler.Handle(MathCommand(session, math, MathAnswer), TestContext.Current.CancellationToken);
+
+        var replay = await _handler.Handle(MathCommand(session, math, MathAnswer), TestContext.Current.CancellationToken);
+
+        replay.PendingAnswer.HasValue.Should().BeTrue();
+        await _mathCheckClient.Received(1).CheckAsync(Arg.Any<AiMathCheckRequest>(), Arg.Any<CancellationToken>());
+        _mathCheckRateLimiter.Received(1).TryAcquire(_builder.StudentId);
+        await _mathStepGradeRepository.Received(1).AddAsync(Arg.Any<MathStepGrade>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_RateLimitDenied_ThrowsTooManyRequestsWithoutCheck()
+    {
+        var (session, math) = StartMathQuiz(stepGraded: true);
+        _mathCheckRateLimiter.TryAcquire(Arg.Any<Guid>()).Returns(false);
+
+        await AssertThrowsAsync<RateLimitExceededCoreException>(MathCommand(session, math, MathAnswer), ErrorCodes.TooManyRequests);
+        await _mathCheckClient.DidNotReceive().CheckAsync(Arg.Any<AiMathCheckRequest>(), Arg.Any<CancellationToken>());
+        await _mathStepGradeRepository.DidNotReceive().AddAsync(Arg.Any<MathStepGrade>(), Arg.Any<CancellationToken>());
+        session.Items.Single().SavedAnswer.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Handle_BlankMathFinalAnswer_SkipsLimiter()
+    {
+        var (session, math) = StartMathQuiz(stepGraded: true);
+
+        await _handler.Handle(MathCommand(session, math, """{"steps":["2x = 4"],"finalAnswer":"  "}"""), TestContext.Current.CancellationToken);
+
+        session.Attempts.Single().ReadFeedback().Should().Be(GradeFeedback.Unanswered);
+        _mathCheckRateLimiter.DidNotReceive().TryAcquire(Arg.Any<Guid>());
+        await _mathCheckClient.DidNotReceive().CheckAsync(Arg.Any<AiMathCheckRequest>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_NonMathAnswer_SkipsLimiter()
+    {
+        await _handler.Handle(Command(SessionBuilder.AnswerB), TestContext.Current.CancellationToken);
+
+        _session.Attempts.Should().ContainSingle();
+        _mathCheckRateLimiter.DidNotReceive().TryAcquire(Arg.Any<Guid>());
+    }
+
+    private const string MathAnswer = """{"steps":["2x = 4"],"finalAnswer":"x = 2"}""";
+
+    private (Session Session, Question Math) StartMathQuiz(bool stepGraded = false)
+    {
+        var math = (stepGraded ? _builder.Questions.MathStepsGraded() : _builder.Questions.MathSteps()).Approved().Build();
         var session = Session.StartQuiz(_builder.StudentId, _builder.Questions.Lesson, [math], isTestMode: false);
         SessionRepositoryStub.StubFind(_sessionRepository, session);
         _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(math.Revisions);
+        _questionRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<Question, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Question>, IQueryable<Question>>?>(), Arg.Any<Func<IQueryable<Question>, IOrderedQueryable<Question>>?>(), Arg.Any<bool>())
+            .Returns(call => new[] { math }.FirstOrDefault(call.Arg<Expression<Func<Question, bool>>>().Compile()));
         return (session, math);
     }
 

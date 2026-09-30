@@ -11,6 +11,7 @@ using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
+using Elmanhg.Domain.MathStepGrading;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.ReviewSessions;
 using Elmanhg.Domain.Sessions;
@@ -195,6 +196,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         ConfigureAvatar(modelBuilder);
         ConfigureTrainingData(modelBuilder);
         ConfigureEssayGrades(modelBuilder);
+        ConfigureMathStepGrades(modelBuilder);
         ConfigureTrainingExports(modelBuilder);
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
@@ -647,6 +649,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         modelBuilder.Entity<AvatarTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<TeacherThreadTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<EssayGrade>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<MathStepGrade>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<EssayGradeTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<TrainingExport>().HasQueryFilter(x => !x.IsDeleted);
     }
