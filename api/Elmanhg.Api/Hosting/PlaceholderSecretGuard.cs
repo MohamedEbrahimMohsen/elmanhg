@@ -1,3 +1,5 @@
+using Npgsql;
+
 namespace Elmanhg.Api.Hosting;
 
 public static class PlaceholderSecretGuard
@@ -5,7 +7,6 @@ public static class PlaceholderSecretGuard
     // Every secret in the committed deploy/*.env.example files starts with this marker.
     public const string PlaceholderPrefix = "change-me";
 
-    private const string DatabasePasswordPlaceholder = "Password=change-me";
     private const string OtpSecretKey = "CoreOtp:Secret";
     private const string ConnectionStringKey = "ConnectionStrings:DbConnectionString";
 
@@ -21,7 +22,7 @@ public static class PlaceholderSecretGuard
         var offending = SecretKeys
             .Where(x => IsPlaceholder(configuration[x]))
             .ToList();
-        if (configuration[ConnectionStringKey]?.Contains(DatabasePasswordPlaceholder, StringComparison.OrdinalIgnoreCase) == true)
+        if (HasPlaceholderPassword(configuration[ConnectionStringKey]))
         {
             offending.Add(ConnectionStringKey);
         }
@@ -36,6 +37,8 @@ public static class PlaceholderSecretGuard
             throw new InvalidOperationException($"The {environment.EnvironmentName} host refuses to start: replace the example or missing secrets {string.Join(", ", offending)} (docs/security.md).");
         }
     }
+
+    private static bool HasPlaceholderPassword(string? connectionString) => !string.IsNullOrWhiteSpace(connectionString) && IsPlaceholder(new NpgsqlConnectionStringBuilder(connectionString).Password);
 
     private static bool IsPlaceholder(string? value) => value?.Trim().StartsWith(PlaceholderPrefix, StringComparison.OrdinalIgnoreCase) == true;
 }

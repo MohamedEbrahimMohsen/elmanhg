@@ -37,6 +37,22 @@ public sealed class PlaceholderSecretGuardTests
     }
 
     [Fact]
+    public void EnsureReplaced_ProductionWithQuotedPlaceholderDatabasePassword_ThrowsNamingConnectionString()
+    {
+        var act = () => PlaceholderSecretGuard.EnsureReplaced(Configuration(("ConnectionStrings:DbConnectionString", "Host=db;Password=\"change-me-openssl-rand-hex-32\"")), Environment(Environments.Production));
+
+        act.Should().Throw<InvalidOperationException>().Which.Message.Should().Contain("ConnectionStrings:DbConnectionString");
+    }
+
+    [Fact]
+    public void EnsureReplaced_ProductionWithPlaceholderMarkerOutsideDatabasePassword_DoesNotThrow()
+    {
+        var act = () => PlaceholderSecretGuard.EnsureReplaced(Configuration(("ConnectionStrings:DbConnectionString", "Host=db;Application Name=\"Password=change-me\";Password=not-a-secret-9c8b7a")), Environment(Environments.Production));
+
+        act.Should().NotThrow();
+    }
+
+    [Fact]
     public void EnsureReplaced_ProductionWithEmptyOtpSecret_ThrowsNamingOtpSecret()
     {
         var act = () => PlaceholderSecretGuard.EnsureReplaced(new ConfigurationBuilder().Build(), Environment(Environments.Production));

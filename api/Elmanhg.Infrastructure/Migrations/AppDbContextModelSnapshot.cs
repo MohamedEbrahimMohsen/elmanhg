@@ -901,7 +901,8 @@ namespace Elmanhg.Infrastructure.Migrations
 
                     b.HasIndex("FamilyId");
 
-                    b.HasIndex("TokenHash");
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 

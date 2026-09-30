@@ -50,7 +50,8 @@ namespace Elmanhg.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_IssuedRefreshTokens_TokenHash",
                 table: "IssuedRefreshTokens",
-                column: "TokenHash");
+                column: "TokenHash",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_IssuedRefreshTokens_UserId",

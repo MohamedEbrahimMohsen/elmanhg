@@ -15,7 +15,7 @@ public partial class AppDbContext
             builder.Property(x => x.TokenHash).IsRequired().HasMaxLength(Sha256HexLength);
             builder.Ignore(x => x.IsRevoked);
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
-            builder.HasIndex(x => x.TokenHash);
+            builder.HasIndex(x => x.TokenHash).IsUnique();
             builder.HasIndex(x => x.FamilyId);
             builder.HasIndex(x => x.ExpiresAt);
         });

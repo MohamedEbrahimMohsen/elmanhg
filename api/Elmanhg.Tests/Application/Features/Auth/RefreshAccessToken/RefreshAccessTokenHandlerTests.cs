@@ -30,6 +30,7 @@ public sealed class RefreshAccessTokenHandlerTests
     private readonly List<IssuedRefreshToken> _records = [];
     private readonly User _user = User.CreateStudentWithPhone("Ahmed", "01012345678");
     private readonly RefreshAccessTokenHandler _handler;
+    private Action<IssuedRefreshToken> _addIfAbsent;
 
     public RefreshAccessTokenHandlerTests()
     {
@@ -40,6 +41,8 @@ public sealed class RefreshAccessTokenHandlerTests
         _issuedRefreshTokenRepository.FindAsync(Arg.Any<Expression<Func<IssuedRefreshToken, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<IssuedRefreshToken>, IQueryable<IssuedRefreshToken>>?>(), Arg.Any<Func<IQueryable<IssuedRefreshToken>, IOrderedQueryable<IssuedRefreshToken>>?>(), Arg.Any<bool>())
             .Returns(call => _records.Where(call.Arg<Expression<Func<IssuedRefreshToken, bool>>>().Compile()).ToList());
         _issuedRefreshTokenRepository.When(x => x.AddAsync(Arg.Any<IssuedRefreshToken>(), Arg.Any<CancellationToken>())).Do(call => _records.Add(call.Arg<IssuedRefreshToken>()));
+        _addIfAbsent = _records.Add;
+        _issuedRefreshTokenRepository.When(x => x.AddIfAbsentAsync(Arg.Any<IssuedRefreshToken>(), Arg.Any<CancellationToken>())).Do(call => _addIfAbsent(call.Arg<IssuedRefreshToken>()));
         var authOptions = Options.Create(new AuthOptions { RefreshTokenReuseGraceSeconds = GraceSeconds });
         var jwtOptions = Options.Create(new JwtOptions { RefreshTokenExpirationDays = 7 });
         _handler = new RefreshAccessTokenHandler(_tokenService, _refreshTokenService, _issuedRefreshTokenRepository, authOptions, jwtOptions, _timeProvider);
@@ -64,6 +67,20 @@ public sealed class RefreshAccessTokenHandlerTests
         var presented = _records.Single(x => x.TokenHash == RefreshTokenHash.Compute(OldRefreshToken));
         var issued = _records.Single(x => x.TokenHash == RefreshTokenHash.Compute(NewRefreshToken));
         (presented.RotatedAt, issued.RotatedAt, issued.FamilyId, issued.UserId, issued.ExpiresAt).Should().Be((Now, (DateTimeOffset?)null, presented.FamilyId, _user.Id, Now.AddDays(7)));
+    }
+
+    [Fact]
+    public async Task Handle_SignInTokenRecordedByConcurrentRefresh_IssuesTokenInTheWinningFamily()
+    {
+        var winningFamilyId = Guid.NewGuid();
+        _addIfAbsent = _ => Record(OldRefreshToken, winningFamilyId, rotatedAt: null);
+
+        await _handler.Handle(new RefreshAccessTokenCommand(OldRefreshToken), TestContext.Current.CancellationToken);
+
+        var presented = _records.Single(x => x.TokenHash == RefreshTokenHash.Compute(OldRefreshToken));
+        var issued = _records.Single(x => x.TokenHash == RefreshTokenHash.Compute(NewRefreshToken));
+        (presented.FamilyId, presented.RotatedAt, issued.FamilyId).Should().Be((winningFamilyId, (DateTimeOffset?)Now, winningFamilyId));
+        await _issuedRefreshTokenRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

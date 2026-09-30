@@ -44,9 +44,8 @@ public sealed class RefreshAccessTokenHandler(ITokenService tokenService, IRefre
         var expiresAt = now.AddDays(jwtOptions.Value.RefreshTokenExpirationDays);
         if (presented.Count == 0)
         {
-            var loginToken = IssuedRefreshToken.Issue(user.Id, Guid.NewGuid(), presentedHash, now, expiresAt);
-            await issuedRefreshTokenRepository.AddAsync(loginToken, cancellationToken).ConfigureAwait(false);
-            presented.Add(loginToken);
+            await issuedRefreshTokenRepository.AddIfAbsentAsync(IssuedRefreshToken.Issue(user.Id, Guid.NewGuid(), presentedHash, now, expiresAt), cancellationToken).ConfigureAwait(false);
+            presented = await issuedRefreshTokenRepository.FindAsync(x => x.TokenHash == presentedHash, cancellationToken).ConfigureAwait(false);
         }
 
         presented.ForEach(x => x.Rotate(now));

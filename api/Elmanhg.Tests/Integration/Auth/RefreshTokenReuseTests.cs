@@ -1,8 +1,11 @@
+using Elmanhg.Infrastructure.Data.Context;
 using Elmanhg.Tests.Integration.Authorization;
 using Elmanhg.Tests.Integration.Infrastructure;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -65,6 +68,23 @@ public sealed class RefreshTokenReuseTests(ApiFactory factory)
         replay.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         using var other = await SendRefreshAsync(client, AuthTestClient.ReadRefreshCookie(otherSignIn));
         other.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task Refresh_SignInCookieRefreshedConcurrently_Returns200AndKeepsOneFamily()
+    {
+        using var client = AuthTestClient.Create(factory);
+        var student = await ScopeTestData.SeedStudentAsync(factory, TestContext.Current.CancellationToken);
+        using var signIn = await client.PostAsJsonAsync("/api/auth/login/email", new { email = student.Email, password = ScopeTestData.Password }, TestContext.Current.CancellationToken);
+        var signInCookie = AuthTestClient.ReadRefreshCookie(signIn);
+
+        var responses = await Task.WhenAll(SendRefreshAsync(client, signInCookie), SendRefreshAsync(client, signInCookie));
+
+        responses.Select(x => x.StatusCode).Should().Equal(HttpStatusCode.OK, HttpStatusCode.OK);
+        await using var scope = factory.Services.CreateAsyncScope();
+        var records = await scope.ServiceProvider.GetRequiredService<AppDbContext>().IssuedRefreshTokens.AsNoTracking().Where(x => x.UserId == student.Id).ToListAsync(TestContext.Current.CancellationToken);
+        (records.Count, records.Select(x => x.FamilyId).Distinct().Count()).Should().Be((3, 1));
+        Array.ForEach(responses, x => x.Dispose());
     }
 
     private static async Task<HttpResponseMessage> SendRefreshAsync(HttpClient client, string cookie)
