@@ -28,6 +28,17 @@ public sealed class LocalDiskFileStorage(IOptions<FileStorageOptions> fileStorag
         return Task.FromResult<StoredFile?>(new StoredFile(stream, stream.Length, MediaContentTypes.FromKey(key)));
     }
 
+    public Task DeleteAsync(string key, CancellationToken cancellationToken)
+    {
+        var path = ResolvePath(key);
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+
+        return Task.CompletedTask;
+    }
+
     private string ResolvePath(string key)
     {
         var root = Path.GetFullPath(fileStorageOptions.Value.LocalRootPath, hostEnvironment.ContentRootPath);

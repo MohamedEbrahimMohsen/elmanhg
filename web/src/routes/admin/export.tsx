@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { PlaceholderPage } from '@/features/shell';
+import { TrainingExportPage, trainingExportSearchSchema } from '@/features/trainingExport';
 
 export const Route = createFileRoute('/admin/export')({
-  component: () => <PlaceholderPage titleKey="nav.admin.export" />,
+  validateSearch: trainingExportSearchSchema,
+  component: TrainingExportPage,
 });

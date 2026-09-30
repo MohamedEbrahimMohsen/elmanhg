@@ -15,6 +15,7 @@ public static class MediaContentTypes
             ".webm" => "audio/webm",
             ".ogg" => "audio/ogg",
             ".m4a" or ".mp4" => "audio/mp4",
+            ".jsonl" => "application/x-ndjson",
             _ => Fallback,
         };
     }

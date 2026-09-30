@@ -62,4 +62,12 @@ public sealed class S3FileStorageTests
 
         (await act.Should().ThrowAsync<AmazonS3Exception>()).Which.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
+
+    [Fact]
+    public async Task DeleteAsync_DeletesObjectFromBucket()
+    {
+        await _storage.DeleteAsync("training-exports/a.jsonl", TestContext.Current.CancellationToken);
+
+        await _s3.Received(1).DeleteObjectAsync(Bucket, "training-exports/a.jsonl", Arg.Any<CancellationToken>());
+    }
 }

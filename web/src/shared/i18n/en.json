@@ -266,7 +266,17 @@
     "TEACHER_THREAD_RATING_INVALID": "Choose a rating from 1 to 5.",
     "ESSAY_GRADE_NOT_FOUND": "This essay grade was not found.",
     "ESSAY_GRADING_UNAVAILABLE": "The AI grader is unavailable right now. Try again in a moment.",
-    "ESSAY_GRADE_NOT_PENDING": "This essay is no longer waiting for the AI grader."
+    "ESSAY_GRADE_NOT_PENDING": "This essay is no longer waiting for the AI grader.",
+    "TRAINING_EXPORT_SOURCE_INVALID": "The export source is not recognised.",
+    "TRAINING_EXPORT_DATE_RANGE_INVALID": "The start date must be before the end date.",
+    "TRAINING_EXPORT_DATE_RANGE_TOO_WIDE": "The date range is longer than an export allows.",
+    "TRAINING_EXPORT_PAGE_NUMBER_INVALID": "The page number is not valid.",
+    "TRAINING_EXPORT_PAGE_SIZE_INVALID": "The page size is not valid.",
+    "TRAINING_EXPORT_NOT_FOUND": "The export was not found.",
+    "TRAINING_EXPORT_MODIFIED_CONCURRENTLY": "The export was changed at the same time. Try again.",
+    "TRAINING_EXPORT_NOT_PENDING": "The export is no longer being prepared.",
+    "TRAINING_EXPORT_NOT_READY": "The export is not ready yet.",
+    "TRAINING_EXPORT_EXPIRED": "The export file has expired and was deleted. Request a new export."
   },
   "error": {
     "title": "Something went wrong"

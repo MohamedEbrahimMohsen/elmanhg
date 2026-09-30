@@ -22,7 +22,7 @@ public static class EssayGradingTestData
 {
     private static CancellationToken CancellationToken => TestContext.Current.CancellationToken;
 
-    public static async Task<(Guid EssayGradeId, Guid SessionId, Guid QuestionId)> SeedPendingAsync(ApiFactory factory, Guid studentId)
+    public static async Task<(Guid EssayGradeId, Guid SessionId, Guid QuestionId)> SeedPendingAsync(ApiFactory factory, Guid studentId, bool isTestMode = false)
     {
         var (lessonId, questionIds) = await SessionTestData.SeedServableLessonAsync(factory, 1).ConfigureAwait(false);
         using var scope = factory.Services.CreateScope();
@@ -33,7 +33,7 @@ public static class EssayGradingTestData
         var mcq = await context.Questions.AsNoTracking().SingleAsync(x => x.Id == questionIds[0], CancellationToken).ConfigureAwait(false);
         var essay = Question.Create(lesson, unit, QuestionType.Essay, QuestionBuilder.EssayContent(), new QuestionMetadata(QuestionDifficulty.Medium, null, []), Guid.NewGuid());
         context.Questions.Add(essay);
-        var session = Session.StartQuiz(studentId, lesson, [mcq], isTestMode: false);
+        var session = Session.StartQuiz(studentId, lesson, [mcq], isTestMode);
         context.Sessions.Add(session);
         var grade = EssayGrade.Request(studentId, session.Id, subject.Id, essay.Id, essay.Version, 5, "القصور الذاتي هو ممانعة الجسم لتغيير حالته الحركية.", DateTimeOffset.UtcNow.AddSeconds(-1), 0);
         context.EssayGrades.Add(grade);

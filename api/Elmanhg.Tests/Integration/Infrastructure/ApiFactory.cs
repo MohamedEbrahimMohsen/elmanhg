@@ -62,6 +62,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         // The sweep would race tests that transcribe through the mediator.
         builder.UseSetting("AskTeacher:TranscriptionSweepEnabled", "false");
         builder.UseSetting("EssayGrading:SweepEnabled", "false");
+        // The sweeps would race tests that run and expire exports through the mediator and assert their exact state.
+        builder.UseSetting("TrainingExports:SweepEnabled", "false");
+        builder.UseSetting("TrainingExports:RetentionSweepEnabled", "false");
         // The sweep would race tests that record SLA events through the mediator.
         builder.UseSetting("AskTeacher:SlaSweepEnabled", "false");
         builder.UseSetting("TrainingData:StudentIdHashKey", TestStudentIdHashKey);

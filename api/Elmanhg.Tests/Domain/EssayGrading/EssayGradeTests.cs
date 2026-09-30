@@ -190,4 +190,24 @@ public sealed class EssayGradeTests
 
         act.Should().Throw<InvalidOperationException>();
     }
+
+    [Fact]
+    public void Complete_ConfidentAssessment_RaisesEssayGradeCompleted()
+    {
+        var grade = new EssayGradeBuilder().Build();
+
+        grade.Complete(EssayGradeBuilder.Assessment(0.9m), PartialGrade, 0.7m, RequestedAt.AddSeconds(40));
+
+        grade.GetDomainEvents().Should().ContainSingle().Which.Should().BeOfType<EssayGradeCompleted>().Which.Grade.Should().BeSameAs(grade);
+    }
+
+    [Fact]
+    public void FailAttempt_ReachesMax_RaisesNoEvent()
+    {
+        var grade = new EssayGradeBuilder().Build();
+
+        grade.FailAttempt("ESSAY_GRADING_UNAVAILABLE", RequestedAt.AddSeconds(5), 1, RetryBaseDelay);
+
+        grade.GetDomainEvents().Should().BeEmpty();
+    }
 }

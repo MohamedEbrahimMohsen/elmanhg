@@ -1,5 +1,6 @@
 using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Application.TeacherThreads.CreateTeacherThread;
+using Elmanhg.Application.TrainingExports.Shared;
 
 namespace Elmanhg.Api.FileStorage;
 
@@ -45,8 +46,10 @@ public sealed class PublicMediaMiddleware(RequestDelegate next, PathString media
         }
 
         var segments = key.Split('/');
-        return segments.All(x => x.Length > 0 && x != "." && x != "..") && !string.Equals(segments[0].TrimEnd('.'), TeacherThreadImageFormats.StorageFolder, StringComparison.OrdinalIgnoreCase);
+        return segments.All(x => x.Length > 0 && x != "." && x != "..") && !IsPrivateFolder(segments[0].TrimEnd('.'));
     }
+
+    private static bool IsPrivateFolder(string folder) => string.Equals(folder, TeacherThreadImageFormats.StorageFolder, StringComparison.OrdinalIgnoreCase) || string.Equals(folder, TrainingExportFiles.StorageFolder, StringComparison.OrdinalIgnoreCase);
 
     private static bool IsKeyCharacter(char character) => char.IsAsciiLetterOrDigit(character) || character is '.' or '_' or '/' or '-';
 }

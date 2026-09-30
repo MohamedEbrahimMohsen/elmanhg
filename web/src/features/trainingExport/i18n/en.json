@@ -1,0 +1,57 @@
+{
+  "page": {
+    "title": "Training data export (JSONL)",
+    "intro": "Every file strips personal data: the student id is hashed, names, phones and emails are never exported as fields, and phones, emails and links are removed from texts. Each file is deleted automatically when its retention period ends.",
+    "note": "The Ask a Teacher training record is text only (question text + context + final transcript + rating).",
+    "loading": "Loading export files"
+  },
+  "form": {
+    "source": "Source",
+    "subject": "Subject",
+    "allSubjects": "All subjects",
+    "from": "From",
+    "to": "To",
+    "submit": "Create export file",
+    "done": "The export file is being prepared.",
+    "errors": {
+      "source": "Choose a source.",
+      "date": "Enter a valid date.",
+      "dateRange": "The end date is before the start date.",
+      "rangeTooWide": "An export covers at most 366 days."
+    }
+  },
+  "source": {
+    "TeacherThreads": "Ask a Teacher",
+    "Avatar": "Assistant",
+    "Attempts": "Attempts",
+    "EssayGrades": "Essay grading"
+  },
+  "status": {
+    "Pending": "Preparing",
+    "Completed": "Ready",
+    "Failed": "Failed",
+    "Expired": "Expired"
+  },
+  "list": {
+    "title": "Export files",
+    "columns": {
+      "source": "Source",
+      "period": "Period",
+      "subject": "Subject",
+      "status": "Status",
+      "rows": "Rows",
+      "size": "Size",
+      "requestedAt": "Requested",
+      "action": "File"
+    },
+    "period": "{from} – {to}",
+    "sizeKb": "{size} KB",
+    "download": "Download",
+    "availableUntil": "Available until {date}",
+    "preparing": "Preparing…",
+    "expired": "Deleted",
+    "downloadFailed": "Could not download the export file.",
+    "empty": "No export files yet.",
+    "errorTitle": "Could not load the export files"
+  }
+}

@@ -410,4 +410,14 @@
   <data name="CONTENT_EMBEDDING_DIMENSIONS_INVALID" xml:space="preserve"><value>أبعاد التمثيل الرقمي للمحتوى غير متوافقة.</value></data>
   <data name="DASHBOARD_DATE_RANGE_INVALID" xml:space="preserve"><value>يجب أن يكون تاريخ النهاية في نفس يوم تاريخ البداية أو بعده.</value></data>
   <data name="DASHBOARD_DATE_RANGE_TOO_WIDE" xml:space="preserve"><value>الفترة الزمنية أطول من الحد المسموح.</value></data>
+  <data name="TRAINING_EXPORT_SOURCE_INVALID" xml:space="preserve"><value>مصدر التصدير غير معروف.</value></data>
+  <data name="TRAINING_EXPORT_DATE_RANGE_INVALID" xml:space="preserve"><value>يجب أن يكون تاريخ البداية قبل تاريخ النهاية.</value></data>
+  <data name="TRAINING_EXPORT_DATE_RANGE_TOO_WIDE" xml:space="preserve"><value>الفترة أطول من الحد المسموح للتصدير.</value></data>
+  <data name="TRAINING_EXPORT_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة غير صالح.</value></data>
+  <data name="TRAINING_EXPORT_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة غير صالح.</value></data>
+  <data name="TRAINING_EXPORT_NOT_FOUND" xml:space="preserve"><value>لم يتم العثور على ملف التصدير.</value></data>
+  <data name="TRAINING_EXPORT_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>تم تعديل ملف التصدير في نفس الوقت. حاول مرة أخرى.</value></data>
+  <data name="TRAINING_EXPORT_NOT_PENDING" xml:space="preserve"><value>ملف التصدير لم يعد قيد التجهيز.</value></data>
+  <data name="TRAINING_EXPORT_NOT_READY" xml:space="preserve"><value>ملف التصدير غير جاهز بعد.</value></data>
+  <data name="TRAINING_EXPORT_EXPIRED" xml:space="preserve"><value>انتهت صلاحية ملف التصدير وتم حذفه. اطلب تصديرا جديدا.</value></data>
 </root>

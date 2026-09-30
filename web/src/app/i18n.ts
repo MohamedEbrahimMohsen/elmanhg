@@ -19,6 +19,7 @@ import { questionsLocales } from '@/features/questions/locales';
 import { quizLocales } from '@/features/quiz/locales';
 import { sessionLocales } from '@/features/session';
 import { subscriptionLocales } from '@/features/subscription/locales';
+import { trainingExportLocales } from '@/features/trainingExport/locales';
 import { shellLocales } from '@/features/shell';
 import { numberLocale } from '@/shared/lib/format';
 import commonAr from '@/shared/i18n/ar.json';
@@ -54,6 +55,7 @@ const resources = {
     avatar: avatarLocales.ar,
     askTeacher: askTeacherLocales.ar,
     avatarConversations: avatarConversationsLocales.ar,
+    trainingExport: trainingExportLocales.ar,
   },
   en: {
     common: commonEn,
@@ -76,6 +78,7 @@ const resources = {
     avatar: avatarLocales.en,
     askTeacher: askTeacherLocales.en,
     avatarConversations: avatarConversationsLocales.en,
+    trainingExport: trainingExportLocales.en,
   },
 };
 
@@ -119,6 +122,7 @@ export function initI18n(lng: Language = defaultLanguage): void {
         'avatar',
         'askTeacher',
         'avatarConversations',
+        'trainingExport',
       ],
       defaultNS: 'common',
       resources,

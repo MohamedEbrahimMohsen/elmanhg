@@ -1,4 +1,5 @@
 using Elmanhg.Application.TeacherThreads.CreateTeacherThread;
+using Elmanhg.Application.TrainingExports.Shared;
 using Elmanhg.Infrastructure.Storage;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
@@ -23,7 +24,7 @@ public static class MediaStorageExtensions
         var files = new PhysicalFileProvider(root);
         app.UseStaticFiles(new StaticFileOptions
         {
-            FileProvider = new PublicMediaFileProvider(files, [TeacherThreadImageFormats.StorageFolder]),
+            FileProvider = new PublicMediaFileProvider(files, [TeacherThreadImageFormats.StorageFolder, TrainingExportFiles.StorageFolder]),
             RequestPath = options.PublicBaseUrl,
             OnPrepareResponse = context =>
             {

@@ -45,7 +45,7 @@ All state is saved in `localStorage` under the key `elmanhg.v1`. Click **إعا�
     - The product also has a payments page (log, needs-review queue, refunds); the prototype does not simulate it.
     - The product also has an assistant conversations page (list with search, and each conversation with the model, prompt version, tokens, cost and context of every reply); the prototype does not simulate it.
     - Audit log.
-    - JSONL training-data export, with student ids hashed.
+    - JSONL training-data export, with student ids hashed. The product requests an export per source with a date range and optional subject, prepares it in the background, lets the admin download it through the API with their session, and deletes the file after a retention period; the prototype downloads three files at once.
 
 ## Business rules implemented (PRD §17)
 

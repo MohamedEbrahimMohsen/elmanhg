@@ -87,14 +87,17 @@ An array with one element per changed audited entity. Property keys are camelCas
 | RefundPayment | `Payment.Refund` | Payment | command (the diff shows the status, the refund fields, the review resolution, and the Subscription end/status) |
 | ResolvePaymentReview | `Payment.ResolveReview` | Payment | command |
 | RebuildContentIndex | `ContentIndex.Rebuild` | ContentIndex | none (bulk delete of derived index state; no diff) |
+| RequestTrainingExport | `TrainingExport.Request` | TrainingExport | result (the diff shows the new Pending export: source, range, subject) |
+| DownloadTrainingExport | `TrainingExport.Download` | TrainingExport | command (a read of training data, audited on purpose: who downloaded which export; no diff) |
+| ExpireTrainingExport | `TrainingExport.Expire` | TrainingExport | command (system actor: the retention sweep; the diff shows the status and the cleared `fileKey`; for a `Failed` export whose last attempt left a file, only the cleared `fileKey`) |
 
-Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`, `ExamBlueprint`, `Subscription`, `Payment`.
+Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`, `ExamBlueprint`, `Subscription`, `Payment`, `TrainingExport`.
 
 `QuestionRevision` and `QuestionDecision` rows are an append-only history and are not diffed.
 
 ## Not audited (deliberate)
 
-- **Reads** (queries), including the audit log itself.
+- **Reads** (queries), including the audit log itself. The one exception is the training-export file download (`TrainingExport.Download`), because it hands training data out of the system. The export worker's own commands (`RunTrainingExport`, `FailTrainingExport`) are not audited.
 - **Auth**: login, register, OTP, logout. A separate security-log concern.
 - **Noise**: access-token refresh.
 - **Evidence uploads** (Ask a Teacher images and voice): audit the decision, not the file. Lesson content images are the exception: they change content (PRD §17 rule 13), so `UploadLessonImage` is audited as `Lesson.UploadImage` with no diff.

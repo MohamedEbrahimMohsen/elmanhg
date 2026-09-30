@@ -35,7 +35,8 @@
     { "key": "voiceThreadId", "value": "" },
     { "key": "voiceDraftId", "value": "" },
     { "key": "avatarConversationId", "value": "" },
-    { "key": "adminAvatarConversationId", "value": "" }
+    { "key": "adminAvatarConversationId", "value": "" },
+    { "key": "trainingExportId", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -4087,6 +4088,99 @@
               "raw": "{{baseUrl}}/api/audit-logs/resource-types",
               "host": ["{{baseUrl}}"],
               "path": ["api", "audit-logs", "resource-types"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "TrainingExports",
+      "description": "Admin only (TrainingData.Export). Sign in as an admin first so accessToken is set. Request an export, wait for the training-export worker (every 15 s) to complete it, then download the file with the same admin token. Request and download are audited. Files are deleted after TrainingExports:RetentionDays (7).",
+      "item": [
+        {
+          "name": "Request export",
+          "description": "source is Attempts, Avatar, TeacherThreads or EssayGrades; from is inclusive, to is exclusive (ISO 8601 with offset), at most 366 days; subjectId is optional (null for all subjects).",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"export is pending\", function () { pm.expect(pm.response.json().status).to.eql(\"Pending\"); });",
+                  "pm.collectionVariables.set(\"trainingExportId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/training-exports",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "training-exports"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source\": \"Attempts\",\n  \"from\": \"2026-01-01T00:00:00Z\",\n  \"to\": \"2026-12-31T00:00:00Z\",\n  \"subjectId\": null\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List exports",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns a page\", function () { pm.expect(pm.response.json().items).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/training-exports?pageNumber=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "training-exports"],
+              "query": [
+                { "key": "pageNumber", "value": "1" },
+                { "key": "pageSize", "value": "20" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download export file",
+          "description": "Run after List exports shows the export as Completed. Returns the JSONL file as an application/x-ndjson attachment; 409 TRAINING_EXPORT_NOT_READY while pending, 409 TRAINING_EXPORT_EXPIRED after retention.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"is ndjson\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/x-ndjson\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/training-exports/{{trainingExportId}}/file",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "training-exports", "{{trainingExportId}}", "file"]
             }
           },
           "response": []

@@ -40,7 +40,7 @@ Indexes: unique `(SessionId, QuestionId)` (`IX_EssayGrades_SessionId_QuestionId`
 - `GradeEssayCommand` calls the AI and saves the result on the grade (one save). It does nothing for a grade that is not due, so a `Graded` grade is never sent to the AI again.
 - `ApplyEssayGradeCommand` runs for a `Graded` grade whose `AppliedAt` is null (`EssayAttemptRecorder`), in one save: it writes the session's `Attempt` (`GradedBy = AI`, `CreatedAt = RequestedAt`, `TimeTakenMilliseconds` from the grade, no feedback JSON), updates mastery (not in test mode), recomputes `ScorePercent` when the session is already finished, and stamps `AppliedAt`. The attempt raises `AttemptsRecorded`, so its training row ([training-data.md](training-data.md)) is written in the same save; an attempt that already exists is not written again, so a retry writes no second attempt or training row. A missing (or deleted) session, or a question that is not an item of the session, writes no attempt; the grade is still applied.
 - Writing the attempt stamps the session row, so its `xmin` token serialises it against a concurrent answer or finish. A lost race fails only the apply save: the AI result is already stored, and the next sweep applies it again without calling the AI. `InReview` grades are not applied; #128 writes their attempt.
-- On success, `Complete` stores the result and sets `Graded`, or `InReview` / `LowConfidence` when the confidence is below `ReviewConfidenceThreshold`. The score is stored either way.
+- On success, `Complete` stores the result and sets `Graded`, or `InReview` / `LowConfidence` when the confidence is below `ReviewConfidenceThreshold`. The score is stored either way. `Complete` raises `EssayGradeCompleted`, which writes an `EssayGradeTrainingRecords` row in the same save as the grade (not for test-mode sessions; [training-data.md](training-data.md)). `FailAttempt` raises nothing.
 - On a failure the worker logs a warning and sends `FailEssayGradeCommand` with the exception's error code (or its type name). `FailAttempt` schedules the next try at `RetryBaseDelaySeconds × 2^(attempt − 1)` (30, 60 and 120 s by default). After `MaxAttempts` (4) the grade becomes `InReview` / `GradingFailed`.
 - Only `Pending` grades are graded or failed (`ESSAY_GRADE_NOT_PENDING` otherwise). `Graded` is final; `InReview` waits for #128.
 - Kill switch: `EssayGrading:SweepEnabled=false` stops the worker (the test host sets it).
@@ -120,4 +120,4 @@ With `AiService:Provider=Fake` (the default), `FakeAiEssayGradingClient` awards 
 
 ## What #128 adds
 
-The teacher review queue for `InReview` grades (scoped by `SubjectId`), and accepting or overriding a grade, which makes it final.
+The teacher review queue for `InReview` grades (scoped by `SubjectId`), and accepting or overriding a grade, which makes it final. The override also adds its training row (the AI grade row is written at `Complete`).
