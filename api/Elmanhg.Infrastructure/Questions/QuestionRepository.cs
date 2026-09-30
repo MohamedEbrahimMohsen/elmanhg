@@ -98,4 +98,15 @@ public partial class QuestionRepository(AppDbContext context) : Repository<Quest
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
     }
+
+    public async Task<Dictionary<Guid, QuestionPlacement>> GetPlacementsAsync(IReadOnlyCollection<Guid> questionIds, CancellationToken cancellationToken)
+    {
+        return await _dbSet
+            .IgnoreQueryFilters()
+            .Where(x => questionIds.Contains(x.Id))
+            .Join(_context.Set<Lesson>().IgnoreQueryFilters(), question => question.LessonId, lesson => lesson.Id, (question, lesson) => new QuestionPlacement(question.Id, question.SubjectId, lesson.UnitId, question.LessonId))
+            .AsNoTracking()
+            .ToDictionaryAsync(x => x.QuestionId, cancellationToken)
+            .ConfigureAwait(false);
+    }
 }

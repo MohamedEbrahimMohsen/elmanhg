@@ -108,17 +108,7 @@ public class CoreDbContext<TUser, TRole, TKey>(DbContextOptions options, IMediat
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
-        var events = ChangeTracker.Entries<Entity>()
-            .Select(e => e.Entity);
-
-        var domainEvents = events?.Where(e => e.GetDomainEvents().Any())
-            .SelectMany(e => e.GetDomainEvents()) ?? [];
-
-        foreach (var domainEvent in domainEvents ?? [])
-            await mediator.Publish(domainEvent);
-
-        foreach (var e in events ?? [])
-            e.ClearDomainEvents();
+        await DomainEventDispatcher.PublishAsync(mediator, () => ChangeTracker.Entries<Entity>().Select(e => e.Entity), cancellationToken).ConfigureAwait(false);
 
         var auditedChanges = AuditChangeReader.Read(ChangeTracker);
         var result = await base.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

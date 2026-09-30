@@ -1,0 +1,6 @@
+namespace Elmanhg.Application.Shared.TrainingData;
+
+public interface IStudentIdHasher
+{
+    string Hash(Guid studentId);
+}

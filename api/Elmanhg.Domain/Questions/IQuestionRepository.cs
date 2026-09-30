@@ -15,6 +15,7 @@ public interface IQuestionRepository : IRepository<Question>
     Task<List<Question>> GetServableInLessonAsync(Guid lessonId, CancellationToken cancellationToken);
     Task<List<ExamCandidate>> GetServableExamCandidatesAsync(IReadOnlyCollection<Guid> unitIds, CancellationToken cancellationToken);
     Task<List<QuestionRevision>> GetRevisionsAsync(IReadOnlyCollection<Guid> questionIds, CancellationToken cancellationToken);
+    Task<Dictionary<Guid, QuestionPlacement>> GetPlacementsAsync(IReadOnlyCollection<Guid> questionIds, CancellationToken cancellationToken);
     Task<List<QuestionInventoryCount>> CountInventoryAsync(Guid? subjectId, CancellationToken cancellationToken);
     Task<int> CountServableInSubjectAsync(Guid subjectId, CancellationToken cancellationToken);
     Task<QuestionDecisionStats> GetDecisionStatsAsync(DateTimeOffset start, DateTimeOffset end, Guid? subjectId, Guid? teacherId, CancellationToken cancellationToken);

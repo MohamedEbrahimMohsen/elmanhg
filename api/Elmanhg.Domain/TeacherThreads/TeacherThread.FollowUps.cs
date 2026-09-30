@@ -47,6 +47,7 @@ public partial class TeacherThread
         }
 
         var at = ToMicroseconds(ratedAt);
+        var wasClosed = Status == TeacherThreadStatus.Closed;
         Rating = rating;
         if (Status == TeacherThreadStatus.Answered)
         {
@@ -56,5 +57,6 @@ public partial class TeacherThread
 
         UpdatedBy = StudentId;
         UpdationDate = at;
+        RaiseDomainEvent(wasClosed ? new TeacherThreadRatedAfterClose(this, at) : new TeacherThreadClosed(this));
     }
 }

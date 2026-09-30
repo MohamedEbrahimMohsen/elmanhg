@@ -36,6 +36,11 @@ public partial class Session
         ScorePercent = CalculateScorePercent();
         SubmittedAt = at;
         Touch(at);
+        if (attempts.Count > 0)
+        {
+            RaiseDomainEvent(new AttemptsRecorded(this, attempts));
+        }
+
         return attempts;
     }
 }

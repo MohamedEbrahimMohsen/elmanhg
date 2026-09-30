@@ -128,7 +128,7 @@ Migration `AddSessionsAndAttempts` creates the function `reject_append_only_muta
 - `attempts_append_only`: `BEFORE UPDATE OR DELETE ... FOR EACH ROW`
 - `attempts_no_truncate`: `BEFORE TRUNCATE ... FOR EACH STATEMENT`
 
-This is the audit-log pattern from `docs/audit-log.md`. `Attempt` has no mutating method and is only created through `Session.RecordAttempt`. Every foreign key to `Users`, `Questions` and `Sessions` is restrict, and users are only soft-deleted, so attempts survive. Anonymisation happens at export time (E12), not by rewriting attempts.
+This is the audit-log pattern from `docs/audit-log.md`. `Attempt` has no mutating method and is only created through `Session.RecordAttempt`. Every foreign key to `Users`, `Questions` and `Sessions` is restrict, and users are only soft-deleted, so attempts survive. Each new attempt is also copied, under a hashed student id, to the append-only `AttemptTrainingRecords` ([training-data.md](training-data.md)); attempts themselves are never rewritten.
 
 ## Indexes
 
@@ -149,7 +149,7 @@ This is the audit-log pattern from `docs/audit-log.md`. `Attempt` has no mutatin
 
 ## Test mode
 
-When the caller is an Admin, the session gets `IsTestMode = true`. It otherwise behaves the same and still writes attempts. Mastery (#77) and training-data export (E12) exclude test-mode sessions. Test-mode attempts still count toward that admin's own question selection.
+When the caller is an Admin, the session gets `IsTestMode = true`. It otherwise behaves the same and still writes attempts. Mastery (#77) and training records (#109) exclude test-mode sessions. Test-mode attempts still count toward that admin's own question selection.
 
 Session commands are not audited (`docs/audit-log.md`, "Not audited"): the attempts are their own log.
 

@@ -70,6 +70,11 @@ public partial class TeacherThread
 
         UpdatedBy = teacherId;
         UpdationDate = at;
+        if (isFinalReply)
+        {
+            RaiseDomainEvent(new TeacherThreadClosed(this));
+        }
+
         return message;
     }
 

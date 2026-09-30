@@ -66,6 +66,7 @@ Generating secrets:
 | `CoreJwt__Key` | `openssl rand -base64 48` | |
 | `CoreOtp__Secret` | `openssl rand -hex 32` | |
 | `AiService__ServiceToken` = `ELMANHG_AI_SERVICE_TOKEN` | `openssl rand -hex 32` | the same value in both files |
+| `TrainingData__StudentIdHashKey` | `openssl rand -hex 32` | set once; never rotate |
 
 Rotation:
 
@@ -73,6 +74,7 @@ Rotation:
 |---|---|---|
 | JWT key | change `CoreJwt__Key` in `api.env`, then `docker compose -f docker-compose.prod.yml up -d api` | every access token becomes invalid, so everyone signs in again |
 | AI service token | change both `api.env` and `ai.env`, then `docker compose -f docker-compose.prod.yml up -d` | none if both change together |
+| Training hash key | never rotate | a new key gives every student a new pseudonym and splits their training history |
 | Database password | first `ALTER USER elmanhg PASSWORD '<new>';` through `docker compose -f docker-compose.prod.yml exec postgres psql -U elmanhg`, then change `POSTGRES_PASSWORD` in `.env` and `up -d` | `POSTGRES_PASSWORD` only seeds a new data volume, so the database must change first |
 
 A story that adds an options section holding a secret or a per-host value must add it to `deploy/api.env.example` and to this page. Otherwise the baked example default applies.
@@ -109,6 +111,7 @@ A story that adds an options section holding a secret or a per-host value must a
 | `CoreJwt__Key` | yes | empty | secret |
 | `CoreJwt__ExpirationHours` / `CoreJwt__RefreshTokenExpirationDays` | no | `1` / `7` | |
 | `CoreOtp__Secret` | yes | empty | secret; HMAC key of OTP codes |
+| `TrainingData__StudentIdHashKey` | yes (every environment except Development and Testing) | empty | secret; HMAC key of student ids in training records; the API refuses to start without it outside Development and Testing |
 | `AdminSeed__Email` / `AdminSeed__Password` / `AdminSeed__DisplayName` | first start | empty | the admin is created on the first start when missing; an empty email skips the seed |
 | `CoreLogging__Trace__Cluster` | no | `Local` | log label, for example `production` |
 | `LoadTestSeed__Key` / `LoadTestSeed__StudentCount` / `LoadTestSeed__StudentPassword` | load-test stacks only | `loadtest` / `60` / empty | read only by `--SeedLoadTestAndExit=true`, which `deploy/load-test.sh` runs and which refuses Production ([docs/performance.md](performance.md) §5); never set them on a real host |

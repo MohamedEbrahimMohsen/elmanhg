@@ -52,12 +52,15 @@ public class AvatarConversation : AuditEntity
     {
         var asked = ToMicroseconds(askedAt);
         var replied = ToMicroseconds(repliedAt);
-        Messages.Add(AvatarMessage.FromStudent(Id, MessageCount, question.Trim(), asked));
-        Messages.Add(AvatarMessage.FromAssistant(Id, MessageCount + 1, reply, replied));
+        var studentMessage = AvatarMessage.FromStudent(Id, MessageCount, question.Trim(), asked);
+        var assistantMessage = AvatarMessage.FromAssistant(Id, MessageCount + 1, reply, replied);
+        Messages.Add(studentMessage);
+        Messages.Add(assistantMessage);
         MessageCount += 2;
         LastMessageAt = replied;
         UpdatedBy = StudentId;
         UpdationDate = replied;
+        RaiseDomainEvent(new AvatarExchangeRecorded(this, studentMessage, assistantMessage));
     }
 
     // PostgreSQL timestamptz keeps microseconds; truncating keeps the returned result equal to what is stored.

@@ -142,9 +142,9 @@ The AI service's prompt version is `ELMANHG_AI_CHAT_PROMPT_VERSION` (default `v2
 - **Cost** is the AI service's `costUsd` for the reply ([ai-service.md](ai-service.md)); the fake returns 0.
 - **Append-only.** Triggers reject `UPDATE`, `DELETE` and `TRUNCATE` on `AvatarMessages`, with the same `reject_append_only_mutation()` as the attempt log. `AvatarConversations` stays mutable for `LastMessageAt` and `MessageCount`.
 - **Concurrency.** Two messages sent at once in one conversation collide on the row version or on the position index. The second returns `409 AVATAR_CONVERSATION_MODIFIED_CONCURRENTLY`, and its usage row rolls back with it.
-- **Privacy.** Rows are keyed by the real student id (operational data; #109 derives hashed-id copies). The send command is not audited, so no message text reaches `AuditLogs`, and no log line carries message text. The admin view shows the student's display name only (no phone or email). Teachers have no access. A student can only continue their own conversation id; there is no student history view.
-- **Retention.** Kept indefinitely in v1: there is no purge job, and no endpoint deletes a conversation or a message. The retention period and the erasure path belong to #109's retention and privacy review.
-- **Consumers.** #109 (training records) and #110 (JSONL export) read messages by `CreatedAt` and use the subject, unit, lesson and question references.
+- **Privacy.** Rows are keyed by the real student id (operational data; each exchange is also copied to `AvatarTrainingRecords` under a hashed id, see [training-data.md](training-data.md)). The send command is not audited, so no message text reaches `AuditLogs`, and no log line carries message text. The admin view shows the student's display name only (no phone or email). Teachers have no access. A student can only continue their own conversation id; there is no student history view.
+- **Retention.** Kept indefinitely in v1: there is no purge job, and no endpoint deletes a conversation or a message. The retention period and the erasure path are open in the retention and privacy checklist of [training-data.md](training-data.md) (dev decision #215).
+- **Consumers.** #110 (JSONL export) reads `AvatarTrainingRecords` ([training-data.md](training-data.md)).
 
 ## Admin view
 
@@ -181,6 +181,6 @@ There is no streaming: each message gets one JSON reply, and the panel shows Â«Ø
 
 ## Not in this story
 
-- A student history view, and a retention purge (#109 review).
+- A student history view, and a retention purge (#215).
 - A per-student concurrency cap on avatar calls (#115).
 - Ask a Teacher (E9).
