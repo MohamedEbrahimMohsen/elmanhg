@@ -97,6 +97,7 @@ Arabic body text never below 15 px. Fonts: Google Fonts `Readex Pro:wght@500;600
 | EmptyState | no-data, no-results | — | icon, one line, primary CTA; no-results offers "مسح الفلاتر" |
 | Skeleton | — | loading | soft blocks with radius of the element they replace |
 | MathInput | step, final | default, focus, disabled, keypad open (inputmode none) | textarea like Input but type.mono family at type.body size (16 px, avoids iOS zoom), dir="ltr"; preview box surface + border, radius.sm, min height 44; keypad 6×6 keys (surface, border.strong, radius.sm, ≥44px) on soft panel radius.md, dir="ltr", under the active field; step row surface + border radius.md with move up/down (ghost) and remove (danger) icon buttons ≥44px |
+| DiagramCanvas | edit, student, key | default, drawing | image full width with aspect ratio; zones: 2px non-scaling stroke — edit accent + accent/15 fill, student text.muted dashed + surface/60, key success + success/20; number badge surface circle top-left; draft dashed accent; never mirrored in RTL; item chips pill, surface, border.strong |
 
 ## Rules
 1. Blue = action or link. Green = correct. Red = wrong. Amber = partial / pending. Nothing else is coloured.

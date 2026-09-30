@@ -62,6 +62,8 @@ export function describeCorrectAnswer(question: StudentQuestion, correctAnswer: 
       return describeShort(question, correctAnswer);
     case 'Essay':
       return null;
+    case 'DragDrop':
+      return null;
   }
 }
 
@@ -82,6 +84,7 @@ export function choiceReview(question: StudentQuestion, correctAnswer: unknown):
     case 'Fill':
     case 'Short':
     case 'Essay':
+    case 'DragDrop':
       return undefined;
   }
 }

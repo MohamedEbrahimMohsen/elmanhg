@@ -64,4 +64,8 @@ describe('studentQuestion', () => {
     expect(toStudentQuestion({ ...values, maxWords: '' }).maxWords).toBeNull();
     expect(toAnswerPayload(question({ type: 'Essay' }), { ...emptyAnswer(), text: 'x' })).toEqual({ text: 'x' });
   });
+
+  it('sends no answer payload for drag-and-drop', () => {
+    expect(toAnswerPayload(question({ type: 'DragDrop' }), { ...emptyAnswer(), text: 'x' })).toEqual({});
+  });
 });

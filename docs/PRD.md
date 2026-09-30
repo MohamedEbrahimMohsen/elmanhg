@@ -120,7 +120,7 @@ Transitions: **Publish** Draft or Archived → Published (sets `published_at`). 
 | Field | Values |
 |---|---|
 | Validation status | Pending · Approved · Rejected |
-| Servable (derived, not stored) | `Approved AND lesson.state == Published AND question.not_retired` |
+| Servable (derived, not stored) | `Approved AND lesson.state == Published AND question.not_retired` AND type != DragDrop (until the student canvas ships, E16.S2) |
 
 Rules:
 - A question is created as Pending. Only a Teacher assigned to the question's subject can Approve or Reject.
@@ -161,7 +161,7 @@ Every answer produces a **score in [0, max_score]** and a **normalised score in 
 | Short answer (numeric/text) | v1 | String or number | Numeric: tolerance ±x or %; Text: accepted list with normalisation | No |
 | Essay | v2 | Plain text (Arabic, multi-paragraph) | LLM grader with rubric (criteria + weights) and model answer. Returns score per criterion + justification. | Yes |
 | Math with steps | v2 | Ordered list of steps (LaTeX/text) + final answer | Final answer: CAS equivalence check (SymPy). Steps: LLM against model solution, per-step credit. | Yes |
-| Science drag-and-drop | v2 | Map of item → drop zone | Deterministic: each item's zone vs correct zone; optional order constraints | Per item |
+| Science drag-and-drop | v2 | Map of item → drop zone (per-zone order when the zone is ordered) | Deterministic: each item's zone vs correct zone; optional order constraints | Per item |
 
 Per-type `body` and `grading_spec` JSON shapes: `docs/question-schemas.md`.
 Answer shapes and the exact grading rules (normalisation, numeric parsing, rounding) are in the same document.
@@ -326,7 +326,7 @@ An in-app assistant for students, scoped to the platform's content.
 - CRUD for Subjects, Units, Lessons with ordering (drag to reorder).
 - Lesson editor: three rich-text areas (Explanation, Objectives as list, Summary), image upload, LaTeX support, video embed URL.
 - Question editor per type, with live preview of the student view and a "test answer" box that runs the real grader.
-- Bulk import of questions via spreadsheet template (v1: deterministic types only). Imported questions enter as Pending.
+- Bulk import of questions via spreadsheet template (v1: deterministic types only). Imported questions enter as Pending; drag-and-drop diagrams are authored in the editor only.
 - Question list with validation status, version, teacher, rejection reasons; one-click "edit and resubmit".
 - Publish / unpublish / archive lessons.
 
@@ -538,7 +538,7 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 
 ## 17. Key business rules (single list, for implementation reference)
 
-1. Servable = Approved ∧ Lesson Published ∧ not retired. Derived, never stored.
+1. Servable = Approved ∧ Lesson Published ∧ not retired. Derived, never stored; drag-and-drop questions are not servable until the student canvas ships.
 2. Content edit on an Approved question → Pending, version + 1. Historical attempts keep the old version.
 3. Only a Teacher assigned to the subject may validate. Admins cannot.
 4. Rejection requires a reason.

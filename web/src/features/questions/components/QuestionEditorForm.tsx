@@ -52,7 +52,10 @@ export function QuestionEditorForm({ lesson, question }: QuestionEditorFormProps
           label={t('editor.fields.type')}
           options={questionTypes.map((value) => ({
             value,
-            label: value === 'Essay' ? t('editor.fields.typeV2', { type: t('types.Essay') }) : t(`types.${value}`),
+            label:
+              value === 'Essay' || value === 'DragDrop'
+                ? t('editor.fields.typeV2', { type: t(`types.${value}`) })
+                : t(`types.${value}`),
           }))}
           disabled={locked}
           description={locked ? t('editor.fields.typeLocked') : undefined}
@@ -63,7 +66,7 @@ export function QuestionEditorForm({ lesson, question }: QuestionEditorFormProps
           description={type === 'Fill' ? t('editor.fields.stemFillHint') : undefined}
           onUploadImage={upload}
         />
-        <TypeSpecificFields />
+        <TypeSpecificFields lessonId={lesson.id} />
         <QuestionMetadataFields lesson={lesson} />
         <QuestionRichTextField name="explanation" label={t('editor.fields.explanation')} onUploadImage={upload} />
         <SubmitButton>{submitLabel}</SubmitButton>

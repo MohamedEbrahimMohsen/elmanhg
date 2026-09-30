@@ -232,6 +232,8 @@ export * from './unitProgressResult';
 export * from './unitResult';
 export * from './updateLessonRequest';
 export * from './updateQuestionRequest';
+export * from './uploadDiagramImageBody';
+export * from './uploadDiagramImageResult';
 export * from './uploadLessonImageBody';
 export * from './uploadLessonImageResult';
 export * from './usageResult';

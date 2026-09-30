@@ -126,3 +126,16 @@ export const UploadLessonImageResponse = zod.object({
   "url": zod.string()
 })
 
+export const UploadDiagramImageParams = zod.object({
+  "lessonId": zod.uuid()
+})
+
+export const UploadDiagramImageBody = zod.object({
+  "file": zod.instanceof(Blob).optional()
+})
+
+export const UploadDiagramImageResponse = zod.object({
+  "key": zod.string(),
+  "url": zod.string()
+})
+

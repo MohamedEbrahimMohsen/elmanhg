@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { questionDifficulties, questionMaxScoreMax, questionOptionsMin, questionTypes } from '../api/questionOptions';
 import { splitLines } from '../api/questionValues';
 import { countOccurrences, hasRichTextContent } from '../api/richTextContent';
+import { addDragDropIssues } from './dragDropRules';
 import { addEssayIssues } from './essayRules';
 
 const errorKey = (key: string) => `questions:editor.errors.${key}`;
@@ -49,6 +50,26 @@ export const questionEditorSchema = z
       }),
     ),
     modelAnswers: z.array(z.object({ text: z.string() })),
+    diagramImage: z.object({
+      key: z.string(),
+      url: z.string(),
+      width: z.number(),
+      height: z.number(),
+      alt: z.string(),
+    }),
+    diagramZones: z.array(
+      z.object({
+        id: z.string(),
+        x: z.string(),
+        y: z.string(),
+        width: z.string(),
+        height: z.string(),
+        capacity: z.string(),
+        ordered: z.boolean(),
+        itemIds: z.array(z.string()),
+      }),
+    ),
+    diagramItems: z.array(z.object({ id: z.string(), text: z.string() })),
   })
   .superRefine((values, context) => {
     const issue = (path: (string | number)[], message: string) => {
@@ -107,6 +128,9 @@ export const questionEditorSchema = z
     }
     if (values.type === 'Essay') {
       addEssayIssues(values, issue);
+    }
+    if (values.type === 'DragDrop') {
+      addDragDropIssues(values, issue);
     }
   });
 

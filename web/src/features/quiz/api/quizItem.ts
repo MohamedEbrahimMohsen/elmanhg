@@ -55,6 +55,8 @@ export function fromAnswerPayload(question: StudentQuestion, payload: unknown): 
       return { ...answer, text: text ?? '' };
     case 'Essay':
       return { ...answer, text: text ?? '' };
+    case 'DragDrop':
+      return answer;
   }
 }
 
@@ -71,6 +73,8 @@ export function isAnswerEmpty(question: StudentQuestion, answer: QuestionAnswer)
       return answer.text.trim() === '';
     case 'Essay':
       return answer.text.trim() === '';
+    case 'DragDrop':
+      return true;
   }
 }
 

@@ -17,6 +17,8 @@
     { "key": "lessonId", "value": "" },
     { "key": "questionId", "value": "" },
     { "key": "essayQuestionId", "value": "" },
+    { "key": "diagramImageKey", "value": "" },
+    { "key": "dragDropQuestionId", "value": "" },
     { "key": "importBatchId", "value": "" },
     { "key": "reviewSessionId", "value": "" },
     { "key": "rejectQuestionId", "value": "" },
@@ -1182,6 +1184,64 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"lessonId\": \"{{lessonId}}\",\n  \"type\": \"Essay\",\n  \"stem\": \"<p>Explain inertia.</p>\",\n  \"body\": { \"maxWords\": 200 },\n  \"gradingSpec\": {\n    \"criteria\": [\n      {\n        \"id\": \"c1\",\n        \"title\": \"  Definition \",\n        \"description\": \"  \",\n        \"points\": 2,\n        \"levels\": [\n          { \"points\": 2, \"description\": \"Complete\" },\n          { \"points\": 0, \"description\": \"Missing\" },\n          { \"points\": 1, \"description\": \" Partial \" }\n        ]\n      }\n    ],\n    \"modelAnswers\": [\"<p>Inertia is resistance to change in motion.</p>\"]\n  },\n  \"explanation\": \"<p>Newton 1.</p>\",\n  \"difficulty\": \"Medium\",\n  \"tags\": [],\n  \"maxScore\": 5,\n  \"answer\": { \"text\": \"القصور الذاتي هو ممانعة الجسم لتغيير حالته الحركية.\" }\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload diagram image",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"returns a diagram storage key\", function () { pm.expect(json.key).to.match(/^question-diagrams[/]/); });",
+                  "pm.collectionVariables.set(\"diagramImageKey\", json.key);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/{{lessonId}}/diagram-images",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons", "{{lessonId}}", "diagram-images"]
+            },
+            "body": { "mode": "formdata", "formdata": [{ "key": "file", "type": "file", "src": "" }] }
+          },
+          "response": []
+        },
+        {
+          "name": "Create drag-and-drop question",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"dragDropQuestionId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/questions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "questions"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lessonId\": \"{{lessonId}}\",\n  \"type\": \"DragDrop\",\n  \"stem\": \"<p>Label the plant cell.</p>\",\n  \"body\": {\n    \"image\": { \"key\": \"{{diagramImageKey}}\", \"width\": 800, \"height\": 600, \"alt\": \"Plant cell\" },\n    \"zones\": [\n      { \"id\": \"z1\", \"x\": 10, \"y\": 10, \"width\": 20, \"height\": 15, \"capacity\": 2 },\n      { \"id\": \"z2\", \"x\": 50, \"y\": 40, \"width\": 30, \"height\": 20.5, \"capacity\": 2 }\n    ],\n    \"items\": [\n      { \"id\": \"i1\", \"text\": \"Nucleus\" },\n      { \"id\": \"i2\", \"text\": \"Vacuole\" },\n      { \"id\": \"i3\", \"text\": \"Wall\" },\n      { \"id\": \"i4\", \"text\": \"Membrane\" },\n      { \"id\": \"i5\", \"text\": \"Engine\" }\n    ]\n  },\n  \"gradingSpec\": {\n    \"zones\": [\n      { \"zoneId\": \"z1\", \"itemIds\": [\"i1\", \"i2\"], \"ordered\": false },\n      { \"zoneId\": \"z2\", \"itemIds\": [\"i4\", \"i3\"], \"ordered\": true }\n    ]\n  },\n  \"explanation\": \"<p>Parts of a cell.</p>\",\n  \"difficulty\": \"Medium\",\n  \"tags\": [],\n  \"maxScore\": 4\n}",
               "options": { "raw": { "language": "json" } }
             }
           },

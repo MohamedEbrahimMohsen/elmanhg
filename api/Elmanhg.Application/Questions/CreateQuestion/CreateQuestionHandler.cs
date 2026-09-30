@@ -31,6 +31,7 @@ public sealed class CreateQuestionHandler(ILessonRepository lessonRepository, IC
             throw new NotFoundCoreException(ErrorCodes.UnitNotFound);
         }
 
+        QuestionBodyMedia.EnsureLessonMedia(request.Question, lesson.Id);
         var content = QuestionContentFactory.CreateContent(request.Question, richTextSanitizer);
         var metadata = QuestionContentFactory.CreateMetadata(request.Question);
         var question = Question.Create(lesson, unit, request.Question.Type.GetValueOrDefault(), content, metadata, currentUserService.UserId.Value);

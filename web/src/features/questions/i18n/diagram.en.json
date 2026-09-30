@@ -1,0 +1,64 @@
+{
+  "editor": {
+    "errors": {
+      "diagramImage": "Upload the diagram image.",
+      "zonesCount": "Draw at least one drop zone.",
+      "zonePosition": "Enter a number from 0 to 100 with at most two decimals.",
+      "zoneSize": "Enter at least 2% and keep the zone inside the image.",
+      "zoneCapacity": "Enter a whole number from 1 to 10.",
+      "zoneOverCapacity": "More correct items than this zone holds.",
+      "zoneOrder": "An ordered zone needs at least two correct items.",
+      "zonesOverlap": "Drop zones must not overlap.",
+      "keyEmpty": "Place at least one item in a zone.",
+      "itemsCount": "Add at least one item.",
+      "itemText": "Keep the item to 100 characters."
+    },
+    "dragDrop": {
+      "imageLegend": "Diagram",
+      "imageFile": "Diagram image (PNG, JPG or WEBP)",
+      "imageUploading": "Uploading the image…",
+      "imageCurrent": "Current image: {width} × {height} px",
+      "imageUnreadable": "This image could not be read. Try a PNG, JPG or WEBP file.",
+      "imageAlt": "Image description (for screen readers)",
+      "canvasLabel": "Diagram canvas",
+      "canvasHint": "Drag on the image to draw a drop zone, or use «Add zone» and type its position.",
+      "noImage": "Upload the diagram image to start drawing zones.",
+      "zonesLegend": "Drop zones",
+      "zone": "Zone {number}",
+      "zoneX": "Zone {number}: from left (%)",
+      "zoneY": "Zone {number}: from top (%)",
+      "zoneWidth": "Zone {number}: width (%)",
+      "zoneHeight": "Zone {number}: height (%)",
+      "zoneCapacity": "Zone {number}: items it holds",
+      "zoneOrdered": "Zone {number}: order matters",
+      "zoneItems": "Correct items in zone {number}",
+      "zoneEmpty": "No item belongs here; the zone stays empty.",
+      "moveUp": "Move {item} up",
+      "moveDown": "Move {item} down",
+      "addZone": "Add zone",
+      "removeZone": "Remove zone {number}",
+      "itemsLegend": "Draggable items",
+      "itemsHint": "An item with no correct zone is a distractor: the student should leave it unplaced.",
+      "item": "Item {number}",
+      "itemZone": "Correct zone for item {number}",
+      "noZone": "None (distractor)",
+      "addItem": "Add item",
+      "removeItem": "Remove item {number}"
+    }
+  },
+  "preview": {
+    "showKey": "Show correct placements",
+    "dragDropGradingHint": "«Try the answer» is not available for drag-and-drop questions yet."
+  },
+  "view": {
+    "diagramMissing": "The diagram image has not been uploaded yet.",
+    "diagramBank": "Items to place",
+    "diagramKeyTitle": "Correct placements",
+    "diagramKeyZone": "Zone {number}: {items}",
+    "diagramKeyOrdered": "Zone {number}, in order: {items}",
+    "diagramKeyEmpty": "Zone {number}: stays empty",
+    "diagramDistractors": "Distractors (stay unplaced): {items}",
+    "listSeparator": ", ",
+    "orderSeparator": " → "
+  }
+}

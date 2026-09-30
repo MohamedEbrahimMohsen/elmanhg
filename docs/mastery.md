@@ -48,7 +48,7 @@ The pair (`StudentId`, `QuestionId`) is unique (`IX_QuestionMasteries_StudentId_
 
 ## Aggregates
 
-- Every aggregate counts **servable** questions only (`ServableQuestionSpecification`: Approved, lesson Published, not retired), joined at read time. Mastered and seen are intersected with servable, so remaining is never negative.
+- Every aggregate counts **servable** questions only (`ServableQuestionSpecification`: Approved, lesson Published, not retired, not drag-and-drop (until #126)), joined at read time. Mastered and seen are intersected with servable, so remaining is never negative.
 - Nothing that depends on servability is stored (PRD §17 rule 1).
 - Percentages are integers 0–100, rounded down: `floor(mastered × 100 / servable)`, and 0 when there are no servable questions. Rounding down never shows 100 % before everything is mastered.
 - Unit and subject percentages pool their lessons (Σ mastered / Σ servable), so a lesson with more questions weighs more.

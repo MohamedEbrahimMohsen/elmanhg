@@ -16,6 +16,7 @@ public sealed class QuestionBuilder
     private string? _rejectionReason;
     private bool _retired;
     private bool _essay;
+    private bool _dragDrop;
 
     public QuestionBuilder()
     {
@@ -64,9 +65,15 @@ public sealed class QuestionBuilder
         return this;
     }
 
+    public QuestionBuilder DragDrop()
+    {
+        _dragDrop = true;
+        return this;
+    }
+
     public Question Build()
     {
-        var question = Question.Create(Lesson, Unit, _essay ? QuestionType.Essay : QuestionType.Mcq, _essay ? EssayContent() : McqContent(), _metadata ?? new QuestionMetadata(QuestionDifficulty.Medium, null, []), Guid.NewGuid());
+        var question = Question.Create(Lesson, Unit, _dragDrop ? QuestionType.DragDrop : _essay ? QuestionType.Essay : QuestionType.Mcq, _dragDrop ? DragDropContent() : _essay ? EssayContent() : McqContent(), _metadata ?? new QuestionMetadata(QuestionDifficulty.Medium, null, []), Guid.NewGuid());
         if (_approved)
         {
             question.Approve(TeacherSubject.Create(Teacher, Subject, Guid.NewGuid()), question.Version);
@@ -106,6 +113,20 @@ public sealed class QuestionBuilder
     {
         return new QuestionFields(QuestionType.Essay, "<p>Explain inertia.</p>", Json("""{"maxWords":200}"""), Json(EssaySpecJson), "<p>Newton 1.</p>", QuestionDifficulty.Medium, null, [], 5);
     }
+
+    public const string DragDropImageLessonId = "0b5c1f4e-3d2a-4c8e-9f1a-2b3c4d5e6f70";
+
+    public const string DragDropImageKey = $"question-diagrams/{DragDropImageLessonId}/0123456789abcdef0123456789abcdef.png";
+
+    public const string DragDropBodyJson = $$"""{"image":{"key":"{{DragDropImageKey}}","width":800,"height":600,"alt":"Plant cell"},"zones":[{"id":"z1","x":10,"y":10,"width":20,"height":15,"capacity":2},{"id":"z2","x":50,"y":40,"width":30,"height":20.5,"capacity":2}],"items":[{"id":"i1","text":"Nucleus"},{"id":"i2","text":"Vacuole"},{"id":"i3","text":"Wall"},{"id":"i4","text":"Membrane"},{"id":"i5","text":"Engine"}]}""";
+
+    public const string DragDropSpecJson = """{"zones":[{"zoneId":"z1","itemIds":["i1","i2"],"ordered":false},{"zoneId":"z2","itemIds":["i4","i3"],"ordered":true}]}""";
+
+    public static QuestionContent DragDropContent() => new("<p>Label the plant cell.</p>", DragDropBodyJson, DragDropSpecJson, "<p>Parts of a cell.</p>", 4);
+
+    public static string ForLesson(string json, Guid lessonId) => json.Replace(DragDropImageLessonId, lessonId.ToString(), StringComparison.Ordinal);
+
+    public static QuestionFields DragDropFields() => new(QuestionType.DragDrop, "<p>Label the plant cell.</p>", Json(DragDropBodyJson), Json(DragDropSpecJson), "<p>Parts of a cell.</p>", QuestionDifficulty.Medium, null, [], 4);
 
     public static JsonElement Json(string json)
     {

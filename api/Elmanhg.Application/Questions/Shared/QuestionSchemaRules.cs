@@ -16,6 +16,7 @@ public static class QuestionSchemaRules
             QuestionType.Fill => FillQuestionRules.Validate(fields.Stem ?? string.Empty, fields.Body, fields.GradingSpec, options),
             QuestionType.Short => ShortQuestionRules.Validate(fields.Body, fields.GradingSpec, options),
             QuestionType.Essay => EssayQuestionRules.Validate(fields.Body, fields.GradingSpec, options),
+            QuestionType.DragDrop => DragDropQuestionRules.Validate(fields.Body, fields.GradingSpec, options),
             _ => [],
         };
     }
@@ -30,6 +31,7 @@ public static class QuestionSchemaRules
             QuestionType.Fill => FillQuestionRules.Normalize(fields.Body, fields.GradingSpec),
             QuestionType.Short => ShortQuestionRules.Normalize(fields.Body, fields.GradingSpec),
             QuestionType.Essay => EssayQuestionRules.Normalize(fields.Body, fields.GradingSpec, sanitizer),
+            QuestionType.DragDrop => DragDropQuestionRules.Normalize(fields.Body, fields.GradingSpec),
             _ => throw new InvalidOperationException("Unsupported question type."),
         };
     }

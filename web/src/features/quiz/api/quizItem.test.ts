@@ -115,4 +115,11 @@ describe('quizItem', () => {
     expect(fromAnswerPayload(essayQuestion, { text: 'a' }).text).toBe('a');
     expect(isAnswerEmpty(essayQuestion, { ...emptyAnswer(), text: '  ' })).toBe(true);
   });
+
+  it('treats a drag-and-drop answer as empty', () => {
+    const dragDrop = question('DragDrop');
+
+    expect(isAnswerEmpty(dragDrop, { ...emptyAnswer(), text: 'a', optionIds: ['x'] })).toBe(true);
+    expect(fromAnswerPayload(dragDrop, { text: 'a', optionIds: ['x'] })).toEqual(emptyAnswer());
+  });
 });

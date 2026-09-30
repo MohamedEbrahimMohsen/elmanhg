@@ -75,6 +75,14 @@ public sealed class GradeQuestionDraftValidatorTests
         codes.Should().Equal(ErrorCodes.QuestionEssayAnswerTooLong);
     }
 
+    [Fact]
+    public void Validate_DragDrop_ReturnsQuestionTypeNotGradableOnly()
+    {
+        var codes = Codes(new GradeQuestionDraftQuery(DragDropFields(), Json("{}")));
+
+        codes.Should().Contain(ErrorCodes.QuestionTypeNotGradable).And.NotContain(ErrorCodes.QuestionAnswerInvalid);
+    }
+
     private List<string> Codes(GradeQuestionDraftQuery query)
     {
         return _validator.Validate(query).Errors

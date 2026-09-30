@@ -1,12 +1,12 @@
 # Elmanhg — autopilot progress
 
-Last updated: laptop session, after story #105 merged (main at `5856bb3`).
-**Next story: #106 [E11.S3] Student and teacher administration**, the first row of "Remaining stories".
+Last updated: laptop session, after story #106 merged (main at `28528a6`).
+**Next story: #107 [E11.S4] Teacher personal stats card**, the first row of "Remaining stories".
 The laptop run did #54–#64; the cloud session did #65–#76 (see "Running in a cloud session" and "Hand-off" below).
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (49 of 60)
+## Finished stories (53 of 60)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -59,23 +59,23 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 47 | #118 [E14.S2] LLM essay grader (v2) | #227 | 2 | skipped (too many files); #117 CodeRabbit items folded in | #228 |
 | 48 | #109 [E12.S1] Append-only training records | #225 | 2 | rate-limited (treated as none) | #229 |
 | 49 | #105 [E11.S2] Dashboard UI | #230 | 2 | 2 comments, fixed (Cairo day, triage wording) | #231 |
+| 50 | #119 [E14.S3] Student essay input (v2) | #232 | 2 | skipped (too many files) | #233 |
+| 51 | #110 [E12.S2] JSONL export | #234 | 2 | skipped (too many files) | #235 |
+| 52 | #122 [E15.S2] CAS final answer check (v2) | #236 | 2 | skipped (too many files); +r3 security fix, +main integration | #237 |
+| 53 | #106 [E11.S3] Student and teacher administration | #239 | 1 | skipped (too many files) | #240 |
 
 Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (11), in run order
+## Remaining stories (7), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
 | Order | Issue | Story |
 |---|---|---|
-| 34 | #106 | [E11.S3] Student and teacher administration |
 | 35 | #107 | [E11.S4] Teacher personal stats card |
-| 37 | #110 | [E12.S2] JSONL export |
 | 41 | #115 | [E13.S4] Security hardening |
 | 42 | #117 | [E14.S1] Essay question authoring with rubric (v2) |
-| 44 | #119 | [E14.S3] Student essay input (v2) |
-| 46 | #122 | [E15.S2] CAS final answer check (v2) |
 | 47 | #123 | [E15.S3] LLM step grading (v2) |
 | 48 | #125 | [E16.S1] Admin diagram authoring tool (v2) |
 | 49 | #126 | [E16.S2] Student canvas and grading (v2) |
@@ -215,7 +215,7 @@ How the next agent resumes, in a cloud session or on the laptop:
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199, #201, #204, #205, #207, #209, #211, #213, #215, #217, #222, #220, #224, #228, #229, #231 · `dev-decision`: none open (#135 and #155 confirmed and closed).
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199, #201, #204, #205, #207, #209, #211, #213, #215, #217, #222, #220, #224, #228, #229, #231, #233, #235, #237, #240 · `dev-decision`: none open (#135 and #155 confirmed and closed).
 ## Resume notes (safe stop for /compact, 2026-09-30)
 
 **State:** there are no running agents, no open PRs except as listed below, and the heartbeat cron is cancelled.

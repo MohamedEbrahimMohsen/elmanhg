@@ -24,5 +24,7 @@ export function toAnswerKey(values: QuestionValues): QuestionAnswer {
       };
     case 'Essay':
       return answer;
+    case 'DragDrop':
+      return answer;
   }
 }

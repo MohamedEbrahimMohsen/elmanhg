@@ -8,6 +8,7 @@ using Elmanhg.Application.Lessons.ReorderLesson;
 using Elmanhg.Application.Lessons.Shared;
 using Elmanhg.Application.Lessons.UnpublishLesson;
 using Elmanhg.Application.Lessons.UpdateLesson;
+using Elmanhg.Application.Lessons.UploadDiagramImage;
 using Elmanhg.Application.Lessons.UploadLessonImage;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.SharedKernel;
@@ -113,6 +114,16 @@ public class LessonsController(IMediator mediator) : ControllerBase
     public async Task<ActionResult> UploadLessonImage([FromRoute] Guid lessonId, IFormFile? file, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new UploadLessonImageCommand(lessonId, file), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("{lessonId:guid}/diagram-images", Name = "UploadDiagramImage")]
+    [Authorize(Policy = DefaultCodes.ContentManage)]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType<UploadDiagramImageResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> UploadDiagramImage([FromRoute] Guid lessonId, IFormFile? file, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new UploadDiagramImageCommand(lessonId, file), cancellationToken);
         return Ok(result);
     }
 }

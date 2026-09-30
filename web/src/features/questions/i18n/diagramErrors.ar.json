@@ -1,0 +1,25 @@
+{
+  "errors": {
+    "QUESTION_TYPE_NOT_GRADABLE": "لا يصحح المصحح التجريبي هذا النوع من الاسئلة بعد.",
+    "QUESTION_DIAGRAM_IMAGE_TYPE_INVALID": "استخدم صورة PNG او JPEG او WebP.",
+    "QUESTION_DIAGRAM_IMAGE_INVALID": "ارفع صورة الرسم مرة اخرى: الصورة غير موجودة او غير صالحة.",
+    "QUESTION_DIAGRAM_IMAGE_ALT_REQUIRED": "اكتب وصفا لصورة الرسم.",
+    "QUESTION_DIAGRAM_IMAGE_ALT_TOO_LONG": "وصف الصورة اطول من المسموح.",
+    "QUESTION_DIAGRAM_ZONES_COUNT_INVALID": "ارسم منطقة افلات واحدة على الاقل وبما لا يتجاوز الحد المسموح.",
+    "QUESTION_DIAGRAM_ZONE_ID_INVALID": "معرف كل منطقة من 1 الى 20 حرفا لاتينيا صغيرا او رقما او شرطة.",
+    "QUESTION_DIAGRAM_ZONE_ID_DUPLICATE": "يجب الا يتكرر معرف المنطقة.",
+    "QUESTION_DIAGRAM_ZONE_BOUNDS_INVALID": "يجب ان تقع كل منطقة داخل الصورة والا تقل عن الحد الادنى للمقاس.",
+    "QUESTION_DIAGRAM_ZONES_OVERLAP": "يجب الا تتداخل مناطق الافلات.",
+    "QUESTION_DIAGRAM_ZONE_CAPACITY_INVALID": "تتسع كل منطقة لعنصر واحد على الاقل وبما لا يتجاوز الحد المسموح.",
+    "QUESTION_DIAGRAM_ITEMS_COUNT_INVALID": "اضف عنصرا واحدا على الاقل وبما لا يتجاوز الحد المسموح.",
+    "QUESTION_DIAGRAM_ITEM_ID_INVALID": "معرف كل عنصر من 1 الى 20 حرفا لاتينيا صغيرا او رقما او شرطة.",
+    "QUESTION_DIAGRAM_ITEM_ID_DUPLICATE": "يجب الا يتكرر معرف العنصر.",
+    "QUESTION_DIAGRAM_ITEM_TEXT_REQUIRED": "اكتب نصا لكل عنصر.",
+    "QUESTION_DIAGRAM_ITEM_TEXT_TOO_LONG": "نص العنصر اطول من المسموح.",
+    "QUESTION_DIAGRAM_KEY_ZONES_MISMATCH": "يجب ان يذكر مفتاح الاجابة كل منطقة مرة واحدة ولا شيء غيرها.",
+    "QUESTION_DIAGRAM_KEY_ITEM_INVALID": "مفتاح الاجابة يضع عنصرا غير موجود او يضع العنصر نفسه اكثر من مرة.",
+    "QUESTION_DIAGRAM_ZONE_OVER_CAPACITY": "في احدى المناطق عناصر صحيحة اكثر مما تتسع له.",
+    "QUESTION_DIAGRAM_KEY_EMPTY": "ضع عنصرا واحدا على الاقل في منطقة.",
+    "QUESTION_DIAGRAM_ORDER_INVALID": "المنطقة المرتبة تحتاج عنصرين صحيحين على الاقل."
+  }
+}

@@ -85,6 +85,19 @@ public sealed class ResubmitQuestionHandlerTests
         await _questionRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
+    [Fact]
+    public async Task Handle_DragDropImageFromAnotherLesson_ThrowsQuestionDiagramImageInvalid()
+    {
+        var question = Returns(_builder.DragDrop().Rejected("Wrong unit").Build());
+        var fields = QuestionBuilder.DragDropFields() with { Body = QuestionBuilder.Json(QuestionBuilder.ForLesson(QuestionBuilder.DragDropBodyJson, Guid.NewGuid())) };
+
+        var act = () => _handler.Handle(new ResubmitQuestionCommand(question.Id, fields), TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<ApplicationValidationCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.QuestionDiagramImageInvalid);
+        question.ValidationStatus.Should().Be(QuestionValidationStatus.Rejected);
+        await _questionRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
     private Question Returns(Question question)
     {
         _questionRepository.GetByIdAsync(question.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Question>, IQueryable<Question>>?>(), Arg.Any<bool>()).Returns(question);

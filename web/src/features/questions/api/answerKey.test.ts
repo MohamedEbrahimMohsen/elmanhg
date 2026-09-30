@@ -61,4 +61,8 @@ describe('toAnswerKey', () => {
   it('leaves the essay answer empty', () => {
     expect(toAnswerKey(emptyQuestionValues('Essay'))).toEqual(emptyAnswer());
   });
+
+  it('leaves the drag-and-drop answer empty', () => {
+    expect(toAnswerKey(emptyQuestionValues('DragDrop'))).toEqual(emptyAnswer());
+  });
 });

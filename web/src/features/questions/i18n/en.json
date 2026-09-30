@@ -5,7 +5,8 @@
     "TrueFalse": "True or false",
     "Fill": "Fill in the blank",
     "Short": "Short answer",
-    "Essay": "Essay"
+    "Essay": "Essay",
+    "DragDrop": "Drag and drop"
   },
   "statuses": {
     "Pending": "Pending review",

@@ -55,5 +55,7 @@ export function toAnswerPayload(question: StudentQuestion, answer: QuestionAnswe
       return { text: answer.text };
     case 'Essay':
       return { text: answer.text };
+    case 'DragDrop':
+      return {};
   }
 }

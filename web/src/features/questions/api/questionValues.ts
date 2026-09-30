@@ -7,6 +7,7 @@ import type {
 import type { QuestionValues } from '../schemas/questionEditorSchema';
 import { type NormalizationRule, optionIdAlphabet, toQuestionDifficulty, toQuestionType } from './questionOptions';
 import * as contentSchemas from '../schemas/questionContentSchemas';
+import { emptyDiagramImage, readDragDrop, toDragDropContent } from './dragDropValues';
 import { emptyCriterion, readEssay, toEssayContent } from './essayValues';
 
 function readNormalization(
@@ -46,6 +47,9 @@ export function emptyQuestionValues(type: QuestionType): QuestionValues {
     maxWords: '',
     criteria: [emptyCriterion('c1')],
     modelAnswers: [{ text: '' }],
+    diagramImage: emptyDiagramImage(),
+    diagramZones: [],
+    diagramItems: [{ id: 'i1', text: '' }],
   };
 }
 
@@ -119,6 +123,8 @@ function readQuestionContent(type: QuestionValues['type'], body: JsonElement, sp
       return readShort(body, spec);
     case 'Essay':
       return readEssay(body, spec);
+    case 'DragDrop':
+      return readDragDrop(body, spec);
   }
 }
 
@@ -177,6 +183,8 @@ function toContent(values: QuestionValues): Pick<UpdateQuestionRequest, 'body' |
           };
     case 'Essay':
       return toEssayContent(values);
+    case 'DragDrop':
+      return toDragDropContent(values);
   }
 }
 

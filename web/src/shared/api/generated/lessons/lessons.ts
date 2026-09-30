@@ -35,6 +35,8 @@ import type {
   LessonPositionRequest,
   LessonResult,
   UpdateLessonRequest,
+  UploadDiagramImageBody,
+  UploadDiagramImageResult,
   UploadLessonImageBody,
   UploadLessonImageResult
 } from '../model';
@@ -944,4 +946,76 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getUploadLessonImageMutationOptions(options), queryClient);
+    }
+    export const getUploadDiagramImageUrl = (lessonId: string,) => {
+
+
+
+
+  return `/api/lessons/${lessonId}/diagram-images`
+}
+
+export const uploadDiagramImage = async (lessonId: string,
+    uploadDiagramImageBody: UploadDiagramImageBody, options?: Parameters<typeof http>[1]): Promise<UploadDiagramImageResult> => {
+    const formData = new FormData();
+if(uploadDiagramImageBody.file !== undefined) {
+ formData.append(`file`, uploadDiagramImageBody.file);
+ }
+
+  return http<UploadDiagramImageResult>(getUploadDiagramImageUrl(lessonId),
+  {
+    ...options,
+    method: 'POST'
+    ,
+    body: formData
+  }
+);}
+
+
+
+
+
+export const getUploadDiagramImageMutationKey = () => ['uploadDiagramImage'] as const;
+
+export const getUploadDiagramImageMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadDiagramImage>>, TError,UploadDiagramImageMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadDiagramImage>>, TError,UploadDiagramImageMutationVariables, TContext> => {
+
+const mutationKey = getUploadDiagramImageMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadDiagramImage>>, UploadDiagramImageMutationVariables> = (props) => {
+          const {lessonId,data} = props ?? {};
+
+          return  uploadDiagramImage(lessonId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UploadDiagramImageMutationResult = NonNullable<Awaited<ReturnType<typeof uploadDiagramImage>>>
+    export type UploadDiagramImageMutationBody = UploadDiagramImageBody
+    export type UploadDiagramImageMutationError = unknown
+    export type UploadDiagramImageMutationVariables = {lessonId: string;data: UploadDiagramImageBody}
+
+    export const useUploadDiagramImage = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadDiagramImage>>, TError,UploadDiagramImageMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof uploadDiagramImage>>,
+        TError,
+        UploadDiagramImageMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUploadDiagramImageMutationOptions(options), queryClient);
     }

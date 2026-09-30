@@ -38,7 +38,7 @@ Indexes (partial, unique, soft-delete aware):
 
 ## Rules
 
-- **Shortfall (PRD §17 rule 8):** a blueprint cannot be saved when, for any type, the required count is greater than the number of servable questions of that type. Servable is `ServableQuestionSpecification` (Approved, lesson Published, not retired). The check is `ExamBlueprintShortfall.Find`, enforced by the entity on create and update, and mirrored on the web by `findShortfall`.
+- **Shortfall (PRD §17 rule 8):** a blueprint cannot be saved when, for any type, the required count is greater than the number of servable questions of that type. Servable is `ServableQuestionSpecification` (Approved, lesson Published, not retired, not drag-and-drop (until #126)). The check is `ExamBlueprintShortfall.Find`, enforced by the entity on create and update, and mirrored on the web by `findShortfall`.
 - **Pool:** the subject default is checked against the subject's whole servable pool (all its units). A unit blueprint is checked against its own unit's pool only.
 - **A default that is short for one unit** is not an error. The unit card shows a warning («عجز حالي في هذه الوحدة»), computed on the client; the exam start (#81) re-checks.
 - **Difficulty mix** is optional: Easy/Medium/Hard as whole percentages 0–100 that sum to 100. It is a **target**, not part of the save check. The generator (#81) follows it as far as the pool allows.
