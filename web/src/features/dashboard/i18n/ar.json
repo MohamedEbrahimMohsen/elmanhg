@@ -1,0 +1,119 @@
+{
+  "page": {
+    "title": "لوحة المؤشرات",
+    "intro": "أرقام المنصة للفترة المختارة بأيام القاهرة. قد تتأخر الأرقام حتى دقيقة."
+  },
+  "filters": {
+    "label": "فلاتر لوحة المؤشرات",
+    "subject": "المادة",
+    "allSubjects": "كل المواد",
+    "period": "الفترة",
+    "periods": { "7": "آخر 7 أيام", "14": "آخر 14 يومًا", "30": "آخر 30 يومًا" },
+    "range": "من {from} إلى {to}"
+  },
+  "card": {
+    "loading": "جارٍ تحميل {title}",
+    "error": "تعذّر تحميل {title}",
+    "noSubject": "لا يُفلتر حسب المادة",
+    "snapshot": "لقطة حالية، لا تُفلتر حسب الفترة"
+  },
+  "students": {
+    "title": "الطلاب",
+    "caption": "إجمالي الطلاب",
+    "newInRange": "جدد في الفترة: {count}",
+    "newThisWeek": "جدد هذا الأسبوع: {count}",
+    "activeToday": "نشط اليوم (DAU): {count}",
+    "activeThisMonth": "نشط هذا الشهر (MAU): {count}"
+  },
+  "subscribers": {
+    "title": "المشتركون",
+    "caption": "الاشتراكات النشطة",
+    "plan": "{plan}: {count}",
+    "plans": { "Base": "الأساسية", "AskTeacher": "اسأل معلّم" },
+    "churnedInRange": "ألغوا في الفترة: {count}",
+    "churnedThisMonth": "ألغوا هذا الشهر: {count}",
+    "mrr": "الإيراد الشهري المتكرر (MRR): {amount}"
+  },
+  "content": {
+    "title": "المحتوى",
+    "caption": "سؤال قابل للعرض (الرقم المُعلن)",
+    "structure": "المواد: {subjects} · الوحدات: {units}",
+    "lessons": "الدروس: منشور {published} · مسودة {draft} · مؤرشف {archived}",
+    "questions": "الأسئلة: قيد المراجعة {pending} · معتمد {approved} · مرفوض {rejected} · متقاعد {retired}",
+    "byType": "الأسئلة حسب النوع",
+    "typeCount": "{type}: {count}"
+  },
+  "solveRate": {
+    "title": "معدل الحل",
+    "caption": "محاولة لكل طالب نشط يوميًا",
+    "attempts": "المحاولات: {count}",
+    "studentDays": "أيام نشاط الطلاب: {count}"
+  },
+  "successRate": {
+    "title": "معدل النجاح",
+    "caption": "المحاولات الصحيحة من كل المحاولات",
+    "correct": "صحيحة: {correct} من {attempts}"
+  },
+  "validation": {
+    "title": "المراجعة",
+    "caption": "أسئلة قيد المراجعة",
+    "approved": "معتمدة في الفترة: {count}",
+    "rejected": "مرفوضة في الفترة: {count}",
+    "median": "وسيط زمن القرار: {duration}",
+    "teacher": "{name}: {approved} معتمد · {rejected} مرفوض"
+  },
+  "askTeacher": {
+    "title": "اسأل معلّم",
+    "caption": "أسئلة مفتوحة",
+    "awaiting": "بانتظار الرد: {count}",
+    "overdue": "متأخرة الآن: {count}",
+    "breaches": "تجاوزات مهلة الرد في الفترة: {count}",
+    "replies": "الردود في الفترة: {count} ({within} ضمن المهلة)",
+    "compliance": "الالتزام بالمهلة: {rate}",
+    "median": "وسيط زمن الرد: {duration}"
+  },
+  "payments": {
+    "title": "المدفوعات",
+    "caption": "الإيرادات في الفترة",
+    "succeeded": "ناجحة: {count}",
+    "failed": "فاشلة: {count}",
+    "refunds": "مستردات: {count} ({amount})",
+    "net": "صافي الإيرادات: {amount}"
+  },
+  "funnel": {
+    "title": "مسار التسجيل",
+    "caption": "زوار وصلوا إلى أول إجابة",
+    "step": "{step}: {visitors}",
+    "stepConversion": "{step}: {visitors} ({rate})",
+    "steps": {
+      "LandingViewed": "زيارة الصفحة الرئيسية",
+      "SignUpStarted": "بدء التسجيل",
+      "SignUpCompleted": "إنشاء الحساب",
+      "OnboardingCompleted": "اختيار المواد",
+      "FirstQuizAnswered": "أول إجابة تدريب"
+    },
+    "median": "وسيط الزمن من الزيارة إلى أول إجابة: {duration}"
+  },
+  "breakdown": {
+    "title": "معدل النجاح حسب المنهج",
+    "levelLabel": "التجميع حسب",
+    "levels": { "subject": "المواد", "unit": "الوحدات", "lesson": "الدروس" },
+    "name": "الاسم",
+    "attempts": "المحاولات",
+    "correct": "الصحيحة",
+    "rate": "معدل النجاح",
+    "empty": "لا توجد محاولات في هذه الفترة.",
+    "chooseSubject": "اختر مادة لعرض الدروس."
+  },
+  "charts": {
+    "attempts": "المحاولات يوميًا",
+    "revenue": "الإيرادات يوميًا",
+    "decisions": "قرارات المراجعة يوميًا",
+    "date": "التاريخ",
+    "value": "القيمة",
+    "peak": "الأعلى: {value}",
+    "emptyAttempts": "لا توجد محاولات في هذه الفترة.",
+    "emptyRevenue": "لا توجد إيرادات في هذه الفترة.",
+    "emptyDecisions": "لا توجد قرارات في هذه الفترة."
+  }
+}
