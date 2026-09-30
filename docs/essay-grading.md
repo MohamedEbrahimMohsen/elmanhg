@@ -28,13 +28,18 @@ Essays (question type `Essay`, v2) are graded by Claude against the rubric a tea
 | `Confidence` (5,4) | numeric, null | 0 to 1 |
 | `Model`, `PromptVersion` | text, null | from the successful call |
 | `InputTokens`, `OutputTokens`, `CostUsd` (12,6) | | the successful call's usage and cost |
+| `TimeTakenMilliseconds` | int, default 0 | the quiz writing time measured at submission (`Session.SubmitEssay`); 0 for exam essays |
+| `AppliedAt` | timestamptz, null | when a `Graded` grade was applied to its session (attempt and mastery); null until then |
 
-Indexes: unique `(SessionId, QuestionId)` (`IX_EssayGrades_SessionId_QuestionId`), `NextAttemptAt` filtered to `Pending` (the worker's due query), and `(SubjectId, Status)` for the teacher queue. The row version is PostgreSQL `xmin`: when two API replicas grade the same row, the losing save fails and the worker records a failed attempt.
+Indexes: unique `(SessionId, QuestionId)` (`IX_EssayGrades_SessionId_QuestionId`), `NextAttemptAt` filtered to `Pending` (the worker's due query), `GradedAt` filtered to `Graded` with a null `AppliedAt` (grades still waiting to be applied), and `(SubjectId, Status)` for the teacher queue. The row version is PostgreSQL `xmin`: when two API replicas grade the same row, the losing save fails and the worker records a failed attempt.
 
 ## Lifecycle
 
-- `EssayGrade.Request(...)` creates a `Pending` grade that is due immediately. A blank essay is rejected: #119 grades blank essays directly as Unanswered, without the AI.
-- Every `EssayGrading:SweepIntervalSeconds` the worker lists up to `SweepBatchSize` due ids and sends `GradeEssayCommand` for each, in a new scope per item.
+- `EssayGrade.Request(...)` creates a `Pending` grade that is due immediately; it also takes the time taken. A blank essay is rejected: blank essays are graded directly as Unanswered, without the AI (see Student input).
+- Every `EssayGrading:SweepIntervalSeconds` the worker lists up to `SweepBatchSize` due ids and, for each, in a new scope, sends `GradeEssayCommand` and then `ApplyEssayGradeCommand`. Due means `Pending` with `NextAttemptAt` reached, or `Graded` and not yet applied; the not-yet-applied grades are listed first.
+- `GradeEssayCommand` calls the AI and saves the result on the grade (one save). It does nothing for a grade that is not due, so a `Graded` grade is never sent to the AI again.
+- `ApplyEssayGradeCommand` runs for a `Graded` grade whose `AppliedAt` is null (`EssayAttemptRecorder`), in one save: it writes the session's `Attempt` (`GradedBy = AI`, `CreatedAt = RequestedAt`, `TimeTakenMilliseconds` from the grade, no feedback JSON), updates mastery (not in test mode), recomputes `ScorePercent` when the session is already finished, and stamps `AppliedAt`. The attempt raises `AttemptsRecorded`, so its training row ([training-data.md](training-data.md)) is written in the same save; an attempt that already exists is not written again, so a retry writes no second attempt or training row. A missing (or deleted) session, or a question that is not an item of the session, writes no attempt; the grade is still applied.
+- Writing the attempt stamps the session row, so its `xmin` token serialises it against a concurrent answer or finish. A lost race fails only the apply save: the AI result is already stored, and the next sweep applies it again without calling the AI. `InReview` grades are not applied; #128 writes their attempt.
 - On success, `Complete` stores the result and sets `Graded`, or `InReview` / `LowConfidence` when the confidence is below `ReviewConfidenceThreshold`. The score is stored either way.
 - On a failure the worker logs a warning and sends `FailEssayGradeCommand` with the exception's error code (or its type name). `FailAttempt` schedules the next try at `RetryBaseDelaySeconds × 2^(attempt − 1)` (30, 60 and 120 s by default). After `MaxAttempts` (4) the grade becomes `InReview` / `GradingFailed`.
 - Only `Pending` grades are graded or failed (`ESSAY_GRADE_NOT_PENDING` otherwise). `Graded` is final; `InReview` waits for #128.
@@ -69,9 +74,9 @@ The AI service logs `essay_grading.completed` (tokens, latency, `cost_usd`, mode
 
 ## Student API
 
-`GET /api/sessions/{sessionId}/questions/{questionId}/essay-grade` (policy `Assessments.Take`) returns the caller's own grade as `EssayGradeResult`: `id`, `status`, `maxScore`, `requestedAt`, and, only when the status is `Graded`, `gradedAt`, `score`, `normalisedScore`, `outcome`, `justification` and `criteria`. A pending or in-review grade never shows the AI score. Another student's grade, or a missing one, returns `404 ESSAY_GRADE_NOT_FOUND`.
+`GET /api/sessions/{sessionId}/questions/{questionId}/essay-grade` (policy `Assessments.Take`) returns the caller's own grade as `EssayGradeResult`: `id`, `status`, `maxScore`, `requestedAt`, and, only when the status is `Graded`, `gradedAt`, `score`, `normalisedScore`, `outcome`, `justification` and `criteria`. The status reads `Graded` only once the grade is applied to the session (`AppliedAt` set): a grade that is `Graded` but not yet applied is reported as `Pending`, so by the time a client sees `Graded` the attempt and the session score already include it. A pending or in-review grade never shows the AI score. Another student's grade, or a missing one, returns `404 ESSAY_GRADE_NOT_FOUND`.
 
-The web polls it every 2 s while the status is `Pending` (`useEssayGrade`), and `EssayGradeStatus` shows «جارٍ تصحيح إجابتك…», «قيد المراجعة» or the verdict with the score, criterion marks and justification. Both are exported from the quiz feature for #119. There is no push.
+The web polls it every 2 s while the status is `Pending` (`useEssayGrade`), and `EssayGradeStatus` shows «جارٍ تصحيح إجابتك…», «قيد المراجعة» or the verdict with the score, criterion marks and justification. Both are exported from the quiz feature; `EssayGradeStatus` takes an `onGraded` callback that fires once on `Pending → Graded`. There is no push.
 
 ## Admin test grader
 
@@ -89,7 +94,7 @@ The web polls it every 2 s while the status is `Pending` (`useEssayGrade`), and 
 | `EssayGrading:ReviewConfidenceThreshold` | 0.7 | 0 to 1; a lower confidence goes to teacher review |
 | `EssayGrading:ContextFieldMaxLength` | 20000 | 1 to 100000 characters per context field sent to the grader |
 | `AiService:EssayGradingTimeoutSeconds` | 100 | the essay client's attempt and total timeout; above the AI service's worst case of about 91 s |
-| `Content:QuestionEssayAnswerMaxLength` | 20000 | the longest essay `grade-draft` accepts |
+| `Content:QuestionEssayAnswerMaxLength` | 20000 | the longest essay `grade-draft`, the quiz answer and the exam save accept |
 
 With `AiService:Provider=Fake` (the default), `FakeAiEssayGradingClient` awards every criterion its full points with confidence 0.9 and model `fake`, and refuses in Production.
 
@@ -97,20 +102,21 @@ With `AiService:Provider=Fake` (the default), `FakeAiEssayGradingClient` awards 
 
 | Code | Status | When |
 |---|---|---|
-| `QUESTION_ESSAY_ANSWER_TOO_LONG` | 422 | a `grade-draft` essay is longer than `Content:QuestionEssayAnswerMaxLength` |
+| `QUESTION_ESSAY_ANSWER_TOO_LONG` | 422 | a `grade-draft`, quiz or exam essay is longer than `Content:QuestionEssayAnswerMaxLength` |
 | `QUESTION_ANSWER_INVALID` | 422 | the essay answer has no string `text` |
 | `QUESTION_MODEL_ANSWER_REQUIRED` | 422 | a model answer has no readable text (no text, formula or image alt) as sent or after sanitising |
 | `ESSAY_GRADE_NOT_FOUND` | 404 | no grade for this session, question and student |
 | `ESSAY_GRADING_UNAVAILABLE` | 503 | the AI grader failed, timed out or returned an invalid reply; the fake in Production |
 | `ESSAY_GRADE_NOT_PENDING` | 409 | the worker tried to grade or fail a grade that is no longer pending (worker only) |
 
-## What #119 adds
+## Student input (#119)
 
-- Student essay input and submission, which calls `EssayGrade.Request`.
-- Writing the `Attempt` and mastery from a final `EssayGrade`, and adding essays to the session `ScorePercent`.
-- Grading a blank essay without the AI.
-- Removing the essay exclusion from `ServableQuestionSpecification`.
-- Mounting `EssayGradeStatus` in the quiz and exam screens.
+- Essays are servable, in quizzes and in unit and multi-unit exams (`ServableQuestionSpecification` has no essay clause).
+- **Quiz:** a written essay (`POST /api/sessions/{id}/answers` with `{ "text": "…" }`) is saved on the item (`SessionItem.SavedAnswer`) and requests an `EssayGrade`; there is no attempt until the grade is applied. The response has `attempt: null` and `pendingAnswer`. Sending the same essay again is a replay; a different one is 409 `SESSION_QUESTION_ALREADY_ANSWERED`. See [sessions.md](sessions.md).
+- **Exam:** essays autosave like other answers. On submit a written essay requests an `EssayGrade` (time 0, `RequestedAt` = the submission time) instead of an attempt; the other answers are graded as before. See [exams.md](exams.md).
+- **Blank essay:** graded as Unanswered by `QuestionGrader` (score 0, `unanswered` feedback, `GradedBy = Auto`), with no AI call.
+- **Length:** an essay longer than `Content:QuestionEssayAnswerMaxLength` gets 422 `QUESTION_ESSAY_ANSWER_TOO_LONG` on the quiz answer and the exam save. The raw JSON cap for an essay answer is `Sessions:EssayAnswerMaxLength`; every other type keeps `Sessions:AnswerMaxLength`.
+- **Web:** a plain-text RTL editor (`dir="auto"`, word count against `maxWords` with an over-limit state, characters left near 20 000, `maxLength` 20 000). Quiz drafts autosave to the device (`localStorage`, 7 days) and are removed on submit; exam drafts autosave to the server. After submit the quiz card, the quiz result and the exam result show the essay read-only with `EssayGradeStatus`; `onGraded` refreshes the session score when the grade lands.
 
 ## What #128 adds
 

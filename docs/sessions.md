@@ -33,8 +33,8 @@ All three tables map one to one to PRD §15. Names follow constitution §3 (no a
 | `QuestionId` | FK `Questions`, restrict. Unique `(SessionId, QuestionId)`: a question never appears twice in one session (PRD §7.2). |
 | `QuestionVersion` | The version the student saw. |
 | `MaxScore` | Copied from the served version. |
-| `SavedAnswer` | Exams only: jsonb, the canonical draft answer, overwritten by each save until submission (`docs/exams.md`). |
-| `AnswerSavedAt` | Exams only: when the draft was last saved. |
+| `SavedAnswer` | jsonb. Exams: the canonical draft answer, overwritten by each save until submission (`docs/exams.md`). Quizzes: a written essay awaiting its AI grade (with `AnswerSavedAt` = the submission time); it stays after the attempt is written. |
+| `AnswerSavedAt` | Exams: when the draft was last saved. Quizzes: when a written essay was submitted. |
 
 The served questions are chosen and written when the session starts and never change afterwards; an exam item's saved answer does, until submission.
 
@@ -47,7 +47,7 @@ The served questions are chosen and written when the session starts and never ch
 | `Answer` | `answer_json` | jsonb, the canonical form of the typed answer (unknown properties dropped). |
 | `Score` | `score` | numeric(9,2) |
 | `NormalisedScore` | `normalised_score` | numeric(5,4), 0 to 1 |
-| `GradedBy` | `graded_by` | `Auto`, `AI`, `Teacher`. Every v1 type is `Auto`. |
+| `GradedBy` | `graded_by` | `Auto`, `AI`, `Teacher`. Every v1 type and a blank essay are `Auto`; a written essay is `AI` (#119). |
 | `Grade` | `grade_json?` | jsonb, the serialised `GradeFeedback` (null when the grader gives none). |
 | `TimeTakenMilliseconds` | `time_taken_ms` | See Time taken. |
 | `CreatedAt` | `created_at` | |
@@ -60,9 +60,10 @@ The served questions are chosen and written when the session starts and never ch
    - If the student already has an open quiz session for that lesson, it is returned as is and `questionCount` is ignored (a refresh resumes, PRD §14).
    - Otherwise up to `questionCount` (default `Sessions:DefaultQuizSize`) questions are chosen by adaptive selection (see Selection) from the lesson's **servable** questions (`ServableQuestionSpecification`, #67). The domain re-checks each question with `ServableQuestionSpecification.IsSatisfiedBy`. A lesson with fewer servable questions gives a shorter quiz; none gives 400 `SESSION_NO_SERVABLE_QUESTIONS`.
 2. **Answer** — `POST /api/sessions/{id}/answers { questionId, answer, timeTakenMilliseconds? }`. One answer per question, graded at once and saved immediately. There is no draft state for quizzes. A new attempt in a non-test session also updates the student's `QuestionMastery` row in the same save (`docs/mastery.md`); a replayed answer does not.
-   - **Free tier:** a new attempt in a non-test session re-checks the lesson lock (403 `LESSON_LOCKED`, which covers a quiz started while subscribed and continued after a lapse) and then the daily quota (403 `QUIZ_DAILY_LIMIT_REACHED`); nothing is stored when refused. A replayed identical answer and a test-mode session are not gated. The quota is a soft limit: two parallel answers at 9/10 can both pass.
+   - **Essay:** a written essay is not graded at once. It is saved on the item (`SavedAnswer`), an `EssayGrade` is requested with the measured time, and the response has `attempt: null` and `pendingAnswer: { text }`. The attempt (`GradedBy = AI`, created at the submission time) and the mastery update are written when the AI grade is applied ([essay-grading.md](essay-grading.md)). The same essay again is a replay; a different one, or any answer to that item, is 409 `SESSION_QUESTION_ALREADY_ANSWERED`. A blank essay is graded at once as Unanswered (score 0).
+   - **Free tier:** a new attempt or essay in a non-test session re-checks the lesson lock (403 `LESSON_LOCKED`, which covers a quiz started while subscribed and continued after a lapse) and then the daily quota (403 `QUIZ_DAILY_LIMIT_REACHED`); nothing is stored when refused. A replayed identical answer and a test-mode session are not gated. The quota is a soft limit: two parallel answers at 9/10 can both pass.
 3. **Finish** — `POST /api/sessions/{id}/finish`. Allowed at any time, including mid-quiz. Nothing finishes a session automatically.
-4. **Read** — `GET /api/sessions/{id}` returns the items, the saved attempts and `currentPosition`: the lowest unanswered position, or null when every item is answered or the session is finished.
+4. **Read** — `GET /api/sessions/{id}` returns the items, the saved attempts and `currentPosition`: the lowest position with no attempt and no pending essay, or null when every item is answered or the session is finished.
 
 The answer and finish endpoints serve quizzes only: an exam session id returns 404 `SESSION_NOT_FOUND`, and the domain refuses `RecordAttempt` and `Submit()` on an exam. Exams save drafts and submit through `/api/exams` (`docs/exams.md`).
 
@@ -95,9 +96,9 @@ For example, a history of correct, wrong, correct is Rest; wrong, correct is Cor
 
 Grading loads the `QuestionRevision` at `item.QuestionVersion` and calls `QuestionRevision.Grade(answer)`, which calls `QuestionGrader.Grade` with that snapshot's type, grading spec and max score. The live `Question` row is never used to grade. If a question is edited, retired or its lesson unpublished mid-session, the answer is still accepted and graded against the version the student saw (PRD §17 rule 2).
 
-Essays are graded asynchronously by the AI grader against the served revision (`EssayGrade`, [essay-grading.md](essay-grading.md)); student essay input (#119) connects essay grades to attempts.
+Written essays are graded asynchronously by the AI grader against the served revision (`EssayGrade`, [essay-grading.md](essay-grading.md)); the attempt is written when the grade is applied. A blank essay is graded at once by `QuestionGrader` as Unanswered.
 
-The validator checks that the answer is a JSON object of at most `Sessions:AnswerMaxLength` characters. The handler then checks the shape for the served type and returns 422 `QUESTION_ANSWER_INVALID` for a wrong shape, so a malformed answer never reaches the grader.
+The validator checks that the answer is a JSON object no longer than the larger of `Sessions:AnswerMaxLength` and `Sessions:EssayAnswerMaxLength`. The handler then checks the shape for the served type (422 `QUESTION_ANSWER_INVALID`), the raw length for that type (422 `ATTEMPT_ANSWER_TOO_LONG`: `EssayAnswerMaxLength` for an essay, `AnswerMaxLength` for every other type) and, for an essay, the text length (422 `QUESTION_ESSAY_ANSWER_TOO_LONG` over `Content:QuestionEssayAnswerMaxLength`), so a malformed answer never reaches the grader.
 
 ## Idempotency
 
@@ -115,11 +116,11 @@ The client may report `timeTakenMilliseconds`. The server measures `elapsed = no
 
 ## Scoring
 
-`ScorePercent = round(Σ attempt.Score / Σ item.MaxScore × 100, 2)`. Unanswered items count 0. Exams use the same formula (`docs/exams.md`).
+`ScorePercent = round(Σ attempt.Score / Σ item.MaxScore × 100, 2)`. Unanswered items count 0. Exams use the same formula (`docs/exams.md`). A written essay counts once its grade is applied; applying it to a finished session recomputes `ScorePercent`, so the score is provisional while an essay is pending.
 
 ## What is revealed
 
-Each item carries the served `type`, `stem`, `body` and `maxScore`. `correctAnswer` (the served grading spec) and `explanation` are returned only when the item has an attempt or the session is finished, so unanswered keys never leak while a quiz is open.
+Each item carries the served `type`, `stem`, `body` and `maxScore`. `correctAnswer` (the served grading spec) and `explanation` are returned only when the item has an attempt or a pending essay, or the session is finished, so unanswered keys never leak while a quiz is open.
 
 ## Append-only enforcement
 
@@ -160,7 +161,8 @@ Session commands are not audited (`docs/audit-log.md`, "Not audited"): the attem
 | `Sessions:DefaultQuizSize` | 10 | Questions served when `questionCount` is omitted. |
 | `Sessions:MinQuizSize` | 5 | Smallest allowed `questionCount`. |
 | `Sessions:MaxQuizSize` | 20 | Largest allowed `questionCount`. The UI offers 5, 10 and 20. |
-| `Sessions:AnswerMaxLength` | 4000 | Maximum raw length of an answer's JSON. |
+| `Sessions:AnswerMaxLength` | 4000 | Maximum raw length of an answer's JSON, for every type except Essay. |
+| `Sessions:EssayAnswerMaxLength` | 121000 | Maximum raw length of an essay answer's JSON: 20 000 characters even when a client escapes each one as `\uXXXX` (6 characters), plus the envelope. |
 | `Mastery:CorrectThreshold` | 0.8 | Normalised score at or above which an attempt counts as correct (PRD §7.3); used by selection and mastery (`docs/mastery.md`). |
 
 The app fails to start unless `MinQuizSize <= DefaultQuizSize <= MaxQuizSize`.
@@ -177,7 +179,7 @@ The app fails to start unless `MinQuizSize <= DefaultQuizSize <= MaxQuizSize`.
 History: `GET /api/progress/sessions` (`docs/progress.md`).
 
 `SessionResult { id, kind, scope, isTestMode, startedAt, submittedAt?, scorePercent?, timeTakenMilliseconds, currentPosition?, items[] }`
-`SessionItemResult { position, questionId, questionVersion, type, stem, body, maxScore, attempt?, correctAnswer?, explanation? }`
+`SessionItemResult { position, questionId, questionVersion, type, stem, body, maxScore, attempt?, correctAnswer?, explanation?, pendingAnswer? }` — `pendingAnswer` is the submitted essay (`{ text }`) while it waits for its grade, else null.
 `AttemptResult { id, answer, score, normalisedScore, outcome, feedback?, timeTakenMilliseconds, createdAt }`
 
 ## Error codes
@@ -189,7 +191,8 @@ History: `GET /api/progress/sessions` (`docs/progress.md`).
 | `SESSION_QUESTION_COUNT_INVALID` | 422 | `questionCount` outside `[MinQuizSize, MaxQuizSize]`. |
 | `SESSION_QUESTION_NOT_FOUND` | 404 | The question is not part of the session. |
 | `SESSION_ALREADY_IN_PROGRESS` | 409 | A concurrent start for the same lesson won the race; retry to resume. |
-| `ATTEMPT_ANSWER_TOO_LONG` | 422 | The answer JSON is over `AnswerMaxLength`. |
+| `ATTEMPT_ANSWER_TOO_LONG` | 422 | The answer JSON is over `AnswerMaxLength` (`EssayAnswerMaxLength` for an essay). |
+| `QUESTION_ESSAY_ANSWER_TOO_LONG` | 422 | An essay is longer than `Content:QuestionEssayAnswerMaxLength`. |
 | `ATTEMPT_TIME_TAKEN_INVALID` | 422 | Negative `timeTakenMilliseconds`. |
 | `SESSION_NO_SERVABLE_QUESTIONS` | 400 | The lesson has no servable questions. |
 | `SESSION_QUESTION_NOT_SERVABLE` | 400 | A drawn question is not servable (a guard; the draw already filters). |
@@ -210,3 +213,5 @@ History: `GET /api/progress/sessions` (`docs/progress.md`).
 - The client reports `timeTakenMilliseconds` from the moment the question was shown to "تحقّق".
 - "تدريب جديد" starts the smallest of 5/10/20 that is at least the number of questions served.
 - "اسأل المساعد" opens the avatar panel with the answered question as its context ([avatar.md](avatar.md)).
+- **Essay card (#119):** a plain-text RTL editor with a live word count against `maxWords` (over-limit state), characters left near 20 000 and a 20 000 cap. The draft autosaves to the device (`localStorage` key `elmanhg.essayDraft.<studentId>.<sessionId>.<questionId>`, 800 ms after the last change and when the page is hidden or left, kept 7 days) and is restored with «استعدنا مسودتك المحفوظة.». «أرسل الإجابة» is blocked for an empty essay or one over the word limit; a successful submit removes the draft. The submitted essay is shown read-only with the grade status («جارٍ تصحيح إجابتك…», «قيد المراجعة» or the verdict with criterion marks and justification) and the explanation. When the grade lands, the session and mastery queries are refreshed.
+- The result page counts written essays as answered, reviews them with their grade status, and notes that the score is provisional while any essay is being graded.

@@ -4,14 +4,15 @@ import { useTranslation } from 'react-i18next';
 import { AskAvatarButton, type AvatarContextInput } from '@/features/avatar';
 import { RichTextViewer } from '@/features/content';
 import type { StudentQuestion } from '@/features/questions';
-import type { AttemptResult, SessionItemResult } from '@/shared/api/generated/model';
+import type { AttemptResult } from '@/shared/api/generated/model';
+import type { QuizItemContent } from '../api/quizItem';
 import { formatNumber } from '@/shared/lib/format';
 import { cn } from '@/shared/lib/utils';
 import { describeCorrectAnswer } from '../api/correctAnswer';
 import { CorrectAnswer } from './CorrectAnswer';
 
 export interface FeedbackPanelProps {
-  item: SessionItemResult;
+  item: QuizItemContent;
   attempt: AttemptResult;
   question: StudentQuestion;
   ask: AvatarContextInput;

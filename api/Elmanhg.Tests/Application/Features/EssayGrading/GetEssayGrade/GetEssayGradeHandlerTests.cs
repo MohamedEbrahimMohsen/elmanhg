@@ -35,11 +35,24 @@ public sealed class GetEssayGradeHandlerTests
     {
         var grade = Seed(_studentId);
         grade.Complete(EssayGradeBuilder.Assessment(0.9m), PartialGrade, 0.7m, GradedAt);
+        grade.MarkApplied(GradedAt.AddSeconds(1));
 
         var result = await Handle(grade);
 
         (result.Status, result.Score, result.Outcome, result.Justification, result.GradedAt).Should().Be(("Graded", (decimal?)2.5m, "Partial", "جيد", (DateTimeOffset?)GradedAt));
         result.Criteria.Should().Equal(new EssayCriterionResult("c1", "Definition", 1, 2, "ناقص"));
+    }
+
+    [Fact]
+    public async Task Handle_GradedNotYetApplied_ReportsPendingWithoutScore()
+    {
+        var grade = Seed(_studentId);
+        grade.Complete(EssayGradeBuilder.Assessment(0.9m), PartialGrade, 0.7m, GradedAt);
+
+        var result = await Handle(grade);
+
+        (result.Status, result.Score, result.Outcome, result.Justification, result.GradedAt).Should().Be(("Pending", (decimal?)null, (string?)null, (string?)null, (DateTimeOffset?)null));
+        result.Criteria.Should().BeEmpty();
     }
 
     [Fact]

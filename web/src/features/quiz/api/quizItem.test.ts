@@ -46,8 +46,12 @@ describe('quizItem', () => {
     expect(result.answerKind).toBeNull();
   });
 
-  it('throws for a type outside v1', () => {
-    expect(() => toQuizQuestion(quizItem(1, { type: 'Essay' }))).toThrow();
+  it('maps an essay item with its word limit', () => {
+    const question = toQuizQuestion(quizItem(1, { type: 'Essay', body: { maxWords: 150 } }));
+
+    expect(question.type).toBe('Essay');
+    expect(question.maxWords).toBe(150);
+    expect(question.options).toEqual([]);
   });
 
   it.each([

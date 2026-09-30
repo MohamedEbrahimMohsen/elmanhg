@@ -20,7 +20,7 @@ export function initialPosition(session: SessionResult): number {
 export function mergeAnsweredItem(session: SessionResult, answered: SessionItemResult): SessionResult {
   const items = session.items.map((item) => (Number(item.position) === Number(answered.position) ? answered : item));
   const unanswered = items
-    .filter((item) => item.attempt === null)
+    .filter((item) => item.attempt === null && item.pendingAnswer === null)
     .map((item) => Number(item.position))
     .sort((a, b) => a - b);
   return { ...session, items, currentPosition: unanswered[0] ?? null };

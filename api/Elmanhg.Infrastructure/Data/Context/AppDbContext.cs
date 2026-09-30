@@ -599,6 +599,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.SessionId, x.QuestionId }).IsUnique().HasDatabaseName(EssayGradePerQuestionIndex);
             builder.HasIndex(x => x.NextAttemptAt).HasFilter("\"Status\" = 'Pending'");
+            builder.HasIndex(x => x.GradedAt).HasFilter("\"Status\" = 'Graded' AND \"AppliedAt\" IS NULL");
             builder.HasIndex(x => new { x.SubjectId, x.Status });
         });
     }

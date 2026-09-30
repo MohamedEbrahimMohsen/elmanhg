@@ -106,21 +106,17 @@ public sealed class ServableQuestionSpecificationTests
     }
 
     [Fact]
-    public void IsSatisfiedBy_ApprovedEssayInPublishedLesson_ReturnsFalse()
+    public void IsSatisfiedBy_ApprovedEssayInPublishedLesson_ReturnsTrue()
     {
         _builder.Lesson.Publish(Guid.NewGuid());
         var question = _builder.Essay().Approved().Build();
 
-        ServableQuestionSpecification.IsSatisfiedBy(question, _builder.Lesson).Should().BeFalse();
+        ServableQuestionSpecification.IsSatisfiedBy(question, _builder.Lesson).Should().BeTrue();
     }
 
     [Fact]
-    public void ServedTypes_EveryTypeExceptEssay()
+    public void ServedTypes_EveryType()
     {
-        var expected = Enum.GetValues<QuestionType>()
-            .Where(x => x != QuestionType.Essay)
-            .ToList();
-
-        ServableQuestionSpecification.ServedTypes.Should().Equal(expected);
+        ServableQuestionSpecification.ServedTypes.Should().Equal(Enum.GetValues<QuestionType>());
     }
 }

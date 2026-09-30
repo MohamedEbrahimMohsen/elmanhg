@@ -7,6 +7,11 @@ public static class EssayGradeResultGenerator
 {
     public static EssayGradeResult Generate(EssayGrade grade)
     {
+        if (grade.IsAwaitingApplication)
+        {
+            return new EssayGradeResult(grade.Id, nameof(EssayGradeStatus.Pending), grade.MaxScore, grade.RequestedAt, null, null, null, null, null, []);
+        }
+
         if (grade.Status != EssayGradeStatus.Graded)
         {
             return new EssayGradeResult(grade.Id, grade.Status.ToString(), grade.MaxScore, grade.RequestedAt, null, null, null, null, null, []);

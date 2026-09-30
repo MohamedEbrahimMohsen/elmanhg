@@ -52,5 +52,5 @@ public sealed class QuizAnswerMetricsBehaviourTests : IDisposable
 
     public void Dispose() => _answers.Dispose();
 
-    private static SessionItemResult Item(AttemptResult? attempt) => new(1, Command.QuestionId, 1, "Mcq", "stem", Answer, 1, attempt, null, null);
+    private static SessionItemResult Item(AttemptResult? attempt) => new(1, Command.QuestionId, 1, "Mcq", "stem", Answer, 1, attempt, null, null, null);
 }

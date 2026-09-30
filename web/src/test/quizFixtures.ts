@@ -23,8 +23,13 @@ export function quizItem(position: number, overrides?: Partial<SessionItemResult
     attempt: null,
     correctAnswer: null,
     explanation: null,
+    pendingAnswer: null,
     ...overrides,
   };
+}
+
+export function essayQuizItem(position: number, overrides?: Partial<SessionItemResult>): SessionItemResult {
+  return quizItem(position, { type: 'Essay', body: { maxWords: 5 }, maxScore: 5, ...overrides });
 }
 
 export function answered(
@@ -52,7 +57,9 @@ export function answered(
 }
 
 export function quizSession(items: SessionItemResult[], overrides?: Partial<SessionResult>): SessionResult {
-  const unanswered = items.filter((item) => item.attempt === null).map((item) => Number(item.position));
+  const unanswered = items
+    .filter((item) => item.attempt === null && item.pendingAnswer === null)
+    .map((item) => Number(item.position));
   return {
     id: quizSessionId,
     kind: 'Quiz',

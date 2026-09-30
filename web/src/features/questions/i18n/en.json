@@ -211,7 +211,9 @@
     "essayLabel": "Your essay",
     "essayPlaceholder": "Write your answer",
     "essayWords": "{count} words",
-    "essayWordsOf": "{count} of {max} words"
+    "essayWordsOf": "{count} of {max} words",
+    "essayOverLimit": "{over} words over the limit",
+    "essayCharactersLeft": "{count} characters left"
   },
   "import": {
     "title": "Import questions",

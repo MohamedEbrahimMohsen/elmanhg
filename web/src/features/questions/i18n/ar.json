@@ -211,7 +211,9 @@
     "essayLabel": "إجابتك المقالية",
     "essayPlaceholder": "اكتب إجابتك المقالية",
     "essayWords": "عدد الكلمات: {count}",
-    "essayWordsOf": "عدد الكلمات: {count} من {max}"
+    "essayWordsOf": "عدد الكلمات: {count} من {max}",
+    "essayOverLimit": "تجاوزت الحد بـ {over} كلمة",
+    "essayCharactersLeft": "متبقٍّ {count} حرف"
   },
   "import": {
     "title": "استيراد أسئلة",

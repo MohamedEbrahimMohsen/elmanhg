@@ -1,5 +1,7 @@
+using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Questions.Schemas;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 namespace Elmanhg.Application.Questions.Shared;
@@ -33,4 +35,14 @@ public static class QuestionAnswerRules
             _ => throw new InvalidOperationException("Unsupported question type."),
         };
     }
+
+    public static bool TryReadWrittenEssay(QuestionType type, JsonElement answer, [NotNullWhen(true)] out string? text)
+    {
+        text = type == QuestionType.Essay && QuestionSchemaReader.TryRead<EssayAnswer>(answer, out var essay) && !string.IsNullOrWhiteSpace(essay.Text) ? essay.Text.Trim() : null;
+        return text is not null;
+    }
+
+    public static bool IsEssayTooLong(QuestionType type, JsonElement answer, int maxLength) => type == QuestionType.Essay && QuestionSchemaReader.Read<EssayAnswer>(answer).Text!.Length > maxLength;
+
+    public static bool IsRawAnswerTooLong(QuestionType type, JsonElement answer, SessionsOptions options) => answer.GetRawText().Length > (type == QuestionType.Essay ? options.EssayAnswerMaxLength : options.AnswerMaxLength);
 }

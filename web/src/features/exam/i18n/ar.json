@@ -72,7 +72,8 @@
     "unitCorrectHeader": "الإجابات الصحيحة",
     "unitCorrect": "{correct, number} من {total, number}",
     "unknownUnit": "غير متاح",
-    "avatarTitle": "سؤال {position} — مراجعة الامتحان"
+    "avatarTitle": "سؤال {position} — مراجعة الامتحان",
+    "essaysPending": "بعض الإجابات المقالية ما زالت قيد التصحيح، وستتحدّث الدرجة عند اكتمالها."
   },
   "multi": {
     "title": "امتحان متعدد الوحدات",

@@ -22,4 +22,5 @@ export interface SessionItemResult {
   correctAnswer: null | JsonElement;
   /** @nullable */
   explanation: string | null;
+  pendingAnswer: null | JsonElement;
 }

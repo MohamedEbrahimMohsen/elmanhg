@@ -2,13 +2,13 @@ import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AvatarContextInput } from '@/features/avatar';
 import { QuestionView } from '@/features/questions';
-import type { AttemptResult, SessionItemResult } from '@/shared/api/generated/model';
+import type { AttemptResult } from '@/shared/api/generated/model';
 import { choiceReview } from '../api/correctAnswer';
-import { fromAnswerPayload, toQuizQuestion } from '../api/quizItem';
+import { fromAnswerPayload, toQuizQuestion, type QuizItemContent } from '../api/quizItem';
 import { FeedbackPanel } from './FeedbackPanel';
 
 export interface QuizReviewItemProps {
-  item: SessionItemResult;
+  item: QuizItemContent;
   attempt: AttemptResult;
   ask: AvatarContextInput;
 }

@@ -10953,7 +10953,8 @@
           "maxScore",
           "attempt",
           "correctAnswer",
-          "explanation"
+          "explanation",
+          "pendingAnswer"
         ],
         "type": "object",
         "properties": {
@@ -11018,6 +11019,16 @@
             "type": [
               "null",
               "string"
+            ]
+          },
+          "pendingAnswer": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
             ]
           }
         }

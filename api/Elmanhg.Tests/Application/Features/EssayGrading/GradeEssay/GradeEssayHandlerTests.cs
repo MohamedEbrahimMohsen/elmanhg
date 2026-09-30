@@ -6,6 +6,7 @@ using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
+using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Units;
 using Elmanhg.Infrastructure.RichText;
@@ -78,6 +79,18 @@ public sealed class GradeEssayHandlerTests
 
         await Handle(grade.Id);
 
+        await ShouldNotGrade();
+    }
+
+    [Fact]
+    public async Task Handle_GradedAwaitingApplication_DoesNotCallAiAgain()
+    {
+        var grade = Seed();
+        grade.Complete(EssayGradeBuilder.Assessment(), new QuestionGrade(2.5m, 0.5m, GradeOutcome.Partial, null), 0.7m, Now);
+
+        await Handle(grade.Id);
+
+        grade.IsAwaitingApplication.Should().BeTrue();
         await ShouldNotGrade();
     }
 

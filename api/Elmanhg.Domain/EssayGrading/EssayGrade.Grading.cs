@@ -52,6 +52,28 @@ public partial class EssayGrade
         UpdationDate = at;
     }
 
+    public QuestionGrade ToQuestionGrade()
+    {
+        if (Status != EssayGradeStatus.Graded || Score is null || NormalisedScore is null)
+        {
+            throw new InvalidOperationException("Only a graded essay has a final score.");
+        }
+
+        return new QuestionGrade(Score.Value, NormalisedScore.Value, QuestionGrade.ToOutcome(NormalisedScore.Value), null);
+    }
+
+    public void MarkApplied(DateTimeOffset appliedAt)
+    {
+        if (!IsAwaitingApplication)
+        {
+            throw new InvalidOperationException("Only a graded essay that is not yet applied can be applied.");
+        }
+
+        var at = ToMicroseconds(appliedAt);
+        AppliedAt = at;
+        UpdationDate = at;
+    }
+
     private void EnsurePending()
     {
         if (Status != EssayGradeStatus.Pending)

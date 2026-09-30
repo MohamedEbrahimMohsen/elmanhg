@@ -1,9 +1,13 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { Link, Navigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ContentErrorState, ContentListSkeleton } from '@/features/content';
-import { useGetSession } from '@/shared/api/generated/sessions/sessions';
+import { invalidateMastery } from '@/features/mastery';
+import { getGetSessionQueryKey, useGetSession } from '@/shared/api/generated/sessions/sessions';
 import { Button } from '@/shared/ui/button';
+import { isWrittenEssay } from '../api/essayItem';
 import { lessonIdOf, sortedItems } from '../api/quizSession';
+import { EssayReviewItem } from '../components/EssayReviewItem';
 import { NewPracticeButton } from '../components/NewPracticeButton';
 import { QuizResultSummary } from '../components/QuizResultSummary';
 import { QuizReviewItem } from '../components/QuizReviewItem';
@@ -14,6 +18,7 @@ export interface QuizResultPageProps {
 
 export function QuizResultPage({ sessionId }: QuizResultPageProps) {
   const { t } = useTranslation('quiz');
+  const queryClient = useQueryClient();
   const { data, error, isPending, isError, refetch } = useGetSession(sessionId, { query: { staleTime: Infinity } });
 
   if (isError) {
@@ -34,7 +39,11 @@ export function QuizResultPage({ sessionId }: QuizResultPageProps) {
     return <Navigate to="/student/quiz/$sessionId" params={{ sessionId }} replace />;
   }
 
-  const reviewed = sortedItems(data).flatMap((item) => (item.attempt ? [{ item, attempt: item.attempt }] : []));
+  const reviewed = sortedItems(data).filter((item) => item.attempt !== null || isWrittenEssay(item));
+  const refreshSession = () => {
+    void queryClient.invalidateQueries({ queryKey: getGetSessionQueryKey(sessionId) });
+    void invalidateMastery(queryClient);
+  };
   const lessonId = lessonIdOf(data);
   return (
     <section className="flex flex-col gap-4">
@@ -42,19 +51,23 @@ export function QuizResultPage({ sessionId }: QuizResultPageProps) {
       <QuizResultSummary session={data} />
       <h2 className="font-display text-h2 font-bold lg:text-h2-desktop">{t('result.review')}</h2>
       {reviewed.length > 0 ? (
-        reviewed.map(({ item, attempt }) => (
-          <QuizReviewItem
-            key={item.questionId}
-            item={item}
-            attempt={attempt}
-            ask={{
-              entryPoint: 'QuizQuestion',
-              sessionId,
-              questionId: item.questionId,
-              title: t('avatar.questionTitle', { position: Number(item.position) }),
-            }}
-          />
-        ))
+        reviewed.map((item) =>
+          item.attempt === null || isWrittenEssay(item) ? (
+            <EssayReviewItem key={item.questionId} sessionId={sessionId} item={item} onGraded={refreshSession} />
+          ) : (
+            <QuizReviewItem
+              key={item.questionId}
+              item={item}
+              attempt={item.attempt}
+              ask={{
+                entryPoint: 'QuizQuestion',
+                sessionId,
+                questionId: item.questionId,
+                title: t('avatar.questionTitle', { position: Number(item.position) }),
+              }}
+            />
+          ),
+        )
       ) : (
         <p className="text-ui text-text-muted">{t('result.none')}</p>
       )}

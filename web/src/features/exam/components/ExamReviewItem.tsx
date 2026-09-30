@@ -1,10 +1,21 @@
 import { useId } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { AskAvatarButton, type AvatarContextInput } from '@/features/avatar';
 import { RichTextViewer } from '@/features/content';
 import { emptyAnswer, QuestionView } from '@/features/questions';
-import { choiceReview, CorrectAnswer, describeCorrectAnswer, QuizReviewItem, toQuizQuestion } from '@/features/quiz';
+import {
+  choiceReview,
+  CorrectAnswer,
+  describeCorrectAnswer,
+  EssayReviewItem,
+  isWrittenEssay,
+  QuizReviewItem,
+  toQuizQuestion,
+} from '@/features/quiz';
+import { getGetExamSessionQueryKey } from '@/shared/api/generated/exams/exams';
 import type { ExamItemResult } from '@/shared/api/generated/model';
+import { invalidateExamViews } from '../api/invalidateExamViews';
 
 export interface ExamReviewItemProps {
   item: ExamItemResult;
@@ -12,6 +23,7 @@ export interface ExamReviewItemProps {
 }
 
 export function ExamReviewItem({ item, sessionId }: ExamReviewItemProps) {
+  const queryClient = useQueryClient();
   const { t } = useTranslation('exam');
   const headingId = useId();
   const ask: AvatarContextInput = {
@@ -21,6 +33,18 @@ export function ExamReviewItem({ item, sessionId }: ExamReviewItemProps) {
     title: t('result.avatarTitle', { position: Number(item.position) }),
   };
 
+  if (isWrittenEssay(item)) {
+    return (
+      <EssayReviewItem
+        sessionId={sessionId}
+        item={item}
+        onGraded={() => {
+          void queryClient.invalidateQueries({ queryKey: getGetExamSessionQueryKey(sessionId) });
+          void invalidateExamViews(queryClient);
+        }}
+      />
+    );
+  }
   if (item.attempt) {
     return <QuizReviewItem item={item} attempt={item.attempt} ask={ask} />;
   }

@@ -7,7 +7,9 @@ public partial class Session
     // Exam questions share one page; per-question time is not observable, the exam's time is SubmittedAt - StartedAt.
     private const int ExamAttemptTimeTakenMilliseconds = 0;
 
-    public List<Attempt> SubmitExam(IReadOnlyDictionary<Guid, QuestionGrade> grades, DateTimeOffset now)
+    public List<Attempt> SubmitExam(IReadOnlyDictionary<Guid, QuestionGrade> grades, DateTimeOffset now) => SubmitExam(grades, new HashSet<Guid>(), now);
+
+    public List<Attempt> SubmitExam(IReadOnlyDictionary<Guid, QuestionGrade> grades, IReadOnlySet<Guid> essayQuestionIds, DateTimeOffset now)
     {
         if (!IsExam)
         {
@@ -20,7 +22,7 @@ public partial class Session
         }
 
         var answered = Items
-            .Where(x => x.SavedAnswer is not null)
+            .Where(x => x.SavedAnswer is not null && !essayQuestionIds.Contains(x.QuestionId))
             .OrderBy(x => x.Position)
             .ToList();
         if (answered.Any(x => !grades.ContainsKey(x.QuestionId)))
@@ -30,7 +32,7 @@ public partial class Session
 
         var at = ToMicroseconds(now);
         var attempts = answered
-            .Select(x => Attempt.Create(this, x, x.SavedAnswer ?? string.Empty, grades[x.QuestionId], ExamAttemptTimeTakenMilliseconds, at))
+            .Select(x => Attempt.Create(this, x, x.SavedAnswer ?? string.Empty, grades[x.QuestionId], ExamAttemptTimeTakenMilliseconds, at, AttemptGrader.Auto))
             .ToList();
         Attempts.AddRange(attempts);
         ScorePercent = CalculateScorePercent();

@@ -25,7 +25,7 @@ public class Attempt : Entity
 
     public GradeFeedback? ReadFeedback() => Grade is null ? null : JsonSerializer.Deserialize<GradeFeedback>(Grade, QuestionJson.SerializerOptions);
 
-    internal static Attempt Create(Session session, SessionItem item, string answer, QuestionGrade grade, int timeTakenMilliseconds, DateTimeOffset createdAt)
+    internal static Attempt Create(Session session, SessionItem item, string answer, QuestionGrade grade, int timeTakenMilliseconds, DateTimeOffset createdAt, AttemptGrader gradedBy)
     {
         return new Attempt(Guid.NewGuid())
         {
@@ -36,7 +36,7 @@ public class Attempt : Entity
             Answer = answer,
             Score = grade.Score,
             NormalisedScore = grade.NormalisedScore,
-            GradedBy = AttemptGrader.Auto,
+            GradedBy = gradedBy,
             Grade = grade.Feedback is null ? null : JsonSerializer.Serialize(grade.Feedback, QuestionJson.SerializerOptions),
             TimeTakenMilliseconds = timeTakenMilliseconds,
             CreatedAt = createdAt,

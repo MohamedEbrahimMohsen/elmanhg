@@ -33,17 +33,20 @@ public partial class EssayGrade : AuditEntity
     public int? InputTokens { get; private set; }
     public int? OutputTokens { get; private set; }
     public decimal? CostUsd { get; private set; }
+    public int TimeTakenMilliseconds { get; private set; }
+    public DateTimeOffset? AppliedAt { get; private set; }
     public uint Version { get; private set; }
 
     private EssayGrade(Guid id, Guid? createdBy) : base(id, createdBy) { }
 
-    public static EssayGrade Request(Guid studentId, Guid sessionId, Guid subjectId, Guid questionId, int questionVersion, int maxScore, string answerText, DateTimeOffset requestedAt)
+    public static EssayGrade Request(Guid studentId, Guid sessionId, Guid subjectId, Guid questionId, int questionVersion, int maxScore, string answerText, DateTimeOffset requestedAt, int timeTakenMilliseconds)
     {
         if (string.IsNullOrWhiteSpace(answerText))
         {
             throw new InvalidOperationException("A blank essay is graded without the AI grader.");
         }
 
+        ArgumentOutOfRangeException.ThrowIfNegative(timeTakenMilliseconds);
         var at = ToMicroseconds(requestedAt);
         return new EssayGrade(Guid.NewGuid(), studentId)
         {
@@ -58,10 +61,13 @@ public partial class EssayGrade : AuditEntity
             Attempts = 0,
             NextAttemptAt = at,
             RequestedAt = at,
+            TimeTakenMilliseconds = timeTakenMilliseconds,
         };
     }
 
     public bool IsDueAt(DateTimeOffset now) => Status == EssayGradeStatus.Pending && NextAttemptAt <= now;
+
+    public bool IsAwaitingApplication => Status == EssayGradeStatus.Graded && AppliedAt is null;
 
     public string ReadAnswerText() => JsonSerializer.Deserialize<EssayAnswer>(Answer, QuestionJson.SerializerOptions)?.Text ?? string.Empty;
 
