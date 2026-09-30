@@ -61,6 +61,8 @@ export const questionEditorSchema = z
     mathForm: z.enum(mathAnswerForms),
     mathTolerance: z.string(),
     mathToleranceMode: z.enum(['absolute', 'percent']),
+    mathSolution: z.array(z.object({ latex: z.string() })),
+    mathStepsWeight: z.string(),
     diagramImage: z.object({
       key: z.string(),
       url: z.string(),

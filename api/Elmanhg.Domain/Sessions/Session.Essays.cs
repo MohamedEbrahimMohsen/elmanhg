@@ -9,11 +9,13 @@ public partial class Session
 {
     public string? FindPendingEssayAnswer(SessionItem item) => !IsExam && item.SavedAnswer is not null && FindAttempt(item.QuestionId) is null ? item.SavedAnswer : null;
 
-    public EssaySubmission SubmitEssay(SessionItem item, string answer, int? reportedTimeTakenMilliseconds)
+    public EssaySubmission SubmitEssay(SessionItem item, string answer, int? reportedTimeTakenMilliseconds) => SubmitForAiGrading(item, answer, reportedTimeTakenMilliseconds);
+
+    public EssaySubmission SubmitForAiGrading(SessionItem item, string answer, int? reportedTimeTakenMilliseconds)
     {
         if (IsExam)
         {
-            throw new InvalidOperationException("Exam essays are saved with SaveExamAnswer.");
+            throw new InvalidOperationException("Exam answers are saved with SaveExamAnswer.");
         }
 
         EnsureOwnItem(item);
@@ -36,7 +38,9 @@ public partial class Session
         return new EssaySubmission(true, timeTaken, now);
     }
 
-    public Attempt? RecordEssayAttempt(SessionItem item, string answer, QuestionGrade grade, AttemptGrader gradedBy, int timeTakenMilliseconds, DateTimeOffset answeredAt, DateTimeOffset now)
+    public Attempt? RecordEssayAttempt(SessionItem item, string answer, QuestionGrade grade, AttemptGrader gradedBy, int timeTakenMilliseconds, DateTimeOffset answeredAt, DateTimeOffset now) => RecordAiGradedAttempt(item, answer, grade, gradedBy, timeTakenMilliseconds, answeredAt, now);
+
+    public Attempt? RecordAiGradedAttempt(SessionItem item, string answer, QuestionGrade grade, AttemptGrader gradedBy, int timeTakenMilliseconds, DateTimeOffset answeredAt, DateTimeOffset now)
     {
         EnsureOwnItem(item);
         if (FindAttempt(item.QuestionId) is not null)

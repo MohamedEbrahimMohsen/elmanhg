@@ -724,10 +724,10 @@
       "stories": [
         {
           "title": "Review queue and override",
-          "description": "As a teacher I see low-confidence AI grades and unchecked math answers in my subjects and can accept or override them.",
+          "description": "As a teacher I see low-confidence AI grades, MathSteps step grades in review and unchecked math answers in my subjects and can accept or override them.",
           "tasks": [
             "Queue query scoped to assigned subjects with confidence threshold configuration",
-            "MathSteps attempts graded unchecked (feedback kind mathUnchecked, awaitsReview) are listed and can be scored by the teacher",
+            "MathSteps step grades in review (MathStepGrades InReview: low confidence, grading failed, final answer unchecked after retries) and legacy MathSteps attempts graded unchecked (feedback kind mathUnchecked, awaitsReview) are listed and can be scored by the teacher",
             "Accept and override commands updating the attempt score and notifying the student",
             "Training record for every override",
             "Teacher review queue UI"

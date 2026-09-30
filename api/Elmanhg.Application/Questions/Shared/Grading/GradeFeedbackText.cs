@@ -31,6 +31,11 @@ public static class GradeFeedbackText
             GradeFeedbackKind.MathWrongForm => localizer.GetMessage(GradeFeedbackKeys.MathWrongForm),
             GradeFeedbackKind.MathUnreadable => localizer.GetMessage(GradeFeedbackKeys.MathUnreadable),
             GradeFeedbackKind.MathUnchecked => localizer.GetMessage(GradeFeedbackKeys.MathUnchecked),
+            GradeFeedbackKind.MathStepTally => localizer.GetMessage(GradeFeedbackKeys.MathStepTally, context: new Dictionary<string, object>
+            {
+                [GradeFeedbackKeys.RightArgument] = feedback.Right,
+                [GradeFeedbackKeys.TotalArgument] = feedback.Total,
+            }),
             GradeFeedbackKind.PlacementTally => localizer.GetMessage(GradeFeedbackKeys.PlacementTally, context: new Dictionary<string, object>
             {
                 [GradeFeedbackKeys.RightArgument] = feedback.Right,

@@ -36,7 +36,7 @@ public sealed class GradeQuestionDraftHandlerTests
     public GradeQuestionDraftHandlerTests()
     {
         _richTextSanitizer.Sanitize(Arg.Any<string?>()).Returns(x => x.Arg<string?>() ?? string.Empty);
-        _handler = new GradeQuestionDraftHandler(_richTextSanitizer, new RichTextExtractor(), _lessonRepository, _unitRepository, _subjectRepository, _essayGradingClient, Options.Create(new EssayGradingOptions()), _localizer, _mathCheckClient, Options.Create(new SessionsOptions()));
+        _handler = new GradeQuestionDraftHandler(_richTextSanitizer, new RichTextExtractor(), _lessonRepository, _unitRepository, _subjectRepository, _essayGradingClient, Options.Create(new EssayGradingOptions()), _localizer, _mathCheckClient, Options.Create(new SessionsOptions()), Substitute.For<IAiMathStepGradingClient>(), Options.Create(new MathStepGradingOptions()));
     }
 
     [Fact]
@@ -178,7 +178,7 @@ public sealed class GradeQuestionDraftHandlerTests
     [Fact]
     public async Task Handle_DragDropOverPlacementCap_ThrowsAttemptAnswerTooLong()
     {
-        var handler = new GradeQuestionDraftHandler(_richTextSanitizer, new RichTextExtractor(), _lessonRepository, _unitRepository, _subjectRepository, _essayGradingClient, Options.Create(new EssayGradingOptions()), _localizer, _mathCheckClient, Options.Create(new SessionsOptions { DragDropPlacementsMaxCount = 1 }));
+        var handler = new GradeQuestionDraftHandler(_richTextSanitizer, new RichTextExtractor(), _lessonRepository, _unitRepository, _subjectRepository, _essayGradingClient, Options.Create(new EssayGradingOptions()), _localizer, _mathCheckClient, Options.Create(new SessionsOptions { DragDropPlacementsMaxCount = 1 }), Substitute.For<IAiMathStepGradingClient>(), Options.Create(new MathStepGradingOptions()));
 
         var act = () => handler.Handle(new GradeQuestionDraftQuery(DragDropFields(), Json("""{"placements":[{"zoneId":"z1","itemIds":["i1"]},{"zoneId":"z2","itemIds":["i4"]}]}""")), TestContext.Current.CancellationToken);
 

@@ -9,6 +9,7 @@ from elmanhg_ai.clients.transcription import TranscriptionClient
 from elmanhg_ai.core.errors import ServiceNotReadyError
 from elmanhg_ai.pipelines.chat import ChatPrompts
 from elmanhg_ai.pipelines.essay_grading import EssayGradingPrompts
+from elmanhg_ai.pipelines.math_step_grading import MathStepGradingPrompts
 from elmanhg_ai.settings import Settings
 
 
@@ -54,6 +55,15 @@ def essay_grading_prompts_from_app(request: Request) -> EssayGradingPrompts:
     return prompts
 
 
+def math_step_grading_prompts_from_app(request: Request) -> MathStepGradingPrompts:
+    prompts: MathStepGradingPrompts | None = getattr(
+        request.app.state, "math_step_grading_prompts", None
+    )
+    if prompts is None:
+        raise ServiceNotReadyError()
+    return prompts
+
+
 def cas_pool_from_app(request: Request) -> CasPool:
     cas_pool: CasPool | None = getattr(request.app.state, "cas_pool", None)
     if cas_pool is None:
@@ -65,6 +75,9 @@ SettingsDep = Annotated[Settings, Depends(settings_from_app)]
 ModelClientDep = Annotated[ModelClient, Depends(model_client_from_app)]
 ChatPromptsDep = Annotated[ChatPrompts, Depends(chat_prompts_from_app)]
 EssayGradingPromptsDep = Annotated[EssayGradingPrompts, Depends(essay_grading_prompts_from_app)]
+MathStepGradingPromptsDep = Annotated[
+    MathStepGradingPrompts, Depends(math_step_grading_prompts_from_app)
+]
 EmbeddingClientDep = Annotated[EmbeddingClient, Depends(embedding_client_from_app)]
 TranscriptionClientDep = Annotated[TranscriptionClient, Depends(transcription_client_from_app)]
 CasPoolDep = Annotated[CasPool, Depends(cas_pool_from_app)]

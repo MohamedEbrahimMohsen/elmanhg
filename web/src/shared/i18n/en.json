@@ -301,7 +301,12 @@
     "QUESTION_MATH_FORM_INVALID": "Choose a valid required form.",
     "QUESTION_MATH_TOLERANCE_INVALID": "Enter a tolerance of zero or more together with absolute or percent, or leave both empty.",
     "QUESTION_MATH_TOLERANCE_FORM_CONFLICT": "A tolerance works only with the any-equivalent-form rule.",
-    "MATH_CHECK_UNAVAILABLE": "The final answer cannot be checked right now. Try again in a moment."
+    "MATH_CHECK_UNAVAILABLE": "The final answer cannot be checked right now. Try again in a moment.",
+    "QUESTION_MATH_MODEL_SOLUTION_INVALID": "Write the model solution steps with no step empty or too long, up to the allowed maximum.",
+    "QUESTION_MATH_MODEL_SOLUTION_REQUIRED": "Add at least one model solution step when the steps weight is above 0.",
+    "QUESTION_MATH_STEPS_WEIGHT_INVALID": "The steps weight is a whole number from 0 to 100.",
+    "MATH_STEP_GRADING_UNAVAILABLE": "The step grader is unavailable right now. Try again in a moment.",
+    "MATH_STEP_GRADE_NOT_FOUND": "No step grade was found for this answer."
   },
   "error": {
     "title": "Something went wrong"

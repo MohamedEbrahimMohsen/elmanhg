@@ -64,7 +64,8 @@
     "newPractice": "New practice",
     "backToLesson": "Back to the lesson",
     "inReview": "{count, plural, one {# answer is} other {# answers are}} under review. The score is provisional until your teacher reviews them.",
-    "essaysPending": "Some essays are still being graded. The score will update when they are done."
+    "essaysPending": "Some essays are still being graded. The score will update when they are done.",
+    "mathPending": "Some math answers are still being graded. The score will update when they are done."
   },
   "essayDraft": {
     "restored": "Your saved draft was restored.",
@@ -73,5 +74,23 @@
   },
   "essayAnswer": {
     "label": "Your answer"
+  },
+  "mathStepGrade": {
+    "label": "Step grading",
+    "loading": "Loading the grade…",
+    "error": "Could not load the grade.",
+    "retry": "Try again",
+    "pending": "Grading your answer…",
+    "pendingHint": "We check your final answer and mark your steps against the model solution. This usually takes under a minute.",
+    "inReview": "Under review",
+    "inReviewHint": "A teacher will review your grade before it is final.",
+    "finalAnswer": "Final answer:",
+    "verdicts": {
+      "Equivalent": "correct",
+      "NotEquivalent": "incorrect",
+      "WrongForm": "not in the required form",
+      "Unreadable": "unreadable"
+    },
+    "justification": "Grader's comment"
   }
 }

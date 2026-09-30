@@ -87,6 +87,9 @@ public static class ErrorCodes
     // ESSAY GRADING
     public const string EssayGradeNotPending = "ESSAY_GRADE_NOT_PENDING";
 
+    // MATH STEP GRADING
+    public const string MathStepGradeNotPending = "MATH_STEP_GRADE_NOT_PENDING";
+
     // TRAINING EXPORTS
     public const string TrainingExportNotPending = "TRAINING_EXPORT_NOT_PENDING";
     public const string TrainingExportNotReady = "TRAINING_EXPORT_NOT_READY";

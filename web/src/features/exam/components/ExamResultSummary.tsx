@@ -1,5 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import { countAwaitingReview, isWrittenEssay, ProvisionalScoreNotes } from '@/features/quiz';
+import {
+  countAwaitingReview,
+  hasPendingMathSteps,
+  isPendingMathSteps,
+  isWrittenEssay,
+  ProvisionalScoreNotes,
+} from '@/features/quiz';
 import type { ExamSessionResult } from '@/shared/api/generated/model';
 import { splitDuration } from '../api/examSession';
 
@@ -11,8 +17,10 @@ const badgeClassName = 'self-start rounded-full px-2.5 py-0.5 text-micro font-se
 
 export function ExamResultSummary({ session }: ExamResultSummaryProps) {
   const { t } = useTranslation('exam');
-  const answered = session.items.filter((item) => item.attempt !== null || isWrittenEssay(item)).length;
-  const inReview = countAwaitingReview(session.items) > 0;
+  const answered = session.items.filter(
+    (item) => item.attempt !== null || isWrittenEssay(item) || isPendingMathSteps(item),
+  ).length;
+  const inReview = countAwaitingReview(session.items) > 0 || hasPendingMathSteps(session.items);
 
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5">

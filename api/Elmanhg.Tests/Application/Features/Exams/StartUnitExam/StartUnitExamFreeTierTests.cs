@@ -11,6 +11,7 @@ using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
+using Elmanhg.Domain.MathStepGrading;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Sessions.Exams;
@@ -39,6 +40,7 @@ public sealed class StartUnitExamFreeTierTests
     private readonly IExamBlueprintRepository _examBlueprintRepository = Substitute.For<IExamBlueprintRepository>();
     private readonly IQuestionMasteryRepository _questionMasteryRepository = Substitute.For<IQuestionMasteryRepository>();
     private readonly IEssayGradeRepository _essayGradeRepository = Substitute.For<IEssayGradeRepository>();
+    private readonly IMathStepGradeRepository _mathStepGradeRepository = Substitute.For<IMathStepGradeRepository>();
     private readonly ISubscriptionRepository _subscriptionRepository = Substitute.For<ISubscriptionRepository>();
     private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
     private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
@@ -72,7 +74,7 @@ public sealed class StartUnitExamFreeTierTests
         _questionMasteryRepository.FindAsync(Arg.Any<Expression<Func<QuestionMastery, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<QuestionMastery>, IQueryable<QuestionMastery>>?>(), Arg.Any<Func<IQueryable<QuestionMastery>, IOrderedQueryable<QuestionMastery>>?>(), Arg.Any<bool>())
             .Returns(call => _masteries.Where(call.Arg<Expression<Func<QuestionMastery, bool>>>().Compile()).ToList());
         SubscriptionRepositoryStub.Stub(_subscriptionRepository);
-        _handler = new StartUnitExamHandler(_sessionRepository, _unitRepository, _subjectRepository, _lessonRepository, _lessonOpeningRepository, _questionRepository, _examBlueprintRepository, _questionMasteryRepository, _essayGradeRepository, _subscriptionRepository, _examsOptions, Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), new Random(42), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), Substitute.For<IAiMathCheckClient>(), Substitute.For<IFileStorage>());
+        _handler = new StartUnitExamHandler(_sessionRepository, _unitRepository, _subjectRepository, _lessonRepository, _lessonOpeningRepository, _questionRepository, _examBlueprintRepository, _questionMasteryRepository, _essayGradeRepository, _mathStepGradeRepository, _subscriptionRepository, _examsOptions, Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), new Random(42), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), Substitute.For<IAiMathCheckClient>(), Substitute.For<IFileStorage>());
     }
 
     private CurriculumUnit Unit => _builder.Questions.Unit;

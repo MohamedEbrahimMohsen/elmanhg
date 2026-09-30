@@ -41,3 +41,18 @@ None.
 - Non-blocking items (Escape-cancel swallow, sessions.md:203 wording, `key.title`, `rounded-full`, `touch-none`) were not touched, per rework mode.
 - `useDiagramDrag.ts` is 155 lines. It was already over ~100 before this rework.
 - No contract change, so OpenAPI, Orval and Postman are unchanged.
+
+## Merge note — origin/main (#123 LLM step grading) into #126
+
+`git merge origin/main` produced 23 conflicts; all resolved keeping both stories:
+
+| Area | Resolution |
+|---|---|
+| `GradeFeedbackKind` | main's values unchanged; `MathStepTally` stays 8, `PlacementTally` appended as 9. `GradeFeedback`, `GradeFeedbackKeys`, `GradeFeedbackText` carry both kinds. |
+| `Messages.ar/en.resx` | both sets of keys (`GRADE_FEEDBACK_PLACEMENT_TALLY` + #123's math-step keys). |
+| StartUnitExam / StartMultiUnitExam / SubmitExam / SubmitAnswer handlers | main's constructor (incl. `IMathStepGradeRepository`, `IMathCheckRateLimiter`) plus `IFileStorage fileStorage` appended last; test constructors updated the same way. |
+| `GradeQuestionDraftHandler` | #126's up-front raw-size + limits check for every type, then #123's synchronous `MathStepsDraftGrading` for MathSteps, `QuestionGrader.Grade` otherwise (main's duplicate `ExceedsLimits` check dropped). `GradeQuestionDraftHandlerTests.Handle_DragDropOverPlacementCap_ThrowsAttemptAnswerTooLong` gets the two new constructor args. |
+| `QuestionPreviewPanel.tsx` | both `isDragDrop` and `isStepGraded`. |
+| Docs (PRD §grading table, sessions.md, question-schemas.md, claude-design-prompt.md §4–§6) | both stories described: steps weight + deferred MathSteps grading, and the drag-and-drop canvas / per-item grader / placement tally. main's "DragDrop not servable until #126" lines replaced by the #126 text. |
+
+Verification after merge: `dotnet build api/ -c Release` succeeded (0 warnings; OpenAPI unchanged vs merged state); `npm --prefix web run gen:api` no drift; `dotnet test api/ -c Release` with `appsettings.json` moved aside: 4526/4526 passed; web lint, typecheck clean; `npm --prefix web test -- --run` 1482/1482 passed; `npm --prefix web run build` ok; `perf:budget` all within budget.

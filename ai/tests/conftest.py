@@ -33,6 +33,7 @@ def settings() -> Settings:
         env="testing",
         llm_provider="fake",
         log_format="json",
+        cas_warm_on_start=False,
     )
 
 

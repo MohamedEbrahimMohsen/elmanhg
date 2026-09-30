@@ -465,9 +465,16 @@
   <data name="QUESTION_MATH_TOLERANCE_INVALID" xml:space="preserve"><value>اكتب هامش خطا صفرا او اكثر مع قيمة مطلقة او نسبة مئوية، او اتركهما فارغين.</value></data>
   <data name="QUESTION_MATH_TOLERANCE_FORM_CONFLICT" xml:space="preserve"><value>هامش الخطا يعمل مع قاعدة اي صورة مكافئة فقط.</value></data>
   <data name="MATH_CHECK_UNAVAILABLE" xml:space="preserve"><value>تعذر تصحيح الاجابة النهائية الان. حاول مرة اخرى بعد قليل.</value></data>
-  <data name="GRADE_FEEDBACK_MATH_FINAL_ONLY" xml:space="preserve"><value>صُحّحت الإجابة النهائية فقط، وتُصحَّح الخطوات لاحقًا.</value></data>
+  <data name="GRADE_FEEDBACK_MATH_FINAL_ONLY" xml:space="preserve"><value>صُحّحت الإجابة النهائية فقط.</value></data>
   <data name="GRADE_FEEDBACK_MATH_WRONG_FORM" xml:space="preserve"><value>اكتب الإجابة النهائية بالصورة التي يطلبها السؤال.</value></data>
   <data name="GRADE_FEEDBACK_MATH_UNREADABLE" xml:space="preserve"><value>تعذّرت قراءة الإجابة النهائية. اكتبها بالرموز الرياضية، مثل x = 2.</value></data>
   <data name="GRADE_FEEDBACK_MATH_UNCHECKED" xml:space="preserve"><value>تعذّر التحقق من الإجابة النهائية آليًا، وسيراجعها معلمك.</value></data>
   <data name="GRADE_FEEDBACK_PLACEMENT_TALLY" xml:space="preserve"><value>العناصر في أماكنها الصحيحة: {right} من {total}، والعناصر المشتِّتة الموضوعة: {wrong}.</value></data>
+  <data name="MATH_STEP_GRADING_UNAVAILABLE" xml:space="preserve"><value>مصحح خطوات الحل غير متاح الآن. حاول مرة أخرى بعد قليل.</value></data>
+  <data name="MATH_STEP_GRADE_NOT_FOUND" xml:space="preserve"><value>لا يوجد تصحيح لخطوات هذه الإجابة.</value></data>
+  <data name="MATH_STEP_GRADE_NOT_PENDING" xml:space="preserve"><value>هذه الإجابة لم تعد بانتظار مصحح الخطوات.</value></data>
+  <data name="QUESTION_MATH_MODEL_SOLUTION_INVALID" xml:space="preserve"><value>اكتب خطوات الحل النموذجي بحيث لا تكون أي خطوة فارغة أو طويلة جدًا، وبما لا يتجاوز الحد المسموح.</value></data>
+  <data name="QUESTION_MATH_MODEL_SOLUTION_REQUIRED" xml:space="preserve"><value>أضف خطوة واحدة على الأقل للحل النموذجي عندما يكون وزن الخطوات أكبر من صفر.</value></data>
+  <data name="QUESTION_MATH_STEPS_WEIGHT_INVALID" xml:space="preserve"><value>وزن الخطوات عدد صحيح من 0 إلى 100.</value></data>
+  <data name="GRADE_FEEDBACK_MATH_STEP_TALLY" xml:space="preserve"><value>خطوات صحيحة كاملة: {right} من {total}.</value></data>
 </root>

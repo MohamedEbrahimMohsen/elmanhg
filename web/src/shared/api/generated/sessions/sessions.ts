@@ -29,6 +29,7 @@ import type {
 
 import type {
   EssayGradeResult,
+  MathStepGradeResult,
   SessionItemResult,
   SessionResult,
   StartQuizSessionCommand,
@@ -581,6 +582,165 @@ export function useGetEssayGradeSuspense<TData = Awaited<ReturnType<typeof getEs
  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetEssayGradeSuspenseQueryOptions(sessionId,questionId,options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetMathStepGradeUrl = (sessionId: string,
+    questionId: string,) => {
+
+
+
+
+  return `/api/sessions/${sessionId}/questions/${questionId}/math-step-grade`
+}
+
+export const getMathStepGrade = async (sessionId: string,
+    questionId: string, options?: Parameters<typeof http>[1]): Promise<MathStepGradeResult> => {
+
+  return http<MathStepGradeResult>(getGetMathStepGradeUrl(sessionId,questionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMathStepGradeQueryKey = (sessionId: string,
+    questionId: string,) => {
+    return [
+    `/api/sessions/${sessionId}/questions/${questionId}/math-step-grade`
+    ] as const;
+    }
+
+
+export const getGetMathStepGradeQueryOptions = <TData = Awaited<ReturnType<typeof getMathStepGrade>>, TError = unknown>(sessionId: string,
+    questionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMathStepGrade>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMathStepGradeQueryKey(sessionId,questionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMathStepGrade>>> = ({ signal }) => getMathStepGrade(sessionId,questionId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: sessionId !== null && sessionId !== undefined && questionId !== null && questionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMathStepGrade>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMathStepGradeQueryResult = NonNullable<Awaited<ReturnType<typeof getMathStepGrade>>>
+export type GetMathStepGradeQueryError = unknown
+
+
+export function useGetMathStepGrade<TData = Awaited<ReturnType<typeof getMathStepGrade>>, TError = unknown>(
+ sessionId: string,
+    questionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMathStepGrade>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMathStepGrade>>,
+          TError,
+          Awaited<ReturnType<typeof getMathStepGrade>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMathStepGrade<TData = Awaited<ReturnType<typeof getMathStepGrade>>, TError = unknown>(
+ sessionId: string,
+    questionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMathStepGrade>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMathStepGrade>>,
+          TError,
+          Awaited<ReturnType<typeof getMathStepGrade>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMathStepGrade<TData = Awaited<ReturnType<typeof getMathStepGrade>>, TError = unknown>(
+ sessionId: string,
+    questionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMathStepGrade>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetMathStepGrade<TData = Awaited<ReturnType<typeof getMathStepGrade>>, TError = unknown>(
+ sessionId: string,
+    questionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMathStepGrade>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMathStepGradeQueryOptions(sessionId,questionId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetMathStepGradeSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getMathStepGrade>>, TError = unknown>(sessionId: string,
+    questionId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMathStepGrade>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMathStepGradeQueryKey(sessionId,questionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMathStepGrade>>> = ({ signal }) => getMathStepGrade(sessionId,questionId, { signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMathStepGrade>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetMathStepGradeSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getMathStepGrade>>>
+export type GetMathStepGradeSuspenseQueryError = unknown
+
+
+export function useGetMathStepGradeSuspense<TData = Awaited<ReturnType<typeof getMathStepGrade>>, TError = unknown>(
+ sessionId: string,
+    questionId: string, options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMathStepGrade>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMathStepGradeSuspense<TData = Awaited<ReturnType<typeof getMathStepGrade>>, TError = unknown>(
+ sessionId: string,
+    questionId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMathStepGrade>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMathStepGradeSuspense<TData = Awaited<ReturnType<typeof getMathStepGrade>>, TError = unknown>(
+ sessionId: string,
+    questionId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMathStepGrade>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetMathStepGradeSuspense<TData = Awaited<ReturnType<typeof getMathStepGrade>>, TError = unknown>(
+ sessionId: string,
+    questionId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMathStepGrade>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMathStepGradeSuspenseQueryOptions(sessionId,questionId,options)
 
   const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

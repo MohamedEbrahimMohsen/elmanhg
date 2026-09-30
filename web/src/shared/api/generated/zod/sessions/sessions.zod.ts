@@ -237,3 +237,36 @@ export const GetEssayGradeResponse = zod.object({
 }))
 })
 
+export const GetMathStepGradeParams = zod.object({
+  "sessionId": zod.uuid(),
+  "questionId": zod.uuid()
+})
+
+export const getMathStepGradeResponseMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMathStepGradeResponseScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const getMathStepGradeResponseNormalisedScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const getMathStepGradeResponseStepsItemStepIndexRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMathStepGradeResponseStepsItemPointsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMathStepGradeResponseStepsItemMaxPointsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const GetMathStepGradeResponse = zod.object({
+  "id": zod.uuid(),
+  "status": zod.string(),
+  "maxScore": zod.union([zod.int(),zod.stringFormat('int32', getMathStepGradeResponseMaxScoreRegExpTwo)]),
+  "requestedAt": zod.iso.datetime({"offset":true}),
+  "gradedAt": zod.iso.datetime({"offset":true}).nullable(),
+  "score": zod.union([zod.number(),zod.stringFormat('double', getMathStepGradeResponseScoreRegExpTwo)]).nullable(),
+  "normalisedScore": zod.union([zod.number(),zod.stringFormat('double', getMathStepGradeResponseNormalisedScoreRegExpTwo)]).nullable(),
+  "outcome": zod.string().nullable(),
+  "finalAnswerVerdict": zod.string().nullable(),
+  "justification": zod.string().nullable(),
+  "steps": zod.array(zod.object({
+  "stepIndex": zod.union([zod.int(),zod.stringFormat('int32', getMathStepGradeResponseStepsItemStepIndexRegExpTwo)]),
+  "step": zod.string(),
+  "points": zod.union([zod.int(),zod.stringFormat('int32', getMathStepGradeResponseStepsItemPointsRegExpTwo)]),
+  "maxPoints": zod.union([zod.int(),zod.stringFormat('int32', getMathStepGradeResponseStepsItemMaxPointsRegExpTwo)]),
+  "justification": zod.string()
+}))
+})
+

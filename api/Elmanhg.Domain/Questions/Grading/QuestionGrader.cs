@@ -25,6 +25,8 @@ public static class QuestionGrader
 
     public static QuestionGrade GradeMathSteps(int maxScore, MathAnswerVerdict? verdict) => QuestionGrade.FromNormalised(MathStepsGrader.Grade(verdict), maxScore);
 
+    public static QuestionGrade GradeMathStepsCombined(string gradingSpec, int maxScore, MathAnswerVerdict verdict, IReadOnlyList<MathStepAward>? awards) => QuestionGrade.FromNormalised(MathStepsGrader.Combine(ReadSpec<MathStepsGradingSpec>(gradingSpec), verdict, awards), maxScore);
+
     private static T ReadSpec<T>(string json) where T : class
     {
         var value = JsonSerializer.Deserialize<T>(json, QuestionJson.SerializerOptions);

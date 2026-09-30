@@ -2,7 +2,6 @@ using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Core.Localization;
 using Elmanhg.Application.Exceptions;
-using Elmanhg.Application.Mastery.Shared;
 using Elmanhg.Application.Questions.Shared;
 using Elmanhg.Application.Questions.Shared.Grading;
 using Elmanhg.Application.Sessions.Shared;
@@ -13,8 +12,8 @@ using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
+using Elmanhg.Domain.MathStepGrading;
 using Elmanhg.Domain.Questions;
-using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subscriptions;
 using MediatR;
@@ -23,7 +22,7 @@ using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.Sessions.SubmitAnswer;
 
-public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, ILessonRepository lessonRepository, ISubscriptionRepository subscriptionRepository, IEssayGradeRepository essayGradeRepository, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, IOptions<ContentOptions> contentOptions, IOptions<SessionsOptions> sessionsOptions, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer, IAiMathCheckClient mathCheckClient, IFileStorage fileStorage) : IRequestHandler<SubmitAnswerCommand, SessionItemResult>
+public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, ILessonRepository lessonRepository, ISubscriptionRepository subscriptionRepository, IEssayGradeRepository essayGradeRepository, IMathStepGradeRepository mathStepGradeRepository, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, IOptions<ContentOptions> contentOptions, IOptions<SessionsOptions> sessionsOptions, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer, IAiMathCheckClient mathCheckClient, IMathCheckRateLimiter mathCheckRateLimiter, IFileStorage fileStorage) : IRequestHandler<SubmitAnswerCommand, SessionItemResult>
 {
     public async Task<SessionItemResult> Handle(SubmitAnswerCommand request, CancellationToken cancellationToken)
     {
@@ -79,8 +78,7 @@ public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQ
         }
         else
         {
-            var grade = await AnswerGrader.GradeAsync(revision, request.Answer, mathCheckClient, cancellationToken).ConfigureAwait(false);
-            await RecordAttemptAsync(session, item, grade, QuestionAnswerRules.Canonicalize(type, request.Answer), request.TimeTakenMilliseconds, cancellationToken).ConfigureAwait(false);
+            await AnswerAsync(session, item, revision, type, request, userId, cancellationToken).ConfigureAwait(false);
         }
 
         await sessionRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -97,15 +95,26 @@ public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQ
         await FreeTierGate.EnsureQuizQuestionAvailableAsync(entitlement, studentId, sessionRepository, options, now, cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task RecordAttemptAsync(Session session, SessionItem item, QuestionGrade grade, string answer, int? reportedTimeTakenMilliseconds, CancellationToken cancellationToken)
+    private async Task AnswerAsync(Session session, SessionItem item, QuestionRevision revision, QuestionType type, SubmitAnswerCommand request, Guid userId, CancellationToken cancellationToken)
     {
-        var isNewAttempt = session.FindAttempt(item.QuestionId) is null;
-        var attempt = session.RecordAttempt(item, answer, grade, reportedTimeTakenMilliseconds);
-        if (!isNewAttempt || session.IsTestMode || grade.AwaitsReview)
+        var answer = QuestionAnswerRules.Canonicalize(type, request.Answer);
+        if (session.IsReplay(item, answer))
         {
             return;
         }
 
-        await QuestionMasteryRecorder.RecordAsync(attempt, questionMasteryRepository, masteryOptions.Value.CorrectThreshold, cancellationToken).ConfigureAwait(false);
+        if (type == QuestionType.MathSteps && MathStepsAnswerRules.HasFinalAnswer(request.Answer) && !mathCheckRateLimiter.TryAcquire(userId))
+        {
+            throw new RateLimitExceededCoreException(ErrorCodes.TooManyRequests);
+        }
+
+        var decision = await AnswerGrader.DecideAsync(revision, request.Answer, mathCheckClient, cancellationToken).ConfigureAwait(false);
+        if (decision.Grade is not null)
+        {
+            await QuizAttemptRecorder.RecordAsync(session, item, decision.Grade, answer, request.TimeTakenMilliseconds, questionMasteryRepository, masteryOptions.Value.CorrectThreshold, cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
+        await QuizMathStepsSubmission.SubmitAsync(session, item, answer, decision.Verdict, request.TimeTakenMilliseconds, questionRepository, mathStepGradeRepository, cancellationToken).ConfigureAwait(false);
     }
 }

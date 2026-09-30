@@ -1,5 +1,6 @@
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Questions.Schemas;
 using System.Text.Json;
 
@@ -27,13 +28,19 @@ public static class MathStepsQuestionRules
             QuestionSchemaReader.AddIf(errors, (spec.Form ?? MathAnswerForm.Equivalent) != MathAnswerForm.Equivalent, ErrorCodes.QuestionMathToleranceFormConflict);
         }
 
+        QuestionSchemaReader.AddIf(errors, spec.ModelSolution is not null && !IsValidModelSolution(spec.ModelSolution, options), ErrorCodes.QuestionMathModelSolutionInvalid);
+        QuestionSchemaReader.AddIf(errors, spec.StepsWeight is < 0 or > MathStepsGrader.PercentScale, ErrorCodes.QuestionMathStepsWeightInvalid);
+        QuestionSchemaReader.AddIf(errors, spec.StepsWeight > 0 && spec.ModelSolution is not { Count: > 0 }, ErrorCodes.QuestionMathModelSolutionRequired);
         return errors;
     }
 
     public static (string Body, string GradingSpec) Normalize(JsonElement body, JsonElement gradingSpec)
     {
         var spec = QuestionSchemaReader.Read<MathStepsGradingSpec>(gradingSpec);
-        var normalizedSpec = new MathStepsGradingSpec(QuestionSchemaReader.TrimAnswers(spec.AcceptedAnswers), spec.Form ?? MathAnswerForm.Equivalent, spec.Tolerance, spec.Tolerance is null ? null : spec.ToleranceMode);
+        var normalizedSpec = new MathStepsGradingSpec(QuestionSchemaReader.TrimAnswers(spec.AcceptedAnswers), spec.Form ?? MathAnswerForm.Equivalent, spec.Tolerance, spec.Tolerance is null ? null : spec.ToleranceMode, spec.ModelSolution is { Count: > 0 } solution ? QuestionSchemaReader.TrimAnswers(solution) : null, spec.StepsWeight is > 0 ? spec.StepsWeight : null);
         return (QuestionSchemaReader.Serialize(new MathStepsBody()), QuestionSchemaReader.Serialize(normalizedSpec));
     }
+
+    private static bool IsValidModelSolution(List<string> steps, ContentOptions options) => steps.Count <= options.QuestionModelSolutionStepsMaxCount
+        && steps.All(x => !string.IsNullOrWhiteSpace(x) && x.Trim().Length <= options.QuestionModelSolutionStepMaxLength);
 }

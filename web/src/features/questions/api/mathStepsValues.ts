@@ -13,10 +13,13 @@ export function readMathSteps(spec: JsonElement): Partial<QuestionValues> {
     mathForm: parsed.data.form ?? 'equivalent',
     mathTolerance: parsed.data.tolerance === undefined ? '' : String(parsed.data.tolerance),
     mathToleranceMode: parsed.data.toleranceMode ?? 'absolute',
+    mathSolution: (parsed.data.modelSolution ?? []).map((latex) => ({ latex })),
+    mathStepsWeight: String(parsed.data.stepsWeight ?? 0),
   };
 }
 
 export function toMathStepsContent(values: QuestionValues): Pick<UpdateQuestionRequest, 'body' | 'gradingSpec'> {
+  const weight = Number(values.mathStepsWeight.trim());
   return {
     body: {},
     gradingSpec: {
@@ -25,6 +28,10 @@ export function toMathStepsContent(values: QuestionValues): Pick<UpdateQuestionR
       ...(values.mathTolerance.trim() === ''
         ? {}
         : { tolerance: Number(values.mathTolerance), toleranceMode: values.mathToleranceMode }),
+      ...(values.mathSolution.length === 0
+        ? {}
+        : { modelSolution: values.mathSolution.map((step) => step.latex.trim()) }),
+      ...(weight > 0 ? { stepsWeight: weight } : {}),
     },
   };
 }

@@ -465,9 +465,16 @@
   <data name="QUESTION_MATH_TOLERANCE_INVALID" xml:space="preserve"><value>Enter a tolerance of zero or more together with absolute or percent, or leave both empty.</value></data>
   <data name="QUESTION_MATH_TOLERANCE_FORM_CONFLICT" xml:space="preserve"><value>A tolerance works only with the any-equivalent-form rule.</value></data>
   <data name="MATH_CHECK_UNAVAILABLE" xml:space="preserve"><value>The final answer cannot be checked right now. Try again in a moment.</value></data>
-  <data name="GRADE_FEEDBACK_MATH_FINAL_ONLY" xml:space="preserve"><value>Only the final answer was graded; the steps are graded later.</value></data>
+  <data name="GRADE_FEEDBACK_MATH_FINAL_ONLY" xml:space="preserve"><value>Only the final answer was graded.</value></data>
   <data name="GRADE_FEEDBACK_MATH_WRONG_FORM" xml:space="preserve"><value>Write the final answer in the form the question asks for.</value></data>
   <data name="GRADE_FEEDBACK_MATH_UNREADABLE" xml:space="preserve"><value>The final answer could not be read. Write it with math symbols, for example x = 2.</value></data>
   <data name="GRADE_FEEDBACK_MATH_UNCHECKED" xml:space="preserve"><value>The final answer could not be checked automatically. Your teacher will review it.</value></data>
   <data name="GRADE_FEEDBACK_PLACEMENT_TALLY" xml:space="preserve"><value>Items in the right place: {right} of {total}; distractors placed: {wrong}.</value></data>
+  <data name="MATH_STEP_GRADING_UNAVAILABLE" xml:space="preserve"><value>The step grader is unavailable right now. Try again in a moment.</value></data>
+  <data name="MATH_STEP_GRADE_NOT_FOUND" xml:space="preserve"><value>No step grade was found for this answer.</value></data>
+  <data name="MATH_STEP_GRADE_NOT_PENDING" xml:space="preserve"><value>This answer is no longer waiting for the step grader.</value></data>
+  <data name="QUESTION_MATH_MODEL_SOLUTION_INVALID" xml:space="preserve"><value>Write the model solution steps with no step empty or too long, up to the allowed maximum.</value></data>
+  <data name="QUESTION_MATH_MODEL_SOLUTION_REQUIRED" xml:space="preserve"><value>Add at least one model solution step when the steps weight is above 0.</value></data>
+  <data name="QUESTION_MATH_STEPS_WEIGHT_INVALID" xml:space="preserve"><value>The steps weight is a whole number from 0 to 100.</value></data>
+  <data name="GRADE_FEEDBACK_MATH_STEP_TALLY" xml:space="preserve"><value>Fully correct steps: {right} of {total}.</value></data>
 </root>

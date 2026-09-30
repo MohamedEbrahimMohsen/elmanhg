@@ -3,6 +3,8 @@ export { QuestionEditorPage } from './pages/QuestionEditorPage';
 export { NewQuestionPage } from './pages/NewQuestionPage';
 export { QuestionView } from './components/QuestionView';
 export { EssayCriteriaList } from './components/EssayCriteriaList';
+export { MathStepScoreList } from './components/MathStepScoreList';
+export { MathStepsReadOnly } from './components/MathStepsReadOnly';
 export { questionListSearchSchema, type QuestionListSearch } from './schemas/questionListSearchSchema';
 export { LazyDragDropCorrectAnswer } from './components/LazyDragDropCorrectAnswer';
 export {
