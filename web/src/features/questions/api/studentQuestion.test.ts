@@ -11,6 +11,18 @@ const question = (overrides: Partial<StudentQuestion>): StudentQuestion => ({
   ...overrides,
 });
 
+const diagram = {
+  image: { url: '/api/media/question-diagrams/l/abc.png', width: 800, height: 600, alt: 'Plant cell' },
+  zones: [
+    { id: 'z1', x: 10, y: 10, width: 20, height: 15, capacity: 2 },
+    { id: 'z2', x: 50, y: 40, width: 30, height: 20.5, capacity: 2 },
+  ],
+  items: [
+    { id: 'i1', text: 'Nucleus' },
+    { id: 'i2', text: 'Vacuole' },
+  ],
+};
+
 const payloadCases: [StudentQuestion, object][] = [
   [question({ type: 'Mcq' }), { optionId: 'b' }],
   [question({ type: 'Multi' }), { optionIds: ['b', 'c'] }],
@@ -65,7 +77,30 @@ describe('studentQuestion', () => {
     expect(toAnswerPayload(question({ type: 'Essay' }), { ...emptyAnswer(), text: 'x' })).toEqual({ text: 'x' });
   });
 
-  it('sends no answer payload for drag-and-drop', () => {
-    expect(toAnswerPayload(question({ type: 'DragDrop' }), { ...emptyAnswer(), text: 'x' })).toEqual({});
+  it('sends drag-and-drop placements in zone order', () => {
+    const dragDrop = question({ type: 'DragDrop', diagram });
+
+    expect(toAnswerPayload(dragDrop, { ...emptyAnswer(), placements: { z2: [], z1: ['i1', 'x'] } })).toEqual({
+      placements: [{ zoneId: 'z1', itemIds: ['i1'] }],
+    });
+  });
+
+  it('builds the student diagram from editor values', () => {
+    const values = {
+      ...emptyQuestionValues('DragDrop'),
+      diagramImage: { key: 'k', url: diagram.image.url, width: 800, height: 600, alt: 'Plant cell' },
+      diagramZones: [
+        { id: 'z1', x: '10', y: '10', width: '20', height: '15', capacity: '2', ordered: false, itemIds: ['i1'] },
+        { id: 'z2', x: '50', y: '40', width: '30', height: '20.5', capacity: '2', ordered: true, itemIds: [] },
+      ],
+      diagramItems: [{ id: 'i1', text: 'Nucleus' }],
+    };
+
+    expect(toStudentQuestion(values).diagram).toEqual({
+      image: diagram.image,
+      zones: diagram.zones,
+      items: [{ id: 'i1', text: 'Nucleus' }],
+    });
+    expect(toStudentQuestion({ ...values, diagramImage: { ...values.diagramImage, url: '' } }).diagram).toBeNull();
   });
 });

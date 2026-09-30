@@ -19,6 +19,7 @@ public static class ErrorCodes
     public const string OtpDeliveryFailed = "OTP_DELIVERY_FAILED";
     public const string InvitationNotFound = "INVITATION_NOT_FOUND";
     public const string PasswordRejected = "PASSWORD_REJECTED";
+    public const string RefreshTokenRevoked = "REFRESH_TOKEN_REVOKED";
 
     // USERS
     public const string UserListPageNumberInvalid = "USER_LIST_PAGE_NUMBER_INVALID";
@@ -125,7 +126,6 @@ public static class ErrorCodes
     public const string QuestionModelAnswersCountInvalid = "QUESTION_MODEL_ANSWERS_COUNT_INVALID";
     public const string QuestionModelAnswerRequired = "QUESTION_MODEL_ANSWER_REQUIRED";
     public const string QuestionModelAnswerTooLong = "QUESTION_MODEL_ANSWER_TOO_LONG";
-    public const string QuestionTypeNotGradable = "QUESTION_TYPE_NOT_GRADABLE";
     public const string QuestionDiagramImageTypeInvalid = "QUESTION_DIAGRAM_IMAGE_TYPE_INVALID";
     public const string QuestionDiagramImageInvalid = "QUESTION_DIAGRAM_IMAGE_INVALID";
     public const string QuestionDiagramImageAltRequired = "QUESTION_DIAGRAM_IMAGE_ALT_REQUIRED";

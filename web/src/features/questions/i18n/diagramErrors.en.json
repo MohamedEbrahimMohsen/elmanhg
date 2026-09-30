@@ -1,6 +1,5 @@
 {
   "errors": {
-    "QUESTION_TYPE_NOT_GRADABLE": "The test grader does not grade this question type yet.",
     "QUESTION_DIAGRAM_IMAGE_TYPE_INVALID": "Use a PNG, JPEG or WebP image.",
     "QUESTION_DIAGRAM_IMAGE_INVALID": "Upload the diagram image again: it is missing or invalid.",
     "QUESTION_DIAGRAM_IMAGE_ALT_REQUIRED": "Describe the diagram image.",

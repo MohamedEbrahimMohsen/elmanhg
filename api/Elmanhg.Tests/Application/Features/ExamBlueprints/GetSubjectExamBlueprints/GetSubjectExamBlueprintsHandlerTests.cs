@@ -44,11 +44,11 @@ public sealed class GetSubjectExamBlueprintsHandlerTests
         result.Units.Select(x => x.UnitId).Should().Equal(_builder.Unit.Id, _unitB.Id);
         result.Units[0].Blueprint!.Id.Should().Be(unitBlueprint.Id);
         result.Units[1].Blueprint.Should().BeNull();
-        result.Units[0].Servable.Should().HaveCount(7);
+        result.Units[0].Servable.Should().HaveCount(8);
         result.Units[0].Servable.Single(x => x.Type == QuestionType.Mcq).Count.Should().Be(2);
         result.Units[0].Servable.Where(x => x.Type != QuestionType.Mcq).Should().OnlyContain(x => x.Count == 0);
         result.Servable.Single(x => x.Type == QuestionType.Mcq).Count.Should().Be(3);
-        result.Servable.Count.Should().Be(7);
+        result.Servable.Count.Should().Be(8);
     }
 
     [Fact]

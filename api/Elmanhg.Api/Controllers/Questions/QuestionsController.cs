@@ -1,4 +1,5 @@
 using Core.DDD.Models;
+using Elmanhg.Api.RateLimiting;
 using Elmanhg.Application.Questions.CreateQuestion;
 using Elmanhg.Application.Questions.GetQuestion;
 using Elmanhg.Application.Questions.GetQuestions;
@@ -14,6 +15,7 @@ using Elmanhg.Domain.SharedKernel;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Api.Controllers.Questions;
@@ -35,6 +37,7 @@ public class QuestionsController(IMediator mediator, IOptions<ContentOptions> co
 
     [HttpGet("servable-count", Name = "GetServableQuestionCount")]
     [AllowAnonymous]
+    [EnableRateLimiting(PublicRateLimitPolicies.Reads)]
     [ProducesResponseType<ServableQuestionCountResult>(StatusCodes.Status200OK)]
     public async Task<ActionResult> GetServableQuestionCount(CancellationToken cancellationToken)
     {

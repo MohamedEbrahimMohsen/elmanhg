@@ -44,7 +44,7 @@ The editor produces these shapes with `@tiptap/extension-mathematics`, which als
 ## Images
 
 - Upload: `POST /api/lessons/{lessonId}/images` (multipart, field `file`, policy `Content.Manage`). The response is `{ "url": "..." }`, which the editor puts in an `img` tag with the required description as `alt`.
-- Allowed: `.png` `.jpg` `.jpeg` `.webp` `.gif`, and the content type must match (`image/png`, `image/jpeg`, `image/webp`, `image/gif`). SVG is excluded because it can carry script and media is served from the API origin.
+- Allowed: `.png` `.jpg` `.jpeg` `.webp` `.gif`, and the content type must match (`image/png`, `image/jpeg`, `image/webp`, `image/gif`), and the file signature must match the extension (PNG `89 50 4E 47 0D 0A 1A 0A`, JPEG `FF D8 FF`, WEBP `RIFF….WEBP`, GIF `GIF87a`/`GIF89a`), otherwise 422 `LESSON_IMAGE_TYPE_INVALID`. SVG is excluded because it can carry script and media is served from the API origin.
 - Size cap: `Content:LessonImageMaxSizeInMb` (default 5).
 - Before the upload, the editor downscales the image to WebP (longest edge at most 1600 px, quality 0.8) when the browser supports it (`createImageBitmap` and `OffscreenCanvas`) and the result is smaller. GIFs are kept as they are, and anything that fails falls back to the original file.
 - Public media is served with `Cache-Control: public, max-age=31536000, immutable`, because a key is never rewritten.

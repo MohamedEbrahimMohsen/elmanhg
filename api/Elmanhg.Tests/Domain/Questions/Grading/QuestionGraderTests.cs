@@ -161,6 +161,14 @@ public sealed class QuestionGraderTests
     }
 
     [Fact]
+    public void Grade_DragDrop_ScalesPerItemCreditByMaxScore()
+    {
+        var grade = QuestionGrader.Grade(QuestionType.DragDrop, DragDropSpecJson, 4, Json("""{"placements":[{"zoneId":"z1","itemIds":["i1","i2"]},{"zoneId":"z2","itemIds":["i4"]}]}"""));
+
+        grade.Should().Be(new QuestionGrade(3m, 0.75m, GradeOutcome.Partial, GradeFeedback.PlacementTally(3, 0, 4)));
+    }
+
+    [Fact]
     public void Grade_MathSteps_ThrowsInvalidOperationException()
     {
         var act = () => QuestionGrader.Grade(QuestionType.MathSteps, MathStepsSpecJson, 2, Json("{}"));

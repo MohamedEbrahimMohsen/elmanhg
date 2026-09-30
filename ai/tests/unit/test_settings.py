@@ -193,3 +193,31 @@ def test_settings_math_step_grading_defaults() -> None:
     assert settings.math_step_grading_max_accepted_answers == 20
     assert settings.math_step_grading_max_field_chars == 20000
     assert settings.math_step_grading_max_objectives == 20
+
+
+PLACEHOLDER_TOKEN = "change-me-local-ai-service-token-0123456789"
+
+
+def test_settings_production_placeholder_service_token_raises_validation_error() -> None:
+    with pytest.raises(ValidationError) as error:
+        Settings(service_token=SecretStr(PLACEHOLDER_TOKEN), env="production")
+
+    assert "service_token still holds the example placeholder" in str(error.value)
+
+
+def test_settings_development_placeholder_service_token_is_accepted() -> None:
+    settings = Settings(service_token=SecretStr(PLACEHOLDER_TOKEN))
+
+    assert settings.env == "development"
+
+
+def test_settings_production_placeholder_error_hides_token_value(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("ELMANHG_AI_SERVICE_TOKEN", "change-me-QZX-secret-token-0123456789")
+    monkeypatch.setenv("ELMANHG_AI_ENV", "production")
+
+    with pytest.raises(ValidationError) as error:
+        Settings()
+
+    assert "QZX-secret" not in str(error.value)

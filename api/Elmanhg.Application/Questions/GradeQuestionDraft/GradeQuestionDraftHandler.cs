@@ -25,13 +25,13 @@ public sealed class GradeQuestionDraftHandler(IRichTextSanitizer richTextSanitiz
     {
         var content = QuestionContentFactory.CreateContent(request.Question, richTextSanitizer);
         var type = request.Question.Type.GetValueOrDefault();
+        if (QuestionAnswerRules.IsRawAnswerTooLong(type, request.Answer, sessionsOptions.Value) || QuestionAnswerRules.ExceedsLimits(type, request.Answer, sessionsOptions.Value))
+        {
+            throw new ApplicationValidationCoreException(ErrorCodes.AttemptAnswerTooLong);
+        }
+
         if (type != QuestionType.Essay)
         {
-            if (QuestionAnswerRules.ExceedsLimits(type, request.Answer, sessionsOptions.Value))
-            {
-                throw new ApplicationValidationCoreException(ErrorCodes.AttemptAnswerTooLong);
-            }
-
             if (type == QuestionType.MathSteps)
             {
                 var (mathGrade, detail) = await MathStepsDraftGrading.GradeAsync(content, request.Answer, request.LessonId, mathCheckClient, mathStepGradingClient, lessonRepository, unitRepository, subjectRepository, richTextExtractor, mathStepGradingOptions.Value.ContextFieldMaxLength, cancellationToken).ConfigureAwait(false);

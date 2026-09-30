@@ -36,6 +36,12 @@ public static class GradeFeedbackText
                 [GradeFeedbackKeys.RightArgument] = feedback.Right,
                 [GradeFeedbackKeys.TotalArgument] = feedback.Total,
             }),
+            GradeFeedbackKind.PlacementTally => localizer.GetMessage(GradeFeedbackKeys.PlacementTally, context: new Dictionary<string, object>
+            {
+                [GradeFeedbackKeys.RightArgument] = feedback.Right,
+                [GradeFeedbackKeys.WrongArgument] = feedback.Wrong,
+                [GradeFeedbackKeys.TotalArgument] = feedback.Total,
+            }),
             _ => throw new InvalidOperationException("Unsupported grade feedback."),
         };
     }

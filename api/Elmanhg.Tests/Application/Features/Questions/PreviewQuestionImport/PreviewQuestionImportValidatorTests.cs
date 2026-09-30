@@ -11,7 +11,7 @@ public sealed class PreviewQuestionImportValidatorTests
 {
     private readonly PreviewQuestionImportValidator _validator = new(Options.Create(QuestionImportParserTests.ImportOptions()));
 
-    internal static FormFile Upload(string fileName, long length) => new(new MemoryStream(new byte[10]), 0, length, "file", fileName);
+    internal static FormFile Upload(string fileName, long length) => new(new MemoryStream([0x50, 0x4B, 0x03, 0x04, 0, 0, 0, 0, 0, 0]), 0, length, "file", fileName);
 
     [Fact]
     public void Validate_Valid_HasNoErrors()
@@ -41,6 +41,15 @@ public sealed class PreviewQuestionImportValidatorTests
     public void Validate_OversizedFile_HasFileTooLarge()
     {
         Codes(new PreviewQuestionImportQuery(Guid.NewGuid(), Upload("q.xlsx", (5 * 1024 * 1024) + 1))).Should().Contain(ErrorCodes.QuestionImportFileTooLarge);
+    }
+
+    [Fact]
+    public void Validate_XlsxExtensionWithTextBytes_FailsWithFileTypeInvalid()
+    {
+        var bytes = "not a workbook"u8.ToArray();
+        var upload = new FormFile(new MemoryStream(bytes), 0, bytes.Length, "file", "q.xlsx");
+
+        Codes(new PreviewQuestionImportQuery(Guid.NewGuid(), upload)).Should().Contain(ErrorCodes.QuestionImportFileTypeInvalid);
     }
 
     private List<string> Codes(PreviewQuestionImportQuery query) => _validator.Validate(query).Errors.Select(x => x.ErrorCode).ToList();

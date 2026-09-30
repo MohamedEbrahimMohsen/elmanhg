@@ -3,6 +3,7 @@ using Core.Identity.Tokens.CurrentUser;
 using Core.Localization;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Sessions.Shared;
+using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
 using MediatR;
@@ -10,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Application.Sessions.FinishSession;
 
-public sealed class FinishSessionHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<FinishSessionCommand, SessionResult>
+public sealed class FinishSessionHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, ICurrentUserService currentUserService, ILocalizer localizer, IFileStorage fileStorage) : IRequestHandler<FinishSessionCommand, SessionResult>
 {
     public async Task<SessionResult> Handle(FinishSessionCommand request, CancellationToken cancellationToken)
     {
@@ -31,6 +32,6 @@ public sealed class FinishSessionHandler(ISessionRepository sessionRepository, I
         await sessionRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         var revisions = await questionRepository.GetRevisionsAsync(session.Items.Select(x => x.QuestionId).ToList(), cancellationToken).ConfigureAwait(false);
-        return SessionResultGenerator.Generate(session, revisions, localizer);
+        return SessionResultGenerator.Generate(session, revisions, localizer, fileStorage);
     }
 }

@@ -33,5 +33,14 @@ public sealed class SessionsOptions
     [Range(1, 10000)]
     public int MathFinalAnswerMaxLength { get; set; } = 200;
 
-    public int RequestAnswerMaxLength => Math.Max(AnswerMaxLength, Math.Max(EssayAnswerMaxLength, MathStepsAnswerMaxLength));
+    [Range(1, 100000)]
+    public int DragDropAnswerMaxLength { get; set; } = 4000;
+
+    [Range(1, 100)]
+    public int DragDropPlacementsMaxCount { get; set; } = 20;
+
+    [Range(1, 1000)]
+    public int DragDropPlacedItemsMaxCount { get; set; } = 30;
+
+    public int RequestAnswerMaxLength => Math.Max(AnswerMaxLength, Math.Max(EssayAnswerMaxLength, Math.Max(MathStepsAnswerMaxLength, DragDropAnswerMaxLength)));
 }

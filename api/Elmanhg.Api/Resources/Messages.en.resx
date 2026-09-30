@@ -89,6 +89,7 @@
   <data name="REFRESH_TOKEN_IS_REQUIRED" xml:space="preserve"><value>Your session has ended. Sign in again.</value></data>
   <data name="REFRESH_TOKEN_IS_EXPIRED" xml:space="preserve"><value>Your session has ended. Sign in again.</value></data>
   <data name="REFRESH_TOKEN_USER_NOT_FOUND" xml:space="preserve"><value>Your session has ended. Sign in again.</value></data>
+  <data name="REFRESH_TOKEN_REVOKED" xml:space="preserve"><value>Your session was ended for your security. Sign in again.</value></data>
   <data name="DISPLAY_NAME_REQUIRED" xml:space="preserve"><value>Enter your name.</value></data>
   <data name="DISPLAY_NAME_TOO_LONG" xml:space="preserve"><value>Name is too long.</value></data>
   <data name="EMAIL_REQUIRED" xml:space="preserve"><value>Enter your email.</value></data>
@@ -186,7 +187,6 @@
   <data name="QUESTION_MODEL_ANSWERS_COUNT_INVALID" xml:space="preserve"><value>Add at least one model answer, up to the allowed maximum.</value></data>
   <data name="QUESTION_MODEL_ANSWER_REQUIRED" xml:space="preserve"><value>A model answer cannot be empty.</value></data>
   <data name="QUESTION_MODEL_ANSWER_TOO_LONG" xml:space="preserve"><value>A model answer is too long.</value></data>
-  <data name="QUESTION_TYPE_NOT_GRADABLE" xml:space="preserve"><value>The test grader does not grade this question type yet.</value></data>
   <data name="QUESTION_DIAGRAM_IMAGE_TYPE_INVALID" xml:space="preserve"><value>Use a PNG, JPEG or WebP image.</value></data>
   <data name="QUESTION_DIAGRAM_IMAGE_INVALID" xml:space="preserve"><value>Upload the diagram image again: it is missing or invalid.</value></data>
   <data name="QUESTION_DIAGRAM_IMAGE_ALT_REQUIRED" xml:space="preserve"><value>Describe the diagram image.</value></data>
@@ -485,6 +485,7 @@
   <data name="GRADE_FEEDBACK_MATH_WRONG_FORM" xml:space="preserve"><value>Write the final answer in the form the question asks for.</value></data>
   <data name="GRADE_FEEDBACK_MATH_UNREADABLE" xml:space="preserve"><value>The final answer could not be read. Write it with math symbols, for example x = 2.</value></data>
   <data name="GRADE_FEEDBACK_MATH_UNCHECKED" xml:space="preserve"><value>The final answer could not be checked automatically. Your teacher will review it.</value></data>
+  <data name="GRADE_FEEDBACK_PLACEMENT_TALLY" xml:space="preserve"><value>Items in the right place: {right} of {total}; distractors placed: {wrong}.</value></data>
   <data name="MATH_STEP_GRADING_UNAVAILABLE" xml:space="preserve"><value>The step grader is unavailable right now. Try again in a moment.</value></data>
   <data name="MATH_STEP_GRADE_NOT_FOUND" xml:space="preserve"><value>No step grade was found for this answer.</value></data>
   <data name="MATH_STEP_GRADE_NOT_PENDING" xml:space="preserve"><value>This answer is no longer waiting for the step grader.</value></data>

@@ -4,6 +4,7 @@ using Core.Localization;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Sessions.Shared;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
@@ -18,7 +19,7 @@ using System.Security.Claims;
 
 namespace Elmanhg.Application.Sessions.StartQuizSession;
 
-public sealed class StartQuizSessionHandler(ISessionRepository sessionRepository, ILessonRepository lessonRepository, IQuestionRepository questionRepository, ISubscriptionRepository subscriptionRepository, IOptions<SessionsOptions> sessionsOptions, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, Random random, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<StartQuizSessionCommand, SessionResult>
+public sealed class StartQuizSessionHandler(ISessionRepository sessionRepository, ILessonRepository lessonRepository, IQuestionRepository questionRepository, ISubscriptionRepository subscriptionRepository, IOptions<SessionsOptions> sessionsOptions, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, Random random, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer, IFileStorage fileStorage) : IRequestHandler<StartQuizSessionCommand, SessionResult>
 {
     public async Task<SessionResult> Handle(StartQuizSessionCommand request, CancellationToken cancellationToken)
     {
@@ -63,7 +64,7 @@ public sealed class StartQuizSessionHandler(ISessionRepository sessionRepository
         await sessionRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         var revisions = await questionRepository.GetRevisionsAsync(session.Items.Select(x => x.QuestionId).ToList(), cancellationToken).ConfigureAwait(false);
-        return SessionResultGenerator.Generate(session, revisions, localizer);
+        return SessionResultGenerator.Generate(session, revisions, localizer, fileStorage);
     }
 
     private async Task<List<Question>> SelectQuestionsAsync(Guid studentId, Guid lessonId, int count, CancellationToken cancellationToken)

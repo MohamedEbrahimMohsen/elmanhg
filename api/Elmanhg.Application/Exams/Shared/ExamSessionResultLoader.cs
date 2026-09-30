@@ -1,4 +1,5 @@
 using Core.Localization;
+using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
@@ -11,7 +12,7 @@ namespace Elmanhg.Application.Exams.Shared;
 
 public static class ExamSessionResultLoader
 {
-    public static async Task<ExamSessionResult> LoadAsync(Session session, IReadOnlyCollection<QuestionRevision> revisions, IQuestionRepository questionRepository, ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, decimal correctThreshold, int weakestObjectiveCount, DateTimeOffset now, ILocalizer localizer, CancellationToken cancellationToken)
+    public static async Task<ExamSessionResult> LoadAsync(Session session, IReadOnlyCollection<QuestionRevision> revisions, IQuestionRepository questionRepository, ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, decimal correctThreshold, int weakestObjectiveCount, DateTimeOffset now, ILocalizer localizer, IFileStorage fileStorage, CancellationToken cancellationToken)
     {
         var unitIds = session.GetExamUnitIds();
         List<CurriculumUnit> units = [];
@@ -31,7 +32,7 @@ public static class ExamSessionResultLoader
             .ToList();
         if (!session.IsSubmitted)
         {
-            return ExamSessionResultGenerator.Generate(session, revisions, subjectId, subject?.Name, unitResults, [], [], [], now, localizer);
+            return ExamSessionResultGenerator.Generate(session, revisions, subjectId, subject?.Name, unitResults, [], [], [], now, localizer, fileStorage);
         }
 
         var questionIds = session.Items
@@ -49,7 +50,7 @@ public static class ExamSessionResultLoader
         var lessonResults = ExamBreakdownResultGenerator.Lessons(lessonShares, lessons);
         var unitBreakdown = ExamBreakdownResultGenerator.Units(unitShares, units);
         var objectiveResults = ExamBreakdownResultGenerator.Objectives(ExamBreakdown.WeakestObjectives(session, placements, correctThreshold, weakestObjectiveCount), lessons);
-        return ExamSessionResultGenerator.Generate(session, revisions, subjectId, subject?.Name, unitResults, lessonResults, unitBreakdown, objectiveResults, now, localizer);
+        return ExamSessionResultGenerator.Generate(session, revisions, subjectId, subject?.Name, unitResults, lessonResults, unitBreakdown, objectiveResults, now, localizer, fileStorage);
     }
 
     private static List<ExamItemPlacement> Place(IEnumerable<Question> questions, IReadOnlyCollection<Lesson> lessons)

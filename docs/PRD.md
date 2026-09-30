@@ -120,7 +120,7 @@ Transitions: **Publish** Draft or Archived → Published (sets `published_at`). 
 | Field | Values |
 |---|---|
 | Validation status | Pending · Approved · Rejected |
-| Servable (derived, not stored) | `Approved AND lesson.state == Published AND question.not_retired` AND type != DragDrop (until the student canvas ships, E16.S2) |
+| Servable (derived, not stored) | `Approved AND lesson.state == Published AND question.not_retired` |
 
 Rules:
 - A question is created as Pending. Only a Teacher assigned to the question's subject can Approve or Reject.
@@ -161,9 +161,11 @@ Every answer produces a **score in [0, max_score]** and a **normalised score in 
 | Short answer (numeric/text) | v1 | String or number | Numeric: tolerance ±x or %; Text: accepted list with normalisation | No |
 | Essay | v2 | Plain text (Arabic, multi-paragraph) | LLM grader with rubric (criteria + weights) and model answer. Returns score per criterion + justification. | Yes |
 | Math with steps | v2 | Ordered list of steps (LaTeX/text) + final answer | Final answer: CAS equivalence check (SymPy). Steps: LLM against model solution, per-step credit, weighted per question (steps weight). | Yes |
-| Science drag-and-drop | v2 | Map of item → drop zone (per-zone order when the zone is ordered) | Deterministic: each item's zone vs correct zone; optional order constraints | Per item |
+| Science drag-and-drop | v2 | Map of item → drop zone (per-zone order when the zone is ordered) | Deterministic per item: each keyed item's zone (and position in an ordered zone) vs the key; each distractor placed cancels one right item | Per item |
 
 Math with steps: each question sets a required form and an optional numeric tolerance for the final answer, and optionally a model solution and a steps weight w (0–100 %) (docs/question-schemas.md, docs/math-cas.md). Step grading (E15.S3, #123) awards 0, 1 or 2 points per model-solution step. The score is ((100 − w) × F + w × S) ÷ 100 of the max score, where F is 1 for an equivalent final answer (else 0) and S is the step points ÷ (2 × model steps); w = 0 (the default) grades the final answer only. A blank final answer is Unanswered even with steps; with w > 0 and no written steps the steps earn 0 without an AI call. When step grading is needed, or the CAS cannot check the final answer (for example, the AI service is down), the answer is graded in the background: the student sees «جارٍ تصحيح إجابتك…», then the verdict with per-step marks, or «قيد المراجعة» when the grade goes to teacher review (§8.3); the correct answer stays hidden until the grade is applied, and the quiz or exam score is marked provisional. A check that fails is retried; after the retries the answer goes to review. See docs/math-step-grading.md.
+
+Science drag-and-drop: the answer lists, per zone, the items placed there in order. Each item the key places scores when it sits in its key zone (at its key position when the zone is ordered); each placed item the key places nowhere cancels one right item. Score = max(0, (right − distractors placed) ÷ keyed items); an answer that places nothing is unanswered. Exact rules in docs/question-schemas.md.
 
 Per-type `body` and `grading_spec` JSON shapes: `docs/question-schemas.md`.
 Answer shapes and the exact grading rules (normalisation, numeric parsing, rounding) are in the same document.
@@ -457,7 +459,7 @@ Exports (admin only): JSONL per source, date-ranged, optionally per subject, wit
 | Devices | Mobile-first responsive web. All interactions touch-friendly. v2 canvas and math input must work on phones. |
 | Performance | Lesson page < 2s on 3G-class connections; quiz question transition < 300ms (prefetch next). Budgets and how they are measured: docs/performance.md. |
 | Availability | 99.5% monthly, measured and alerted as in docs/observability.md. Exam sessions auto-save every answer; a refresh resumes the session. |
-| Security | Role-based authorisation on every endpoint; teacher subject scoping enforced server-side; Paymob webhooks HMAC-verified; rate limits on auth and Avatar. |
+| Security | Role-based authorisation on every endpoint; teacher subject scoping enforced server-side; Paymob webhooks HMAC-verified; rate limits on auth, Avatar, Ask a Teacher, analytics and every other anonymous endpoint; a replayed refresh token ends its whole sign-in; security headers and CSP at the edge; dependency, container-image and secret scanning in CI (docs/security.md). |
 | Privacy | Students identified to teachers by display name only. Training exports strip PII. |
 | Auditability | All content changes and validation decisions logged with actor and timestamp. |
 | Accessibility | Readable font sizes, sufficient contrast, keyboard-navigable quizzes. |
@@ -552,7 +554,7 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 
 ## 17. Key business rules (single list, for implementation reference)
 
-1. Servable = Approved ∧ Lesson Published ∧ not retired. Derived, never stored; drag-and-drop questions are not servable until the student canvas ships.
+1. Servable = Approved ∧ Lesson Published ∧ not retired. Derived, never stored.
 2. Content edit on an Approved question → Pending, version + 1. Historical attempts keep the old version.
 3. Only a Teacher assigned to the subject may validate. Admins cannot.
 4. Rejection requires a reason.
