@@ -22,3 +22,147 @@ export const SaveSubjectInterestsBody = zod.object({
 
 export const SaveSubjectInterestsResponse = zod.unknown()
 
+export const GetStudentProfileParams = zod.object({
+  "studentId": zod.uuid()
+})
+
+export const GetStudentProfileResponse = zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string(),
+  "maskedPhone": zod.string().nullable(),
+  "maskedEmail": zod.string().nullable(),
+  "status": zod.enum(['Active', 'Suspended']),
+  "canSuspend": zod.boolean(),
+  "creationDate": zod.iso.datetime({"offset":true}),
+  "onboardedAt": zod.iso.datetime({"offset":true}).nullable(),
+  "subjectInterests": zod.array(zod.string()),
+  "tier": zod.enum(['Free', 'Base']),
+  "hasAskTeacher": zod.boolean(),
+  "subscriptions": zod.array(zod.object({
+  "id": zod.uuid(),
+  "plan": zod.enum(['Base', 'AskTeacher']),
+  "period": zod.enum(['Monthly', 'Termly', 'Yearly']),
+  "status": zod.enum(['Active', 'PastDue', 'Cancelled', 'Expired']),
+  "currentPeriodStart": zod.iso.datetime({"offset":true}),
+  "currentPeriodEnd": zod.iso.datetime({"offset":true}),
+  "entitledUntil": zod.iso.datetime({"offset":true}).nullable(),
+  "isComplimentary": zod.boolean()
+}))
+})
+
+export const GetStudentProgressParams = zod.object({
+  "studentId": zod.uuid()
+})
+
+export const getStudentProgressResponseSubjectsItemServableCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getStudentProgressResponseSubjectsItemMasteredCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getStudentProgressResponseSubjectsItemSeenCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getStudentProgressResponseSubjectsItemMasteryPercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getStudentProgressResponseSubjectsItemUnitsItemServableCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getStudentProgressResponseSubjectsItemUnitsItemMasteredCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getStudentProgressResponseSubjectsItemUnitsItemSeenCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getStudentProgressResponseSubjectsItemUnitsItemMasteryPercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getStudentProgressResponseSubjectsItemUnitsItemBestExamScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const getStudentProgressResponseWeakSpotsLessonsItemServableCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getStudentProgressResponseWeakSpotsLessonsItemMasteredCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getStudentProgressResponseWeakSpotsLessonsItemSeenCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getStudentProgressResponseWeakSpotsLessonsItemMasteryPercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getStudentProgressResponseWeakSpotsObjectivesItemServableCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getStudentProgressResponseWeakSpotsObjectivesItemMasteredCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getStudentProgressResponseWeakSpotsObjectivesItemSeenCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getStudentProgressResponseWeakSpotsObjectivesItemMasteryPercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const GetStudentProgressResponse = zod.object({
+  "subjects": zod.array(zod.object({
+  "subjectId": zod.uuid(),
+  "name": zod.string(),
+  "servableCount": zod.union([zod.int(),zod.stringFormat('int32', getStudentProgressResponseSubjectsItemServableCountRegExpTwo)]),
+  "masteredCount": zod.union([zod.int(),zod.stringFormat('int32', getStudentProgressResponseSubjectsItemMasteredCountRegExpTwo)]),
+  "seenCount": zod.union([zod.int(),zod.stringFormat('int32', getStudentProgressResponseSubjectsItemSeenCountRegExpTwo)]),
+  "masteryPercent": zod.union([zod.int(),zod.stringFormat('int32', getStudentProgressResponseSubjectsItemMasteryPercentRegExpTwo)]),
+  "units": zod.array(zod.object({
+  "unitId": zod.uuid(),
+  "name": zod.string(),
+  "servableCount": zod.union([zod.int(),zod.stringFormat('int32', getStudentProgressResponseSubjectsItemUnitsItemServableCountRegExpTwo)]),
+  "masteredCount": zod.union([zod.int(),zod.stringFormat('int32', getStudentProgressResponseSubjectsItemUnitsItemMasteredCountRegExpTwo)]),
+  "seenCount": zod.union([zod.int(),zod.stringFormat('int32', getStudentProgressResponseSubjectsItemUnitsItemSeenCountRegExpTwo)]),
+  "masteryPercent": zod.union([zod.int(),zod.stringFormat('int32', getStudentProgressResponseSubjectsItemUnitsItemMasteryPercentRegExpTwo)]),
+  "bestExamScorePercent": zod.union([zod.number(),zod.stringFormat('double', getStudentProgressResponseSubjectsItemUnitsItemBestExamScorePercentRegExpTwo)]).nullable()
+}))
+})),
+  "weakSpots": zod.object({
+  "lessons": zod.array(zod.object({
+  "lessonId": zod.uuid(),
+  "lessonName": zod.string(),
+  "subjectId": zod.uuid(),
+  "subjectName": zod.string(),
+  "servableCount": zod.union([zod.int(),zod.stringFormat('int32', getStudentProgressResponseWeakSpotsLessonsItemServableCountRegExpTwo)]),
+  "masteredCount": zod.union([zod.int(),zod.stringFormat('int32', getStudentProgressResponseWeakSpotsLessonsItemMasteredCountRegExpTwo)]),
+  "seenCount": zod.union([zod.int(),zod.stringFormat('int32', getStudentProgressResponseWeakSpotsLessonsItemSeenCountRegExpTwo)]),
+  "masteryPercent": zod.union([zod.int(),zod.stringFormat('int32', getStudentProgressResponseWeakSpotsLessonsItemMasteryPercentRegExpTwo)])
+})),
+  "objectives": zod.array(zod.object({
+  "objectiveId": zod.uuid(),
+  "text": zod.string(),
+  "lessonId": zod.uuid(),
+  "lessonName": zod.string(),
+  "subjectId": zod.uuid(),
+  "subjectName": zod.string(),
+  "servableCount": zod.union([zod.int(),zod.stringFormat('int32', getStudentProgressResponseWeakSpotsObjectivesItemServableCountRegExpTwo)]),
+  "masteredCount": zod.union([zod.int(),zod.stringFormat('int32', getStudentProgressResponseWeakSpotsObjectivesItemMasteredCountRegExpTwo)]),
+  "seenCount": zod.union([zod.int(),zod.stringFormat('int32', getStudentProgressResponseWeakSpotsObjectivesItemSeenCountRegExpTwo)]),
+  "masteryPercent": zod.union([zod.int(),zod.stringFormat('int32', getStudentProgressResponseWeakSpotsObjectivesItemMasteryPercentRegExpTwo)])
+}))
+})
+})
+
+export const GetStudentSessionHistoryParams = zod.object({
+  "studentId": zod.uuid()
+})
+
+export const getStudentSessionHistoryResponseItemsItemScorePercentRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const getStudentSessionHistoryResponsePageNumberRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getStudentSessionHistoryResponsePageSizeRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getStudentSessionHistoryResponseTotalItemsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getStudentSessionHistoryResponseTotalPagesRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const GetStudentSessionHistoryResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.uuid(),
+  "kind": zod.string(),
+  "lessonId": zod.uuid().nullable(),
+  "unitId": zod.uuid().nullable(),
+  "scopeName": zod.string().nullable(),
+  "startedAt": zod.iso.datetime({"offset":true}),
+  "submittedAt": zod.iso.datetime({"offset":true}).nullable(),
+  "scorePercent": zod.union([zod.number(),zod.stringFormat('double', getStudentSessionHistoryResponseItemsItemScorePercentRegExpTwo)]).nullable(),
+  "isBestScore": zod.boolean()
+})).optional(),
+  "pageNumber": zod.union([zod.int(),zod.stringFormat('int64', getStudentSessionHistoryResponsePageNumberRegExpTwo)]).optional(),
+  "pageSize": zod.union([zod.int(),zod.stringFormat('int64', getStudentSessionHistoryResponsePageSizeRegExpTwo)]).optional(),
+  "totalItems": zod.union([zod.int(),zod.stringFormat('int64', getStudentSessionHistoryResponseTotalItemsRegExpTwo)]).optional(),
+  "totalPages": zod.union([zod.int(),zod.stringFormat('int64', getStudentSessionHistoryResponseTotalPagesRegExpTwo)]).optional()
+})
+
+export const GrantComplimentarySubscriptionParams = zod.object({
+  "studentId": zod.uuid()
+})
+
+export const GrantComplimentarySubscriptionBody = zod.object({
+  "plan": zod.enum(['Base', 'AskTeacher']),
+  "period": zod.enum(['Monthly', 'Termly', 'Yearly'])
+})
+
+export const GrantComplimentarySubscriptionResponse = zod.object({
+  "id": zod.uuid(),
+  "plan": zod.enum(['Base', 'AskTeacher']),
+  "period": zod.enum(['Monthly', 'Termly', 'Yearly']),
+  "status": zod.enum(['Active', 'PastDue', 'Cancelled', 'Expired']),
+  "currentPeriodStart": zod.iso.datetime({"offset":true}),
+  "currentPeriodEnd": zod.iso.datetime({"offset":true}),
+  "entitledUntil": zod.iso.datetime({"offset":true}).nullable(),
+  "isComplimentary": zod.boolean()
+})
+

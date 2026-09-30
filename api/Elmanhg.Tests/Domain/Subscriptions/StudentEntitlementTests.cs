@@ -148,5 +148,41 @@ public sealed class StudentEntitlementTests
         act.Should().NotThrow();
     }
 
+    [Fact]
+    public void EnsureCanGrant_BaseWhenFree_DoesNotThrow()
+    {
+        var act = () => StudentEntitlement.Free.EnsureCanGrant(SubscriptionPlan.Base);
+
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void EnsureCanGrant_AskTeacherWithoutBase_ThrowsComplimentaryRequiresBase()
+    {
+        var act = () => StudentEntitlement.Free.EnsureCanGrant(SubscriptionPlan.AskTeacher);
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.ComplimentaryRequiresBase);
+    }
+
+    [Fact]
+    public void EnsureCanGrant_HeldBase_ThrowsComplimentaryPlanAlreadyActive()
+    {
+        var entitlement = StudentEntitlement.Resolve([Build(SubscriptionPlan.Base)], Now, Grace);
+
+        var act = () => entitlement.EnsureCanGrant(SubscriptionPlan.Base);
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.ComplimentaryPlanAlreadyActive);
+    }
+
+    [Fact]
+    public void EnsureCanGrant_AskTeacherWithBase_DoesNotThrow()
+    {
+        var entitlement = StudentEntitlement.Resolve([Build(SubscriptionPlan.Base)], Now, Grace);
+
+        var act = () => entitlement.EnsureCanGrant(SubscriptionPlan.AskTeacher);
+
+        act.Should().NotThrow();
+    }
+
     private Subscription Build(SubscriptionPlan plan) => new SubscriptionBuilder().ForStudent(_studentId).WithPlan(plan).Build();
 }

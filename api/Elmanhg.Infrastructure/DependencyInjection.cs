@@ -28,6 +28,7 @@ using Elmanhg.Infrastructure.Hosting;
 using Elmanhg.Infrastructure.Identity;
 using Elmanhg.Infrastructure.Lessons;
 using Elmanhg.Infrastructure.Mastery;
+using Elmanhg.Infrastructure.Invitations;
 using Elmanhg.Infrastructure.OtpDelivery;
 using Elmanhg.Infrastructure.Payments;
 using Elmanhg.Infrastructure.Questions;
@@ -53,6 +54,7 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
         services.AddOtpDelivery();
+        services.AddInvitationEmail();
         services.AddPayments();
         services.AddAiService();
         services.AddFileStorage();
