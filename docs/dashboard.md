@@ -4,6 +4,7 @@ The admin dashboard (PRD §10.3) reads one endpoint per card under `GET /api/das
 
 ## Filters
 
+- **The admin page** (`/admin`, #105) always sends both `from` and `to`: `to` is today in Africa/Cairo computed in the browser, `from` is `to` minus the chosen period (7, 14 or 30 days, default 14) plus one. The subject filter adds `subjectId` only to the five cards that accept it.
 - **Days are Cairo days.** `from` and `to` are dates (`yyyy-MM-dd`) in `Dashboard:TimeZone` (Africa/Cairo), both inclusive. The range covers `[start of from, start of the day after to)` as instants. Local midnight is computed without `ConvertTimeToUtc`, so the spring-forward day (midnight does not exist in Cairo) still has a start.
 - **Defaults.** A missing `to` is today. A missing `from` is `to` minus `Dashboard:DefaultRangeDays − 1` (30 days including `to`).
 - **Validation** runs on the resolved range: `from` after `to` returns 422 `DASHBOARD_DATE_RANGE_INVALID`; more than `Dashboard:MaxRangeDays` (366) days returns 422 `DASHBOARD_DATE_RANGE_TOO_WIDE`.

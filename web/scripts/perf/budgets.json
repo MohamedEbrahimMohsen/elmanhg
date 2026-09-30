@@ -20,6 +20,15 @@
         "src/routes/student/quiz.$sessionId.tsx?tsr-split=component"
       ],
       "maxKb": 255
+    },
+    {
+      "name": "admin-dashboard",
+      "entries": [
+        "index.html",
+        "src/routes/admin/route.tsx?tsr-split=component",
+        "src/routes/admin/index.tsx?tsr-split=component"
+      ],
+      "maxKb": 230
     }
   ]
 }
