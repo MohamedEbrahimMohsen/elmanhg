@@ -89,6 +89,7 @@
   <data name="REFRESH_TOKEN_IS_REQUIRED" xml:space="preserve"><value>انتهت جلستك. سجل الدخول مرة اخرى.</value></data>
   <data name="REFRESH_TOKEN_IS_EXPIRED" xml:space="preserve"><value>انتهت جلستك. سجل الدخول مرة اخرى.</value></data>
   <data name="REFRESH_TOKEN_USER_NOT_FOUND" xml:space="preserve"><value>انتهت جلستك. سجل الدخول مرة اخرى.</value></data>
+  <data name="REFRESH_TOKEN_REVOKED" xml:space="preserve"><value>انتهت جلستك لأسباب أمنية. سجل الدخول مرة اخرى.</value></data>
   <data name="DISPLAY_NAME_REQUIRED" xml:space="preserve"><value>ادخل اسمك.</value></data>
   <data name="DISPLAY_NAME_TOO_LONG" xml:space="preserve"><value>الاسم طويل جدا.</value></data>
   <data name="EMAIL_REQUIRED" xml:space="preserve"><value>ادخل بريدك الالكتروني.</value></data>

@@ -19,6 +19,7 @@ rm -rf .smoke && mkdir -p .smoke
 cp .env.example .smoke/.env
 cp api.env.example .smoke/api.env
 cp ai.env.example .smoke/ai.env
+replace_example_secrets .smoke/api.env .smoke/ai.env
 
 set_env "$ENV_FILE" COMPOSE_PROJECT_NAME "${SMOKE_PROJECT_NAME:-elmanhg-smoke}"
 set_env "$ENV_FILE" COMPOSE_PROFILES ai
@@ -96,6 +97,10 @@ asset_headers=$(curl -fsSI "$base$asset")
 grep -i 'cache-control:.*immutable' <<< "$asset_headers" > /dev/null || fail "$asset is not cached as immutable"
 asset_br=$(curl -fsSI -H 'Accept-Encoding: br' "$base$asset")
 grep -i '^content-encoding: br' <<< "$asset_br" > /dev/null || fail "$asset is not served brotli-precompressed"
+for expected in "content-security-policy: default-src 'self'" "frame-ancestors 'none'" "x-frame-options: DENY"   "x-content-type-options: nosniff" "referrer-policy: strict-origin-when-cross-origin"   "strict-transport-security: max-age=31536000" "permissions-policy:" "cross-origin-opener-policy: same-origin"; do
+  grep -iF "$expected" <<< "$shell_headers" > /dev/null || fail "SPA shell is missing the header '$expected'"
+done
+if grep -i '^server:' <<< "$shell_headers" > /dev/null; then fail "SPA shell exposes a Server header"; fi
 
 # Signals the observability assertions below look for; the public checks run with or without the profile.
 health=$(curl -fsS "$base/api/health") || fail "/api/health is not served"
@@ -103,6 +108,20 @@ health=$(curl -fsS "$base/api/health") || fail "/api/health is not served"
 api_headers=$(curl -fsS -D - "$base/api/questions/servable-count") || fail "servable-count failed"
 trace_id=$(grep -i '^x-trace-id:' <<< "$api_headers" | head -1 | cut -d: -f2 | tr -d ' \r')
 [[ $trace_id =~ ^[0-9a-f]{32}$ ]] || fail "no W3C trace id in X-Trace-Id (got '$trace_id')"
+grep -iF "content-security-policy: default-src 'none'" <<< "$api_headers" > /dev/null || fail "/api response has no API CSP"
+grep -iF 'cache-control: public, max-age=60' <<< "$api_headers" > /dev/null || fail "/api overwrote the API's own Cache-Control"
+if grep -i '^server:' <<< "$api_headers" > /dev/null; then fail "/api response exposes a Server header"; fi
+refresh=$(curl -sS -D - -X POST "$base/api/auth/refresh")
+grep -iF 'cache-control: no-store' <<< "$refresh" > /dev/null || fail "/api/auth/refresh is not Cache-Control: no-store"
+curl -fsS -H 'CF-Connecting-IP: 198.51.100.77' "$base/api/plans" > /dev/null || fail "/api/plans failed"
+api_log=""
+for _ in $(seq 1 10); do
+  api_log=$(compose logs --no-color api)
+  [[ $api_log == *'/api/plans'* ]] && break
+  sleep 1
+done
+[[ $api_log == *'/api/plans'* ]] || fail "the API did not log the /api/plans request"
+[[ $api_log != *'198.51.100.0/24'* ]] || fail "the API trusted a client-sent CF-Connecting-IP"
 client_error=$(curl -sS -w '\n%{http_code}' -X POST -H 'Content-Type: application/json' \
   -d '{"message":"smoke client error","source":"Window","path":"/smoke"}' "$base/api/client-errors")
 [ "$(tail -1 <<< "$client_error")" = 200 ] || fail "POST /api/client-errors answered '$client_error'"

@@ -20,6 +20,7 @@ rm -rf .loadtest && mkdir -p .loadtest .loadtest-results && chmod 777 .loadtest-
 cp .env.example .loadtest/.env
 cp api.env.example .loadtest/api.env
 cp ai.env.example .loadtest/ai.env
+replace_example_secrets .loadtest/api.env .loadtest/ai.env
 
 set_env "$ENV_FILE" COMPOSE_PROJECT_NAME "${LOAD_PROJECT_NAME:-elmanhg-load}"
 set_env "$ENV_FILE" COMPOSE_PROFILES ai
@@ -33,8 +34,12 @@ set_env "$ENV_FILE" DOCKER_SUBNET "${LOAD_DOCKER_SUBNET:-172.30.251.0/24}"
 set_env "$ENV_FILE" API_ENV_FILE .loadtest/api.env
 set_env "$ENV_FILE" AI_ENV_FILE .loadtest/ai.env
 set_env "$ENV_FILE" POSTGRES_PASSWORD loadpostgrespasswordnotasecret
-# One client IP signs in every student; the browser receives the refresh cookie over plain http; the avatar quota is not under test.
+# One client IP signs in every student; the browser receives the refresh cookie over plain http; the avatar quota and rate limits are not under test.
 set_env .loadtest/api.env Auth__CredentialPermitLimit 10000
+set_env .loadtest/api.env RateLimiting__AuthRefreshPermitLimit 100000
+set_env .loadtest/api.env RateLimiting__PublicReadPermitLimit 100000
+set_env .loadtest/api.env RateLimiting__AvatarMessagePermitLimit 100000
+set_env .loadtest/api.env RateLimiting__StudentConcurrentRequestLimit 100
 set_env .loadtest/api.env Auth__RefreshTokenCookieSecure false
 set_env .loadtest/api.env Subscriptions__BaseDailyAvatarMessages 10000
 set_env .loadtest/api.env LoadTestSeed__Key "$LOAD_KEY"

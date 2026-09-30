@@ -16,6 +16,8 @@ public static class QuestionImportFileValidation
             .WithErrorCode(ErrorCodes.QuestionImportFileRequired)
             .ValidateRequired(ErrorCodes.QuestionImportFileRequired)
             .ValidateAllowedExtensions(QuestionImportFile.Extensions, ErrorCodes.QuestionImportFileTypeInvalid)
-            .ValidateMaxFileSize(options.QuestionImportMaxFileSizeInMb, ErrorCodes.QuestionImportFileTooLarge);
+            .ValidateMaxFileSize(options.QuestionImportMaxFileSizeInMb, ErrorCodes.QuestionImportFileTooLarge)
+            .Must(file => file is not null && QuestionImportFile.HasZipSignature(file))
+            .WithErrorCode(ErrorCodes.QuestionImportFileTypeInvalid);
     }
 }

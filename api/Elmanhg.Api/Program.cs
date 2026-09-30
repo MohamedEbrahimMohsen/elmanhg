@@ -52,6 +52,8 @@ if (isBuildTimeOpenApiGeneration)
 }
 #endregion
 
+builder.WebHost.UseKestrelHardening();
+
 builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 // Nullable enum use sites already carry null through oneOf; a null member inside the named component would make null a legal value everywhere.
@@ -95,12 +97,17 @@ builder.Services.AddHostedService<TrainingExportWorker>();
 builder.Services.AddHostedService<TrainingExportRetentionWorker>();
 builder.Services.AddElmanhgRealtime();
 builder.Services.AddActiveUserTokenValidation();
-builder.Services.AddAuthRateLimiting();
+builder.Services.AddAppRateLimiting();
 #endregion
 
 builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
 
 var app = builder.Build();
+
+if (!isBuildTimeOpenApiGeneration)
+{
+    PlaceholderSecretGuard.EnsureReplaced(app.Configuration, app.Environment);
+}
 
 #region DEPLOY-TIME MIGRATION
 // The compose `migrate` service runs `--MigrateAndExit=true`: apply pending migrations, then exit before the seed and the HTTP pipeline.

@@ -18,7 +18,7 @@ public sealed class AuthOptions
     [Required]
     public string RefreshTokenCookiePath { get; set; } = default!;
 
-    public bool RefreshTokenCookieSecure { get; set; }
+    public bool RefreshTokenCookieSecure { get; set; } = true;
 
     [Range(1, int.MaxValue)]
     public int OtpRequestPermitLimit { get; set; }
@@ -31,4 +31,7 @@ public sealed class AuthOptions
 
     [Range(1, int.MaxValue)]
     public int CredentialWindowSeconds { get; set; }
+
+    [Range(0, int.MaxValue)]
+    public int RefreshTokenReuseGraceSeconds { get; set; } = 10;
 }

@@ -1,3 +1,4 @@
+using Elmanhg.Application.Auth.Shared;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Users.Shared;
 using Elmanhg.Domain.Identity;
@@ -11,20 +12,28 @@ public sealed class CheckUserActiveHandler(IUserRepository userRepository, IMemo
 {
     public async Task<bool> Handle(CheckUserActiveQuery request, CancellationToken cancellationToken)
     {
-        var key = UserActiveCacheKey.For(request.UserId);
-        if (memoryCache.TryGetValue(key, out bool cached))
+        var state = await GetStateAsync(request.UserId, cancellationToken).ConfigureAwait(false);
+        return state.IsActive && SecurityStampClaim.Matches(request.SecurityStampFingerprint, state.SecurityStamp);
+    }
+
+    private async Task<UserTokenState> GetStateAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var key = UserActiveCacheKey.For(userId);
+        if (memoryCache.TryGetValue(key, out UserTokenState? cached) && cached is not null)
         {
             return cached;
         }
 
-        var user = await userRepository.FirstOrDefaultAsync(x => x.Id == request.UserId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        var active = user is { IsActive: true };
+        var user = await userRepository.FirstOrDefaultAsync(x => x.Id == userId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
+        var state = new UserTokenState(user is { IsActive: true }, user?.SecurityStamp);
         var seconds = usersOptions.Value.ActiveStatusCacheSeconds;
         if (seconds > 0)
         {
-            memoryCache.Set(key, active, TimeSpan.FromSeconds(seconds));
+            memoryCache.Set(key, state, TimeSpan.FromSeconds(seconds));
         }
 
-        return active;
+        return state;
     }
+
+    private sealed record UserTokenState(bool IsActive, string? SecurityStamp);
 }

@@ -308,7 +308,7 @@ On the .NET side, `HttpAiMathCheckClient` does not throw for an unreachable serv
 ## Service auth
 
 - Header `Authorization: Bearer <token>`, required on `/v1/*`. Health endpoints are anonymous.
-- One shared secret: the API's `AiService:ServiceToken` equals the service's `ELMANHG_AI_SERVICE_TOKEN`. It must be at least 32 characters on both sides; both refuse to start otherwise (the API only when `Provider=Http`).
+- One shared secret: the API's `AiService:ServiceToken` equals the service's `ELMANHG_AI_SERVICE_TOKEN`. It must be at least 32 characters on both sides; both refuse to start otherwise (the API only when `Provider=Http`), and the service refuses a token starting with `change-me` when `ELMANHG_AI_ENV=production` (the API refuses one outside Development, [security.md](security.md) §6).
 - The service compares tokens in constant time (`secrets.compare_digest`). The token is never logged. Settings validation errors at startup omit input values (`hide_input_in_errors`), so a rejected token or key never reaches the container log.
 - Rotation: change `AiService__ServiceToken` and `ELMANHG_AI_SERVICE_TOKEN` together, then restart both.
 

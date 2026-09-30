@@ -7,6 +7,8 @@ api/**/obj/
 api/**/TestResults/
 api/.vs/
 api/Elmanhg.Tests/
+api/**/.env
+api/**/.env.*
 api/Elmanhg.Api/appsettings.json
 api/Elmanhg.Api/appsettings.Development.json
 api/Elmanhg.Api/appsettings.Production.json
