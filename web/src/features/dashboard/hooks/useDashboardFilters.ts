@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
 import {
+  cairoToday,
   dashboardRange,
   defaultDashboardPeriod,
   type DashboardPeriod,
@@ -8,6 +9,21 @@ import {
 } from '../api/dashboardRange';
 
 const routeApi = getRouteApi('/admin/');
+
+const dayCheckIntervalMs = 60_000;
+
+function useCairoToday(): string {
+  const [today, setToday] = useState(() => cairoToday(new Date()));
+  useEffect(() => {
+    const id = setInterval(() => {
+      setToday(cairoToday(new Date()));
+    }, dayCheckIntervalMs);
+    return () => {
+      clearInterval(id);
+    };
+  }, []);
+  return today;
+}
 
 export interface DashboardFilters {
   days: DashboardPeriod;
@@ -22,9 +38,9 @@ export interface DashboardFilters {
 export function useDashboardFilters(): DashboardFilters {
   const search = routeApi.useSearch();
   const navigate = routeApi.useNavigate();
-  const [now] = useState(() => new Date());
+  const today = useCairoToday();
   const days = search.days ?? defaultDashboardPeriod;
-  const range = dashboardRange(days, now);
+  const range = useMemo(() => dashboardRange(days, new Date(`${today}T12:00:00Z`)), [days, today]);
   const subject = search.subjectId === undefined ? {} : { subjectId: search.subjectId };
 
   return {

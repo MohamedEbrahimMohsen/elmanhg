@@ -84,6 +84,22 @@ describe('DashboardPage filters', () => {
     expect(router.state.location.search).toEqual({ days: 7 });
   });
 
+  it('moves the range to the new Cairo day after midnight', async () => {
+    vi.setSystemTime(new Date('2026-09-30T20:59:30Z'));
+    server.use(
+      getGetDashboardSolveRateMockHandler(({ request }) =>
+        solveRateMetrics({ attempts: param(request, 'to') === '2026-10-01' ? 333 : 5400 }),
+      ),
+    );
+    await openDashboard();
+
+    expect(await screen.findByText('From Sep 17 to Sep 30')).toBeInTheDocument();
+    await vi.advanceTimersByTimeAsync(60_000);
+
+    expect(await (await region('Solve rate')).findByText('Attempts: 333')).toBeInTheDocument();
+    expect(screen.getByText('From Sep 18 to Oct 1')).toBeInTheDocument();
+  });
+
   it('filters subject-scoped cards by the chosen subject', async () => {
     respondBySubject();
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
