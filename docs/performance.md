@@ -43,11 +43,11 @@ Also: `http_req_failed` < 1 % and `checks` > 99 %. The answer check is the only 
 
 | Page | Entries | Measured (KB br) | Budget (KB br) |
 |---|---|---|---|
-| `entry` | `index.html` | 201 | 210 |
-| `landing` | + `routes/index` | 210 | 220 |
-| `lesson` | + `student/route`, `student/lesson.$lessonId`, `lesson.$lessonId.index` | 231 | 240 |
-| `quiz` | + `student/route`, `student/quiz.$sessionId` | 249 | 255 |
-| `admin-dashboard` | + `admin/route`, `admin/index` | 219 | 230 |
+| `entry` | `index.html` | 204 | 210 |
+| `landing` | + `routes/index` | 213 | 220 |
+| `lesson` | + `student/route`, `student/lesson.$lessonId`, `lesson.$lessonId.index` | 234 | 240 |
+| `quiz` | + `student/route`, `student/quiz.$sessionId` | 245 | 255 |
+| `admin-dashboard` | + `admin/route`, `admin/index` | 222 | 230 |
 | `admin-users` | + `admin/route`, `admin/users` | 254 | 270 |
 
 Budget = measured × 1.05, rounded up to the next 5 KB. They are regression guards; the 2 s browser gate is the real target. When a change legitimately grows a page, raise its budget in the same pull request and say why.
@@ -56,6 +56,7 @@ Budget = measured × 1.05, rounded up to the next 5 KB. They are regression guar
 
 - **KaTeX on demand.** `RichTextViewer` renders HTML without math synchronously. HTML with math shows its text at once, while KaTeX and its CSS load as one lazy chunk (`renderMath`), then re-renders with formulas. Once loaded, later views render at once. KaTeX is no longer on the lesson or quiz critical path; the editor (admin) still bundles it.
 - **Lazy avatar panel.** `AvatarDock` loads `AvatarPanel` (with react-hook-form and the radix dialog) the first time the student opens the assistant, and keeps it mounted afterwards.
+- **Lazy quiz extras.** The quiz page loads the MathSteps input (`MathStepsAnswerInput`) only for a MathSteps question, the essay card (`QuizEssayCard`) only for an essay question, and the paywall dialog (`LazyPaywallDialog`, with the radix dialog) only when a free-tier limit is reached.
 - **Realtime client on connect.** The SignalR client (`@microsoft/signalr`, about 11 KB brotli) loads as its own chunk when the realtime connection starts, so it stays out of the entry bundle.
 - **Dashboard charts without a library.** The admin dashboard's three daily charts are plain SVG (`DailyBarChart`), so no chart library ships; the page is the auto-split `/admin/` chunk and has its own budget.
 - **Admin-only strings on demand.** The `dashboard` i18n namespace is not in `app/i18n.ts`. `DashboardPage` registers it with `addResourceBundle` when its `/admin/` chunk loads, before the first render, so student pages do not download admin copy. The `users` namespace is registered the same way by `UsersPage` and `StudentDetailPage` (#106). The `admin-users` page also carries react-hook-form, the radix dialog and both `users` locale files, which is why it sits above `admin-dashboard`.

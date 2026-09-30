@@ -296,7 +296,12 @@
     "LAST_ACTIVE_ADMIN": "At least one active admin must remain.",
     "USER_NOT_SUSPENDED": "This account is already active.",
     "COMPLIMENTARY_REQUIRES_BASE": "Ask a Teacher needs an active Base plan first.",
-    "COMPLIMENTARY_PLAN_ALREADY_ACTIVE": "The student already has this plan."
+    "COMPLIMENTARY_PLAN_ALREADY_ACTIVE": "The student already has this plan.",
+    "QUESTION_MATH_ANSWERS_INVALID": "Add one or more accepted final answers, none empty or too long, up to the allowed maximum.",
+    "QUESTION_MATH_FORM_INVALID": "Choose a valid required form.",
+    "QUESTION_MATH_TOLERANCE_INVALID": "Enter a tolerance of zero or more together with absolute or percent, or leave both empty.",
+    "QUESTION_MATH_TOLERANCE_FORM_CONFLICT": "A tolerance works only with the any-equivalent-form rule.",
+    "MATH_CHECK_UNAVAILABLE": "The final answer cannot be checked right now. Try again in a moment."
   },
   "error": {
     "title": "Something went wrong"

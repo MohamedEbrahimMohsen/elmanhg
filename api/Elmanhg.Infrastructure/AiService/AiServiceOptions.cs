@@ -24,4 +24,7 @@ public sealed class AiServiceOptions
 
     [Range(1, 600)]
     public int EssayGradingTimeoutSeconds { get; set; } = 100;
+
+    [Range(1, 120)]
+    public int MathCheckTimeoutSeconds { get; set; } = 15;
 }

@@ -12,6 +12,8 @@ public static partial class AvatarAnswerText
     private const string TrueText = "صح";
     private const string FalseText = "خطأ";
     private const string ListSeparator = "، ";
+    private const string StepSeparator = "\n";
+    private const string FinalAnswerLabel = "الإجابة النهائية: ";
 
     public static string? StudentAnswer(QuestionRevisionSnapshot snapshot, string? answerJson, IRichTextExtractor extractor)
     {
@@ -27,6 +29,7 @@ public static partial class AvatarAnswerText
             QuestionType.TrueFalse => BooleanText(Read<TrueFalseAnswer>(answerJson)?.Value),
             QuestionType.Fill => Blanks(Read<FillAnswer>(answerJson)?.Blanks?.Select(x => (x.Id, x.Text))),
             QuestionType.Short => NullIfBlank(Read<ShortAnswer>(answerJson)?.Text),
+            QuestionType.MathSteps => MathStepsText(Read<MathStepsAnswer>(answerJson)),
             _ => null,
         };
     }
@@ -65,6 +68,25 @@ public static partial class AvatarAnswerText
             .Select(x => $"[[{x.Id}]] {x.Text}")
             .ToList();
         return parts is null ? null : NullIfBlank(string.Join(ListSeparator, parts));
+    }
+
+    private static string? MathStepsText(MathStepsAnswer? answer)
+    {
+        if (answer is null)
+        {
+            return null;
+        }
+
+        var parts = (answer.Steps ?? [])
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x!.Trim())
+            .ToList();
+        if (!string.IsNullOrWhiteSpace(answer.FinalAnswer))
+        {
+            parts.Add(FinalAnswerLabel + answer.FinalAnswer.Trim());
+        }
+
+        return NullIfBlank(string.Join(StepSeparator, parts));
     }
 
     private static string? NullIfBlank(string? text) => string.IsNullOrWhiteSpace(text) ? null : text;

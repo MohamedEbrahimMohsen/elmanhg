@@ -440,4 +440,13 @@
   <data name="USER_NOT_SUSPENDED" xml:space="preserve"><value>This account is already active.</value></data>
   <data name="COMPLIMENTARY_REQUIRES_BASE" xml:space="preserve"><value>Ask a Teacher needs an active Base plan first.</value></data>
   <data name="COMPLIMENTARY_PLAN_ALREADY_ACTIVE" xml:space="preserve"><value>The student already has this plan.</value></data>
+  <data name="QUESTION_MATH_ANSWERS_INVALID" xml:space="preserve"><value>Add one or more accepted final answers, none empty or too long, up to the allowed maximum.</value></data>
+  <data name="QUESTION_MATH_FORM_INVALID" xml:space="preserve"><value>Choose a valid required form.</value></data>
+  <data name="QUESTION_MATH_TOLERANCE_INVALID" xml:space="preserve"><value>Enter a tolerance of zero or more together with absolute or percent, or leave both empty.</value></data>
+  <data name="QUESTION_MATH_TOLERANCE_FORM_CONFLICT" xml:space="preserve"><value>A tolerance works only with the any-equivalent-form rule.</value></data>
+  <data name="MATH_CHECK_UNAVAILABLE" xml:space="preserve"><value>The final answer cannot be checked right now. Try again in a moment.</value></data>
+  <data name="GRADE_FEEDBACK_MATH_FINAL_ONLY" xml:space="preserve"><value>Only the final answer was graded; the steps are graded later.</value></data>
+  <data name="GRADE_FEEDBACK_MATH_WRONG_FORM" xml:space="preserve"><value>Write the final answer in the form the question asks for.</value></data>
+  <data name="GRADE_FEEDBACK_MATH_UNREADABLE" xml:space="preserve"><value>The final answer could not be read. Write it with math symbols, for example x = 2.</value></data>
+  <data name="GRADE_FEEDBACK_MATH_UNCHECKED" xml:space="preserve"><value>The final answer could not be checked automatically. Your teacher will review it.</value></data>
 </root>

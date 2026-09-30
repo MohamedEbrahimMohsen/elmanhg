@@ -21,5 +21,17 @@ public sealed class SessionsOptions
     [Range(1, 200000)]
     public int EssayAnswerMaxLength { get; set; } = 121000;
 
-    public int RequestAnswerMaxLength => Math.Max(AnswerMaxLength, EssayAnswerMaxLength);
+    [Range(1, 100000)]
+    public int MathStepsAnswerMaxLength { get; set; } = 24000;
+
+    [Range(1, 100)]
+    public int MathStepsMaxCount { get; set; } = 20;
+
+    [Range(1, 10000)]
+    public int MathStepMaxLength { get; set; } = 500;
+
+    [Range(1, 10000)]
+    public int MathFinalAnswerMaxLength { get; set; } = 200;
+
+    public int RequestAnswerMaxLength => Math.Max(AnswerMaxLength, Math.Max(EssayAnswerMaxLength, MathStepsAnswerMaxLength));
 }

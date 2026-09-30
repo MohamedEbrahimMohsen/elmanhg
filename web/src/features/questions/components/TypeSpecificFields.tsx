@@ -4,6 +4,7 @@ import type { QuestionValues } from '../schemas/questionEditorSchema';
 import { ChoiceOptionsField } from './ChoiceOptionsField';
 import { EssayFields } from './EssayFields';
 import { FillBlanksField } from './FillBlanksField';
+import { MathStepsFields } from './MathStepsFields';
 import { SelectField } from './SelectField';
 import { ShortAnswerFields } from './ShortAnswerFields';
 
@@ -33,5 +34,7 @@ export function TypeSpecificFields() {
       return <ShortAnswerFields />;
     case 'Essay':
       return <EssayFields />;
+    case 'MathSteps':
+      return <MathStepsFields />;
   }
 }

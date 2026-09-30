@@ -65,6 +65,7 @@ All state is saved in `localStorage` under the key `elmanhg.v1`. Click **إعا�
 Essay and math-with-steps questions are marked **v2**:
 - Essay uses a keyword-overlap heuristic with a fake AI justification.
 - Math-with-steps checks only the final answer ("تصحيح الخطوات في الإصدار 2").
+- The built app grades the math final answer with a SymPy CAS check (equivalent forms, tolerance, form rules; #122); steps are stored for step grading (#123). An answer the CAS could not check shows «قيد المراجعة» until a teacher scores it (#128); the prototype does not simulate this.
 
 The built app replaces the prototype's essay keyword list with a rubric (criteria, points, levels) and model answers (#117); essays are served since #119, and students write them in an RTL plain-text editor. The built app grades essays with Claude against the rubric (#118) instead of the keyword heuristic.
 

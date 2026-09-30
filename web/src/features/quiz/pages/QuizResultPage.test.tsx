@@ -59,6 +59,37 @@ describe('QuizResultPage', () => {
     expect(wrongChoice).toBeDisabled();
   });
 
+  it('marks the score provisional and shows an unchecked math answer as under review', async () => {
+    const math = {
+      ...answered(
+        quizItem(2, { type: 'MathSteps', body: {} }),
+        'Incorrect',
+        { steps: [], finalAnswer: 'x = 2' },
+        {
+          awaitsReview: true,
+        },
+      ),
+      correctAnswer: { acceptedAnswers: ['x = 2'], form: 'equivalent' },
+    };
+    useSession(quizSession([answered(quizItem(1), 'Correct', { optionId: 'b' }), math], finishedAt));
+    openResult();
+
+    expect(
+      await screen.findByText('1 answer is under review. The score is provisional until your teacher reviews them.'),
+    ).toBeInTheDocument();
+    const review = within(screen.getByRole('article', { name: 'Question 2' }));
+    expect(review.getByRole('status')).toHaveTextContent('Under review');
+    expect(review.queryByText('Wrong answer')).not.toBeInTheDocument();
+    expect(review.queryByText('The correct answer')).not.toBeInTheDocument();
+  });
+
+  it('does not mention review when no answer awaits it', async () => {
+    openResult();
+
+    expect(await screen.findByText('67 / 100')).toBeInTheDocument();
+    expect(screen.queryByText(/under review/)).not.toBeInTheDocument();
+  });
+
   it('shows the empty review when nothing was answered', async () => {
     useSession(quizSession([quizItem(1), quizItem(2)], finishedAt));
     openResult();

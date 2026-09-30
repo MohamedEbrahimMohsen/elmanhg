@@ -37,7 +37,7 @@ export function countsFromValues(values: ExamBlueprintValues): ExamTypeCountResu
 }
 
 export const emptyBlueprintValues: ExamBlueprintValues = {
-  counts: { Mcq: '0', Multi: '0', TrueFalse: '0', Fill: '0', Short: '0', Essay: '0' },
+  counts: { Mcq: '0', Multi: '0', TrueFalse: '0', Fill: '0', Short: '0', Essay: '0', MathSteps: '0' },
   timeLimitMinutes: '',
   passMark: '50',
   difficultyMix: { enabled: false, easy: '', medium: '', hard: '' },
@@ -57,6 +57,7 @@ export function toFormValues(blueprint: ExamBlueprintResult | null | undefined):
       Fill: count('Fill'),
       Short: count('Short'),
       Essay: count('Essay'),
+      MathSteps: count('MathSteps'),
     },
     timeLimitMinutes: blueprint.timeLimitMinutes === null ? '' : String(blueprint.timeLimitMinutes),
     passMark: String(blueprint.passMark),

@@ -1,3 +1,4 @@
+import { clearMathDraft } from '@/features/mathSteps';
 import type { ExamItemResult, ExamSessionResult } from '@/shared/api/generated/model';
 
 export const examAutoSaveDelayMilliseconds = 800;
@@ -44,4 +45,15 @@ export function examUnitNames(session: ExamSessionResult): string {
     .map((unit) => unit.name)
     .filter((name): name is string => name !== null)
     .join(' + ');
+}
+
+export function clearExamMathDrafts(session: ExamSessionResult, studentId: string | undefined): void {
+  if (!studentId) {
+    return;
+  }
+  session.items
+    .filter((item) => item.type === 'MathSteps')
+    .forEach((item) => {
+      clearMathDraft({ studentId, sessionId: session.id, questionId: item.questionId });
+    });
 }

@@ -42,7 +42,7 @@ describe('blueprintValues', () => {
     });
 
     expect(toFormValues(result)).toEqual({
-      counts: { Mcq: '2', Multi: '0', TrueFalse: '0', Fill: '1', Short: '0', Essay: '0' },
+      counts: { Mcq: '2', Multi: '0', TrueFalse: '0', Fill: '1', Short: '0', Essay: '0', MathSteps: '0' },
       timeLimitMinutes: '',
       passMark: '60',
       difficultyMix: { enabled: true, easy: '30', medium: '50', hard: '20' },
@@ -77,6 +77,7 @@ describe('blueprintValues', () => {
       'Fill',
       'Short',
       'Essay',
+      'MathSteps',
     ]);
   });
 });

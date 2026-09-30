@@ -3,6 +3,7 @@ using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Questions.Schemas;
 using FluentAssertions;
+using System.Text.Json;
 using static Elmanhg.Tests.Builders.QuestionBuilder;
 
 namespace Elmanhg.Tests.Application.Features.Questions.Shared;
@@ -89,5 +90,38 @@ public sealed class QuestionAnswerRulesTests
         var shortAnswer = QuestionAnswerRules.IsRawAnswerTooLong(QuestionType.Short, answer, options);
 
         (essay, shortAnswer).Should().Be((false, true));
+    }
+
+    [Fact]
+    public void IsRawAnswerTooLong_MathStepsUsesMathStepsCap()
+    {
+        var options = new SessionsOptions { AnswerMaxLength = 20, MathStepsAnswerMaxLength = 40 };
+        var answer = Json("""{"steps":["2x=4"],"finalAnswer":"x=2"}""");
+
+        var mathSteps = QuestionAnswerRules.IsRawAnswerTooLong(QuestionType.MathSteps, answer, options);
+        var shortAnswer = QuestionAnswerRules.IsRawAnswerTooLong(QuestionType.Short, answer, options);
+
+        (mathSteps, shortAnswer).Should().Be((false, true));
+    }
+
+    [Theory]
+    [InlineData(4001, false)]
+    [InlineData(23999, false)]
+    [InlineData(24001, true)]
+    public void IsRawAnswerTooLong_MathStepsAtConfiguredCaps_ComparesAgainstMathStepsCap(int rawLength, bool expected)
+    {
+        var options = new SessionsOptions { AnswerMaxLength = 4000, MathStepsAnswerMaxLength = 24000 };
+        var answer = MathStepsAnswerOfRawLength(rawLength);
+
+        QuestionAnswerRules.IsRawAnswerTooLong(QuestionType.MathSteps, answer, options).Should().Be(expected);
+    }
+
+    private static JsonElement MathStepsAnswerOfRawLength(int rawLength)
+    {
+        const string Prefix = "{\"steps\":[\"";
+        const string Suffix = "\"],\"finalAnswer\":\"x=2\"}";
+        var answer = Json(Prefix + new string('a', rawLength - Prefix.Length - Suffix.Length) + Suffix);
+        answer.GetRawText().Length.Should().Be(rawLength);
+        return answer;
     }
 }

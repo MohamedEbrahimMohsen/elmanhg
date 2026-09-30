@@ -27,6 +27,10 @@ public static class GradeFeedbackText
                 [GradeFeedbackKeys.TotalArgument] = feedback.Total,
             }),
             GradeFeedbackKind.NotANumber => localizer.GetMessage(GradeFeedbackKeys.NotANumber),
+            GradeFeedbackKind.MathFinalAnswerOnly => localizer.GetMessage(GradeFeedbackKeys.MathFinalAnswerOnly),
+            GradeFeedbackKind.MathWrongForm => localizer.GetMessage(GradeFeedbackKeys.MathWrongForm),
+            GradeFeedbackKind.MathUnreadable => localizer.GetMessage(GradeFeedbackKeys.MathUnreadable),
+            GradeFeedbackKind.MathUnchecked => localizer.GetMessage(GradeFeedbackKeys.MathUnchecked),
             _ => throw new InvalidOperationException("Unsupported grade feedback."),
         };
     }

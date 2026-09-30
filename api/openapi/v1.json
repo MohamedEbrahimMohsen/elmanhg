@@ -7367,6 +7367,7 @@
           "score",
           "normalisedScore",
           "outcome",
+          "awaitsReview",
           "feedback",
           "timeTakenMilliseconds",
           "createdAt"
@@ -7398,6 +7399,9 @@
           },
           "outcome": {
             "type": "string"
+          },
+          "awaitsReview": {
+            "type": "boolean"
           },
           "feedback": {
             "type": [
@@ -11346,7 +11350,8 @@
           "TrueFalse",
           "Fill",
           "Short",
-          "Essay"
+          "Essay",
+          "MathSteps"
         ]
       },
       "QuestionTypeCountResult": {

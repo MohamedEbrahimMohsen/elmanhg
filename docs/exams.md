@@ -41,7 +41,7 @@ Example: 10 Mcq with a 30/50/20 mix targets 3 Easy, 5 Medium and 2 Hard. With no
 - `PUT /api/exams/{sessionId}/answers/{questionId}` saves the canonical answer on the item (`SessionItem.SavedAnswer`, jsonb, and `AnswerSavedAt`). It overwrites the previous draft and creates no attempt. A wrong shape for the served type is 422 `QUESTION_ANSWER_INVALID`; any readable shape is kept, including a cleared answer (which grades 0).
 - A save after `Deadline + Exams:DeadlineGraceSeconds` (30 s) returns 400 `EXAM_TIME_EXPIRED`. The grace absorbs the client's last in-flight save at 0:00.
 - A save on a submitted exam returns 400 `SESSION_ALREADY_SUBMITTED`.
-- **Essays (#119)** save like every other answer (`{ "text": "…" }`, autosaved as the student writes). An essay longer than `Content:QuestionEssayAnswerMaxLength` is 422 `QUESTION_ESSAY_ANSWER_TOO_LONG`. The raw JSON cap is `Sessions:EssayAnswerMaxLength` for an essay and `Sessions:AnswerMaxLength` for every other type (422 `ATTEMPT_ANSWER_TOO_LONG`).
+- **Essays (#119)** save like every other answer (`{ "text": "…" }`, autosaved as the student writes). An essay longer than `Content:QuestionEssayAnswerMaxLength` is 422 `QUESTION_ESSAY_ANSWER_TOO_LONG`. The raw JSON cap is `Sessions:EssayAnswerMaxLength` for an essay, `Sessions:MathStepsAnswerMaxLength` for a MathSteps answer and `Sessions:AnswerMaxLength` for every other type (422 `ATTEMPT_ANSWER_TOO_LONG`).
 - **What is revealed.** While open, items carry `savedAnswer` only; `attempt`, `correctAnswer` and `explanation` are null. After submission, every item carries `correctAnswer` and `explanation`, and answered items carry `attempt`.
 - `GET /api/exams/{sessionId}` never mutates; a refresh resumes with the saved answers.
 - The quiz endpoints (`/api/sessions/{id}/answers` and `/finish`) return 404 `SESSION_NOT_FOUND` for an exam id.
@@ -50,11 +50,12 @@ Example: 10 Mcq with a 30/50/20 mix targets 3 Easy, 5 Medium and 2 Hard. With no
 
 `POST /api/exams/{sessionId}/submit` is always allowed, also after the deadline, and grades what was saved (saves are already closed, so a late submit cannot add answers).
 
-- Every item with a saved answer gets one append-only `Attempt`, graded through `QuestionRevision.Grade` at the served version. Unanswered items get no attempt and count 0.
+- Every item with a saved answer, except a written essay, gets one append-only `Attempt`, graded through `AnswerGrader` at the served version. Unanswered items get no attempt and count 0.
 - A **written essay** gets no attempt at submission: it requests an `EssayGrade` (time 0, `RequestedAt` = the submission time) in the same save, and its attempt is written when the AI grade is applied ([essay-grading.md](essay-grading.md)). Applying it recomputes `ScorePercent` (and so `isPassed`), which are provisional until then; the attempts and exam history read the new score. A grade that goes to teacher review waits for #128. A **blank essay** is graded at once as Unanswered (score 0).
+- MathSteps items are checked by the AI service's CAS at submit, not on each autosave ([math-cas.md](math-cas.md)). An unreachable AI service never blocks the submit (manual, on start or by the worker): the item is graded `unchecked` (provisional 0), its attempt is left out of mastery, and it waits for teacher review (#128). Its attempt result has `awaitsReview: true`, and the exam result shows it as «قيد المراجعة» with the score marked provisional ([math-cas.md](math-cas.md)). One submit can hold both kinds: pending essays and unchecked math answers.
 - `ScorePercent = round(Σ attempt.Score / Σ item.MaxScore × 100, 2)`, the session formula. `IsPassed = ScorePercent >= PassMark`.
 - Exam attempts store `TimeTakenMilliseconds = 0`: all questions share one page, so per-question time is not observable. The exam's time is `elapsedMilliseconds = (SubmittedAt ?? now) − StartedAt`.
-- In a non-test exam each new attempt updates `QuestionMastery` exactly as a quiz answer does, in the same save. The day streak stays quiz-only.
+- In a non-test exam each new attempt (except an `unchecked` MathSteps attempt) updates `QuestionMastery` exactly as a quiz answer does, in the same save. The day streak stays quiz-only.
 - Submitting twice returns the same result and writes nothing new.
 
 ## Auto-submit
@@ -174,7 +175,7 @@ Policy `Assessments.Take` (Students and Admins). Teachers get 403, anonymous cal
 | `Exams:WeakestObjectiveCount` | 3 | Objectives shown in the weakest list (1–20). |
 | `Exams:RequireAllLessonsOpened` | false | When true, a student must have opened every Published lesson of the unit (or of every selected unit) before a new exam starts. |
 
-`Sessions:AnswerMaxLength` caps a saved answer (`Sessions:EssayAnswerMaxLength` for an essay), as for quizzes.
+`Sessions:AnswerMaxLength` caps a saved answer (`Sessions:EssayAnswerMaxLength` for an essay, `Sessions:MathStepsAnswerMaxLength` for MathSteps), as for quizzes.
 
 ## Student screens (web)
 

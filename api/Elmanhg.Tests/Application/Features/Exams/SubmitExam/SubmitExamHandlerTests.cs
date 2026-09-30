@@ -3,11 +3,13 @@ using Core.Identity.Tokens.CurrentUser;
 using Core.Localization;
 using Elmanhg.Application.Exams.SubmitExam;
 using Elmanhg.Application.Exceptions;
+using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
+using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subjects;
@@ -24,6 +26,7 @@ namespace Elmanhg.Tests.Application.Features.Exams.SubmitExam;
 public sealed class SubmitExamHandlerTests
 {
     private static readonly TimeSpan Grace = TimeSpan.FromSeconds(30);
+    private readonly IAiMathCheckClient _mathCheckClient = Substitute.For<IAiMathCheckClient>();
     private readonly ISessionRepository _sessionRepository = Substitute.For<ISessionRepository>();
     private readonly IQuestionRepository _questionRepository = Substitute.For<IQuestionRepository>();
     private readonly IQuestionMasteryRepository _questionMasteryRepository = Substitute.For<IQuestionMasteryRepository>();
@@ -54,7 +57,7 @@ public sealed class SubmitExamHandlerTests
             .Returns(call => _masteries.Where(call.Arg<Expression<Func<QuestionMastery, bool>>>().Compile()).ToList());
         _unitRepository.GetByIdAsync(_builder.Questions.Unit.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<CurriculumUnit>, IQueryable<CurriculumUnit>>?>(), Arg.Any<bool>()).Returns(_builder.Questions.Unit);
         _subjectRepository.GetByIdAsync(_builder.Questions.Subject.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Subject>, IQueryable<Subject>>?>(), Arg.Any<bool>()).Returns(_builder.Questions.Subject);
-        _handler = new SubmitExamHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _essayGradeRepository, _lessonRepository, _unitRepository, _subjectRepository, Options.Create(new ExamsOptions()), Options.Create(new MasteryOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>());
+        _handler = new SubmitExamHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _essayGradeRepository, _lessonRepository, _unitRepository, _subjectRepository, Options.Create(new ExamsOptions()), Options.Create(new MasteryOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), _mathCheckClient);
     }
 
     private Guid QuestionId => _questions[0].Id;
@@ -167,6 +170,67 @@ public sealed class SubmitExamHandlerTests
         _session.SaveExamAnswer(_session.GetItem(essay.Id)!, System.Text.Json.JsonSerializer.Serialize(new { text = essayText }), Grace, savedAt);
         SessionRepositoryStub.StubFind(_sessionRepository, _session);
         return essay;
+    }
+
+    [Fact]
+    public async Task Handle_SavedMathStepsAnswer_GradesWithMathCheck()
+    {
+        var math = _builder.Questions.MathSteps().Approved().Build();
+        _questions.Add(math);
+        _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(_questions.SelectMany(x => x.Revisions).ToList());
+        _session = Session.StartUnitExam(_builder.StudentId, _builder.Questions.Unit, _builder.Blueprint(3), _questions, [_builder.Questions.Lesson], false, ExamSessionBuilder.Now);
+        _session.SaveExamAnswer(_session.GetItem(math.Id)!, """{"steps":["2x = 4"],"finalAnswer":"x = 2"}""", Grace, ExamSessionBuilder.Now.AddMinutes(1));
+        SessionRepositoryStub.StubFind(_sessionRepository, _session);
+        _mathCheckClient.CheckAsync(Arg.Any<AiMathCheckRequest>(), Arg.Any<CancellationToken>()).Returns(new AiMathCheckResult(MathAnswerVerdict.Equivalent, 0, []));
+
+        await _handler.Handle(new SubmitExamCommand(_session.Id), TestContext.Current.CancellationToken);
+
+        var attempt = _session.Attempts.Should().ContainSingle().Which;
+        (attempt.QuestionId, attempt.Outcome, attempt.Score).Should().Be((math.Id, GradeOutcome.Correct, 2m));
+        await _mathCheckClient.Received(1).CheckAsync(Arg.Is<AiMathCheckRequest>(x => x.Answer == "x = 2"), Arg.Any<CancellationToken>());
+        await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_SavedMathStepsAnswerUnchecked_ReturnsItemAwaitingReview()
+    {
+        var math = _builder.Questions.MathSteps().Approved().Build();
+        _questions.Add(math);
+        _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(_questions.SelectMany(x => x.Revisions).ToList());
+        _session = Session.StartUnitExam(_builder.StudentId, _builder.Questions.Unit, _builder.Blueprint(3), _questions, [_builder.Questions.Lesson], false, ExamSessionBuilder.Now);
+        _session.SaveExamAnswer(_session.GetItem(math.Id)!, """{"steps":["2x = 4"],"finalAnswer":"x = 2"}""", Grace, ExamSessionBuilder.Now.AddMinutes(1));
+        SessionRepositoryStub.StubFind(_sessionRepository, _session);
+        _mathCheckClient.CheckAsync(Arg.Any<AiMathCheckRequest>(), Arg.Any<CancellationToken>()).Returns(new AiMathCheckResult(MathAnswerVerdict.Unchecked, null, []));
+
+        var result = await _handler.Handle(new SubmitExamCommand(_session.Id), TestContext.Current.CancellationToken);
+
+        var attempt = result.Items.Single(x => x.QuestionId == math.Id).Attempt!;
+        (attempt.Score, attempt.AwaitsReview).Should().Be((0m, true));
+        result.Items.Where(x => x.QuestionId != math.Id).Should().OnlyContain(x => x.Attempt == null || !x.Attempt.AwaitsReview);
+    }
+
+    [Fact]
+    public async Task Handle_WrittenEssayAndUncheckedMathSteps_HandlesBothPendingKindsInOneSubmit()
+    {
+        var essay = _builder.Questions.Essay().Approved().Build();
+        var math = _builder.Questions.MathSteps().Approved().Build();
+        _questions.AddRange([essay, math]);
+        _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(_questions.SelectMany(x => x.Revisions).ToList());
+        var blueprint = ExamBlueprint.CreateForUnit(_builder.Questions.Unit, new ExamBlueprintShape([new ExamTypeCount(QuestionType.Mcq, 2), new ExamTypeCount(QuestionType.Essay, 1), new ExamTypeCount(QuestionType.MathSteps, 1)], null, 30, 50), ExamBlueprintBuilder.Plenty(), Guid.NewGuid());
+        _session = Session.StartUnitExam(_builder.StudentId, _builder.Questions.Unit, blueprint, _questions, [_builder.Questions.Lesson], false, ExamSessionBuilder.Now);
+        var savedAt = ExamSessionBuilder.Now.AddMinutes(1);
+        _session.SaveExamAnswer(_session.GetItem(essay.Id)!, """{"text":"القصور الذاتي"}""", Grace, savedAt);
+        _session.SaveExamAnswer(_session.GetItem(math.Id)!, """{"steps":["2x = 4"],"finalAnswer":"x = 2"}""", Grace, savedAt);
+        SessionRepositoryStub.StubFind(_sessionRepository, _session);
+        _mathCheckClient.CheckAsync(Arg.Any<AiMathCheckRequest>(), Arg.Any<CancellationToken>()).Returns(new AiMathCheckResult(MathAnswerVerdict.Unchecked, null, []));
+
+        var result = await _handler.Handle(new SubmitExamCommand(_session.Id), TestContext.Current.CancellationToken);
+
+        await _essayGradeRepository.Received(1).AddRangeAsync(Arg.Is<List<EssayGrade>>(list => list.Count == 1 && list[0].QuestionId == essay.Id), Arg.Any<CancellationToken>());
+        _session.Attempts.Should().ContainSingle().Which.QuestionId.Should().Be(math.Id);
+        result.Items.Single(x => x.QuestionId == math.Id).Attempt!.AwaitsReview.Should().BeTrue();
+        await _questionMasteryRepository.DidNotReceive().AddRangeAsync(Arg.Any<List<QuestionMastery>>(), Arg.Any<CancellationToken>());
+        await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     private Session StartExam(bool isTestMode)

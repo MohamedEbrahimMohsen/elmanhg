@@ -263,6 +263,72 @@
         ]
       }
     },
+    "/v1/math-checks": {
+      "post": {
+        "tags": [
+          "grading"
+        ],
+        "summary": "Create Math Check",
+        "operationId": "grading_create_math_check",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MathCheckIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MathCheckOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/v1/essay-grades": {
       "post": {
         "tags": [
@@ -352,6 +418,17 @@
   },
   "components": {
     "schemas": {
+      "AnswerForm": {
+        "type": "string",
+        "enum": [
+          "equivalent",
+          "simplified",
+          "factored",
+          "expanded",
+          "exact"
+        ],
+        "title": "AnswerForm"
+      },
       "AudioContentType": {
         "type": "string",
         "enum": [
@@ -870,6 +947,93 @@
         ],
         "title": "LessonContextIn"
       },
+      "MathCheckIn": {
+        "properties": {
+          "answer": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Answer"
+          },
+          "expected": {
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Expected"
+          },
+          "form": {
+            "$ref": "#/components/schemas/AnswerForm",
+            "default": "equivalent"
+          },
+          "tolerance": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tolerance"
+          },
+          "toleranceMode": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ToleranceMode"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "answer",
+          "expected"
+        ],
+        "title": "MathCheckIn"
+      },
+      "MathCheckOut": {
+        "properties": {
+          "verdict": {
+            "$ref": "#/components/schemas/Verdict"
+          },
+          "matchedIndex": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matchedindex"
+          },
+          "invalidExpected": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Invalidexpected"
+          }
+        },
+        "type": "object",
+        "required": [
+          "verdict",
+          "matchedIndex",
+          "invalidExpected"
+        ],
+        "title": "MathCheckOut"
+      },
       "Problem": {
         "properties": {
           "type": {
@@ -1078,6 +1242,14 @@
         ],
         "title": "RubricLevelIn"
       },
+      "ToleranceMode": {
+        "type": "string",
+        "enum": [
+          "absolute",
+          "percent"
+        ],
+        "title": "ToleranceMode"
+      },
       "TranscriptionIn": {
         "properties": {
           "audio": {
@@ -1173,6 +1345,17 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "Verdict": {
+        "type": "string",
+        "enum": [
+          "equivalent",
+          "notEquivalent",
+          "wrongForm",
+          "unreadable",
+          "unchecked"
+        ],
+        "title": "Verdict"
       }
     },
     "securitySchemes": {

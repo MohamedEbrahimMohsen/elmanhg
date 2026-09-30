@@ -3,6 +3,7 @@ using Core.Identity.Tokens.CurrentUser;
 using Core.Localization;
 using Elmanhg.Application.Exams.Shared;
 using Elmanhg.Application.Exceptions;
+using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.Lessons;
@@ -17,7 +18,7 @@ using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.Exams.SubmitExam;
 
-public sealed class SubmitExamHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, IEssayGradeRepository essayGradeRepository, ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IOptions<ExamsOptions> examsOptions, IOptions<MasteryOptions> masteryOptions, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<SubmitExamCommand, ExamSessionResult>
+public sealed class SubmitExamHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, IEssayGradeRepository essayGradeRepository, ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IOptions<ExamsOptions> examsOptions, IOptions<MasteryOptions> masteryOptions, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer, IAiMathCheckClient mathCheckClient) : IRequestHandler<SubmitExamCommand, ExamSessionResult>
 {
     public async Task<ExamSessionResult> Handle(SubmitExamCommand request, CancellationToken cancellationToken)
     {
@@ -36,7 +37,7 @@ public sealed class SubmitExamHandler(ISessionRepository sessionRepository, IQue
         }
 
         var revisions = await questionRepository.GetRevisionsAsync(session.Items.Select(x => x.QuestionId).ToList(), cancellationToken).ConfigureAwait(false);
-        await ExamSubmission.SubmitAsync(session, revisions, questionRepository, questionMasteryRepository, essayGradeRepository, threshold, now, cancellationToken).ConfigureAwait(false);
+        await ExamSubmission.SubmitAsync(session, revisions, questionRepository, questionMasteryRepository, essayGradeRepository, mathCheckClient, threshold, now, cancellationToken).ConfigureAwait(false);
 
         await sessionRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

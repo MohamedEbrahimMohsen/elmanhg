@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { mathAnswerForms } from '../api/questionOptions';
 
 export const choiceBodySchema = z.object({
   options: z.array(z.object({ id: z.string(), text: z.string() })),
@@ -57,4 +58,11 @@ export const essaySpecSchema = z.object({
     }),
   ),
   modelAnswers: z.array(z.string()),
+});
+
+export const mathStepsSpecSchema = z.object({
+  acceptedAnswers: z.array(z.string()),
+  form: z.enum(mathAnswerForms).optional(),
+  tolerance: z.number().optional(),
+  toleranceMode: z.enum(['absolute', 'percent']).optional(),
 });

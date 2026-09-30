@@ -218,6 +218,8 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | `AskTeacher__ReminderListMaxCount` | `20` | 1 to 100, the «تذكيرات» card on the teacher inbox |
 | `AiService__TranscriptionTimeoutSeconds` | `150` | 1 to 600; above the AI service's worst case (about 121 s) |
 | `AiService__EssayGradingTimeoutSeconds` | `100` | 1 to 600; above the AI service's essay-grading worst case (about 91 s) |
+| `AiService__MathCheckTimeoutSeconds` | `15` | 1 to 120; the math final-answer check's attempt and total timeout (no POST retry). A timeout or outage grades the answer «unchecked» for teacher review ([docs/math-cas.md](math-cas.md)) |
+| `Sessions__MathStepsAnswerMaxLength` / `Sessions__MathStepsMaxCount` / `Sessions__MathStepMaxLength` / `Sessions__MathFinalAnswerMaxLength` | `24000` / `20` / `500` / `200` | raw JSON cap and caps on a math-with-steps answer (422 `ATTEMPT_ANSWER_TOO_LONG`) |
 | `EssayGrading__SweepEnabled` / `EssayGrading__ReviewConfidenceThreshold` | `true` / `0.7` | the essay-grading worker, and the confidence below which a teacher reviews the grade ([docs/essay-grading.md](essay-grading.md)) |
 | `TrainingExports__SweepEnabled` / `TrainingExports__SweepIntervalSeconds` / `TrainingExports__SweepBatchSize` | `true` / `15` / `2` | the `training-export` worker that writes JSONL files ([docs/training-data.md](training-data.md), Export); 1 to 3600 / 1 to 20 |
 | `TrainingExports__MaxAttempts` / `TrainingExports__RetryBaseDelaySeconds` | `3` / `60` | 1 to 10 / 1 to 3600; after the last failure the export is `Failed` |
@@ -288,6 +290,8 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | `ELMANHG_AI_TRANSCRIPTION_USD_PER_MINUTE` | `0.006` | cost logging only |
 | `ELMANHG_AI_ESSAY_GRADING_MODEL` | `claude-sonnet-5` | essay grading uses the Claude provider and key above |
 | `ELMANHG_AI_ESSAY_GRADING_TIMEOUT_SECONDS` | `45` | per call; with one retry (about 91 s) it stays under `AiService__EssayGradingTimeoutSeconds` |
+| `ELMANHG_AI_CAS_TIMEOUT_SECONDS` | `5` | hard timeout of one SymPy check; on a timeout only the offending worker slot is killed and restarted in the background, and the other slots are untouched ([docs/math-cas.md](math-cas.md)) |
+| `ELMANHG_AI_CAS_WORKERS` / `ELMANHG_AI_CAS_WORKER_MEMORY_MB` | `2` / `1024` | CAS worker processes and their address-space cap (POSIX) |
 | `ELMANHG_AI_ENV` | set by compose | from `.env` |
 
 Switching the embedding provider or model (for example `fake` to `openai`) needs a re-index: after `up -d`, call `POST /api/content-index/rebuild` as an admin (Postman, `ContentRetrieval` folder). Until each lesson is re-embedded by the sweep, its search returns no matches, because old-model chunks are never compared with a new-model query ([docs/content-retrieval.md](content-retrieval.md), Rebuild).

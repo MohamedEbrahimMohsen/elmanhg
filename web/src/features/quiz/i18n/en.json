@@ -32,7 +32,10 @@
     "false": "False",
     "blank": "Blank {number, number}:",
     "tolerance": "{value} (± {tolerance})",
-    "tolerancePercent": "{value} (± {tolerance}%)"
+    "tolerancePercent": "{value} (± {tolerance}%)",
+    "mathAnswer": "Final answer",
+    "inReview": "Under review",
+    "inReviewHint": "The score is on hold until your teacher reviews it."
   },
   "essayGrade": {
     "label": "Essay grade",
@@ -60,6 +63,7 @@
     "none": "You did not answer any question in this practice.",
     "newPractice": "New practice",
     "backToLesson": "Back to the lesson",
+    "inReview": "{count, plural, one {# answer is} other {# answers are}} under review. The score is provisional until your teacher reviews them.",
     "essaysPending": "Some essays are still being graded. The score will update when they are done."
   },
   "essayDraft": {

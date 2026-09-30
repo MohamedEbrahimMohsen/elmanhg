@@ -3,11 +3,14 @@ using Core.Identity.Tokens.CurrentUser;
 using Core.Localization;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Sessions.SubmitAnswer;
+using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
+using Elmanhg.Domain.Questions.Grading;
+using Elmanhg.Domain.Questions.Schemas;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subscriptions;
@@ -26,6 +29,7 @@ namespace Elmanhg.Tests.Application.Features.Sessions.SubmitAnswer;
 public sealed class SubmitAnswerHandlerTests
 {
     private static readonly DateTimeOffset T0 = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+    private readonly IAiMathCheckClient _mathCheckClient = Substitute.For<IAiMathCheckClient>();
     private readonly ISessionRepository _sessionRepository = Substitute.For<ISessionRepository>();
     private readonly IQuestionRepository _questionRepository = Substitute.For<IQuestionRepository>();
     private readonly IQuestionMasteryRepository _questionMasteryRepository = Substitute.For<IQuestionMasteryRepository>();
@@ -48,7 +52,7 @@ public sealed class SubmitAnswerHandlerTests
         _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(_questions[0].Revisions);
         _timeProvider.GetUtcNow().Returns(T0);
         SubscriptionRepositoryStub.Stub(_subscriptionRepository, SubscriptionRepositoryStub.EntitledBase(_builder.StudentId, T0));
-        _handler = new SubmitAnswerHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _lessonRepository, _subscriptionRepository, _essayGradeRepository, Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), Options.Create(new ContentOptions { QuestionEssayAnswerMaxLength = 20000 }), Options.Create(new SessionsOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>());
+        _handler = new SubmitAnswerHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _lessonRepository, _subscriptionRepository, _essayGradeRepository, Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), Options.Create(new ContentOptions { QuestionEssayAnswerMaxLength = 20000 }), Options.Create(new SessionsOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), _mathCheckClient);
     }
 
     private Guid QuestionId => _questions[0].Id;
@@ -223,6 +227,20 @@ public sealed class SubmitAnswerHandlerTests
     }
 
     [Fact]
+    public async Task Handle_MathStepsAnswer_RecordsGradeFromMathCheck()
+    {
+        var (session, math) = StartMathQuiz();
+        ReplyMath(MathAnswerVerdict.Equivalent);
+
+        var result = await _handler.Handle(MathCommand(session, math, """{"steps":[" 2x = 4 ","  "],"finalAnswer":" x = 2 "}"""), TestContext.Current.CancellationToken);
+
+        (result.Attempt!.Outcome, result.Attempt.Score, result.Attempt.AwaitsReview).Should().Be(("Correct", 2m, false));
+        QuestionJson.AreEquivalent(session.Attempts.Single().Answer, """{"steps":["2x = 4"],"finalAnswer":"x = 2"}""").Should().BeTrue();
+        await _mathCheckClient.Received(1).CheckAsync(Arg.Is<AiMathCheckRequest>(x => x.Answer == "x = 2"), Arg.Any<CancellationToken>());
+        await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task Handle_WrittenEssayReplay_RequestsNoSecondGrade()
     {
         var (session, essay) = SeedEssaySession();
@@ -279,6 +297,44 @@ public sealed class SubmitAnswerHandlerTests
     }
 
     private static SubmitAnswerCommand EssayCommand(Session session, Question essay, string text) => new(session.Id, essay.Id, QuestionBuilder.Json(JsonSerializer.Serialize(new { text })), 1000);
+
+    [Fact]
+    public async Task Handle_MathStepsAnswerOverLimits_ThrowsAttemptAnswerTooLong()
+    {
+        var (session, math) = StartMathQuiz();
+        var steps = string.Join(",", Enumerable.Repeat("\"x\"", 21));
+
+        await AssertThrowsAsync<ApplicationValidationCoreException>(MathCommand(session, math, $$"""{"steps":[{{steps}}],"finalAnswer":"x = 2"}"""), ErrorCodes.AttemptAnswerTooLong);
+        await _mathCheckClient.DidNotReceive().CheckAsync(Arg.Any<AiMathCheckRequest>(), Arg.Any<CancellationToken>());
+        session.Attempts.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Handle_MathCheckUnchecked_RecordsAttemptForReviewWithoutMastery()
+    {
+        var (session, math) = StartMathQuiz();
+        ReplyMath(MathAnswerVerdict.Unchecked);
+
+        var result = await _handler.Handle(MathCommand(session, math, """{"steps":["2x = 4"],"finalAnswer":"x = 2"}"""), TestContext.Current.CancellationToken);
+
+        (result.Attempt!.Score, result.Attempt.AwaitsReview).Should().Be((0m, true));
+        session.Attempts.Single().ReadFeedback().Should().Be(GradeFeedback.MathUnchecked);
+        await _questionMasteryRepository.DidNotReceive().AddAsync(Arg.Any<QuestionMastery>(), Arg.Any<CancellationToken>());
+        await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    private (Session Session, Question Math) StartMathQuiz()
+    {
+        var math = _builder.Questions.MathSteps().Approved().Build();
+        var session = Session.StartQuiz(_builder.StudentId, _builder.Questions.Lesson, [math], isTestMode: false);
+        SessionRepositoryStub.StubFind(_sessionRepository, session);
+        _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(math.Revisions);
+        return (session, math);
+    }
+
+    private void ReplyMath(MathAnswerVerdict verdict) => _mathCheckClient.CheckAsync(Arg.Any<AiMathCheckRequest>(), Arg.Any<CancellationToken>()).Returns(new AiMathCheckResult(verdict, null, []));
+
+    private static SubmitAnswerCommand MathCommand(Session session, Question math, string answer) => new(session.Id, math.Id, QuestionBuilder.Json(answer), 1000);
 
     private SubmitAnswerCommand Command(string answer) => new(_session.Id, QuestionId, QuestionBuilder.Json(answer), 1000);
 

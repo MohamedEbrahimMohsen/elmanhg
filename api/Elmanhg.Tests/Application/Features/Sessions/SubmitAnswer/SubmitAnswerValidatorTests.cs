@@ -50,7 +50,7 @@ public sealed class SubmitAnswerValidatorTests
     [Fact]
     public void Validate_AnswerOverMaxLength_FailsAttemptAnswerTooLong()
     {
-        var validator = new SubmitAnswerValidator(Options.Create(new SessionsOptions { AnswerMaxLength = 20, EssayAnswerMaxLength = 20 }));
+        var validator = new SubmitAnswerValidator(Options.Create(new SessionsOptions { AnswerMaxLength = 20, EssayAnswerMaxLength = 20, MathStepsAnswerMaxLength = 20 }));
 
         var codes = validator.Validate(Command() with { Answer = QuestionBuilder.Json("""{"text":"a long answer over twenty"}""") }).Errors.Select(x => x.ErrorCode);
 

@@ -71,7 +71,7 @@ Controller `api/exam-blueprints`, policy `Blueprints.Manage` (admin only) on eve
 
 | Method | Route | Name | Body | Response |
 |---|---|---|---|---|
-| GET | `/api/exam-blueprints/subjects/{subjectId}` | `GetSubjectExamBlueprints` | — | 200 `SubjectExamBlueprintsResult`: the default, every unit (by order) with its blueprint or null, and servable counts for every served type (the five v1 types; zeros included) for the subject and for each unit |
+| GET | `/api/exam-blueprints/subjects/{subjectId}` | `GetSubjectExamBlueprints` | — | 200 `SubjectExamBlueprintsResult`: the default, every unit (by order) with its blueprint or null, and servable counts for every served type (the seven served types: the five v1 types, Essay and MathSteps; zeros included) for the subject and for each unit |
 | PUT | `/api/exam-blueprints/subjects/{subjectId}` | `SaveSubjectExamBlueprint` | `ExamBlueprintInput` | 200 `ExamBlueprintResult` |
 | PUT | `/api/exam-blueprints/units/{unitId}` | `SaveUnitExamBlueprint` | `ExamBlueprintInput` | 200 `ExamBlueprintResult` |
 | DELETE | `/api/exam-blueprints/{examBlueprintId}` | `DeleteExamBlueprint` | — | 200 |
