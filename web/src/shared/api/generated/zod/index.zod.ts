@@ -6,6 +6,7 @@ export * from './avatar-conversations/avatar-conversations.zod';
 export * from './browse/browse.zod';
 export * from './client-errors/client-errors.zod';
 export * from './content-retrieval/content-retrieval.zod';
+export * from './dashboard/dashboard.zod';
 export * from './exam-blueprints/exam-blueprints.zod';
 export * from './exams/exams.zod';
 export * from './lessons/lessons.zod';

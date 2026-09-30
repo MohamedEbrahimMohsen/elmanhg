@@ -9,4 +9,5 @@ public interface ILessonRepository : IRepository<Lesson>
     Task<Dictionary<Guid, int>> CountByUnitAsync(IReadOnlyCollection<Guid> unitIds, bool publishedOnly, CancellationToken cancellationToken);
     Task<List<LessonPosition>> GetPublishedPositionsAsync(CancellationToken cancellationToken);
     Task<List<LessonPosition>> GetPublishedSiblingPositionsAsync(Guid lessonId, CancellationToken cancellationToken);
+    Task<List<LessonStateCount>> CountByStateAsync(Guid? subjectId, CancellationToken cancellationToken);
 }

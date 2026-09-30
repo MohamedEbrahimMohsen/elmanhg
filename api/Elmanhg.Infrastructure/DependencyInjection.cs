@@ -74,6 +74,7 @@ public static class DependencyInjection
         services.AddScoped<ITeacherVoiceDraftRepository, TeacherVoiceDraftRepository>();
         services.AddScoped<ITeacherThreadSlaEventRepository, TeacherThreadSlaEventRepository>();
         services.AddScoped<IFunnelEventRepository, FunnelEventRepository>();
+        services.AddScoped<IUserActivityDayRepository, UserActivityDayRepository>();
         services.AddScoped<ILessonContentChunkRepository, LessonContentChunkRepository>();
         services.AddScoped<ILessonContentIndexRepository, LessonContentIndexRepository>();
         services.AddScoped<IAvatarMessageUsageRepository, AvatarMessageUsageRepository>();

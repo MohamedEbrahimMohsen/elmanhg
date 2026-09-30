@@ -209,6 +209,18 @@ Question photos and teachers' voice replies are stored under `teacher-threads/` 
 
 Caddy proxies the SignalR hub `/api/hubs/notifications` (WebSockets) with the existing `/api/*` rule; the access log already redacts the `access_token` query value.
 
+### Dashboard (`api.env`, [docs/dashboard.md](dashboard.md))
+
+None is a secret; the baked defaults suit staging and production. Validated at startup, so a value out of range, an unknown time zone or a default range above the maximum stops the API.
+
+| Variable | Default | Notes |
+|---|---|---|
+| `Dashboard__TimeZone` | `Africa/Cairo` | IANA time zone id for day boundaries (`Cairo` alone is rejected) |
+| `Dashboard__CacheSeconds` | `60` | 0 to 3600; per-card in-memory cache, `0` disables it |
+| `Dashboard__DefaultRangeDays` / `Dashboard__MaxRangeDays` | `30` / `366` | 1 to 3650 each; the default must not exceed the max |
+| `Dashboard__RecentWeekDays` | `7` | 1 to 31, the "new this week" window |
+| `Dashboard__RecentMonthDays` | `30` | 1 to 366, the MAU and "churned this month" window |
+
 ### Object storage (`api.env`, R2 or S3)
 
 | Variable | Default | Notes |
