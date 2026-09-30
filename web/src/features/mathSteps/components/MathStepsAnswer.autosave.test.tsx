@@ -121,20 +121,49 @@ describe('MathStepsAnswer autosave', () => {
     renderWithProviders(<MathStepsAnswer owner={owner} />);
     await user.type(stepOne(), 'x');
 
-    window.dispatchEvent(new Event('pagehide'));
+    act(() => {
+      window.dispatchEvent(new Event('pagehide'));
+    });
     expect(storedSteps()).toEqual(['x']);
+    expect(screen.getByText('Draft saved on this device.')).toBeInTheDocument();
 
     await user.type(stepOne(), 'y');
     try {
       Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true });
-      document.dispatchEvent(new Event('visibilitychange'));
+      act(() => {
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
       expect(storedSteps()).toEqual(['x']);
       Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
-      document.dispatchEvent(new Event('visibilitychange'));
+      act(() => {
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
       expect(storedSteps()).toEqual(['xy']);
+      expect(screen.getByText('Draft saved on this device.')).toBeInTheDocument();
     } finally {
       Reflect.deleteProperty(document, 'visibilityState');
     }
+  });
+
+  it('shows an error when the page hides and the device cannot save', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    renderWithProviders(<MathStepsAnswer owner={owner} />);
+    await user.type(stepOne(), 'x');
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('QuotaExceededError');
+    });
+
+    try {
+      Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+      act(() => {
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
+    } finally {
+      Reflect.deleteProperty(document, 'visibilityState');
+    }
+
+    expect(screen.getByText('Could not save the draft on this device.')).toBeInTheDocument();
+    expect(localStorage.getItem(key)).toBeNull();
   });
 
   it('shows an error when the device cannot save', async () => {

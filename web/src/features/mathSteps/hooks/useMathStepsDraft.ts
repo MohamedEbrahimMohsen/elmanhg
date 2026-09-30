@@ -36,25 +36,31 @@ export function useMathStepsDraft({ owner, initialValue, onChange }: MathStepsDr
 
   useEffect(() => {
     purgeExpiredMathDrafts(Date.now());
-    const flush = () => {
+    const flush = (updateStatus = true) => {
       if (timer.current === undefined) {
         return;
       }
       clearTimeout(timer.current);
       timer.current = undefined;
-      writeMathDraft(storageKey, latest.current, Date.now());
+      const saved = writeMathDraft(storageKey, latest.current, Date.now());
+      if (updateStatus) {
+        setStatus(saved ? 'saved' : 'error');
+      }
     };
     const onVisibility = () => {
       if (document.visibilityState === 'hidden') {
         flush();
       }
     };
+    const onPageHide = () => {
+      flush();
+    };
     document.addEventListener('visibilitychange', onVisibility);
-    window.addEventListener('pagehide', flush);
+    window.addEventListener('pagehide', onPageHide);
     return () => {
       document.removeEventListener('visibilitychange', onVisibility);
-      window.removeEventListener('pagehide', flush);
-      flush();
+      window.removeEventListener('pagehide', onPageHide);
+      flush(false);
     };
   }, [storageKey]);
 
