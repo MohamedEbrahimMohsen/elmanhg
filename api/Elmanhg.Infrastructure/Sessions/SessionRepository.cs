@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.Sessions;
 
-public class SessionRepository(AppDbContext context) : Repository<Session>(context), ISessionRepository
+public partial class SessionRepository(AppDbContext context) : Repository<Session>(context), ISessionRepository
 {
     public async Task<List<QuestionAttemptSummary>> GetAttemptSummariesAsync(Guid studentId, IReadOnlyCollection<Guid> questionIds, decimal correctThreshold, CancellationToken cancellationToken)
     {

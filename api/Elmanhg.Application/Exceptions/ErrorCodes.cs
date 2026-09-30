@@ -297,6 +297,10 @@ public static class ErrorCodes
     public const string ContentSearchQueryTooLong = "CONTENT_SEARCH_QUERY_TOO_LONG";
     public const string ContentSearchTopInvalid = "CONTENT_SEARCH_TOP_INVALID";
 
+    // DASHBOARD
+    public const string DashboardDateRangeInvalid = "DASHBOARD_DATE_RANGE_INVALID";
+    public const string DashboardDateRangeTooWide = "DASHBOARD_DATE_RANGE_TOO_WIDE";
+
     // PLATFORM
     public const string TooManyRequests = "TOO_MANY_REQUESTS";
     public const string AdminSeedFailed = "ADMIN_SEED_FAILED";

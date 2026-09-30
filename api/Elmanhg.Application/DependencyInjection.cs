@@ -1,4 +1,6 @@
+using Elmanhg.Application.Dashboard.Shared;
 using Elmanhg.Application.Questions.ImportQuestions;
+using Elmanhg.Application.Shared.Analytics;
 using Elmanhg.Application.Shared.Authorization;
 using Elmanhg.Application.Shared.Options;
 using FluentValidation;
@@ -16,6 +18,8 @@ public static class DependencyInjection
         services.AddMediatR(configuration => configuration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(SubjectScopeBehaviour<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UserActivityBehaviour<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(DashboardCacheBehaviour<,>));
         services.AddTransient<IPipelineBehavior<ImportQuestionsCommand, ImportQuestionsResult>, ImportQuestionsReplayBehaviour>();
         services.AddMemoryCache();
         services.AddOptions<AuthOptions>().BindConfiguration(AuthOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
@@ -40,6 +44,10 @@ public static class DependencyInjection
         services.AddOptions<AskTeacherOptions>().BindConfiguration(AskTeacherOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddSingleton<IValidateOptions<AskTeacherOptions>, AskTeacherOptionsValidator>();
         services.AddOptions<AnalyticsOptions>().BindConfiguration(AnalyticsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<DashboardOptions>().BindConfiguration(DashboardOptions.SectionName).ValidateDataAnnotations()
+            .Validate(x => TimeZoneInfo.TryFindSystemTimeZoneById(x.TimeZone, out _), "Dashboard:TimeZone must be a known IANA time zone id.")
+            .Validate(x => x.DefaultRangeDays <= x.MaxRangeDays, "Dashboard:DefaultRangeDays must not exceed MaxRangeDays.")
+            .ValidateOnStart();
         services.AddOptions<ClientErrorsOptions>().BindConfiguration(ClientErrorsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<ContentRetrievalOptions>().BindConfiguration(ContentRetrievalOptions.SectionName).ValidateDataAnnotations()
             .Validate(x => x.DefaultTopK <= x.MaxTopK, "ContentRetrieval:DefaultTopK must not exceed MaxTopK.")

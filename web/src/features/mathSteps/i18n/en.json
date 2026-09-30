@@ -1,0 +1,72 @@
+{
+  "input": {
+    "hint": "Write each step in LaTeX. The preview under it shows how it reads."
+  },
+  "steps": {
+    "title": "Steps",
+    "label": "Step {number, number}",
+    "add": "Add a step",
+    "max": "You can add up to {max, number} steps.",
+    "moveUp": "Move step {number, number} up",
+    "moveDown": "Move step {number, number} down",
+    "remove": "Remove step {number, number}",
+    "added": "Step {number, number} added.",
+    "removed": "Step {number, number} removed.",
+    "moved": "Step moved to position {number, number}."
+  },
+  "final": {
+    "label": "Final answer"
+  },
+  "preview": {
+    "label": "Preview of {name}",
+    "empty": "The preview appears here."
+  },
+  "keypad": {
+    "toggle": "Keypad",
+    "label": "Math keypad",
+    "textGlyph": "Text"
+  },
+  "keys": {
+    "d0": "0",
+    "d1": "1",
+    "d2": "2",
+    "d3": "3",
+    "d4": "4",
+    "d5": "5",
+    "d6": "6",
+    "d7": "7",
+    "d8": "8",
+    "d9": "9",
+    "point": "Decimal point",
+    "plus": "Plus",
+    "minus": "Minus",
+    "times": "Times",
+    "divide": "Divided by",
+    "equals": "Equals",
+    "openParen": "Opening bracket",
+    "closeParen": "Closing bracket",
+    "power": "Power",
+    "sqrt": "Square root",
+    "fraction": "Fraction",
+    "pi": "Pi",
+    "x": "x",
+    "y": "y",
+    "le": "Less than or equal to",
+    "ge": "Greater than or equal to",
+    "ne": "Not equal to",
+    "pm": "Plus or minus",
+    "sin": "Sine",
+    "cos": "Cosine",
+    "tan": "Tangent",
+    "log": "Logarithm",
+    "text": "Text",
+    "left": "Move cursor left",
+    "right": "Move cursor right",
+    "backspace": "Delete"
+  },
+  "draft": {
+    "restored": "Your saved draft was restored.",
+    "saved": "Draft saved on this device.",
+    "error": "Could not save the draft on this device."
+  }
+}

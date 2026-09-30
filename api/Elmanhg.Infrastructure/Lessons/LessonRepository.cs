@@ -1,5 +1,6 @@
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.Lessons;
+using Elmanhg.Domain.Units;
 using Elmanhg.Infrastructure.Data.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -49,6 +50,18 @@ public class LessonRepository(AppDbContext context) : Repository<Lesson>(context
             .Where(x => x.State == LessonState.Published && _dbSet.Any(lesson => lesson.Id == lessonId && lesson.UnitId == x.UnitId))
             .Select(x => new LessonPosition(x.Id, x.UnitId, x.Order, x.CreationDate))
             .AsNoTracking()
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<List<LessonStateCount>> CountByStateAsync(Guid? subjectId, CancellationToken cancellationToken)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Join(_context.Set<CurriculumUnit>(), lesson => lesson.UnitId, unit => unit.Id, (lesson, unit) => new { lesson.State, unit.SubjectId })
+            .Where(x => subjectId == null || x.SubjectId == subjectId)
+            .GroupBy(x => x.State)
+            .Select(x => new LessonStateCount(x.Key, x.Count()))
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
     }

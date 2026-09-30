@@ -4203,6 +4203,276 @@
       ]
     },
     {
+      "name": "Dashboard",
+      "description": "Admin only (Dashboards.View). Sign in as an admin first. One read per PRD §10.3 card (docs/dashboard.md). from/to are Cairo days, both inclusive (default: the last 30 days, max 366); subjectId only where the card has a subject dimension. Results are cached for Dashboard:CacheSeconds.",
+      "item": [
+        {
+          "name": "Get Students metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"total is a number\", function () { pm.expect(pm.response.json().total).to.be.a(\"number\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/students",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "students"],
+              "query": [
+                { "key": "from", "value": "2026-09-01", "disabled": true },
+                { "key": "to", "value": "2026-09-30", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Subscribers metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"has generatedAt\", function () { pm.expect(pm.response.json()).to.have.property(\"generatedAt\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/subscribers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "subscribers"],
+              "query": [
+                { "key": "from", "value": "2026-09-01", "disabled": true },
+                { "key": "to", "value": "2026-09-30", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Content metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"has generatedAt\", function () { pm.expect(pm.response.json()).to.have.property(\"generatedAt\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/content",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "content"],
+              "query": [
+                { "key": "subjectId", "value": "{{subjectId}}", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Solve rate metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"has generatedAt\", function () { pm.expect(pm.response.json()).to.have.property(\"generatedAt\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/solve-rate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "solve-rate"],
+              "query": [
+                { "key": "from", "value": "2026-09-01", "disabled": true },
+                { "key": "to", "value": "2026-09-30", "disabled": true },
+                { "key": "subjectId", "value": "{{subjectId}}", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Success rate metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"has generatedAt\", function () { pm.expect(pm.response.json()).to.have.property(\"generatedAt\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/success-rate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "success-rate"],
+              "query": [
+                { "key": "from", "value": "2026-09-01", "disabled": true },
+                { "key": "to", "value": "2026-09-30", "disabled": true },
+                { "key": "subjectId", "value": "{{subjectId}}", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Validation metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"has generatedAt\", function () { pm.expect(pm.response.json()).to.have.property(\"generatedAt\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/validation",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "validation"],
+              "query": [
+                { "key": "from", "value": "2026-09-01", "disabled": true },
+                { "key": "to", "value": "2026-09-30", "disabled": true },
+                { "key": "subjectId", "value": "{{subjectId}}", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Ask a Teacher metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"has generatedAt\", function () { pm.expect(pm.response.json()).to.have.property(\"generatedAt\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/ask-teacher",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "ask-teacher"],
+              "query": [
+                { "key": "from", "value": "2026-09-01", "disabled": true },
+                { "key": "to", "value": "2026-09-30", "disabled": true },
+                { "key": "subjectId", "value": "{{subjectId}}", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Payments metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"has generatedAt\", function () { pm.expect(pm.response.json()).to.have.property(\"generatedAt\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "payments"],
+              "query": [
+                { "key": "from", "value": "2026-09-01", "disabled": true },
+                { "key": "to", "value": "2026-09-30", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Sign-up funnel metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"steps is an array\", function () { pm.expect(pm.response.json().steps).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/funnel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "funnel"],
+              "query": [
+                { "key": "from", "value": "2026-09-01", "disabled": true },
+                { "key": "to", "value": "2026-09-30", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Analytics",
       "description": "Anonymous, first-party sign-up funnel events (docs/analytics.md). No PII: a random browser id plus a whitelisted event type. Rate limited per IP (Analytics:FunnelEventPermitLimit per Analytics:FunnelEventWindowSeconds).",
       "item": [

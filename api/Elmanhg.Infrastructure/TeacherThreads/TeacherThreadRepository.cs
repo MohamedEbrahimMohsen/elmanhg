@@ -36,4 +36,31 @@ public class TeacherThreadRepository(AppDbContext context) : Repository<TeacherT
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
     }
+
+    public async Task<TeacherReplyStats> GetReplyStatsAsync(DateTimeOffset start, DateTimeOffset end, Guid? subjectId, Guid? teacherId, TimeSpan replySla, CancellationToken cancellationToken)
+    {
+        var replySlaSeconds = replySla.TotalSeconds;
+        return await _context.Database
+            .SqlQuery<TeacherReplyStats>($"""
+                SELECT COUNT(*)::int AS "Replies",
+                COUNT(*) FILTER (WHERE r."Wait" <= {replySlaSeconds})::int AS "RepliedWithinSla",
+                percentile_cont(0.5) WITHIN GROUP (ORDER BY r."Wait") AS "MedianReplySeconds"
+                FROM (
+                    SELECT EXTRACT(EPOCH FROM (m."CreatedAt" - q."CreatedAt"))::double precision AS "Wait"
+                    FROM "TeacherMessages" AS m
+                    INNER JOIN "TeacherThreads" AS t ON t."Id" = m."ThreadId"
+                    INNER JOIN LATERAL (
+                        SELECT s."CreatedAt"
+                        FROM "TeacherMessages" AS s
+                        WHERE s."ThreadId" = m."ThreadId" AND s."SenderId" = t."StudentId" AND s."CreatedAt" <= m."CreatedAt" AND s."IsDeleted" = false
+                        ORDER BY s."CreatedAt" DESC
+                        LIMIT 1
+                    ) AS q ON true
+                    WHERE m."IsDeleted" = false AND t."IsDeleted" = false AND m."SenderId" <> t."StudentId" AND m."CreatedAt" >= {start} AND m."CreatedAt" < {end}
+                    AND ({subjectId}::uuid IS NULL OR t."SubjectId" = {subjectId}) AND ({teacherId}::uuid IS NULL OR m."SenderId" = {teacherId})
+                ) AS r
+                """)
+            .SingleAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
 }

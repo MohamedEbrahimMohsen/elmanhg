@@ -191,6 +191,13 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Students:SubjectInterestsMaxCount"] = "50",
             ["Analytics:FunnelEventPermitLimit"] = "1000",
             ["Analytics:FunnelEventWindowSeconds"] = "60",
+            ["Dashboard:TimeZone"] = "Africa/Cairo",
+            // Parallel tests share this host, so caching would leak one test's dashboard results into another's.
+            ["Dashboard:CacheSeconds"] = "0",
+            ["Dashboard:DefaultRangeDays"] = "30",
+            ["Dashboard:MaxRangeDays"] = "366",
+            ["Dashboard:RecentWeekDays"] = "7",
+            ["Dashboard:RecentMonthDays"] = "30",
             ["ClientErrors:PermitLimit"] = "1000",
             ["ClientErrors:WindowSeconds"] = "60",
             ["ClientErrors:MessageMaxLength"] = "500",

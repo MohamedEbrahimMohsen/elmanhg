@@ -408,4 +408,6 @@
   <data name="CONTENT_SEARCH_QUERY_TOO_LONG" xml:space="preserve"><value>The search text is too long.</value></data>
   <data name="CONTENT_SEARCH_TOP_INVALID" xml:space="preserve"><value>The number of results requested is not valid.</value></data>
   <data name="CONTENT_EMBEDDING_DIMENSIONS_INVALID" xml:space="preserve"><value>The content embedding has the wrong number of dimensions.</value></data>
+  <data name="DASHBOARD_DATE_RANGE_INVALID" xml:space="preserve"><value>The end date must be on or after the start date.</value></data>
+  <data name="DASHBOARD_DATE_RANGE_TOO_WIDE" xml:space="preserve"><value>The date range is longer than allowed.</value></data>
 </root>
