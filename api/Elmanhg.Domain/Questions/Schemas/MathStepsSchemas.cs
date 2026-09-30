@@ -4,6 +4,6 @@ public enum MathAnswerForm { Equivalent, Simplified, Factored, Expanded, Exact }
 
 public sealed record MathStepsBody;
 
-public sealed record MathStepsGradingSpec(List<string>? AcceptedAnswers, MathAnswerForm? Form, decimal? Tolerance, ToleranceMode? ToleranceMode);
+public sealed record MathStepsGradingSpec(List<string>? AcceptedAnswers, MathAnswerForm? Form, decimal? Tolerance, ToleranceMode? ToleranceMode, List<string>? ModelSolution = null, int? StepsWeight = null);
 
 public sealed record MathStepsAnswer(List<string?>? Steps, string? FinalAnswer);

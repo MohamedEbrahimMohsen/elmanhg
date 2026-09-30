@@ -1,9 +1,16 @@
-import { mathAnswerMaxLength } from '../api/questionOptions';
+import {
+  mathAnswerMaxLength,
+  mathSolutionStepMaxLength,
+  mathSolutionStepsMax,
+  mathStepsWeightMax,
+} from '../api/questionOptions';
 
 export interface MathStepsRuleInput {
   mathAnswers: { latex: string }[];
   mathForm: string;
   mathTolerance: string;
+  mathSolution: { latex: string }[];
+  mathStepsWeight: string;
 }
 
 type IssueSink = (path: (string | number)[], message: string) => void;
@@ -22,6 +29,7 @@ export function addMathStepsIssues(values: MathStepsRuleInput, issue: IssueSink)
       issue(['mathAnswers', index, 'latex'], errorKey('mathAnswerLength'));
     }
   });
+  addSolutionIssues(values, issue);
   const tolerance = values.mathTolerance.trim();
   if (tolerance === '') {
     return;
@@ -31,5 +39,26 @@ export function addMathStepsIssues(values: MathStepsRuleInput, issue: IssueSink)
   }
   if (values.mathForm !== 'equivalent') {
     issue(['mathTolerance'], errorKey('mathToleranceForm'));
+  }
+}
+
+function addSolutionIssues(values: MathStepsRuleInput, issue: IssueSink): void {
+  const weight = values.mathStepsWeight.trim();
+  if (!/^\d+$/.test(weight) || Number(weight) > mathStepsWeightMax) {
+    issue(['mathStepsWeight'], errorKey('mathStepsWeight'));
+  }
+  if (values.mathSolution.length > mathSolutionStepsMax) {
+    issue(['mathSolution'], errorKey('mathSolutionCount'));
+  }
+  values.mathSolution.forEach((step, index) => {
+    const latex = step.latex.trim();
+    if (latex === '') {
+      issue(['mathSolution', index, 'latex'], 'validation.required');
+    } else if (latex.length > mathSolutionStepMaxLength) {
+      issue(['mathSolution', index, 'latex'], errorKey('mathSolutionStepLength'));
+    }
+  });
+  if (Number(weight) > 0 && values.mathSolution.length === 0) {
+    issue(['mathSolution'], errorKey('mathSolutionRequired'));
   }
 }

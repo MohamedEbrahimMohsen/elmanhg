@@ -12,7 +12,7 @@ The wire names are the `QuestionType` enum values. v1 grading follows PRD §6.
 - `Fill`: one string per blank. Normalised match (PRD §6.2) against an accepted-answers list per blank; credit per blank.
 - `Short`: a number or a string. Numeric within a tolerance (absolute or percent); text against an accepted list with normalisation.
 - `Essay` (v2): plain-text answer (student input is #119), graded by the AI grader against the rubric and model answers ([essay-grading.md](essay-grading.md)); a blank answer is graded at once as Unanswered.
-- `MathSteps` (v2): steps plus a final answer. The final answer is checked by the CAS (#122, [math-cas.md](math-cas.md)); the steps are stored for step grading (#123).
+- `MathSteps` (v2): steps plus a final answer. The final answer is checked by the CAS (#122, [math-cas.md](math-cas.md)); with a steps weight above 0 the steps are graded against the model solution (#123, [math-step-grading.md](math-step-grading.md)).
 - `DragDrop` (v2): a diagram with drop zones and draggable items (#125); the student canvas and per-item grader are #126. Not servable until #126.
 
 ## Body vs grading spec
@@ -103,9 +103,17 @@ Canonical JSON, exactly as stored. Keys are camelCase; enum values are camelCase
 {"acceptedAnswers":["x = 2","2"],"form":"equivalent","tolerance":0.01,"toleranceMode":"absolute"}
 ```
 
+With step grading (#123):
+
+```json
+{"acceptedAnswers":["x = 2"],"form":"equivalent","modelSolution":["2x + 3 = 7","2x = 4","x = 2"],"stepsWeight":50}
+```
+
 - `acceptedAnswers`: one or more LaTeX final answers, trimmed; any mathematically equivalent answer is accepted. Notation, lists, `\pm` and equations are in [math-cas.md](math-cas.md).
 - `form`: `equivalent` (the default, written explicitly when saved), `simplified`, `factored`, `expanded` or `exact`. The form rule applies to an answer that is already equivalent ([math-cas.md](math-cas.md), Forms).
 - `tolerance` (≥ 0) and `toleranceMode` (`absolute` or `percent`) come as a pair, are optional, and are allowed only with `equivalent`. They apply when both values are constants; the bound is inclusive, as for a numeric Short answer.
+- `modelSolution` (optional): the solution steps in order, one LaTeX string each, trimmed; at most `Content:QuestionModelSolutionStepsMaxCount` (20) steps of at most `Content:QuestionModelSolutionStepMaxLength` (500) characters, none blank. It is omitted from the canonical spec when empty.
+- `stepsWeight` (optional): a whole number from 0 to 100, the percentage of the score given to the steps; a missing value means 0 and it is omitted when 0, so final-only specs stay byte-for-byte as before. A weight above 0 needs a model solution.
 - Unknown fields are dropped. Accepted answers are not CAS-parsed when saved; an unparseable one is skipped when grading.
 - The grading spec is revealed after answering, like every other type (the first accepted answer is shown).
 
@@ -187,6 +195,9 @@ A request whose `body` or `gradingSpec` breaks a rule gets `422` with the code b
 | MathSteps | `form`, when present, is a defined form (an unknown name does not read: `QUESTION_GRADING_SPEC_INVALID`) | `QUESTION_MATH_FORM_INVALID` |
 | MathSteps | `tolerance` ≥ 0 and `toleranceMode` both present, or both absent | `QUESTION_MATH_TOLERANCE_INVALID` |
 | MathSteps | a tolerance only with the `equivalent` form | `QUESTION_MATH_TOLERANCE_FORM_CONFLICT` |
+| MathSteps | `modelSolution`, when present, has at most `Content:QuestionModelSolutionStepsMaxCount` steps, none blank, each at most `Content:QuestionModelSolutionStepMaxLength` after trimming | `QUESTION_MATH_MODEL_SOLUTION_INVALID` |
+| MathSteps | `stepsWeight` from 0 to 100 | `QUESTION_MATH_STEPS_WEIGHT_INVALID` |
+| MathSteps | a `stepsWeight` above 0 needs at least one model solution step | `QUESTION_MATH_MODEL_SOLUTION_REQUIRED` |
 | DragDrop | `image` is present, `key` is a stored diagram key of the question's lesson (checked when saving), and `width`/`height` are 1 to `Content:QuestionDiagramImageDimensionMax` | `QUESTION_DIAGRAM_IMAGE_INVALID` |
 | DragDrop | `image.alt` is not blank | `QUESTION_DIAGRAM_IMAGE_ALT_REQUIRED` |
 | DragDrop | `image.alt` is at most `Content:QuestionDiagramImageAltMaxLength` after trimming | `QUESTION_DIAGRAM_IMAGE_ALT_TOO_LONG` |
@@ -321,7 +332,7 @@ The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of
 - **Short numeric** (the spec has `value`): the answer is parsed as a number and is correct when `value − allowed ≤ answer ≤ value + allowed` (both bounds inclusive). `allowed` is `tolerance` (`absolute`) or `|value| × tolerance / 100` (`percent`). A negative `value` gets the same band as its magnitude, and a `value` of 0 with `percent` accepts only 0. A missing or negative tolerance counts as 0 and a missing mode as `absolute` (unreachable after validation). Only the spec takes part in the arithmetic; when a bound would pass the decimal range (±79228162514264337593543950335) it is clamped to that limit, so grading never fails.
 - **Short text**: the normalised answer must equal one of the normalised accepted answers.
 - **Essay**: the AI grader awards points per rubric criterion ([essay-grading.md](essay-grading.md)); `QuestionGrader.GradeEssay` turns them into `Σ awarded ÷ Σ criterion points`, scaled by the max score like every other type. The model's own total is never used. `grade-draft` grades essays synchronously through the AI grader (`503 ESSAY_GRADING_UNAVAILABLE` when it fails) and adds an `essay` detail (criteria, justification, confidence, model, prompt version, cost); a blank essay scores 0 (Unanswered) without calling the grader.
-- **MathSteps**: only the final answer is graded until step grading (#123), through `AnswerGrader` and the AI service's CAS check ([math-cas.md](math-cas.md)); every other type grades locally without the AI service. `equivalent` scores 1, every other verdict 0. A blank final answer is Unanswered (0) without calling the AI service, even with steps. `QuestionGrader.Grade` does not grade MathSteps; `QuestionGrader.GradeMathSteps(maxScore, verdict)` scales the verdict like every other type. When the AI service cannot be reached the verdict is `unchecked`: the answer is still recorded with a provisional 0, left out of mastery, and waits for teacher review (#128); nothing is lost and no submit fails.
+- **MathSteps**: the final answer is checked through `AnswerGrader` and the AI service's CAS ([math-cas.md](math-cas.md)); every other type grades locally without the AI service. A blank final answer is Unanswered (0) without calling the AI service, even with steps. `QuestionGrader.Grade` does not grade MathSteps. With a steps weight w and step points from the step grader, `QuestionGrader.GradeMathStepsCombined` scores ((100 − w) × F + w × S) ÷ 100, where F is 1 for `equivalent` (else 0) and S is the step points ÷ (2 × model steps); with w = 0 it is the final-only grade (`equivalent` 1, every other verdict 0). When step grading is needed, or the verdict is `unchecked` (the AI service cannot be reached), `AnswerGrader.DecideAsync` defers the answer to a background `MathStepGrade` instead of an attempt; nothing is lost and no submit fails ([math-step-grading.md](math-step-grading.md)).
 - **DragDrop** is graded per item by #126; until then `grade-draft` returns `422 QUESTION_TYPE_NOT_GRADABLE`.
 - An answer that normalises to empty never matches.
 - **Normalisation** (PRD §6.2): the student answer and every accepted answer go through the same steps. Always, in this order: drop unpaired UTF-16 surrogates and the noncharacter U+FFFE (both make NFC fail), and invisible marks (U+061C, U+200B–U+200F, U+202A–U+202E, U+2060, U+2066–U+2069, U+FEFF), so none of them can split a letter from its mark; Unicode NFC (so a decomposed hamza or madda, such as ا + U+0654, becomes أ); map ، (U+060C) to `,` and ی (U+06CC) to ي (U+064A). Then the question's `normalization` rules (see **Fill** and **Short** above), each applied only when on. Finally the answer is always trimmed. With `collapseWhitespace` off, inner whitespace is kept verbatim (tabs and runs included); the ends are still trimmed. Hamza seats (ئ ؤ ء) are never unified.
@@ -332,7 +343,7 @@ The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of
   - A Multi answer that is not exactly the correct set returns «الاختيارات الصحيحة: {right} من {total}، والخاطئة: {wrong}.» / "Correct choices: {right} of {total}; wrong choices: {wrong}." This applies in both partial-credit modes.
   - A Fill answer with two or more blanks that is not fully correct returns «الفراغات الصحيحة: {right} من {total}.» / "Correct blanks: {right} of {total}." A single-blank Fill returns `null`.
   - A numeric Short answer that does not parse as a number returns «اكتب الإجابة رقمًا فقط، بدون وحدات.» / "Write the answer as a plain number, without units." A number outside the tolerance returns `null`: a direction hint would reveal part of the answer.
-  - A MathSteps final answer returns one of four lines: «صُحّحت الإجابة النهائية فقط، وتُصحَّح الخطوات لاحقًا.» / "Only the final answer was graded; the steps are graded later." (equivalent or not equivalent); «اكتب الإجابة النهائية بالصورة التي يطلبها السؤال.» / "Write the final answer in the form the question asks for." (wrong form; it tells the student to change the form without revealing the answer); «تعذّرت قراءة الإجابة النهائية. اكتبها بالرموز الرياضية، مثل x = 2.» / "The final answer could not be read. …" (unreadable); «تعذّر التحقق من الإجابة النهائية آليًا، وسيراجعها معلمك.» / "The final answer could not be checked automatically. Your teacher will review it." (unchecked).
+  - A MathSteps final answer returns one of four lines: «صُحّحت الإجابة النهائية فقط.» / "Only the final answer was graded." (equivalent or not equivalent, on a final-only question); «اكتب الإجابة النهائية بالصورة التي يطلبها السؤال.» / "Write the final answer in the form the question asks for." (wrong form; it tells the student to change the form without revealing the answer); «تعذّرت قراءة الإجابة النهائية. اكتبها بالرموز الرياضية، مثل x = 2.» / "The final answer could not be read. …" (unreadable); «تعذّر التحقق من الإجابة النهائية آليًا، وسيراجعها معلمك.» / "The final answer could not be checked automatically. Your teacher will review it." (unchecked; `grade-draft` and legacy attempts only). A step-graded answer returns «خطوات صحيحة كاملة: {right} من {total}.» / "Fully correct steps: {right} of {total}." (`mathStepTally`).
   - Every other case returns `null`.
 
   The feedback never contains the verdict, the correct answer or the explanation.

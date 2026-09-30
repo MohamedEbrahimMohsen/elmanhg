@@ -160,10 +160,10 @@ Every answer produces a **score in [0, max_score]** and a **normalised score in 
 | Fill-in-the-blank | v1 | One string per blank | Normalised match (Arabic diacritics stripped, whitespace collapsed, alef/hamza/taa-marbuta variants unified); accepted-answers list per blank | Per blank |
 | Short answer (numeric/text) | v1 | String or number | Numeric: tolerance ±x or %; Text: accepted list with normalisation | No |
 | Essay | v2 | Plain text (Arabic, multi-paragraph) | LLM grader with rubric (criteria + weights) and model answer. Returns score per criterion + justification. | Yes |
-| Math with steps | v2 | Ordered list of steps (LaTeX/text) + final answer | Final answer: CAS equivalence check (SymPy). Steps: LLM against model solution, per-step credit. | Yes |
+| Math with steps | v2 | Ordered list of steps (LaTeX/text) + final answer | Final answer: CAS equivalence check (SymPy). Steps: LLM against model solution, per-step credit, weighted per question (steps weight). | Yes |
 | Science drag-and-drop | v2 | Map of item → drop zone (per-zone order when the zone is ordered) | Deterministic: each item's zone vs correct zone; optional order constraints | Per item |
 
-Math with steps: until step grading (E15.S3) the score is the final answer's CAS verdict (1 or 0); each question sets a required form and an optional numeric tolerance (docs/question-schemas.md, docs/math-cas.md). A final answer the CAS cannot check (for example, the AI service is down) is recorded with a provisional 0 for teacher review (§8.3); the student sees «قيد المراجعة» instead of a verdict, with no correct answer, and the quiz or exam score is marked provisional.
+Math with steps: each question sets a required form and an optional numeric tolerance for the final answer, and optionally a model solution and a steps weight w (0–100 %) (docs/question-schemas.md, docs/math-cas.md). Step grading (E15.S3, #123) awards 0, 1 or 2 points per model-solution step. The score is ((100 − w) × F + w × S) ÷ 100 of the max score, where F is 1 for an equivalent final answer (else 0) and S is the step points ÷ (2 × model steps); w = 0 (the default) grades the final answer only. A blank final answer is Unanswered even with steps; with w > 0 and no written steps the steps earn 0 without an AI call. When step grading is needed, or the CAS cannot check the final answer (for example, the AI service is down), the answer is graded in the background: the student sees «جارٍ تصحيح إجابتك…», then the verdict with per-step marks, or «قيد المراجعة» when the grade goes to teacher review (§8.3); the correct answer stays hidden until the grade is applied, and the quiz or exam score is marked provisional. A check that fails is retried; after the retries the answer goes to review. See docs/math-step-grading.md.
 
 Per-type `body` and `grading_spec` JSON shapes: `docs/question-schemas.md`.
 Answer shapes and the exact grading rules (normalisation, numeric parsing, rounding) are in the same document.
@@ -175,6 +175,7 @@ Answer shapes and the exact grading rules (normalisation, numeric parsing, round
 - Low-confidence grades (below a configurable threshold) are queued for teacher review before the score is final. The student sees "قيد المراجعة" in the meantime.
 - A teacher may override any AI grade. Overrides are training data (§13).
 - Decided (#118): the threshold is `EssayGrading:ReviewConfidenceThreshold` (default 0.7); a grade the AI cannot produce after `EssayGrading:MaxAttempts` also goes to teacher review; grading is a background job with retries; the admin test grader grades essays synchronously ([essay-grading.md](essay-grading.md)).
+- Decided (#123): math step grading returns 0–2 points per model-solution step with a justification each, a one-paragraph justification and a confidence; the threshold is `MathStepGrading:ReviewConfidenceThreshold` (default 0.7); grading and failed final-answer checks are retried in the background (`MathStepGrading:MaxAttempts`, 4) before going to teacher review; the admin test grader grades steps synchronously ([math-step-grading.md](math-step-grading.md)).
 
 ### 6.2 Answer normalisation (Arabic)
 
@@ -283,7 +284,7 @@ The headline counter is shown on Home as "متبقّي لك X سؤال من 100,
 ### 8.3 AI grade review queue (v2)
 
 - Low-confidence AI grades for the teacher's subjects.
-- MathSteps attempts graded `unchecked` (feedback kind `mathUnchecked`: the CAS could not check the final answer) are listed and can be scored by the teacher. Until then the student sees «قيد المراجعة» instead of a verdict (docs/math-cas.md).
+- MathSteps step grades in review (`MathStepGrades` `InReview`: low confidence, grading failed, or a final answer the CAS still could not check after the retries) are listed with their reason and can be scored by the teacher. Legacy MathSteps attempts graded `unchecked` before #123 (feedback kind `mathUnchecked`) are listed too. Until then the student sees «قيد المراجعة» instead of a verdict (docs/math-step-grading.md, docs/math-cas.md).
 - Teacher sees student answer, AI score and justification; can accept or override with a score and comment.
 
 ### 8.4 Teacher visibility limits

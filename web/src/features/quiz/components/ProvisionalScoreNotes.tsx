@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { hasPendingEssay, type EssayItem } from '../api/essayItem';
+import { hasPendingMathSteps, type MathStepsItem } from '../api/mathStepsItem';
 import { countAwaitingReview } from '../api/pendingGrades';
 
 export interface ProvisionalScoreNotesProps {
-  items: readonly EssayItem[];
+  items: readonly (EssayItem & MathStepsItem)[];
 }
 
 export function ProvisionalScoreNotes({ items }: ProvisionalScoreNotesProps) {
@@ -18,6 +19,7 @@ export function ProvisionalScoreNotes({ items }: ProvisionalScoreNotesProps) {
         </p>
       ) : null}
       {hasPendingEssay(items) ? <p className="text-caption text-text-muted">{t('result.essaysPending')}</p> : null}
+      {hasPendingMathSteps(items) ? <p className="text-caption text-text-muted">{t('result.mathPending')}</p> : null}
     </>
   );
 }

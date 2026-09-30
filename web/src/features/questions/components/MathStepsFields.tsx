@@ -3,6 +3,7 @@ import { TextField } from '@/shared/form/TextField';
 import { mathAnswerForms } from '../api/questionOptions';
 import type { QuestionValues } from '../schemas/questionEditorSchema';
 import { MathAnswersField } from './MathAnswersField';
+import { MathSolutionField } from './MathSolutionField';
 import { SelectField } from './SelectField';
 
 export function MathStepsFields() {
@@ -32,6 +33,13 @@ export function MathStepsFields() {
           ]}
         />
       </div>
+      <TextField<QuestionValues>
+        name="mathStepsWeight"
+        label={t('editor.math.stepsWeight')}
+        description={t('editor.math.stepsWeightHint')}
+        dir="ltr"
+      />
+      <MathSolutionField />
       <p className="text-caption text-text-muted">{t('editor.math.stepsNote')}</p>
     </div>
   );

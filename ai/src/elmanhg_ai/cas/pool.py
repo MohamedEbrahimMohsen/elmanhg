@@ -53,6 +53,10 @@ class CasPool:
             logger.warning("math_check.worker_failed", error_type=type(error).__name__)
             self._idle.put_nowait(worker)
             return UNCHECKED
+        except Exception as error:
+            logger.warning("math_check.worker_failed", error_type=type(error).__name__)
+            self._recycle(worker)
+            return UNCHECKED
         except BaseException:
             self._recycle(worker)
             raise

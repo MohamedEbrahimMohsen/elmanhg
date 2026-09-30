@@ -2,8 +2,12 @@ import asyncio
 import dataclasses
 from typing import Final
 
+import pytest
+from structlog.testing import LogCapture
+
 from elmanhg_ai.cas.models import AnswerForm, CasLimits, CasRequest, Verdict
 from elmanhg_ai.cas.pool import CasPool
+from elmanhg_ai.cas.worker import CasWorker
 from elmanhg_ai.settings import Settings
 
 # A spawned worker imports SymPy first; this leaves room for a slow CI runner.
@@ -106,3 +110,34 @@ async def test_cas_pool_queue_wait_is_not_charged_to_timeout(settings: Settings)
 
     assert (benign.verdict, benign.matched_index) == (Verdict.EQUIVALENT, 0)
     assert timed_out.verdict == Verdict.UNCHECKED
+
+
+class _FailingResult:
+    def get(self, timeout: float) -> None:
+        raise SystemError("worker state corrupted")
+
+
+async def test_cas_pool_unknown_worker_exception_returns_unchecked_and_recycles(
+    settings: Settings, monkeypatch: pytest.MonkeyPatch, log_capture: LogCapture
+) -> None:
+    warmed: list[CasWorker] = []
+
+    def warm(worker: CasWorker) -> int:
+        warmed.append(worker)
+        return 1
+
+    monkeypatch.setattr(CasWorker, "submit", lambda _worker, _request: _FailingResult())
+    monkeypatch.setattr(CasWorker, "warm", warm)
+    pool_settings = settings.model_copy(update={"cas_workers": 1})
+    pool = CasPool(pool_settings)
+
+    try:
+        outcome = await pool.check(request(pool_settings))
+    finally:
+        await pool.aclose()
+
+    assert outcome.verdict == Verdict.UNCHECKED
+    assert len(warmed) == 1
+    assert pool.started is False
+    [entry] = [e for e in log_capture.entries if e["event"] == "math_check.worker_failed"]
+    assert entry["error_type"] == "SystemError"

@@ -54,6 +54,7 @@ class CasLimits:
     max_number_digits: int
     max_exponent: int
     max_magnitude: int
+    max_expansion_terms: int
 
     @classmethod
     def from_settings(cls, settings: Settings) -> Self:
@@ -64,6 +65,7 @@ class CasLimits:
             max_number_digits=settings.cas_max_number_digits,
             max_exponent=settings.cas_max_exponent,
             max_magnitude=settings.cas_max_magnitude,
+            max_expansion_terms=settings.cas_max_expansion_terms,
         )
 
 

@@ -157,7 +157,11 @@
       "modelAnswersCount": "أضف إجابة نموذجية واحدة على الأقل.",
       "mathAnswersCount": "أضف إجابة مقبولة واحدة على الأقل.",
       "mathAnswerLength": "يجب ألا تزيد الإجابة على 200 حرف.",
-      "mathToleranceForm": "هامش الخطأ يعمل مع «أي صورة مكافئة» فقط."
+      "mathToleranceForm": "هامش الخطأ يعمل مع «أي صورة مكافئة» فقط.",
+      "mathStepsWeight": "وزن الخطوات عدد صحيح من 0 إلى 100.",
+      "mathSolutionCount": "الحد الأقصى 20 خطوة.",
+      "mathSolutionStepLength": "الخطوة أطول من 500 حرف.",
+      "mathSolutionRequired": "أضف خطوة واحدة على الأقل للحل النموذجي."
     },
     "essay": {
       "maxWords": "الحد الأقصى للكلمات (اختياري)",
@@ -199,7 +203,15 @@
       "tolerance": "هامش الخطأ العددي (اختياري)",
       "toleranceHint": "يقبل إجابة عددية قريبة بهذا القدر. يعمل مع «أي صورة مكافئة» فقط.",
       "toleranceMode": "نوع الهامش",
-      "stepsNote": "تُحفظ خطوات الطالب مع إجابته، وتُصحَّح لاحقًا."
+      "stepsNote": "عندما يكون وزن الخطوات أكبر من صفر، يصحّح مصحح الذكاء الاصطناعي خطوات الطالب مقارنةً بالحل النموذجي.",
+      "solutionLegend": "الحل النموذجي",
+      "solutionHint": "اكتب خطوات الحل بالترتيب بصيغة LaTeX. يقارن مصحح الذكاء الاصطناعي خطوات الطالب بها.",
+      "solutionStep": "الخطوة {number}",
+      "solutionStepPreview": "معاينة الخطوة {number}",
+      "addSolutionStep": "أضف خطوة",
+      "removeSolutionStep": "احذف الخطوة {number}",
+      "stepsWeight": "وزن الخطوات (٪)",
+      "stepsWeightHint": "٠ يصحّح الإجابة النهائية فقط. أي قيمة أكبر تمنح هذه النسبة من الدرجة لخطوات الحل."
     }
   },
   "preview": {
@@ -218,6 +230,18 @@
       "justification": "تبرير الذكاء الاصطناعي",
       "confidence": "الثقة: {confidence}٪",
       "model": "النموذج {model} · إصدار التعليمات {promptVersion}"
+    },
+    "mathStepsGradingHint": "يرسل «جرّب الإجابة» الخطوات إلى مصحح الذكاء الاصطناعي، وقد يستغرق ذلك دقيقة.",
+    "mathStepsGrading": "يصحّح مصحح الذكاء الاصطناعي الخطوات…",
+    "mathSteps": {
+      "verdict": "الإجابة النهائية: {verdict}",
+      "verdicts": {
+        "Equivalent": "صحيحة",
+        "NotEquivalent": "غير صحيحة",
+        "WrongForm": "ليست بالصورة المطلوبة",
+        "Unreadable": "تعذّرت قراءتها",
+        "Unchecked": "لم يُتحقق منها"
+      }
     }
   },
   "essayGrade": {
@@ -350,7 +374,10 @@
       "mathAccepted": "الإجابات المقبولة",
       "mathForm": "الصورة المطلوبة: {form}",
       "mathTolerance": "هامش الخطأ: ±{tolerance}",
-      "mathTolerancePercent": "هامش الخطأ: ±{tolerance}%"
+      "mathTolerancePercent": "هامش الخطأ: ±{tolerance}%",
+      "mathSolution": "الحل النموذجي",
+      "mathStepsWeight": "وزن الخطوات: {weight}٪",
+      "mathFinalOnly": "تُصحَّح الإجابة النهائية فقط."
     },
     "decision": {
       "title": "القرار",
@@ -378,5 +405,10 @@
       "noActor": "—",
       "difficultyChanged": "تغيّرت الصعوبة من {from} إلى {to}"
     }
+  },
+  "mathStepGrade": {
+    "steps": "درجات الخطوات",
+    "step": "الخطوة {number}",
+    "stepPoints": "{points} / {maxPoints}"
   }
 }

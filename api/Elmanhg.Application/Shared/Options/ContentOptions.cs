@@ -122,4 +122,10 @@ public sealed class ContentOptions
 
     [Range(1, 3600)]
     public int ServableCountCacheSeconds { get; set; } = 60;
+
+    [Range(1, int.MaxValue)]
+    public int QuestionModelSolutionStepsMaxCount { get; set; } = 20;
+
+    [Range(1, int.MaxValue)]
+    public int QuestionModelSolutionStepMaxLength { get; set; } = 500;
 }

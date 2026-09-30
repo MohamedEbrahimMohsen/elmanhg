@@ -28,4 +28,6 @@ public sealed record GradeFeedback(GradeFeedbackKind Kind, int Right, int Wrong,
     {
         return new(GradeFeedbackKind.BlankTally, right, 0, total);
     }
+
+    public static GradeFeedback MathStepTally(int right, int total) => new(GradeFeedbackKind.MathStepTally, right, 0, total);
 }

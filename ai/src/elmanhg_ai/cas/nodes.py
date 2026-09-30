@@ -1,3 +1,4 @@
+import math
 from collections.abc import Callable, Sequence
 from math import gcd
 from typing import Final
@@ -52,6 +53,7 @@ def power(base: sympy.Expr, exponent: sympy.Expr, limits: CasLimits) -> sympy.Ex
     value = sympy.Pow(base, exponent, evaluate=False)
     if magnitude(value) > limits.max_magnitude:
         raise MathParseError("power too large")
+    check_expansion(value, limits)
     return value
 
 
@@ -95,3 +97,32 @@ def is_unreduced_fraction(numerator: sympy.Expr, denominator: sympy.Expr) -> boo
         return False
     top, bottom = abs(int(numerator)), abs(int(denominator))
     return bottom != 0 and (gcd(top, bottom) > 1 or bottom == 1)
+
+
+def check_expansion(value: sympy.Basic, limits: CasLimits) -> None:
+    if expansion_terms(value, limits.max_expansion_terms + 1) > limits.max_expansion_terms:
+        raise MathParseError("expansion too large")
+
+
+# An upper bound on the terms of the fully expanded value, saturating at cap: a power of a
+# t-term base to the n has at most C(n + t - 1, t - 1) terms, so SymPy never has to expand it.
+def expansion_terms(value: sympy.Basic, cap: int) -> int:
+    if not value.free_symbols or isinstance(value, sympy.Symbol):
+        return 1
+    if isinstance(value, sympy.Add):
+        return min(cap, sum(expansion_terms(argument, cap) for argument in value.args))
+    if isinstance(value, sympy.Mul):
+        product = 1
+        for argument in value.args:
+            product = min(cap, product * expansion_terms(argument, cap))
+        return product
+    if isinstance(value, sympy.Pow):
+        base, exponent = value.args
+        terms = expansion_terms(base, cap)
+        if not exponent.is_number:
+            return terms
+        count = int(abs(sympy.N(exponent, EXPONENT_DIGITS)))
+        if terms == 1 or count <= 1:
+            return terms
+        return min(cap, math.comb(count + terms - 1, terms - 1))
+    return max((expansion_terms(argument, cap) for argument in value.args), default=1)

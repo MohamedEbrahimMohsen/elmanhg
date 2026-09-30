@@ -12,6 +12,7 @@ LIMITS: Final = CasLimits(
     max_number_digits=30,
     max_exponent=1000,
     max_magnitude=10000,
+    max_expansion_terms=500,
 )
 ARABIC_TWO: Final = chr(0x0662)
 ARABIC_FIVE: Final = chr(0x0665)

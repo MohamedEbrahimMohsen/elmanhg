@@ -118,5 +118,67 @@ public sealed class MathStepsQuestionRulesTests
         JsonNode.DeepEquals(JsonNode.Parse(spec), JsonNode.Parse("""{"acceptedAnswers":["2"],"form":"equivalent","tolerance":0.01,"toleranceMode":"absolute"}""")).Should().BeTrue();
     }
 
+    [Fact]
+    public void Validate_ModelSolutionAndWeight_ReturnsNoErrors()
+    {
+        Validate("""{"acceptedAnswers":["2"],"modelSolution":["2x = 4","x = 2"],"stepsWeight":100}""").Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Validate_BlankSolutionStep_ReturnsQuestionMathModelSolutionInvalid()
+    {
+        Validate("""{"acceptedAnswers":["2"],"modelSolution":["2x = 4","  "],"stepsWeight":50}""").Should().Equal(ErrorCodes.QuestionMathModelSolutionInvalid);
+    }
+
+    [Fact]
+    public void Validate_TooManySolutionSteps_ReturnsQuestionMathModelSolutionInvalid()
+    {
+        _options.QuestionModelSolutionStepsMaxCount = 1;
+
+        Validate("""{"acceptedAnswers":["2"],"modelSolution":["2x = 4","x = 2"],"stepsWeight":50}""").Should().Equal(ErrorCodes.QuestionMathModelSolutionInvalid);
+    }
+
+    [Fact]
+    public void Validate_SolutionStepTooLong_ReturnsQuestionMathModelSolutionInvalid()
+    {
+        _options.QuestionModelSolutionStepMaxLength = 5;
+
+        Validate("""{"acceptedAnswers":["2"],"modelSolution":["  x = 2  ","2x = 44"]}""").Should().Equal(ErrorCodes.QuestionMathModelSolutionInvalid);
+    }
+
+    [Fact]
+    public void Validate_WeightWithoutSolution_ReturnsQuestionMathModelSolutionRequired()
+    {
+        Validate("""{"acceptedAnswers":["2"],"modelSolution":[],"stepsWeight":50}""").Should().Equal(ErrorCodes.QuestionMathModelSolutionRequired);
+    }
+
+    [Fact]
+    public void Validate_WeightAbove100_ReturnsQuestionMathStepsWeightInvalid()
+    {
+        Validate("""{"acceptedAnswers":["2"],"modelSolution":["x = 2"],"stepsWeight":101}""").Should().Equal(ErrorCodes.QuestionMathStepsWeightInvalid);
+    }
+
+    [Fact]
+    public void Validate_NegativeWeight_ReturnsQuestionMathStepsWeightInvalid()
+    {
+        Validate("""{"acceptedAnswers":["2"],"stepsWeight":-1}""").Should().Equal(ErrorCodes.QuestionMathStepsWeightInvalid);
+    }
+
+    [Fact]
+    public void Normalize_WithSolutionAndWeight_TrimsAndKeepsBoth()
+    {
+        var (_, spec) = MathStepsQuestionRules.Normalize(Json("{}"), Json("""{"acceptedAnswers":["2"],"modelSolution":[" 2x = 4 ","x = 2  "],"stepsWeight":40}"""));
+
+        JsonNode.DeepEquals(JsonNode.Parse(spec), JsonNode.Parse("""{"acceptedAnswers":["2"],"form":"equivalent","modelSolution":["2x = 4","x = 2"],"stepsWeight":40}""")).Should().BeTrue();
+    }
+
+    [Fact]
+    public void Normalize_ZeroWeightEmptySolution_OmitsBoth()
+    {
+        var (_, spec) = MathStepsQuestionRules.Normalize(Json("{}"), Json("""{"acceptedAnswers":["2"],"modelSolution":[],"stepsWeight":0}"""));
+
+        spec.Should().Be("""{"acceptedAnswers":["2"],"form":"equivalent"}""");
+    }
+
     private List<string> Validate(string spec) => MathStepsQuestionRules.Validate(Json("{}"), Json(spec), _options);
 }
