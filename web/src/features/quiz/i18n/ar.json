@@ -15,7 +15,10 @@
     "finish": "إنهاء التدريب",
     "next": "التالي",
     "showResult": "عرض النتيجة",
-    "answerRequired": "أجب عن السؤال أولًا."
+    "answerRequired": "أجب عن السؤال أولًا.",
+    "submitEssay": "أرسل الإجابة",
+    "submittingEssay": "جارٍ الإرسال…",
+    "essayOverLimit": "اختصر مقالك إلى {max, number} كلمة أو أقل."
   },
   "feedback": {
     "label": "نتيجة الإجابة",
@@ -56,6 +59,15 @@
     "reviewItem": "السؤال {position, number}",
     "none": "لم تُجب عن أي سؤال في هذا التدريب.",
     "newPractice": "تدريب جديد",
-    "backToLesson": "العودة للدرس"
+    "backToLesson": "العودة للدرس",
+    "essaysPending": "بعض الإجابات المقالية ما زالت قيد التصحيح، وستتحدّث الدرجة عند اكتمالها."
+  },
+  "essayDraft": {
+    "restored": "استعدنا مسودتك المحفوظة.",
+    "saved": "حُفظت المسودة على هذا الجهاز",
+    "error": "تعذّر حفظ المسودة على هذا الجهاز."
+  },
+  "essayAnswer": {
+    "label": "إجابتك"
   }
 }

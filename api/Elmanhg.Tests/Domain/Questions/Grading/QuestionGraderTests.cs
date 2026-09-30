@@ -153,4 +153,24 @@ public sealed class QuestionGraderTests
     }
 
     private const string PartialNormalizationSpec = """{"blanks":[{"id":"1","acceptedAnswers":["القاهرة"]}],"normalization":{"unifyTaaMarbuta":false}}""";
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Grade_BlankEssay_ReturnsUnanswered(string text)
+    {
+        var answer = Json($$"""{"text":"{{text}}"}""");
+
+        var grade = QuestionGrader.Grade(QuestionType.Essay, EssaySpecJson, 5, answer);
+
+        grade.Should().Be(new QuestionGrade(0m, 0m, GradeOutcome.Incorrect, GradeFeedback.Unanswered));
+    }
+
+    [Fact]
+    public void Grade_WrittenEssay_ThrowsInvalidOperationException()
+    {
+        var act = () => QuestionGrader.Grade(QuestionType.Essay, EssaySpecJson, 5, Json("""{"text":"x"}"""));
+
+        act.Should().Throw<InvalidOperationException>();
+    }
 }

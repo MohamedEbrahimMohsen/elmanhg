@@ -1,4 +1,5 @@
 using Elmanhg.Application.Questions.Shared;
+using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Questions.Schemas;
 using FluentAssertions;
@@ -49,5 +50,44 @@ public sealed class QuestionAnswerRulesTests
         var canonical = QuestionAnswerRules.Canonicalize(QuestionType.Essay, Json("""{"text":"  a b ","x":1}"""));
 
         canonical.Should().Be("""{"text":"a b"}""");
+    }
+
+    [Fact]
+    public void TryReadWrittenEssay_WrittenEssay_ReturnsTrimmedText()
+    {
+        var read = QuestionAnswerRules.TryReadWrittenEssay(QuestionType.Essay, Json("""{"text":"  القصور الذاتي  "}"""), out var text);
+
+        (read, text).Should().Be((true, "القصور الذاتي"));
+    }
+
+    [Theory]
+    [InlineData(QuestionType.Essay, """{"text":"   "}""")]
+    [InlineData(QuestionType.Short, """{"text":"Newton"}""")]
+    public void TryReadWrittenEssay_BlankOrOtherType_ReturnsFalse(QuestionType type, string answer)
+    {
+        var read = QuestionAnswerRules.TryReadWrittenEssay(type, Json(answer), out var text);
+
+        (read, text).Should().Be((false, (string?)null));
+    }
+
+    [Fact]
+    public void IsEssayTooLong_OverMax_ReturnsTrue()
+    {
+        var over = QuestionAnswerRules.IsEssayTooLong(QuestionType.Essay, Json("""{"text":"abcdef"}"""), 5);
+        var atMax = QuestionAnswerRules.IsEssayTooLong(QuestionType.Essay, Json("""{"text":"abcde"}"""), 5);
+
+        (over, atMax).Should().Be((true, false));
+    }
+
+    [Fact]
+    public void IsRawAnswerTooLong_EssayUsesEssayCapAndOtherTypesKeepAnswerCap()
+    {
+        var options = new SessionsOptions { AnswerMaxLength = 20, EssayAnswerMaxLength = 40 };
+        var answer = Json("""{"text":"thirty characters long"}""");
+
+        var essay = QuestionAnswerRules.IsRawAnswerTooLong(QuestionType.Essay, answer, options);
+        var shortAnswer = QuestionAnswerRules.IsRawAnswerTooLong(QuestionType.Short, answer, options);
+
+        (essay, shortAnswer).Should().Be((false, true));
     }
 }

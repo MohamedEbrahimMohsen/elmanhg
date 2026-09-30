@@ -1,5 +1,6 @@
 using Core.Errors;
 using Elmanhg.Api.Workers;
+using Elmanhg.Application.EssayGrading.ApplyEssayGrade;
 using Elmanhg.Application.EssayGrading.FailEssayGrade;
 using Elmanhg.Application.EssayGrading.GetDueEssayGradeIds;
 using Elmanhg.Application.EssayGrading.GradeEssay;
@@ -112,6 +113,40 @@ public sealed class EssayGradingWorkerTests
         await runs.WaitForMeasurementsAsync(1, WaitLimit);
 
         runs.LastMeasurement!.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "essay-grading").And.Contain(BackgroundJobMetrics.OutcomeTag, "Failed");
+    }
+
+    [Fact]
+    public async Task Sweep_DueGrade_AppliesAfterGrading()
+    {
+        var ids = StubDue();
+        _sender.Send(Arg.Is<ApplyEssayGradeCommand>(x => x.EssayGradeId == ids[1]), Arg.Any<CancellationToken>()).Returns(_ =>
+        {
+            Complete();
+            return Task.CompletedTask;
+        });
+
+        using var worker = await RunAsync();
+
+        Received.InOrder(() =>
+        {
+            _sender.Send(Arg.Is<GradeEssayCommand>(x => x.EssayGradeId == ids[0]), Arg.Any<CancellationToken>());
+            _sender.Send(Arg.Is<ApplyEssayGradeCommand>(x => x.EssayGradeId == ids[0]), Arg.Any<CancellationToken>());
+            _sender.Send(Arg.Is<GradeEssayCommand>(x => x.EssayGradeId == ids[1]), Arg.Any<CancellationToken>());
+            _sender.Send(Arg.Is<ApplyEssayGradeCommand>(x => x.EssayGradeId == ids[1]), Arg.Any<CancellationToken>());
+        });
+    }
+
+    [Fact]
+    public async Task Sweep_ApplyConflicts_RecordsFailureWithoutRegrading()
+    {
+        var ids = StubDue();
+        _sender.Send(Arg.Is<ApplyEssayGradeCommand>(x => x.EssayGradeId == ids[0]), Arg.Any<CancellationToken>()).Returns(Task.FromException(new ConflictCoreException(ErrorCodes.SessionModifiedConcurrently)));
+        CompleteOnGrade(ids[1]);
+
+        using var worker = await RunAsync();
+
+        await _sender.Received(1).Send(Arg.Is<GradeEssayCommand>(x => x.EssayGradeId == ids[0]), Arg.Any<CancellationToken>());
+        await _sender.Received(1).Send(Arg.Is<FailEssayGradeCommand>(x => x.EssayGradeId == ids[0] && x.ErrorCode == ErrorCodes.SessionModifiedConcurrently), Arg.Any<CancellationToken>());
     }
 
     private Guid[] StubDue()

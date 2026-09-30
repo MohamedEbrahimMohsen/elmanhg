@@ -1647,6 +1647,36 @@
           "response": []
         },
         {
+          "name": "Approve essay question",
+          "description": "Approves the essay created under Questions so the quiz in Sessions can serve it.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/validation-queue/questions/{{essayQuestionId}}/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "validation-queue", "questions", "{{essayQuestionId}}", "approve"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"version\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Reject question",
           "event": [
             {
@@ -1747,7 +1777,10 @@
                   "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
                   "const json = pm.response.json();",
                   "pm.collectionVariables.set(\"sessionId\", json.id);",
-                  "pm.collectionVariables.set(\"sessionQuestionId\", json.items[0].questionId);"
+                  "const graded = json.items.find((item) => item.type !== \"Essay\");",
+                  "pm.collectionVariables.set(\"sessionQuestionId\", graded ? graded.questionId : \"\");",
+                  "const essay = json.items.find((item) => item.type === \"Essay\");",
+                  "pm.collectionVariables.set(\"essayQuestionId\", essay ? essay.questionId : \"\");"
                 ]
               }
             }
@@ -1822,6 +1855,46 @@
           "response": []
         },
         {
+          "name": "Submit essay answer",
+          "description": "Runs only when Start quiz served the essay approved in QuestionValidation; skipped otherwise.",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"essayQuestionId\")) { pm.execution.skipRequest(); }"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"the essay awaits its AI grade\", function () { const item = pm.response.json(); pm.expect(item.attempt).to.eql(null); pm.expect(item.pendingAnswer).to.not.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/{{sessionId}}/answers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sessions", "{{sessionId}}", "answers"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionId\": \"{{essayQuestionId}}\",\n  \"answer\": { \"text\": \"القصور الذاتي هو ممانعة الجسم لتغيير حالته الحركية.\" },\n  \"timeTakenMilliseconds\": 120000\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Finish session",
           "event": [
             {
@@ -1847,13 +1920,23 @@
         },
         {
           "name": "Get essay grade",
+          "description": "Reports Pending until the grade is applied to the session, then Graded with the score. Skipped when the quiz served no essay.",
           "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"essayQuestionId\")) { pm.execution.skipRequest(); }"
+                ]
+              }
+            },
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"status is 200 or 404 until essays are served (#119)\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 404]); });"
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
                 ]
               }
             }
@@ -1862,9 +1945,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/sessions/{{sessionId}}/questions/{{sessionQuestionId}}/essay-grade",
+              "raw": "{{baseUrl}}/api/sessions/{{sessionId}}/questions/{{essayQuestionId}}/essay-grade",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "sessions", "{{sessionId}}", "questions", "{{sessionQuestionId}}", "essay-grade"]
+              "path": ["api", "sessions", "{{sessionId}}", "questions", "{{essayQuestionId}}", "essay-grade"]
             }
           },
           "response": []

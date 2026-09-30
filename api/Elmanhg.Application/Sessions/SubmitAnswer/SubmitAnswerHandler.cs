@@ -2,13 +2,16 @@ using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Core.Localization;
 using Elmanhg.Application.Exceptions;
+using Elmanhg.Application.Mastery.Shared;
 using Elmanhg.Application.Questions.Shared;
 using Elmanhg.Application.Sessions.Shared;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Subscriptions.Shared;
+using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
 using Elmanhg.Domain.Questions;
+using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subscriptions;
 using MediatR;
@@ -17,7 +20,7 @@ using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.Sessions.SubmitAnswer;
 
-public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, ILessonRepository lessonRepository, ISubscriptionRepository subscriptionRepository, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<SubmitAnswerCommand, SessionItemResult>
+public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, ILessonRepository lessonRepository, ISubscriptionRepository subscriptionRepository, IEssayGradeRepository essayGradeRepository, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, IOptions<ContentOptions> contentOptions, IOptions<SessionsOptions> sessionsOptions, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<SubmitAnswerCommand, SessionItemResult>
 {
     public async Task<SessionItemResult> Handle(SubmitAnswerCommand request, CancellationToken cancellationToken)
     {
@@ -39,7 +42,7 @@ public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQ
             throw new NotFoundCoreException(ErrorCodes.SessionQuestionNotFound);
         }
 
-        if (!session.IsTestMode && session.FindAttempt(item.QuestionId) is null)
+        if (!session.IsTestMode && session.FindAttempt(item.QuestionId) is null && item.SavedAnswer is null)
         {
             await EnsureFreeTierAsync(userId, session, cancellationToken).ConfigureAwait(false);
         }
@@ -57,11 +60,23 @@ public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQ
             throw new ApplicationValidationCoreException(ErrorCodes.QuestionAnswerInvalid);
         }
 
-        var isNewAttempt = session.FindAttempt(item.QuestionId) is null;
-        var attempt = session.RecordAttempt(item, QuestionAnswerRules.Canonicalize(type, request.Answer), revision.Grade(request.Answer), request.TimeTakenMilliseconds);
-        if (isNewAttempt && !session.IsTestMode)
+        if (QuestionAnswerRules.IsRawAnswerTooLong(type, request.Answer, sessionsOptions.Value))
         {
-            await RecordMasteryAsync(userId, attempt, cancellationToken).ConfigureAwait(false);
+            throw new ApplicationValidationCoreException(ErrorCodes.AttemptAnswerTooLong);
+        }
+
+        if (QuestionAnswerRules.IsEssayTooLong(type, request.Answer, contentOptions.Value.QuestionEssayAnswerMaxLength))
+        {
+            throw new ApplicationValidationCoreException(ErrorCodes.QuestionEssayAnswerTooLong);
+        }
+
+        if (QuestionAnswerRules.TryReadWrittenEssay(type, request.Answer, out var essayText))
+        {
+            await QuizEssaySubmission.SubmitAsync(session, item, essayText, request.TimeTakenMilliseconds, questionRepository, essayGradeRepository, cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            await RecordAttemptAsync(session, item, revision.Grade(request.Answer), QuestionAnswerRules.Canonicalize(type, request.Answer), request.TimeTakenMilliseconds, cancellationToken).ConfigureAwait(false);
         }
 
         await sessionRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -78,16 +93,15 @@ public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQ
         await FreeTierGate.EnsureQuizQuestionAvailableAsync(entitlement, studentId, sessionRepository, options, now, cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task RecordMasteryAsync(Guid studentId, Attempt attempt, CancellationToken cancellationToken)
+    private async Task RecordAttemptAsync(Session session, SessionItem item, QuestionGrade grade, string answer, int? reportedTimeTakenMilliseconds, CancellationToken cancellationToken)
     {
-        var masteryAttempt = MasteryAttempt.From(attempt);
-        var mastery = await questionMasteryRepository.FirstOrDefaultAsync(x => x.StudentId == studentId && x.QuestionId == attempt.QuestionId, cancellationToken).ConfigureAwait(false);
-        if (mastery is null)
+        var isNewAttempt = session.FindAttempt(item.QuestionId) is null;
+        var attempt = session.RecordAttempt(item, answer, grade, reportedTimeTakenMilliseconds);
+        if (!isNewAttempt || session.IsTestMode)
         {
-            await questionMasteryRepository.AddAsync(QuestionMastery.Start(studentId, attempt.QuestionId, masteryAttempt), cancellationToken).ConfigureAwait(false);
             return;
         }
 
-        mastery.Record(masteryAttempt, masteryOptions.Value.CorrectThreshold);
+        await QuestionMasteryRecorder.RecordAsync(attempt, questionMasteryRepository, masteryOptions.Value.CorrectThreshold, cancellationToken).ConfigureAwait(false);
     }
 }

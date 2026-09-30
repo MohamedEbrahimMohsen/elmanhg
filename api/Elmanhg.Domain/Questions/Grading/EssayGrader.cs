@@ -17,6 +17,16 @@ public static class EssayGrader
         return new NormalisedGrade((decimal)awarded / total, null);
     }
 
+    public static NormalisedGrade GradeBlank(EssayAnswer answer)
+    {
+        if (answer.Text is null || !string.IsNullOrWhiteSpace(answer.Text))
+        {
+            throw new InvalidOperationException("A written essay is graded by the AI grader.");
+        }
+
+        return NormalisedGrade.Unanswered;
+    }
+
     private static bool IsAwardedOnce(RubricCriterion criterion, IReadOnlyList<EssayCriterionAward> awards)
     {
         var matches = awards

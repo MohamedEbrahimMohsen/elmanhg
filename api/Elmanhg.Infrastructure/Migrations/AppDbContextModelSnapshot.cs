@@ -670,6 +670,9 @@ namespace Elmanhg.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb");
 
+                    b.Property<DateTimeOffset?>("AppliedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("Attempts")
                         .HasColumnType("integer");
 
@@ -761,6 +764,9 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<Guid>("SubjectId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("TimeTakenMilliseconds")
+                        .HasColumnType("integer");
+
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uuid");
 
@@ -774,6 +780,9 @@ namespace Elmanhg.Infrastructure.Migrations
                         .HasColumnName("xmin");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GradedAt")
+                        .HasFilter("\"Status\" = 'Graded' AND \"AppliedAt\" IS NULL");
 
                     b.HasIndex("NextAttemptAt")
                         .HasFilter("\"Status\" = 'Pending'");
@@ -2476,7 +2485,8 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.HasIndex("StudentHash");
 
                     b.HasIndex("ThreadId", "Trigger")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_TeacherThreadTrainingRecords_ThreadId_Trigger");
 
                     b.ToTable("TeacherThreadTrainingRecords", (string)null);
                 });

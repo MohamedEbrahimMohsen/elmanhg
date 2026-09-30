@@ -38,6 +38,10 @@ export function examItem(position: number, overrides?: Partial<ExamItemResult>):
   };
 }
 
+export function essayExamItem(position: number, overrides?: Partial<ExamItemResult>): ExamItemResult {
+  return examItem(position, { type: 'Essay', body: {}, maxScore: 5, ...overrides });
+}
+
 export function openExam(items: ExamItemResult[], overrides?: Partial<ExamSessionResult>): ExamSessionResult {
   return {
     id: examSessionId,

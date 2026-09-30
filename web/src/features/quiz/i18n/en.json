@@ -15,7 +15,10 @@
     "finish": "End practice",
     "next": "Next",
     "showResult": "See result",
-    "answerRequired": "Answer the question first."
+    "answerRequired": "Answer the question first.",
+    "submitEssay": "Submit answer",
+    "submittingEssay": "Submitting…",
+    "essayOverLimit": "Shorten your essay to {max, number} words or fewer."
   },
   "feedback": {
     "label": "Answer feedback",
@@ -56,6 +59,15 @@
     "reviewItem": "Question {position, number}",
     "none": "You did not answer any question in this practice.",
     "newPractice": "New practice",
-    "backToLesson": "Back to the lesson"
+    "backToLesson": "Back to the lesson",
+    "essaysPending": "Some essays are still being graded. The score will update when they are done."
+  },
+  "essayDraft": {
+    "restored": "Your saved draft was restored.",
+    "saved": "Draft saved on this device",
+    "error": "Could not save the draft on this device."
+  },
+  "essayAnswer": {
+    "label": "Your answer"
   }
 }

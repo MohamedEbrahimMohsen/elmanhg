@@ -55,7 +55,8 @@ export const StartQuizSessionResponse = zod.object({
   "createdAt": zod.iso.datetime({"offset":true})
 })]),
   "correctAnswer": zod.union([zod.null(),zod.unknown()]),
-  "explanation": zod.string().nullable()
+  "explanation": zod.string().nullable(),
+  "pendingAnswer": zod.union([zod.null(),zod.unknown()])
 }))
 })
 
@@ -103,7 +104,8 @@ export const GetSessionResponse = zod.object({
   "createdAt": zod.iso.datetime({"offset":true})
 })]),
   "correctAnswer": zod.union([zod.null(),zod.unknown()]),
-  "explanation": zod.string().nullable()
+  "explanation": zod.string().nullable(),
+  "pendingAnswer": zod.union([zod.null(),zod.unknown()])
 }))
 })
 
@@ -147,7 +149,8 @@ export const SubmitSessionAnswerResponse = zod.object({
   "createdAt": zod.iso.datetime({"offset":true})
 })]),
   "correctAnswer": zod.union([zod.null(),zod.unknown()]),
-  "explanation": zod.string().nullable()
+  "explanation": zod.string().nullable(),
+  "pendingAnswer": zod.union([zod.null(),zod.unknown()])
 })
 
 export const FinishSessionParams = zod.object({
@@ -194,7 +197,8 @@ export const FinishSessionResponse = zod.object({
   "createdAt": zod.iso.datetime({"offset":true})
 })]),
   "correctAnswer": zod.union([zod.null(),zod.unknown()]),
-  "explanation": zod.string().nullable()
+  "explanation": zod.string().nullable(),
+  "pendingAnswer": zod.union([zod.null(),zod.unknown()])
 }))
 })
 

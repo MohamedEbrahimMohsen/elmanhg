@@ -34,9 +34,14 @@ public partial class Session
             throw new ConflictCoreException(ErrorCodes.SessionQuestionAlreadyAnswered);
         }
 
+        if (FindPendingEssayAnswer(item) is not null)
+        {
+            throw new ConflictCoreException(ErrorCodes.SessionQuestionAlreadyAnswered);
+        }
+
         EnsureNotSubmitted();
         var now = UtcNowToMicroseconds();
-        var attempt = Attempt.Create(this, item, answer, grade, MeasureTimeTaken(LastActivityAt, now, reportedTimeTakenMilliseconds), now);
+        var attempt = Attempt.Create(this, item, answer, grade, MeasureTimeTaken(LastActivityAt, now, reportedTimeTakenMilliseconds), now, AttemptGrader.Auto);
         Attempts.Add(attempt);
         Touch(now);
         RaiseDomainEvent(new AttemptsRecorded(this, [attempt]));

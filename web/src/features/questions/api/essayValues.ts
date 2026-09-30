@@ -73,3 +73,7 @@ export function rubricTotalPoints(criteria: readonly { points: string }[]): numb
 export function countWords(text: string): number {
   return text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
 }
+
+export function isOverWordLimit(maxWords: number | null | undefined, text: string): boolean {
+  return maxWords != null && countWords(text) > maxWords;
+}

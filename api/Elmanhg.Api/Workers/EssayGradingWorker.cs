@@ -1,4 +1,5 @@
 using Core.Errors;
+using Elmanhg.Application.EssayGrading.ApplyEssayGrade;
 using Elmanhg.Application.EssayGrading.FailEssayGrade;
 using Elmanhg.Application.EssayGrading.GetDueEssayGradeIds;
 using Elmanhg.Application.EssayGrading.GradeEssay;
@@ -70,7 +71,9 @@ public sealed class EssayGradingWorker(IServiceScopeFactory scopeFactory, IOptio
         try
         {
             await using var scope = scopeFactory.CreateAsyncScope();
-            await scope.ServiceProvider.GetRequiredService<ISender>().Send(new GradeEssayCommand(gradeId), stoppingToken).ConfigureAwait(false);
+            var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+            await sender.Send(new GradeEssayCommand(gradeId), stoppingToken).ConfigureAwait(false);
+            await sender.Send(new ApplyEssayGradeCommand(gradeId), stoppingToken).ConfigureAwait(false);
             return true;
         }
         catch (Exception exception) when (!stoppingToken.IsCancellationRequested)

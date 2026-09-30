@@ -12,7 +12,7 @@ using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.Exams.SaveExamAnswer;
 
-public sealed class SaveExamAnswerHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, IOptions<ExamsOptions> examsOptions, TimeProvider timeProvider, ICurrentUserService currentUserService) : IRequestHandler<SaveExamAnswerCommand, ExamAnswerSavedResult>
+public sealed class SaveExamAnswerHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, IOptions<ExamsOptions> examsOptions, IOptions<ContentOptions> contentOptions, IOptions<SessionsOptions> sessionsOptions, TimeProvider timeProvider, ICurrentUserService currentUserService) : IRequestHandler<SaveExamAnswerCommand, ExamAnswerSavedResult>
 {
     public async Task<ExamAnswerSavedResult> Handle(SaveExamAnswerCommand request, CancellationToken cancellationToken)
     {
@@ -46,6 +46,16 @@ public sealed class SaveExamAnswerHandler(ISessionRepository sessionRepository, 
         if (!QuestionAnswerRules.CanRead(type, request.Answer))
         {
             throw new ApplicationValidationCoreException(ErrorCodes.QuestionAnswerInvalid);
+        }
+
+        if (QuestionAnswerRules.IsRawAnswerTooLong(type, request.Answer, sessionsOptions.Value))
+        {
+            throw new ApplicationValidationCoreException(ErrorCodes.AttemptAnswerTooLong);
+        }
+
+        if (QuestionAnswerRules.IsEssayTooLong(type, request.Answer, contentOptions.Value.QuestionEssayAnswerMaxLength))
+        {
+            throw new ApplicationValidationCoreException(ErrorCodes.QuestionEssayAnswerTooLong);
         }
 
         session.SaveExamAnswer(item, QuestionAnswerRules.Canonicalize(type, request.Answer), examsOptions.Value.DeadlineGrace, now);

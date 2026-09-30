@@ -49,13 +49,14 @@ Aggregates raise domain events; handlers in `Application/Events/TrainingRecords`
 
 | Source | Event | Handler | Row |
 |---|---|---|---|
-| Quiz answer (`RecordAttempt`), exam submission (`SubmitExam`, including the auto-submit worker) | `AttemptsRecorded` | `AttemptTrainingRecordHandler` | one per new attempt |
+| Quiz answer (`RecordAttempt`), exam submission (`SubmitExam`, including the auto-submit worker), an applied AI essay grade (`RecordEssayAttempt`, [essay-grading.md](essay-grading.md)) | `AttemptsRecorded` | `AttemptTrainingRecordHandler` | one per new attempt |
 | Avatar reply (`RecordExchange`) | `AvatarExchangeRecorded` | `AvatarTrainingRecordHandler` | one per exchange |
 | Final teacher reply, or rating an Answered thread | `TeacherThreadClosed` | `TeacherThreadTrainingRecordHandler` | `Closed` snapshot at `ClosedAt` |
 | Rating a thread that is already Closed | `TeacherThreadRatedAfterClose` | `TeacherThreadTrainingRecordHandler` | `RatedAfterClose` snapshot at the rating time |
 
 - Admin test-mode sessions ([sessions.md](sessions.md), Test mode) write no attempt rows.
 - A repeated identical quiz answer returns the existing attempt and writes nothing.
+- A written essay has no attempt row until its AI grade is applied; the row then has `GradedBy = AI` and `OccurredAt` = the submission time. Re-applying a grade writes nothing, because the attempt already exists.
 - `RecordedAt` is the write time; `OccurredAt` is the source time (the attempt, the reply, the close or the rating). #110 exports by date range on `OccurredAt`.
 - Rows that existed before migration `AddTrainingRecords` are not backfilled.
 

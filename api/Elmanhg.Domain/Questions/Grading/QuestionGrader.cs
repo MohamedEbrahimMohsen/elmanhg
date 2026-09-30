@@ -14,6 +14,7 @@ public static class QuestionGrader
             QuestionType.TrueFalse => ChoiceGrader.GradeTrueFalse(ReadSpec<TrueFalseGradingSpec>(gradingSpec), ReadAnswer<TrueFalseAnswer>(answer)),
             QuestionType.Fill => TextGrader.GradeFill(ReadSpec<FillGradingSpec>(gradingSpec), ReadAnswer<FillAnswer>(answer)),
             QuestionType.Short => TextGrader.GradeShort(ReadSpec<ShortGradingSpec>(gradingSpec), ReadAnswer<ShortAnswer>(answer)),
+            QuestionType.Essay => EssayGrader.GradeBlank(ReadAnswer<EssayAnswer>(answer)),
             _ => throw new InvalidOperationException("Unsupported question type."),
         };
         return QuestionGrade.FromNormalised(grade, maxScore);

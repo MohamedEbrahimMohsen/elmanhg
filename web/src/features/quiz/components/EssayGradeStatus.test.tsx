@@ -67,6 +67,41 @@ describe('EssayGradeStatus', () => {
     expect(await screen.findByText('Partially correct')).toBeInTheDocument();
   });
 
+  it('calls onGraded once when a pending grade becomes graded', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const onGraded = vi.fn();
+    let polls = 0;
+    server.use(
+      getGetEssayGradeMockHandler(() => {
+        polls += 1;
+        return polls === 1 ? pendingEssayGrade : gradedEssayGrade;
+      }),
+    );
+    const first = renderWithProviders(
+      <EssayGradeStatus sessionId={essaySessionId} questionId={essayQuestionId} onGraded={onGraded} />,
+    );
+
+    expect(await screen.findByText('Grading your essay…')).toBeInTheDocument();
+    expect(onGraded).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(essayGradePollIntervalMs);
+    expect(await screen.findByText('Partially correct')).toBeInTheDocument();
+    await vi.advanceTimersByTimeAsync(essayGradePollIntervalMs);
+    expect(onGraded).toHaveBeenCalledTimes(1);
+
+    first.unmount();
+    const alreadyGraded = vi.fn();
+    server.use(getGetEssayGradeMockHandler(gradedEssayGrade));
+    renderWithProviders(
+      <EssayGradeStatus
+        sessionId={essaySessionId}
+        questionId="99999999-9999-4999-8999-999999999999"
+        onGraded={alreadyGraded}
+      />,
+    );
+    expect(await screen.findByText('Partially correct')).toBeInTheDocument();
+    expect(alreadyGraded).not.toHaveBeenCalled();
+  });
+
   it('shows under review without a score', async () => {
     renderStatus(inReviewEssayGrade);
 

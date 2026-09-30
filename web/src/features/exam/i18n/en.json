@@ -72,7 +72,8 @@
     "unitCorrectHeader": "Correct",
     "unitCorrect": "{correct, number} of {total, number}",
     "unknownUnit": "Not available",
-    "avatarTitle": "Question {position} — exam review"
+    "avatarTitle": "Question {position} — exam review",
+    "essaysPending": "Some essays are still being graded. The score will update when they are done."
   },
   "multi": {
     "title": "Multi-unit exam",

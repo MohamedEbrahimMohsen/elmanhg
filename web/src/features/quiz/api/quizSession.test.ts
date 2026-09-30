@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { answered, quizItem, quizSession } from '@/test/quizFixtures';
+import { answered, essayQuizItem, quizItem, quizSession } from '@/test/quizFixtures';
 import {
   defaultQuizSize,
   initialPosition,
@@ -35,6 +35,14 @@ describe('quizSession', () => {
     const merged = mergeAnsweredItem(session, answered(quizItem(2), 'Incorrect', { optionId: 'a' }));
 
     expect(merged.currentPosition).toBeNull();
+  });
+
+  it('treats a pending essay as answered when merging', () => {
+    const session = quizSession([essayQuizItem(1), quizItem(2)]);
+
+    const merged = mergeAnsweredItem(session, essayQuizItem(1, { pendingAnswer: { text: 'مقالي' } }));
+
+    expect(merged.currentPosition).toBe(2);
   });
 
   it('starts at the current position, or at the last item when all are answered', () => {

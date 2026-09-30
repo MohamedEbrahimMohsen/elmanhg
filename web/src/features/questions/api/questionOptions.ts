@@ -15,6 +15,7 @@ export const servedQuestionTypes = [
   'TrueFalse',
   'Fill',
   'Short',
+  'Essay',
 ] as const satisfies readonly QuestionType[];
 
 export const questionDifficulties = ['Easy', 'Medium', 'Hard'] as const satisfies readonly QuestionDifficulty[];
@@ -38,6 +39,11 @@ export const questionBlanksMax = 10;
 
 // mirrors Content:QuestionEssayMaxWordsMax
 export const essayMaxWordsMax = 2000;
+
+// Mirrors Content:QuestionEssayAnswerMaxLength.
+export const essayAnswerMaxLength = 20000;
+
+export const essayCharactersLeftShownAt = 1000;
 
 // mirrors Content:QuestionRubricCriteriaMaxCount
 export const rubricCriteriaMax = 10;

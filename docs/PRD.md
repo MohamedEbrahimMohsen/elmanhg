@@ -120,7 +120,7 @@ Transitions: **Publish** Draft or Archived → Published (sets `published_at`). 
 | Field | Values |
 |---|---|
 | Validation status | Pending · Approved · Rejected |
-| Servable (derived, not stored) | `Approved AND lesson.state == Published AND question.not_retired AND type != Essay` (until student essay input ships, E14.S3) |
+| Servable (derived, not stored) | `Approved AND lesson.state == Published AND question.not_retired` |
 
 Rules:
 - A question is created as Pending. Only a Teacher assigned to the question's subject can Approve or Reject.
@@ -159,7 +159,7 @@ Every answer produces a **score in [0, max_score]** and a **normalised score in 
 | True/False | v1 | Boolean | Exact match | No |
 | Fill-in-the-blank | v1 | One string per blank | Normalised match (Arabic diacritics stripped, whitespace collapsed, alef/hamza/taa-marbuta variants unified); accepted-answers list per blank | Per blank |
 | Short answer (numeric/text) | v1 | String or number | Numeric: tolerance ±x or %; Text: accepted list with normalisation | No |
-| Essay | v2 | Rich text | LLM grader with rubric (criteria + weights) and model answer. Returns score per criterion + justification. | Yes |
+| Essay | v2 | Plain text (Arabic, multi-paragraph) | LLM grader with rubric (criteria + weights) and model answer. Returns score per criterion + justification. | Yes |
 | Math with steps | v2 | Ordered list of steps (LaTeX/text) + final answer | Final answer: CAS equivalence check (SymPy). Steps: LLM against model solution, per-step credit. | Yes |
 | Science drag-and-drop | v2 | Map of item → drop zone | Deterministic: each item's zone vs correct zone; optional order constraints | Per item |
 
@@ -536,7 +536,7 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 
 ## 17. Key business rules (single list, for implementation reference)
 
-1. Servable = Approved ∧ Lesson Published ∧ not retired. Derived, never stored; essays are not servable until student essay input ships.
+1. Servable = Approved ∧ Lesson Published ∧ not retired. Derived, never stored.
 2. Content edit on an Approved question → Pending, version + 1. Historical attempts keep the old version.
 3. Only a Teacher assigned to the subject may validate. Admins cannot.
 4. Rejection requires a reason.

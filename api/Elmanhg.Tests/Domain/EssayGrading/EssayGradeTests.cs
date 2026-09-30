@@ -132,4 +132,62 @@ public sealed class EssayGradeTests
 
         act.Should().Throw<ConflictCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.EssayGradeNotPending);
     }
+
+    [Fact]
+    public void Request_StoresTimeTaken()
+    {
+        var grade = new EssayGradeBuilder().WithTimeTaken(42_000).Build();
+
+        grade.TimeTakenMilliseconds.Should().Be(42_000);
+    }
+
+    [Fact]
+    public void Request_NegativeTimeTaken_ThrowsArgumentOutOfRange()
+    {
+        var act = () => new EssayGradeBuilder().WithTimeTaken(-1).Build();
+
+        act.Should().Throw<ArgumentOutOfRangeException>();
+    }
+
+    [Fact]
+    public void ToQuestionGrade_Graded_ReturnsScoreNormalisedAndOutcome()
+    {
+        var grade = new EssayGradeBuilder().Build();
+        grade.Complete(EssayGradeBuilder.Assessment(), PartialGrade, 0.7m, RequestedAt.AddSeconds(40));
+
+        grade.ToQuestionGrade().Should().Be(new QuestionGrade(2.5m, 0.5m, GradeOutcome.Partial, null));
+    }
+
+    [Fact]
+    public void ToQuestionGrade_Pending_ThrowsInvalidOperation()
+    {
+        var grade = new EssayGradeBuilder().Build();
+
+        var act = () => grade.ToQuestionGrade();
+
+        act.Should().Throw<InvalidOperationException>();
+    }
+
+    [Fact]
+    public void MarkApplied_Graded_StampsAppliedAtAndStopsAwaiting()
+    {
+        var grade = new EssayGradeBuilder().Build();
+        grade.Complete(EssayGradeBuilder.Assessment(), PartialGrade, 0.7m, RequestedAt.AddSeconds(40));
+        var awaitingBefore = grade.IsAwaitingApplication;
+
+        grade.MarkApplied(RequestedAt.AddSeconds(41).AddTicks(3));
+
+        (awaitingBefore, grade.IsAwaitingApplication, grade.AppliedAt).Should().Be((true, false, (DateTimeOffset?)RequestedAt.AddSeconds(41)));
+    }
+
+    [Fact]
+    public void MarkApplied_InReview_ThrowsInvalidOperation()
+    {
+        var grade = new EssayGradeBuilder().Build();
+        grade.Complete(EssayGradeBuilder.Assessment(0.3m), PartialGrade, 0.7m, RequestedAt.AddSeconds(40));
+
+        var act = () => grade.MarkApplied(RequestedAt.AddSeconds(41));
+
+        act.Should().Throw<InvalidOperationException>();
+    }
 }

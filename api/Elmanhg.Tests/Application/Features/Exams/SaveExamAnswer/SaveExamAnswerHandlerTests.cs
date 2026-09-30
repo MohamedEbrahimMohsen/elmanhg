@@ -36,7 +36,7 @@ public sealed class SaveExamAnswerHandlerTests
         _timeProvider.GetUtcNow().Returns(Clock);
         SessionRepositoryStub.StubFind(_sessionRepository, _session);
         _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(_questions[0].Revisions);
-        _handler = new SaveExamAnswerHandler(_sessionRepository, _questionRepository, Options.Create(new ExamsOptions()), _timeProvider, _currentUserService);
+        _handler = new SaveExamAnswerHandler(_sessionRepository, _questionRepository, Options.Create(new ExamsOptions()), Options.Create(new ContentOptions { QuestionEssayAnswerMaxLength = 20000 }), Options.Create(new SessionsOptions()), _timeProvider, _currentUserService);
     }
 
     [Fact]
@@ -100,6 +100,29 @@ public sealed class SaveExamAnswerHandlerTests
         _session.SubmitExam(new Dictionary<Guid, QuestionGrade>(), ExamSessionBuilder.Now.AddMinutes(1));
 
         await AssertThrowsAsync<BusinessRuleViolationCoreException>(Command(SessionBuilder.AnswerB), DomainErrorCodes.SessionAlreadySubmitted);
+    }
+
+    [Fact]
+    public async Task Handle_EssayOverMaxLength_ThrowsQuestionEssayAnswerTooLong()
+    {
+        var exam = new ExamSessionBuilder();
+        var session = exam.BuildWithEssay();
+        var essayItem = session.Items.Single(x => x.MaxScore == 5);
+        _currentUserService.UserId.Returns(exam.StudentId);
+        SessionRepositoryStub.StubFind(_sessionRepository, session);
+        var essay = exam.Questions.Essay().Approved().Build();
+        _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(essay.Revisions);
+        var command = new SaveExamAnswerCommand(session.Id, essayItem.QuestionId, QuestionBuilder.Json($$"""{"text":"{{new string('ب', 20001)}}"}"""));
+
+        await AssertThrowsAsync<ApplicationValidationCoreException>(command, ErrorCodes.QuestionEssayAnswerTooLong);
+        essayItem.SavedAnswer.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Handle_NonEssayOverAnswerCap_ThrowsAttemptAnswerTooLong()
+    {
+        await AssertThrowsAsync<ApplicationValidationCoreException>(Command($$"""{"optionId":"b","padding":"{{new string('x', 4000)}}"}"""), ErrorCodes.AttemptAnswerTooLong);
+        _session.Items[0].SavedAnswer.Should().BeNull();
     }
 
     private SaveExamAnswerCommand Command(string answer) => new(_session.Id, _questions[0].Id, QuestionBuilder.Json(answer));

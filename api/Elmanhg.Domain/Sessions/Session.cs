@@ -27,7 +27,7 @@ public partial class Session : AuditEntity
     public bool IsSubmitted => SubmittedAt is not null;
     public bool IsExam => Kind != SessionKind.Quiz;
     public long TotalTimeTakenMilliseconds => Attempts.Sum(x => (long)x.TimeTakenMilliseconds);
-    public int? CurrentPosition => IsSubmitted ? null : Items.OrderBy(x => x.Position).FirstOrDefault(x => FindAttempt(x.QuestionId) is null)?.Position;
+    public int? CurrentPosition => IsSubmitted ? null : Items.OrderBy(x => x.Position).FirstOrDefault(x => FindAttempt(x.QuestionId) is null && FindPendingEssayAnswer(x) is null)?.Position;
 
     private Session(Guid id, Guid? createdBy) : base(id, createdBy) { }
 

@@ -17,4 +17,9 @@ public sealed class SessionsOptions
 
     [Range(1, 100000)]
     public int AnswerMaxLength { get; set; } = 4000;
+
+    [Range(1, 200000)]
+    public int EssayAnswerMaxLength { get; set; } = 121000;
+
+    public int RequestAnswerMaxLength => Math.Max(AnswerMaxLength, EssayAnswerMaxLength);
 }

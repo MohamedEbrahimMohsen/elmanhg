@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { SessionResult } from '@/shared/api/generated/model';
+import { hasPendingEssay, isWrittenEssay } from '../api/essayItem';
 import { splitDuration } from '../api/quizSession';
 
 export interface QuizResultSummaryProps {
@@ -8,7 +9,7 @@ export interface QuizResultSummaryProps {
 
 export function QuizResultSummary({ session }: QuizResultSummaryProps) {
   const { t } = useTranslation('quiz');
-  const answered = session.items.filter((item) => item.attempt !== null).length;
+  const answered = session.items.filter((item) => item.attempt !== null || isWrittenEssay(item)).length;
 
   return (
     <div className="flex flex-col gap-1 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5">
@@ -19,6 +20,9 @@ export function QuizResultSummary({ session }: QuizResultSummaryProps) {
       <p className="text-caption text-text-muted">
         {t('result.time', splitDuration(Number(session.timeTakenMilliseconds)))}
       </p>
+      {hasPendingEssay(session.items) ? (
+        <p className="text-caption text-text-muted">{t('result.essaysPending')}</p>
+      ) : null}
     </div>
   );
 }

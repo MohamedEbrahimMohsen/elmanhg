@@ -9,6 +9,7 @@ export interface QuizQuestionActionsProps {
   isChecking: boolean;
   onCheck: () => void;
   onNext: () => void;
+  isEssay?: boolean | undefined;
 }
 
 export function QuizQuestionActions({
@@ -18,6 +19,7 @@ export function QuizQuestionActions({
   isChecking,
   onCheck,
   onNext,
+  isEssay = false,
 }: QuizQuestionActionsProps) {
   const { t } = useTranslation('quiz');
   const { finish, isPending } = useFinishQuiz(sessionId);
@@ -31,7 +33,9 @@ export function QuizQuestionActions({
       ) : (
         <>
           <Button className="min-h-12 w-full" disabled={isChecking} onClick={onCheck}>
-            {t(isChecking ? 'session.checking' : 'session.check')}
+            {isEssay
+              ? t(isChecking ? 'session.submittingEssay' : 'session.submitEssay')
+              : t(isChecking ? 'session.checking' : 'session.check')}
           </Button>
           <Button variant="secondary" disabled={isPending || isChecking} onClick={finish}>
             {t('session.finish')}

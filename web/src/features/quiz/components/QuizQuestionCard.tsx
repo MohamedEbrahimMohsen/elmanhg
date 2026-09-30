@@ -9,6 +9,7 @@ import { fromAnswerPayload, toQuizQuestion } from '../api/quizItem';
 import { useQuizAnswer } from '../hooks/useQuizAnswer';
 import { FeedbackPanel } from './FeedbackPanel';
 import { QuizQuestionActions } from './QuizQuestionActions';
+import { QuizQuestionHeading } from './QuizQuestionHeading';
 
 export interface QuizQuestionCardProps {
   sessionId: string;
@@ -41,25 +42,13 @@ export function QuizQuestionCard({
       aria-labelledby={headingId}
       className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4.5 shadow-1"
     >
-      <div className="flex flex-wrap items-center gap-2">
-        <h2
-          id={headingId}
-          tabIndex={-1}
-          ref={
-            focusOnMount
-              ? (node) => {
-                  node?.focus();
-                }
-              : undefined
-          }
-          className="font-display text-h3 font-semibold focus-visible:outline-hidden"
-        >
-          {t('session.counter', { position, total })}
-        </h2>
-        <span className="rounded-full bg-soft px-2.5 py-0.5 text-micro font-semibold text-text-muted">
-          {t(`questions:types.${question.type}`)}
-        </span>
-      </div>
+      <QuizQuestionHeading
+        id={headingId}
+        position={position}
+        total={total}
+        type={question.type}
+        focusOnMount={focusOnMount}
+      />
       <QuestionView
         question={question}
         answer={answer}

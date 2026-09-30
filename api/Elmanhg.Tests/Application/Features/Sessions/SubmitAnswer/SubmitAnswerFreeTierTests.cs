@@ -5,6 +5,7 @@ using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Sessions.Shared;
 using Elmanhg.Application.Sessions.SubmitAnswer;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
 using Elmanhg.Domain.Questions;
@@ -24,6 +25,7 @@ public sealed class SubmitAnswerFreeTierTests
     private readonly ISessionRepository _sessionRepository = Substitute.For<ISessionRepository>();
     private readonly IQuestionRepository _questionRepository = Substitute.For<IQuestionRepository>();
     private readonly IQuestionMasteryRepository _questionMasteryRepository = Substitute.For<IQuestionMasteryRepository>();
+    private readonly IEssayGradeRepository _essayGradeRepository = Substitute.For<IEssayGradeRepository>();
     private readonly ILessonRepository _lessonRepository = Substitute.For<ILessonRepository>();
     private readonly ISubscriptionRepository _subscriptionRepository = Substitute.For<ISubscriptionRepository>();
     private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
@@ -45,7 +47,7 @@ public sealed class SubmitAnswerFreeTierTests
         _lessonRepository.GetPublishedSiblingPositionsAsync(lesson.Id, Arg.Any<CancellationToken>()).Returns([LessonPosition.Of(lesson), new LessonPosition(Guid.NewGuid(), lesson.UnitId, 2, lesson.CreationDate)]);
         SubscriptionRepositoryStub.Stub(_subscriptionRepository);
         StubUsedToday(0);
-        _handler = new SubmitAnswerHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _lessonRepository, _subscriptionRepository, Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>());
+        _handler = new SubmitAnswerHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _lessonRepository, _subscriptionRepository, _essayGradeRepository, Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), Options.Create(new ContentOptions { QuestionEssayAnswerMaxLength = 20000 }), Options.Create(new SessionsOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>());
     }
 
     [Fact]
@@ -118,6 +120,23 @@ public sealed class SubmitAnswerFreeTierTests
 
         _session.Attempts.Should().ContainSingle();
         await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_PendingEssayReplay_SkipsFreeTierGate()
+    {
+        var essay = _builder.Questions.Essay().Approved().Build();
+        var session = Session.StartQuiz(_builder.StudentId, _builder.Questions.Lesson, [essay], isTestMode: false);
+        const string Answer = """{"text":"القصور الذاتي"}""";
+        session.SubmitEssay(session.Items[0], Answer, 0);
+        SessionRepositoryStub.StubFind(_sessionRepository, session);
+        _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(essay.Revisions);
+        StubUsedToday(10);
+
+        var result = await _handler.Handle(new SubmitAnswerCommand(session.Id, essay.Id, QuestionBuilder.Json(Answer), 1000), TestContext.Current.CancellationToken);
+
+        result.PendingAnswer.Should().NotBeNull();
+        await _essayGradeRepository.DidNotReceive().AddAsync(Arg.Any<EssayGrade>(), Arg.Any<CancellationToken>());
     }
 
     private Task<SessionItemResult> Handle(Session session) => _handler.Handle(new SubmitAnswerCommand(session.Id, _questions[0].Id, QuestionBuilder.Json(SessionBuilder.AnswerB), 1000), TestContext.Current.CancellationToken);

@@ -21,9 +21,11 @@ export {
   fillSpecSchema,
   shortNumericSpecSchema,
   shortTextSpecSchema,
+  essayBodySchema,
 } from './schemas/questionContentSchemas';
 export { QuestionImportPage } from './pages/QuestionImportPage';
 export { ValidationQueuePage } from './pages/ValidationQueuePage';
 export { ValidationQuestionPage } from './pages/ValidationQuestionPage';
 export { validationQueueSearchSchema } from './schemas/validationQueueSearchSchema';
-export { questionTypes, servedQuestionTypes } from './api/questionOptions';
+export { questionTypes, servedQuestionTypes, essayAnswerMaxLength } from './api/questionOptions';
+export { countWords, isOverWordLimit } from './api/essayValues';

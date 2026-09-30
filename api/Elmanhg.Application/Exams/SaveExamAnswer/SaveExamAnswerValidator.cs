@@ -18,7 +18,7 @@ public sealed class SaveExamAnswerValidator : AbstractValidator<SaveExamAnswerCo
             .Must(x => x.ValueKind == JsonValueKind.Object)
             .WithErrorCode(ErrorCodes.QuestionAnswerInvalid);
         RuleFor(x => x.Answer)
-            .Must(x => x.GetRawText().Length <= options.AnswerMaxLength)
+            .Must(x => x.GetRawText().Length <= options.RequestAnswerMaxLength)
             .WithErrorCode(ErrorCodes.AttemptAnswerTooLong)
             .When(x => x.Answer.ValueKind == JsonValueKind.Object);
     }

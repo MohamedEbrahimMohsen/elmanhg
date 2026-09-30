@@ -7,11 +7,12 @@ import { EssayGradeOutcome } from './EssayGradeOutcome';
 export interface EssayGradeStatusProps {
   sessionId: string;
   questionId: string;
+  onGraded?: (() => void) | undefined;
 }
 
-export function EssayGradeStatus({ sessionId, questionId }: EssayGradeStatusProps) {
+export function EssayGradeStatus({ sessionId, questionId, onGraded }: EssayGradeStatusProps) {
   const { t } = useTranslation('quiz');
-  const { data, isPending, isError, refetch } = useEssayGrade(sessionId, questionId);
+  const { data, isPending, isError, refetch } = useEssayGrade(sessionId, questionId, onGraded);
 
   if (isPending) {
     return (

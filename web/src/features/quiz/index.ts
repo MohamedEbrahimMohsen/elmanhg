@@ -7,3 +7,5 @@ export { choiceReview, describeCorrectAnswer } from './api/correctAnswer';
 export { CorrectAnswer } from './components/CorrectAnswer';
 export { QuizReviewItem } from './components/QuizReviewItem';
 export { EssayGradeStatus } from './components/EssayGradeStatus';
+export { EssayReviewItem } from './components/EssayReviewItem';
+export { essayAnswerText, hasPendingEssay, isWrittenEssay } from './api/essayItem';

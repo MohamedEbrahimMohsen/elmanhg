@@ -28,5 +28,7 @@ public sealed class SessionBuilder
 
     public Session Build(int count = 2, bool isTestMode = false) => Session.StartQuiz(StudentId, Questions.Lesson, BuildQuestions(count), isTestMode);
 
+    public Session BuildWithEssay(bool isTestMode = false) => Session.StartQuiz(StudentId, Questions.Lesson, [Questions.Approved().Build(), Questions.Essay().Approved().Build()], isTestMode);
+
     public static QuestionGrade Grade(decimal normalised, GradeFeedback? feedback = null) => QuestionGrade.FromNormalised(new NormalisedGrade(normalised, feedback), 1);
 }

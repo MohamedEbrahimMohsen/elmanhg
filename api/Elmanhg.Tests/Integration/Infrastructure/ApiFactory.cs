@@ -115,6 +115,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Sessions:MinQuizSize"] = "5",
             ["Sessions:MaxQuizSize"] = "20",
             ["Sessions:AnswerMaxLength"] = "4000",
+            ["Sessions:EssayAnswerMaxLength"] = "121000",
             ["Mastery:CorrectThreshold"] = "0.8",
             ["Progress:StreakTimeZone"] = "Africa/Cairo",
             ["Progress:StreakMaxDays"] = "365",

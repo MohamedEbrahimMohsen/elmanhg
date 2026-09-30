@@ -11,7 +11,7 @@ The wire names are the `QuestionType` enum values. v1 grading follows PRD §6.
 - `TrueFalse`: a boolean. Exact match.
 - `Fill`: one string per blank. Normalised match (PRD §6.2) against an accepted-answers list per blank; credit per blank.
 - `Short`: a number or a string. Numeric within a tolerance (absolute or percent); text against an accepted list with normalisation.
-- `Essay` (v2): plain-text answer (student input is #119), graded by the AI grader against the rubric and model answers ([essay-grading.md](essay-grading.md)). Not servable until #119.
+- `Essay` (v2): plain-text answer (student input is #119), graded by the AI grader against the rubric and model answers ([essay-grading.md](essay-grading.md)); a blank answer is graded at once as Unanswered.
 
 ## Body vs grading spec
 
@@ -191,8 +191,8 @@ A non-integer `maxWords`, criterion `points` or level `points` does not read as 
 
 ## Servable
 
-- Servable = Approved ∧ lesson Published ∧ not retired ∧ not an essay (essays are excluded until student essay input, #119) (PRD §5.3, §17 rule 1). It is derived on every read and never stored.
-- `ServableQuestionSpecification.ServedTypes` lists the five served v1 types (`Mcq`, `Multi`, `TrueFalse`, `Fill`, `Short`) for per-type listings such as blueprint servable counts. #119 adds `Essay` back to both.
+- Servable = Approved ∧ lesson Published ∧ not retired (PRD §5.3, §17 rule 1). It is derived on every read and never stored.
+- `ServableQuestionSpecification.ServedTypes` lists all six types (`Mcq`, `Multi`, `TrueFalse`, `Fill`, `Short`, `Essay`) for per-type listings such as blueprint servable counts.
 - `ServableQuestionSpecification` (`Elmanhg.Domain/Questions`) is the only definition. `WhereServable(questions, lessons)` composes the rule into SQL; `IsSatisfiedBy(question, lesson)` runs compiled copies of the same expressions in memory.
 - Every serving query (quizzes, exams, blueprints, anything a student is shown) must filter through `WhereServable`. Admin reads never filter by it: `GET /api/questions` lists every status and annotates each item with `isServable`, and `GET /api/lessons` returns `servableQuestionCount` next to `questionCount`.
 - `GET /api/questions/servable-count` is anonymous and returns `{"count": n}`, the platform-wide total shown on the landing page. It is cached in `IMemoryCache` under `questions:servable-count`.
@@ -234,7 +234,7 @@ A student's answer (and the `answer` of `POST /api/questions/grade-draft`) is a 
 {"text":"9.8"}
 ```
 
-**Essay** (plain text; trimmed when canonicalised; at most `Content:QuestionEssayAnswerMaxLength` characters, else `422 QUESTION_ESSAY_ANSWER_TOO_LONG`; a missing or non-string `text` gets `422 QUESTION_ANSWER_INVALID`)
+**Essay** (plain text; trimmed when canonicalised; at most `Content:QuestionEssayAnswerMaxLength` characters on `grade-draft`, the quiz answer and the exam save, else `422 QUESTION_ESSAY_ANSWER_TOO_LONG`; a missing or non-string `text` gets `422 QUESTION_ANSWER_INVALID`)
 
 ```json
 {"text":"القصور الذاتي هو ممانعة الجسم لتغيير حالته الحركية."}

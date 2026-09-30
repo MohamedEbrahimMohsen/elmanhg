@@ -4,6 +4,8 @@ using Core.Localization;
 using Elmanhg.Application.Exams.SubmitExam;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Domain.EssayGrading;
+using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
 using Elmanhg.Domain.Questions;
@@ -25,6 +27,7 @@ public sealed class SubmitExamHandlerTests
     private readonly ISessionRepository _sessionRepository = Substitute.For<ISessionRepository>();
     private readonly IQuestionRepository _questionRepository = Substitute.For<IQuestionRepository>();
     private readonly IQuestionMasteryRepository _questionMasteryRepository = Substitute.For<IQuestionMasteryRepository>();
+    private readonly IEssayGradeRepository _essayGradeRepository = Substitute.For<IEssayGradeRepository>();
     private readonly ILessonRepository _lessonRepository = Substitute.For<ILessonRepository>();
     private readonly ICurriculumUnitRepository _unitRepository = Substitute.For<ICurriculumUnitRepository>();
     private readonly ISubjectRepository _subjectRepository = Substitute.For<ISubjectRepository>();
@@ -51,7 +54,7 @@ public sealed class SubmitExamHandlerTests
             .Returns(call => _masteries.Where(call.Arg<Expression<Func<QuestionMastery, bool>>>().Compile()).ToList());
         _unitRepository.GetByIdAsync(_builder.Questions.Unit.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<CurriculumUnit>, IQueryable<CurriculumUnit>>?>(), Arg.Any<bool>()).Returns(_builder.Questions.Unit);
         _subjectRepository.GetByIdAsync(_builder.Questions.Subject.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Subject>, IQueryable<Subject>>?>(), Arg.Any<bool>()).Returns(_builder.Questions.Subject);
-        _handler = new SubmitExamHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _lessonRepository, _unitRepository, _subjectRepository, Options.Create(new ExamsOptions()), Options.Create(new MasteryOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>());
+        _handler = new SubmitExamHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _essayGradeRepository, _lessonRepository, _unitRepository, _subjectRepository, Options.Create(new ExamsOptions()), Options.Create(new MasteryOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>());
     }
 
     private Guid QuestionId => _questions[0].Id;
@@ -127,6 +130,43 @@ public sealed class SubmitExamHandlerTests
 
         (second.ScorePercent, second.SubmittedAt).Should().Be((first.ScorePercent, first.SubmittedAt));
         _session.Attempts.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public async Task Handle_WrittenEssay_RequestsGradeWithoutAttempt()
+    {
+        var essay = StartEssayExam("القصور الذاتي");
+
+        var result = await _handler.Handle(new SubmitExamCommand(_session.Id), TestContext.Current.CancellationToken);
+
+        await _essayGradeRepository.Received(1).AddRangeAsync(Arg.Is<List<EssayGrade>>(list => list.Count == 1 && list[0].QuestionId == essay.Id && list[0].SubjectId == essay.SubjectId && list[0].TimeTakenMilliseconds == 0 && list[0].RequestedAt == _session.SubmittedAt && list[0].ReadAnswerText() == "القصور الذاتي"), Arg.Any<CancellationToken>());
+        _session.Attempts.Should().NotContain(x => x.QuestionId == essay.Id);
+        result.Items.Single(x => x.QuestionId == essay.Id).Attempt.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Handle_BlankEssay_RecordsUnansweredAttempt()
+    {
+        var essay = StartEssayExam("   ");
+
+        await _handler.Handle(new SubmitExamCommand(_session.Id), TestContext.Current.CancellationToken);
+
+        _session.Attempts.Single(x => x.QuestionId == essay.Id).Score.Should().Be(0m);
+        await _essayGradeRepository.DidNotReceive().AddRangeAsync(Arg.Any<List<EssayGrade>>(), Arg.Any<CancellationToken>());
+    }
+
+    private Question StartEssayExam(string essayText)
+    {
+        var essay = _builder.Questions.Essay().Approved().Build();
+        _questions.Add(essay);
+        _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(_questions.SelectMany(x => x.Revisions).ToList());
+        var blueprint = ExamBlueprint.CreateForUnit(_builder.Questions.Unit, new ExamBlueprintShape([new ExamTypeCount(QuestionType.Mcq, 2), new ExamTypeCount(QuestionType.Essay, 1)], null, 30, 50), ExamBlueprintBuilder.Plenty(), Guid.NewGuid());
+        _session = Session.StartUnitExam(_builder.StudentId, _builder.Questions.Unit, blueprint, _questions, [_builder.Questions.Lesson], false, ExamSessionBuilder.Now);
+        var savedAt = ExamSessionBuilder.Now.AddMinutes(1);
+        _session.SaveExamAnswer(_session.GetItem(_questions[0].Id)!, SessionBuilder.AnswerB, Grace, savedAt);
+        _session.SaveExamAnswer(_session.GetItem(essay.Id)!, System.Text.Json.JsonSerializer.Serialize(new { text = essayText }), Grace, savedAt);
+        SessionRepositoryStub.StubFind(_sessionRepository, _session);
+        return essay;
     }
 
     private Session StartExam(bool isTestMode)

@@ -50,7 +50,7 @@ public sealed class EssayValidationEndpointTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task Approve_EssayInPublishedLesson_ApprovedButNotServable()
+    public async Task Approve_EssayInPublishedLesson_ApprovedAndServable()
     {
         var cancellationToken = TestContext.Current.CancellationToken;
         var tree = await SeedSubjectTreeAsync(factory, "Physics");
@@ -65,11 +65,11 @@ public sealed class EssayValidationEndpointTests(ApiFactory factory)
         var lessons = await admin.GetFromJsonAsync<JsonElement>($"/api/lessons?unitId={tree.UnitId}", cancellationToken);
         var lesson = lessons.EnumerateArray().Single(x => x.GetProperty("id").GetGuid() == lessonId);
         lesson.GetProperty("questionCount").GetInt32().Should().Be(1);
-        lesson.GetProperty("servableQuestionCount").GetInt32().Should().Be(0);
+        lesson.GetProperty("servableQuestionCount").GetInt32().Should().Be(1);
         var questions = await admin.GetFromJsonAsync<JsonElement>($"/api/questions?lessonId={lessonId}", cancellationToken);
         var item = questions.GetProperty("items").EnumerateArray().Should().ContainSingle().Subject;
         item.GetProperty("validationStatus").GetString().Should().Be("Approved");
-        item.GetProperty("isServable").GetBoolean().Should().BeFalse();
+        item.GetProperty("isServable").GetBoolean().Should().BeTrue();
     }
 
     private static async Task<Guid> CreateEssayAsync(HttpClient admin, Guid lessonId)

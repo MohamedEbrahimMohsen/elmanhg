@@ -24,6 +24,7 @@ export const examBlueprintSchema = z
       TrueFalse: z.string(),
       Fill: z.string(),
       Short: z.string(),
+      Essay: z.string(),
     }),
     timeLimitMinutes: z.string(),
     passMark: z.string(),

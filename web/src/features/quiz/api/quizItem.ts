@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
   choiceBodySchema,
   emptyAnswer,
+  essayBodySchema,
   fillBodySchema,
   shortBodySchema,
   type QuestionAnswer,
@@ -9,7 +10,9 @@ import {
 } from '@/features/questions';
 import type { SessionItemResult } from '@/shared/api/generated/model';
 
-export const quizQuestionTypes = ['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short'] as const;
+export type QuizItemContent = Omit<SessionItemResult, 'pendingAnswer'>;
+
+export const quizQuestionTypes = ['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay'] as const;
 
 const answerPayloadSchema = z.object({
   optionId: z.string().nullish(),
@@ -19,7 +22,7 @@ const answerPayloadSchema = z.object({
   text: z.string().nullish(),
 });
 
-export function toQuizQuestion(item: SessionItemResult): StudentQuestion {
+export function toQuizQuestion(item: QuizItemContent): StudentQuestion {
   const type = z.enum(quizQuestionTypes).parse(item.type);
   const isChoice = type === 'Mcq' || type === 'Multi';
   return {
@@ -28,6 +31,7 @@ export function toQuizQuestion(item: SessionItemResult): StudentQuestion {
     options: isChoice ? choiceBodySchema.parse(item.body).options : [],
     blankIds: type === 'Fill' ? fillBodySchema.parse(item.body).blanks.map((blank) => blank.id) : [],
     answerKind: type === 'Short' ? shortBodySchema.parse(item.body).answerKind : null,
+    maxWords: type === 'Essay' ? (essayBodySchema.safeParse(item.body).data?.maxWords ?? null) : null,
   };
 }
 
@@ -70,7 +74,7 @@ export function isAnswerEmpty(question: StudentQuestion, answer: QuestionAnswer)
   }
 }
 
-export function questionImageSources(item: SessionItemResult): string[] {
+export function questionImageSources(item: QuizItemContent): string[] {
   const body = choiceBodySchema.safeParse(item.body);
   const htmls = [item.stem, ...(body.success ? body.data.options.map((option) => option.text) : [])];
   const sources = htmls.flatMap((html) =>
