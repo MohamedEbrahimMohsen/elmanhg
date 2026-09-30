@@ -240,7 +240,7 @@ If another project already uses port 5432, set `POSTGRES_PORT` (for example 5543
 
 ### Commands
 
-The "Verified by" column says where each command is exercised: **CI** means a workflow in `.github/workflows/` runs it on every PR that touches that stack and on main, and every story merged with it green (main was green on all five workflows at `66b18ae`, and on every workflow that ran for the last story's merge at `0ca08ae`); **local** means the README's local-development step, which CI does not run.
+The "Verified by" column says where each command is exercised: **CI** means a workflow in `.github/workflows/` runs it on every PR that touches that stack and on main, and every story merged with it green (main was green on all five workflows at `66b18ae`, and on every workflow that ran for the last story's merge at `0ca08ae`); **local** means the README's local-development step, which CI does not run. The table lists the main command of each check, not every step: the workflow files are the full list (for example coverage thresholds, `dotnet list package --vulnerable`, npm audit, readiness waits, generated-file drift and route-tree checks).
 
 | Part | Command | Verified by |
 |---|---|---|
