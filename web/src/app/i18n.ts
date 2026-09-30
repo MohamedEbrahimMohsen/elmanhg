@@ -9,6 +9,7 @@ import { blueprintsLocales } from '@/features/blueprints/locales';
 import { browseLocales } from '@/features/browse/locales';
 import { contentLocales } from '@/features/content/locales';
 import { examLocales } from '@/features/exam/locales';
+import { gradeReviewLocales } from '@/features/gradeReview/locales';
 import { landingLocales } from '@/features/landing/locales';
 import { masteryLocales } from '@/features/mastery/locales';
 import { mathStepsLocales } from '@/features/mathSteps/locales';
@@ -56,6 +57,7 @@ const resources = {
     askTeacher: askTeacherLocales.ar,
     avatarConversations: avatarConversationsLocales.ar,
     trainingExport: trainingExportLocales.ar,
+    gradeReview: gradeReviewLocales.ar,
   },
   en: {
     common: commonEn,
@@ -79,6 +81,7 @@ const resources = {
     askTeacher: askTeacherLocales.en,
     avatarConversations: avatarConversationsLocales.en,
     trainingExport: trainingExportLocales.en,
+    gradeReview: gradeReviewLocales.en,
   },
 };
 
@@ -123,6 +126,7 @@ export function initI18n(lng: Language = defaultLanguage): void {
         'askTeacher',
         'avatarConversations',
         'trainingExport',
+        'gradeReview',
       ],
       defaultNS: 'common',
       resources,

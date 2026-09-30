@@ -95,8 +95,10 @@ An array with one element per changed audited entity. Property keys are camelCas
 | SuspendUser | `User.Suspend` | User | command (no diff) |
 | ReactivateUser | `User.Reactivate` | User | command (no diff) |
 | GrantComplimentarySubscription | `Subscription.GrantComplimentary` | Subscription | result (the diff shows the new Subscription with a null `paymobReference`) |
+| ReviewEssayGrade | `EssayGrade.Review` | EssayGrade | command (the diff shows the status and the review fields; the student's answer never changes, so it is not in the diff) |
+| ReviewMathStepGrade | `MathStepGrade.Review` | MathStepGrade | command (the same for a math step grade) |
 
-Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`, `ExamBlueprint`, `Subscription`, `Payment`, `TrainingExport`.
+Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`, `ExamBlueprint`, `Subscription`, `Payment`, `TrainingExport`, `EssayGrade`, `MathStepGrade`.
 
 `QuestionRevision` and `QuestionDecision` rows are an append-only history and are not diffed.
 

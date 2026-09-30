@@ -11,6 +11,7 @@ public static class RealtimeExtensions
     {
         services.AddSignalR().AddJsonProtocol(options => options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
         services.AddSingleton<ITeacherThreadNotifier, SignalRTeacherThreadNotifier>();
+        services.AddSingleton<IGradeReviewNotifier, SignalRGradeReviewNotifier>();
         services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
         {
             options.Events ??= new JwtBearerEvents();

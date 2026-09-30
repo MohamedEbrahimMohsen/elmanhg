@@ -146,6 +146,7 @@
   },
   "realtime": {
     "newReply": "A teacher replied to your question.",
-    "reminder": "Reminder: a student's question is waiting for your reply."
+    "reminder": "Reminder: a student's question is waiting for your reply.",
+    "gradeReviewed": "Your teacher reviewed one of your answers. The grade is now final."
   }
 }

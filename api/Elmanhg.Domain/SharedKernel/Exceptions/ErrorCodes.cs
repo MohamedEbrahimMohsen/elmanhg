@@ -90,6 +90,11 @@ public static class ErrorCodes
     // MATH STEP GRADING
     public const string MathStepGradeNotPending = "MATH_STEP_GRADE_NOT_PENDING";
 
+    // GRADE REVIEW
+    public const string GradeNotInReview = "GRADE_NOT_IN_REVIEW";
+    public const string GradeReviewNoAiScore = "GRADE_REVIEW_NO_AI_SCORE";
+    public const string GradeReviewScoreOutOfRange = "GRADE_REVIEW_SCORE_OUT_OF_RANGE";
+
     // TRAINING EXPORTS
     public const string TrainingExportNotPending = "TRAINING_EXPORT_NOT_PENDING";
     public const string TrainingExportNotReady = "TRAINING_EXPORT_NOT_READY";

@@ -3,6 +3,7 @@ import {
   BookOpen,
   ChartColumn,
   ChartLine,
+  ClipboardCheck,
   ClipboardList,
   CreditCard,
   Download,
@@ -84,6 +85,13 @@ export const navByRole: Record<Role, RoleNav> = {
         icon: ListChecks,
         capability: 'questionsValidate',
       },
+      {
+        key: 'gradeReviews',
+        to: '/teacher/grades',
+        labelKey: 'nav.teacher.gradeReviews',
+        icon: ClipboardCheck,
+        capability: 'aiGradesOverride',
+      },
       { key: 'inbox', to: '/teacher/inbox', labelKey: 'nav.teacher.inbox', icon: Inbox, capability: 'askTeacherReply' },
       {
         key: 'stats',
@@ -93,8 +101,8 @@ export const navByRole: Record<Role, RoleNav> = {
         capability: 'teacherStatsViewOwn',
       },
     ],
-    tabBarKeys: ['queue', 'inbox', 'stats'],
-    morePath: null,
+    tabBarKeys: ['queue', 'gradeReviews', 'inbox'],
+    morePath: '/teacher/more',
   },
   admin: {
     items: [

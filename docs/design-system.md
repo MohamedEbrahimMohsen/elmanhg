@@ -155,7 +155,7 @@ Track `--soft`, fill `--accent` (mastery) or `--ok` (exam pass). Height 6 px, fu
 
 ### 5.7 Navigation
 
-Mobile: bottom tab bar, at most 4 items, icons 22 px stroke 1.8, active in `--text` 600, inactive `--text-2`. A role with more than 4 destinations shows its 3 primary destinations plus a fourth item "المزيد" that opens a list of the rest. Desktop (≥ 900 px): top bar with every destination as text tabs, active underlined 2 px `--accent`.
+Mobile: bottom tab bar, at most 4 items, icons 22 px stroke 1.8, active in `--text` 600, inactive `--text-2`. A role with more than 3 destinations shows its 3 primary destinations plus a fourth item "المزيد" that opens a list of the rest. Desktop (≥ 900 px): top bar with every destination as text tabs, active underlined 2 px `--accent`.
 
 ### 5.8 Inputs
 

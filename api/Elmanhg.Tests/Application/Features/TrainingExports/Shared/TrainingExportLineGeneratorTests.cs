@@ -80,5 +80,19 @@ public sealed class TrainingExportLineGeneratorTests
         serialized.Should().Contain("[email]").And.Contain("[url]");
     }
 
+    [Fact]
+    public void EssayGrade_ReviewedRecord_CarriesReviewFieldsAndScrubsComment()
+    {
+        var grade = EssayGradeBuilder.InReview(new EssayGradeBuilder());
+        var reviewedAt = RecordedAt.AddMinutes(-5);
+        grade.Override(4m, Guid.NewGuid(), "call 01112345678", reviewedAt);
+        var record = EssayGradeTrainingRecord.FromReview(grade, SessionKind.Quiz, new QuestionPlacement(grade.QuestionId, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()), StudentHash, RecordedAt);
+
+        var line = TrainingExportLineGenerator.EssayGrade(record);
+
+        (line.Trigger, line.ReviewDecision, line.ReviewedScore, line.ReviewedNormalisedScore, line.ReviewedAt).Should().Be((EssayGradeTrainingTrigger.TeacherReviewed, (GradeReviewDecision?)GradeReviewDecision.Overridden, (decimal?)4m, (decimal?)0.8m, (DateTimeOffset?)reviewedAt));
+        line.ReviewComment.Should().Be("call [number]");
+    }
+
     private static string Serialize<TLine>(TLine line) => JsonSerializer.Serialize(line, TrainingExportJson.SerializerOptions);
 }

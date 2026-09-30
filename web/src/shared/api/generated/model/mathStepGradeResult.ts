@@ -4,6 +4,7 @@
  * Elmanhg.Api | v1
  * OpenAPI spec version: 1.0.0
  */
+import type { GradeReviewNoteResult } from './gradeReviewNoteResult';
 import type { MathStepScoreResult } from './mathStepScoreResult';
 
 export interface MathStepGradeResult {
@@ -31,4 +32,5 @@ export interface MathStepGradeResult {
   /** @nullable */
   justification: string | null;
   steps: MathStepScoreResult[];
+  review: null | GradeReviewNoteResult;
 }

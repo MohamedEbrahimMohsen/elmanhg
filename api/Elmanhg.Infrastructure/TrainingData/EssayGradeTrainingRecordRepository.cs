@@ -11,7 +11,8 @@ public class EssayGradeTrainingRecordRepository(AppDbContext context) : Reposito
     {
         var query = _dbSet
             .AsNoTracking()
-            .Where(x => x.OccurredAt >= filter.From && x.OccurredAt < filter.To);
+            .Where(x => x.OccurredAt >= filter.From && x.OccurredAt < filter.To)
+            .Where(x => x.Trigger == EssayGradeTrainingTrigger.TeacherReviewed || !_dbSet.Any(y => y.EssayGradeId == x.EssayGradeId && y.Trigger == EssayGradeTrainingTrigger.TeacherReviewed));
         if (filter.SubjectId is { } subjectId)
         {
             query = query.Where(x => x.SubjectId == subjectId);

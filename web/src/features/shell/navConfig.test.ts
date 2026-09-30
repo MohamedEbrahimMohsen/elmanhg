@@ -23,7 +23,12 @@ describe('visibleNavItems', () => {
       ],
     };
 
-    expect(visibleNavItems('teacher', nav).map((item) => item.key)).toEqual(['queue', 'inbox', 'stats']);
-    expect(overflowItems('teacher', nav)).toEqual([]);
+    expect(visibleNavItems('teacher', nav).map((item) => item.key)).toEqual([
+      'queue',
+      'gradeReviews',
+      'inbox',
+      'stats',
+    ]);
+    expect(overflowItems('teacher', nav).map((item) => item.key)).toEqual(['stats']);
   });
 });

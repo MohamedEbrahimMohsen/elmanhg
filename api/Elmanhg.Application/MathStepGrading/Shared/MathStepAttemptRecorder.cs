@@ -17,7 +17,7 @@ public static class MathStepAttemptRecorder
             return;
         }
 
-        var attempt = session.RecordAiGradedAttempt(item, grade.Answer, grade.ToQuestionGrade(), AttemptGrader.AI, grade.TimeTakenMilliseconds, grade.RequestedAt, now);
+        var attempt = session.RecordAiGradedAttempt(item, grade.Answer, grade.ToQuestionGrade(), grade.GradedBy, grade.TimeTakenMilliseconds, grade.RequestedAt, now);
         if (attempt is null || session.IsTestMode)
         {
             return;

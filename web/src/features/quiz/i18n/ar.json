@@ -92,5 +92,10 @@
       "Unreadable": "تعذّرت قراءتها"
     },
     "justification": "تعليق المصحح"
+  },
+  "teacherReview": {
+    "accepted": "راجع معلمك هذا التصحيح واعتمده.",
+    "overridden": "راجع معلمك هذه الإجابة وحدّد درجتها.",
+    "comment": "ملاحظة المعلم: {comment}"
   }
 }

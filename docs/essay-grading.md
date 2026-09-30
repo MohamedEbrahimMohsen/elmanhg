@@ -30,6 +30,10 @@ Essays (question type `Essay`, v2) are graded by Claude against the rubric a tea
 | `InputTokens`, `OutputTokens`, `CostUsd` (12,6) | | the successful call's usage and cost |
 | `TimeTakenMilliseconds` | int, default 0 | the quiz writing time measured at submission (`Session.SubmitEssay`); 0 for exam essays |
 | `AppliedAt` | timestamptz, null | when a `Graded` grade was applied to its session (attempt and mastery); null until then |
+| `ReviewDecision` | text, null | `Accepted` or `Overridden` once a teacher reviewed the grade ([grade-review.md](grade-review.md)) |
+| `ReviewedBy`, `ReviewedAt` | uuid / timestamptz, null | the reviewing teacher (or admin) and when |
+| `ReviewComment` | text, null | the teacher's note to the student; at most `GradeReview:CommentMaxLength` characters |
+| `ReviewedScore` (9,2), `ReviewedNormalisedScore` (5,4) | numeric, null | the final score the teacher set (accept copies the AI score); the AI `Score` is never overwritten |
 
 Indexes: unique `(SessionId, QuestionId)` (`IX_EssayGrades_SessionId_QuestionId`), `NextAttemptAt` filtered to `Pending` (the worker's due query), `GradedAt` filtered to `Graded` with a null `AppliedAt` (grades still waiting to be applied), and `(SubjectId, Status)` for the teacher queue. The row version is PostgreSQL `xmin`: when two API replicas grade the same row, the losing save fails and the worker records a failed attempt.
 
@@ -39,10 +43,10 @@ Indexes: unique `(SessionId, QuestionId)` (`IX_EssayGrades_SessionId_QuestionId`
 - Every `EssayGrading:SweepIntervalSeconds` the worker lists up to `SweepBatchSize` due ids and, for each, in a new scope, sends `GradeEssayCommand` and then `ApplyEssayGradeCommand`. Due means `Pending` with `NextAttemptAt` reached, or `Graded` and not yet applied; the not-yet-applied grades are listed first.
 - `GradeEssayCommand` calls the AI and saves the result on the grade (one save). It does nothing for a grade that is not due, so a `Graded` grade is never sent to the AI again.
 - `ApplyEssayGradeCommand` runs for a `Graded` grade whose `AppliedAt` is null (`EssayAttemptRecorder`), in one save: it writes the session's `Attempt` (`GradedBy = AI`, `CreatedAt = RequestedAt`, `TimeTakenMilliseconds` from the grade, no feedback JSON), updates mastery (not in test mode), recomputes `ScorePercent` when the session is already finished, and stamps `AppliedAt`. The attempt raises `AttemptsRecorded`, so its training row ([training-data.md](training-data.md)) is written in the same save; an attempt that already exists is not written again, so a retry writes no second attempt or training row. A missing (or deleted) session, or a question that is not an item of the session, writes no attempt; the grade is still applied.
-- Writing the attempt stamps the session row, so its `xmin` token serialises it against a concurrent answer or finish. A lost race fails only the apply save: the AI result is already stored, and the next sweep applies it again without calling the AI. `InReview` grades are not applied; #128 writes their attempt.
+- Writing the attempt stamps the session row, so its `xmin` token serialises it against a concurrent answer or finish. A lost race fails only the apply save: the AI result is already stored, and the next sweep applies it again without calling the AI. `InReview` grades are not applied by the worker; a teacher review writes their attempt, in the review's save ([grade-review.md](grade-review.md)).
 - On success, `Complete` stores the result and sets `Graded`, or `InReview` / `LowConfidence` when the confidence is below `ReviewConfidenceThreshold`. The score is stored either way. `Complete` raises `EssayGradeCompleted`, which writes an `EssayGradeTrainingRecords` row in the same save as the grade (not for test-mode sessions; [training-data.md](training-data.md)). `FailAttempt` raises nothing.
 - On a failure the worker logs a warning and sends `FailEssayGradeCommand` with the exception's error code (or its type name). `FailAttempt` schedules the next try at `RetryBaseDelaySeconds × 2^(attempt − 1)` (30, 60 and 120 s by default). After `MaxAttempts` (4) the grade becomes `InReview` / `GradingFailed`.
-- Only `Pending` grades are graded or failed (`ESSAY_GRADE_NOT_PENDING` otherwise). `Graded` is final; `InReview` waits for #128.
+- Only `Pending` grades are graded or failed (`ESSAY_GRADE_NOT_PENDING` otherwise). `Graded` is final; `InReview` waits for a teacher review, which sets `Graded`.
 - Kill switch: `EssayGrading:SweepEnabled=false` stops the worker (the test host sets it).
 
 ## Score
@@ -74,7 +78,7 @@ The AI service logs `essay_grading.completed` (tokens, latency, `cost_usd`, mode
 
 ## Student API
 
-`GET /api/sessions/{sessionId}/questions/{questionId}/essay-grade` (policy `Assessments.Take`) returns the caller's own grade as `EssayGradeResult`: `id`, `status`, `maxScore`, `requestedAt`, and, only when the status is `Graded`, `gradedAt`, `score`, `normalisedScore`, `outcome`, `justification` and `criteria`. The status reads `Graded` only once the grade is applied to the session (`AppliedAt` set): a grade that is `Graded` but not yet applied is reported as `Pending`, so by the time a client sees `Graded` the attempt and the session score already include it. A pending or in-review grade never shows the AI score. Another student's grade, or a missing one, returns `404 ESSAY_GRADE_NOT_FOUND`.
+`GET /api/sessions/{sessionId}/questions/{questionId}/essay-grade` (policy `Assessments.Take`) returns the caller's own grade as `EssayGradeResult`: `id`, `status`, `maxScore`, `requestedAt`, and, only when the status is `Graded`, `gradedAt`, `score`, `normalisedScore`, `outcome`, `justification` and `criteria`, plus `review` (`{ decision, comment, reviewedAt }`, or null). After a teacher review the score and outcome are the final (teacher) values; an `Overridden` grade returns `criteria: []` and `justification: null`, an `Accepted` one keeps the AI detail. The status reads `Graded` only once the grade is applied to the session (`AppliedAt` set): a grade that is `Graded` but not yet applied is reported as `Pending`, so by the time a client sees `Graded` the attempt and the session score already include it. A pending or in-review grade never shows the AI score. Another student's grade, or a missing one, returns `404 ESSAY_GRADE_NOT_FOUND`.
 
 The web polls it every 2 s while the status is `Pending` (`useEssayGrade`), and `EssayGradeStatus` shows «جارٍ تصحيح إجابتك…», «قيد المراجعة» or the verdict with the score, criterion marks and justification. Both are exported from the quiz feature; `EssayGradeStatus` takes an `onGraded` callback that fires once on `Pending → Graded`. There is no push.
 
@@ -118,6 +122,6 @@ With `AiService:Provider=Fake` (the default), `FakeAiEssayGradingClient` awards 
 - **Length:** an essay longer than `Content:QuestionEssayAnswerMaxLength` gets 422 `QUESTION_ESSAY_ANSWER_TOO_LONG` on the quiz answer and the exam save. The raw JSON cap for an essay answer is `Sessions:EssayAnswerMaxLength`; MathSteps uses `Sessions:MathStepsAnswerMaxLength` and every other type keeps `Sessions:AnswerMaxLength`.
 - **Web:** a plain-text RTL editor (`dir="auto"`, word count against `maxWords` with an over-limit state, characters left near 20 000, `maxLength` 20 000). Quiz drafts autosave to the device (`localStorage`, 7 days) and are removed on submit; exam drafts autosave to the server. After submit the quiz card, the quiz result and the exam result show the essay read-only with `EssayGradeStatus`; `onGraded` refreshes the session score when the grade lands.
 
-## What #128 adds
+## Teacher review (#128)
 
-The teacher review queue for `InReview` grades (scoped by `SubjectId`), and accepting or overriding a grade, which makes it final. The override also adds its training row (the AI grade row is written at `Complete`).
+`InReview` grades are listed in the teacher review queue, scoped by `SubjectId`. A teacher accepts or overrides the grade, which makes it final and writes the attempt with `GradedBy = Teacher`. See [grade-review.md](grade-review.md).

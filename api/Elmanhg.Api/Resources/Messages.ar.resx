@@ -425,6 +425,21 @@
   <data name="ESSAY_GRADE_NOT_FOUND" xml:space="preserve"><value>لم يتم العثور على تصحيح هذا المقال.</value></data>
   <data name="ESSAY_GRADING_UNAVAILABLE" xml:space="preserve"><value>مصحح الذكاء الاصطناعي غير متاح الان. حاول مرة اخرى بعد قليل.</value></data>
   <data name="ESSAY_GRADE_NOT_PENDING" xml:space="preserve"><value>هذا المقال لم يعد بانتظار مصحح الذكاء الاصطناعي.</value></data>
+  <data name="GRADE_NOT_IN_REVIEW" xml:space="preserve"><value>هذه الاجابة لم تعد بانتظار المراجعة.</value></data>
+  <data name="GRADE_REVIEW_NO_AI_SCORE" xml:space="preserve"><value>لا توجد درجة من الذكاء الاصطناعي لاعتمادها. حدد الدرجة بنفسك.</value></data>
+  <data name="GRADE_REVIEW_SCORE_OUT_OF_RANGE" xml:space="preserve"><value>الدرجة يجب ان تكون بين صفر والدرجة الكاملة للسؤال.</value></data>
+  <data name="GRADE_REVIEW_NOT_FOUND" xml:space="preserve"><value>لم يتم العثور على هذه الاجابة في قائمة المراجعة.</value></data>
+  <data name="GRADE_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>تغير هذا التصحيح للتو. حدث الصفحة وحاول مرة اخرى.</value></data>
+  <data name="GRADE_REVIEW_ID_REQUIRED" xml:space="preserve"><value>معرف التصحيح مطلوب.</value></data>
+  <data name="GRADE_REVIEW_KIND_INVALID" xml:space="preserve"><value>نوع المراجعة غير صالح.</value></data>
+  <data name="GRADE_REVIEW_DECISION_INVALID" xml:space="preserve"><value>القرار غير صالح.</value></data>
+  <data name="GRADE_REVIEW_SCORE_REQUIRED" xml:space="preserve"><value>حدد الدرجة.</value></data>
+  <data name="GRADE_REVIEW_SCORE_NOT_ALLOWED" xml:space="preserve"><value>لا ترسل درجة عند اعتماد درجة الذكاء الاصطناعي.</value></data>
+  <data name="GRADE_REVIEW_SCORE_INVALID" xml:space="preserve"><value>الدرجة يجب ان تكون رقما غير سالب بمنزلتين عشريتين على الاكثر.</value></data>
+  <data name="GRADE_REVIEW_COMMENT_REQUIRED" xml:space="preserve"><value>اكتب ملاحظة للطالب توضح الدرجة.</value></data>
+  <data name="GRADE_REVIEW_COMMENT_TOO_LONG" xml:space="preserve"><value>الملاحظة اطول من المسموح.</value></data>
+  <data name="GRADE_REVIEW_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة غير صالح.</value></data>
+  <data name="GRADE_REVIEW_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة غير صالح.</value></data>
   <data name="CONTENT_SEARCH_QUERY_REQUIRED" xml:space="preserve"><value>اكتب نص البحث.</value></data>
   <data name="CONTENT_SEARCH_QUERY_TOO_LONG" xml:space="preserve"><value>نص البحث أطول من المسموح.</value></data>
   <data name="CONTENT_SEARCH_TOP_INVALID" xml:space="preserve"><value>عدد النتائج المطلوبة غير صالح.</value></data>

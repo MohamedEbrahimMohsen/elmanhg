@@ -1,6 +1,7 @@
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
+using Elmanhg.Application.GradeReviews.Shared;
 using Elmanhg.Application.MathStepGrading.GetMathStepGrade;
 using Elmanhg.Application.MathStepGrading.Shared;
 using Elmanhg.Domain.MathStepGrading;
@@ -99,6 +100,22 @@ public sealed class GetMathStepGradeHandlerTests
         var act = () => Handle(grade);
 
         (await act.Should().ThrowAsync<UnauthorizedCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.UserNotAuthenticated);
+    }
+
+    [Fact]
+    public async Task Handle_OverriddenUncheckedGrade_ReturnsTeacherScoreAndNullVerdict()
+    {
+        var grade = new MathStepGradeBuilder().ForStudent(_studentId).WithVerdict(null).Build();
+        _grades.Add(grade);
+        grade.FailAttempt("MATH_CHECK_UNAVAILABLE", GradedAt, 1, TimeSpan.FromSeconds(30));
+        grade.Override(2m, Guid.NewGuid(), "Correct method.", GradedAt.AddHours(1));
+        grade.MarkApplied(GradedAt.AddHours(1));
+
+        var result = await Handle(grade);
+
+        (result.Status, result.Score, result.NormalisedScore, result.Outcome, result.FinalAnswerVerdict, result.Justification).Should().Be(("Graded", (decimal?)2m, (decimal?)1m, "Correct", (string?)null, (string?)null));
+        result.Steps.Should().BeEmpty();
+        result.Review.Should().Be(new GradeReviewNoteResult("Overridden", "Correct method.", GradedAt.AddHours(1)));
     }
 
     private MathStepGrade Seed(Guid studentId)

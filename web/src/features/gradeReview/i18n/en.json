@@ -1,0 +1,81 @@
+{
+  "queue": {
+    "title": "AI grade review",
+    "caption": "Answers the AI graded with low confidence or could not grade. Accept or change the score to make it final.",
+    "subjects": "Subjects",
+    "subjectPill": "{name} · {count}",
+    "kinds": {
+      "Essay": "Essays ({count})",
+      "MathSteps": "Math steps ({count})"
+    },
+    "listLabel": "Answers waiting for review",
+    "loading": "Loading the review queue…",
+    "errorTitle": "Could not load the review queue.",
+    "age": "Waiting {age}",
+    "aiScore": "AI: {score} / {maxScore}",
+    "noAiScore": "No AI score",
+    "confidence": "Confidence {percent}%",
+    "empty": {
+      "noSubjects": "No subjects are assigned to you.",
+      "noItems": "No answers are waiting for review."
+    }
+  },
+  "reasons": {
+    "LowConfidence": "Low confidence",
+    "GradingFailed": "AI grading failed",
+    "FinalAnswerUnchecked": "Final answer could not be checked"
+  },
+  "detail": {
+    "title": "Review answer",
+    "back": "Back to AI grade review",
+    "question": "Question",
+    "answer": "Student's answer",
+    "ai": "AI grading",
+    "aiScore": "Suggested score: {score} of {maxScore}",
+    "confidence": "Confidence: {percent}%",
+    "verdict": "Final answer: {verdict}",
+    "noAiScore": "The AI could not give this answer a score.",
+    "reviewed": "Reviewed",
+    "finalScore": "Final score: {score} of {maxScore}",
+    "reviewedAt": "Reviewed on {date}",
+    "saved": "Decision saved. The score is now final.",
+    "conflict": "Another teacher just reviewed this answer.",
+    "saveFailed": "Could not save the decision.",
+    "notFound": "This answer was not found.",
+    "loading": "Loading the answer…",
+    "errorTitle": "Could not load the answer."
+  },
+  "decisions": {
+    "Accepted": "AI score accepted",
+    "Overridden": "Score changed"
+  },
+  "verdicts": {
+    "Equivalent": "Correct",
+    "NotEquivalent": "Not correct",
+    "WrongForm": "Wrong form",
+    "Unreadable": "Unreadable",
+    "Unchecked": "Not checked"
+  },
+  "form": {
+    "decision": "Your decision",
+    "accept": "Accept the suggested score ({score} of {maxScore})",
+    "acceptUnavailable": "There is no suggested score to accept.",
+    "override": "Set the score myself",
+    "score": "Score (out of {maxScore})",
+    "commentRequiredLabel": "Note to the student",
+    "commentOptionalLabel": "Note to the student (optional)",
+    "commentHint": "Up to {max} characters. The student sees this note.",
+    "submit": "Save decision",
+    "scoreRequired": "Enter the score.",
+    "scoreRange": "Enter a number from 0 to the full marks, with up to 2 decimals.",
+    "commentRequired": "Write a note explaining the score.",
+    "commentTooLong": "The note is too long."
+  },
+  "errors": {
+    "GRADE_REVIEW_SCORE_REQUIRED": "Enter the score.",
+    "GRADE_REVIEW_SCORE_INVALID": "The score must be a non-negative number with at most two decimals.",
+    "GRADE_REVIEW_SCORE_OUT_OF_RANGE": "The score must be between 0 and the question's full marks.",
+    "GRADE_REVIEW_COMMENT_REQUIRED": "Write a note to the student explaining the score.",
+    "GRADE_REVIEW_COMMENT_TOO_LONG": "The note is too long."
+  }
+}

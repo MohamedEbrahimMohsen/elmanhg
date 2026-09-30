@@ -342,6 +342,20 @@ public static class ErrorCodes
     public const string MathStepGradeNotFound = "MATH_STEP_GRADE_NOT_FOUND";
     public const string MathStepGradingUnavailable = "MATH_STEP_GRADING_UNAVAILABLE";
 
+    // GRADE REVIEW
+    public const string GradeReviewNotFound = "GRADE_REVIEW_NOT_FOUND";
+    public const string GradeModifiedConcurrently = "GRADE_MODIFIED_CONCURRENTLY";
+    public const string GradeReviewIdRequired = "GRADE_REVIEW_ID_REQUIRED";
+    public const string GradeReviewKindInvalid = "GRADE_REVIEW_KIND_INVALID";
+    public const string GradeReviewDecisionInvalid = "GRADE_REVIEW_DECISION_INVALID";
+    public const string GradeReviewScoreRequired = "GRADE_REVIEW_SCORE_REQUIRED";
+    public const string GradeReviewScoreNotAllowed = "GRADE_REVIEW_SCORE_NOT_ALLOWED";
+    public const string GradeReviewScoreInvalid = "GRADE_REVIEW_SCORE_INVALID";
+    public const string GradeReviewCommentRequired = "GRADE_REVIEW_COMMENT_REQUIRED";
+    public const string GradeReviewCommentTooLong = "GRADE_REVIEW_COMMENT_TOO_LONG";
+    public const string GradeReviewPageNumberInvalid = "GRADE_REVIEW_PAGE_NUMBER_INVALID";
+    public const string GradeReviewPageSizeInvalid = "GRADE_REVIEW_PAGE_SIZE_INVALID";
+
     // CONTENT RETRIEVAL
     public const string ContentSearchQueryRequired = "CONTENT_SEARCH_QUERY_REQUIRED";
     public const string ContentSearchQueryTooLong = "CONTENT_SEARCH_QUERY_TOO_LONG";

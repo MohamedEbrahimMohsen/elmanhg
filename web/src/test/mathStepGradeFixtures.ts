@@ -20,6 +20,7 @@ export const pendingMathStepGrade: MathStepGradeResult = {
   finalAnswerVerdict: null,
   justification: null,
   steps: [],
+  review: null,
 };
 
 export const inReviewMathStepGrade: MathStepGradeResult = { ...pendingMathStepGrade, status: 'InReview' };
@@ -34,6 +35,17 @@ export const gradedMathStepGrade: MathStepGradeResult = {
   finalAnswerVerdict: 'Equivalent',
   justification: 'Good working; finish the division.',
   steps,
+};
+
+export const overriddenMathStepGrade: MathStepGradeResult = {
+  ...gradedMathStepGrade,
+  score: 2,
+  normalisedScore: 1,
+  outcome: 'Correct',
+  finalAnswerVerdict: null,
+  justification: null,
+  steps: [],
+  review: { decision: 'Overridden', comment: 'Correct method.', reviewedAt: '2026-10-01T09:00:00Z' },
 };
 
 export const mathStepsDraftGradeResult: QuestionGradeResult = {

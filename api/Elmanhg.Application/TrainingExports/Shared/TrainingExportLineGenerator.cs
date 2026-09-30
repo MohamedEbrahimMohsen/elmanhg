@@ -25,6 +25,6 @@ public static class TrainingExportLineGenerator
 
     public static EssayGradeExportLine EssayGrade(EssayGradeTrainingRecord record)
     {
-        return new EssayGradeExportLine(record.Id, record.StudentHash, record.QuestionId, record.QuestionVersion, record.SubjectId, record.UnitId, record.LessonId, record.SessionKind, TrainingDataScrubber.ScrubJson(record.Answer), record.MaxScore, record.Score, record.NormalisedScore, TrainingDataScrubber.ScrubJson(record.Criteria), TrainingDataScrubber.ScrubText(record.Justification), record.Confidence, record.Outcome, record.Model, record.PromptVersion, record.OccurredAt);
+        return new EssayGradeExportLine(record.Id, record.StudentHash, record.QuestionId, record.QuestionVersion, record.SubjectId, record.UnitId, record.LessonId, record.SessionKind, TrainingDataScrubber.ScrubJson(record.Answer), record.MaxScore, record.Score, record.NormalisedScore, TrainingDataScrubber.ScrubJson(record.Criteria), TrainingDataScrubber.ScrubText(record.Justification), record.Confidence, record.Outcome, record.Model, record.PromptVersion, record.OccurredAt, record.Trigger, record.ReviewDecision, record.ReviewedScore, record.ReviewedNormalisedScore, record.ReviewComment is null ? null : TrainingDataScrubber.ScrubText(record.ReviewComment), record.ReviewedAt);
     }
 }

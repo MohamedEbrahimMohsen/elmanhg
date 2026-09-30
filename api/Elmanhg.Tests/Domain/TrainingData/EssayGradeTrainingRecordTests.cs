@@ -52,6 +52,56 @@ public sealed class EssayGradeTrainingRecordTests
         act.Should().Throw<InvalidOperationException>();
     }
 
+    [Fact]
+    public void From_CompletedGrade_SetsCompletedTrigger()
+    {
+        var grade = CompletedGrade();
+        var placement = new QuestionPlacement(grade.QuestionId, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+
+        var record = EssayGradeTrainingRecord.From(grade, SessionKind.Quiz, placement, StudentHash, RecordedAt);
+
+        record.Trigger.Should().Be(EssayGradeTrainingTrigger.Completed);
+        (record.ReviewDecision, record.ReviewedScore, record.ReviewedNormalisedScore, record.ReviewComment, record.ReviewedAt).Should().Be(((GradeReviewDecision?)null, (decimal?)null, (decimal?)null, (string?)null, (DateTimeOffset?)null));
+    }
+
+    [Fact]
+    public void FromReview_OverriddenGrade_CopiesAiAndTeacherFields()
+    {
+        var grade = CompletedGrade();
+        var reviewedAt = GradedAt.AddHours(2);
+        grade.Override(4m, Guid.NewGuid(), "Full marks for the definition.", reviewedAt);
+        var placement = new QuestionPlacement(grade.QuestionId, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+
+        var record = EssayGradeTrainingRecord.FromReview(grade, SessionKind.Quiz, placement, StudentHash, RecordedAt);
+
+        (record.Trigger, record.Outcome, record.Score, record.NormalisedScore, record.Confidence).Should().Be((EssayGradeTrainingTrigger.TeacherReviewed, EssayGradeStatus.InReview, 2.5m, 0.5m, 0.5m));
+        (record.ReviewDecision, record.ReviewedScore, record.ReviewedNormalisedScore, record.ReviewComment, record.ReviewedAt).Should().Be(((GradeReviewDecision?)GradeReviewDecision.Overridden, (decimal?)4m, (decimal?)0.8m, "Full marks for the definition.", (DateTimeOffset?)reviewedAt));
+        (record.EssayGradeId, record.StudentHash, record.OccurredAt, record.RecordedAt).Should().Be((grade.Id, StudentHash, GradedAt, RecordedAt));
+    }
+
+    [Fact]
+    public void FromReview_UnreviewedGrade_ThrowsInvalidOperationException()
+    {
+        var grade = CompletedGrade();
+        var placement = new QuestionPlacement(grade.QuestionId, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+
+        var act = () => EssayGradeTrainingRecord.FromReview(grade, SessionKind.Quiz, placement, StudentHash, RecordedAt);
+
+        act.Should().Throw<InvalidOperationException>();
+    }
+
+    [Fact]
+    public void FromReview_GradingFailedReview_ThrowsInvalidOperationException()
+    {
+        var grade = EssayGradeBuilder.GradingFailed(new EssayGradeBuilder());
+        grade.Override(3m, Guid.NewGuid(), "Graded by hand.", GradedAt.AddHours(2));
+        var placement = new QuestionPlacement(grade.QuestionId, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+
+        var act = () => EssayGradeTrainingRecord.FromReview(grade, SessionKind.Quiz, placement, StudentHash, RecordedAt);
+
+        act.Should().Throw<InvalidOperationException>();
+    }
+
     private static EssayGrade CompletedGrade()
     {
         var grade = new EssayGradeBuilder().Build();

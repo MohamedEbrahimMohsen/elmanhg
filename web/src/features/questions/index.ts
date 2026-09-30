@@ -5,6 +5,9 @@ export { QuestionView } from './components/QuestionView';
 export { EssayCriteriaList } from './components/EssayCriteriaList';
 export { MathStepScoreList } from './components/MathStepScoreList';
 export { MathStepsReadOnly } from './components/MathStepsReadOnly';
+export { GradingKeyView } from './components/GradingKeyView';
+export { stemExcerpt } from './api/stemExcerpt';
+export { formatPendingAge } from './api/pendingAge';
 export { questionListSearchSchema, type QuestionListSearch } from './schemas/questionListSearchSchema';
 export {
   emptyAnswer,

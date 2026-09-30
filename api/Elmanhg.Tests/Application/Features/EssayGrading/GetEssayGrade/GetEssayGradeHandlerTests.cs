@@ -3,6 +3,7 @@ using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.EssayGrading.GetEssayGrade;
 using Elmanhg.Application.EssayGrading.Shared;
 using Elmanhg.Application.Exceptions;
+using Elmanhg.Application.GradeReviews.Shared;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Tests.Builders;
@@ -97,6 +98,36 @@ public sealed class GetEssayGradeHandlerTests
         var act = () => Handle(grade);
 
         (await act.Should().ThrowAsync<UnauthorizedCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.UserNotAuthenticated);
+    }
+
+    [Fact]
+    public async Task Handle_Overridden_ReturnsTeacherScoreWithoutAiDetail()
+    {
+        var grade = Seed(_studentId);
+        grade.Complete(EssayGradeBuilder.Assessment(0.3m), PartialGrade, 0.7m, GradedAt);
+        grade.Override(4m, Guid.NewGuid(), "Full marks for the definition.", GradedAt.AddHours(1));
+        grade.MarkApplied(GradedAt.AddHours(1));
+
+        var result = await Handle(grade);
+
+        (result.Status, result.Score, result.NormalisedScore, result.Outcome, result.Justification).Should().Be(("Graded", (decimal?)4m, (decimal?)0.8m, "Partial", (string?)null));
+        result.Criteria.Should().BeEmpty();
+        result.Review.Should().Be(new GradeReviewNoteResult("Overridden", "Full marks for the definition.", GradedAt.AddHours(1)));
+    }
+
+    [Fact]
+    public async Task Handle_Accepted_ReturnsAiDetailWithReviewNote()
+    {
+        var grade = Seed(_studentId);
+        grade.Complete(EssayGradeBuilder.Assessment(0.3m), PartialGrade, 0.7m, GradedAt);
+        grade.Accept(Guid.NewGuid(), null, GradedAt.AddHours(1));
+        grade.MarkApplied(GradedAt.AddHours(1));
+
+        var result = await Handle(grade);
+
+        (result.Status, result.Score, result.Justification).Should().Be(("Graded", (decimal?)2.5m, "جيد"));
+        result.Criteria.Should().Equal(new EssayCriterionResult("c1", "Definition", 1, 2, "ناقص"));
+        result.Review.Should().Be(new GradeReviewNoteResult("Accepted", null, GradedAt.AddHours(1)));
     }
 
     private EssayGrade Seed(Guid studentId)

@@ -9,6 +9,7 @@ export * from './content-retrieval/content-retrieval.zod';
 export * from './dashboard/dashboard.zod';
 export * from './exam-blueprints/exam-blueprints.zod';
 export * from './exams/exams.zod';
+export * from './grade-reviews/grade-reviews.zod';
 export * from './lessons/lessons.zod';
 export * from './mastery/mastery.zod';
 export * from './payments/payments.zod';

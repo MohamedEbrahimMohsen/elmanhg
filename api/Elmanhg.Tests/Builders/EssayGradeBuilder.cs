@@ -1,4 +1,5 @@
 using Elmanhg.Domain.EssayGrading;
+using Elmanhg.Domain.Questions.Grading;
 
 namespace Elmanhg.Tests.Builders;
 
@@ -9,7 +10,7 @@ public sealed class EssayGradeBuilder
 
     private Guid _studentId = Guid.NewGuid();
     private Guid _sessionId = Guid.NewGuid();
-    private readonly Guid _subjectId = Guid.NewGuid();
+    private Guid _subjectId = Guid.NewGuid();
     private Guid _questionId = Guid.NewGuid();
     private int _questionVersion = 1;
     private int _maxScore = 5;
@@ -27,6 +28,12 @@ public sealed class EssayGradeBuilder
     {
         _questionId = questionId;
         _questionVersion = version;
+        return this;
+    }
+
+    public EssayGradeBuilder ForSubject(Guid subjectId)
+    {
+        _subjectId = subjectId;
         return this;
     }
 
@@ -61,6 +68,20 @@ public sealed class EssayGradeBuilder
     }
 
     public EssayGrade Build() => EssayGrade.Request(_studentId, _sessionId, _subjectId, _questionId, _questionVersion, _maxScore, _answer, _requestedAt, _timeTakenMilliseconds);
+
+    public static EssayGrade InReview(EssayGradeBuilder builder, decimal confidence = 0.5m)
+    {
+        var grade = builder.Build();
+        grade.Complete(Assessment(confidence), new QuestionGrade(2.5m, 0.5m, GradeOutcome.Partial, null), 0.7m, DefaultRequestedAt.AddSeconds(40));
+        return grade;
+    }
+
+    public static EssayGrade GradingFailed(EssayGradeBuilder builder)
+    {
+        var grade = builder.Build();
+        grade.FailAttempt("ESSAY_GRADING_UNAVAILABLE", DefaultRequestedAt.AddSeconds(5), 1, TimeSpan.FromSeconds(30));
+        return grade;
+    }
 
     public static EssayAssessment Assessment(decimal confidence = 0.9m, int points = 1) => new([new EssayCriterionScore("c1", "Definition", points, 2, "ناقص")], "جيد", confidence, "claude-sonnet-5", "v1", 900, 150, 0.00495m);
 }

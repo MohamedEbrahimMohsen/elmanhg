@@ -10,6 +10,7 @@ import {
   inReviewMathStepGrade,
   mathQuestionId,
   mathSessionId,
+  overriddenMathStepGrade,
   pendingMathStepGrade,
 } from '@/test/mathStepGradeFixtures';
 import { server } from '@/test/msw/server';
@@ -80,6 +81,16 @@ describe('MathStepGradeStatus', () => {
     expect(marks.getByText('2 / 2')).toBeInTheDocument();
     expect(marks.getByText('The division is incomplete.')).toBeInTheDocument();
     expect(group.getByText('Good working; finish the division.')).toBeInTheDocument();
+  });
+
+  it('shows the teacher score and note without a verdict line when an unchecked answer was overridden', async () => {
+    renderStatus(overriddenMathStepGrade);
+
+    const group = within(await screen.findByRole('group', { name: 'Step grading' }));
+    expect(group.getByRole('status')).toHaveTextContent('Score 2 / 2');
+    expect(group.queryByText('Final answer:')).not.toBeInTheDocument();
+    expect(group.queryByRole('region', { name: 'Marks per step' })).not.toBeInTheDocument();
+    expect(group.getByRole('note')).toHaveTextContent("Teacher's note: Correct method.");
   });
 
   it('hides the outcome header but keeps step marks when showOutcome is false', async () => {

@@ -4,6 +4,7 @@ import { EssayCriteriaList } from '@/features/questions';
 import type { EssayGradeResult } from '@/shared/api/generated/model';
 import { formatNumber } from '@/shared/lib/format';
 import { cn } from '@/shared/lib/utils';
+import { TeacherReviewNote } from './TeacherReviewNote';
 
 export interface EssayGradeOutcomeProps {
   grade: EssayGradeResult;
@@ -53,11 +54,14 @@ export function EssayGradeOutcome({ grade }: EssayGradeOutcomeProps) {
           </p>
         </div>
       </div>
-      <EssayCriteriaList criteria={grade.criteria} />
-      <div className="flex flex-col gap-1">
-        <h3 className="text-caption font-semibold text-text">{t('essayGrade.justification')}</h3>
-        <p className="text-ui text-text-muted">{grade.justification}</p>
-      </div>
+      {grade.criteria.length > 0 ? <EssayCriteriaList criteria={grade.criteria} /> : null}
+      {grade.justification !== null ? (
+        <div className="flex flex-col gap-1">
+          <h3 className="text-caption font-semibold text-text">{t('essayGrade.justification')}</h3>
+          <p className="text-ui text-text-muted">{grade.justification}</p>
+        </div>
+      ) : null}
+      {grade.review ? <TeacherReviewNote review={grade.review} /> : null}
     </div>
   );
 }
