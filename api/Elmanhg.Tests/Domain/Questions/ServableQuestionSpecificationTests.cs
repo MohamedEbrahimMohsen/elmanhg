@@ -115,6 +115,15 @@ public sealed class ServableQuestionSpecificationTests
     }
 
     [Fact]
+    public void IsSatisfiedBy_ApprovedMathStepsInPublishedLesson_ReturnsTrue()
+    {
+        _builder.Lesson.Publish(Guid.NewGuid());
+        var question = _builder.MathSteps().Approved().Build();
+
+        ServableQuestionSpecification.IsSatisfiedBy(question, _builder.Lesson).Should().BeTrue();
+    }
+
+    [Fact]
     public void IsSatisfiedBy_ApprovedDragDropInPublishedLesson_ReturnsFalse()
     {
         _builder.Lesson.Publish(Guid.NewGuid());

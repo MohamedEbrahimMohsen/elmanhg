@@ -38,7 +38,11 @@
     { "key": "voiceDraftId", "value": "" },
     { "key": "avatarConversationId", "value": "" },
     { "key": "adminAvatarConversationId", "value": "" },
-    { "key": "trainingExportId", "value": "" }
+    { "key": "trainingExportId", "value": "" },
+    { "key": "studentId", "value": "" },
+    { "key": "invitedUserId", "value": "" },
+    { "key": "invitedEmail", "value": "invited.teacher@elmanhg.local" },
+    { "key": "invitePassword", "value": "Invited2026" }
   ],
   "auth": {
     "type": "bearer",
@@ -291,6 +295,57 @@
           "response": []
         },
         {
+          "name": "AcceptInvitation",
+          "description": "Finishes an invitation from Users > Invite teacher. Run SendEmailOtp and VerifyOtp for the invited email first; the invitee sets the first password and is signed in. 404 INVITATION_NOT_FOUND when the email has no pending invitation.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"signs the invitee in\", function () { pm.expect(pm.response.json().user.role).to.be.oneOf([\"Teacher\", \"Admin\"]); });",
+                  "pm.collectionVariables.set(\"accessToken\", pm.response.json().accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/invitations/accept",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "invitations",
+                "accept"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"verificationId\": \"{{verificationId}}\",\n  \"password\": \"{{invitePassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
           "name": "LoginWithEmail",
           "event": [
             {
@@ -447,6 +502,396 @@
               "raw": "{{baseUrl}}/api/teachers/{{teacherId}}/subjects/{{subjectId}}",
               "host": ["{{baseUrl}}"],
               "path": ["api", "teachers", "{{teacherId}}", "subjects", "{{subjectId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "description": "Admin only (Users.Manage). Sign in as an admin first so accessToken is set. Invite teacher stores invitedUserId and invitedEmail; Suspend then Reactivate run on that user, so keep the order.",
+      "item": [
+        {
+          "name": "List students",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"contacts are masked\", function () { pm.response.json().items.forEach(function (x) { pm.expect(x.maskedPhone === null || x.maskedPhone.indexOf(\"*\") >= 0).to.eql(true); }); });",
+                  "if (pm.response.json().items.length > 0) { pm.collectionVariables.set(\"studentId\", pm.response.json().items[0].id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?role=Student&pageNumber=1&pageSize=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "Student"
+                },
+                {
+                  "key": "pageNumber",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invite teacher",
+          "description": "Creates a password-less teacher and, when Resend is configured, emails the /accept-invite link. The email is never part of the link.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"invitedUserId\", pm.response.json().userId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/invitations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "invitations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"Teacher\",\n  \"displayName\": \"Invited teacher\",\n  \"email\": \"{{invitedEmail}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List teachers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"invitation is pending\", function () { pm.expect(pm.response.json().items[0].invitationPending).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?role=Teacher&search={{invitedEmail}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "Teacher"
+                },
+                {
+                  "key": "search",
+                  "value": "{{invitedEmail}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Assign subject",
+          "description": "Same endpoint as Teachers > Assign subject, run on the invited teacher.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teachers/{{invitedUserId}}/subjects/{{subjectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "teachers",
+                "{{invitedUserId}}",
+                "subjects",
+                "{{subjectId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Suspend user",
+          "description": "Deactivates the user: the refresh token dies at once and the access token is refused on its next request. 400 USER_CANNOT_SUSPEND_SELF or LAST_ACTIVE_ADMIN.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{invitedUserId}}/suspend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{invitedUserId}}",
+                "suspend"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reactivate user",
+          "description": "400 USER_NOT_SUSPENDED when the account is already active.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{invitedUserId}}/reactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{invitedUserId}}",
+                "reactivate"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Students",
+      "description": "Admin only. Run Users > List students first so studentId is set. Profile and grant use Users.Manage; progress and sessions use Progress.ViewAny.",
+      "item": [
+        {
+          "name": "Get student profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"email is masked\", function () { var email = pm.response.json().maskedEmail; pm.expect(email === null || email.indexOf(\"***\") >= 0).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/{{studentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students",
+                "{{studentId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get student progress",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns subjects\", function () { pm.expect(Array.isArray(pm.response.json().subjects)).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/{{studentId}}/progress",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students",
+                "{{studentId}}",
+                "progress"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get student sessions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/{{studentId}}/sessions?pageNumber=1&pageSize=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students",
+                "{{studentId}}",
+                "sessions"
+              ],
+              "query": [
+                {
+                  "key": "pageNumber",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Grant complimentary subscription",
+          "description": "Free Base or Ask a Teacher, starting now. 400 COMPLIMENTARY_PLAN_ALREADY_ACTIVE when the student already holds the plan, COMPLIMENTARY_REQUIRES_BASE for Ask a Teacher without Base.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200 or 400\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 400]); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/{{studentId}}/complimentary-subscriptions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students",
+                "{{studentId}}",
+                "complimentary-subscriptions"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plan\": \"Base\",\n  \"period\": \"Monthly\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
@@ -1160,6 +1605,50 @@
           "response": []
         },
         {
+          "name": "Create math question",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"mathQuestionId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/questions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "questions"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lessonId\": \"{{lessonId}}\",\n  \"type\": \"MathSteps\",\n  \"stem\": \"<p>Solve 2x + 3 = 7.</p>\",\n  \"body\": { \"x\": 1 },\n  \"gradingSpec\": { \"acceptedAnswers\": [\"  x = 2 \", \"2\"], \"form\": \"equivalent\", \"tolerance\": 0.01, \"toleranceMode\": \"absolute\" },\n  \"explanation\": \"<p>Subtract 3, divide by 2.</p>\",\n  \"difficulty\": \"Medium\",\n  \"tags\": [],\n  \"maxScore\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Grade essay draft",
           "event": [
             {
@@ -1357,6 +1846,51 @@
               "mode": "raw",
               "raw": "{\n  \"type\": \"Mcq\",\n  \"stem\": \"<p>2 + 2 = ?</p>\",\n  \"body\": { \"options\": [{ \"id\": \"a\", \"text\": \"3\" }, { \"id\": \"b\", \"text\": \"4\" }] },\n  \"gradingSpec\": { \"correctOptionId\": \"b\" },\n  \"explanation\": \"<p>Add the numbers.</p>\",\n  \"difficulty\": \"Easy\",\n  \"objectiveId\": null,\n  \"tags\": [\"arithmetic\"],\n  \"maxScore\": 1,\n  \"answer\": { \"optionId\": \"b\" }\n}",
               "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Grade math draft",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns an outcome\", function () { pm.expect(pm.response.json().outcome).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/questions/grade-draft",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "questions",
+                "grade-draft"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"MathSteps\",\n  \"stem\": \"<p>Solve 2x + 3 = 7.</p>\",\n  \"body\": {},\n  \"gradingSpec\": { \"acceptedAnswers\": [\"x = 2\"], \"form\": \"equivalent\" },\n  \"explanation\": \"<p>Subtract 3, divide by 2.</p>\",\n  \"difficulty\": \"Medium\",\n  \"tags\": [],\n  \"maxScore\": 2,\n  \"answer\": { \"steps\": [\"2x = 4\"], \"finalAnswer\": \"x=2\" }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []

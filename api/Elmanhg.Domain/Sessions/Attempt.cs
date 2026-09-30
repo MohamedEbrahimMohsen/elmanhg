@@ -23,6 +23,8 @@ public class Attempt : Entity
 
     private Attempt(Guid id) : base(id) { }
 
+    public bool AwaitsReview => ReadFeedback()?.AwaitsReview == true;
+
     public GradeFeedback? ReadFeedback() => Grade is null ? null : JsonSerializer.Deserialize<GradeFeedback>(Grade, QuestionJson.SerializerOptions);
 
     internal static Attempt Create(Session session, SessionItem item, string answer, QuestionGrade grade, int timeTakenMilliseconds, DateTimeOffset createdAt, AttemptGrader gradedBy)

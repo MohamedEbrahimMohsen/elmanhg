@@ -2,7 +2,7 @@
 
 ## Role
 
-`ai/` is an internal Python 3.13 FastAPI service (package `elmanhg_ai`, managed with uv). It answers avatar chat turns over the Claude API (PRD §9) embeds text for lesson retrieval ([content-retrieval.md](content-retrieval.md)), transcribes teachers' voice replies (speech to text, [ask-teacher.md](ask-teacher.md)), and grades essays against the teacher's rubric ([essay-grading.md](essay-grading.md)). Only the .NET API calls it, over HTTP with a shared service token; browsers never do. The .NET side of the contract is `api/Elmanhg.Application/Shared/AiService/` (`IAiServiceClient`, `IAiTranscriptionClient` for transcription and `IAiEssayGradingClient` for essay grading), and the Python side is `ai/src/elmanhg_ai/api/chat/schemas.py`, `ai/src/elmanhg_ai/api/embeddings/schemas.py` `ai/src/elmanhg_ai/api/transcriptions/schemas.py` and `ai/src/elmanhg_ai/api/essay_grades/schemas.py`. Both change together, and `ai/openapi/v1.json` is the committed contract (regenerate with `uv run python -m elmanhg_ai.openapi_export` from `ai/`; a test fails on drift).
+`ai/` is an internal Python 3.13 FastAPI service (package `elmanhg_ai`, managed with uv). It answers avatar chat turns over the Claude API (PRD §9) embeds text for lesson retrieval ([content-retrieval.md](content-retrieval.md)), transcribes teachers' voice replies (speech to text, [ask-teacher.md](ask-teacher.md)), grades essays against the teacher's rubric ([essay-grading.md](essay-grading.md)), and checks math final answers with SymPy ([math-cas.md](math-cas.md)). Only the .NET API calls it, over HTTP with a shared service token; browsers never do. The .NET side of the contract is `api/Elmanhg.Application/Shared/AiService/` (`IAiServiceClient`, `IAiTranscriptionClient` for transcription, `IAiEssayGradingClient` for essay grading and `IAiMathCheckClient` for the math check), and the Python side is `ai/src/elmanhg_ai/api/chat/schemas.py`, `ai/src/elmanhg_ai/api/embeddings/schemas.py` `ai/src/elmanhg_ai/api/transcriptions/schemas.py` `ai/src/elmanhg_ai/api/essay_grades/schemas.py` and `ai/src/elmanhg_ai/api/math_checks/schemas.py`. Both change together, and `ai/openapi/v1.json` is the committed contract (regenerate with `uv run python -m elmanhg_ai.openapi_export` from `ai/`; a test fails on drift).
 
 How the API builds the context bundle, the exam refusal, the daily quota and the student UI are in [avatar.md](avatar.md).
 
@@ -193,6 +193,35 @@ Limits (`400 VALIDATION_FAILED`):
 | `ELMANHG_AI_ESSAY_GRADING_MAX_MODEL_ANSWERS` | 3 | `TOO_MANY_ITEMS` on `modelAnswers` |
 | `ELMANHG_AI_ESSAY_GRADING_MAX_OBJECTIVES` | 20 | `TOO_MANY_ITEMS` on `objectives` |
 
+### `POST /v1/math-checks`
+
+operationId `grading_create_math_check`. Checks one final answer against the accepted answers with SymPy; no model is called, so there is no prompt, token count or cost. The API calls it from `AnswerGrader` for MathSteps answers only (quiz answer, exam submit and auto-submit, `grade-draft`).
+
+Request (`form` defaults to `equivalent`; `tolerance` ≥ 0 and `toleranceMode` go together and only with `equivalent`):
+
+```json
+{ "answer": "x=\\frac{4}{2}", "expected": ["x = 2"], "form": "equivalent", "tolerance": null, "toleranceMode": null }
+```
+
+Response `200`:
+
+```json
+{ "verdict": "equivalent", "matchedIndex": 0, "invalidExpected": [] }
+```
+
+- `verdict`: `equivalent`, `notEquivalent`, `wrongForm`, `unreadable` or `unchecked` ([math-cas.md](math-cas.md), Verdicts).
+- `matchedIndex`: the accepted answer that matched, or `null`.
+- `invalidExpected`: indexes of accepted answers that do not parse (skipped).
+- The endpoint **never returns 5xx for CAS work**: a timeout or a worker failure is `200 unchecked`, an unparseable answer `200 unreadable`.
+
+Limits (`400 VALIDATION_FAILED`):
+
+| Setting | Default | Field code |
+|---|---|---|
+| `ELMANHG_AI_CAS_MAX_ANSWER_CHARS` | 500 | `TOO_LONG` on `answer` |
+| `ELMANHG_AI_CAS_MAX_EXPECTED` | 20 | `TOO_MANY_ITEMS` on `expected` |
+| `ELMANHG_AI_CAS_MAX_EXPECTED_CHARS` | 500 | `TOO_LONG` on `expected[i]` |
+
 ## Errors
 
 Every error is RFC 9457 `application/problem+json`. `detail` is omitted when the status is 500 or above, and `errors` appears only for `VALIDATION_FAILED`. Titles are English only: the one caller, the .NET API, maps any failure to its own localised `AI_SERVICE_UNAVAILABLE` (503).
@@ -221,7 +250,7 @@ Every error is RFC 9457 `application/problem+json`. `detail` is omitted when the
 | `SERVICE_NOT_READY` | 503 | Startup has not finished |
 | `INTERNAL_ERROR` | 500 | Anything unexpected (logged, never echoed) |
 
-On the .NET side, `HttpAiEssayGradingClient` throws `ServiceUnavailableCoreException(ESSAY_GRADING_UNAVAILABLE)` on any failure, including a reply whose criteria, points, totals, confidence, model or prompt version do not match the request (`AiEssayGradingReplyRules`). `HttpAiServiceClient` throws `ServiceUnavailableCoreException(AI_SERVICE_UNAVAILABLE)` on a transport failure, any non-2xx response, or an unreadable or empty reply. For embeddings it also throws when the model is blank, `dimensions` is not positive, the vector count differs from the text count, or any vector's length differs from `dimensions`.
+On the .NET side, `HttpAiMathCheckClient` does not throw for an unreachable service: a transport failure, timeout, non-2xx or unreadable reply becomes the `unchecked` verdict (logged as an Error), so a student answer is never lost and an exam submit never fails ([math-cas.md](math-cas.md)). `MATH_CHECK_UNAVAILABLE` (503) is used only by the fake in Production. `HttpAiEssayGradingClient` throws `ServiceUnavailableCoreException(ESSAY_GRADING_UNAVAILABLE)` on any failure, including a reply whose criteria, points, totals, confidence, model or prompt version do not match the request (`AiEssayGradingReplyRules`). `HttpAiServiceClient` throws `ServiceUnavailableCoreException(AI_SERVICE_UNAVAILABLE)` on a transport failure, any non-2xx response, or an unreadable or empty reply. For embeddings it also throws when the model is blank, `dimensions` is not positive, the vector count differs from the text count, or any vector's length differs from `dimensions`.
 
 ## Service auth
 
@@ -259,6 +288,13 @@ AI service (`ELMANHG_AI_*` environment variables; `settings.py` is the only plac
 | `ELMANHG_AI_ESSAY_GRADING_MAX_CRITERIA` | 10 | 1 to 50 |
 | `ELMANHG_AI_ESSAY_GRADING_MAX_MODEL_ANSWERS` | 3 | 1 to 10 |
 | `ELMANHG_AI_ESSAY_GRADING_MAX_OBJECTIVES` | 20 | 0 to 100 |
+| `ELMANHG_AI_CAS_TIMEOUT_SECONDS` | 5 | hard timeout of one math check, above 0 and at most 60; on a timeout only the offending worker slot is killed and restarted in the background, and checks in the other slots are untouched |
+| `ELMANHG_AI_CAS_WORKERS` | 2 | CAS worker processes, 1 to 16 |
+| `ELMANHG_AI_CAS_WORKER_MEMORY_MB` | 1024 | address-space cap per worker (POSIX), 256 to 8192 |
+| `ELMANHG_AI_CAS_MAX_TASKS_PER_WORKER` | 200 | checks before a worker is recycled |
+| `ELMANHG_AI_CAS_MAX_ANSWER_CHARS` / `ELMANHG_AI_CAS_MAX_EXPECTED` / `ELMANHG_AI_CAS_MAX_EXPECTED_CHARS` | 500 / 20 / 500 | request limits |
+| `ELMANHG_AI_CAS_MAX_ELEMENTS` / `ELMANHG_AI_CAS_MAX_TOKENS` / `ELMANHG_AI_CAS_MAX_DEPTH` | 10 / 300 / 30 | parser limits |
+| `ELMANHG_AI_CAS_MAX_NUMBER_DIGITS` / `ELMANHG_AI_CAS_MAX_EXPONENT` / `ELMANHG_AI_CAS_MAX_MAGNITUDE` | 30 / 1000 / 10000 | parser limits ([math-cas.md](math-cas.md)) |
 | `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` | 20 | per Claude call, up to 120 |
 | `ELMANHG_AI_MODEL_MAX_RETRIES` | 1 | SDK retries with exponential backoff, 0 to 5 |
 | `ELMANHG_AI_MODEL_INPUT_USD_PER_MILLION_TOKENS` | 3 | cost logging and the `costUsd` returned per reply; confirm the list price at go-live |
@@ -296,8 +332,9 @@ The OpenAI embeddings adapter reuses `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` per call
 | `AiService:TotalTimeoutSeconds` | 50 | 1 to 120 |
 | `AiService:TranscriptionTimeoutSeconds` | 150 | 1 to 600; the attempt and total timeout of the separate transcription client |
 | `AiService:EssayGradingTimeoutSeconds` | 100 | 1 to 600; the attempt and total timeout of the separate essay-grading client |
+| `AiService:MathCheckTimeoutSeconds` | 15 | 1 to 120; the attempt and total timeout of the separate math-check client |
 
-Timeouts nest so the AI service always answers before the API gives up: the worst case in Python is about 41 s (20 s × 2 attempts), and the API waits up to 45 s per attempt, 50 s in total. Transcription nests the same way: at most about 121 s in Python (60 s × 2 attempts), under the API's 150 s. Essay grading too: at most about 91 s in Python (45 s × 2 attempts), under the API's 100 s. The API never retries the POST; a failed transcription or essay grade is retried later by its worker.
+Timeouts nest so the AI service always answers before the API gives up: the worst case in Python is about 41 s (20 s × 2 attempts), and the API waits up to 45 s per attempt, 50 s in total. Transcription nests the same way: at most about 121 s in Python (60 s × 2 attempts), under the API's 150 s. Essay grading too: at most about 91 s in Python (45 s × 2 attempts), under the API's 100 s. The API never retries the POST; a failed transcription or essay grade is retried later by its worker. The math check nests too: 5 s of CAS work plus a cold worker start of about 2 s, under the API's 15 s; a failed math check is graded `unchecked` for teacher review.
 
 ## Fakes
 
@@ -306,6 +343,7 @@ Timeouts nest so the AI service always answers before the API gives up: the wors
 - `ELMANHG_AI_EMBEDDING_PROVIDER=fake` (the default) uses `FakeEmbeddingClient`: deterministic lexical vectors (NFKC, case folding, tashkeel and tatweel removed, alef variants unified, word tokens hashed with BLAKE2b into signed buckets, L2-normalised; text with no words gives the unit vector on the first axis). Model `fake-embedding`.
 - `ELMANHG_AI_TRANSCRIPTION_PROVIDER=fake` (the default) uses `FakeTranscriptionClient`, which returns the fixed text `هذا تفريغ تجريبي للرد الصوتي.` with model `fake-transcription`. The .NET `FakeAiTranscriptionClient` (selected by `AiService:Provider=Fake`) returns the same text with model `fake` without calling the service, and refuses with `AI_SERVICE_UNAVAILABLE` in Production.
 - The .NET `FakeAiEssayGradingClient` (selected by `AiService:Provider=Fake`) awards every criterion its full points with confidence 0.9, model and prompt version `fake` and cost 0, without calling the service, and refuses with `ESSAY_GRADING_UNAVAILABLE` in Production. The Python `FakeModelClient`'s default reply is not a grade, so `POST /v1/essay-grades` against the Python fake returns `502 MODEL_OUTPUT_INVALID`; tests script the fake with a JSON grade.
+- The .NET `FakeAiMathCheckClient` (selected by `AiService:Provider=Fake`) compares the answer with each accepted answer as strings after mapping Arabic-Indic digits and removing `\left`, `\right` and whitespace, without calling the service, and refuses with `MATH_CHECK_UNAVAILABLE` in Production. The Python side has no fake: SymPy runs locally.
 - The .NET fake embeds in-process the same way (SHA-256 buckets over `AnswerNormalizer` output) with model `fake`, so a mixed fake index never matches across the two (the search filters by model). Texts that share words score higher, which makes retrieval tests meaningful without a key.
 
 ## Prompts

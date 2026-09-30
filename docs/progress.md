@@ -73,7 +73,18 @@ The streak options (`Progress:StreakTimeZone`, `Progress:StreakMaxDays`) are in 
 
 ## Access
 
-All three endpoints require `Progress.ViewOwn` (PRD §16), which only Students hold. Every query filters on the signed-in student, so a student only ever sees their own data. Test-mode sessions are excluded everywhere. Admin views of a student's progress come in #106.
+All three endpoints require `Progress.ViewOwn` (PRD §16), which only Students hold. Every query filters on the signed-in student, so a student only ever sees their own data. Test-mode sessions are excluded everywhere. Admins see any student's progress through the admin view below.
+
+## Admin view
+
+The admin student page (`/admin/student/$studentId`, [user-administration.md](user-administration.md)) reads a student's progress through two endpoints. Both require `Progress.ViewAny` (PRD §16, Admin only) and return 404 `STUDENT_NOT_FOUND` for an id that is not a student (422 `STUDENT_ID_REQUIRED` for an empty id).
+
+| Method | Route | Query | Response |
+|---|---|---|---|
+| GET | `/api/students/{studentId}/progress` | — | 200 `StudentProgressResult { subjects: SubjectProgressResult[], weakSpots: WeakSpotsResult }` |
+| GET | `/api/students/{studentId}/sessions` | `kind?`, `pageNumber` = 1, `pageSize` = 20 | 200 `PageData<SessionHistoryItemResult>`; 422 `SESSION_HISTORY_*` as above |
+
+They use the same loaders as the student endpoints (`SubjectProgressLoader`, `WeakSpotsLoader`, `SessionHistoryLoader` in `Progress/Shared`), scoped to the route's student instead of the signed-in user, so the numbers match what the student sees. The headline counter and the streak are not part of the admin view, and the admin page links nowhere into student-only routes.
 
 ## Freshness
 

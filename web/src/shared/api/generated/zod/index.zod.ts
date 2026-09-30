@@ -25,4 +25,5 @@ export * from './teacher-threads/teacher-threads.zod';
 export * from './teachers/teachers.zod';
 export * from './training-exports/training-exports.zod';
 export * from './units/units.zod';
+export * from './users/users.zod';
 export * from './validation-queue/validation-queue.zod';

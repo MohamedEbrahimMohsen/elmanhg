@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AskAvatarButton } from '@/features/avatar';
+import { useSession } from '@/features/session';
 import type { ExamSessionResult } from '@/shared/api/generated/model';
 import { Button } from '@/shared/ui/button';
-import { examUnitNames, isMultiUnitExam, sortedExamItems } from '../api/examSession';
+import { clearExamMathDrafts, examUnitNames, isMultiUnitExam, sortedExamItems } from '../api/examSession';
 import { useExamAnswers } from '../hooks/useExamAnswers';
 import { useExamCountdown } from '../hooks/useExamCountdown';
 import { useSubmitExam } from '../hooks/useSubmitExam';
@@ -23,7 +24,10 @@ export function ExamRunner({ session, receivedAt }: ExamRunnerProps) {
   const answers = useExamAnswers(session, () => {
     submitRef.current();
   });
-  const submitter = useSubmitExam(session.id, answers.flush);
+  const studentId = useSession()?.userId;
+  const submitter = useSubmitExam(session.id, answers.flush, () => {
+    clearExamMathDrafts(session, studentId);
+  });
   const remaining = useExamCountdown(session.deadline, session.serverNow, receivedAt, submitter.submit);
   const items = sortedExamItems(session);
 
@@ -48,6 +52,7 @@ export function ExamRunner({ session, receivedAt }: ExamRunnerProps) {
         {items.map((item) => (
           <ExamQuestionCard
             key={item.questionId}
+            sessionId={session.id}
             item={item}
             total={items.length}
             answer={answers.answerOf(item.questionId)}

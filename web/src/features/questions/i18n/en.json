@@ -6,6 +6,7 @@
     "Fill": "Fill in the blank",
     "Short": "Short answer",
     "Essay": "Essay",
+    "MathSteps": "Math with steps",
     "DragDrop": "Drag and drop"
   },
   "statuses": {
@@ -153,7 +154,10 @@
       "levelsCount": "Add at least two levels.",
       "levelPoints": "Enter whole points from 0 to the criterion's points.",
       "levelScale": "Levels need different points, including 0 and the criterion's full points.",
-      "modelAnswersCount": "Add at least one model answer."
+      "modelAnswersCount": "Add at least one model answer.",
+      "mathAnswersCount": "Add at least one accepted answer.",
+      "mathAnswerLength": "An answer can be at most 200 characters.",
+      "mathToleranceForm": "A tolerance works only with “Any equivalent form”."
     },
     "essay": {
       "maxWords": "Word limit (optional)",
@@ -176,6 +180,26 @@
       "modelAnswer": "Model answer {number}",
       "addModelAnswer": "Add model answer",
       "removeModelAnswer": "Remove model answer {number}"
+    },
+    "math": {
+      "answersLegend": "Accepted final answers",
+      "answersHint": "Write each answer in LaTeX, such as x = 2 or \\sqrt 2. Any mathematically equivalent answer is accepted.",
+      "answer": "Accepted answer {number}",
+      "answerPreview": "Preview of accepted answer {number}",
+      "addAnswer": "Add answer",
+      "removeAnswer": "Remove accepted answer {number}",
+      "form": "Required form",
+      "forms": {
+        "equivalent": "Any equivalent form",
+        "simplified": "Simplest form",
+        "factored": "Factored",
+        "expanded": "Expanded",
+        "exact": "Exact value, no decimals"
+      },
+      "tolerance": "Numeric tolerance (optional)",
+      "toleranceHint": "Accepts a numeric answer this close. Works only with “Any equivalent form”.",
+      "toleranceMode": "Tolerance type",
+      "stepsNote": "The student's steps are saved with the answer and graded later."
     }
   },
   "preview": {
@@ -214,7 +238,11 @@
     "essayWords": "{count} words",
     "essayWordsOf": "{count} of {max} words",
     "essayOverLimit": "{over} words over the limit",
-    "essayCharactersLeft": "{count} characters left"
+    "essayCharactersLeft": "{count} characters left",
+    "mathReadOnly": "Your solution",
+    "mathStep": "Step {number}",
+    "mathFinal": "Final answer",
+    "mathNoSteps": "No steps were written."
   },
   "import": {
     "title": "Import questions",
@@ -317,7 +345,12 @@
       "criterionPoints": "({points} points)",
       "level": "{points} points: {description}",
       "modelAnswers": "Model answers",
-      "modelAnswer": "Model answer {number}"
+      "modelAnswer": "Model answer {number}",
+      "mathRules": "Final answer check",
+      "mathAccepted": "Accepted answers",
+      "mathForm": "Required form: {form}",
+      "mathTolerance": "Tolerance: ±{tolerance}",
+      "mathTolerancePercent": "Tolerance: ±{tolerance}%"
     },
     "decision": {
       "title": "Decision",

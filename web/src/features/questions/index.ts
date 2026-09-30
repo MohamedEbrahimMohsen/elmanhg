@@ -22,6 +22,7 @@ export {
   shortNumericSpecSchema,
   shortTextSpecSchema,
   essayBodySchema,
+  mathStepsSpecSchema,
 } from './schemas/questionContentSchemas';
 export { QuestionImportPage } from './pages/QuestionImportPage';
 export { ValidationQueuePage } from './pages/ValidationQueuePage';

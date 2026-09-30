@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { RichTextViewer } from '@/features/content';
+import { MathPreview } from '@/features/mathSteps';
 import { formatNumber } from '@/shared/lib/format';
 import type { CorrectAnswerView } from '../api/correctAnswer';
 
@@ -56,5 +57,7 @@ export function CorrectAnswer({ view }: CorrectAnswerProps) {
           <bdi>{view.text}</bdi>
         </p>
       );
+    case 'math':
+      return <MathPreview latex={view.latex} label={t('feedback.mathAnswer')} />;
   }
 }

@@ -7,6 +7,7 @@ import { toStudentQuestion } from '../api/studentQuestion';
 import type { QuestionValues } from '../schemas/questionEditorSchema';
 import { DragDropPreview } from './DragDropPreview';
 import { EssayRubricView } from './EssayRubricView';
+import { MathAnswerRulesView } from './MathAnswerRulesView';
 import { QuestionView } from './QuestionView';
 
 export interface ValidationQuestionContentProps {
@@ -36,6 +37,14 @@ export function ValidationQuestionContent({ question, values }: ValidationQuesti
       </section>
       {values.type === 'Essay' ? (
         <EssayRubricView criteria={values.criteria} modelAnswers={values.modelAnswers} />
+      ) : null}
+      {values.type === 'MathSteps' ? (
+        <MathAnswerRulesView
+          answers={values.mathAnswers}
+          form={values.mathForm}
+          tolerance={values.mathTolerance}
+          toleranceMode={values.mathToleranceMode}
+        />
       ) : null}
       <section aria-label={t('validation.detail.explanation')} className={cardClassName}>
         <h2 className="font-display text-h3 font-semibold">{t('validation.detail.explanation')}</h2>

@@ -441,4 +441,33 @@
   <data name="TRAINING_EXPORT_NOT_PENDING" xml:space="preserve"><value>ملف التصدير لم يعد قيد التجهيز.</value></data>
   <data name="TRAINING_EXPORT_NOT_READY" xml:space="preserve"><value>ملف التصدير غير جاهز بعد.</value></data>
   <data name="TRAINING_EXPORT_EXPIRED" xml:space="preserve"><value>انتهت صلاحية ملف التصدير وتم حذفه. اطلب تصديرا جديدا.</value></data>
+  <data name="USER_LIST_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة يجب أن يكون 1 أو أكثر.</value></data>
+  <data name="USER_LIST_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة خارج النطاق المسموح.</value></data>
+  <data name="USER_LIST_ROLE_INVALID" xml:space="preserve"><value>نوع المستخدم غير معروف.</value></data>
+  <data name="USER_LIST_STATUS_INVALID" xml:space="preserve"><value>حالة الحساب غير معروفة.</value></data>
+  <data name="USER_LIST_SEARCH_TOO_LONG" xml:space="preserve"><value>نص البحث طويل جدا.</value></data>
+  <data name="USER_ID_REQUIRED" xml:space="preserve"><value>معرف المستخدم مطلوب.</value></data>
+  <data name="USER_INVITE_ROLE_INVALID" xml:space="preserve"><value>يمكن دعوة المعلمين والمديرين فقط.</value></data>
+  <data name="USER_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>تم تعديل هذا الحساب من شخص آخر. أعد التحميل وحاول مرة أخرى.</value></data>
+  <data name="STUDENT_ID_REQUIRED" xml:space="preserve"><value>معرف الطالب مطلوب.</value></data>
+  <data name="STUDENT_NOT_FOUND" xml:space="preserve"><value>الطالب غير موجود.</value></data>
+  <data name="COMPLIMENTARY_PLAN_INVALID" xml:space="preserve"><value>اختر باقة صحيحة.</value></data>
+  <data name="COMPLIMENTARY_PERIOD_INVALID" xml:space="preserve"><value>اختر مدة صحيحة.</value></data>
+  <data name="COMPLIMENTARY_PERIOD_UNAVAILABLE" xml:space="preserve"><value>هذه الباقة غير متاحة لهذه المدة.</value></data>
+  <data name="INVITATION_NOT_FOUND" xml:space="preserve"><value>لا توجد دعوة معلقة لهذا البريد.</value></data>
+  <data name="PASSWORD_REJECTED" xml:space="preserve"><value>لم تقبل كلمة المرور هذه. اختر كلمة أخرى.</value></data>
+  <data name="USER_CANNOT_SUSPEND_SELF" xml:space="preserve"><value>لا يمكنك إيقاف حسابك.</value></data>
+  <data name="LAST_ACTIVE_ADMIN" xml:space="preserve"><value>يجب أن يبقى مدير نشط واحد على الأقل.</value></data>
+  <data name="USER_NOT_SUSPENDED" xml:space="preserve"><value>هذا الحساب نشط بالفعل.</value></data>
+  <data name="COMPLIMENTARY_REQUIRES_BASE" xml:space="preserve"><value>اسأل معلم يتطلب باقة أساسية نشطة أولا.</value></data>
+  <data name="COMPLIMENTARY_PLAN_ALREADY_ACTIVE" xml:space="preserve"><value>لدى الطالب هذه الباقة بالفعل.</value></data>
+  <data name="QUESTION_MATH_ANSWERS_INVALID" xml:space="preserve"><value>اضف اجابة نهائية مقبولة واحدة او اكثر، غير فارغة وغير طويلة جدا، بما لا يتجاوز الحد المسموح.</value></data>
+  <data name="QUESTION_MATH_FORM_INVALID" xml:space="preserve"><value>اختر صورة مطلوبة صحيحة.</value></data>
+  <data name="QUESTION_MATH_TOLERANCE_INVALID" xml:space="preserve"><value>اكتب هامش خطا صفرا او اكثر مع قيمة مطلقة او نسبة مئوية، او اتركهما فارغين.</value></data>
+  <data name="QUESTION_MATH_TOLERANCE_FORM_CONFLICT" xml:space="preserve"><value>هامش الخطا يعمل مع قاعدة اي صورة مكافئة فقط.</value></data>
+  <data name="MATH_CHECK_UNAVAILABLE" xml:space="preserve"><value>تعذر تصحيح الاجابة النهائية الان. حاول مرة اخرى بعد قليل.</value></data>
+  <data name="GRADE_FEEDBACK_MATH_FINAL_ONLY" xml:space="preserve"><value>صُحّحت الإجابة النهائية فقط، وتُصحَّح الخطوات لاحقًا.</value></data>
+  <data name="GRADE_FEEDBACK_MATH_WRONG_FORM" xml:space="preserve"><value>اكتب الإجابة النهائية بالصورة التي يطلبها السؤال.</value></data>
+  <data name="GRADE_FEEDBACK_MATH_UNREADABLE" xml:space="preserve"><value>تعذّرت قراءة الإجابة النهائية. اكتبها بالرموز الرياضية، مثل x = 2.</value></data>
+  <data name="GRADE_FEEDBACK_MATH_UNCHECKED" xml:space="preserve"><value>تعذّر التحقق من الإجابة النهائية آليًا، وسيراجعها معلمك.</value></data>
 </root>

@@ -9,7 +9,7 @@ namespace Elmanhg.Tests.Application.Features.Exams.SaveExamAnswer;
 
 public sealed class SaveExamAnswerValidatorTests
 {
-    private readonly SaveExamAnswerValidator _validator = new(Options.Create(new SessionsOptions { AnswerMaxLength = 30, EssayAnswerMaxLength = 30 }));
+    private readonly SaveExamAnswerValidator _validator = new(Options.Create(new SessionsOptions { AnswerMaxLength = 30, EssayAnswerMaxLength = 30, MathStepsAnswerMaxLength = 30 }));
 
     [Fact]
     public void Validate_ValidCommand_Passes()

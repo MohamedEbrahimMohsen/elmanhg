@@ -91,6 +91,10 @@ An array with one element per changed audited entity. Property keys are camelCas
 | RequestTrainingExport | `TrainingExport.Request` | TrainingExport | result (the diff shows the new Pending export: source, range, subject) |
 | DownloadTrainingExport | `TrainingExport.Download` | TrainingExport | command (a read of training data, audited on purpose: who downloaded which export; no diff) |
 | ExpireTrainingExport | `TrainingExport.Expire` | TrainingExport | command (system actor: the retention sweep; the diff shows the status and the cleared `fileKey`; for a `Failed` export whose last attempt left a file, only the cleared `fileKey`) |
+| InviteUser | `User.Invite` | User | result (no diff: `User` is not an audited entity) |
+| SuspendUser | `User.Suspend` | User | command (no diff) |
+| ReactivateUser | `User.Reactivate` | User | command (no diff) |
+| GrantComplimentarySubscription | `Subscription.GrantComplimentary` | Subscription | result (the diff shows the new Subscription with a null `paymobReference`) |
 
 Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`, `ExamBlueprint`, `Subscription`, `Payment`, `TrainingExport`.
 
@@ -98,8 +102,8 @@ Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUni
 
 ## Not audited (deliberate)
 
-- **Reads** (queries), including the audit log itself. The one exception is the training-export file download (`TrainingExport.Download`), because it hands training data out of the system. The export worker's own commands (`RunTrainingExport`, `FailTrainingExport`) are not audited.
-- **Auth**: login, register, OTP, logout. A separate security-log concern.
+- **Reads** (queries), including the audit log itself and the per-request active-user check (`CheckUserActive`). The one exception is the training-export file download (`TrainingExport.Download`), because it hands training data out of the system. The export worker's own commands (`RunTrainingExport`, `FailTrainingExport`) are not audited.
+- **Auth**: login, register, OTP, logout, and accepting an invitation (`AcceptInvitation`). A separate security-log concern.
 - **Noise**: access-token refresh.
 - **Evidence uploads** (Ask a Teacher images and voice): audit the decision, not the file. Lesson content images are the exception: they change content (PRD §17 rule 13), so `UploadLessonImage` is audited as `Lesson.UploadImage` with no diff. Drag-and-drop diagram images are audited the same way (`UploadDiagramImage` as `Lesson.UploadDiagramImage`, no diff).
 - **Review sessions and openings** (`StartReviewSession`, `RecordQuestionOpening`): a reading aid that gates bulk approval, not a content or validation change. `ReviewSession` and `ReviewSessionOpening` are not `IAuditedEntity`; the approvals they enable are audited.

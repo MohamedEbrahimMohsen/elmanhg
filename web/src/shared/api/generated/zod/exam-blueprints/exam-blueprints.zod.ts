@@ -38,7 +38,7 @@ export const GetSubjectExamBlueprintsResponse = zod.object({
   "subjectId": zod.uuid(),
   "unitId": zod.uuid().nullable(),
   "typeCounts": zod.array(zod.object({
-  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'DragDrop']),
+  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'MathSteps', 'DragDrop']),
   "count": zod.union([zod.int(),zod.stringFormat('int32', getSubjectExamBlueprintsResponseDefaultBlueprintTwoTypeCountsItemCountRegExpTwo)])
 })),
   "difficultyMix": zod.union([zod.null(),zod.object({
@@ -51,7 +51,7 @@ export const GetSubjectExamBlueprintsResponse = zod.object({
   "passMark": zod.union([zod.int(),zod.stringFormat('int32', getSubjectExamBlueprintsResponseDefaultBlueprintTwoPassMarkRegExpTwo)])
 })]),
   "servable": zod.array(zod.object({
-  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'DragDrop']),
+  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'MathSteps', 'DragDrop']),
   "count": zod.union([zod.int(),zod.stringFormat('int32', getSubjectExamBlueprintsResponseServableItemCountRegExpTwo)])
 })),
   "units": zod.array(zod.object({
@@ -63,7 +63,7 @@ export const GetSubjectExamBlueprintsResponse = zod.object({
   "subjectId": zod.uuid(),
   "unitId": zod.uuid().nullable(),
   "typeCounts": zod.array(zod.object({
-  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'DragDrop']),
+  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'MathSteps', 'DragDrop']),
   "count": zod.union([zod.int(),zod.stringFormat('int32', getSubjectExamBlueprintsResponseUnitsItemBlueprintTwoTypeCountsItemCountRegExpTwo)])
 })),
   "difficultyMix": zod.union([zod.null(),zod.object({
@@ -76,7 +76,7 @@ export const GetSubjectExamBlueprintsResponse = zod.object({
   "passMark": zod.union([zod.int(),zod.stringFormat('int32', getSubjectExamBlueprintsResponseUnitsItemBlueprintTwoPassMarkRegExpTwo)])
 })]),
   "servable": zod.array(zod.object({
-  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'DragDrop']),
+  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'MathSteps', 'DragDrop']),
   "count": zod.union([zod.int(),zod.stringFormat('int32', getSubjectExamBlueprintsResponseUnitsItemServableItemCountRegExpTwo)])
 }))
 }))
@@ -96,7 +96,7 @@ export const saveSubjectExamBlueprintBodyPassMarkRegExpTwo = new RegExp('^-?(?:0
 
 export const SaveSubjectExamBlueprintBody = zod.object({
   "typeCounts": zod.array(zod.object({
-  "type": zod.union([zod.null(),zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'DragDrop'])]),
+  "type": zod.union([zod.null(),zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'MathSteps', 'DragDrop'])]),
   "count": zod.union([zod.int(),zod.stringFormat('int32', saveSubjectExamBlueprintBodyTypeCountsItemCountRegExpTwo)])
 })),
   "difficultyMix": zod.union([zod.null(),zod.object({
@@ -122,7 +122,7 @@ export const SaveSubjectExamBlueprintResponse = zod.object({
   "subjectId": zod.uuid(),
   "unitId": zod.uuid().nullable(),
   "typeCounts": zod.array(zod.object({
-  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'DragDrop']),
+  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'MathSteps', 'DragDrop']),
   "count": zod.union([zod.int(),zod.stringFormat('int32', saveSubjectExamBlueprintResponseTypeCountsItemCountRegExpTwo)])
 })),
   "difficultyMix": zod.union([zod.null(),zod.object({
@@ -149,7 +149,7 @@ export const saveUnitExamBlueprintBodyPassMarkRegExpTwo = new RegExp('^-?(?:0|[1
 
 export const SaveUnitExamBlueprintBody = zod.object({
   "typeCounts": zod.array(zod.object({
-  "type": zod.union([zod.null(),zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'DragDrop'])]),
+  "type": zod.union([zod.null(),zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'MathSteps', 'DragDrop'])]),
   "count": zod.union([zod.int(),zod.stringFormat('int32', saveUnitExamBlueprintBodyTypeCountsItemCountRegExpTwo)])
 })),
   "difficultyMix": zod.union([zod.null(),zod.object({
@@ -175,7 +175,7 @@ export const SaveUnitExamBlueprintResponse = zod.object({
   "subjectId": zod.uuid(),
   "unitId": zod.uuid().nullable(),
   "typeCounts": zod.array(zod.object({
-  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'DragDrop']),
+  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'MathSteps', 'DragDrop']),
   "count": zod.union([zod.int(),zod.stringFormat('int32', saveUnitExamBlueprintResponseTypeCountsItemCountRegExpTwo)])
 })),
   "difficultyMix": zod.union([zod.null(),zod.object({

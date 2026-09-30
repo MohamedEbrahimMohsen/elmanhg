@@ -7,6 +7,7 @@ export const questionTypes = [
   'Fill',
   'Short',
   'Essay',
+  'MathSteps',
   'DragDrop',
 ] as const satisfies readonly QuestionType[];
 
@@ -17,6 +18,7 @@ export const servedQuestionTypes = [
   'Fill',
   'Short',
   'Essay',
+  'MathSteps',
 ] as const satisfies readonly QuestionType[];
 
 export const questionDifficulties = ['Easy', 'Medium', 'Hard'] as const satisfies readonly QuestionDifficulty[];
@@ -59,6 +61,14 @@ export const rubricPointsMax = 100;
 
 // mirrors Content:QuestionModelAnswersMaxCount
 export const modelAnswersMax = 3;
+
+export const mathAnswerForms = ['equivalent', 'simplified', 'factored', 'expanded', 'exact'] as const;
+
+// mirrors Content:QuestionAcceptedAnswersMaxCount
+export const mathAnswersMax = 20;
+
+// mirrors Content:QuestionAnswerMaxLength
+export const mathAnswerMaxLength = 200;
 
 // mirrors Content:QuestionDiagramZonesMaxCount
 export const diagramZonesMax = 20;

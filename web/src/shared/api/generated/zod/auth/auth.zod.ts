@@ -122,6 +122,23 @@ export const LoginWithEmailCodeResponse = zod.object({
 })
 })
 
+export const AcceptInvitationBody = zod.object({
+  "verificationId": zod.uuid(),
+  "password": zod.string()
+})
+
+export const AcceptInvitationResponse = zod.object({
+  "accessToken": zod.string(),
+  "user": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string(),
+  "role": zod.string(),
+  "phoneNumber": zod.string().nullable(),
+  "email": zod.string().nullable(),
+  "needsOnboarding": zod.boolean()
+})
+})
+
 export const RefreshAccessTokenResponse = zod.object({
   "accessToken": zod.string(),
   "user": zod.object({

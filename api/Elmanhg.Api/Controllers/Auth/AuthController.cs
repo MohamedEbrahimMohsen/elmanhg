@@ -2,6 +2,7 @@ using Core.Identity.Tokens;
 using Core.OTP.GenerateOTP;
 using Core.OTP.VerifyOTP;
 using Elmanhg.Api.RateLimiting;
+using Elmanhg.Application.Auth.AcceptInvitation;
 using Elmanhg.Application.Auth.LoginWithEmail;
 using Elmanhg.Application.Auth.LoginWithEmailCode;
 using Elmanhg.Application.Auth.LoginWithPhone;
@@ -74,6 +75,12 @@ public class AuthController(IMediator mediator, IOptions<AuthOptions> authOption
     [EnableRateLimiting(AuthRateLimitPolicies.Credentials)]
     [ProducesResponseType<AuthResult>(StatusCodes.Status200OK)]
     public Task<ActionResult> LoginWithEmailCode([FromBody] LoginWithEmailCodeCommand command, CancellationToken cancellationToken) => SendWithRefreshCookie(command, cancellationToken);
+
+    [HttpPost("invitations/accept", Name = "AcceptInvitation")]
+    [AllowAnonymous]
+    [EnableRateLimiting(AuthRateLimitPolicies.Credentials)]
+    [ProducesResponseType<AuthResult>(StatusCodes.Status200OK)]
+    public Task<ActionResult> AcceptInvitation([FromBody] AcceptInvitationCommand command, CancellationToken cancellationToken) => SendWithRefreshCookie(command, cancellationToken);
 
     [HttpPost("refresh", Name = "RefreshAccessToken")]
     [AllowAnonymous]

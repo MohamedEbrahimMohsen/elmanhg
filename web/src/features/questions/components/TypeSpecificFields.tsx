@@ -5,6 +5,7 @@ import { ChoiceOptionsField } from './ChoiceOptionsField';
 import { DragDropFields } from './DragDropFields';
 import { EssayFields } from './EssayFields';
 import { FillBlanksField } from './FillBlanksField';
+import { MathStepsFields } from './MathStepsFields';
 import { SelectField } from './SelectField';
 import { ShortAnswerFields } from './ShortAnswerFields';
 
@@ -38,6 +39,8 @@ export function TypeSpecificFields({ lessonId }: TypeSpecificFieldsProps) {
       return <ShortAnswerFields />;
     case 'Essay':
       return <EssayFields />;
+    case 'MathSteps':
+      return <MathStepsFields />;
     case 'DragDrop':
       return <DragDropFields lessonId={lessonId} />;
   }

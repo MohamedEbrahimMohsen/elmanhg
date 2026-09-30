@@ -24,7 +24,7 @@ public static class SessionResultGenerator
         var attempt = session.FindAttempt(item.QuestionId);
         var pendingAnswer = session.FindPendingEssayAnswer(item);
         var reveal = attempt is not null || pendingAnswer is not null || session.IsSubmitted;
-        var attemptResult = attempt is null ? null : new AttemptResult(attempt.Id, Parse(attempt.Answer), attempt.Score, attempt.NormalisedScore, attempt.Outcome.ToString(), GradeFeedbackText.Localize(attempt.ReadFeedback(), localizer), attempt.TimeTakenMilliseconds, attempt.CreatedAt);
+        var attemptResult = attempt is null ? null : new AttemptResult(attempt.Id, Parse(attempt.Answer), attempt.Score, attempt.NormalisedScore, attempt.Outcome.ToString(), attempt.AwaitsReview, GradeFeedbackText.Localize(attempt.ReadFeedback(), localizer), attempt.TimeTakenMilliseconds, attempt.CreatedAt);
         return new SessionItemResult(item.Position, item.QuestionId, item.QuestionVersion, snapshot.Type.ToString(), snapshot.Stem, ToElement(snapshot.Body), item.MaxScore, attemptResult, reveal ? ToElement(snapshot.GradingSpec) : null, reveal ? snapshot.Explanation : null, pendingAnswer is null ? null : Parse(pendingAnswer));
     }
 

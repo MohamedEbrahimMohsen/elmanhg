@@ -73,7 +73,7 @@
     "unitCorrect": "{correct, number} من {total, number}",
     "unknownUnit": "غير متاح",
     "avatarTitle": "سؤال {position} — مراجعة الامتحان",
-    "essaysPending": "بعض الإجابات المقالية ما زالت قيد التصحيح، وستتحدّث الدرجة عند اكتمالها."
+    "provisional": "قيد المراجعة"
   },
   "multi": {
     "title": "امتحان متعدد الوحدات",

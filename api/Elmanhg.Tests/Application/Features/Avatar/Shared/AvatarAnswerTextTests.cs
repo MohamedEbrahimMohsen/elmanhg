@@ -94,5 +94,21 @@ public sealed class AvatarAnswerTextTests
         AvatarAnswerText.CorrectAnswer(snapshot, _extractor).Should().Be("[[1]] 5، [[2]] 7");
     }
 
+    [Fact]
+    public void StudentAnswer_MathSteps_ListsStepsAndFinalAnswer()
+    {
+        var snapshot = Snapshot(QuestionType.MathSteps, "{}", """{"acceptedAnswers":["x = 2"],"form":"equivalent"}""");
+
+        AvatarAnswerText.StudentAnswer(snapshot, """{"steps":["2x = 4"],"finalAnswer":"x = 2"}""", _extractor).Should().Be("2x = 4\nالإجابة النهائية: x = 2");
+    }
+
+    [Fact]
+    public void CorrectAnswer_MathSteps_ReturnsFirstAcceptedAnswer()
+    {
+        var snapshot = Snapshot(QuestionType.MathSteps, "{}", """{"acceptedAnswers":["x = 2","2"],"form":"equivalent"}""");
+
+        AvatarAnswerText.CorrectAnswer(snapshot, _extractor).Should().Be("x = 2");
+    }
+
     private static QuestionRevisionSnapshot Snapshot(QuestionType type, string body, string spec) => new(type, "<p>stem</p>", JsonNode.Parse(body), JsonNode.Parse(spec), "<p>explanation</p>", 1);
 }

@@ -1,5 +1,6 @@
 import {
   fillSpecSchema,
+  mathStepsSpecSchema,
   mcqSpecSchema,
   multiSpecSchema,
   shortNumericSpecSchema,
@@ -14,7 +15,8 @@ export type CorrectAnswerView =
   | { kind: 'trueFalse'; value: boolean }
   | { kind: 'blanks'; answers: { id: string; text: string }[] }
   | { kind: 'numeric'; value: number; tolerance: number; toleranceMode: 'absolute' | 'percent' }
-  | { kind: 'text'; text: string };
+  | { kind: 'text'; text: string }
+  | { kind: 'math'; latex: string };
 
 function describeShort(question: StudentQuestion, correctAnswer: unknown): CorrectAnswerView | null {
   if (question.answerKind === 'numeric') {
@@ -62,6 +64,11 @@ export function describeCorrectAnswer(question: StudentQuestion, correctAnswer: 
       return describeShort(question, correctAnswer);
     case 'Essay':
       return null;
+    case 'MathSteps': {
+      const spec = mathStepsSpecSchema.safeParse(correctAnswer);
+      const latex = spec.success ? spec.data.acceptedAnswers[0] : undefined;
+      return latex ? { kind: 'math', latex } : null;
+    }
     case 'DragDrop':
       return null;
   }
@@ -84,6 +91,7 @@ export function choiceReview(question: StudentQuestion, correctAnswer: unknown):
     case 'Fill':
     case 'Short':
     case 'Essay':
+    case 'MathSteps':
     case 'DragDrop':
       return undefined;
   }

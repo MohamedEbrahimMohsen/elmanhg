@@ -33,6 +33,15 @@ export function useMathStepsDraft({ owner, initialValue, onChange }: MathStepsDr
   const [status, setStatus] = useState<MathDraftStatusValue>(initial.status);
   const latest = useRef(initial.value);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const announced = useRef(false);
+
+  useEffect(() => {
+    if (announced.current || initial.status !== 'restored') {
+      return;
+    }
+    announced.current = true;
+    onChange?.(initial.value);
+  }, [initial, onChange]);
 
   useEffect(() => {
     purgeExpiredMathDrafts(Date.now());

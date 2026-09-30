@@ -93,6 +93,7 @@ builder.Services.AddHostedService<TeacherThreadSlaWorker>();
 builder.Services.AddHostedService<TrainingExportWorker>();
 builder.Services.AddHostedService<TrainingExportRetentionWorker>();
 builder.Services.AddElmanhgRealtime();
+builder.Services.AddActiveUserTokenValidation();
 builder.Services.AddAuthRateLimiting();
 #endregion
 

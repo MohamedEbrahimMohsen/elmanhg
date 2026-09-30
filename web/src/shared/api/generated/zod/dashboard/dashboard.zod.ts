@@ -93,7 +93,7 @@ export const GetDashboardContentResponse = zod.object({
   "questionsRejected": zod.union([zod.int(),zod.stringFormat('int32', getDashboardContentResponseQuestionsRejectedRegExpTwo)]),
   "questionsRetired": zod.union([zod.int(),zod.stringFormat('int32', getDashboardContentResponseQuestionsRetiredRegExpTwo)]),
   "questionsByType": zod.array(zod.object({
-  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'DragDrop']),
+  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'MathSteps', 'DragDrop']),
   "count": zod.union([zod.int(),zod.stringFormat('int32', getDashboardContentResponseQuestionsByTypeItemCountRegExpTwo)])
 })),
   "servableTotal": zod.union([zod.int(),zod.stringFormat('int32', getDashboardContentResponseServableTotalRegExpTwo)]),

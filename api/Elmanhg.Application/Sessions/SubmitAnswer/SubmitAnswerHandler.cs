@@ -4,7 +4,9 @@ using Core.Localization;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Mastery.Shared;
 using Elmanhg.Application.Questions.Shared;
+using Elmanhg.Application.Questions.Shared.Grading;
 using Elmanhg.Application.Sessions.Shared;
+using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.EssayGrading;
@@ -20,7 +22,7 @@ using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.Sessions.SubmitAnswer;
 
-public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, ILessonRepository lessonRepository, ISubscriptionRepository subscriptionRepository, IEssayGradeRepository essayGradeRepository, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, IOptions<ContentOptions> contentOptions, IOptions<SessionsOptions> sessionsOptions, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<SubmitAnswerCommand, SessionItemResult>
+public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, ILessonRepository lessonRepository, ISubscriptionRepository subscriptionRepository, IEssayGradeRepository essayGradeRepository, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, IOptions<ContentOptions> contentOptions, IOptions<SessionsOptions> sessionsOptions, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer, IAiMathCheckClient mathCheckClient) : IRequestHandler<SubmitAnswerCommand, SessionItemResult>
 {
     public async Task<SessionItemResult> Handle(SubmitAnswerCommand request, CancellationToken cancellationToken)
     {
@@ -60,7 +62,7 @@ public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQ
             throw new ApplicationValidationCoreException(ErrorCodes.QuestionAnswerInvalid);
         }
 
-        if (QuestionAnswerRules.IsRawAnswerTooLong(type, request.Answer, sessionsOptions.Value))
+        if (QuestionAnswerRules.IsRawAnswerTooLong(type, request.Answer, sessionsOptions.Value) || QuestionAnswerRules.ExceedsLimits(type, request.Answer, sessionsOptions.Value))
         {
             throw new ApplicationValidationCoreException(ErrorCodes.AttemptAnswerTooLong);
         }
@@ -76,7 +78,8 @@ public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQ
         }
         else
         {
-            await RecordAttemptAsync(session, item, revision.Grade(request.Answer), QuestionAnswerRules.Canonicalize(type, request.Answer), request.TimeTakenMilliseconds, cancellationToken).ConfigureAwait(false);
+            var grade = await AnswerGrader.GradeAsync(revision, request.Answer, mathCheckClient, cancellationToken).ConfigureAwait(false);
+            await RecordAttemptAsync(session, item, grade, QuestionAnswerRules.Canonicalize(type, request.Answer), request.TimeTakenMilliseconds, cancellationToken).ConfigureAwait(false);
         }
 
         await sessionRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -97,7 +100,7 @@ public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQ
     {
         var isNewAttempt = session.FindAttempt(item.QuestionId) is null;
         var attempt = session.RecordAttempt(item, answer, grade, reportedTimeTakenMilliseconds);
-        if (!isNewAttempt || session.IsTestMode)
+        if (!isNewAttempt || session.IsTestMode || grade.AwaitsReview)
         {
             return;
         }

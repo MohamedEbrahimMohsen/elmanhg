@@ -17,6 +17,7 @@ public sealed class QuestionBuilder
     private bool _retired;
     private bool _essay;
     private bool _dragDrop;
+    private bool _mathSteps;
 
     public QuestionBuilder()
     {
@@ -71,9 +72,17 @@ public sealed class QuestionBuilder
         return this;
     }
 
+    public QuestionBuilder MathSteps()
+    {
+        _mathSteps = true;
+        return this;
+    }
+
     public Question Build()
     {
-        var question = Question.Create(Lesson, Unit, _dragDrop ? QuestionType.DragDrop : _essay ? QuestionType.Essay : QuestionType.Mcq, _dragDrop ? DragDropContent() : _essay ? EssayContent() : McqContent(), _metadata ?? new QuestionMetadata(QuestionDifficulty.Medium, null, []), Guid.NewGuid());
+        var type = _dragDrop ? QuestionType.DragDrop : _mathSteps ? QuestionType.MathSteps : _essay ? QuestionType.Essay : QuestionType.Mcq;
+        var content = _dragDrop ? DragDropContent() : _mathSteps ? MathStepsContent() : _essay ? EssayContent() : McqContent();
+        var question = Question.Create(Lesson, Unit, type, content, _metadata ?? new QuestionMetadata(QuestionDifficulty.Medium, null, []), Guid.NewGuid());
         if (_approved)
         {
             question.Approve(TeacherSubject.Create(Teacher, Subject, Guid.NewGuid()), question.Version);
@@ -127,6 +136,18 @@ public sealed class QuestionBuilder
     public static string ForLesson(string json, Guid lessonId) => json.Replace(DragDropImageLessonId, lessonId.ToString(), StringComparison.Ordinal);
 
     public static QuestionFields DragDropFields() => new(QuestionType.DragDrop, "<p>Label the plant cell.</p>", Json(DragDropBodyJson), Json(DragDropSpecJson), "<p>Parts of a cell.</p>", QuestionDifficulty.Medium, null, [], 4);
+
+    public const string MathStepsSpecJson = """{"acceptedAnswers":["x = 2"],"form":"equivalent"}""";
+
+    public static QuestionContent MathStepsContent()
+    {
+        return new QuestionContent("<p>Solve 2x + 3 = 7.</p>", "{}", MathStepsSpecJson, "<p>Subtract 3, divide by 2.</p>", 2);
+    }
+
+    public static QuestionFields MathStepsFields()
+    {
+        return new QuestionFields(QuestionType.MathSteps, "<p>Solve 2x + 3 = 7.</p>", Json("{}"), Json(MathStepsSpecJson), "<p>Subtract 3, divide by 2.</p>", QuestionDifficulty.Medium, null, [], 2);
+    }
 
     public static JsonElement Json(string json)
     {

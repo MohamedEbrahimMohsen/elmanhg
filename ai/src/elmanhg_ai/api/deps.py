@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends, Request
 
+from elmanhg_ai.cas.pool import CasPool
 from elmanhg_ai.clients.embedding import EmbeddingClient
 from elmanhg_ai.clients.model import ModelClient
 from elmanhg_ai.clients.transcription import TranscriptionClient
@@ -53,9 +54,17 @@ def essay_grading_prompts_from_app(request: Request) -> EssayGradingPrompts:
     return prompts
 
 
+def cas_pool_from_app(request: Request) -> CasPool:
+    cas_pool: CasPool | None = getattr(request.app.state, "cas_pool", None)
+    if cas_pool is None:
+        raise ServiceNotReadyError()
+    return cas_pool
+
+
 SettingsDep = Annotated[Settings, Depends(settings_from_app)]
 ModelClientDep = Annotated[ModelClient, Depends(model_client_from_app)]
 ChatPromptsDep = Annotated[ChatPrompts, Depends(chat_prompts_from_app)]
 EssayGradingPromptsDep = Annotated[EssayGradingPrompts, Depends(essay_grading_prompts_from_app)]
 EmbeddingClientDep = Annotated[EmbeddingClient, Depends(embedding_client_from_app)]
 TranscriptionClientDep = Annotated[TranscriptionClient, Depends(transcription_client_from_app)]
+CasPoolDep = Annotated[CasPool, Depends(cas_pool_from_app)]

@@ -53,7 +53,7 @@ export function QuestionEditorForm({ lesson, question }: QuestionEditorFormProps
           options={questionTypes.map((value) => ({
             value,
             label:
-              value === 'Essay' || value === 'DragDrop'
+              value === 'Essay' || value === 'MathSteps' || value === 'DragDrop'
                 ? t('editor.fields.typeV2', { type: t(`types.${value}`) })
                 : t(`types.${value}`),
           }))}

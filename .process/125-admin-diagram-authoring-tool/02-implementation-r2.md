@@ -57,3 +57,15 @@
 - The lesson-binding check lives in the handlers, not the validator, because Update and Resubmit only learn the lesson after loading the question. It throws `ApplicationValidationCoreException`, the same 422 path `EssayQuestionRules.Normalize` uses. Import ignores DragDrop, and grade-draft rejects DragDrop in its validator, so neither needs the check.
 - Postman is unchanged. "Create drag-and-drop question" already uses `{{diagramImageKey}}` from the upload to the same `{{lessonId}}`.
 - Running `prettier --write` on `src/features/questions` re-wrote the working-copy line endings of unrelated files to LF. Git (autocrlf) shows no content diff for them.
+
+## Merge of origin/main (#122 MathSteps, #106 user admin) — 2026-09-30
+
+28 conflicts resolved keeping both question types:
+- `QuestionType` = `{ Mcq, Multi, TrueFalse, Fill, Short, Essay, MathSteps, DragDrop }`: main's `MathSteps` keeps ordinal 6, `DragDrop` takes 7 (the column is stored as a string, so data is stable either way). OpenAPI/Orval enum order matches.
+- `QuestionSchemaRules`, web `answerKey`, `questionValues`, `studentQuestion`, `TypeSpecificFields`, `questionEditorSchema`, `quiz/correctAnswer`, `quiz/quizItem`, `questionErrorFields`, `questionOptions`: both arms / both field sets kept.
+- Servability unchanged: `QuestionCondition` excludes `DragDrop`; `ServedTypes` includes `MathSteps` and not `DragDrop`. `ServableQuestionSpecificationTests` keeps main's MathSteps-servable test and #125's DragDrop-unservable and `ServedTypes_EveryTypeExceptDragDrop` tests. `QuestionBuilder` has both `DragDrop()` and `MathSteps()`.
+- i18n: `questions` `types` has both labels (no duplicate keys, both JSON files validated); DragDrop editor strings stay in the lazy `questionsDiagram` namespace.
+- Docs (`question-schemas`, `question-import`, `claude-design-prompt`, `performance`) describe both types; servable text says every type except DragDrop incl. MathSteps.
+- Generated: `api/openapi/v1.json` from `dotnet build api/ -c Release`, Orval from `npm --prefix web run gen:api`.
+
+Verification: `dotnet test api/ -c Release` (appsettings.json moved aside) 4321/4321 passed; web typecheck, lint clean; prettier (touched folders) clean; vitest 248 files / 1390 tests passed; build ok; perf:budget all within budget (quiz 246/255 KB, lesson 235/240 KB, entry 206/210 KB). `ai/` had no conflicts and pytest was not rerun.

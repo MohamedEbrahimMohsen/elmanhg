@@ -30,6 +30,21 @@ public static class QuestionTestData
         return question.Id;
     }
 
+    public static async Task<Guid> SeedMathStepsQuestionAsync(ApiFactory factory, Guid lessonId, CancellationToken cancellationToken)
+    {
+        using var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var lesson = await context.Lessons.Include(x => x.Objectives).AsNoTracking().SingleAsync(x => x.Id == lessonId, cancellationToken).ConfigureAwait(false);
+        var unit = await context.Units.AsNoTracking().SingleAsync(x => x.Id == lesson.UnitId, cancellationToken).ConfigureAwait(false);
+        var subject = await context.Subjects.AsNoTracking().SingleAsync(x => x.Id == unit.SubjectId, cancellationToken).ConfigureAwait(false);
+        var creator = Guid.NewGuid();
+        var question = Question.Create(lesson, unit, QuestionType.MathSteps, QuestionBuilder.MathStepsContent(), new QuestionMetadata(QuestionDifficulty.Medium, null, []), creator);
+        question.Approve(TeacherSubject.Create(User.CreateTeacher("Teacher", $"{Guid.NewGuid():N}@example.com"), subject, creator), question.Version);
+        context.Questions.Add(question);
+        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return question.Id;
+    }
+
     public static async Task<Guid> SeedRetiredQuestionAsync(ApiFactory factory, Guid lessonId, CancellationToken cancellationToken)
     {
         using var scope = factory.Services.CreateScope();

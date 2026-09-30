@@ -12,7 +12,7 @@ import type { SessionItemResult } from '@/shared/api/generated/model';
 
 export type QuizItemContent = Omit<SessionItemResult, 'pendingAnswer'>;
 
-export const quizQuestionTypes = ['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay'] as const;
+export const quizQuestionTypes = ['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'MathSteps'] as const;
 
 const answerPayloadSchema = z.object({
   optionId: z.string().nullish(),
@@ -20,6 +20,8 @@ const answerPayloadSchema = z.object({
   value: z.boolean().nullish(),
   blanks: z.array(z.object({ id: z.string(), text: z.string() })).optional(),
   text: z.string().nullish(),
+  steps: z.array(z.string()).optional(),
+  finalAnswer: z.string().nullish(),
 });
 
 export function toQuizQuestion(item: QuizItemContent): StudentQuestion {
@@ -40,7 +42,7 @@ export function fromAnswerPayload(question: StudentQuestion, payload: unknown): 
   if (!parsed.success) {
     return emptyAnswer();
   }
-  const { optionId, optionIds, value, blanks, text } = parsed.data;
+  const { optionId, optionIds, value, blanks, text, steps, finalAnswer } = parsed.data;
   const answer = emptyAnswer();
   switch (question.type) {
     case 'Mcq':
@@ -55,6 +57,8 @@ export function fromAnswerPayload(question: StudentQuestion, payload: unknown): 
       return { ...answer, text: text ?? '' };
     case 'Essay':
       return { ...answer, text: text ?? '' };
+    case 'MathSteps':
+      return { ...answer, math: { steps: steps ?? [], finalAnswer: finalAnswer ?? '' } };
     case 'DragDrop':
       return answer;
   }
@@ -73,6 +77,8 @@ export function isAnswerEmpty(question: StudentQuestion, answer: QuestionAnswer)
       return answer.text.trim() === '';
     case 'Essay':
       return answer.text.trim() === '';
+    case 'MathSteps':
+      return answer.math.finalAnswer.trim() === '';
     case 'DragDrop':
       return true;
   }
