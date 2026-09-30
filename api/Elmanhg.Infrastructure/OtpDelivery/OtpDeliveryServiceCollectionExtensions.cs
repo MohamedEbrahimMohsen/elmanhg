@@ -41,13 +41,13 @@ public static class OtpDeliveryServiceCollectionExtensions
         return services;
     }
 
-    private static OtpDeliveryOptions Options(IServiceProvider serviceProvider) => serviceProvider.GetRequiredService<IOptions<OtpDeliveryOptions>>().Value;
+    internal static OtpDeliveryOptions Options(IServiceProvider serviceProvider) => serviceProvider.GetRequiredService<IOptions<OtpDeliveryOptions>>().Value;
 
-    private static Uri BaseAddress(string url) => new(url.TrimEnd('/') + "/");
+    internal static Uri BaseAddress(string url) => new(url.TrimEnd('/') + "/");
 
     private static FakeOtpChannel Fake(IServiceProvider serviceProvider, OtpChannel channel) => new(channel, serviceProvider.GetRequiredService<ILogger<FakeOtpChannel>>(), serviceProvider.GetRequiredService<IHostEnvironment>());
 
-    private static void AddOtpResilience(this IHttpClientBuilder builder, bool retryUnsafeMethods)
+    internal static void AddOtpResilience(this IHttpClientBuilder builder, bool retryUnsafeMethods)
     {
         builder.AddStandardResilienceHandler().Configure((resilience, serviceProvider) =>
         {

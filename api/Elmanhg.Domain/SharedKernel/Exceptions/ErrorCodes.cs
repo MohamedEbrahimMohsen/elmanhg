@@ -5,6 +5,9 @@ public static class ErrorCodes
     // USERS
     public const string UserAlreadySuspended = "USER_ALREADY_SUSPENDED";
     public const string UserNotStudent = "USER_NOT_STUDENT";
+    public const string UserCannotSuspendSelf = "USER_CANNOT_SUSPEND_SELF";
+    public const string LastActiveAdmin = "LAST_ACTIVE_ADMIN";
+    public const string UserNotSuspended = "USER_NOT_SUSPENDED";
 
     // TEACHERS
     public const string UserNotTeacher = "USER_NOT_TEACHER";
@@ -75,6 +78,8 @@ public static class ErrorCodes
     public const string PaymentAlreadyRefunded = "PAYMENT_ALREADY_REFUNDED";
     public const string PaymentNotRefundable = "PAYMENT_NOT_REFUNDABLE";
     public const string PaymentReviewNotOpen = "PAYMENT_REVIEW_NOT_OPEN";
+    public const string ComplimentaryRequiresBase = "COMPLIMENTARY_REQUIRES_BASE";
+    public const string ComplimentaryPlanAlreadyActive = "COMPLIMENTARY_PLAN_ALREADY_ACTIVE";
 
     // CONTENT RETRIEVAL
     public const string ContentEmbeddingDimensionsInvalid = "CONTENT_EMBEDDING_DIMENSIONS_INVALID";

@@ -46,6 +46,7 @@ export function answered(
       score: scores[outcome],
       normalisedScore: scores[outcome],
       outcome,
+      awaitsReview: false,
       feedback: null,
       timeTakenMilliseconds: 4000,
       createdAt: '2026-09-28T10:00:05Z',

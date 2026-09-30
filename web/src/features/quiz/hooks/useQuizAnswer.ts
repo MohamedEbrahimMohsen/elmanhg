@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { clearMathDraft, type MathDraftOwner } from '@/features/mathSteps';
 import { emptyAnswer, toAnswerPayload, type QuestionAnswer, type StudentQuestion } from '@/features/questions';
 import type { PaywallReason } from '@/features/subscription';
 import type { SessionItemResult } from '@/shared/api/generated/model';
@@ -15,11 +16,24 @@ export interface QuizAnswerState {
   closePaywall: () => void;
 }
 
-export function useQuizAnswer(sessionId: string, item: SessionItemResult, question: StudentQuestion): QuizAnswerState {
+export function useQuizAnswer(
+  sessionId: string,
+  item: SessionItemResult,
+  question: StudentQuestion,
+  draftOwner?: MathDraftOwner,
+): QuizAnswerState {
   const [answer, setAnswerState] = useState(emptyAnswer);
   const [shownAt] = useState(() => Date.now());
   const [showRequired, setShowRequired] = useState(false);
   const submitter = useQuizSubmit(sessionId);
+  const isRecorded = item.attempt !== null;
+  const mathOwner = question.type === 'MathSteps' ? draftOwner : undefined;
+
+  useEffect(() => {
+    if (isRecorded && mathOwner) {
+      clearMathDraft(mathOwner);
+    }
+  }, [isRecorded, mathOwner]);
 
   return {
     answer,

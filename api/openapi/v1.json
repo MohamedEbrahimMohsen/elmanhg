@@ -5,6 +5,184 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "GetUsers",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/UserStatus"
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "schema": {
+              "default": "Student",
+              "$ref": "#/components/schemas/UserRole"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfUserSummaryResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfUserSummaryResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfUserSummaryResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/invitations": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "InviteUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteUserCommand"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteUserCommand"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteUserCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteUserResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteUserResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteUserResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{userId}/suspend": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "SuspendUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/{userId}/reactivate": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "ReactivateUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/subjects/{subjectId}/units": {
       "post": {
         "tags": [
@@ -1941,6 +2119,223 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/students/{studentId}": {
+      "get": {
+        "tags": [
+          "Students"
+        ],
+        "operationId": "GetStudentProfile",
+        "parameters": [
+          {
+            "name": "studentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentProfileResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentProfileResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentProfileResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/students/{studentId}/progress": {
+      "get": {
+        "tags": [
+          "Students"
+        ],
+        "operationId": "GetStudentProgress",
+        "parameters": [
+          {
+            "name": "studentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentProgressResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentProgressResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentProgressResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/students/{studentId}/sessions": {
+      "get": {
+        "tags": [
+          "Students"
+        ],
+        "operationId": "GetStudentSessionHistory",
+        "parameters": [
+          {
+            "name": "studentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/SessionHistoryKind"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfSessionHistoryItemResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfSessionHistoryItemResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfSessionHistoryItemResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/students/{studentId}/complimentary-subscriptions": {
+      "post": {
+        "tags": [
+          "Students"
+        ],
+        "operationId": "GrantComplimentarySubscription",
+        "parameters": [
+          {
+            "name": "studentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantComplimentarySubscriptionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantComplimentarySubscriptionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantComplimentarySubscriptionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSubscriptionResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSubscriptionResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSubscriptionResult"
+                }
+              }
+            }
           }
         }
       }
@@ -5889,6 +6284,56 @@
         }
       }
     },
+    "/api/auth/invitations/accept": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "AcceptInvitation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptInvitationCommand"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptInvitationCommand"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptInvitationCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/refresh": {
       "post": {
         "tags": [
@@ -6095,6 +6540,22 @@
   },
   "components": {
     "schemas": {
+      "AcceptInvitationCommand": {
+        "required": [
+          "verificationId",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "verificationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
       "AdminAvatarConversationDetailResult": {
         "required": [
           "id",
@@ -6564,6 +7025,52 @@
           }
         }
       },
+      "AdminSubscriptionResult": {
+        "required": [
+          "id",
+          "plan",
+          "period",
+          "status",
+          "currentPeriodStart",
+          "currentPeriodEnd",
+          "entitledUntil",
+          "isComplimentary"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/SubscriptionPlan"
+          },
+          "period": {
+            "$ref": "#/components/schemas/BillingPeriod"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SubscriptionStatus"
+          },
+          "currentPeriodStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "currentPeriodEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "entitledUntil": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "isComplimentary": {
+            "type": "boolean"
+          }
+        }
+      },
       "AiChatEntryPoint": {
         "enum": [
           "Lesson",
@@ -6908,6 +7415,7 @@
           "score",
           "normalisedScore",
           "outcome",
+          "awaitsReview",
           "feedback",
           "timeTakenMilliseconds",
           "createdAt"
@@ -6939,6 +7447,9 @@
           },
           "outcome": {
             "type": "string"
+          },
+          "awaitsReview": {
+            "type": "boolean"
           },
           "feedback": {
             "type": [
@@ -9022,6 +9533,21 @@
           }
         }
       },
+      "GrantComplimentarySubscriptionRequest": {
+        "required": [
+          "plan",
+          "period"
+        ],
+        "type": "object",
+        "properties": {
+          "plan": {
+            "$ref": "#/components/schemas/SubscriptionPlan"
+          },
+          "period": {
+            "$ref": "#/components/schemas/BillingPeriod"
+          }
+        }
+      },
       "IFormFile": {
         "type": "string",
         "format": "binary"
@@ -9063,6 +9589,60 @@
             "format": "uuid"
           },
           "isThisUnit": {
+            "type": "boolean"
+          }
+        }
+      },
+      "InviteUserCommand": {
+        "required": [
+          "role",
+          "displayName",
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "auditAction": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditResourceType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditResourceId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          }
+        }
+      },
+      "InviteUserResult": {
+        "required": [
+          "userId",
+          "emailSent"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emailSent": {
             "type": "boolean"
           }
         }
@@ -10205,6 +10785,49 @@
           }
         }
       },
+      "PageDataOfUserSummaryResult": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserSummaryResult"
+            }
+          },
+          "pageNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalItems": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
       "PageDataOfValidationQueueItemResult": {
         "type": "object",
         "properties": {
@@ -10863,7 +11486,8 @@
           "TrueFalse",
           "Fill",
           "Short",
-          "Essay"
+          "Essay",
+          "MathSteps"
         ]
       },
       "QuestionTypeCountResult": {
@@ -11873,6 +12497,97 @@
           "generatedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "StudentProfileResult": {
+        "required": [
+          "id",
+          "displayName",
+          "maskedPhone",
+          "maskedEmail",
+          "status",
+          "canSuspend",
+          "creationDate",
+          "onboardedAt",
+          "subjectInterests",
+          "tier",
+          "hasAskTeacher",
+          "subscriptions"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "maskedPhone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "maskedEmail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/UserStatus"
+          },
+          "canSuspend": {
+            "type": "boolean"
+          },
+          "creationDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "onboardedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "subjectInterests": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tier": {
+            "$ref": "#/components/schemas/PlanTier"
+          },
+          "hasAskTeacher": {
+            "type": "boolean"
+          },
+          "subscriptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminSubscriptionResult"
+            }
+          }
+        }
+      },
+      "StudentProgressResult": {
+        "required": [
+          "subjects",
+          "weakSpots"
+        ],
+        "type": "object",
+        "properties": {
+          "subjects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SubjectProgressResult"
+            }
+          },
+          "weakSpots": {
+            "$ref": "#/components/schemas/WeakSpotsResult"
           }
         }
       },
@@ -13929,6 +14644,93 @@
           }
         }
       },
+      "UserRole": {
+        "enum": [
+          "Student",
+          "Teacher",
+          "Admin"
+        ]
+      },
+      "UserStatus": {
+        "enum": [
+          "Active",
+          "Suspended"
+        ]
+      },
+      "UserSummaryResult": {
+        "required": [
+          "id",
+          "displayName",
+          "role",
+          "status",
+          "maskedPhone",
+          "maskedEmail",
+          "invitationPending",
+          "canSuspend",
+          "creationDate",
+          "tier",
+          "hasAskTeacher",
+          "subjectIds"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "status": {
+            "$ref": "#/components/schemas/UserStatus"
+          },
+          "maskedPhone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "maskedEmail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "invitationPending": {
+            "type": "boolean"
+          },
+          "canSuspend": {
+            "type": "boolean"
+          },
+          "creationDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tier": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PlanTier"
+              }
+            ]
+          },
+          "hasAskTeacher": {
+            "type": "boolean"
+          },
+          "subjectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
       "ValidationLessonOption": {
         "required": [
           "id",
@@ -14505,6 +15307,9 @@
     }
   },
   "tags": [
+    {
+      "name": "Users"
+    },
     {
       "name": "Units"
     },

@@ -42,7 +42,7 @@ public sealed class OpenApiEndpointTests(ApiFactory factory)
         await using var body = await response.Content.ReadAsStreamAsync(TestContext.Current.CancellationToken);
         using var document = await JsonDocument.ParseAsync(body, cancellationToken: TestContext.Current.CancellationToken);
         var schemas = document.RootElement.GetProperty("components").GetProperty("schemas");
-        schemas.GetProperty("QuestionType").GetProperty("enum").EnumerateArray().Select(x => x.GetString()).Should().Equal("Mcq", "Multi", "TrueFalse", "Fill", "Short", "Essay");
+        schemas.GetProperty("QuestionType").GetProperty("enum").EnumerateArray().Select(x => x.GetString()).Should().Equal("Mcq", "Multi", "TrueFalse", "Fill", "Short", "Essay", "MathSteps");
         schemas.GetProperty("QuestionValidationStatus").GetProperty("enum").EnumerateArray().Select(x => x.GetString()).Should().Contain("Rejected");
     }
 

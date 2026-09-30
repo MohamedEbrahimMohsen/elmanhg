@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { PlaceholderPage } from '@/features/shell';
+import { UsersPage, usersSearchSchema } from '@/features/users';
 
 export const Route = createFileRoute('/admin/users')({
-  component: () => <PlaceholderPage titleKey="nav.admin.users" />,
+  validateSearch: usersSearchSchema,
+  component: UsersPage,
 });

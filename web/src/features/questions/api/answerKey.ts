@@ -24,5 +24,7 @@ export function toAnswerKey(values: QuestionValues): QuestionAnswer {
       };
     case 'Essay':
       return answer;
+    case 'MathSteps':
+      return { ...answer, math: { steps: [], finalAnswer: values.mathAnswers[0]?.latex ?? '' } };
   }
 }

@@ -41,4 +41,24 @@ public sealed class SubscriptionEntitlementSpecificationTests
 
         satisfied.Should().BeFalse();
     }
+
+    [Fact]
+    public void EntitledForStudents_ListedStudentEntitled_IsSatisfied()
+    {
+        var subscription = new SubscriptionBuilder().Build();
+
+        var satisfied = SubscriptionEntitlementSpecification.EntitledForStudents([Guid.NewGuid(), subscription.StudentId], PeriodEnd.AddDays(-1), Grace).Compile()(subscription);
+
+        satisfied.Should().BeTrue();
+    }
+
+    [Fact]
+    public void EntitledForStudents_UnlistedStudent_IsNotSatisfied()
+    {
+        var subscription = new SubscriptionBuilder().Build();
+
+        var satisfied = SubscriptionEntitlementSpecification.EntitledForStudents([Guid.NewGuid()], PeriodEnd.AddDays(-1), Grace).Compile()(subscription);
+
+        satisfied.Should().BeFalse();
+    }
 }

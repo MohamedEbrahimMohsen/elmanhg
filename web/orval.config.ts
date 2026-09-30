@@ -39,6 +39,8 @@ export default defineConfig({
           GetPaymentLog: { zod: { generate: { query: false } } },
           GetAvatarConversations: { zod: { generate: { query: false } } },
           GetTrainingExports: { zod: { generate: { query: false } } },
+          GetUsers: { zod: { generate: { query: false } } },
+          GetStudentSessionHistory: { zod: { generate: { query: false } } },
         },
       },
     },

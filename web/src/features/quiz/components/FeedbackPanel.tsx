@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { CircleAlert, CircleCheck, CircleX } from 'lucide-react';
+import { CircleAlert, CircleCheck, CircleX, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { AskAvatarButton, type AvatarContextInput } from '@/features/avatar';
 import { RichTextViewer } from '@/features/content';
@@ -33,18 +33,24 @@ const verdicts = {
     key: 'feedback.partial',
   },
   Incorrect: { icon: CircleX, panel: 'border-danger bg-danger-soft', color: 'text-danger', key: 'feedback.incorrect' },
+  InReview: { icon: Clock, panel: 'border-warning bg-warning-soft', color: 'text-warning', key: 'feedback.inReview' },
 } as const;
 
-function toVerdict(outcome: string): keyof typeof verdicts {
-  return outcome === 'Correct' || outcome === 'Partial' ? outcome : 'Incorrect';
+function toVerdict(attempt: AttemptResult): keyof typeof verdicts {
+  if (attempt.awaitsReview) {
+    return 'InReview';
+  }
+  return attempt.outcome === 'Correct' || attempt.outcome === 'Partial' ? attempt.outcome : 'Incorrect';
 }
 
 export function FeedbackPanel({ item, attempt, question, ask, children }: FeedbackPanelProps) {
   const { t, i18n } = useTranslation('quiz');
   const lng = i18n.resolvedLanguage ?? i18n.language;
-  const verdict = verdicts[toVerdict(attempt.outcome)];
+  const inReview = attempt.awaitsReview;
+  const verdict = verdicts[toVerdict(attempt)];
   const Icon = verdict.icon;
-  const view = describeCorrectAnswer(question, item.correctAnswer);
+  const view = inReview ? null : describeCorrectAnswer(question, item.correctAnswer);
+  const explanation = inReview ? null : item.explanation;
 
   return (
     <div
@@ -60,10 +66,12 @@ export function FeedbackPanel({ item, attempt, question, ask, children }: Feedba
         <div>
           <p className="text-ui font-semibold text-text">{t(verdict.key)}</p>
           <p className="text-caption text-text">
-            {t('feedback.score', {
-              score: formatNumber(Number(attempt.score), lng),
-              maxScore: formatNumber(Number(item.maxScore), lng),
-            })}
+            {inReview
+              ? t('feedback.inReviewHint')
+              : t('feedback.score', {
+                  score: formatNumber(Number(attempt.score), lng),
+                  maxScore: formatNumber(Number(item.maxScore), lng),
+                })}
           </p>
         </div>
       </div>
@@ -74,11 +82,11 @@ export function FeedbackPanel({ item, attempt, question, ask, children }: Feedba
           <CorrectAnswer view={view} />
         </div>
       ) : null}
-      {item.explanation ? (
+      {explanation ? (
         <div className="flex flex-col gap-1">
           <p className="text-caption font-semibold text-text">{t('feedback.explanation')}</p>
           <div className="text-ui text-text-muted">
-            <RichTextViewer html={item.explanation} />
+            <RichTextViewer html={explanation} />
           </div>
         </div>
       ) : null}

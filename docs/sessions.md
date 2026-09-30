@@ -98,7 +98,9 @@ Grading loads the `QuestionRevision` at `item.QuestionVersion` and calls `Questi
 
 Written essays are graded asynchronously by the AI grader against the served revision (`EssayGrade`, [essay-grading.md](essay-grading.md)); the attempt is written when the grade is applied. A blank essay is graded at once by `QuestionGrader` as Unanswered.
 
-The validator checks that the answer is a JSON object no longer than the larger of `Sessions:AnswerMaxLength` and `Sessions:EssayAnswerMaxLength`. The handler then checks the shape for the served type (422 `QUESTION_ANSWER_INVALID`), the raw length for that type (422 `ATTEMPT_ANSWER_TOO_LONG`: `EssayAnswerMaxLength` for an essay, `AnswerMaxLength` for every other type) and, for an essay, the text length (422 `QUESTION_ESSAY_ANSWER_TOO_LONG` over `Content:QuestionEssayAnswerMaxLength`), so a malformed answer never reaches the grader.
+A MathSteps answer goes through `AnswerGrader`: the final answer is checked by the AI service's CAS ([math-cas.md](math-cas.md)); every other type is graded locally by `QuestionGrader`. If the AI service cannot be reached, the verdict is `unchecked` (provisional score 0, feedback kind `mathUnchecked`): the attempt is still recorded, is left out of mastery, and waits for teacher review (#128).
+
+The validator checks that the answer is a JSON object no longer than the largest of `Sessions:AnswerMaxLength`, `Sessions:EssayAnswerMaxLength` and `Sessions:MathStepsAnswerMaxLength`. The handler then checks the shape for the served type (422 `QUESTION_ANSWER_INVALID`), the raw length for that type (422 `ATTEMPT_ANSWER_TOO_LONG`: `EssayAnswerMaxLength` for an essay, `MathStepsAnswerMaxLength` for a MathSteps answer, `AnswerMaxLength` for every other type), the MathSteps step and final-answer caps (422 `ATTEMPT_ANSWER_TOO_LONG`) and, for an essay, the text length (422 `QUESTION_ESSAY_ANSWER_TOO_LONG` over `Content:QuestionEssayAnswerMaxLength`), so a malformed answer never reaches the grader.
 
 ## Idempotency
 
@@ -163,6 +165,10 @@ Session commands are not audited (`docs/audit-log.md`, "Not audited"): the attem
 | `Sessions:MaxQuizSize` | 20 | Largest allowed `questionCount`. The UI offers 5, 10 and 20. |
 | `Sessions:AnswerMaxLength` | 4000 | Maximum raw length of an answer's JSON, for every type except Essay. |
 | `Sessions:EssayAnswerMaxLength` | 121000 | Maximum raw length of an essay answer's JSON: 20 000 characters even when a client escapes each one as `\uXXXX` (6 characters), plus the envelope. |
+| `Sessions:MathStepsAnswerMaxLength` | 24000 | Maximum raw length of a MathSteps answer's JSON (sized for 20 LaTeX steps of 500 characters, whose backslashes double in JSON). |
+| `Sessions:MathStepsMaxCount` | 20 | Steps in a MathSteps answer. |
+| `Sessions:MathStepMaxLength` | 500 | Characters per MathSteps step. |
+| `Sessions:MathFinalAnswerMaxLength` | 200 | Characters in a MathSteps final answer. |
 | `Mastery:CorrectThreshold` | 0.8 | Normalised score at or above which an attempt counts as correct (PRD §7.3); used by selection and mastery (`docs/mastery.md`). |
 
 The app fails to start unless `MinQuizSize <= DefaultQuizSize <= MaxQuizSize`.
@@ -180,7 +186,7 @@ History: `GET /api/progress/sessions` (`docs/progress.md`).
 
 `SessionResult { id, kind, scope, isTestMode, startedAt, submittedAt?, scorePercent?, timeTakenMilliseconds, currentPosition?, items[] }`
 `SessionItemResult { position, questionId, questionVersion, type, stem, body, maxScore, attempt?, correctAnswer?, explanation?, pendingAnswer? }` — `pendingAnswer` is the submitted essay (`{ text }`) while it waits for its grade, else null.
-`AttemptResult { id, answer, score, normalisedScore, outcome, feedback?, timeTakenMilliseconds, createdAt }`
+`AttemptResult { id, answer, score, normalisedScore, outcome, awaitsReview, feedback?, timeTakenMilliseconds, createdAt }`. `awaitsReview` is true for a MathSteps attempt graded `unchecked`: its score is a provisional 0 and the UI shows «قيد المراجعة» instead of the verdict ([math-cas.md](math-cas.md)).
 
 ## Error codes
 
@@ -191,8 +197,9 @@ History: `GET /api/progress/sessions` (`docs/progress.md`).
 | `SESSION_QUESTION_COUNT_INVALID` | 422 | `questionCount` outside `[MinQuizSize, MaxQuizSize]`. |
 | `SESSION_QUESTION_NOT_FOUND` | 404 | The question is not part of the session. |
 | `SESSION_ALREADY_IN_PROGRESS` | 409 | A concurrent start for the same lesson won the race; retry to resume. |
-| `ATTEMPT_ANSWER_TOO_LONG` | 422 | The answer JSON is over `AnswerMaxLength` (`EssayAnswerMaxLength` for an essay). |
+| `ATTEMPT_ANSWER_TOO_LONG` | 422 | The answer JSON is over its type's cap (`EssayAnswerMaxLength` for an essay, `MathStepsAnswerMaxLength` for MathSteps, else `AnswerMaxLength`), or a MathSteps answer is over one of the `Math*` caps. |
 | `QUESTION_ESSAY_ANSWER_TOO_LONG` | 422 | An essay is longer than `Content:QuestionEssayAnswerMaxLength`. |
+| `MATH_CHECK_UNAVAILABLE` | 503 | Only when the .NET math-check fake runs in Production (a misconfiguration); an unreachable AI service grades `unchecked` instead. |
 | `ATTEMPT_TIME_TAKEN_INVALID` | 422 | Negative `timeTakenMilliseconds`. |
 | `SESSION_NO_SERVABLE_QUESTIONS` | 400 | The lesson has no servable questions. |
 | `SESSION_QUESTION_NOT_SERVABLE` | 400 | A drawn question is not servable (a guard; the draw already filters). |

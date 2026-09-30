@@ -39,6 +39,17 @@ describe('FeedbackPanel', () => {
     expect(screen.getByText('Two plus two is four.')).toBeVisible();
   });
 
+  it('shows an answer awaiting review with the warning style and no score or correct answer', () => {
+    renderPanel(answered(quizItem(1), 'Incorrect', { optionId: 'a' }, { awaitsReview: true }));
+
+    const status = screen.getByRole('status');
+    expect(status).toHaveTextContent('Under review');
+    expect(status).not.toHaveTextContent('Score 0 / 1');
+    expect(screen.getByRole('group', { name: 'Answer feedback' })).toHaveClass('border-warning');
+    expect(screen.queryByText('The correct answer')).not.toBeInTheDocument();
+    expect(screen.queryByText('Two plus two is four.')).not.toBeInTheDocument();
+  });
+
   it('shows a partial verdict', () => {
     renderPanel(answered(quizItem(1), 'Partial', { optionId: 'b' }));
 

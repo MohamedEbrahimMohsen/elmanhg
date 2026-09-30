@@ -17,6 +17,18 @@ public static class ErrorCodes
     public const string EmailCodeSignInNotAllowed = "EMAIL_CODE_SIGN_IN_NOT_ALLOWED";
     public const string OtpChannelUnavailable = "OTP_CHANNEL_UNAVAILABLE";
     public const string OtpDeliveryFailed = "OTP_DELIVERY_FAILED";
+    public const string InvitationNotFound = "INVITATION_NOT_FOUND";
+    public const string PasswordRejected = "PASSWORD_REJECTED";
+
+    // USERS
+    public const string UserListPageNumberInvalid = "USER_LIST_PAGE_NUMBER_INVALID";
+    public const string UserListPageSizeInvalid = "USER_LIST_PAGE_SIZE_INVALID";
+    public const string UserListRoleInvalid = "USER_LIST_ROLE_INVALID";
+    public const string UserListStatusInvalid = "USER_LIST_STATUS_INVALID";
+    public const string UserListSearchTooLong = "USER_LIST_SEARCH_TOO_LONG";
+    public const string UserIdRequired = "USER_ID_REQUIRED";
+    public const string UserInviteRoleInvalid = "USER_INVITE_ROLE_INVALID";
+    public const string UserModifiedConcurrently = "USER_MODIFIED_CONCURRENTLY";
 
     // VALIDATION
     public const string OtpVerificationIdInvalidFormat = "OTP_VERIFICATION_ID_INVALID_FORMAT";
@@ -126,6 +138,10 @@ public static class ErrorCodes
     public const string QuestionIdsRequired = "QUESTION_IDS_REQUIRED";
     public const string QuestionIdsTooMany = "QUESTION_IDS_TOO_MANY";
     public const string QuestionIdsDuplicate = "QUESTION_IDS_DUPLICATE";
+    public const string QuestionMathAnswersInvalid = "QUESTION_MATH_ANSWERS_INVALID";
+    public const string QuestionMathFormInvalid = "QUESTION_MATH_FORM_INVALID";
+    public const string QuestionMathToleranceInvalid = "QUESTION_MATH_TOLERANCE_INVALID";
+    public const string QuestionMathToleranceFormConflict = "QUESTION_MATH_TOLERANCE_FORM_CONFLICT";
 
     // REVIEW SESSIONS
     public const string ReviewSessionNotFound = "REVIEW_SESSION_NOT_FOUND";
@@ -220,6 +236,9 @@ public static class ErrorCodes
     public const string PaymentLogPlanInvalid = "PAYMENT_LOG_PLAN_INVALID";
     public const string PaymentLogReferenceTooLong = "PAYMENT_LOG_REFERENCE_TOO_LONG";
     public const string PaymentLogDateRangeInvalid = "PAYMENT_LOG_DATE_RANGE_INVALID";
+    public const string ComplimentaryPlanInvalid = "COMPLIMENTARY_PLAN_INVALID";
+    public const string ComplimentaryPeriodInvalid = "COMPLIMENTARY_PERIOD_INVALID";
+    public const string ComplimentaryPeriodUnavailable = "COMPLIMENTARY_PERIOD_UNAVAILABLE";
 
     // FREE TIER
     public const string QuizDailyLimitReached = "QUIZ_DAILY_LIMIT_REACHED";
@@ -229,6 +248,8 @@ public static class ErrorCodes
     // STUDENTS
     public const string SubjectInterestsTooMany = "SUBJECT_INTERESTS_TOO_MANY";
     public const string SubjectInterestsDuplicate = "SUBJECT_INTERESTS_DUPLICATE";
+    public const string StudentIdRequired = "STUDENT_ID_REQUIRED";
+    public const string StudentNotFound = "STUDENT_NOT_FOUND";
 
     // ASK A TEACHER
     public const string TeacherThreadNotFound = "TEACHER_THREAD_NOT_FOUND";
@@ -287,6 +308,7 @@ public static class ErrorCodes
 
     // AI SERVICE
     public const string AiServiceUnavailable = "AI_SERVICE_UNAVAILABLE";
+    public const string MathCheckUnavailable = "MATH_CHECK_UNAVAILABLE";
 
     // ESSAY GRADING
     public const string EssayGradeNotFound = "ESSAY_GRADE_NOT_FOUND";

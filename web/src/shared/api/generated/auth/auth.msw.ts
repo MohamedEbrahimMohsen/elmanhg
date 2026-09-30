@@ -40,6 +40,8 @@ export const getLoginWithEmailResponseMock = (overrideResponse: Partial<Extract<
 
 export const getLoginWithEmailCodeResponseMock = (overrideResponse: Partial<Extract<AuthResult, object>> = {}): AuthResult => (faker.helpers.arrayElement([{accessToken: faker.string.alpha({length: {min: 10, max: 20}}), user: {id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 10, max: 20}}), role: faker.string.alpha({length: {min: 10, max: 20}}), phoneNumber: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), email: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), needsOnboarding: faker.datatype.boolean()}, ...overrideResponse}, {accessToken: faker.string.alpha({length: {min: 10, max: 20}}), user: {id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 10, max: 20}}), role: faker.string.alpha({length: {min: 10, max: 20}}), phoneNumber: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), email: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), needsOnboarding: faker.datatype.boolean()}, ...overrideResponse}, {accessToken: faker.string.alpha({length: {min: 10, max: 20}}), user: {id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 10, max: 20}}), role: faker.string.alpha({length: {min: 10, max: 20}}), phoneNumber: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), email: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), needsOnboarding: faker.datatype.boolean()}, ...overrideResponse}]))
 
+export const getAcceptInvitationResponseMock = (overrideResponse: Partial<Extract<AuthResult, object>> = {}): AuthResult => (faker.helpers.arrayElement([{accessToken: faker.string.alpha({length: {min: 10, max: 20}}), user: {id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 10, max: 20}}), role: faker.string.alpha({length: {min: 10, max: 20}}), phoneNumber: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), email: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), needsOnboarding: faker.datatype.boolean()}, ...overrideResponse}, {accessToken: faker.string.alpha({length: {min: 10, max: 20}}), user: {id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 10, max: 20}}), role: faker.string.alpha({length: {min: 10, max: 20}}), phoneNumber: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), email: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), needsOnboarding: faker.datatype.boolean()}, ...overrideResponse}, {accessToken: faker.string.alpha({length: {min: 10, max: 20}}), user: {id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 10, max: 20}}), role: faker.string.alpha({length: {min: 10, max: 20}}), phoneNumber: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), email: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), needsOnboarding: faker.datatype.boolean()}, ...overrideResponse}]))
+
 export const getRefreshAccessTokenResponseMock = (overrideResponse: Partial<Extract<AuthResult, object>> = {}): AuthResult => (faker.helpers.arrayElement([{accessToken: faker.string.alpha({length: {min: 10, max: 20}}), user: {id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 10, max: 20}}), role: faker.string.alpha({length: {min: 10, max: 20}}), phoneNumber: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), email: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), needsOnboarding: faker.datatype.boolean()}, ...overrideResponse}, {accessToken: faker.string.alpha({length: {min: 10, max: 20}}), user: {id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 10, max: 20}}), role: faker.string.alpha({length: {min: 10, max: 20}}), phoneNumber: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), email: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), needsOnboarding: faker.datatype.boolean()}, ...overrideResponse}, {accessToken: faker.string.alpha({length: {min: 10, max: 20}}), user: {id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 10, max: 20}}), role: faker.string.alpha({length: {min: 10, max: 20}}), phoneNumber: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), email: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), needsOnboarding: faker.datatype.boolean()}, ...overrideResponse}]))
 
 
@@ -127,6 +129,18 @@ export const getLoginWithEmailCodeMockHandler = (overrideResponse?: AuthResult |
   }, options)
 }
 
+export const getAcceptInvitationMockHandler = (overrideResponse?: AuthResult | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<AuthResult> | AuthResult), options?: RequestHandlerOptions) => {
+  return http.post('*/api/auth/invitations/accept', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getAcceptInvitationResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
 export const getRefreshAccessTokenMockHandler = (overrideResponse?: AuthResult | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<AuthResult> | AuthResult), options?: RequestHandlerOptions) => {
   return http.post('*/api/auth/refresh', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
 
@@ -156,6 +170,7 @@ export const getAuthMock = () => [
   getLoginWithPhoneMockHandler(),
   getLoginWithEmailMockHandler(),
   getLoginWithEmailCodeMockHandler(),
+  getAcceptInvitationMockHandler(),
   getRefreshAccessTokenMockHandler(),
   getLogoutMockHandler()
 ]

@@ -12,4 +12,12 @@ public static class SubscriptionEntitlementSpecification
             && (((x.Status == SubscriptionStatus.Active || x.Status == SubscriptionStatus.PastDue) && x.CurrentPeriodEnd > lapsedBefore)
                 || (x.Status == SubscriptionStatus.Cancelled && x.CurrentPeriodEnd > now));
     }
+
+    public static Expression<Func<Subscription, bool>> EntitledForStudents(List<Guid> studentIds, DateTimeOffset now, TimeSpan gracePeriod)
+    {
+        var lapsedBefore = now - gracePeriod;
+        return x => studentIds.Contains(x.StudentId)
+            && (((x.Status == SubscriptionStatus.Active || x.Status == SubscriptionStatus.PastDue) && x.CurrentPeriodEnd > lapsedBefore)
+                || (x.Status == SubscriptionStatus.Cancelled && x.CurrentPeriodEnd > now));
+    }
 }

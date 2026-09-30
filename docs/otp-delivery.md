@@ -76,6 +76,7 @@ The adapter posts to `{BaseUrl}/{ApiVersion}/{PhoneNumberId}/messages` with a Be
 1. Add and verify the sending domain in Resend (the DNS records it lists).
 2. Create an API key with **sending access** only.
 3. Set `OtpDelivery__Email__Provider=Resend`, `OtpDelivery__Email__ApiKey` and `OtpDelivery__Email__FromAddress` (an address on the verified domain).
+4. Set `InvitationEmail__AcceptInviteUrl` to `https://<SITE_ADDRESS>/accept-invite`. The same Resend account sends the teacher and admin invitation email ([user-administration.md](user-administration.md)); the API refuses to start with Resend on and this URL missing or not `https`.
 
 The adapter posts to `{BaseUrl}/emails` with a Bearer key.
 

@@ -6,6 +6,8 @@ public sealed record QuestionGrade(decimal Score, decimal NormalisedScore, Grade
     private const int ScoreDecimals = 2;
     private const int NormalisedScoreDecimals = 4;
 
+    public bool AwaitsReview => Feedback?.AwaitsReview == true;
+
     public static QuestionGrade FromNormalised(NormalisedGrade grade, int maxScore)
     {
         return new QuestionGrade(Math.Round(grade.Value * maxScore, ScoreDecimals, MidpointRounding.AwayFromZero), Math.Round(grade.Value, NormalisedScoreDecimals, MidpointRounding.AwayFromZero), ToOutcome(grade.Value), grade.Feedback);

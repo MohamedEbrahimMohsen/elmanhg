@@ -720,13 +720,14 @@
       "key": "E17",
       "title": "v2: Teacher AI grade review queue",
       "labels": ["v2", "teacher", "backend", "frontend"],
-      "description": "Low-confidence AI grades reviewed and overridable by teachers; overrides captured as training data. PRD §8.3.",
+      "description": "Low-confidence AI grades, and MathSteps attempts the CAS could not check, reviewed and overridable by teachers; overrides captured as training data. PRD §8.3.",
       "stories": [
         {
           "title": "Review queue and override",
-          "description": "As a teacher I see low-confidence AI grades in my subjects and can accept or override them.",
+          "description": "As a teacher I see low-confidence AI grades and unchecked math answers in my subjects and can accept or override them.",
           "tasks": [
             "Queue query scoped to assigned subjects with confidence threshold configuration",
+            "MathSteps attempts graded unchecked (feedback kind mathUnchecked, awaitsReview) are listed and can be scored by the teacher",
             "Accept and override commands updating the attempt score and notifying the student",
             "Training record for every override",
             "Teacher review queue UI"

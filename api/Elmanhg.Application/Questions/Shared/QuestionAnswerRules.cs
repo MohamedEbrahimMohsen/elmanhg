@@ -18,6 +18,7 @@ public static class QuestionAnswerRules
             QuestionType.Fill => QuestionSchemaReader.TryRead<FillAnswer>(answer, out _),
             QuestionType.Short => QuestionSchemaReader.TryRead<ShortAnswer>(answer, out _),
             QuestionType.Essay => QuestionSchemaReader.TryRead<EssayAnswer>(answer, out var essay) && essay.Text is not null,
+            QuestionType.MathSteps => MathStepsAnswerRules.CanRead(answer),
             _ => false,
         };
     }
@@ -32,6 +33,7 @@ public static class QuestionAnswerRules
             QuestionType.Fill => QuestionSchemaReader.Serialize(QuestionSchemaReader.Read<FillAnswer>(answer)),
             QuestionType.Short => QuestionSchemaReader.Serialize(QuestionSchemaReader.Read<ShortAnswer>(answer)),
             QuestionType.Essay => QuestionSchemaReader.Serialize(new EssayAnswer(QuestionSchemaReader.Read<EssayAnswer>(answer).Text!.Trim())),
+            QuestionType.MathSteps => MathStepsAnswerRules.Canonicalize(answer),
             _ => throw new InvalidOperationException("Unsupported question type."),
         };
     }
@@ -44,5 +46,14 @@ public static class QuestionAnswerRules
 
     public static bool IsEssayTooLong(QuestionType type, JsonElement answer, int maxLength) => type == QuestionType.Essay && QuestionSchemaReader.Read<EssayAnswer>(answer).Text!.Length > maxLength;
 
-    public static bool IsRawAnswerTooLong(QuestionType type, JsonElement answer, SessionsOptions options) => answer.GetRawText().Length > (type == QuestionType.Essay ? options.EssayAnswerMaxLength : options.AnswerMaxLength);
+    public static bool IsRawAnswerTooLong(QuestionType type, JsonElement answer, SessionsOptions options) => answer.GetRawText().Length > RawAnswerMaxLength(type, options);
+
+    public static bool ExceedsLimits(QuestionType type, JsonElement answer, SessionsOptions options) => type == QuestionType.MathSteps && MathStepsAnswerRules.ExceedsLimits(answer, options);
+
+    private static int RawAnswerMaxLength(QuestionType type, SessionsOptions options) => type switch
+    {
+        QuestionType.Essay => options.EssayAnswerMaxLength,
+        QuestionType.MathSteps => options.MathStepsAnswerMaxLength,
+        _ => options.AnswerMaxLength,
+    };
 }

@@ -25,4 +25,5 @@ export * from './teacher-threads/teacher-threads';
 export * from './teachers/teachers';
 export * from './training-exports/training-exports';
 export * from './units/units';
+export * from './users/users';
 export * from './validation-queue/validation-queue';

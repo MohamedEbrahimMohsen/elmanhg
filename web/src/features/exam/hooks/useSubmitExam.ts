@@ -12,7 +12,7 @@ export interface SubmitExam {
   isPending: boolean;
 }
 
-export function useSubmitExam(sessionId: string, flush: () => Promise<void>): SubmitExam {
+export function useSubmitExam(sessionId: string, flush: () => Promise<void>, onSubmitted?: () => void): SubmitExam {
   const { t } = useTranslation('exam');
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -22,6 +22,7 @@ export function useSubmitExam(sessionId: string, flush: () => Promise<void>): Su
   const mutation = useSubmitExamMutation({
     mutation: {
       onSuccess: async (session) => {
+        onSubmitted?.();
         queryClient.setQueryData(key, session);
         void invalidateExamViews(queryClient);
         await navigate({ to: '/student/exam-result/$sessionId', params: { sessionId } });

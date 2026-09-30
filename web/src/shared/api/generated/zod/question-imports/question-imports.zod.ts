@@ -25,7 +25,7 @@ export const PreviewQuestionImportResponse = zod.object({
   "totalRows": zod.union([zod.int(),zod.stringFormat('int32', previewQuestionImportResponseTotalRowsRegExpTwo)]),
   "validRows": zod.union([zod.int(),zod.stringFormat('int32', previewQuestionImportResponseValidRowsRegExpTwo)]),
   "types": zod.array(zod.object({
-  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay']),
+  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'MathSteps']),
   "count": zod.union([zod.int(),zod.stringFormat('int32', previewQuestionImportResponseTypesItemCountRegExpTwo)])
 })),
   "errors": zod.array(zod.object({
