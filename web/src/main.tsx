@@ -14,6 +14,7 @@ import { createQueryClient } from '@/app/queryClient';
 import { createAppRouter } from '@/app/router';
 import { createSessionStore, installAuthHandlers, restoreSession } from '@/features/session';
 import { clientErrorReporter } from '@/shared/lib/clientErrorReporter';
+import { createSignalRRealtimeClient } from '@/shared/realtime/signalRRealtimeClient';
 
 initI18n();
 clientErrorReporter.install(window);
@@ -31,7 +32,11 @@ if (rootElement === null) {
 void restoreSession(sessionStore).then(() => {
   createRoot(rootElement).render(
     <StrictMode>
-      <AppProviders queryClient={queryClient} sessionStore={sessionStore}>
+      <AppProviders
+        queryClient={queryClient}
+        sessionStore={sessionStore}
+        realtimeClientFactory={createSignalRRealtimeClient}
+      >
         <RouterProvider router={router} />
       </AppProviders>
     </StrictMode>,

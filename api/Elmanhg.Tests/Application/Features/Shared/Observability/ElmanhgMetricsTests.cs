@@ -1,6 +1,7 @@
 using Core.OTP.Delivery;
 using Elmanhg.Application.Shared.Observability;
 using Elmanhg.Application.Subscriptions.Shared;
+using Elmanhg.Domain.TeacherThreads;
 using FluentAssertions;
 using Microsoft.Extensions.Diagnostics.Metrics.Testing;
 using System.Diagnostics.Metrics;
@@ -70,6 +71,18 @@ public sealed class ElmanhgMetricsTests
         _metrics.RecordClientError(ClientErrorSource.Route);
 
         errors.GetMeasurementSnapshot().Should().ContainSingle().Which.Tags.Should().Contain(ElmanhgMetrics.SourceTag, "Route");
+    }
+
+    [Fact]
+    public void RecordAskTeacherSlaEvent_Breach_TagsKind()
+    {
+        using var events = Collector<long>("elmanhg.ask_teacher.sla_events");
+
+        _metrics.RecordAskTeacherSlaEvent(TeacherThreadSlaEventKind.Breach);
+
+        var measurement = events.GetMeasurementSnapshot().Should().ContainSingle().Subject;
+        measurement.Value.Should().Be(1);
+        measurement.Tags.Should().Contain(ElmanhgMetrics.KindTag, "Breach");
     }
 
     private MetricCollector<T> Collector<T>(string instrument) where T : struct => new(_meterFactory, ElmanhgTelemetry.SourceName, instrument);

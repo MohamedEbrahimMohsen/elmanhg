@@ -44,6 +44,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
 
     public const string InProgressSessionIndex = "IX_Sessions_InProgressScope";
     public const string AttemptPerQuestionIndex = "IX_Attempts_SessionId_QuestionId";
+    public const string AttemptStudentCreatedAtIndex = "IX_Attempts_StudentId_CreatedAt";
     public const string QuestionMasteryPerStudentIndex = "IX_QuestionMasteries_StudentId_QuestionId";
     public const string LessonOpeningPerStudentIndex = "IX_LessonOpenings_StudentId_LessonId";
     public const string SubjectDefaultBlueprintIndex = "IX_ExamBlueprints_SubjectDefault";
@@ -79,6 +80,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
     public DbSet<TeacherThread> TeacherThreads { get; set; }
     public DbSet<TeacherMessage> TeacherMessages { get; set; }
     public DbSet<TeacherVoiceDraft> TeacherVoiceDrafts { get; set; }
+    public DbSet<TeacherThreadSlaEvent> TeacherThreadSlaEvents { get; set; }
     public DbSet<FunnelEvent> FunnelEvents { get; set; }
     public DbSet<LessonContentChunk> LessonContentChunks { get; set; }
     public DbSet<LessonContentIndex> LessonContentIndexes { get; set; }
@@ -169,6 +171,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         ConfigureSubscriptions(modelBuilder);
         ConfigureTeacherThreads(modelBuilder);
         ConfigureTeacherVoiceDrafts(modelBuilder);
+        ConfigureTeacherThreadSlaEvents(modelBuilder);
         ConfigureTeacherSubjects(modelBuilder);
         ConfigureFunnelEvents(modelBuilder);
         ConfigureContentRetrieval(modelBuilder);
@@ -332,6 +335,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Question>().WithMany().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.StudentId, x.QuestionId, x.CreatedAt });
+            builder.HasIndex(x => new { x.StudentId, x.CreatedAt }, AttemptStudentCreatedAtIndex);
             builder.HasIndex(x => new { x.SessionId, x.QuestionId }).IsUnique().HasDatabaseName(AttemptPerQuestionIndex);
         });
     }
@@ -414,6 +418,8 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
             builder.HasMany(x => x.Messages).WithOne().HasForeignKey(x => x.ThreadId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.StudentId, x.SubmittedAt });
             builder.HasIndex(x => new { x.SubjectId, x.Status, x.SubmittedAt });
+            builder.HasIndex(x => new { x.Status, x.SlaDueAt });
+            builder.ToTable(x => x.HasCheckConstraint("CK_TeacherThreads_Rating", "\"Rating\" IS NULL OR \"Rating\" BETWEEN 1 AND 5"));
         });
         modelBuilder.Entity<TeacherMessage>(builder =>
         {
@@ -441,6 +447,17 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.TeacherId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.ThreadId, x.TeacherId });
             builder.HasIndex(x => x.NextAttemptAt).HasFilter("\"Status\" = 'Pending'");
+        });
+    }
+
+    private static void ConfigureTeacherThreadSlaEvents(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TeacherThreadSlaEvent>(builder =>
+        {
+            builder.Property(x => x.Kind).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.HasOne<TeacherThread>().WithMany().HasForeignKey(x => x.ThreadId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.TeacherId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.ThreadId, x.Kind, x.SlaDueAt }).IsUnique();
         });
     }
 
@@ -554,6 +571,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         modelBuilder.Entity<TeacherThread>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<TeacherMessage>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<TeacherVoiceDraft>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<TeacherThreadSlaEvent>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<FunnelEvent>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<LessonContentChunk>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<LessonContentIndex>().HasQueryFilter(x => !x.IsDeleted);

@@ -111,6 +111,7 @@ A story that adds an options section holding a secret or a per-host value must a
 | `CoreOtp__Secret` | yes | empty | secret; HMAC key of OTP codes |
 | `AdminSeed__Email` / `AdminSeed__Password` / `AdminSeed__DisplayName` | first start | empty | the admin is created on the first start when missing; an empty email skips the seed |
 | `CoreLogging__Trace__Cluster` | no | `Local` | log label, for example `production` |
+| `LoadTestSeed__Key` / `LoadTestSeed__StudentCount` / `LoadTestSeed__StudentPassword` | load-test stacks only | `loadtest` / `60` / empty | read only by `--SeedLoadTestAndExit=true`, which `deploy/load-test.sh` runs and which refuses Production ([docs/performance.md](performance.md) §5); never set them on a real host |
 
 ### OTP delivery (`api.env`, [docs/otp-delivery.md](otp-delivery.md))
 
@@ -197,10 +198,16 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | `AskTeacher__TranscriptionSweepEnabled` | `true` | the voice transcription worker |
 | `AskTeacher__TranscriptionSweepIntervalSeconds` / `AskTeacher__TranscriptionSweepBatchSize` | `5` / `5` | 1 to 3600 / 1 to 100 |
 | `AskTeacher__TranscriptionMaxAttempts` / `AskTeacher__TranscriptionRetryBaseDelaySeconds` | `4` / `15` | 1 to 10 / 1 to 3600 (retries at 15, 30, 60 s) |
+| `AskTeacher__SlaSweepEnabled` | `true` | the `ask-teacher-sla` reminder and breach worker |
+| `AskTeacher__SlaSweepIntervalSeconds` / `AskTeacher__SlaSweepBatchSize` | `60` / `50` | 1 to 3600 / 1 to 500 |
+| `AskTeacher__FirstReminderAfterHours` / `AskTeacher__SecondReminderAfterHours` | `12` / `20` | 1 to 168 each, hours into the reply window; startup fails unless first < second < `Subscriptions__AskTeacherReplySlaHours` |
+| `AskTeacher__ReminderListMaxCount` | `20` | 1 to 100, the «تذكيرات» card on the teacher inbox |
 | `AiService__TranscriptionTimeoutSeconds` | `150` | 1 to 600; above the AI service's worst case (about 121 s) |
 | `Subscriptions__AskTeacherMonthlyQuestions` / `Subscriptions__AskTeacherReplySlaHours` | `20` / `24` | the add-on's monthly quota and reply SLA ([docs/subscriptions.md](subscriptions.md)) |
 
 Question photos and teachers' voice replies are stored under `teacher-threads/` (in the `api-media` volume with `Local`, in the bucket with `S3`) and are private: the API serves them only to the owning student, a teacher of the subject or an admin. Caddy proxies all of `/api/*` to the API, so never serve `/api/media` straight from the volume or the bucket at the edge. With `Local`, the media backup (section 9) includes them. Voice replies are transcribed by the API's background worker through the AI service, so with `AiService__Provider=Http` the `ai` profile must be on; otherwise the drafts fail after their retries and the teacher types the text.
+
+Caddy proxies the SignalR hub `/api/hubs/notifications` (WebSockets) with the existing `/api/*` rule; the access log already redacts the `access_token` query value.
 
 ### Object storage (`api.env`, R2 or S3)
 
@@ -386,6 +393,8 @@ Caddy terminates TLS and, with no `trusted_proxies` setting, replaces any client
 | `SMOKE_OBSERVABILITY` | `1` | `0` skips the observability profile and its assertions (Docker Desktop may not expose `/var/lib/docker/containers`; CI on Linux is authoritative) |
 | `SMOKE_GRAFANA_PORT` | `3300` | loopback port for Grafana during the smoke test |
 
+`bash deploy/load-test.sh` runs the same stack with seeded load-test data, then the pinned k6 API load and the throttled lesson-page browser run against Caddy, and saves the k6 summaries and the EXPLAIN plans in `deploy/.loadtest-results`. It fails when an API budget or the quiz-transition budget is exceeded; the lesson-page budget is advisory (a `::warning::`) until [#220](https://github.com/MohamedEbrahimMohsen/elmanhg/issues/220) meets it. Its knobs, profiles and CI placement are in [docs/performance.md](performance.md) §5.
+
 ## 13. Not done yet
 
 | Item | Status |
@@ -396,5 +405,5 @@ Caddy terminates TLS and, with no `trusted_proxies` setting, replaces any client
 | Object storage | built (#96): `FileStorage__Provider=S3` with an R2 or S3 bucket; not yet checked against a live bucket (needs credentials) |
 | Voice transcription | built (#96): `ELMANHG_AI_TRANSCRIPTION_PROVIDER=openai`; not yet checked against Whisper (needs a key), and the Egyptian-dialect evaluation waits for recorded clips |
 | Observability (#113) | done ([docs/observability.md](observability.md)); an external uptime monitor, a vendor error tracker (Sentry) and live alert receivers are deferred |
-| Performance (#114) | tuning |
+| Performance (#114) | done ([docs/performance.md](performance.md)); the lesson p75 budget is missed (2.96 s locally, advisory in CI) and tracked in [#220](https://github.com/MohamedEbrahimMohsen/elmanhg/issues/220); CDN deferred until the live domain |
 | Security headers (#115) | HSTS and CSP; the request log still trusts `CF-Connecting-IP` |

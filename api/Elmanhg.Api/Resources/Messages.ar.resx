@@ -99,6 +99,7 @@
   <data name="PASSWORD_MUST_CONTAIN_DIGIT" xml:space="preserve"><value>يجب ان تحتوي كلمة المرور على رقم.</value></data>
   <data name="TOO_MANY_REQUESTS" xml:space="preserve"><value>طلبات كثيرة. انتظر قليلا وحاول مرة اخرى.</value></data>
   <data name="ADMIN_SEED_FAILED" xml:space="preserve"><value>تعذر انشاء حساب المدير.</value></data>
+  <data name="LOAD_TEST_SEED_FAILED" xml:space="preserve"><value>تعذر تجهيز بيانات اختبار الأداء.</value></data>
   <data name="VALIDATION_PHONE_NUMBER_IS_REQUIRED" xml:space="preserve"><value>ادخل رقم الموبايل.</value></data>
   <data name="VALIDATION_PHONE_NUMBER_MUST_BE_ONLY_DIGITS" xml:space="preserve"><value>رقم الموبايل يجب ان يحتوي على ارقام فقط.</value></data>
   <data name="VALIDATION_PHONE_NUMBER_MUST_BE_X_DIGITS" xml:space="preserve"><value>رقم الموبايل يجب ان يكون 11 رقما.</value></data>
@@ -371,6 +372,10 @@
   <data name="TEACHER_VOICE_DRAFT_NOT_READY" xml:space="preserve"><value>لم ينته تفريغ التسجيل بعد.</value></data>
   <data name="TEACHER_VOICE_DRAFT_ALREADY_SENT" xml:space="preserve"><value>أرسل هذا التسجيل من قبل.</value></data>
   <data name="TEACHER_VOICE_DRAFT_NOT_PENDING" xml:space="preserve"><value>لا ينتظر هذا التسجيل التفريغ.</value></data>
+  <data name="TEACHER_THREAD_FOLLOW_UP_NOT_ALLOWED" xml:space="preserve"><value>لا يمكن ارسال سؤال متابعة لهذا السؤال الان.</value></data>
+  <data name="TEACHER_THREAD_NOT_ANSWERED" xml:space="preserve"><value>لم يرد المعلم على هذا السؤال بعد.</value></data>
+  <data name="TEACHER_THREAD_ALREADY_RATED" xml:space="preserve"><value>قيمت هذه الاجابة من قبل.</value></data>
+  <data name="TEACHER_THREAD_RATING_INVALID" xml:space="preserve"><value>اختر تقييما من 1 الى 5.</value></data>
   <data name="FUNNEL_ANONYMOUS_ID_REQUIRED" xml:space="preserve"><value>معرف الزائر مطلوب.</value></data>
   <data name="FUNNEL_EVENT_TYPE_INVALID" xml:space="preserve"><value>نوع الحدث غير صالح.</value></data>
   <data name="CLIENT_ERROR_MESSAGE_REQUIRED" xml:space="preserve"><value>رسالة الخطأ مطلوبة.</value></data>

@@ -12,6 +12,7 @@ using Elmanhg.Api.Authorization;
 using Elmanhg.Api.FileStorage;
 using Elmanhg.Api.Hosting;
 using Elmanhg.Api.RateLimiting;
+using Elmanhg.Api.Realtime;
 using Elmanhg.Api.Workers;
 using Elmanhg.Application;
 using Elmanhg.Application.Auth.SeedAdmin;
@@ -84,6 +85,8 @@ builder.Services.AddHostedService<ExpiredExamSubmissionWorker>();
 builder.Services.AddHostedService<SubscriptionLapseWorker>();
 builder.Services.AddHostedService<LessonContentIndexWorker>();
 builder.Services.AddHostedService<TeacherVoiceTranscriptionWorker>();
+builder.Services.AddHostedService<TeacherThreadSlaWorker>();
+builder.Services.AddElmanhgRealtime();
 builder.Services.AddAuthRateLimiting();
 #endregion
 
@@ -98,6 +101,23 @@ if (MigrationCommand.IsRequested(app.Configuration))
     try
     {
         await MigrationCommand.RunAsync(app.Services, CancellationToken.None);
+    }
+    finally
+    {
+        await Serilog.Log.CloseAndFlushAsync();
+    }
+
+    return;
+}
+#endregion
+
+#region LOAD-TEST SEED
+// deploy/load-test.sh runs `migrate --SeedLoadTestAndExit=true`: seed the load-test curriculum and students, then exit before the HTTP pipeline.
+if (LoadTestSeedCommand.IsRequested(app.Configuration))
+{
+    try
+    {
+        Environment.ExitCode = await LoadTestSeedCommand.RunAsync(app.Services, app.Configuration, app.Environment, CancellationToken.None);
     }
     finally
     {
@@ -141,6 +161,8 @@ app.UseMiddleware<CoreExceptionMiddleware>();
 app.UseRateLimiter();
 
 app.MapControllers();
+
+app.MapElmanhgRealtime();
 
 app.MapHealthChecks("/health").AllowAnonymous();
 

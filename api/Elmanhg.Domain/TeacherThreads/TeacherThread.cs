@@ -12,6 +12,8 @@ public partial class TeacherThread : AuditEntity
     public DateTimeOffset SlaDueAt { get; private set; }
     public Guid? TeacherId { get; private set; }
     public DateTimeOffset? ClaimedAt { get; private set; }
+    public DateTimeOffset? ClosedAt { get; private set; }
+    public int? Rating { get; private set; }
     public uint Version { get; private set; }
     public List<TeacherMessage> Messages { get; private set; } = [];
 

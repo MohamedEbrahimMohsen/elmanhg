@@ -62,12 +62,14 @@ Prometheus receives OTLP from the collector (`--web.enable-otlp-receiver`). Name
 | `elmanhg.payment.notifications` | counter | {notification} | `elmanhg.outcome` (`PaymentNotificationOutcome`) | `PaymentNotificationMetricsBehaviour` | `elmanhg_payment_notifications_total` |
 | `elmanhg.otp.sends` | counter | {message} | `elmanhg.channel` (`WhatsApp`, `Sms`, `Email`), `elmanhg.outcome` (`Delivered`, `Failed`) | `OtpChannelRouter` | `elmanhg_otp_sends_total` |
 | `elmanhg.client.errors` | counter | {error} | `elmanhg.source` (`Window`, `UnhandledRejection`, `Route`) | `ReportClientErrorHandler` | `elmanhg_client_errors_total` |
+| `elmanhg.ask_teacher.sla_events` | counter | {event} | `elmanhg.kind` (`FirstReminder`, `SecondReminder`, `Breach`) | `ProcessTeacherThreadSlaHandler` | `elmanhg_ask_teacher_sla_events_total` |
 | `elmanhg.job.runs` | counter | {run} | `elmanhg.job`, `elmanhg.outcome` (`Succeeded`, `PartiallyFailed`, `Failed`) | `BackgroundJobMetrics` | `elmanhg_job_runs_total` |
 | `elmanhg.job.duration` | histogram | s | `elmanhg.job`, `elmanhg.outcome` | `BackgroundJobMetrics` | `elmanhg_job_duration_seconds_*` |
 | `elmanhg.job.items` | counter | {item} | `elmanhg.job`, `elmanhg.outcome` (`Succeeded`, `Failed`) | `BackgroundJobMetrics` | `elmanhg_job_items_total` |
 | `elmanhg.job.last_success` | gauge | s (unix time) | `elmanhg.job` | `BackgroundJobMetrics` | `elmanhg_job_last_success_seconds` |
 | `elmanhg.job.interval` | gauge | s | `elmanhg.job` | `BackgroundJobMetrics` | `elmanhg_job_interval_seconds` |
 | `http.server.request.duration` | histogram | s | `http.route`, `http.request.method`, `http.response.status_code` | ASP.NET Core (api), FastAPI (ai) | `http_server_request_duration_seconds_*` |
+| (recording rule) | p95 per route | s | `http_route` | Prometheus, over sessions, exams and browse routes of the API | `elmanhg:api_route_latency_p95:rate15m` |
 | `http.client.request.duration` | histogram | s | `server.address`, `http.response.status_code` | HttpClient (api) | `http_client_request_duration_seconds_*` |
 | `System.Runtime` meter | various | | | .NET runtime (GC, memory, thread pool) | `dotnet_*` |
 | `gen_ai.client.operation.duration` | histogram | s | `gen_ai.operation.name` (`chat`, `embeddings`, `transcription`), `gen_ai.provider.name`, `gen_ai.request.model`, `error.type` on failure | `clients/metered.py` (ai) | `gen_ai_client_operation_duration_seconds_*` |
@@ -77,7 +79,7 @@ Prometheus receives OTLP from the collector (`--web.enable-otlp-receiver`). Name
 
 Request outcomes (`elmanhg.outcome` on `elmanhg.requests`): `Success`; `VALIDATION_FAILED` for any validation failure; `CANCELLED` when the caller went away; the error code of any other core exception (for example `SESSION_NOT_FOUND`, `AI_SERVICE_UNAVAILABLE`); `UNHANDLED_EXCEPTION` otherwise. Every tag value is a type name, an enum name or an error code, never an id or user data.
 
-Background jobs (`elmanhg.job`): `exam-auto-submit`, `subscription-lapse`, `lesson-content-index`, `teacher-voice-transcription`. A job registers when its worker starts (last success = now). Each sweep records one run: `Failed` when listing the work threw, `PartiallyFailed` when at least one item failed, `Succeeded` otherwise. Only a sweep that is not `Failed` advances the last success.
+Background jobs (`elmanhg.job`): `exam-auto-submit`, `subscription-lapse`, `lesson-content-index`, `teacher-voice-transcription`, `ask-teacher-sla`. A job registers when its worker starts (last success = now). Each sweep records one run: `Failed` when listing the work threw, `PartiallyFailed` when at least one item failed, `Succeeded` otherwise. Only a sweep that is not `Failed` advances the last success.
 
 ## 5. Logs
 
@@ -146,6 +148,8 @@ Rules live in `deploy/observability/prometheus/rules/elmanhg.rules.yml`, and eac
 | `AiModelErrors` | ≥ 5 failed model or embedding calls in 15 m | warning | Business → AI calls shows the `error.type`; check the Anthropic or OpenAI key and status |
 | `ClientErrorSpike` | ≥ 50 browser errors in 15 m | warning | Loki: `{service_name="elmanhg-api"} |= "Client error from"`; usually a bad web deploy |
 | `PaymentNotificationNeedsReview` | any `FlaggedForReview` notification in 1 h | warning | Resolve it in the admin payment log ([docs/paymob.md](paymob.md)) |
+| `ApiHotPathSlow` | p95 of a sessions/exams/browse route > 1 s over 15 m with > 0.05 rps, for 15 m | warning | Service health → API p95 by route; compare with the [docs/performance.md](performance.md) budgets; check the DB ([docs/performance.md](performance.md) §6) and recent deploys |
+| `AskTeacherSlaBreached` | any `Breach` in 15 m | warning | Open the teacher inbox as admin, or contact the subject's teachers; `ask-teacher-sla` Worker logs show the thread id ([docs/ask-teacher.md](ask-teacher.md), SLA) |
 
 Every alert carries `summary` and `runbook` annotations.
 

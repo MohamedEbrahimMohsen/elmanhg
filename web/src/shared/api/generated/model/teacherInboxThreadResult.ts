@@ -24,4 +24,9 @@ export interface TeacherInboxThreadResult {
   /** @nullable */
   claimedAt: string | null;
   messages: TeacherMessageResult[];
+  /**
+     * @nullable
+     * @pattern ^-?(?:0|[1-9]\d*)$
+     */
+  rating: number | string | null;
 }

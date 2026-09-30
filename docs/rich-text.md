@@ -36,7 +36,8 @@ The editor produces these shapes with `@tiptap/extension-mathematics`, which als
 
 ## Rendering
 
-- `RichTextViewer` is the only renderer of lesson rich text. It runs `renderMath(html)` and then `SafeHtml`.
+- `RichTextViewer` is the only renderer of lesson rich text. HTML without math nodes goes straight to `SafeHtml`. HTML with math renders its text through `SafeHtml` first, while KaTeX and its CSS load on demand (a lazy chunk, loaded once per page), then re-renders with `renderMath(html)`. So the text shows before the formulas, and later views with math render at once ([docs/performance.md](performance.md) §4).
+- Before rendering, every `img` gets `decoding="async"`, and every image after the first gets `loading="lazy"`.
 - `renderMath` replaces the content of every `[data-type="inline-math"]` and `[data-type="block-math"]` node with KaTeX `renderToString` output. `block-math` renders in `displayMode`. `throwOnError` is `false`, so invalid LaTeX shows as a KaTeX error instead of breaking the page.
 - The `.rich-text` class styles the output with design tokens only. LaTeX, code and preformatted text are `direction: ltr` with `unicode-bidi: isolate`, so they read correctly inside Arabic text.
 
@@ -45,6 +46,8 @@ The editor produces these shapes with `@tiptap/extension-mathematics`, which als
 - Upload: `POST /api/lessons/{lessonId}/images` (multipart, field `file`, policy `Content.Manage`). The response is `{ "url": "..." }`, which the editor puts in an `img` tag with the required description as `alt`.
 - Allowed: `.png` `.jpg` `.jpeg` `.webp` `.gif`, and the content type must match (`image/png`, `image/jpeg`, `image/webp`, `image/gif`). SVG is excluded because it can carry script and media is served from the API origin.
 - Size cap: `Content:LessonImageMaxSizeInMb` (default 5).
+- Before the upload, the editor downscales the image to WebP (longest edge at most 1600 px, quality 0.8) when the browser supports it (`createImageBitmap` and `OffscreenCanvas`) and the result is smaller. GIFs are kept as they are, and anything that fails falls back to the original file.
+- Public media is served with `Cache-Control: public, max-age=31536000, immutable`, because a key is never rewritten.
 - Key: `lessons/{lessonId}/{random guid}{lower-case extension}`. Files are public-read by an unguessable key.
 - Storage: `IFileStorage`, selected by `FileStorage:Provider`. The `Local` provider writes under `FileStorage:LocalRootPath` (relative paths resolve against the API content root) and the API serves it at `FileStorage:PublicBaseUrl` (`/api/media`) with `X-Content-Type-Options: nosniff`. An S3-compatible adapter is pending.
 - Every upload is audited as `Lesson.UploadImage` (see `docs/audit-log.md`). Images that are uploaded but never referenced are not cleaned up yet.

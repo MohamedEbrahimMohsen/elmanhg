@@ -405,7 +405,7 @@ Prices, billing periods and quotas are configuration (`Subscriptions` section, s
 1. Student (with add-on) opens "اسأل معلّم" from a lesson or question, or the quiz attempt being asked about. Context (subject/unit/lesson/question) is attached automatically; student writes text and may attach an image (e.g. a photo of their work).
    Each new question counts against the monthly quota, which resets on the 1st of each calendar month in `DailyQuotaTimeZone` (Africa/Cairo); a follow-up does not count. The student may attach one photo (PNG, JPG or WEBP). Photos are private: only the owning student, a teacher assigned to the thread's subject, or an admin can open one (`docs/ask-teacher.md`).
 2. The thread is routed to the queue of teachers assigned to that subject. First teacher to claim it owns it.
-3. SLA clock starts at submission. Reminders to the teacher at 12h and 20h; admin alert on breach.
+3. SLA clock starts at submission. Reminders to the teacher at 12h and 20h; admin alert on breach. A follow-up starts a new 24-hour window; the clock never pauses.
 4. Teacher replies with **text or voice**. Voice is recorded in-browser, stored, and transcribed to Arabic text automatically. The teacher sees the transcript and can correct it before sending.
 5. Student receives the reply (audio player + text). Student may send **one** follow-up on the same thread; the teacher replies once more; the thread then closes. Anything further is a new question against the monthly quota.
 6. Student rates the answer (1–5). Ratings are visible to admin.
@@ -438,7 +438,7 @@ Exports (admin only): JSONL per source, date-ranged, with PII stripped.
 |---|---|
 | Language | Arabic UI, RTL throughout. English only for admin technical fields if needed. |
 | Devices | Mobile-first responsive web. All interactions touch-friendly. v2 canvas and math input must work on phones. |
-| Performance | Lesson page < 2s on 3G-class connections; quiz question transition < 300ms (prefetch next). |
+| Performance | Lesson page < 2s on 3G-class connections; quiz question transition < 300ms (prefetch next). Budgets and how they are measured: docs/performance.md. |
 | Availability | 99.5% monthly, measured and alerted as in docs/observability.md. Exam sessions auto-save every answer; a refresh resumes the session. |
 | Security | Role-based authorisation on every endpoint; teacher subject scoping enforced server-side; Paymob webhooks HMAC-verified; rate limits on auth and Avatar. |
 | Privacy | Students identified to teachers by display name only. Training exports strip PII. |
@@ -482,6 +482,7 @@ Payment(id, student_id, subscription_id?, plan, period, period_months, amount_mi
 TeacherThread(id, student_id, teacher_id?, subject_id, context_json, status[Open|Answered|Closed], submitted_at, sla_due_at, claimed_at?, closed_at?, rating?)  -- docs/ask-teacher.md
 TeacherMessage(id, thread_id, sender_id, kind[Text|Voice], text, image_url?, audio_url?, audio_duration_seconds?, transcript_final bool, student_read_at?, created_at)
 TeacherVoiceDraft(id, thread_id, teacher_id, audio_key, audio_url, audio_duration_seconds, status[Pending|Ready|Failed|Sent], transcript?, transcription_model?, attempts, next_attempt_at?, recorded_at, transcribed_at?, sent_message_id?)  -- transcription job; docs/ask-teacher.md
+TeacherThreadSlaEvent(id, thread_id, kind[FirstReminder|SecondReminder|Breach], sla_due_at, teacher_id?, occurred_at)  -- one per SLA window and stage; reminders and breach record (docs/ask-teacher.md)
 
 AvatarConversation(id, student_id, entry_point, subject_id?, unit_id?, lesson_id?, session_id?, question_id?, started_at, last_message_at, message_count)  -- docs/avatar.md
 AvatarMessage(id, conversation_id, position, role[Student|Assistant], text, created_at, model?, prompt_version?, input_tokens?, output_tokens?, cost_usd?, stop_reason?, history_message_count?, context_json?, citations_json?)  -- append-only; replies carry the context bundle, model and prompt version
@@ -538,7 +539,7 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 8. Exams are generated from blueprints; a blueprint cannot be saved with a shortfall.
 9. Exam retakes unlimited; best score displayed; all kept.
 10. Avatar never reveals answers during an in-progress exam.
-11. Ask a Teacher: 24h SLA from submission; one follow-up per thread; voice always transcribed; training record is text only.
+11. Ask a Teacher: 24h SLA from submission (a follow-up opens a new 24h window); one follow-up per thread; voice always transcribed; training record is text only.
 12. Subscription entitlement changes only through Paymob-verified events: HMAC-verified webhooks, or Paymob's response to an admin refund. The client never sets entitlement.
 13. Every content change and validation decision is audit-logged.
 

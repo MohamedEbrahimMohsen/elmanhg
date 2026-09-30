@@ -72,6 +72,7 @@ public static class DependencyInjection
         services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<ITeacherThreadRepository, TeacherThreadRepository>();
         services.AddScoped<ITeacherVoiceDraftRepository, TeacherVoiceDraftRepository>();
+        services.AddScoped<ITeacherThreadSlaEventRepository, TeacherThreadSlaEventRepository>();
         services.AddScoped<IFunnelEventRepository, FunnelEventRepository>();
         services.AddScoped<ILessonContentChunkRepository, LessonContentChunkRepository>();
         services.AddScoped<ILessonContentIndexRepository, LessonContentIndexRepository>();

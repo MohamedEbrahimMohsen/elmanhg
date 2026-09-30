@@ -16,8 +16,9 @@ export default defineConfig(({ mode }) => {
       tailwindcss(),
     ],
     resolve: { tsconfigPaths: true },
+    build: { manifest: true },
     server: {
-      ...(proxyTarget ? { proxy: { '/api': { target: proxyTarget, changeOrigin: true } } } : {}),
+      ...(proxyTarget ? { proxy: { '/api': { target: proxyTarget, changeOrigin: true, ws: true } } } : {}),
     },
     test: {
       projects: [

@@ -6,7 +6,7 @@ public static class TeacherThreadResultGenerator
 {
     public static TeacherThreadResult Generate(TeacherThread thread, DateTimeOffset now)
     {
-        return new TeacherThreadResult(thread.Id, GenerateContext(thread.ReadContext()), thread.Status, thread.IsOverdueAt(now), thread.SubmittedAt, thread.SlaDueAt, GenerateMessages(thread), thread.HasUnreadReply());
+        return new TeacherThreadResult(thread.Id, GenerateContext(thread.ReadContext()), thread.Status, thread.IsOverdueAt(now), thread.SubmittedAt, thread.SlaDueAt, GenerateMessages(thread), thread.HasUnreadReply(), thread.Rating, thread.ClosedAt, thread.CanFollowUp(), thread.CanBeRated());
     }
 
     public static TeacherThreadSummaryResult GenerateSummary(TeacherThread thread, DateTimeOffset now)

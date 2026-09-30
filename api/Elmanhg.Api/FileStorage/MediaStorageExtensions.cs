@@ -28,6 +28,8 @@ public static class MediaStorageExtensions
             OnPrepareResponse = context =>
             {
                 context.Context.Response.Headers.XContentTypeOptions = "nosniff";
+                // Public media keys are write-once GUID paths, so a stored URL never serves different bytes.
+                context.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
             },
         });
         return app;

@@ -1,13 +1,18 @@
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
+using Elmanhg.Api.Realtime;
 using Elmanhg.Application.Exceptions;
+using Elmanhg.Application.Shared.Realtime;
 using Elmanhg.Application.TeacherInbox.SendVoiceReply;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.TeacherThreads;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Tests.Builders;
 using FluentAssertions;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using System.Linq.Expressions;
 using System.Security.Claims;
 using DomainErrorCodes = Elmanhg.Domain.SharedKernel.Exceptions.ErrorCodes;
@@ -25,6 +30,7 @@ public sealed class SendVoiceReplyHandlerTests
     private readonly IUserRepository _userRepository = Substitute.For<IUserRepository>();
     private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
     private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
+    private readonly ITeacherThreadNotifier _notifier = Substitute.For<ITeacherThreadNotifier>();
     private readonly User _teacher = User.CreateTeacher("Mohamed", "teacher@example.com");
     private readonly User _student = User.CreateStudentWithEmail("Ahmed", "student@example.com");
     private readonly List<TeacherThread> _threads = [];
@@ -44,7 +50,7 @@ public sealed class SendVoiceReplyHandlerTests
             .Returns(call => _drafts.FirstOrDefault(call.Arg<Expression<Func<TeacherVoiceDraft, bool>>>().Compile()));
         _userRepository.FindAsync(Arg.Any<Expression<Func<User, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<User>, IQueryable<User>>?>(), Arg.Any<Func<IQueryable<User>, IOrderedQueryable<User>>?>(), Arg.Any<bool>())
             .Returns(call => users.Where(call.Arg<Expression<Func<User, bool>>>().Compile()).ToList());
-        _handler = new SendVoiceReplyHandler(_teacherThreadRepository, _teacherVoiceDraftRepository, _teacherSubjectRepository, _userRepository, _timeProvider, _currentUserService);
+        _handler = new SendVoiceReplyHandler(_teacherThreadRepository, _teacherVoiceDraftRepository, _teacherSubjectRepository, _userRepository, _timeProvider, _currentUserService, _notifier);
     }
 
     [Fact]
@@ -134,6 +140,37 @@ public sealed class SendVoiceReplyHandlerTests
         await Handle(thread.Id, draft.Id);
 
         draft.Status.Should().Be(TeacherVoiceDraftStatus.Sent);
+        await _teacherThreadRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_VoiceReply_NotifiesStudentAfterSaving()
+    {
+        var thread = SeedThread(new TeacherThreadBuilder().ClaimedBy(_teacher.Id));
+
+        await Handle(thread.Id, ReadyDraft(thread).Id);
+
+        await _notifier.Received(1).NotifyReplyAsync(_student.Id, thread.Id, Arg.Any<CancellationToken>());
+        Received.InOrder(() =>
+        {
+            _teacherThreadRepository.SaveChangesAsync(Arg.Any<CancellationToken>());
+            _notifier.NotifyReplyAsync(_student.Id, thread.Id, Arg.Any<CancellationToken>());
+        });
+    }
+
+    [Fact]
+    public async Task Handle_PushFails_StillReturnsSavedVoiceReply()
+    {
+        var thread = SeedThread(new TeacherThreadBuilder().ClaimedBy(_teacher.Id));
+        var draft = ReadyDraft(thread);
+        var hubContext = Substitute.For<IHubContext<NotificationsHub>>();
+        hubContext.Clients.User(Arg.Any<string>()).SendCoreAsync(Arg.Any<string>(), Arg.Any<object?[]>(), Arg.Any<CancellationToken>()).ThrowsAsync(new IOException("backplane down"));
+        var notifier = new SignalRTeacherThreadNotifier(hubContext, NullLogger<SignalRTeacherThreadNotifier>.Instance);
+        var handler = new SendVoiceReplyHandler(_teacherThreadRepository, _teacherVoiceDraftRepository, _teacherSubjectRepository, _userRepository, _timeProvider, _currentUserService, notifier);
+
+        var result = await handler.Handle(new SendVoiceReplyCommand(thread.Id, draft.Id, CorrectedText), TestContext.Current.CancellationToken);
+
+        (result.Status, draft.Status).Should().Be((TeacherThreadStatus.Answered, TeacherVoiceDraftStatus.Sent));
         await _teacherThreadRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 

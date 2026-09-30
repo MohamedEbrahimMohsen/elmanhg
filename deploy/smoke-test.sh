@@ -20,15 +20,6 @@ cp .env.example .smoke/.env
 cp api.env.example .smoke/api.env
 cp ai.env.example .smoke/ai.env
 
-set_env() {
-  local file=$1 key=$2 value=$3
-  if grep -q "^$key=" "$file"; then
-    sed -i "s|^$key=.*|$key=$value|" "$file"
-  else
-    printf '%s=%s\n' "$key" "$value" >> "$file"
-  fi
-}
-
 set_env "$ENV_FILE" COMPOSE_PROJECT_NAME "${SMOKE_PROJECT_NAME:-elmanhg-smoke}"
 set_env "$ENV_FILE" COMPOSE_PROFILES ai
 set_env "$ENV_FILE" IMAGE_REGISTRY local
@@ -103,6 +94,8 @@ asset=$(grep -o '/assets/[^"]*\.js' <<< "$shell" | head -1)
 [ -n "$asset" ] || fail "no /assets/*.js referenced by the SPA shell"
 asset_headers=$(curl -fsSI "$base$asset")
 grep -i 'cache-control:.*immutable' <<< "$asset_headers" > /dev/null || fail "$asset is not cached as immutable"
+asset_br=$(curl -fsSI -H 'Accept-Encoding: br' "$base$asset")
+grep -i '^content-encoding: br' <<< "$asset_br" > /dev/null || fail "$asset is not served brotli-precompressed"
 
 # Signals the observability assertions below look for; the public checks run with or without the profile.
 health=$(curl -fsS "$base/api/health") || fail "/api/health is not served"

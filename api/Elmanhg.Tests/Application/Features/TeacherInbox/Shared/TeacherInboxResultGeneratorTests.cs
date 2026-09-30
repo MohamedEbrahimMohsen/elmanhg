@@ -59,4 +59,25 @@ public sealed class TeacherInboxResultGeneratorTests
 
         (result.CanClaim, result.CanReply, result.IsClaimedByMe, result.TeacherName).Should().Be((false, false, false, "Sara"));
     }
+
+    [Fact]
+    public void GenerateThread_RatedThread_ReturnsRating()
+    {
+        var thread = new TeacherThreadBuilder().ForStudent(_studentId).AnsweredBy(_callerId).Rated(4).Build();
+
+        var result = TeacherInboxResultGenerator.GenerateThread(thread, _names, _callerId, thread.SubmittedAt);
+
+        result.Rating.Should().Be(4);
+    }
+
+    [Fact]
+    public void GenerateReminder_UnclaimedOverdueThread_MapsFields()
+    {
+        var thread = new TeacherThreadBuilder().ForStudent(_studentId).Build();
+
+        var result = TeacherInboxResultGenerator.GenerateReminder(thread, TeacherThreadSlaEventKind.SecondReminder, _callerId, thread.SlaDueAt.AddMinutes(1));
+
+        (result.ThreadId, result.SubjectName, result.LessonName, result.QuestionText).Should().Be((thread.Id, "Physics", "Newton's laws", "Why is F = ma?"));
+        (result.Kind, result.IsClaimedByMe, result.IsOverdue, result.SlaDueAt).Should().Be((TeacherThreadSlaEventKind.SecondReminder, false, true, thread.SlaDueAt));
+    }
 }

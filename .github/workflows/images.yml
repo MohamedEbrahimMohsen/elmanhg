@@ -26,13 +26,26 @@ concurrency:
 jobs:
   deploy-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
       - name: Whole-stack smoke test (build, migrate, serve, backup, restore drill)
         run: bash deploy/smoke-test.sh
+      # Reuses the local/elmanhg-*:smoke images the smoke step built (docs/performance.md §5).
+      - name: Load test smoke (k6 API budgets + throttled lesson page)
+        run: bash deploy/load-test.sh
+        env:
+          LOAD_SKIP_BUILD: '1'
+          LOAD_IMAGE_TAG: smoke
+          LOAD_PROFILE: smoke
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: load-test-smoke
+          path: deploy/.loadtest-results
+          include-hidden-files: true
 
   publish:
     needs: deploy-smoke

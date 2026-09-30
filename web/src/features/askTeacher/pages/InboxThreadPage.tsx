@@ -6,6 +6,7 @@ import { useGetInboxThread } from '@/shared/api/generated/teacher-inbox/teacher-
 import { InboxThreadActions } from '../components/InboxThreadActions';
 import { ThreadContextCard } from '../components/ThreadContextCard';
 import { ThreadMessage } from '../components/ThreadMessage';
+import { ThreadRating } from '../components/ThreadRating';
 
 export interface InboxThreadPageProps {
   threadId: string;
@@ -64,6 +65,7 @@ export function InboxThreadPage({ threadId }: InboxThreadPageProps) {
           />
         ))}
       </div>
+      {data.rating != null ? <ThreadRating rating={Number(data.rating)} /> : null}
       <InboxThreadActions thread={data} />
     </section>
   );

@@ -57,7 +57,10 @@
 		@shell not path /assets/*
 		header @shell Cache-Control "no-cache"
 		try_files {path} /index.html
-		file_server
+		# npm run build writes .br and .gz next to every text asset (docs/performance.md); Caddy cannot brotli on the fly.
+		file_server {
+			precompressed br gzip
+		}
 	}
 }
 

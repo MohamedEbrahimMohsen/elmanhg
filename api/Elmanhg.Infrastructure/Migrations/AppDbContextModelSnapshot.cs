@@ -1381,6 +1381,8 @@ namespace Elmanhg.Infrastructure.Migrations
 
                     b.HasIndex("StudentId", "QuestionId", "CreatedAt");
 
+                    b.HasIndex(new[] { "StudentId", "CreatedAt" }, "IX_Attempts_StudentId_CreatedAt");
+
                     b.ToTable("Attempts");
                 });
 
@@ -1827,6 +1829,9 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("ClaimedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTimeOffset?>("ClosedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Context")
                         .IsRequired()
                         .HasColumnType("jsonb");
@@ -1842,6 +1847,9 @@ namespace Elmanhg.Infrastructure.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
+
+                    b.Property<int?>("Rating")
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset>("SlaDueAt")
                         .HasColumnType("timestamp with time zone");
@@ -1879,11 +1887,55 @@ namespace Elmanhg.Infrastructure.Migrations
 
                     b.HasIndex("TeacherId");
 
+                    b.HasIndex("Status", "SlaDueAt");
+
                     b.HasIndex("StudentId", "SubmittedAt");
 
                     b.HasIndex("SubjectId", "Status", "SubmittedAt");
 
-                    b.ToTable("TeacherThreads");
+                    b.ToTable("TeacherThreads", t =>
+                        {
+                            t.HasCheckConstraint("CK_TeacherThreads_Rating", "\"Rating\" IS NULL OR \"Rating\" BETWEEN 1 AND 5");
+                        });
+                });
+
+            modelBuilder.Entity("Elmanhg.Domain.TeacherThreads.TeacherThreadSlaEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("SlaDueAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("TeacherId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ThreadId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeacherId");
+
+                    b.HasIndex("ThreadId", "Kind", "SlaDueAt")
+                        .IsUnique();
+
+                    b.ToTable("TeacherThreadSlaEvents");
                 });
 
             modelBuilder.Entity("Elmanhg.Domain.TeacherThreads.TeacherVoiceDraft", b =>
@@ -2585,6 +2637,20 @@ namespace Elmanhg.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Elmanhg.Domain.TeacherThreads.TeacherThreadSlaEvent", b =>
+                {
+                    b.HasOne("Elmanhg.Domain.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Elmanhg.Domain.TeacherThreads.TeacherThread", null)
+                        .WithMany()
+                        .HasForeignKey("ThreadId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Elmanhg.Domain.TeacherThreads.TeacherVoiceDraft", b =>

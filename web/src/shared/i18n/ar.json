@@ -259,7 +259,11 @@
     "TEACHER_VOICE_AUDIO_NOT_FOUND": "ملف التسجيل غير موجود.",
     "TEACHER_VOICE_DRAFT_NOT_READY": "لم ينته تفريغ التسجيل بعد.",
     "TEACHER_VOICE_DRAFT_ALREADY_SENT": "أرسل هذا التسجيل من قبل.",
-    "TEACHER_VOICE_DRAFT_NOT_PENDING": "لا ينتظر هذا التسجيل التفريغ."
+    "TEACHER_VOICE_DRAFT_NOT_PENDING": "لا ينتظر هذا التسجيل التفريغ.",
+    "TEACHER_THREAD_FOLLOW_UP_NOT_ALLOWED": "لا يمكن ارسال سؤال متابعة لهذا السؤال الان.",
+    "TEACHER_THREAD_NOT_ANSWERED": "لم يرد المعلم على هذا السؤال بعد.",
+    "TEACHER_THREAD_ALREADY_RATED": "قيمت هذه الاجابة من قبل.",
+    "TEACHER_THREAD_RATING_INVALID": "اختر تقييما من 1 الى 5."
   },
   "error": {
     "title": "حدث خطأ"

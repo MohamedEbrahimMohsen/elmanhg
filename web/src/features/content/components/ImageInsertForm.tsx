@@ -7,6 +7,7 @@ import { FormRootError } from '@/shared/form/FormRootError';
 import { SubmitButton } from '@/shared/form/SubmitButton';
 import { TextField } from '@/shared/form/TextField';
 import { Button } from '@/shared/ui/button';
+import { optimizeImage } from '../api/optimizeImage';
 import { acceptedImageTypes, imageInsertSchema, type ImageInsertValues } from '../schemas/imageInsertSchema';
 
 export interface ImageInsertFormProps {
@@ -39,7 +40,7 @@ export function ImageInsertForm({ onUpload, onInsert, onCancel }: ImageInsertFor
       form={form}
       serverErrorFields={imageErrorFields}
       onSubmit={async (values) => {
-        const url = await onUpload(values.file);
+        const url = await onUpload(await optimizeImage(values.file));
         onInsert(url, values.description);
       }}
     >

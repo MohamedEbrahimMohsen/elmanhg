@@ -59,6 +59,9 @@ public static class ErrorCodes
     public const string TeacherVoiceDraftNotReady = "TEACHER_VOICE_DRAFT_NOT_READY";
     public const string TeacherVoiceDraftAlreadySent = "TEACHER_VOICE_DRAFT_ALREADY_SENT";
     public const string TeacherVoiceDraftNotPending = "TEACHER_VOICE_DRAFT_NOT_PENDING";
+    public const string TeacherThreadFollowUpNotAllowed = "TEACHER_THREAD_FOLLOW_UP_NOT_ALLOWED";
+    public const string TeacherThreadNotAnswered = "TEACHER_THREAD_NOT_ANSWERED";
+    public const string TeacherThreadAlreadyRated = "TEACHER_THREAD_ALREADY_RATED";
 
     // SUBSCRIPTIONS
     public const string SubscriptionPeriodInvalid = "SUBSCRIPTION_PERIOD_INVALID";

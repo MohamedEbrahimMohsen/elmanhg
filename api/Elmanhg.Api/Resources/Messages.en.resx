@@ -99,6 +99,7 @@
   <data name="PASSWORD_MUST_CONTAIN_DIGIT" xml:space="preserve"><value>Password must include a number.</value></data>
   <data name="TOO_MANY_REQUESTS" xml:space="preserve"><value>Too many requests. Wait a moment and try again.</value></data>
   <data name="ADMIN_SEED_FAILED" xml:space="preserve"><value>The admin account could not be seeded.</value></data>
+  <data name="LOAD_TEST_SEED_FAILED" xml:space="preserve"><value>The load-test data could not be seeded.</value></data>
   <data name="VALIDATION_PHONE_NUMBER_IS_REQUIRED" xml:space="preserve"><value>Enter your mobile number.</value></data>
   <data name="VALIDATION_PHONE_NUMBER_MUST_BE_ONLY_DIGITS" xml:space="preserve"><value>Mobile number must contain digits only.</value></data>
   <data name="VALIDATION_PHONE_NUMBER_MUST_BE_X_DIGITS" xml:space="preserve"><value>Mobile number must be 11 digits.</value></data>
@@ -371,6 +372,10 @@
   <data name="TEACHER_VOICE_DRAFT_NOT_READY" xml:space="preserve"><value>The recording is still being transcribed.</value></data>
   <data name="TEACHER_VOICE_DRAFT_ALREADY_SENT" xml:space="preserve"><value>This recording was already sent.</value></data>
   <data name="TEACHER_VOICE_DRAFT_NOT_PENDING" xml:space="preserve"><value>This recording is not waiting for transcription.</value></data>
+  <data name="TEACHER_THREAD_FOLLOW_UP_NOT_ALLOWED" xml:space="preserve"><value>You can't send a follow-up on this question now.</value></data>
+  <data name="TEACHER_THREAD_NOT_ANSWERED" xml:space="preserve"><value>The teacher has not answered this question yet.</value></data>
+  <data name="TEACHER_THREAD_ALREADY_RATED" xml:space="preserve"><value>You have already rated this answer.</value></data>
+  <data name="TEACHER_THREAD_RATING_INVALID" xml:space="preserve"><value>Choose a rating from 1 to 5.</value></data>
   <data name="FUNNEL_ANONYMOUS_ID_REQUIRED" xml:space="preserve"><value>The visitor id is required.</value></data>
   <data name="FUNNEL_EVENT_TYPE_INVALID" xml:space="preserve"><value>The event type is not valid.</value></data>
   <data name="CLIENT_ERROR_MESSAGE_REQUIRED" xml:space="preserve"><value>The error message is required.</value></data>
