@@ -78,4 +78,7 @@ public static class ErrorCodes
 
     // CONTENT RETRIEVAL
     public const string ContentEmbeddingDimensionsInvalid = "CONTENT_EMBEDDING_DIMENSIONS_INVALID";
+
+    // ESSAY GRADING
+    public const string EssayGradeNotPending = "ESSAY_GRADE_NOT_PENDING";
 }

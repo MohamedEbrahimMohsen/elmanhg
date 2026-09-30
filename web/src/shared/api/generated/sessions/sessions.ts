@@ -28,6 +28,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  EssayGradeResult,
   SessionItemResult,
   SessionResult,
   StartQuizSessionCommand,
@@ -432,3 +433,162 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getFinishSessionMutationOptions(options), queryClient);
     }
+    export const getGetEssayGradeUrl = (sessionId: string,
+    questionId: string,) => {
+
+
+
+
+  return `/api/sessions/${sessionId}/questions/${questionId}/essay-grade`
+}
+
+export const getEssayGrade = async (sessionId: string,
+    questionId: string, options?: Parameters<typeof http>[1]): Promise<EssayGradeResult> => {
+
+  return http<EssayGradeResult>(getGetEssayGradeUrl(sessionId,questionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetEssayGradeQueryKey = (sessionId: string,
+    questionId: string,) => {
+    return [
+    `/api/sessions/${sessionId}/questions/${questionId}/essay-grade`
+    ] as const;
+    }
+
+
+export const getGetEssayGradeQueryOptions = <TData = Awaited<ReturnType<typeof getEssayGrade>>, TError = unknown>(sessionId: string,
+    questionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssayGrade>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetEssayGradeQueryKey(sessionId,questionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEssayGrade>>> = ({ signal }) => getEssayGrade(sessionId,questionId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: sessionId !== null && sessionId !== undefined && questionId !== null && questionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getEssayGrade>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetEssayGradeQueryResult = NonNullable<Awaited<ReturnType<typeof getEssayGrade>>>
+export type GetEssayGradeQueryError = unknown
+
+
+export function useGetEssayGrade<TData = Awaited<ReturnType<typeof getEssayGrade>>, TError = unknown>(
+ sessionId: string,
+    questionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssayGrade>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getEssayGrade>>,
+          TError,
+          Awaited<ReturnType<typeof getEssayGrade>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetEssayGrade<TData = Awaited<ReturnType<typeof getEssayGrade>>, TError = unknown>(
+ sessionId: string,
+    questionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssayGrade>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getEssayGrade>>,
+          TError,
+          Awaited<ReturnType<typeof getEssayGrade>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetEssayGrade<TData = Awaited<ReturnType<typeof getEssayGrade>>, TError = unknown>(
+ sessionId: string,
+    questionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssayGrade>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetEssayGrade<TData = Awaited<ReturnType<typeof getEssayGrade>>, TError = unknown>(
+ sessionId: string,
+    questionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEssayGrade>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetEssayGradeQueryOptions(sessionId,questionId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetEssayGradeSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getEssayGrade>>, TError = unknown>(sessionId: string,
+    questionId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getEssayGrade>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetEssayGradeQueryKey(sessionId,questionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEssayGrade>>> = ({ signal }) => getEssayGrade(sessionId,questionId, { signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getEssayGrade>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetEssayGradeSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getEssayGrade>>>
+export type GetEssayGradeSuspenseQueryError = unknown
+
+
+export function useGetEssayGradeSuspense<TData = Awaited<ReturnType<typeof getEssayGrade>>, TError = unknown>(
+ sessionId: string,
+    questionId: string, options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getEssayGrade>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetEssayGradeSuspense<TData = Awaited<ReturnType<typeof getEssayGrade>>, TError = unknown>(
+ sessionId: string,
+    questionId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getEssayGrade>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetEssayGradeSuspense<TData = Awaited<ReturnType<typeof getEssayGrade>>, TError = unknown>(
+ sessionId: string,
+    questionId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getEssayGrade>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetEssayGradeSuspense<TData = Awaited<ReturnType<typeof getEssayGrade>>, TError = unknown>(
+ sessionId: string,
+    questionId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getEssayGrade>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetEssayGradeSuspenseQueryOptions(sessionId,questionId,options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+

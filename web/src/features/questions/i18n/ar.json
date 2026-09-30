@@ -186,7 +186,18 @@
     "incorrect": "إجابة خاطئة",
     "score": "الدرجة {score} / {maxScore}",
     "gradeFailed": "لا يمكن تصحيح هذه المسودة بعد.",
-    "essayNotGradable": "تُصحَّح الأسئلة المقالية بمصحح الذكاء الاصطناعي، ولا يدعمها المصحح التجريبي."
+    "essayGradingHint": "يرسل «جرّب الإجابة» المقال إلى مصحح الذكاء الاصطناعي ليقيّم كل معيار، وقد يستغرق ذلك دقيقة.",
+    "essayGrading": "يصحّح مصحح الذكاء الاصطناعي المقال…",
+    "essay": {
+      "title": "تفاصيل تصحيح الذكاء الاصطناعي",
+      "justification": "تبرير الذكاء الاصطناعي",
+      "confidence": "الثقة: {confidence}٪",
+      "model": "النموذج {model} · إصدار التعليمات {promptVersion}"
+    }
+  },
+  "essayGrade": {
+    "criteria": "الدرجات حسب المعايير",
+    "criterionPoints": "{points} / {maxPoints}"
   },
   "view": {
     "answerLegend": "إجابتك",

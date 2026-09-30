@@ -95,6 +95,8 @@ For example, a history of correct, wrong, correct is Rest; wrong, correct is Cor
 
 Grading loads the `QuestionRevision` at `item.QuestionVersion` and calls `QuestionRevision.Grade(answer)`, which calls `QuestionGrader.Grade` with that snapshot's type, grading spec and max score. The live `Question` row is never used to grade. If a question is edited, retired or its lesson unpublished mid-session, the answer is still accepted and graded against the version the student saw (PRD §17 rule 2).
 
+Essays are graded asynchronously by the AI grader against the served revision (`EssayGrade`, [essay-grading.md](essay-grading.md)); student essay input (#119) connects essay grades to attempts.
+
 The validator checks that the answer is a JSON object of at most `Sessions:AnswerMaxLength` characters. The handler then checks the shape for the served type and returns 422 `QUESTION_ANSWER_INVALID` for a wrong shape, so a malformed answer never reaches the grader.
 
 ## Idempotency

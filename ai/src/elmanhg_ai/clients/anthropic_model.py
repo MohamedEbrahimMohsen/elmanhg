@@ -1,3 +1,4 @@
+import json
 from typing import Final, Self
 
 import anthropic
@@ -50,18 +51,29 @@ class AnthropicModelClient:
                     {"type": "text", "text": last.content},
                 ],
             }
+        model = request.model or self._model
         try:
             message = await self._client.messages.create(
-                model=self._model,
+                model=model,
                 max_tokens=request.max_tokens,
                 system=request.system,
                 messages=messages,
+                timeout=(
+                    request.timeout_seconds
+                    if request.timeout_seconds is not None
+                    else anthropic.not_given
+                ),
+                output_config=(
+                    {"format": {"type": "json_schema", "schema": json.loads(request.output_schema)}}
+                    if request.output_schema is not None
+                    else anthropic.omit
+                ),
             )
         except anthropic.APIError as error:
             logger.warning(
                 "model.call_failed",
                 provider=PROVIDER,
-                model=self._model,
+                model=model,
                 error_type=type(error).__name__,
                 status_code=getattr(error, "status_code", None),
             )

@@ -96,7 +96,7 @@ public class QuestionsController(IMediator mediator, IOptions<ContentOptions> co
     public async Task<ActionResult> GradeQuestionDraft([FromBody] GradeQuestionDraftRequest request, CancellationToken cancellationToken)
     {
         var fields = new QuestionFields(request.Type, request.Stem, request.Body, request.GradingSpec, request.Explanation, request.Difficulty, request.ObjectiveId, request.Tags ?? [], request.MaxScore);
-        var result = await mediator.Send(new GradeQuestionDraftQuery(fields, request.Answer), cancellationToken);
+        var result = await mediator.Send(new GradeQuestionDraftQuery(fields, request.Answer, request.LessonId), cancellationToken);
         return Ok(result);
     }
 }

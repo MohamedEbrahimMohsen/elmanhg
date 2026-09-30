@@ -6,6 +6,7 @@ using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Analytics;
 using Elmanhg.Domain.Avatar;
 using Elmanhg.Domain.ContentRetrieval;
+using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
@@ -58,6 +59,8 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
     public const string PaymentOpenReviewIndex = "IX_Payments_OpenReview";
     public const string SubscriptionLapseIndex = "IX_Subscriptions_Status_CurrentPeriodEnd";
     public const string AvatarMessagePositionIndex = "IX_AvatarMessages_ConversationId_Position";
+    public const string EssayGradePerQuestionIndex = "IX_EssayGrades_SessionId_QuestionId";
+    public const string UserActivityDayIndex = "IX_UserActivityDays_UserId_Day";
 
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<TeacherSubject> TeacherSubjects { get; set; }
@@ -83,11 +86,13 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
     public DbSet<TeacherVoiceDraft> TeacherVoiceDrafts { get; set; }
     public DbSet<TeacherThreadSlaEvent> TeacherThreadSlaEvents { get; set; }
     public DbSet<FunnelEvent> FunnelEvents { get; set; }
+    public DbSet<UserActivityDay> UserActivityDays { get; set; }
     public DbSet<LessonContentChunk> LessonContentChunks { get; set; }
     public DbSet<LessonContentIndex> LessonContentIndexes { get; set; }
     public DbSet<AvatarMessageUsage> AvatarMessageUsages { get; set; }
     public DbSet<AvatarConversation> AvatarConversations { get; set; }
     public DbSet<AvatarMessage> AvatarMessages { get; set; }
+    public DbSet<EssayGrade> EssayGrades { get; set; }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
@@ -180,9 +185,11 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         ConfigureTeacherThreadSlaEvents(modelBuilder);
         ConfigureTeacherSubjects(modelBuilder);
         ConfigureFunnelEvents(modelBuilder);
+        ConfigureUserActivityDays(modelBuilder);
         ConfigureContentRetrieval(modelBuilder);
         ConfigureAvatar(modelBuilder);
         ConfigureTrainingData(modelBuilder);
+        ConfigureEssayGrades(modelBuilder);
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
 
@@ -194,6 +201,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.Property(x => x.Role).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.SubjectInterestIds).IsRequired().HasDefaultValueSql("'{}'");
+            builder.HasIndex(x => new { x.Role, x.CreationDate });
         });
     }
 
@@ -277,6 +285,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.Property(x => x.Difficulty).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.DifficultyChangedFrom).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.HasIndex(x => new { x.QuestionId, x.DecidedAt });
+            builder.HasIndex(x => x.DecidedAt);
         });
     }
 
@@ -344,6 +353,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.HasIndex(x => new { x.StudentId, x.QuestionId, x.CreatedAt });
             builder.HasIndex(x => new { x.StudentId, x.CreatedAt }, AttemptStudentCreatedAtIndex);
             builder.HasIndex(x => new { x.SessionId, x.QuestionId }).IsUnique().HasDatabaseName(AttemptPerQuestionIndex);
+            builder.HasIndex(x => x.CreatedAt);
         });
     }
 
@@ -409,6 +419,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.HasIndex(x => x.RefundTransactionId, PaymentRefundTransactionIndex).IsUnique().HasFilter("\"RefundTransactionId\" IS NOT NULL");
             builder.HasIndex(x => x.CreationDate);
             builder.HasIndex(x => x.CreationDate, PaymentOpenReviewIndex).HasFilter("\"ReviewReason\" IS NOT NULL AND \"ReviewResolvedAt\" IS NULL");
+            builder.HasIndex(x => x.CompletedAt);
         });
     }
 
@@ -439,6 +450,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.Property(x => x.AudioUrl).HasMaxLength(MediaUrlMaxLength);
             builder.HasIndex(x => x.AudioUrl).HasFilter("\"AudioUrl\" IS NOT NULL");
             builder.Property(x => x.TranscriptFinal).HasDefaultValue(false);
+            builder.HasIndex(x => x.CreatedAt);
         });
     }
 
@@ -465,6 +477,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.HasOne<TeacherThread>().WithMany().HasForeignKey(x => x.ThreadId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.TeacherId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.ThreadId, x.Kind, x.SlaDueAt }).IsUnique();
+            builder.HasIndex(x => new { x.Kind, x.OccurredAt });
         });
     }
 
@@ -487,6 +500,17 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.Type, x.OccurredAt });
             builder.HasIndex(x => x.AnonymousId);
+        });
+    }
+
+    private static void ConfigureUserActivityDays(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<UserActivityDay>(builder =>
+        {
+            builder.Property(x => x.Id).ValueGeneratedNever();
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.UserId, x.Day }, UserActivityDayIndex).IsUnique();
+            builder.HasIndex(x => x.Day);
         });
     }
 
@@ -553,6 +577,32 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         });
     }
 
+    private static void ConfigureEssayGrades(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<EssayGrade>(builder =>
+        {
+            builder.Property(x => x.Answer).IsRequired().HasColumnType("jsonb");
+            builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.ReviewReason).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
+            builder.Property(x => x.Criteria).HasColumnType("jsonb");
+            builder.Property(x => x.Score).HasPrecision(9, 2);
+            builder.Property(x => x.NormalisedScore).HasPrecision(5, 4);
+            builder.Property(x => x.Confidence).HasPrecision(5, 4);
+            builder.Property(x => x.Model).HasMaxLength(AiIdentifierMaxLength);
+            builder.Property(x => x.PromptVersion).HasMaxLength(AiIdentifierMaxLength);
+            builder.Property(x => x.LastErrorCode).HasMaxLength(AiIdentifierMaxLength);
+            builder.Property(x => x.CostUsd).HasPrecision(12, 6);
+            builder.Property(x => x.Version).IsRowVersion();
+            builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Session>().WithMany().HasForeignKey(x => x.SessionId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Question>().WithMany().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(x => new { x.SessionId, x.QuestionId }).IsUnique().HasDatabaseName(EssayGradePerQuestionIndex);
+            builder.HasIndex(x => x.NextAttemptAt).HasFilter("\"Status\" = 'Pending'");
+            builder.HasIndex(x => new { x.SubjectId, x.Status });
+        });
+    }
+
     private static void ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>().HasQueryFilter(x => !x.IsDeleted);
@@ -580,6 +630,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         modelBuilder.Entity<TeacherVoiceDraft>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<TeacherThreadSlaEvent>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<FunnelEvent>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<UserActivityDay>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<LessonContentChunk>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<LessonContentIndex>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<AvatarMessageUsage>().HasQueryFilter(x => !x.IsDeleted);
@@ -588,5 +639,6 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         modelBuilder.Entity<AttemptTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<AvatarTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<TeacherThreadTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<EssayGrade>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

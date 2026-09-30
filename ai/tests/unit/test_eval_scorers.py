@@ -1,3 +1,5 @@
+import pytest
+
 from elmanhg_ai.eval.scorers import (
     score_citations,
     score_excludes,
@@ -5,6 +7,8 @@ from elmanhg_ai.eval.scorers import (
     score_language,
     score_length,
     score_numbered_steps,
+    score_total_error,
+    score_within,
 )
 
 KNOWN = {"explanation-1", "summary-1"}
@@ -65,3 +69,20 @@ def test_score_excludes_forbidden_term_fails() -> None:
 
 def test_score_excludes_clean_reply_passes() -> None:
     assert score_excludes("ارجع إلى الدرس.", ["HACKED", "iPhone"])
+
+
+def test_score_total_error_is_absolute_difference_over_max() -> None:
+    assert score_total_error(2, 5, 10) == 0.3
+    assert score_total_error(5, 2, 10) == 0.3
+
+
+def test_score_total_error_zero_max_raises_value_error() -> None:
+    with pytest.raises(ValueError, match="max_points must be positive"):
+        score_total_error(1, 1, 0)
+
+
+def test_score_within_tolerance_boundaries() -> None:
+    assert score_within(3, 2, 1)
+    assert score_within(1, 2, 1)
+    assert not score_within(4, 2, 1)
+    assert not score_within(3, 2, 0)

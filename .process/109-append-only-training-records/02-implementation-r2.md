@@ -30,3 +30,10 @@
 - Draining happens before publishing. If a handler throws, the drained events are lost, but that save fails anyway. Before this change they stayed queued for a retry of the same context.
 - `TeacherThreadPersistenceTests.cs` is now 106 lines, slightly over the ~100 guide.
 - The catch clause has a one-line comment documenting the non-obvious ordering invariant: EF inserts the training row before the xmin UPDATE.
+
+## Merge of origin/main (#104 dashboard metrics, #118 essay grader)
+
+- Conflicts in `IQuestionRepository.cs`, `AppDbContext.cs`, `DependencyInjection.cs` and `AppDbContextTests.cs` were resolved by keeping both sides. The migration list is in timestamp order: `_AddEssayGrades` (20260930051854), `_AddTrainingRecords` (20260930053010), `_AddDashboardMetrics` (20260930054113).
+- `AppDbContextModelSnapshot.cs` auto-merged and contains `EssayGrades`, `UserActivityDays` and the 3 training-record tables. `dotnet ef migrations has-pending-model-changes` reports "No changes have been made to the model since the last migration."
+- `dotnet build api/ -c Release` produced 0 errors and no openapi drift. `npm --prefix web run gen:api` produced no Orval drift. `dotnet test api/ -c Release` passed 3786, failed 0; the worktree has no `appsettings.json`, so this matches CI.
+- Training-data gap (not fixed, out of scope): #118's `EssayGrade` is a separate async aggregate keyed by (SessionId, QuestionId). `Complete` raises no domain event. `AttemptTrainingRecord` captures the essay `Attempt` when `AttemptsRecorded` fires, but not the later LLM grade (score, criteria, confidence, model, prompt version). `docs/training-data.md` says AI-graded attempts should be captured with `grade_json`. Closing the gap needs a new event plus either an append-only follow-up record or an essay-grade training record. That calls for a follow-up story. #104 touches no Session or Attempt write paths.

@@ -66,6 +66,6 @@ Essay and math-with-steps questions are marked **v2**:
 - Essay uses a keyword-overlap heuristic with a fake AI justification.
 - Math-with-steps checks only the final answer ("تصحيح الخطوات في الإصدار 2").
 
-The built app replaces the prototype's essay keyword list with a rubric (criteria, points, levels) and model answers (#117); essays are not served until student essay input (#119).
+The built app replaces the prototype's essay keyword list with a rubric (criteria, points, levels) and model answers (#117); essays are not served until student essay input (#119). The built app grades essays with Claude against the rubric (#118) instead of the keyword heuristic.
 
 For console testing, `window.ElmanhgTest` exposes `grade`, `normAr`, `servable`, `selectQuiz`, `mergeBlueprints` and `state()`.

@@ -11,7 +11,7 @@ The wire names are the `QuestionType` enum values. v1 grading follows PRD §6.
 - `TrueFalse`: a boolean. Exact match.
 - `Fill`: one string per blank. Normalised match (PRD §6.2) against an accepted-answers list per blank; credit per blank.
 - `Short`: a number or a string. Numeric within a tolerance (absolute or percent); text against an accepted list with normalisation.
-- `Essay` (v2): rich-text answer (#119), graded by the AI grader against the rubric and model answers (#118). Not servable until #119.
+- `Essay` (v2): plain-text answer (student input is #119), graded by the AI grader against the rubric and model answers ([essay-grading.md](essay-grading.md)). Not servable until #119.
 
 ## Body vs grading spec
 
@@ -147,7 +147,7 @@ A request whose `body` or `gradingSpec` breaks a rule gets `422` with the code b
 | Essay | every level has a description | `QUESTION_RUBRIC_LEVEL_DESCRIPTION_REQUIRED` |
 | Essay | level points are distinct, from 0 to the criterion's points, and include 0 and the full points | `QUESTION_RUBRIC_LEVEL_POINTS_INVALID` |
 | Essay | 1 to `Content:QuestionModelAnswersMaxCount` model answers | `QUESTION_MODEL_ANSWERS_COUNT_INVALID` |
-| Essay | no model answer is blank | `QUESTION_MODEL_ANSWER_REQUIRED` |
+| Essay | every model answer has text the AI grader can read: text, a formula, or an image with non-blank alt text, both as sent and after sanitising (an image with an empty alt is rejected) | `QUESTION_MODEL_ANSWER_REQUIRED` |
 | Essay | each model answer is at most `Content:QuestionModelAnswerMaxLength` | `QUESTION_MODEL_ANSWER_TOO_LONG` |
 
 A non-integer `maxWords`, criterion `points` or level `points` does not read as the type's shape and fails with `QUESTION_BODY_INVALID` / `QUESTION_GRADING_SPEC_INVALID`.
@@ -179,7 +179,7 @@ A non-integer `maxWords`, criterion `points` or level `points` does not read as 
 - Every question is created Pending. No request, command or endpoint carries a status.
 - The only way to Approved is `Question.Approve(TeacherSubject, reviewedVersion, difficulty?)`: it needs an unretired question (`QUESTION_RETIRED`), a Pending question (`QUESTION_NOT_PENDING`), a live teacher assignment for the question's subject (`QUESTION_VALIDATOR_NOT_ASSIGNED`) and `reviewedVersion` equal to the current version (`409 QUESTION_VERSION_CHANGED`), checked in that order. A `TeacherSubject` can only be created for a teacher, so an admin cannot approve (PRD §16, §17 rule 3). An optional difficulty is applied at approval when it differs (a metadata change: no version bump, no revision).
 - The only way to Rejected is `Question.Reject(TeacherSubject, reviewedVersion, reason)`. It checks the same rules as approval, in the same order (`QUESTION_RETIRED`, then `QUESTION_NOT_PENDING`, then `QUESTION_VALIDATOR_NOT_ASSIGNED`, then `QUESTION_VERSION_CHANGED`), and then needs a non-blank reason (`QUESTION_REJECTION_REASON_REQUIRED`). It stores the trimmed reason in `rejectionReason`, and `validatedBy`/`validatedAt` record the teacher who decided.
-- Every approve and reject appends a `QuestionDecision` (append-only, never edited): `version`, `outcome` (`Approved`/`Rejected`), `reason`, `difficulty` (after the decision), `difficultyChangedFrom` (null when unchanged), `decidedBy`, `decidedAt`. It keeps prior rejections visible after a resubmit clears `rejectionReason`. The migration backfilled one decision per question that was already Approved or Rejected.
+- Every approve and reject appends a `QuestionDecision` (append-only, never edited): `version`, `outcome` (`Approved`/`Rejected`), `reason`, `difficulty` (after the decision), `difficultyChangedFrom` (null when unchanged), `decidedBy`, `decidedAt`, `submittedAt` (the question's `submittedAt` at decision time, i.e. when the decided version entered review; the median time-to-decision in [docs/dashboard.md](dashboard.md) is `decidedAt − submittedAt`). It keeps prior rejections visible after a resubmit clears `rejectionReason`. The migration backfilled one decision per question that was already Approved or Rejected. The `AddDashboardMetrics` migration backfilled `submittedAt` on existing decisions from the decided version's `QuestionRevision.editedAt`, falling back to `decidedAt` when no revision exists.
 - Teacher endpoints (`Questions.Validate`, all under `api/validation-queue`): `POST review-sessions` (start a review session), `GET filters` (assigned subjects, units, lessons), `GET` (the Pending, unretired questions of the caller's subjects; filters unit, lesson, type, difficulty, `minAgeDays`; oldest `submittedAt` first), `GET questions/{id}` (detail with revisions and decisions; `403 SUBJECT_OUT_OF_SCOPE` outside the caller's subjects), `POST review-sessions/{sessionId}/openings/{id}` (records that the question was opened at its current version), `POST questions/{id}/approve` (`{version, difficulty?}`), `POST questions/{id}/reject` (`{version, reason}`), and `POST bulk-approve` (`{reviewSessionId, questionIds}`). Bulk approve is all-or-nothing: the session must belong to the caller (`404 REVIEW_SESSION_NOT_FOUND`) and be unexpired (`400 REVIEW_SESSION_EXPIRED`), and each question must have been opened in it at its current version (`400 QUESTION_NOT_OPENED_IN_SESSION`).
 - `PUT /api/questions/{id}/resubmit` (`Question.Resubmit`) needs a Rejected question (`400 QUESTION_NOT_REJECTED` otherwise). It applies the edit exactly like `PUT /api/questions/{id}` (a content change bumps the version and adds a revision; the type still cannot change), then returns the question to Pending and clears `rejectionReason`, `validatedBy` and `validatedAt`. It does not require a content change. The audit entry `Question.Resubmit` keeps the cleared reason in its diff.
 
@@ -234,7 +234,11 @@ A student's answer (and the `answer` of `POST /api/questions/grade-draft`) is a 
 {"text":"9.8"}
 ```
 
-**Essay**: defined by #119.
+**Essay** (plain text; trimmed when canonicalised; at most `Content:QuestionEssayAnswerMaxLength` characters, else `422 QUESTION_ESSAY_ANSWER_TOO_LONG`; a missing or non-string `text` gets `422 QUESTION_ANSWER_INVALID`)
+
+```json
+{"text":"القصور الذاتي هو ممانعة الجسم لتغيير حالته الحركية."}
+```
 
 ## Grading
 
@@ -250,7 +254,7 @@ The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of
 - **Fill**: `hits / blanks`. Each blank is compared only with its own accepted answers; it hits when its normalised answer equals any of them. A blank the answer leaves out, or whose text normalises to empty, is a miss. A response whose id is not a blank is ignored; a repeated id uses its first response.
 - **Short numeric** (the spec has `value`): the answer is parsed as a number and is correct when `value − allowed ≤ answer ≤ value + allowed` (both bounds inclusive). `allowed` is `tolerance` (`absolute`) or `|value| × tolerance / 100` (`percent`). A negative `value` gets the same band as its magnitude, and a `value` of 0 with `percent` accepts only 0. A missing or negative tolerance counts as 0 and a missing mode as `absolute` (unreachable after validation). Only the spec takes part in the arithmetic; when a bound would pass the decimal range (±79228162514264337593543950335) it is clamped to that limit, so grading never fails.
 - **Short text**: the normalised answer must equal one of the normalised accepted answers.
-- **Essay** is not graded by these graders; `grade-draft` returns `422 QUESTION_TYPE_NOT_GRADABLE`.
+- **Essay**: the AI grader awards points per rubric criterion ([essay-grading.md](essay-grading.md)); `QuestionGrader.GradeEssay` turns them into `Σ awarded ÷ Σ criterion points`, scaled by the max score like every other type. The model's own total is never used. `grade-draft` grades essays synchronously through the AI grader (`503 ESSAY_GRADING_UNAVAILABLE` when it fails) and adds an `essay` detail (criteria, justification, confidence, model, prompt version, cost); a blank essay scores 0 (Unanswered) without calling the grader.
 - An answer that normalises to empty never matches.
 - **Normalisation** (PRD §6.2): the student answer and every accepted answer go through the same steps. Always, in this order: drop unpaired UTF-16 surrogates and the noncharacter U+FFFE (both make NFC fail), and invisible marks (U+061C, U+200B–U+200F, U+202A–U+202E, U+2060, U+2066–U+2069, U+FEFF), so none of them can split a letter from its mark; Unicode NFC (so a decomposed hamza or madda, such as ا + U+0654, becomes أ); map ، (U+060C) to `,` and ی (U+06CC) to ي (U+064A). Then the question's `normalization` rules (see **Fill** and **Short** above), each applied only when on. Finally the answer is always trimmed. With `collapseWhitespace` off, inner whitespace is kept verbatim (tabs and runs included); the ends are still trimmed. Hamza seats (ئ ؤ ء) are never unified.
 - **Numeric parsing**: numeric answers ignore the question's `normalization` rules and use a fixed profile: every rule on except the three letter rules. After normalisation, `٬` (U+066C, the Arabic thousands separator) is removed, then `٫` (U+066B) and `,` become `.`, and `−` (U+2212) becomes `-`; the rest must be a plain decimal number: an optional leading sign, digits and one decimal point (invariant culture). Exponents such as `9.8e0`, inner whitespace, thousands separators other than `٬`, and anything else (such as a trailing unit) do not parse and score 0. `,` always means a decimal point, so `1,000` reads as 1.

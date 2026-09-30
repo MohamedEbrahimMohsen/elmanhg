@@ -91,7 +91,7 @@ class MeteredModelClient:
 
     async def complete(self, request: ModelRequest) -> ModelReply:
         settings = self._settings
-        model = settings.chat_model
+        model = request.model or settings.chat_model
         with self._tracer.start_as_current_span(f"chat {model}", kind=SpanKind.CLIENT) as span:
             _describe(span, "chat", settings.llm_provider, model)
             started = time.perf_counter()

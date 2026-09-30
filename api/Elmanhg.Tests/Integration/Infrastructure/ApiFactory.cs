@@ -61,6 +61,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("ContentRetrieval:IndexSweepEnabled", "false");
         // The sweep would race tests that transcribe through the mediator.
         builder.UseSetting("AskTeacher:TranscriptionSweepEnabled", "false");
+        builder.UseSetting("EssayGrading:SweepEnabled", "false");
         // The sweep would race tests that record SLA events through the mediator.
         builder.UseSetting("AskTeacher:SlaSweepEnabled", "false");
         builder.UseSetting("TrainingData:StudentIdHashKey", TestStudentIdHashKey);
@@ -104,6 +105,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Content:QuestionRubricTextMaxLength"] = "1000",
             ["Content:QuestionModelAnswersMaxCount"] = "3",
             ["Content:QuestionModelAnswerMaxLength"] = "20000",
+            ["Content:QuestionEssayAnswerMaxLength"] = "20000",
             ["QuestionValidation:QueueMaxPageSize"] = "100",
             ["QuestionValidation:QueueMaxAgeDays"] = "365",
             ["QuestionValidation:RejectionReasonMaxLength"] = "1000",
@@ -193,6 +195,13 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Students:SubjectInterestsMaxCount"] = "50",
             ["Analytics:FunnelEventPermitLimit"] = "1000",
             ["Analytics:FunnelEventWindowSeconds"] = "60",
+            ["Dashboard:TimeZone"] = "Africa/Cairo",
+            // Parallel tests share this host, so caching would leak one test's dashboard results into another's.
+            ["Dashboard:CacheSeconds"] = "0",
+            ["Dashboard:DefaultRangeDays"] = "30",
+            ["Dashboard:MaxRangeDays"] = "366",
+            ["Dashboard:RecentWeekDays"] = "7",
+            ["Dashboard:RecentMonthDays"] = "30",
             ["ClientErrors:PermitLimit"] = "1000",
             ["ClientErrors:WindowSeconds"] = "60",
             ["ClientErrors:MessageMaxLength"] = "500",

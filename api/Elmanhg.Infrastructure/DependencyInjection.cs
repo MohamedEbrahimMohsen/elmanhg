@@ -3,6 +3,7 @@ using Elmanhg.Application.Shared.Spreadsheets;
 using Elmanhg.Domain.Analytics;
 using Elmanhg.Domain.Avatar;
 using Elmanhg.Domain.ContentRetrieval;
+using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
@@ -20,6 +21,7 @@ using Elmanhg.Infrastructure.AiService;
 using Elmanhg.Infrastructure.Analytics;
 using Elmanhg.Infrastructure.Avatar;
 using Elmanhg.Infrastructure.ContentRetrieval;
+using Elmanhg.Infrastructure.EssayGrading;
 using Elmanhg.Infrastructure.ExamBlueprints;
 using Elmanhg.Infrastructure.Hosting;
 using Elmanhg.Infrastructure.Identity;
@@ -77,6 +79,7 @@ public static class DependencyInjection
         services.AddScoped<ITeacherVoiceDraftRepository, TeacherVoiceDraftRepository>();
         services.AddScoped<ITeacherThreadSlaEventRepository, TeacherThreadSlaEventRepository>();
         services.AddScoped<IFunnelEventRepository, FunnelEventRepository>();
+        services.AddScoped<IUserActivityDayRepository, UserActivityDayRepository>();
         services.AddScoped<ILessonContentChunkRepository, LessonContentChunkRepository>();
         services.AddScoped<ILessonContentIndexRepository, LessonContentIndexRepository>();
         services.AddScoped<IAvatarMessageUsageRepository, AvatarMessageUsageRepository>();
@@ -84,6 +87,7 @@ public static class DependencyInjection
         services.AddScoped<IAttemptTrainingRecordRepository, AttemptTrainingRecordRepository>();
         services.AddScoped<IAvatarTrainingRecordRepository, AvatarTrainingRecordRepository>();
         services.AddScoped<ITeacherThreadTrainingRecordRepository, TeacherThreadTrainingRecordRepository>();
+        services.AddScoped<IEssayGradeRepository, EssayGradeRepository>();
         return services;
     }
 }

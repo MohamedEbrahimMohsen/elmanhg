@@ -173,7 +173,6 @@
   <data name="QUESTION_ANSWER_KIND_REQUIRED" xml:space="preserve"><value>Choose a numeric or a text answer.</value></data>
   <data name="QUESTION_NUMERIC_VALUE_REQUIRED" xml:space="preserve"><value>Enter the correct number.</value></data>
   <data name="QUESTION_TOLERANCE_INVALID" xml:space="preserve"><value>Enter a tolerance of zero or more and choose absolute or percent.</value></data>
-  <data name="QUESTION_TYPE_NOT_GRADABLE" xml:space="preserve"><value>This question type is graded by the AI grader, not the test grader.</value></data>
   <data name="QUESTION_ESSAY_MAX_WORDS_INVALID" xml:space="preserve"><value>Enter a whole-number word limit within the allowed range, or leave it empty.</value></data>
   <data name="QUESTION_RUBRIC_CRITERIA_COUNT_INVALID" xml:space="preserve"><value>Add at least one criterion, up to the allowed maximum.</value></data>
   <data name="QUESTION_RUBRIC_CRITERION_ID_INVALID" xml:space="preserve"><value>Each criterion id must be 1 to 20 lowercase letters, digits or dashes.</value></data>
@@ -187,6 +186,7 @@
   <data name="QUESTION_MODEL_ANSWERS_COUNT_INVALID" xml:space="preserve"><value>Add at least one model answer, up to the allowed maximum.</value></data>
   <data name="QUESTION_MODEL_ANSWER_REQUIRED" xml:space="preserve"><value>A model answer cannot be empty.</value></data>
   <data name="QUESTION_MODEL_ANSWER_TOO_LONG" xml:space="preserve"><value>A model answer is too long.</value></data>
+  <data name="QUESTION_ESSAY_ANSWER_TOO_LONG" xml:space="preserve"><value>The essay is longer than allowed.</value></data>
   <data name="QUESTION_OBJECTIVE_NOT_IN_LESSON" xml:space="preserve"><value>This objective does not belong to the question's lesson.</value></data>
   <data name="QUESTION_TYPE_IMMUTABLE" xml:space="preserve"><value>A question's type cannot be changed. Create a new question instead.</value></data>
   <data name="QUESTION_NOT_PENDING" xml:space="preserve"><value>Only a pending question can be approved.</value></data>
@@ -401,8 +401,13 @@
   <data name="AVATAR_CONVERSATIONS_ENTRY_POINT_INVALID" xml:space="preserve"><value>The entry point is not known.</value></data>
   <data name="AVATAR_CONVERSATIONS_DATE_RANGE_INVALID" xml:space="preserve"><value>The start must be before the end.</value></data>
   <data name="AI_SERVICE_UNAVAILABLE" xml:space="preserve"><value>The assistant is unavailable right now. Try again in a moment.</value></data>
+  <data name="ESSAY_GRADE_NOT_FOUND" xml:space="preserve"><value>This essay grade was not found.</value></data>
+  <data name="ESSAY_GRADING_UNAVAILABLE" xml:space="preserve"><value>The AI grader is unavailable right now. Try again in a moment.</value></data>
+  <data name="ESSAY_GRADE_NOT_PENDING" xml:space="preserve"><value>This essay is no longer waiting for the AI grader.</value></data>
   <data name="CONTENT_SEARCH_QUERY_REQUIRED" xml:space="preserve"><value>Enter the search text.</value></data>
   <data name="CONTENT_SEARCH_QUERY_TOO_LONG" xml:space="preserve"><value>The search text is too long.</value></data>
   <data name="CONTENT_SEARCH_TOP_INVALID" xml:space="preserve"><value>The number of results requested is not valid.</value></data>
   <data name="CONTENT_EMBEDDING_DIMENSIONS_INVALID" xml:space="preserve"><value>The content embedding has the wrong number of dimensions.</value></data>
+  <data name="DASHBOARD_DATE_RANGE_INVALID" xml:space="preserve"><value>The end date must be on or after the start date.</value></data>
+  <data name="DASHBOARD_DATE_RANGE_TOO_WIDE" xml:space="preserve"><value>The date range is longer than allowed.</value></data>
 </root>

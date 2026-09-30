@@ -12,7 +12,7 @@ export interface TestGrade {
   isPending: boolean;
 }
 
-export function useTestGrade(): TestGrade {
+export function useTestGrade(lessonId: string): TestGrade {
   const mutation = useGradeQuestionDraft();
   const errorCode = mutation.error
     ? mutation.error instanceof ApiError
@@ -23,7 +23,11 @@ export function useTestGrade(): TestGrade {
   return {
     grade: (values, answer) => {
       mutation.mutate({
-        data: { ...toQuestionRequest(values), answer: toAnswerPayload(toStudentQuestion(values), answer) },
+        data: {
+          ...toQuestionRequest(values),
+          lessonId,
+          answer: toAnswerPayload(toStudentQuestion(values), answer),
+        },
       });
     },
     result: mutation.data,

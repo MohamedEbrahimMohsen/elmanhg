@@ -154,3 +154,26 @@ def test_settings_trace_sample_ratio_above_one_raises() -> None:
         Settings(service_token=SecretStr(VALID_TOKEN), trace_sample_ratio=1.5)
 
     assert error.value.errors()[0]["loc"] == ("trace_sample_ratio",)
+
+
+def test_settings_defaults_essay_grading_sonnet_v1() -> None:
+    settings = Settings(service_token=SecretStr(VALID_TOKEN))
+
+    assert settings.essay_grading_model == "claude-sonnet-5"
+    assert settings.essay_grading_prompt_version == "v1"
+    assert settings.essay_grading_max_tokens == 2048
+    assert settings.essay_grading_timeout_seconds == 45.0
+
+
+def test_settings_invalid_essay_grading_prompt_version_raises_validation_error() -> None:
+    with pytest.raises(ValidationError) as error:
+        Settings(service_token=SecretStr(VALID_TOKEN), essay_grading_prompt_version="latest")
+
+    assert error.value.errors()[0]["loc"] == ("essay_grading_prompt_version",)
+
+
+def test_settings_essay_grading_timeout_above_300_raises_validation_error() -> None:
+    with pytest.raises(ValidationError) as error:
+        Settings(service_token=SecretStr(VALID_TOKEN), essay_grading_timeout_seconds=301)
+
+    assert error.value.errors()[0]["loc"] == ("essay_grading_timeout_seconds",)

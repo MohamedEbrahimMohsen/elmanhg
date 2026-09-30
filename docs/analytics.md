@@ -1,6 +1,6 @@
 # Sign-up funnel analytics
 
-First-party events that measure the PRD §2.1 goal 1: a new visitor goes from the landing page to a first graded quiz answer in under 3 minutes. The events are written here; the read side (the "Sign-up funnel" dashboard row, PRD §10.3) is built by #104 (dashboard metrics queries) and #105 (dashboard UI).
+First-party events that measure the PRD §2.1 goal 1: a new visitor goes from the landing page to a first graded quiz answer in under 3 minutes. The events are written here; the read side (the "Sign-up funnel" dashboard row, PRD §10.3) is `GET /api/dashboard/funnel` (`docs/dashboard.md`), which #105 draws.
 
 There is no third-party tracker. Nothing leaves the platform, and no credentials are needed.
 
@@ -42,10 +42,11 @@ Table `FunnelEvents`: `Id`, `AnonymousId`, `UserId?`, `Type`, `OccurredAt`, plus
 - `UserId` is filled from the bearer token when the caller is signed in (for example `OnboardingCompleted`, `FirstQuizAnswered`), and null otherwise.
 - Indexes: (`Type`, `OccurredAt`) for date-range counts, and `AnonymousId` for per-visitor timing.
 
-## Funnel definition (for #104)
+## Funnel definition
 
 For a date range:
 
 - **Step count**: distinct `AnonymousId` per `Type`, in the order LandingViewed → SignUpStarted → SignUpCompleted → OnboardingCompleted → FirstQuizAnswered.
 - **Conversion**: step count ÷ previous step count.
 - **Time to first answer**: per `AnonymousId`, seconds from its first `LandingViewed` to its first `FirstQuizAnswered`; report the median. The goal is under 180 s.
+- **Range**: steps and timing count only events inside the requested range. A visitor whose landing falls before the range and whose first answer falls inside it has no timing.

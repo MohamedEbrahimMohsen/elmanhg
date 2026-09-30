@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.Questions;
 
-public class QuestionRepository(AppDbContext context) : Repository<Question>(context), IQuestionRepository
+public partial class QuestionRepository(AppDbContext context) : Repository<Question>(context), IQuestionRepository
 {
     public async Task<bool> AnyInLessonAsync(Guid lessonId, CancellationToken cancellationToken)
     {

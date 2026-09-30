@@ -1157,6 +1157,36 @@
           "response": []
         },
         {
+          "name": "Grade essay draft",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns the AI criterion marks\", function () { pm.expect(pm.response.json().essay.criteria).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/questions/grade-draft",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "questions", "grade-draft"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lessonId\": \"{{lessonId}}\",\n  \"type\": \"Essay\",\n  \"stem\": \"<p>Explain inertia.</p>\",\n  \"body\": { \"maxWords\": 200 },\n  \"gradingSpec\": {\n    \"criteria\": [\n      {\n        \"id\": \"c1\",\n        \"title\": \"  Definition \",\n        \"description\": \"  \",\n        \"points\": 2,\n        \"levels\": [\n          { \"points\": 2, \"description\": \"Complete\" },\n          { \"points\": 0, \"description\": \"Missing\" },\n          { \"points\": 1, \"description\": \" Partial \" }\n        ]\n      }\n    ],\n    \"modelAnswers\": [\"<p>Inertia is resistance to change in motion.</p>\"]\n  },\n  \"explanation\": \"<p>Newton 1.</p>\",\n  \"difficulty\": \"Medium\",\n  \"tags\": [],\n  \"maxScore\": 5,\n  \"answer\": { \"text\": \"القصور الذاتي هو ممانعة الجسم لتغيير حالته الحركية.\" }\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Get question",
           "event": [
             {
@@ -1811,6 +1841,30 @@
               "raw": "{{baseUrl}}/api/sessions/{{sessionId}}/finish",
               "host": ["{{baseUrl}}"],
               "path": ["api", "sessions", "{{sessionId}}", "finish"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get essay grade",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200 or 404 until essays are served (#119)\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 404]); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/{{sessionId}}/questions/{{sessionQuestionId}}/essay-grade",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sessions", "{{sessionId}}", "questions", "{{sessionQuestionId}}", "essay-grade"]
             }
           },
           "response": []
@@ -4142,6 +4196,276 @@
               "raw": "{{baseUrl}}/api/payments/{{checkoutPaymentId}}/review-resolution",
               "host": ["{{baseUrl}}"],
               "path": ["api", "payments", "{{checkoutPaymentId}}", "review-resolution"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "description": "Admin only (Dashboards.View). Sign in as an admin first. One read per PRD §10.3 card (docs/dashboard.md). from/to are Cairo days, both inclusive (default: the last 30 days, max 366); subjectId only where the card has a subject dimension. Results are cached for Dashboard:CacheSeconds.",
+      "item": [
+        {
+          "name": "Get Students metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"total is a number\", function () { pm.expect(pm.response.json().total).to.be.a(\"number\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/students",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "students"],
+              "query": [
+                { "key": "from", "value": "2026-09-01", "disabled": true },
+                { "key": "to", "value": "2026-09-30", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Subscribers metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"has generatedAt\", function () { pm.expect(pm.response.json()).to.have.property(\"generatedAt\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/subscribers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "subscribers"],
+              "query": [
+                { "key": "from", "value": "2026-09-01", "disabled": true },
+                { "key": "to", "value": "2026-09-30", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Content metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"has generatedAt\", function () { pm.expect(pm.response.json()).to.have.property(\"generatedAt\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/content",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "content"],
+              "query": [
+                { "key": "subjectId", "value": "{{subjectId}}", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Solve rate metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"has generatedAt\", function () { pm.expect(pm.response.json()).to.have.property(\"generatedAt\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/solve-rate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "solve-rate"],
+              "query": [
+                { "key": "from", "value": "2026-09-01", "disabled": true },
+                { "key": "to", "value": "2026-09-30", "disabled": true },
+                { "key": "subjectId", "value": "{{subjectId}}", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Success rate metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"has generatedAt\", function () { pm.expect(pm.response.json()).to.have.property(\"generatedAt\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/success-rate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "success-rate"],
+              "query": [
+                { "key": "from", "value": "2026-09-01", "disabled": true },
+                { "key": "to", "value": "2026-09-30", "disabled": true },
+                { "key": "subjectId", "value": "{{subjectId}}", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Validation metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"has generatedAt\", function () { pm.expect(pm.response.json()).to.have.property(\"generatedAt\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/validation",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "validation"],
+              "query": [
+                { "key": "from", "value": "2026-09-01", "disabled": true },
+                { "key": "to", "value": "2026-09-30", "disabled": true },
+                { "key": "subjectId", "value": "{{subjectId}}", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Ask a Teacher metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"has generatedAt\", function () { pm.expect(pm.response.json()).to.have.property(\"generatedAt\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/ask-teacher",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "ask-teacher"],
+              "query": [
+                { "key": "from", "value": "2026-09-01", "disabled": true },
+                { "key": "to", "value": "2026-09-30", "disabled": true },
+                { "key": "subjectId", "value": "{{subjectId}}", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Payments metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"has generatedAt\", function () { pm.expect(pm.response.json()).to.have.property(\"generatedAt\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "payments"],
+              "query": [
+                { "key": "from", "value": "2026-09-01", "disabled": true },
+                { "key": "to", "value": "2026-09-30", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Sign-up funnel metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"steps is an array\", function () { pm.expect(pm.response.json().steps).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/funnel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "funnel"],
+              "query": [
+                { "key": "from", "value": "2026-09-01", "disabled": true },
+                { "key": "to", "value": "2026-09-30", "disabled": true }
+              ]
             }
           },
           "response": []

@@ -27,6 +27,16 @@ public sealed class QuestionRejectionTests
         question.UpdatedBy.Should().Be(_builder.Teacher.Id);
     }
 
+    [Fact]
+    public void Reject_Pending_RecordsSubmittedAtOnDecision()
+    {
+        var question = _builder.Build();
+
+        question.Reject(Assignment(), question.Version, "Wrong unit");
+
+        question.Decisions.Single().SubmittedAt.Should().Be(question.SubmittedAt);
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("   ")]

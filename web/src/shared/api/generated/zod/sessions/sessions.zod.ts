@@ -198,3 +198,34 @@ export const FinishSessionResponse = zod.object({
 }))
 })
 
+export const GetEssayGradeParams = zod.object({
+  "sessionId": zod.uuid(),
+  "questionId": zod.uuid()
+})
+
+export const getEssayGradeResponseMaxScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getEssayGradeResponseScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const getEssayGradeResponseNormalisedScoreRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$');
+export const getEssayGradeResponseCriteriaItemPointsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getEssayGradeResponseCriteriaItemMaxPointsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const GetEssayGradeResponse = zod.object({
+  "id": zod.uuid(),
+  "status": zod.string(),
+  "maxScore": zod.union([zod.int(),zod.stringFormat('int32', getEssayGradeResponseMaxScoreRegExpTwo)]),
+  "requestedAt": zod.iso.datetime({"offset":true}),
+  "gradedAt": zod.iso.datetime({"offset":true}).nullable(),
+  "score": zod.union([zod.number(),zod.stringFormat('double', getEssayGradeResponseScoreRegExpTwo)]).nullable(),
+  "normalisedScore": zod.union([zod.number(),zod.stringFormat('double', getEssayGradeResponseNormalisedScoreRegExpTwo)]).nullable(),
+  "outcome": zod.string().nullable(),
+  "justification": zod.string().nullable(),
+  "criteria": zod.array(zod.object({
+  "criterionId": zod.string(),
+  "title": zod.string(),
+  "points": zod.union([zod.int(),zod.stringFormat('int32', getEssayGradeResponseCriteriaItemPointsRegExpTwo)]),
+  "maxPoints": zod.union([zod.int(),zod.stringFormat('int32', getEssayGradeResponseCriteriaItemMaxPointsRegExpTwo)]),
+  "justification": zod.string()
+}))
+})
+
