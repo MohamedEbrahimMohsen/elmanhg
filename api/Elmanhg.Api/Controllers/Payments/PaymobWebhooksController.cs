@@ -1,7 +1,9 @@
+using Elmanhg.Api.RateLimiting;
 using Elmanhg.Application.Subscriptions.ProcessPaymentNotification;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Text.Json;
 
 namespace Elmanhg.Api.Controllers.Payments;
@@ -15,6 +17,7 @@ public class PaymobWebhooksController(IMediator mediator) : ControllerBase
 
     [HttpPost("webhook", Name = "ProcessPaymobWebhook")]
     [AllowAnonymous]
+    [EnableRateLimiting(PublicRateLimitPolicies.PaymentWebhooks)]
     [RequestSizeLimit(MaxNotificationBytes)]
     public async Task<ActionResult> ProcessWebhook([FromBody] JsonElement payload, [FromQuery] string? hmac, CancellationToken cancellationToken)
     {

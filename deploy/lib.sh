@@ -26,6 +26,18 @@ set_env() {
   fi
 }
 
+# The API and the ai service refuse the example "change-me" secrets outside Development; throwaway stacks get random ones.
+replace_example_secrets() {
+  local api_env=$1 ai_env=$2 service_token
+  service_token=$(openssl rand -hex 32)
+  set_env "$api_env" CoreJwt__Key "$(openssl rand -hex 48)"
+  set_env "$api_env" CoreOtp__Secret "$(openssl rand -hex 32)"
+  set_env "$api_env" TrainingData__StudentIdHashKey "$(openssl rand -hex 32)"
+  set_env "$api_env" AdminSeed__Password "$(openssl rand -hex 16)A1"
+  set_env "$api_env" AiService__ServiceToken "$service_token"
+  set_env "$ai_env" ELMANHG_AI_SERVICE_TOKEN "$service_token"
+}
+
 wait_healthy() {
   local service=$1 timeout=${2:-180} waited=0 id status
   id=$(compose ps -q "$service")

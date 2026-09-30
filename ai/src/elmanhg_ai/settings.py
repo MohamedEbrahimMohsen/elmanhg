@@ -7,6 +7,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Shared secret strength floor, same as the .NET validator.
 MIN_SERVICE_TOKEN_LENGTH: Final = 32
+# Every secret in the committed deploy/*.env.example files starts with this marker.
+PLACEHOLDER_PREFIX: Final = "change-me"
 OTLP_SCHEMES: Final = ("http://", "https://")
 
 
@@ -128,6 +130,13 @@ class Settings(BaseSettings):
             key is None or not key.get_secret_value().strip()
         ):
             raise ValueError("openai_api_key is required when transcription_provider is openai")
+        return self
+
+    @model_validator(mode="after")
+    def _production_token_is_not_placeholder(self) -> Self:
+        token = self.service_token.get_secret_value()
+        if self.env == "production" and token.startswith(PLACEHOLDER_PREFIX):
+            raise ValueError("service_token still holds the example placeholder")
         return self
 
 

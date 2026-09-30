@@ -66,6 +66,7 @@ public static class DependencyInjection
         services.AddSingleton<ISpreadsheetReader, ClosedXmlSpreadsheetReader>();
         services.AddSingleton<ISpreadsheetWriter, ClosedXmlSpreadsheetWriter>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IIssuedRefreshTokenRepository, IssuedRefreshTokenRepository>();
         services.AddScoped<ISubjectRepository, SubjectRepository>();
         services.AddScoped<ITeacherSubjectRepository, TeacherSubjectRepository>();
         services.AddScoped<ICurriculumUnitRepository, CurriculumUnitRepository>();

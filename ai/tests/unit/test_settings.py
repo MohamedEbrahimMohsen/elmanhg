@@ -177,3 +177,31 @@ def test_settings_essay_grading_timeout_above_300_raises_validation_error() -> N
         Settings(service_token=SecretStr(VALID_TOKEN), essay_grading_timeout_seconds=301)
 
     assert error.value.errors()[0]["loc"] == ("essay_grading_timeout_seconds",)
+
+
+PLACEHOLDER_TOKEN = "change-me-local-ai-service-token-0123456789"
+
+
+def test_settings_production_placeholder_service_token_raises_validation_error() -> None:
+    with pytest.raises(ValidationError) as error:
+        Settings(service_token=SecretStr(PLACEHOLDER_TOKEN), env="production")
+
+    assert "service_token still holds the example placeholder" in str(error.value)
+
+
+def test_settings_development_placeholder_service_token_is_accepted() -> None:
+    settings = Settings(service_token=SecretStr(PLACEHOLDER_TOKEN))
+
+    assert settings.env == "development"
+
+
+def test_settings_production_placeholder_error_hides_token_value(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("ELMANHG_AI_SERVICE_TOKEN", "change-me-QZX-secret-token-0123456789")
+    monkeypatch.setenv("ELMANHG_AI_ENV", "production")
+
+    with pytest.raises(ValidationError) as error:
+        Settings()
+
+    assert "QZX-secret" not in str(error.value)

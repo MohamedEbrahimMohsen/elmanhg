@@ -452,7 +452,7 @@ Exports (admin only): JSONL per source, date-ranged, optionally per subject, wit
 | Devices | Mobile-first responsive web. All interactions touch-friendly. v2 canvas and math input must work on phones. |
 | Performance | Lesson page < 2s on 3G-class connections; quiz question transition < 300ms (prefetch next). Budgets and how they are measured: docs/performance.md. |
 | Availability | 99.5% monthly, measured and alerted as in docs/observability.md. Exam sessions auto-save every answer; a refresh resumes the session. |
-| Security | Role-based authorisation on every endpoint; teacher subject scoping enforced server-side; Paymob webhooks HMAC-verified; rate limits on auth and Avatar. |
+| Security | Role-based authorisation on every endpoint; teacher subject scoping enforced server-side; Paymob webhooks HMAC-verified; rate limits on auth, Avatar, Ask a Teacher, analytics and every other anonymous endpoint; a replayed refresh token ends its whole sign-in; security headers and CSP at the edge; dependency, container-image and secret scanning in CI (docs/security.md). |
 | Privacy | Students identified to teachers by display name only. Training exports strip PII. |
 | Auditability | All content changes and validation decisions logged with actor and timestamp. |
 | Accessibility | Readable font sizes, sufficient contrast, keyboard-navigable quizzes. |

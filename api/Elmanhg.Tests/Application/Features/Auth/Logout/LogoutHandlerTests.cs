@@ -5,6 +5,7 @@ using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Identity;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Memory;
 using NSubstitute;
 
 namespace Elmanhg.Tests.Application.Features.Auth.Logout;
@@ -17,7 +18,7 @@ public sealed class LogoutHandlerTests
 
     public LogoutHandlerTests()
     {
-        _handler = new LogoutHandler(_userManager, _currentUserService);
+        _handler = new LogoutHandler(_userManager, _currentUserService, new MemoryCache(new MemoryCacheOptions()));
     }
 
     [Fact]

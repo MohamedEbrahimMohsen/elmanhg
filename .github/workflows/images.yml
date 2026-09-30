@@ -33,6 +33,23 @@ jobs:
           persist-credentials: false
       - name: Whole-stack smoke test (build, migrate, serve, backup, restore drill)
         run: bash deploy/smoke-test.sh
+      - name: Install Trivy 0.74.0
+        env:
+          TRIVY_VERSION: 0.74.0
+          TRIVY_SHA256: 2ae6fe3ee734b7fdf11335663e18c75ea12dccc76062f09f164a3b0f8be4371a
+        run: |
+          curl -fsSL -o trivy.tar.gz "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          echo "${TRIVY_SHA256}  trivy.tar.gz" | sha256sum -c -
+          tar -xzf trivy.tar.gz trivy && sudo install -m 755 trivy /usr/local/bin/trivy
+      # Fixable CRITICAL fails the job; HIGH is reported only (docs/security.md §7).
+      - name: Image vulnerability scan (fixable CRITICAL fails)
+        run: |
+          status=0
+          for image in api web ai; do
+            trivy image --scanners vuln --ignore-unfixed --severity HIGH --exit-code 0 --no-progress "local/elmanhg-$image:smoke"
+            trivy image --scanners vuln --ignore-unfixed --severity CRITICAL --exit-code 1 --no-progress "local/elmanhg-$image:smoke" || status=1
+          done
+          exit "$status"
       # Reuses the local/elmanhg-*:smoke images the smoke step built (docs/performance.md §5).
       - name: Load test smoke (k6 API budgets + throttled lesson page)
         run: bash deploy/load-test.sh

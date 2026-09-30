@@ -1,0 +1,9 @@
+title = "Elmanhg secret scan"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Committed example and test values marked as not secret"
+regexTarget = "line"
+regexes = ['''change-me''', '''(?i)not-?a-?secret''', '''(?i)notasecret''']

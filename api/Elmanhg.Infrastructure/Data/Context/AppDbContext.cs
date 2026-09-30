@@ -196,6 +196,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         ConfigureTrainingData(modelBuilder);
         ConfigureEssayGrades(modelBuilder);
         ConfigureTrainingExports(modelBuilder);
+        ConfigureIssuedRefreshTokens(modelBuilder);
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
 
@@ -649,5 +650,6 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         modelBuilder.Entity<EssayGrade>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<EssayGradeTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<TrainingExport>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<IssuedRefreshToken>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

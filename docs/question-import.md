@@ -88,10 +88,10 @@ Import-specific codes:
 | Code | When | HTTP |
 |---|---|---|
 | `QUESTION_IMPORT_FILE_REQUIRED` | no file | 422 |
-| `QUESTION_IMPORT_FILE_TYPE_INVALID` | not `.xlsx` | 422 |
+| `QUESTION_IMPORT_FILE_TYPE_INVALID` | not `.xlsx`, or the bytes are not a zip archive (no `PK` header) | 422 |
 | `QUESTION_IMPORT_FILE_TOO_LARGE` | over the size cap | 422 |
 | `QUESTION_IMPORT_BATCH_ID_REQUIRED` | import without `batchId` | 422 |
-| `SPREADSHEET_UNREADABLE` | the file is not a readable workbook | 400 |
+| `SPREADSHEET_UNREADABLE` | a zip archive that is not a readable workbook | 400 |
 | `QUESTION_IMPORT_EMPTY` | no data rows in any type sheet | 400 |
 | `QUESTION_IMPORT_TOO_MANY_ROWS` | more rows than the cap (context `max`) | 400 |
 | `QUESTION_IMPORT_HAS_ERRORS` | import of a file with any problem (context `count`) | 400 |
@@ -108,7 +108,7 @@ The report carries codes only; the web translates them.
 - `Content:QuestionImportMaxRows` (500): data rows per file, across all type sheets.
 - `Content:QuestionImportMaxFileSizeInMb` (5).
 - Only the first 256 columns of a type sheet are read, and sheets that are not type sheets are not read at all. Reading stops one data row past the row cap. The work stays bounded even when a small file declares a cell far away (for example `XFD1048576`).
-- `.xlsx` only (checked by extension; the content type is not checked because browsers send `application/octet-stream` for it on machines without Office). CSV and `.xls` are not accepted.
+- `.xlsx` only (checked by extension and by the zip signature `50 4B 03 04` at the start of the file; the content type is not checked because browsers send `application/octet-stream` for it on machines without Office). CSV and `.xls` are not accepted.
 
 ## All-or-nothing commit
 

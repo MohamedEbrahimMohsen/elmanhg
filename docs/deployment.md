@@ -68,6 +68,8 @@ Generating secrets:
 | `AiService__ServiceToken` = `ELMANHG_AI_SERVICE_TOKEN` | `openssl rand -hex 32` | the same value in both files |
 | `TrainingData__StudentIdHashKey` | `openssl rand -hex 32` | set once; never rotate |
 
+- Placeholder guard ([docs/security.md](security.md) §6): outside Development the API refuses to start (and to migrate) while any of `CoreJwt__Key`, `CoreOtp__Secret`, `AdminSeed__Password`, `TrainingData__StudentIdHashKey`, `AiService__ServiceToken`, `Payments__Paymob__SecretKey`, `Payments__Paymob__HmacSecret`, `OtpDelivery__WhatsApp__AccessToken`, `OtpDelivery__Email__ApiKey`, `OtpDelivery__Sms__AuthHeaderValue` or `FileStorage__S3SecretAccessKey` still starts with `change-me`, the connection string holds `Password=change-me`, or `CoreOtp__Secret` is empty. The error names the keys, never the values. The ai service refuses a `change-me` `ELMANHG_AI_SERVICE_TOKEN` when `ELMANHG_AI_ENV=production`. The smoke and load tests replace the example secrets with random ones (`replace_example_secrets` in `deploy/lib.sh`).
+
 Rotation:
 
 | Secret | Steps | Effect |
@@ -102,6 +104,7 @@ A story that adds an options section holding a secret or a per-host value must a
 | `GRAFANA_ADMIN_PASSWORD` | with the profile | none | `openssl rand -hex 16`; `deploy.sh` refuses the profile without it |
 | `GRAFANA_PORT` | no | `3000` | loopback port Grafana listens on |
 | `ALERTMANAGER_CONFIG_FILE` | no | `alertmanager.yml` | path of the Alertmanager config, relative to the compose file; `deploy.sh` refuses the profile when it is missing |
+| `MEDIA_ORIGIN` | no | empty | extra origin for images and audio in the SPA's Content-Security-Policy (Caddy). Leave empty while media is served from `/api/media` (the default, also with `S3`); set it (e.g. `https://media.example.com`) only if `FileStorage__PublicBaseUrl` points at another origin ([docs/security.md](security.md) §4) |
 
 ### API identity and seed (`api.env`)
 
@@ -196,6 +199,20 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | `Avatar__ConversationSearchMaxLength` | `200` | 1 to 500 |
 
 The daily message limits (Free 5, Base 50) are `Subscriptions__FreeDailyAvatarMessages` and `Subscriptions__BaseDailyAvatarMessages`.
+
+### Rate limits (`api.env`, [docs/security.md](security.md))
+
+Per-IP limits for anonymous endpoints and per-student limits for the costly student actions; each answers 429 `TOO_MANY_REQUESTS` over the limit. The limits are in memory per API instance. The auth, analytics and client-error limits keep their own sections (`Auth__*`, `Analytics__*`, `ClientErrors__*`).
+
+| Variable | Default | Notes |
+|---|---|---|
+| `RateLimiting__AuthRefreshPermitLimit` / `RateLimiting__AuthRefreshWindowSeconds` | `60` / `60` | `POST /api/auth/refresh`, per IP |
+| `RateLimiting__PublicReadPermitLimit` / `RateLimiting__PublicReadWindowSeconds` | `300` / `60` | `GET /api/questions/servable-count` and `GET /api/plans`, one shared bucket per IP |
+| `RateLimiting__PaymentWebhookPermitLimit` / `RateLimiting__PaymentWebhookWindowSeconds` | `300` / `60` | the Paymob webhook, per IP |
+| `RateLimiting__AvatarMessagePermitLimit` / `RateLimiting__AvatarMessageWindowSeconds` | `20` / `60` | `POST /api/avatar/messages`, per student |
+| `RateLimiting__AskTeacherSubmissionPermitLimit` / `RateLimiting__AskTeacherSubmissionWindowSeconds` | `10` / `600` | Ask a Teacher create and follow-up, per student |
+| `RateLimiting__StudentConcurrentRequestLimit` | `1` | requests in flight per student on the Avatar and on Ask a Teacher submissions |
+| `Auth__RefreshTokenReuseGraceSeconds` | `10` | a rotated refresh cookie sent again within this window gets a new token (tabs refreshing together); after it, the replay revokes the whole sign-in |
 
 ### Ask a Teacher (`api.env`, [docs/ask-teacher.md](ask-teacher.md))
 
@@ -333,6 +350,8 @@ Every other key in `appsettings.example.json` can be overridden in `api.env` as 
 - Every base and third-party image is pinned as `name:tag@sha256:<digest>`: each `FROM` (and the `uv` `COPY --from`) in `api/`, `web/` and `ai/` `Dockerfile`, and `postgres` and every observability image in `docker-compose.prod.yml`. The tag is for readers; the digest is what Docker pulls. To bump one, run `docker buildx imagetools inspect <name>:<tag>`, copy the top-level `Digest:` line (the multi-platform index, not a per-platform manifest), replace the old digest, and let the `images` workflow smoke-test the change in a pull request. Never write a digest by hand.
 - Main runs never cancel each other (one concurrency group per commit), so every main commit gets a full set of images. Pull request runs cancel the older run on the same branch.
 - Deploy `sha-<7>` tags, never `main`, so a rollback names an exact build.
+- After the smoke test, the `deploy-smoke` job installs Trivy 0.74.0 (SHA-256-verified) and scans the three `local/elmanhg-*:smoke` images for vulnerabilities with a fix available (`--ignore-unfixed`): a CRITICAL one fails the job, HIGH ones are reported only. Fix a failure by bumping the base image digest as above ([docs/security.md](security.md) §7).
+- The `security` workflow (`.github/workflows/security.yml`) runs gitleaks 8.30.1 (SHA-256-verified) over the full git history on every pull request and push to main, and a weekly (Monday 04:17 UTC) or manual audit of the .NET, npm and Python dependencies ([docs/security.md](security.md) §6–§7).
 - If a GHCR package is private, log the host in once: `docker login ghcr.io -u <user>` with a personal access token that has `read:packages`.
 
 ## 6. First-time host setup
@@ -420,9 +439,11 @@ Caddy terminates TLS and, with no `trusted_proxies` setting, replaces any client
 
 `ReverseProxy:TrustedNetworks` is a list of CIDR networks. It is empty by default, and an entry that is not a CIDR network stops the API at startup.
 
+Caddy also strips the client-sent `CF-Connecting-IP`, `CF-IPCountry`, `CF-IPCity`, `CF-Region`, `CF-Region-Code` and `CF-Timezone` headers before proxying to the API, because the API's request log reads them as the client location and no Cloudflare sits in front. Revisit this if a CDN is added ([#220](https://github.com/MohamedEbrahimMohsen/elmanhg/issues/220)).
+
 ## 12. Run the production stack locally
 
-`bash deploy/smoke-test.sh` (Docker Desktop and Git Bash on Windows work) builds the three images, validates the Caddyfile, starts the stack with plain HTTP on `http://localhost:8088`, checks the SPA, the `/api` proxy, the cache headers, the public `/api/health` and `POST /api/client-errors`, runs `migrate` a second time, takes a backup and runs the restore drill. With the `observability` profile (the default) it also validates every observability config (`promtool check config` and `test rules`, `amtool check-config`, `otelcol validate`) and waits until metrics, traces, logs linked by trace id, log redaction, probes, alert rules and the three dashboards arrive ([docs/observability.md](observability.md), Running it locally). It removes the stack and its volumes afterwards.
+`bash deploy/smoke-test.sh` (Docker Desktop and Git Bash on Windows work) builds the three images, validates the Caddyfile, starts the stack with plain HTTP on `http://localhost:8088`, checks the SPA, the `/api` proxy, the cache headers, the security headers (CSP, HSTS, anti-framing, no `Server`), that client-sent `CF-*` headers are stripped, the public `/api/health` and `POST /api/client-errors`, runs `migrate` a second time, takes a backup and runs the restore drill. With the `observability` profile (the default) it also validates every observability config (`promtool check config` and `test rules`, `amtool check-config`, `otelcol validate`) and waits until metrics, traces, logs linked by trace id, log redaction, probes, alert rules and the three dashboards arrive ([docs/observability.md](observability.md), Running it locally). It removes the stack and its volumes afterwards.
 
 | Knob | Default | Effect |
 |---|---|---|
@@ -448,4 +469,4 @@ Caddy terminates TLS and, with no `trusted_proxies` setting, replaces any client
 | Voice transcription | built (#96): `ELMANHG_AI_TRANSCRIPTION_PROVIDER=openai`; not yet checked against Whisper (needs a key), and the Egyptian-dialect evaluation waits for recorded clips |
 | Observability (#113) | done ([docs/observability.md](observability.md)); an external uptime monitor, a vendor error tracker (Sentry) and live alert receivers are deferred |
 | Performance (#114) | done ([docs/performance.md](performance.md)); the lesson p75 budget is missed (2.96 s locally, advisory in CI) and tracked in [#220](https://github.com/MohamedEbrahimMohsen/elmanhg/issues/220); CDN deferred until the live domain |
-| Security headers (#115) | HSTS and CSP; the request log still trusts `CF-Connecting-IP` |
+| Security headers (#115) | done ([docs/security.md](security.md)); HSTS takes effect once the live domain serves HTTPS |
