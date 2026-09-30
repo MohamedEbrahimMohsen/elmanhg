@@ -1,12 +1,12 @@
 # Elmanhg — autopilot progress
 
-Last updated: laptop session, after story #115 merged (main at `66b18ae`).
-**Next story: #117 [E14.S1] Essay question authoring with rubric (v2)**, the first row of "Remaining stories".
+Last updated: laptop session, after story #128 merged (main at `0ca08ae`).
+**All 60 stories are merged.** The run report is `docs/implementation-report.md`. What is left for the dev: the dev-decision issues and the go-live keys (report §3–§4).
 The laptop run did #54–#64; the cloud session did #65–#76 (see "Running in a cloud session" and "Hand-off" below).
 
 Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 
-## Finished stories (57 of 60)
+## Finished stories (60 of 60)
 
 | # | Story | PR | Review rounds | CodeRabbit | Follow-up issue |
 |---|---|---|---|---|---|
@@ -67,19 +67,19 @@ Board: https://github.com/users/MohamedEbrahimMohsen/projects/1
 | 55 | #125 [E16.S1] Admin diagram authoring tool (v2) | #241 | 2 | skipped (too many files); +2 main merges | #242 |
 | 56 | #123 [E15.S3] LLM step grading (v2) | #244 | 1 | skipped (too many files); +main merge | #245 |
 | 57 | #115 [E13.S4] Security hardening | #243 | 1 | 3 comments, fixed (gitleaks, Npgsql password, atomic refresh) + Trivy caddy bump | #247 |
+| 58 | #126 [E16.S2] Student canvas and grading (v2) | #246 | 2 | skipped (too many files); +2 main merges | #248 |
+| 59 | #117 [E14.S1] Essay question authoring with rubric (v2) | #218 | 1 | 4 comments, merged before triage (fixed in #118) | #228 (via #118) |
+| 60 | #128 [E17.S1] Review queue and override (v2) | #249 | 2 | skipped (too many files); +main merge | #250 |
 
-Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo).
+Other PRs: #129 (docs, prototype, tooling), #130 (pipeline setup for this repo), #149 (cloud-session pipeline).
 Per-story plans, reviews and metrics live in `.process/<issue>-<slug>/`.
 
-## Remaining stories (3), in run order
+## Remaining stories (0), in run order
 
 Stories run in dependency order, not issue order. E10 (payments) comes before E7 because free-tier gating needs entitlements.
 
 | Order | Issue | Story |
 |---|---|---|
-| 42 | #117 | [E14.S1] Essay question authoring with rubric (v2) |
-| 49 | #126 | [E16.S2] Student canvas and grading (v2) |
-| 50 | #128 | [E17.S1] Review queue and override (v2) |
 
 After the last story, write `docs/implementation-report.md` (see `.claude/commands/feature.md`, "Board report").
 
@@ -215,26 +215,10 @@ How the next agent resumes, in a cloud session or on the laptop:
 
 ## Open issues created by the run
 
-`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199, #201, #204, #205, #207, #209, #211, #213, #215, #217, #222, #220, #224, #228, #229, #231, #233, #235, #237, #240, #242, #245, #247 · `dev-decision`: none open (#135 and #155 confirmed and closed).
-## Resume notes (safe stop for /compact, 2026-09-30)
+`deferred`: #132, #134, #137, #139, #142, #144, #146, #148, #151, #153, #156, #158, #160, #162, #164, #166, #168, #170, #173, #175, #177, #179, #181, #183, #185, #187, #189, #191, #193, #195, #197, #199, #201, #204, #205, #207, #209, #211, #213, #215, #217, #220, #224, #228, #229, #231, #233, #235, #237, #240, #242, #245, #247, #248, #250 · `dev-decision`: #222 open (#135 and #155 confirmed and closed).
+## Run status (2026-10-01)
 
-**State:** there are no running agents, no open PRs except as listed below, and the heartbeat cron is cancelled.
-
-- **#117** was merged (PR #218) before its CodeRabbit comments were triaged. The triage is in `.process/117-*/06-coderabbit-triage.md`. The valid items (an empty model answer after sanitising, and the essay-grading wording) are folded into **#118's plan**.
-- **#118 [E14.S2] LLM essay grader:** the plan is APPROVED and PARKED on branch `feature/118-llm-essay-grader` (pushed, no PR), with `.process/118-llm-essay-grader/01-plan.md` in place. **Resume here:** check out the branch, `git merge origin/main`, launch `feature-implementer` on the plan, then review, PR, CodeRabbit (read the comments BEFORE merging) and merge.
-- **#97** (PR #221) and **#114** (PR #219) are merged. #114's CI fix added an npm `overrides` entry for undici 7.29.1 under `@scalar/json-magic` (security advisory), plus a k6 warm-up in `setup()`.
-- **Parallel lanes:** up to 3 at a time (see Conventions). After #118, the remaining stories are:
-  - #119 (essay input, after #118)
-  - #104–#107 dashboards
-  - #109, #110 training data
-  - #115 security (see the security items collected in #205, #197, #191, #211)
-  - #121–#123 math
-  - #125, #126 diagrams
-  - #128 review queue (after #118 and #119)
-  - then `docs/implementation-report.md`.
-- **Dev decisions pending (for the final report):**
-  - #213 (AGPL)
-  - #215 (chat retention)
-  - #222 (SLA pause, refund, escalation)
-  - #209 (out-of-app reply notification)
-  - go-live keys and hosting (#185, #189, #201, #204, #205, #217)
+The autopilot run is complete: all 60 stories are merged, and main is green at `0ca08ae`. No agents, worktrees or PRs are open.
+- Run report: `docs/implementation-report.md` (stories, every issue opened, fakes and how to switch them to real, how to run locally, decisions made, known gaps).
+- Dev decisions awaiting the dev: #213 (AGPL), #215 (chat and training-data retention), #222 (SLA pause, refund, escalation), #209 (out-of-app reply notification), plus the other `dev-decision` issues.
+- Go-live keys and hosting: #185, #189, #201, #204, #205, #217 (and the provider sections of the report).
