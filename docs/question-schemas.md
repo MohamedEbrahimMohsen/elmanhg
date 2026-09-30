@@ -12,6 +12,7 @@ The wire names are the `QuestionType` enum values. v1 grading follows PRD §6.
 - `Fill`: one string per blank. Normalised match (PRD §6.2) against an accepted-answers list per blank; credit per blank.
 - `Short`: a number or a string. Numeric within a tolerance (absolute or percent); text against an accepted list with normalisation.
 - `Essay` (v2): plain-text answer (student input is #119), graded by the AI grader against the rubric and model answers ([essay-grading.md](essay-grading.md)); a blank answer is graded at once as Unanswered.
+- `MathSteps` (v2): steps plus a final answer. The final answer is checked by the CAS (#122, [math-cas.md](math-cas.md)); the steps are stored for step grading (#123).
 
 ## Body vs grading spec
 
@@ -95,6 +96,18 @@ Canonical JSON, exactly as stored. Keys are camelCase; enum values are camelCase
 - `title`, `description` and level `description` are plain text, trimmed; a blank criterion `description` is omitted. `modelAnswers` are sanitised rich text, like the stem.
 - The grading spec, with its rubric and model answers, is never sent to a student.
 
+**MathSteps** (v2): the body is `{}` (nothing besides the stem is shown to the student). Canonical grading spec:
+
+```json
+{"acceptedAnswers":["x = 2","2"],"form":"equivalent","tolerance":0.01,"toleranceMode":"absolute"}
+```
+
+- `acceptedAnswers`: one or more LaTeX final answers, trimmed; any mathematically equivalent answer is accepted. Notation, lists, `\pm` and equations are in [math-cas.md](math-cas.md).
+- `form`: `equivalent` (the default, written explicitly when saved), `simplified`, `factored`, `expanded` or `exact`. The form rule applies to an answer that is already equivalent ([math-cas.md](math-cas.md), Forms).
+- `tolerance` (≥ 0) and `toleranceMode` (`absolute` or `percent`) come as a pair, are optional, and are allowed only with `equivalent`. They apply when both values are constants; the bound is inclusive, as for a numeric Short answer.
+- Unknown fields are dropped. Accepted answers are not CAS-parsed when saved; an unparseable one is skipped when grading.
+- The grading spec is revealed after answering, like every other type (the first accepted answer is shown).
+
 `normalization` (PRD §6.2) holds the answer-normalisation rules of fill and text short answers. Each rule can be switched off per question; every rule defaults to `true`:
 
 | Key | Effect when `true` | Default |
@@ -149,6 +162,10 @@ A request whose `body` or `gradingSpec` breaks a rule gets `422` with the code b
 | Essay | 1 to `Content:QuestionModelAnswersMaxCount` model answers | `QUESTION_MODEL_ANSWERS_COUNT_INVALID` |
 | Essay | every model answer has text the AI grader can read: text, a formula, or an image with non-blank alt text, both as sent and after sanitising (an image with an empty alt is rejected) | `QUESTION_MODEL_ANSWER_REQUIRED` |
 | Essay | each model answer is at most `Content:QuestionModelAnswerMaxLength` | `QUESTION_MODEL_ANSWER_TOO_LONG` |
+| MathSteps | 1 to `Content:QuestionAcceptedAnswersMaxCount` accepted answers, none blank, each at most `Content:QuestionAnswerMaxLength` after trimming | `QUESTION_MATH_ANSWERS_INVALID` |
+| MathSteps | `form`, when present, is a defined form (an unknown name does not read: `QUESTION_GRADING_SPEC_INVALID`) | `QUESTION_MATH_FORM_INVALID` |
+| MathSteps | `tolerance` ≥ 0 and `toleranceMode` both present, or both absent | `QUESTION_MATH_TOLERANCE_INVALID` |
+| MathSteps | a tolerance only with the `equivalent` form | `QUESTION_MATH_TOLERANCE_FORM_CONFLICT` |
 
 A non-integer `maxWords`, criterion `points` or level `points` does not read as the type's shape and fails with `QUESTION_BODY_INVALID` / `QUESTION_GRADING_SPEC_INVALID`.
 
@@ -192,7 +209,7 @@ A non-integer `maxWords`, criterion `points` or level `points` does not read as 
 ## Servable
 
 - Servable = Approved ∧ lesson Published ∧ not retired (PRD §5.3, §17 rule 1). It is derived on every read and never stored.
-- `ServableQuestionSpecification.ServedTypes` lists all six types (`Mcq`, `Multi`, `TrueFalse`, `Fill`, `Short`, `Essay`) for per-type listings such as blueprint servable counts.
+- `ServableQuestionSpecification.ServedTypes` lists all seven types (the five v1 types `Mcq`, `Multi`, `TrueFalse`, `Fill`, `Short`, plus `Essay`, #119, and `MathSteps`, #122) for per-type listings such as blueprint servable counts.
 - `ServableQuestionSpecification` (`Elmanhg.Domain/Questions`) is the only definition. `WhereServable(questions, lessons)` composes the rule into SQL; `IsSatisfiedBy(question, lesson)` runs compiled copies of the same expressions in memory.
 - Every serving query (quizzes, exams, blueprints, anything a student is shown) must filter through `WhereServable`. Admin reads never filter by it: `GET /api/questions` lists every status and annotates each item with `isServable`, and `GET /api/lessons` returns `servableQuestionCount` next to `questionCount`.
 - `GET /api/questions/servable-count` is anonymous and returns `{"count": n}`, the platform-wide total shown on the landing page. It is cached in `IMemoryCache` under `questions:servable-count`.
@@ -240,6 +257,12 @@ A student's answer (and the `answer` of `POST /api/questions/grade-draft`) is a 
 {"text":"القصور الذاتي هو ممانعة الجسم لتغيير حالته الحركية."}
 ```
 
+**MathSteps** (`steps` optional and only strings, `finalAnswer` an optional string; a null step or a non-string gets `422 QUESTION_ANSWER_INVALID`). Canonicalising trims every step, drops blank steps and trims the final answer. At most `Sessions:MathStepsMaxCount` steps (20), `Sessions:MathStepMaxLength` characters per step (500) and `Sessions:MathFinalAnswerMaxLength` characters in the final answer (200), else `422 ATTEMPT_ANSWER_TOO_LONG` (quiz answer, exam save and `grade-draft`).
+
+```json
+{"steps":["2x = 4"],"finalAnswer":"x = 2"}
+```
+
 ## Grading
 
 The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of the stored grading spec, the max score and the answer. `POST /api/questions/grade-draft` (admin, `Content.Manage`) validates an unsaved draft with the same rules as create and update, canonicalises it, and grades the `answer` with the same graders; it saves nothing and is not audited. Attempts reuse the same graders.
@@ -255,6 +278,7 @@ The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of
 - **Short numeric** (the spec has `value`): the answer is parsed as a number and is correct when `value − allowed ≤ answer ≤ value + allowed` (both bounds inclusive). `allowed` is `tolerance` (`absolute`) or `|value| × tolerance / 100` (`percent`). A negative `value` gets the same band as its magnitude, and a `value` of 0 with `percent` accepts only 0. A missing or negative tolerance counts as 0 and a missing mode as `absolute` (unreachable after validation). Only the spec takes part in the arithmetic; when a bound would pass the decimal range (±79228162514264337593543950335) it is clamped to that limit, so grading never fails.
 - **Short text**: the normalised answer must equal one of the normalised accepted answers.
 - **Essay**: the AI grader awards points per rubric criterion ([essay-grading.md](essay-grading.md)); `QuestionGrader.GradeEssay` turns them into `Σ awarded ÷ Σ criterion points`, scaled by the max score like every other type. The model's own total is never used. `grade-draft` grades essays synchronously through the AI grader (`503 ESSAY_GRADING_UNAVAILABLE` when it fails) and adds an `essay` detail (criteria, justification, confidence, model, prompt version, cost); a blank essay scores 0 (Unanswered) without calling the grader.
+- **MathSteps**: only the final answer is graded until step grading (#123), through `AnswerGrader` and the AI service's CAS check ([math-cas.md](math-cas.md)); every other type grades locally without the AI service. `equivalent` scores 1, every other verdict 0. A blank final answer is Unanswered (0) without calling the AI service, even with steps. `QuestionGrader.Grade` does not grade MathSteps; `QuestionGrader.GradeMathSteps(maxScore, verdict)` scales the verdict like every other type. When the AI service cannot be reached the verdict is `unchecked`: the answer is still recorded with a provisional 0, left out of mastery, and waits for teacher review (#128); nothing is lost and no submit fails.
 - An answer that normalises to empty never matches.
 - **Normalisation** (PRD §6.2): the student answer and every accepted answer go through the same steps. Always, in this order: drop unpaired UTF-16 surrogates and the noncharacter U+FFFE (both make NFC fail), and invisible marks (U+061C, U+200B–U+200F, U+202A–U+202E, U+2060, U+2066–U+2069, U+FEFF), so none of them can split a letter from its mark; Unicode NFC (so a decomposed hamza or madda, such as ا + U+0654, becomes أ); map ، (U+060C) to `,` and ی (U+06CC) to ي (U+064A). Then the question's `normalization` rules (see **Fill** and **Short** above), each applied only when on. Finally the answer is always trimmed. With `collapseWhitespace` off, inner whitespace is kept verbatim (tabs and runs included); the ends are still trimmed. Hamza seats (ئ ؤ ء) are never unified.
 - **Numeric parsing**: numeric answers ignore the question's `normalization` rules and use a fixed profile: every rule on except the three letter rules. After normalisation, `٬` (U+066C, the Arabic thousands separator) is removed, then `٫` (U+066B) and `,` become `.`, and `−` (U+2212) becomes `-`; the rest must be a plain decimal number: an optional leading sign, digits and one decimal point (invariant culture). Exponents such as `9.8e0`, inner whitespace, thousands separators other than `٬`, and anything else (such as a trailing unit) do not parse and score 0. `,` always means a decimal point, so `1,000` reads as 1.
@@ -264,10 +288,11 @@ The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of
   - A Multi answer that is not exactly the correct set returns «الاختيارات الصحيحة: {right} من {total}، والخاطئة: {wrong}.» / "Correct choices: {right} of {total}; wrong choices: {wrong}." This applies in both partial-credit modes.
   - A Fill answer with two or more blanks that is not fully correct returns «الفراغات الصحيحة: {right} من {total}.» / "Correct blanks: {right} of {total}." A single-blank Fill returns `null`.
   - A numeric Short answer that does not parse as a number returns «اكتب الإجابة رقمًا فقط، بدون وحدات.» / "Write the answer as a plain number, without units." A number outside the tolerance returns `null`: a direction hint would reveal part of the answer.
+  - A MathSteps final answer returns one of four lines: «صُحّحت الإجابة النهائية فقط، وتُصحَّح الخطوات لاحقًا.» / "Only the final answer was graded; the steps are graded later." (equivalent or not equivalent); «اكتب الإجابة النهائية بالصورة التي يطلبها السؤال.» / "Write the final answer in the form the question asks for." (wrong form; it tells the student to change the form without revealing the answer); «تعذّرت قراءة الإجابة النهائية. اكتبها بالرموز الرياضية، مثل x = 2.» / "The final answer could not be read. …" (unreadable); «تعذّر التحقق من الإجابة النهائية آليًا، وسيراجعها معلمك.» / "The final answer could not be checked automatically. Your teacher will review it." (unchecked).
   - Every other case returns `null`.
 
   The feedback never contains the verdict, the correct answer or the explanation.
 
 ## Changing a schema
 
-A new field or rule changes the schema record, its rules, this document and the web editor in the same change. The spreadsheet import (`docs/question-import.md`) builds the same shapes from columns; a schema change updates its columns, parser and template in the same change. Essay is not importable (PRD §10.1). Rows already stored in the old shape need a data migration that rewrites them to the new canonical shape.
+A new field or rule changes the schema record, its rules, this document and the web editor in the same change. The spreadsheet import (`docs/question-import.md`) builds the same shapes from columns; a schema change updates its columns, parser and template in the same change. Essay and MathSteps are not importable (PRD §10.1). Rows already stored in the old shape need a data migration that rewrites them to the new canonical shape.

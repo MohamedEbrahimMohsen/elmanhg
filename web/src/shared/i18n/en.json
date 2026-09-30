@@ -276,7 +276,12 @@
     "TRAINING_EXPORT_MODIFIED_CONCURRENTLY": "The export was changed at the same time. Try again.",
     "TRAINING_EXPORT_NOT_PENDING": "The export is no longer being prepared.",
     "TRAINING_EXPORT_NOT_READY": "The export is not ready yet.",
-    "TRAINING_EXPORT_EXPIRED": "The export file has expired and was deleted. Request a new export."
+    "TRAINING_EXPORT_EXPIRED": "The export file has expired and was deleted. Request a new export.",
+    "QUESTION_MATH_ANSWERS_INVALID": "Add one or more accepted final answers, none empty or too long, up to the allowed maximum.",
+    "QUESTION_MATH_FORM_INVALID": "Choose a valid required form.",
+    "QUESTION_MATH_TOLERANCE_INVALID": "Enter a tolerance of zero or more together with absolute or percent, or leave both empty.",
+    "QUESTION_MATH_TOLERANCE_FORM_CONFLICT": "A tolerance works only with the any-equivalent-form rule.",
+    "MATH_CHECK_UNAVAILABLE": "The final answer cannot be checked right now. Try again in a moment."
   },
   "error": {
     "title": "Something went wrong"

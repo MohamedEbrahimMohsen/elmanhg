@@ -16,6 +16,7 @@ public static partial class AvatarAnswerText
             QuestionType.TrueFalse => BooleanText(Read<TrueFalseGradingSpec>(snapshot.GradingSpec)?.CorrectAnswer),
             QuestionType.Fill => Blanks(Read<FillGradingSpec>(snapshot.GradingSpec)?.Blanks?.Select(x => (x.Id, x.AcceptedAnswers?.FirstOrDefault()))),
             QuestionType.Short => ShortText(Read<ShortGradingSpec>(snapshot.GradingSpec)),
+            QuestionType.MathSteps => NullIfBlank(Read<MathStepsGradingSpec>(snapshot.GradingSpec)?.AcceptedAnswers?.FirstOrDefault()),
             _ => null,
         };
     }

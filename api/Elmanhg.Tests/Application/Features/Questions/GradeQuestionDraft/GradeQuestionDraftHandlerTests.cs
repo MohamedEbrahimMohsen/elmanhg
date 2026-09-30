@@ -7,6 +7,7 @@ using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.RichText;
 using Elmanhg.Domain.Lessons;
+using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Units;
@@ -23,6 +24,7 @@ namespace Elmanhg.Tests.Application.Features.Questions.GradeQuestionDraft;
 
 public sealed class GradeQuestionDraftHandlerTests
 {
+    private readonly IAiMathCheckClient _mathCheckClient = Substitute.For<IAiMathCheckClient>();
     private readonly IRichTextSanitizer _richTextSanitizer = Substitute.For<IRichTextSanitizer>();
     private readonly ILocalizer _localizer = Substitute.For<ILocalizer>();
     private readonly ILessonRepository _lessonRepository = Substitute.For<ILessonRepository>();
@@ -34,7 +36,7 @@ public sealed class GradeQuestionDraftHandlerTests
     public GradeQuestionDraftHandlerTests()
     {
         _richTextSanitizer.Sanitize(Arg.Any<string?>()).Returns(x => x.Arg<string?>() ?? string.Empty);
-        _handler = new GradeQuestionDraftHandler(_richTextSanitizer, new RichTextExtractor(), _lessonRepository, _unitRepository, _subjectRepository, _essayGradingClient, Options.Create(new EssayGradingOptions()), _localizer);
+        _handler = new GradeQuestionDraftHandler(_richTextSanitizer, new RichTextExtractor(), _lessonRepository, _unitRepository, _subjectRepository, _essayGradingClient, Options.Create(new EssayGradingOptions()), _localizer, _mathCheckClient, Options.Create(new SessionsOptions()));
     }
 
     [Fact]
@@ -139,6 +141,28 @@ public sealed class GradeQuestionDraftHandlerTests
         var act = () => _handler.Handle(new GradeQuestionDraftQuery(EssayFields(), Json("""{"text":"Inertia"}""")), TestContext.Current.CancellationToken);
 
         (await act.Should().ThrowAsync<ServiceUnavailableCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.EssayGradingUnavailable);
+    }
+
+    [Fact]
+    public async Task Handle_MathStepsEquivalent_ReturnsCorrectWithFeedback()
+    {
+        _mathCheckClient.CheckAsync(Arg.Any<AiMathCheckRequest>(), Arg.Any<CancellationToken>()).Returns(new AiMathCheckResult(MathAnswerVerdict.Equivalent, 0, []));
+        _localizer.GetMessage("GRADE_FEEDBACK_MATH_FINAL_ONLY", Arg.Any<string?>(), Arg.Any<Dictionary<string, object>?>()).Returns("final");
+
+        var result = await _handler.Handle(new GradeQuestionDraftQuery(MathStepsFields(), Json("""{"steps":["2x = 4"],"finalAnswer":"x=2"}""")), TestContext.Current.CancellationToken);
+
+        result.Should().Be(new QuestionGradeResult(2m, 1m, "Correct", 2, "final"));
+    }
+
+    [Fact]
+    public async Task Handle_MathStepsTooManySteps_ThrowsAttemptAnswerTooLong()
+    {
+        var steps = string.Join(",", Enumerable.Repeat("\"x\"", 21));
+
+        var act = () => _handler.Handle(new GradeQuestionDraftQuery(MathStepsFields(), Json($$"""{"steps":[{{steps}}],"finalAnswer":"x=2"}""")), TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<ApplicationValidationCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.AttemptAnswerTooLong);
+        await _mathCheckClient.DidNotReceive().CheckAsync(Arg.Any<AiMathCheckRequest>(), Arg.Any<CancellationToken>());
     }
 
     private static AiEssayGradingResult Reply(decimal confidence) => new([new AiEssayCriterionScore("c1", 1, "Partly correct.")], 1, 2, "Good definition; add an example.", confidence, "claude-sonnet-5", "v1", 900, 150, "end_turn", 0.004m);

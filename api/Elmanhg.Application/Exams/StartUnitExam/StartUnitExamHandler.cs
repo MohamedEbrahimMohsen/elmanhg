@@ -3,6 +3,7 @@ using Core.Identity.Tokens.CurrentUser;
 using Core.Localization;
 using Elmanhg.Application.Exams.Shared;
 using Elmanhg.Application.Exceptions;
+using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.EssayGrading;
@@ -23,7 +24,7 @@ using System.Security.Claims;
 
 namespace Elmanhg.Application.Exams.StartUnitExam;
 
-public sealed class StartUnitExamHandler(ISessionRepository sessionRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, ILessonRepository lessonRepository, ILessonOpeningRepository lessonOpeningRepository, IQuestionRepository questionRepository, IExamBlueprintRepository examBlueprintRepository, IQuestionMasteryRepository questionMasteryRepository, IEssayGradeRepository essayGradeRepository, ISubscriptionRepository subscriptionRepository, IOptions<ExamsOptions> examsOptions, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, Random random, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<StartUnitExamCommand, ExamSessionResult>
+public sealed class StartUnitExamHandler(ISessionRepository sessionRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, ILessonRepository lessonRepository, ILessonOpeningRepository lessonOpeningRepository, IQuestionRepository questionRepository, IExamBlueprintRepository examBlueprintRepository, IQuestionMasteryRepository questionMasteryRepository, IEssayGradeRepository essayGradeRepository, ISubscriptionRepository subscriptionRepository, IOptions<ExamsOptions> examsOptions, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, Random random, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer, IAiMathCheckClient mathCheckClient) : IRequestHandler<StartUnitExamCommand, ExamSessionResult>
 {
     public async Task<ExamSessionResult> Handle(StartUnitExamCommand request, CancellationToken cancellationToken)
     {
@@ -55,7 +56,7 @@ public sealed class StartUnitExamHandler(ISessionRepository sessionRepository, I
         }
         else if (open.IsPastDeadline(now, examsOptions.Value.DeadlineGrace))
         {
-            await ExamSubmission.SubmitAsync(open, revisions, questionRepository, questionMasteryRepository, essayGradeRepository, threshold, now, cancellationToken).ConfigureAwait(false);
+            await ExamSubmission.SubmitAsync(open, revisions, questionRepository, questionMasteryRepository, essayGradeRepository, mathCheckClient, threshold, now, cancellationToken).ConfigureAwait(false);
         }
         else
         {

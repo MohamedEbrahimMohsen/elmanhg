@@ -49,6 +49,35 @@ describe('ExamResultPage', () => {
     expect(screen.queryByText('Passed')).toBeNull();
   });
 
+  it('shows an unchecked math answer as under review instead of failing the exam', async () => {
+    const math = examItem(2, {
+      type: 'MathSteps',
+      body: {},
+      attempt: {
+        id: 'aaaaaaaa-aaaa-4aaa-8aaa-000000000002',
+        answer: { steps: [], finalAnswer: 'x = 2' },
+        score: 0,
+        normalisedScore: 0,
+        outcome: 'Incorrect',
+        awaitsReview: true,
+        feedback: null,
+        timeTakenMilliseconds: 0,
+        createdAt: '2026-09-28T10:12:30Z',
+      },
+    });
+    openResult(submittedExam([examItem(1), math], { scorePercent: 30, isPassed: false }));
+
+    expect(
+      await screen.findByText('1 answer is under review. The score is provisional until your teacher reviews them.'),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText('Under review')).toHaveLength(2);
+    expect(screen.queryByText('Below the pass mark (50)')).toBeNull();
+    const review = within(screen.getByRole('article', { name: 'Question 2' }));
+    expect(review.getByRole('status')).toHaveTextContent('Under review');
+    expect(review.queryByText('Wrong answer')).not.toBeInTheDocument();
+    expect(review.queryByText('The correct answer')).not.toBeInTheDocument();
+  });
+
   it('lists the per-lesson breakdown with a practice link', async () => {
     openResult(submittedExam([examItem(1)]));
 

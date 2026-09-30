@@ -53,6 +53,24 @@ public sealed class AiServiceServiceCollectionExtensionsTests
     }
 
     [Fact]
+    public void AddAiService_Fake_ResolvesFakeMathCheckClient()
+    {
+        using var provider = BuildProvider([]);
+        using var scope = provider.CreateScope();
+
+        scope.ServiceProvider.GetRequiredService<IAiMathCheckClient>().Should().BeOfType<FakeAiMathCheckClient>();
+    }
+
+    [Fact]
+    public void AddAiService_Http_ResolvesHttpMathCheckClient()
+    {
+        using var provider = BuildProvider(AiServiceTestSettings.ToConfiguration(AiServiceTestSettings.WithHttp()));
+        using var scope = provider.CreateScope();
+
+        scope.ServiceProvider.GetRequiredService<IAiMathCheckClient>().Should().BeOfType<HttpAiMathCheckClient>();
+    }
+
+    [Fact]
     public void AddAiService_Http_TranscriptionClientTimeoutDoesNotCapConfiguredBudget()
     {
         using var provider = BuildProvider(AiServiceTestSettings.ToConfiguration(AiServiceTestSettings.WithHttp()));

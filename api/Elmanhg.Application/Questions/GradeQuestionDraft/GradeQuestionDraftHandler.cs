@@ -18,7 +18,7 @@ using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.Questions.GradeQuestionDraft;
 
-public sealed class GradeQuestionDraftHandler(IRichTextSanitizer richTextSanitizer, IRichTextExtractor richTextExtractor, ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IAiEssayGradingClient essayGradingClient, IOptions<EssayGradingOptions> essayGradingOptions, ILocalizer localizer) : IRequestHandler<GradeQuestionDraftQuery, QuestionGradeResult>
+public sealed class GradeQuestionDraftHandler(IRichTextSanitizer richTextSanitizer, IRichTextExtractor richTextExtractor, ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IAiEssayGradingClient essayGradingClient, IOptions<EssayGradingOptions> essayGradingOptions, ILocalizer localizer, IAiMathCheckClient mathCheckClient, IOptions<SessionsOptions> sessionsOptions) : IRequestHandler<GradeQuestionDraftQuery, QuestionGradeResult>
 {
     public async Task<QuestionGradeResult> Handle(GradeQuestionDraftQuery request, CancellationToken cancellationToken)
     {
@@ -26,7 +26,13 @@ public sealed class GradeQuestionDraftHandler(IRichTextSanitizer richTextSanitiz
         var type = request.Question.Type.GetValueOrDefault();
         if (type != QuestionType.Essay)
         {
-            return Result(QuestionGrader.Grade(type, content.GradingSpec, content.MaxScore, request.Answer), content.MaxScore, null);
+            if (QuestionAnswerRules.ExceedsLimits(type, request.Answer, sessionsOptions.Value))
+            {
+                throw new ApplicationValidationCoreException(ErrorCodes.AttemptAnswerTooLong);
+            }
+
+            var grade = await AnswerGrader.GradeAsync(type, content.GradingSpec, content.MaxScore, request.Answer, mathCheckClient, cancellationToken).ConfigureAwait(false);
+            return Result(grade, content.MaxScore, null);
         }
 
         var text = QuestionSchemaReader.Read<EssayAnswer>(request.Answer).Text!;
@@ -38,8 +44,8 @@ public sealed class GradeQuestionDraftHandler(IRichTextSanitizer richTextSanitiz
         var context = request.LessonId is { } lessonId ? await EssayGradingContextLoader.LoadAsync(lessonId, lessonRepository, unitRepository, subjectRepository, cancellationToken).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.LessonNotFound) : null;
         var aiRequest = EssayGradingRequestFactory.Create(content.Stem, content.GradingSpec, text, context, richTextExtractor, essayGradingOptions.Value.ContextFieldMaxLength);
         var result = await essayGradingClient.GradeAsync(aiRequest, cancellationToken).ConfigureAwait(false);
-        var grade = QuestionGrader.GradeEssay(content.GradingSpec, content.MaxScore, EssayAssessments.Awards(result));
-        return Result(grade, content.MaxScore, EssayGradeResultGenerator.Detail(EssayAssessments.From(aiRequest, result)));
+        var essayGrade = QuestionGrader.GradeEssay(content.GradingSpec, content.MaxScore, EssayAssessments.Awards(result));
+        return Result(essayGrade, content.MaxScore, EssayGradeResultGenerator.Detail(EssayAssessments.From(aiRequest, result)));
     }
 
     private QuestionGradeResult Result(QuestionGrade grade, int maxScore, EssayGradeDetailResult? essay) => new(grade.Score, grade.NormalisedScore, grade.Outcome.ToString(), maxScore, GradeFeedbackText.Localize(grade.Feedback, localizer), essay);

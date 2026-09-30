@@ -25,7 +25,7 @@ public sealed class QuizAnswerMetricsBehaviourTests : IDisposable
     [Fact]
     public async Task Handle_AnswerGraded_RecordsAttemptOutcome()
     {
-        var graded = Item(new AttemptResult(Guid.CreateVersion7(), Answer, 1, 1, "Correct", null, 1200, new DateTimeOffset(2026, 9, 29, 10, 0, 0, TimeSpan.Zero)));
+        var graded = Item(new AttemptResult(Guid.CreateVersion7(), Answer, 1, 1, "Correct", false, null, 1200, new DateTimeOffset(2026, 9, 29, 10, 0, 0, TimeSpan.Zero)));
 
         var result = await _behaviour.Handle(Command, _ => Task.FromResult(graded), TestContext.Current.CancellationToken);
 

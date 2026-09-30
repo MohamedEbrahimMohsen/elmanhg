@@ -48,7 +48,7 @@ public sealed class SaveExamAnswerHandler(ISessionRepository sessionRepository, 
             throw new ApplicationValidationCoreException(ErrorCodes.QuestionAnswerInvalid);
         }
 
-        if (QuestionAnswerRules.IsRawAnswerTooLong(type, request.Answer, sessionsOptions.Value))
+        if (QuestionAnswerRules.IsRawAnswerTooLong(type, request.Answer, sessionsOptions.Value) || QuestionAnswerRules.ExceedsLimits(type, request.Answer, sessionsOptions.Value))
         {
             throw new ApplicationValidationCoreException(ErrorCodes.AttemptAnswerTooLong);
         }

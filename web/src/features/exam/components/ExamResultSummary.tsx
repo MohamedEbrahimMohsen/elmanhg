@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { hasPendingEssay, isWrittenEssay } from '@/features/quiz';
+import { countAwaitingReview, isWrittenEssay, ProvisionalScoreNotes } from '@/features/quiz';
 import type { ExamSessionResult } from '@/shared/api/generated/model';
 import { splitDuration } from '../api/examSession';
 
@@ -12,6 +12,7 @@ const badgeClassName = 'self-start rounded-full px-2.5 py-0.5 text-micro font-se
 export function ExamResultSummary({ session }: ExamResultSummaryProps) {
   const { t } = useTranslation('exam');
   const answered = session.items.filter((item) => item.attempt !== null || isWrittenEssay(item)).length;
+  const inReview = countAwaitingReview(session.items) > 0;
 
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5">
@@ -20,6 +21,10 @@ export function ExamResultSummary({ session }: ExamResultSummaryProps) {
       </p>
       {session.isPassed ? (
         <span className={`${badgeClassName} bg-success`}>{t('result.passed')}</span>
+      ) : inReview ? (
+        <span className="self-start rounded-full border border-warning bg-warning-soft px-2.5 py-0.5 text-micro font-semibold text-text">
+          {t('result.provisional')}
+        </span>
       ) : (
         <span className={`${badgeClassName} bg-danger`}>
           {t('result.failed', { passMark: Number(session.passMark) })}
@@ -29,9 +34,7 @@ export function ExamResultSummary({ session }: ExamResultSummaryProps) {
       <p className="text-caption text-text-muted">
         {t('result.time', splitDuration(Number(session.elapsedMilliseconds)))}
       </p>
-      {hasPendingEssay(session.items) ? (
-        <p className="text-caption text-text-muted">{t('result.essaysPending')}</p>
-      ) : null}
+      <ProvisionalScoreNotes items={session.items} />
     </div>
   );
 }

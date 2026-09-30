@@ -10,7 +10,9 @@ from elmanhg_ai.api import health
 from elmanhg_ai.api.chat import router as chat_router
 from elmanhg_ai.api.embeddings import router as embeddings_router
 from elmanhg_ai.api.essay_grades import router as essay_grades_router
+from elmanhg_ai.api.math_checks import router as math_checks_router
 from elmanhg_ai.api.transcriptions import router as transcriptions_router
+from elmanhg_ai.cas.pool import CasPool
 from elmanhg_ai.clients.embedding import EmbeddingClient, build_embedding_client
 from elmanhg_ai.clients.metered import (
     AiMetrics,
@@ -58,6 +60,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.transcription_client = MeteredTranscriptionClient(
         transcription_client, metrics=metrics, tracer=tracer, settings=settings
     )
+    cas_pool = CasPool(settings)
+    app.state.cas_pool = cas_pool
     logger.info(
         "service.started",
         env=settings.env,
@@ -78,6 +82,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await model_client.aclose()
         await embedding_client.aclose()
         await transcription_client.aclose()
+        await cas_pool.aclose()
         telemetry.shutdown()
 
 
@@ -118,5 +123,6 @@ def create_app(
     app.include_router(chat_router.router)
     app.include_router(embeddings_router.router)
     app.include_router(transcriptions_router.router)
+    app.include_router(math_checks_router.router)
     app.include_router(essay_grades_router.router)
     return app

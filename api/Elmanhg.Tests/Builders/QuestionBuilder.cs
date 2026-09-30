@@ -16,6 +16,7 @@ public sealed class QuestionBuilder
     private string? _rejectionReason;
     private bool _retired;
     private bool _essay;
+    private bool _mathSteps;
 
     public QuestionBuilder()
     {
@@ -64,9 +65,17 @@ public sealed class QuestionBuilder
         return this;
     }
 
+    public QuestionBuilder MathSteps()
+    {
+        _mathSteps = true;
+        return this;
+    }
+
     public Question Build()
     {
-        var question = Question.Create(Lesson, Unit, _essay ? QuestionType.Essay : QuestionType.Mcq, _essay ? EssayContent() : McqContent(), _metadata ?? new QuestionMetadata(QuestionDifficulty.Medium, null, []), Guid.NewGuid());
+        var type = _mathSteps ? QuestionType.MathSteps : _essay ? QuestionType.Essay : QuestionType.Mcq;
+        var content = _mathSteps ? MathStepsContent() : _essay ? EssayContent() : McqContent();
+        var question = Question.Create(Lesson, Unit, type, content, _metadata ?? new QuestionMetadata(QuestionDifficulty.Medium, null, []), Guid.NewGuid());
         if (_approved)
         {
             question.Approve(TeacherSubject.Create(Teacher, Subject, Guid.NewGuid()), question.Version);
@@ -105,6 +114,18 @@ public sealed class QuestionBuilder
     public static QuestionFields EssayFields()
     {
         return new QuestionFields(QuestionType.Essay, "<p>Explain inertia.</p>", Json("""{"maxWords":200}"""), Json(EssaySpecJson), "<p>Newton 1.</p>", QuestionDifficulty.Medium, null, [], 5);
+    }
+
+    public const string MathStepsSpecJson = """{"acceptedAnswers":["x = 2"],"form":"equivalent"}""";
+
+    public static QuestionContent MathStepsContent()
+    {
+        return new QuestionContent("<p>Solve 2x + 3 = 7.</p>", "{}", MathStepsSpecJson, "<p>Subtract 3, divide by 2.</p>", 2);
+    }
+
+    public static QuestionFields MathStepsFields()
+    {
+        return new QuestionFields(QuestionType.MathSteps, "<p>Solve 2x + 3 = 7.</p>", Json("{}"), Json(MathStepsSpecJson), "<p>Subtract 3, divide by 2.</p>", QuestionDifficulty.Medium, null, [], 2);
     }
 
     public static JsonElement Json(string json)

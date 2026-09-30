@@ -10,12 +10,13 @@ Students answer math problems as an ordered list of steps plus a final answer, w
 | #122 | CAS check of the final answer |
 | #123 | LLM grading of the steps |
 
-The component is **not mounted anywhere yet**. No `MathSteps` question type exists, so nothing authors, serves or grades one. The question type end to end (type, schemas, authoring, serving, mounting in quiz and exam) is a deferred backlog item, planned into #122.
+The `MathSteps` question type exists since #122. `MathStepsAnswer` is mounted in the quiz and the exam (with the draft owner `{studentId, sessionId, questionId}`), and `MathStepsInput` in the admin editor's student preview (no draft). Answered, review, validation and submitting states show a read-only list of the steps and the final answer.
 
 The barrel `@/features/mathSteps` exports:
 
 - `MathStepsAnswer`: the autosaving component for students.
 - `MathStepsInput`: the controlled component without autosave, for future admin model-solution authoring.
+- `MathPreview`: the KaTeX preview of one LaTeX string (used for the read-only solution, the accepted answers and the correct-answer reveal).
 - `clearMathDraft`, `emptyMathStepsValue`, `fromMathStepsPayload`, `toMathStepsPayload` and the types.
 
 ## 2. Answer shape
@@ -35,7 +36,7 @@ The barrel `@/features/mathSteps` exports:
 | Characters per step | 500 (`mathStepMaxLength`) |
 | Characters in the final answer | 200 (`mathFinalAnswerMaxLength`) |
 
-The limits are client-side until the question type brings a server contract. Textareas carry `maxLength`, and a keypad key that would pass the limit does nothing.
+The server enforces the same limits (`Sessions:MathStepsMaxCount`, `Sessions:MathStepMaxLength`, `Sessions:MathFinalAnswerMaxLength`; `422 ATTEMPT_ANSWER_TOO_LONG`). Textareas carry `maxLength`, and a keypad key that would pass the limit does nothing.
 
 ## 3. Input
 
@@ -87,11 +88,12 @@ The keypad is laid out left to right, like a calculator: 6 columns × 6 rows, ev
 - A valid stored draft **wins** over `initialValue`, and the status line says «استعدنا مسودتك المحفوظة.». After a save it says «حُفظت المسودة على هذا الجهاز.».
 - Storage access never breaks the answer. A failed write (quota, private mode) shows «تعذّر حفظ المسودة على هذا الجهاز.» in Danger, and editing continues. A failed read counts as no draft.
 - A new `owner` remounts the editor, which flushes the old draft and loads the new one.
-- Clearing the draft after submit is the integrator's job: `clearMathDraft(owner)`.
+- A restored draft is sent to `onChange` once on mount, so the quiz «تحقّق» and the exam autosave use it without an edit (#224).
+- The quiz clears the draft once the attempt is recorded (an effect on the answered item, which runs after the input's unmount flush, so a pending write cannot bring it back). The exam clears every math item's draft when the submit succeeds; the inputs are already disabled (unmounted and flushed) while submitting. A failed check or submit keeps the draft, and the input restores it.
 
-## 7. Integration checklist (for the question-type story)
+## 7. Integration (done in #122)
 
-1. Mount `MathStepsAnswer` with `owner = { studentId, sessionId, questionId }`.
-2. Send `toMathStepsPayload(value)` on «تحقّق» (quiz) and on each exam autosave (`onChange` feeds the existing `PUT /api/exams/{id}/answers/{questionId}` debounce).
-3. Call `clearMathDraft(owner)` after a successful submit.
-4. Re-run `npm run build && npm run perf:budget` and check the `quiz` page budget.
+1. `MathStepsAnswer` is mounted by `MathStepsAnswerInput` (`web/src/features/questions/components/`), reached through `QuestionView`'s `mathDraftOwner` prop; the quiz card and the exam card build the owner with `mathDraftOwnerFor` (`web/src/features/quiz/api/mathDraftOwner.ts`). The input is lazy-loaded, so the step editor stays off the quiz page's critical path.
+2. `toMathStepsPayload(value)` feeds the answer: the quiz sends it on «تحقّق», and the exam's existing autosave sends it on every change (`PUT /api/exams/{id}/answers/{questionId}`).
+3. The quiz clears the draft when the attempt is recorded (`useQuizAnswer`); the exam clears every math draft when the submit succeeds (`clearExamMathDrafts` from `useSubmitExam`'s `onSubmitted`).
+4. `npm run build && npm run perf:budget` keeps the `quiz` page within its 255 KB budget (253 KB after #122).
