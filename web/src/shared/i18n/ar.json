@@ -266,7 +266,17 @@
     "TEACHER_THREAD_RATING_INVALID": "اختر تقييما من 1 الى 5.",
     "ESSAY_GRADE_NOT_FOUND": "لم يتم العثور على تصحيح هذا المقال.",
     "ESSAY_GRADING_UNAVAILABLE": "مصحح الذكاء الاصطناعي غير متاح الان. حاول مرة اخرى بعد قليل.",
-    "ESSAY_GRADE_NOT_PENDING": "هذا المقال لم يعد بانتظار مصحح الذكاء الاصطناعي."
+    "ESSAY_GRADE_NOT_PENDING": "هذا المقال لم يعد بانتظار مصحح الذكاء الاصطناعي.",
+    "TRAINING_EXPORT_SOURCE_INVALID": "مصدر التصدير غير معروف.",
+    "TRAINING_EXPORT_DATE_RANGE_INVALID": "يجب ان يكون تاريخ البداية قبل تاريخ النهاية.",
+    "TRAINING_EXPORT_DATE_RANGE_TOO_WIDE": "الفترة اطول من الحد المسموح للتصدير.",
+    "TRAINING_EXPORT_PAGE_NUMBER_INVALID": "رقم الصفحة غير صالح.",
+    "TRAINING_EXPORT_PAGE_SIZE_INVALID": "حجم الصفحة غير صالح.",
+    "TRAINING_EXPORT_NOT_FOUND": "لم يتم العثور على ملف التصدير.",
+    "TRAINING_EXPORT_MODIFIED_CONCURRENTLY": "تم تعديل ملف التصدير في نفس الوقت. حاول مرة اخرى.",
+    "TRAINING_EXPORT_NOT_PENDING": "ملف التصدير لم يعد قيد التجهيز.",
+    "TRAINING_EXPORT_NOT_READY": "ملف التصدير غير جاهز بعد.",
+    "TRAINING_EXPORT_EXPIRED": "انتهت صلاحية ملف التصدير وتم حذفه. اطلب تصديرا جديدا."
   },
   "error": {
     "title": "حدث خطأ"

@@ -16,6 +16,7 @@ using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Domain.TeacherThreads;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.TrainingData;
+using Elmanhg.Domain.TrainingExports;
 using Elmanhg.Domain.Units;
 using Elmanhg.Infrastructure.AiService;
 using Elmanhg.Infrastructure.Analytics;
@@ -40,6 +41,7 @@ using Elmanhg.Infrastructure.Subscriptions;
 using Elmanhg.Infrastructure.TeacherThreads;
 using Elmanhg.Infrastructure.Teachers;
 using Elmanhg.Infrastructure.TrainingData;
+using Elmanhg.Infrastructure.TrainingExports;
 using Elmanhg.Infrastructure.Units;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -88,6 +90,8 @@ public static class DependencyInjection
         services.AddScoped<IAvatarTrainingRecordRepository, AvatarTrainingRecordRepository>();
         services.AddScoped<ITeacherThreadTrainingRecordRepository, TeacherThreadTrainingRecordRepository>();
         services.AddScoped<IEssayGradeRepository, EssayGradeRepository>();
+        services.AddScoped<IEssayGradeTrainingRecordRepository, EssayGradeTrainingRecordRepository>();
+        services.AddScoped<ITrainingExportRepository, TrainingExportRepository>();
         return services;
     }
 }

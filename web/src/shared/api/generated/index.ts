@@ -23,5 +23,6 @@ export * from './subscriptions/subscriptions';
 export * from './teacher-inbox/teacher-inbox';
 export * from './teacher-threads/teacher-threads';
 export * from './teachers/teachers';
+export * from './training-exports/training-exports';
 export * from './units/units';
 export * from './validation-queue/validation-queue';

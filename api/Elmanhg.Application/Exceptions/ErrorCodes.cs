@@ -301,6 +301,15 @@ public static class ErrorCodes
     public const string DashboardDateRangeInvalid = "DASHBOARD_DATE_RANGE_INVALID";
     public const string DashboardDateRangeTooWide = "DASHBOARD_DATE_RANGE_TOO_WIDE";
 
+    // TRAINING EXPORTS
+    public const string TrainingExportSourceInvalid = "TRAINING_EXPORT_SOURCE_INVALID";
+    public const string TrainingExportDateRangeInvalid = "TRAINING_EXPORT_DATE_RANGE_INVALID";
+    public const string TrainingExportDateRangeTooWide = "TRAINING_EXPORT_DATE_RANGE_TOO_WIDE";
+    public const string TrainingExportPageNumberInvalid = "TRAINING_EXPORT_PAGE_NUMBER_INVALID";
+    public const string TrainingExportPageSizeInvalid = "TRAINING_EXPORT_PAGE_SIZE_INVALID";
+    public const string TrainingExportNotFound = "TRAINING_EXPORT_NOT_FOUND";
+    public const string TrainingExportModifiedConcurrently = "TRAINING_EXPORT_MODIFIED_CONCURRENTLY";
+
     // PLATFORM
     public const string TooManyRequests = "TOO_MANY_REQUESTS";
     public const string AdminSeedFailed = "ADMIN_SEED_FAILED";

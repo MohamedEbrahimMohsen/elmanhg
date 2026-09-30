@@ -68,6 +68,32 @@ public sealed class LocalDiskFileStorageTests : IDisposable
         await act.Should().ThrowAsync<ArgumentException>();
     }
 
+    [Fact]
+    public async Task DeleteAsync_ExistingKey_RemovesFile()
+    {
+        await _storage.SaveAsync(new MemoryStream([1, 2]), "training-exports/a.jsonl", TestContext.Current.CancellationToken);
+
+        await _storage.DeleteAsync("training-exports/a.jsonl", TestContext.Current.CancellationToken);
+
+        File.Exists(Path.Combine(_contentRoot, "media", "training-exports", "a.jsonl")).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task DeleteAsync_MissingKey_DoesNotThrow()
+    {
+        var act = () => _storage.DeleteAsync("training-exports/missing.jsonl", TestContext.Current.CancellationToken);
+
+        await act.Should().NotThrowAsync();
+    }
+
+    [Fact]
+    public async Task DeleteAsync_KeyEscapingRoot_ThrowsArgumentException()
+    {
+        var act = () => _storage.DeleteAsync("../escape.jsonl", TestContext.Current.CancellationToken);
+
+        await act.Should().ThrowAsync<ArgumentException>();
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_contentRoot))

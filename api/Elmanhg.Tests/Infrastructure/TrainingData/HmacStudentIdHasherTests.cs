@@ -53,5 +53,23 @@ public sealed class HmacStudentIdHasherTests
         hash.Should().Be(Hasher(TrainingDataOptions.DevelopmentStudentIdHashKey).Hash(StudentId));
     }
 
+    [Fact]
+    public void HashSourceId_KnownKey_MatchesHmacOfScopeAndId()
+    {
+        var hash = Hasher(Key).HashSourceId("teacher-thread", StudentId);
+
+        hash.Should().Be(Convert.ToHexStringLower(HMACSHA256.HashData(Encoding.UTF8.GetBytes(Key), Encoding.UTF8.GetBytes("teacher-thread:7b0f3c1e-2d4a-4f6b-8c9d-0e1f2a3b4c5d"))));
+    }
+
+    [Fact]
+    public void HashSourceId_SameIdDifferentScopes_Differ()
+    {
+        var hasher = Hasher(Key);
+
+        var thread = hasher.HashSourceId("teacher-thread", StudentId);
+
+        thread.Should().NotBe(hasher.HashSourceId("avatar-conversation", StudentId)).And.NotBe(hasher.Hash(StudentId));
+    }
+
     private static HmacStudentIdHasher Hasher(string key) => new(Options.Create(new TrainingDataOptions { StudentIdHashKey = key }));
 }

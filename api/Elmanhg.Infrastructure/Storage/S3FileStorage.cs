@@ -36,4 +36,9 @@ public sealed class S3FileStorage(IAmazonS3 s3, IOptions<FileStorageOptions> fil
             return null;
         }
     }
+
+    public async Task DeleteAsync(string key, CancellationToken cancellationToken)
+    {
+        await s3.DeleteObjectAsync(fileStorageOptions.Value.S3BucketName, key, cancellationToken).ConfigureAwait(false);
+    }
 }

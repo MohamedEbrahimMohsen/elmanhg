@@ -429,9 +429,9 @@ Everything below is written to append-only tables, keyed by anonymised student i
 | AI grading (v2) | Student answer, rubric, AI score + justification, teacher override (if any) |
 | Attempts | Every answer, score, time taken — for difficulty calibration |
 
-The anonymised id is an HMAC-SHA256 of the student id under a server secret. Admin test-mode sessions are not recorded. AI-grading and override records arrive with E17. Tables, triggers and the privacy checklist: `docs/training-data.md`.
+The anonymised id is an HMAC-SHA256 of the student id under a server secret. Admin test-mode sessions are not recorded. AI grades are recorded when the grader completes (`EssayGradeTrainingRecords`); teacher overrides arrive with E17. Tables, triggers and the privacy checklist: `docs/training-data.md`.
 
-Exports (admin only): JSONL per source, date-ranged, with PII stripped.
+Exports (admin only): JSONL per source, date-ranged, optionally per subject, with PII stripped (contact data masked in texts, raw source ids never exported). An export is prepared in the background, downloaded only by an admin through the audited API, and its file is deleted after a configurable retention (7 days by default).
 
 ---
 
@@ -493,6 +493,8 @@ AvatarMessageUsage(id, student_id, entry_point, created_at)  -- daily Avatar quo
 AttemptTrainingRecord(id, student_hash, attempt_id, question_id, question_version, subject_id, unit_id, lesson_id, session_kind, answer_json, score, normalised_score, graded_by, grade_json?, time_taken_ms, occurred_at, recorded_at)  -- append-only; docs/training-data.md
 AvatarTrainingRecord(id, student_hash, conversation_id, student_message_id, assistant_message_id, student_message_position, entry_point, subject_id?, unit_id?, lesson_id?, question_id?, student_text, assistant_text, model, prompt_version, context_json, asked_at, occurred_at, recorded_at)  -- append-only
 TeacherThreadTrainingRecord(id, student_hash, thread_id, trigger[Closed|RatedAfterClose], subject_id, unit_id, lesson_id, question_id?, question_version?, attempt_id?, context_json, messages_json, rating?, submitted_at, occurred_at, recorded_at)  -- append-only; one per trigger
+EssayGradeTrainingRecord(id, student_hash, essay_grade_id, question_id, question_version, subject_id, unit_id, lesson_id, session_kind, answer_json, max_score, score, normalised_score, criteria_json, justification, confidence, outcome[Graded|InReview], model, prompt_version, occurred_at, recorded_at)  -- append-only; one per AI grade
+TrainingExport(id, source[Attempts|Avatar|TeacherThreads|EssayGrades], from, to, subject_id?, status[Pending|Completed|Failed|Expired], attempts, next_attempt_at?, last_error_code?, requested_at, completed_at?, expires_at?, file_key?, row_count?, file_size_bytes?, sha256?, created_by)  -- JSONL export job; docs/training-data.md
 
 LessonContentChunk(id, lesson_id, section[Explanation|Objectives|Summary|QuestionExplanation], section_title?, position, question_id?, question_version?, content, embedding vector(1536), embedding_model, created_at)  -- derived; docs/content-retrieval.md
 LessonContentIndex(id, lesson_id, source_updated_at, questions_updated_at?, chunk_count, embedding_model?, indexed_at)

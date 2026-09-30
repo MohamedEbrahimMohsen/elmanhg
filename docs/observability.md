@@ -79,7 +79,7 @@ Prometheus receives OTLP from the collector (`--web.enable-otlp-receiver`). Name
 
 Request outcomes (`elmanhg.outcome` on `elmanhg.requests`): `Success`; `VALIDATION_FAILED` for any validation failure; `CANCELLED` when the caller went away; the error code of any other core exception (for example `SESSION_NOT_FOUND`, `AI_SERVICE_UNAVAILABLE`); `UNHANDLED_EXCEPTION` otherwise. Every tag value is a type name, an enum name or an error code, never an id or user data.
 
-Background jobs (`elmanhg.job`): `exam-auto-submit`, `subscription-lapse`, `lesson-content-index`, `teacher-voice-transcription`, `ask-teacher-sla`, `essay-grading`. A job registers when its worker starts (last success = now). Each sweep records one run: `Failed` when listing the work threw, `PartiallyFailed` when at least one item failed, `Succeeded` otherwise. Only a sweep that is not `Failed` advances the last success.
+Background jobs (`elmanhg.job`): `exam-auto-submit`, `subscription-lapse`, `lesson-content-index`, `teacher-voice-transcription`, `ask-teacher-sla`, `essay-grading`, `training-export`, `training-export-retention`. A job registers when its worker starts (last success = now). Each sweep records one run: `Failed` when listing the work threw, `PartiallyFailed` when at least one item failed, `Succeeded` otherwise. Only a sweep that is not `Failed` advances the last success.
 
 ## 5. Logs
 

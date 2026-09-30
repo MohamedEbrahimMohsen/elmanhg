@@ -208,9 +208,17 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | `AiService__TranscriptionTimeoutSeconds` | `150` | 1 to 600; above the AI service's worst case (about 121 s) |
 | `AiService__EssayGradingTimeoutSeconds` | `100` | 1 to 600; above the AI service's essay-grading worst case (about 91 s) |
 | `EssayGrading__SweepEnabled` / `EssayGrading__ReviewConfidenceThreshold` | `true` / `0.7` | the essay-grading worker, and the confidence below which a teacher reviews the grade ([docs/essay-grading.md](essay-grading.md)) |
+| `TrainingExports__SweepEnabled` / `TrainingExports__SweepIntervalSeconds` / `TrainingExports__SweepBatchSize` | `true` / `15` / `2` | the `training-export` worker that writes JSONL files ([docs/training-data.md](training-data.md), Export); 1 to 3600 / 1 to 20 |
+| `TrainingExports__MaxAttempts` / `TrainingExports__RetryBaseDelaySeconds` | `3` / `60` | 1 to 10 / 1 to 3600; after the last failure the export is `Failed` |
+| `TrainingExports__RunLeaseMinutes` | `30` | 1 to 1440; a started run holds its export for this long, so no other replica picks it up; a run that crashed is retried after it |
+| `TrainingExports__ReadBatchSize` / `TrainingExports__MaxRangeDays` / `TrainingExports__ListMaxPageSize` | `500` / `366` / `50` | 10 to 5000 rows per page read / 1 to 3660 / 1 to 100 |
+| `TrainingExports__RetentionDays` | `7` | 1 to 365; completed export files are deleted after this many days |
+| `TrainingExports__RetentionSweepEnabled` / `TrainingExports__RetentionSweepIntervalSeconds` / `TrainingExports__RetentionSweepBatchSize` | `true` / `3600` / `20` | the `training-export-retention` worker; 1 to 86400 / 1 to 100 |
 | `Subscriptions__AskTeacherMonthlyQuestions` / `Subscriptions__AskTeacherReplySlaHours` | `20` / `24` | the add-on's monthly quota and reply SLA ([docs/subscriptions.md](subscriptions.md)) |
 
 Question photos and teachers' voice replies are stored under `teacher-threads/` (in the `api-media` volume with `Local`, in the bucket with `S3`) and are private: the API serves them only to the owning student, a teacher of the subject or an admin. Caddy proxies all of `/api/*` to the API, so never serve `/api/media` straight from the volume or the bucket at the edge. With `Local`, the media backup (section 9) includes them. Voice replies are transcribed by the API's background worker through the AI service, so with `AiService__Provider=Http` the `ai` profile must be on; otherwise the drafts fail after their retries and the teacher types the text.
+
+Training export files are stored under `training-exports/` (the `api-media` volume with `Local`, the bucket with `S3`) and are private: `/api/media` never serves them, and only an admin downloads them through `GET /api/training-exports/{id}/file`. The retention worker deletes them after `TrainingExports__RetentionDays`. The worker writes each file to the container's temp directory first, so the API container needs temp space for the largest export.
 
 Caddy proxies the SignalR hub `/api/hubs/notifications` (WebSockets) with the existing `/api/*` rule; the access log already redacts the `access_token` query value.
 

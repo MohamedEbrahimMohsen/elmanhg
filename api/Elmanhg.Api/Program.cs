@@ -90,6 +90,8 @@ builder.Services.AddHostedService<LessonContentIndexWorker>();
 builder.Services.AddHostedService<TeacherVoiceTranscriptionWorker>();
 builder.Services.AddHostedService<EssayGradingWorker>();
 builder.Services.AddHostedService<TeacherThreadSlaWorker>();
+builder.Services.AddHostedService<TrainingExportWorker>();
+builder.Services.AddHostedService<TrainingExportRetentionWorker>();
 builder.Services.AddElmanhgRealtime();
 builder.Services.AddAuthRateLimiting();
 #endregion

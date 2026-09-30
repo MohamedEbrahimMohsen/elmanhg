@@ -29,6 +29,7 @@ public partial class EssayGrade
         GradedAt = at;
         Status = needsReview ? EssayGradeStatus.InReview : EssayGradeStatus.Graded;
         ReviewReason = needsReview ? EssayReviewReason.LowConfidence : null;
+        RaiseDomainEvent(new EssayGradeCompleted(this));
         UpdationDate = at;
     }
 

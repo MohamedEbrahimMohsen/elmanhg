@@ -19,6 +19,7 @@ using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Domain.TeacherThreads;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.TrainingData;
+using Elmanhg.Domain.TrainingExports;
 using Elmanhg.Domain.Units;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -120,6 +121,10 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         {
             throw new ConflictCoreException(ErrorCodes.AvatarConversationModifiedConcurrently, innerException: exception);
         }
+        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is TrainingExport))
+        {
+            throw new ConflictCoreException(ErrorCodes.TrainingExportModifiedConcurrently, innerException: exception);
+        }
         catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: PaymobTransactionIndex or PaymentRefundTransactionIndex })
         {
             throw new ConflictCoreException(ErrorCodes.PaymentTransactionAlreadyRecorded, innerException: exception);
@@ -190,6 +195,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         ConfigureAvatar(modelBuilder);
         ConfigureTrainingData(modelBuilder);
         ConfigureEssayGrades(modelBuilder);
+        ConfigureTrainingExports(modelBuilder);
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
 
@@ -641,5 +647,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         modelBuilder.Entity<AvatarTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<TeacherThreadTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<EssayGrade>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<EssayGradeTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<TrainingExport>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

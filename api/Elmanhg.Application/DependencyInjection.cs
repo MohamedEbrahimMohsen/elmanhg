@@ -54,6 +54,7 @@ public static class DependencyInjection
             .ValidateOnStart();
         services.AddOptions<AvatarOptions>().BindConfiguration(AvatarOptions.SectionName).ValidateDataAnnotations().Validate(x => x.MaxHistoryMessages % 2 == 0, "Avatar:MaxHistoryMessages must be even.").ValidateOnStart();
         services.AddOptions<EssayGradingOptions>().BindConfiguration(EssayGradingOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<TrainingExportsOptions>().BindConfiguration(TrainingExportsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton(Random.Shared);
         return services;

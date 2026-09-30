@@ -41,6 +41,17 @@ public sealed class PublicMediaMiddlewareTests
     }
 
     [Theory]
+    [InlineData("training-exports/x.jsonl")]
+    [InlineData("Training-Exports./x.jsonl")]
+    public async Task Invoke_TrainingExportKey_Returns404WithoutReading(string key)
+    {
+        var context = await InvokeAsync($"/api/media/{key}");
+
+        context.Response.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        await _fileStorage.DidNotReceive().OpenReadAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
+    [Theory]
     [InlineData("lessons/../x.png")]
     [InlineData("lessons//x.png")]
     [InlineData("lessons\\x.png")]

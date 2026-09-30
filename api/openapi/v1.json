@@ -203,6 +203,143 @@
         }
       }
     },
+    "/api/training-exports": {
+      "post": {
+        "tags": [
+          "TrainingExports"
+        ],
+        "operationId": "RequestTrainingExport",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestTrainingExportRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestTrainingExportRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestTrainingExportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingExportResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingExportResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingExportResult"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "TrainingExports"
+        ],
+        "operationId": "GetTrainingExports",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfTrainingExportResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfTrainingExportResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDataOfTrainingExportResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/training-exports/{exportId}/file": {
+      "get": {
+        "tags": [
+          "TrainingExports"
+        ],
+        "operationId": "DownloadTrainingExportFile",
+        "parameters": [
+          {
+            "name": "exportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stream"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/teacher-threads/context": {
       "get": {
         "tags": [
@@ -9889,6 +10026,49 @@
           }
         }
       },
+      "PageDataOfTrainingExportResult": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrainingExportResult"
+            }
+          },
+          "pageNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalItems": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
       "PageDataOfValidationQueueItemResult": {
         "type": "object",
         "properties": {
@@ -10729,6 +10909,35 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "RequestTrainingExportRequest": {
+        "required": [
+          "source",
+          "from",
+          "to",
+          "subjectId"
+        ],
+        "type": "object",
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/TrainingExportSource"
+          },
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "subjectId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           }
         }
       },
@@ -12963,6 +13172,128 @@
           "Sent"
         ]
       },
+      "TrainingExportResult": {
+        "required": [
+          "id",
+          "source",
+          "from",
+          "to",
+          "subjectId",
+          "status",
+          "attempts",
+          "lastErrorCode",
+          "rowCount",
+          "fileSizeBytes",
+          "sha256",
+          "fileName",
+          "requestedAt",
+          "completedAt",
+          "expiresAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "$ref": "#/components/schemas/TrainingExportSource"
+          },
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "subjectId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TrainingExportStatus"
+          },
+          "attempts": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "lastErrorCode": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "fileSizeBytes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "sha256": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "TrainingExportSource": {
+        "enum": [
+          "Attempts",
+          "Avatar",
+          "TeacherThreads",
+          "EssayGrades"
+        ]
+      },
+      "TrainingExportStatus": {
+        "enum": [
+          "Pending",
+          "Completed",
+          "Failed",
+          "Expired"
+        ]
+      },
       "UnitExamBlueprintResult": {
         "required": [
           "unitId",
@@ -14040,6 +14371,9 @@
   "tags": [
     {
       "name": "Units"
+    },
+    {
+      "name": "TrainingExports"
     },
     {
       "name": "TeacherThreads"
