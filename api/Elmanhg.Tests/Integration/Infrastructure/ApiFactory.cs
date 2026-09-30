@@ -27,6 +27,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     // Keys only the HMAC of Paymob notifications posted to this in-memory host.
     public const string TestPaymobHmacSecret = "elmanhg-tests-paymob-hmac";
 
+    // Keys only the student hashes written inside this in-memory host.
+    public const string TestStudentIdHashKey = "elmanhg-tests-training-student-id-key-0123456789";
+
     private readonly PostgreSqlContainer _database = new PostgreSqlBuilder(PostgresImage).Build();
 
     public OtpOutbox Otp { get; } = new();
@@ -60,6 +63,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("AskTeacher:TranscriptionSweepEnabled", "false");
         // The sweep would race tests that record SLA events through the mediator.
         builder.UseSetting("AskTeacher:SlaSweepEnabled", "false");
+        builder.UseSetting("TrainingData:StudentIdHashKey", TestStudentIdHashKey);
         builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
             // UseVector() makes EF build an NpgsqlDataSource, whose connection string drops the password unless it is persisted; tests that open raw connections read it back through DbContext.

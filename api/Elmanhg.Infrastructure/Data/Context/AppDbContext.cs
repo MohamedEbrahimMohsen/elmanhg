@@ -17,6 +17,7 @@ using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Domain.TeacherThreads;
 using Elmanhg.Domain.Teachers;
+using Elmanhg.Domain.TrainingData;
 using Elmanhg.Domain.Units;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +26,7 @@ using DomainErrorCodes = Elmanhg.Domain.SharedKernel.Exceptions.ErrorCodes;
 
 namespace Elmanhg.Infrastructure.Data.Context;
 
-public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditChangeCollector auditChangeCollector) : CoreDbContext<User, Role, Guid>(options, mediator, auditChangeCollector)
+public partial class AppDbContext(DbContextOptions options, IMediator mediator, IAuditChangeCollector auditChangeCollector) : CoreDbContext<User, Role, Guid>(options, mediator, auditChangeCollector)
 {
     // Enum names are short identifiers; the column width is a schema invariant, not a tunable.
     private const int EnumColumnMaxLength = 50;
@@ -151,6 +152,11 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         {
             throw new ConflictCoreException(ErrorCodes.AvatarConversationModifiedConcurrently, innerException: exception);
         }
+        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: TeacherThreadTrainingTriggerIndex })
+        {
+            // EF inserts the training row before the stale thread UPDATE, so a lost close/rate race surfaces here, not as a concurrency exception.
+            throw new ConflictCoreException(ErrorCodes.TeacherThreadModifiedConcurrently, innerException: exception);
+        }
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -176,6 +182,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         ConfigureFunnelEvents(modelBuilder);
         ConfigureContentRetrieval(modelBuilder);
         ConfigureAvatar(modelBuilder);
+        ConfigureTrainingData(modelBuilder);
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
 
@@ -578,5 +585,8 @@ public class AppDbContext(DbContextOptions options, IMediator mediator, IAuditCh
         modelBuilder.Entity<AvatarMessageUsage>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<AvatarConversation>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<AvatarMessage>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<AttemptTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<AvatarTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<TeacherThreadTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

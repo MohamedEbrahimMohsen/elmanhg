@@ -428,6 +428,8 @@ Everything below is written to append-only tables, keyed by anonymised student i
 | AI grading (v2) | Student answer, rubric, AI score + justification, teacher override (if any) |
 | Attempts | Every answer, score, time taken — for difficulty calibration |
 
+The anonymised id is an HMAC-SHA256 of the student id under a server secret. Admin test-mode sessions are not recorded. AI-grading and override records arrive with E17. Tables, triggers and the privacy checklist: `docs/training-data.md`.
+
 Exports (admin only): JSONL per source, date-ranged, with PII stripped.
 
 ---
@@ -487,6 +489,9 @@ TeacherThreadSlaEvent(id, thread_id, kind[FirstReminder|SecondReminder|Breach], 
 AvatarConversation(id, student_id, entry_point, subject_id?, unit_id?, lesson_id?, session_id?, question_id?, started_at, last_message_at, message_count)  -- docs/avatar.md
 AvatarMessage(id, conversation_id, position, role[Student|Assistant], text, created_at, model?, prompt_version?, input_tokens?, output_tokens?, cost_usd?, stop_reason?, history_message_count?, context_json?, citations_json?)  -- append-only; replies carry the context bundle, model and prompt version
 AvatarMessageUsage(id, student_id, entry_point, created_at)  -- daily Avatar quota counter (docs/avatar.md)
+AttemptTrainingRecord(id, student_hash, attempt_id, question_id, question_version, subject_id, unit_id, lesson_id, session_kind, answer_json, score, normalised_score, graded_by, grade_json?, time_taken_ms, occurred_at, recorded_at)  -- append-only; docs/training-data.md
+AvatarTrainingRecord(id, student_hash, conversation_id, student_message_id, assistant_message_id, student_message_position, entry_point, subject_id?, unit_id?, lesson_id?, question_id?, student_text, assistant_text, model, prompt_version, context_json, asked_at, occurred_at, recorded_at)  -- append-only
+TeacherThreadTrainingRecord(id, student_hash, thread_id, trigger[Closed|RatedAfterClose], subject_id, unit_id, lesson_id, question_id?, question_version?, attempt_id?, context_json, messages_json, rating?, submitted_at, occurred_at, recorded_at)  -- append-only; one per trigger
 
 LessonContentChunk(id, lesson_id, section[Explanation|Objectives|Summary|QuestionExplanation], section_title?, position, question_id?, question_version?, content, embedding vector(1536), embedding_model, created_at)  -- derived; docs/content-retrieval.md
 LessonContentIndex(id, lesson_id, source_updated_at, questions_updated_at?, chunk_count, embedding_model?, indexed_at)

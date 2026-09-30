@@ -39,6 +39,7 @@ public partial class Session
         var attempt = Attempt.Create(this, item, answer, grade, MeasureTimeTaken(LastActivityAt, now, reportedTimeTakenMilliseconds), now);
         Attempts.Add(attempt);
         Touch(now);
+        RaiseDomainEvent(new AttemptsRecorded(this, [attempt]));
         return attempt;
     }
 

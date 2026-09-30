@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -46,6 +47,8 @@ var isBuildTimeOpenApiGeneration = Assembly.GetEntryAssembly()?.GetName().Name =
 if (isBuildTimeOpenApiGeneration)
 {
     builder.Configuration.AddJsonFile("appsettings.example.json", optional: false);
+    // The example leaves the student-id hash key empty, which Production refuses; this host hashes nothing, so a throwaway key is enough.
+    builder.Configuration.AddInMemoryCollection([new("TrainingData:StudentIdHashKey", Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32)))]);
 }
 #endregion
 
