@@ -126,6 +126,10 @@ public static class ErrorCodes
     public const string QuestionIdsRequired = "QUESTION_IDS_REQUIRED";
     public const string QuestionIdsTooMany = "QUESTION_IDS_TOO_MANY";
     public const string QuestionIdsDuplicate = "QUESTION_IDS_DUPLICATE";
+    public const string QuestionMathAnswersInvalid = "QUESTION_MATH_ANSWERS_INVALID";
+    public const string QuestionMathFormInvalid = "QUESTION_MATH_FORM_INVALID";
+    public const string QuestionMathToleranceInvalid = "QUESTION_MATH_TOLERANCE_INVALID";
+    public const string QuestionMathToleranceFormConflict = "QUESTION_MATH_TOLERANCE_FORM_CONFLICT";
 
     // REVIEW SESSIONS
     public const string ReviewSessionNotFound = "REVIEW_SESSION_NOT_FOUND";
@@ -287,6 +291,7 @@ public static class ErrorCodes
 
     // AI SERVICE
     public const string AiServiceUnavailable = "AI_SERVICE_UNAVAILABLE";
+    public const string MathCheckUnavailable = "MATH_CHECK_UNAVAILABLE";
 
     // ESSAY GRADING
     public const string EssayGradeNotFound = "ESSAY_GRADE_NOT_FOUND";

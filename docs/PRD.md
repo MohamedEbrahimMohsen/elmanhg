@@ -163,6 +163,8 @@ Every answer produces a **score in [0, max_score]** and a **normalised score in 
 | Math with steps | v2 | Ordered list of steps (LaTeX/text) + final answer | Final answer: CAS equivalence check (SymPy). Steps: LLM against model solution, per-step credit. | Yes |
 | Science drag-and-drop | v2 | Map of item → drop zone | Deterministic: each item's zone vs correct zone; optional order constraints | Per item |
 
+Math with steps: until step grading (E15.S3) the score is the final answer's CAS verdict (1 or 0); each question sets a required form and an optional numeric tolerance (docs/question-schemas.md, docs/math-cas.md). A final answer the CAS cannot check (for example, the AI service is down) is recorded with a provisional 0 for teacher review (§8.3); the student sees «قيد المراجعة» instead of a verdict, with no correct answer, and the quiz or exam score is marked provisional.
+
 Per-type `body` and `grading_spec` JSON shapes: `docs/question-schemas.md`.
 Answer shapes and the exact grading rules (normalisation, numeric parsing, rounding) are in the same document.
 
@@ -281,6 +283,7 @@ The headline counter is shown on Home as "متبقّي لك X سؤال من 100,
 ### 8.3 AI grade review queue (v2)
 
 - Low-confidence AI grades for the teacher's subjects.
+- MathSteps attempts graded `unchecked` (feedback kind `mathUnchecked`: the CAS could not check the final answer) are listed and can be scored by the teacher. Until then the student sees «قيد المراجعة» instead of a verdict (docs/math-cas.md).
 - Teacher sees student answer, AI score and justification; can accept or override with a score and comment.
 
 ### 8.4 Teacher visibility limits

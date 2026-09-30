@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import type { SessionResult } from '@/shared/api/generated/model';
-import { hasPendingEssay, isWrittenEssay } from '../api/essayItem';
+import { isWrittenEssay } from '../api/essayItem';
 import { splitDuration } from '../api/quizSession';
+import { ProvisionalScoreNotes } from './ProvisionalScoreNotes';
 
 export interface QuizResultSummaryProps {
   session: SessionResult;
@@ -20,9 +21,7 @@ export function QuizResultSummary({ session }: QuizResultSummaryProps) {
       <p className="text-caption text-text-muted">
         {t('result.time', splitDuration(Number(session.timeTakenMilliseconds)))}
       </p>
-      {hasPendingEssay(session.items) ? (
-        <p className="text-caption text-text-muted">{t('result.essaysPending')}</p>
-      ) : null}
+      <ProvisionalScoreNotes items={session.items} />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import type { QuestionValues } from '../schemas/questionEditorSchema';
 import { type NormalizationRule, optionIdAlphabet, toQuestionDifficulty, toQuestionType } from './questionOptions';
 import * as contentSchemas from '../schemas/questionContentSchemas';
 import { emptyCriterion, readEssay, toEssayContent } from './essayValues';
+import { readMathSteps, toMathStepsContent } from './mathStepsValues';
 
 function readNormalization(
   stored: Partial<Record<NormalizationRule, boolean | undefined>> | undefined,
@@ -46,6 +47,10 @@ export function emptyQuestionValues(type: QuestionType): QuestionValues {
     maxWords: '',
     criteria: [emptyCriterion('c1')],
     modelAnswers: [{ text: '' }],
+    mathAnswers: [{ latex: '' }],
+    mathForm: 'equivalent',
+    mathTolerance: '',
+    mathToleranceMode: 'absolute',
   };
 }
 
@@ -119,6 +124,8 @@ function readQuestionContent(type: QuestionValues['type'], body: JsonElement, sp
       return readShort(body, spec);
     case 'Essay':
       return readEssay(body, spec);
+    case 'MathSteps':
+      return readMathSteps(spec);
   }
 }
 
@@ -177,6 +184,8 @@ function toContent(values: QuestionValues): Pick<UpdateQuestionRequest, 'body' |
           };
     case 'Essay':
       return toEssayContent(values);
+    case 'MathSteps':
+      return toMathStepsContent(values);
   }
 }
 

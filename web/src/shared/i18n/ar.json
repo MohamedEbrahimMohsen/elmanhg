@@ -276,7 +276,12 @@
     "TRAINING_EXPORT_MODIFIED_CONCURRENTLY": "تم تعديل ملف التصدير في نفس الوقت. حاول مرة اخرى.",
     "TRAINING_EXPORT_NOT_PENDING": "ملف التصدير لم يعد قيد التجهيز.",
     "TRAINING_EXPORT_NOT_READY": "ملف التصدير غير جاهز بعد.",
-    "TRAINING_EXPORT_EXPIRED": "انتهت صلاحية ملف التصدير وتم حذفه. اطلب تصديرا جديدا."
+    "TRAINING_EXPORT_EXPIRED": "انتهت صلاحية ملف التصدير وتم حذفه. اطلب تصديرا جديدا.",
+    "QUESTION_MATH_ANSWERS_INVALID": "اضف اجابة نهائية مقبولة واحدة او اكثر، غير فارغة وغير طويلة جدا، بما لا يتجاوز الحد المسموح.",
+    "QUESTION_MATH_FORM_INVALID": "اختر صورة مطلوبة صحيحة.",
+    "QUESTION_MATH_TOLERANCE_INVALID": "اكتب هامش خطا صفرا او اكثر مع قيمة مطلقة او نسبة مئوية، او اتركهما فارغين.",
+    "QUESTION_MATH_TOLERANCE_FORM_CONFLICT": "هامش الخطا يعمل مع قاعدة اي صورة مكافئة فقط.",
+    "MATH_CHECK_UNAVAILABLE": "تعذر تصحيح الاجابة النهائية الان. حاول مرة اخرى بعد قليل."
   },
   "error": {
     "title": "حدث خطأ"

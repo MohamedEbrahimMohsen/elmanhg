@@ -5,7 +5,8 @@
     "TrueFalse": "صح أو خطأ",
     "Fill": "أكمل الفراغ",
     "Short": "إجابة قصيرة",
-    "Essay": "مقالي"
+    "Essay": "مقالي",
+    "MathSteps": "رياضيات بالخطوات"
   },
   "statuses": {
     "Pending": "قيد المراجعة",
@@ -152,7 +153,10 @@
       "levelsCount": "أضف مستويين على الأقل.",
       "levelPoints": "اكتب نقاطًا صحيحة من 0 إلى نقاط المعيار.",
       "levelScale": "يجب أن تختلف نقاط المستويات وأن تشمل 0 ونقاط المعيار كاملة.",
-      "modelAnswersCount": "أضف إجابة نموذجية واحدة على الأقل."
+      "modelAnswersCount": "أضف إجابة نموذجية واحدة على الأقل.",
+      "mathAnswersCount": "أضف إجابة مقبولة واحدة على الأقل.",
+      "mathAnswerLength": "يجب ألا تزيد الإجابة على 200 حرف.",
+      "mathToleranceForm": "هامش الخطأ يعمل مع «أي صورة مكافئة» فقط."
     },
     "essay": {
       "maxWords": "الحد الأقصى للكلمات (اختياري)",
@@ -175,6 +179,26 @@
       "modelAnswer": "الإجابة النموذجية {number}",
       "addModelAnswer": "إضافة إجابة نموذجية",
       "removeModelAnswer": "حذف الإجابة النموذجية {number}"
+    },
+    "math": {
+      "answersLegend": "الإجابات النهائية المقبولة",
+      "answersHint": "اكتب كل إجابة بصيغة LaTeX، مثل x = 2 أو \\sqrt 2. تُقبل أي إجابة مكافئة رياضيًا.",
+      "answer": "الإجابة المقبولة {number}",
+      "answerPreview": "معاينة الإجابة المقبولة {number}",
+      "addAnswer": "أضف إجابة",
+      "removeAnswer": "احذف الإجابة المقبولة {number}",
+      "form": "الصورة المطلوبة",
+      "forms": {
+        "equivalent": "أي صورة مكافئة",
+        "simplified": "أبسط صورة",
+        "factored": "محللة إلى عوامل",
+        "expanded": "مفكوكة",
+        "exact": "قيمة مضبوطة بدون كسور عشرية"
+      },
+      "tolerance": "هامش الخطأ العددي (اختياري)",
+      "toleranceHint": "يقبل إجابة عددية قريبة بهذا القدر. يعمل مع «أي صورة مكافئة» فقط.",
+      "toleranceMode": "نوع الهامش",
+      "stepsNote": "تُحفظ خطوات الطالب مع إجابته، وتُصحَّح لاحقًا."
     }
   },
   "preview": {
@@ -213,7 +237,11 @@
     "essayWords": "عدد الكلمات: {count}",
     "essayWordsOf": "عدد الكلمات: {count} من {max}",
     "essayOverLimit": "تجاوزت الحد بـ {over} كلمة",
-    "essayCharactersLeft": "متبقٍّ {count} حرف"
+    "essayCharactersLeft": "متبقٍّ {count} حرف",
+    "mathReadOnly": "حلّك",
+    "mathStep": "الخطوة {number}",
+    "mathFinal": "الإجابة النهائية",
+    "mathNoSteps": "لم تُكتب خطوات."
   },
   "import": {
     "title": "استيراد أسئلة",
@@ -316,7 +344,12 @@
       "criterionPoints": "({points} نقاط)",
       "level": "{points} نقاط: {description}",
       "modelAnswers": "الإجابات النموذجية",
-      "modelAnswer": "الإجابة النموذجية {number}"
+      "modelAnswer": "الإجابة النموذجية {number}",
+      "mathRules": "تصحيح الإجابة النهائية",
+      "mathAccepted": "الإجابات المقبولة",
+      "mathForm": "الصورة المطلوبة: {form}",
+      "mathTolerance": "هامش الخطأ: ±{tolerance}",
+      "mathTolerancePercent": "هامش الخطأ: ±{tolerance}%"
     },
     "decision": {
       "title": "القرار",

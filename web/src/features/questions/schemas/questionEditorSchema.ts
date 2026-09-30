@@ -1,8 +1,15 @@
 import { z } from 'zod';
-import { questionDifficulties, questionMaxScoreMax, questionOptionsMin, questionTypes } from '../api/questionOptions';
+import {
+  mathAnswerForms,
+  questionDifficulties,
+  questionMaxScoreMax,
+  questionOptionsMin,
+  questionTypes,
+} from '../api/questionOptions';
 import { splitLines } from '../api/questionValues';
 import { countOccurrences, hasRichTextContent } from '../api/richTextContent';
 import { addEssayIssues } from './essayRules';
+import { addMathStepsIssues } from './mathStepsRules';
 
 const errorKey = (key: string) => `questions:editor.errors.${key}`;
 
@@ -49,6 +56,10 @@ export const questionEditorSchema = z
       }),
     ),
     modelAnswers: z.array(z.object({ text: z.string() })),
+    mathAnswers: z.array(z.object({ latex: z.string() })),
+    mathForm: z.enum(mathAnswerForms),
+    mathTolerance: z.string(),
+    mathToleranceMode: z.enum(['absolute', 'percent']),
   })
   .superRefine((values, context) => {
     const issue = (path: (string | number)[], message: string) => {
@@ -107,6 +118,9 @@ export const questionEditorSchema = z
     }
     if (values.type === 'Essay') {
       addEssayIssues(values, issue);
+    }
+    if (values.type === 'MathSteps') {
+      addMathStepsIssues(values, issue);
     }
   });
 

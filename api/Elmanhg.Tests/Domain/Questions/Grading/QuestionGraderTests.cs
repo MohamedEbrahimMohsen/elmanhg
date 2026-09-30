@@ -152,6 +152,22 @@ public sealed class QuestionGraderTests
         grade.Should().Be(new QuestionGrade(2.50m, 0.5m, GradeOutcome.Partial, null));
     }
 
+    [Fact]
+    public void GradeMathSteps_Equivalent_ScalesToMaxScore()
+    {
+        var grade = QuestionGrader.GradeMathSteps(4, MathAnswerVerdict.Equivalent);
+
+        grade.Should().Be(new QuestionGrade(4m, 1m, GradeOutcome.Correct, GradeFeedback.MathFinalAnswerOnly));
+    }
+
+    [Fact]
+    public void Grade_MathSteps_ThrowsInvalidOperationException()
+    {
+        var act = () => QuestionGrader.Grade(QuestionType.MathSteps, MathStepsSpecJson, 2, Json("{}"));
+
+        act.Should().Throw<InvalidOperationException>();
+    }
+
     private const string PartialNormalizationSpec = """{"blanks":[{"id":"1","acceptedAnswers":["القاهرة"]}],"normalization":{"unifyTaaMarbuta":false}}""";
 
     [Theory]

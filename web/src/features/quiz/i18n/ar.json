@@ -32,7 +32,10 @@
     "false": "خطأ",
     "blank": "الفراغ {number, number}:",
     "tolerance": "{value} (± {tolerance})",
-    "tolerancePercent": "{value} (± {tolerance}٪)"
+    "tolerancePercent": "{value} (± {tolerance}٪)",
+    "mathAnswer": "الإجابة النهائية",
+    "inReview": "قيد المراجعة",
+    "inReviewHint": "الدرجة معلّقة حتى يراجعها معلمك."
   },
   "essayGrade": {
     "label": "تصحيح المقال",
@@ -60,6 +63,7 @@
     "none": "لم تُجب عن أي سؤال في هذا التدريب.",
     "newPractice": "تدريب جديد",
     "backToLesson": "العودة للدرس",
+    "inReview": "{count, plural, one {إجابة واحدة قيد المراجعة} two {إجابتان قيد المراجعة} few {# إجابات قيد المراجعة} many {# إجابةً قيد المراجعة} other {# إجابة قيد المراجعة}}، والنتيجة مبدئية حتى يراجعها معلمك.",
     "essaysPending": "بعض الإجابات المقالية ما زالت قيد التصحيح، وستتحدّث الدرجة عند اكتمالها."
   },
   "essayDraft": {

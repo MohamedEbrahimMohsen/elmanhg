@@ -1,8 +1,10 @@
 using Elmanhg.Application.Exams.AutoSubmitExam;
+using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Mastery;
+using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Tests.Application.Features.Sessions;
@@ -17,6 +19,7 @@ namespace Elmanhg.Tests.Application.Features.Exams.AutoSubmitExam;
 public sealed class AutoSubmitExamHandlerTests
 {
     private static readonly TimeSpan Grace = TimeSpan.FromSeconds(30);
+    private readonly IAiMathCheckClient _mathCheckClient = Substitute.For<IAiMathCheckClient>();
     private readonly ISessionRepository _sessionRepository = Substitute.For<ISessionRepository>();
     private readonly IQuestionRepository _questionRepository = Substitute.For<IQuestionRepository>();
     private readonly IQuestionMasteryRepository _questionMasteryRepository = Substitute.For<IQuestionMasteryRepository>();
@@ -34,7 +37,7 @@ public sealed class AutoSubmitExamHandlerTests
         SessionRepositoryStub.StubFind(_sessionRepository, _session);
         _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(questions.SelectMany(x => x.Revisions).ToList());
         _questionMasteryRepository.FindAsync(Arg.Any<Expression<Func<QuestionMastery, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<QuestionMastery>, IQueryable<QuestionMastery>>?>(), Arg.Any<Func<IQueryable<QuestionMastery>, IOrderedQueryable<QuestionMastery>>?>(), Arg.Any<bool>()).Returns(new List<QuestionMastery>());
-        _handler = new AutoSubmitExamHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _essayGradeRepository, Options.Create(new ExamsOptions()), Options.Create(new MasteryOptions()), _timeProvider);
+        _handler = new AutoSubmitExamHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _essayGradeRepository, Options.Create(new ExamsOptions()), Options.Create(new MasteryOptions()), _timeProvider, _mathCheckClient);
     }
 
     [Fact]
@@ -46,6 +49,25 @@ public sealed class AutoSubmitExamHandlerTests
 
         _session.SubmittedAt.Should().NotBeNull();
         _session.ScorePercent.Should().Be(50.00m);
+        await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_MathCheckUnchecked_SubmitsWithoutMastery()
+    {
+        var math = _builder.Questions.MathSteps().Approved().Build();
+        var session = Session.StartUnitExam(_builder.StudentId, _builder.Questions.Unit, _builder.Blueprint(1), [math], [_builder.Questions.Lesson], false, ExamSessionBuilder.Now);
+        session.SaveExamAnswer(session.Items[0], """{"steps":["2x = 4"],"finalAnswer":"x = 2"}""", Grace, ExamSessionBuilder.Now.AddMinutes(1));
+        SessionRepositoryStub.StubFind(_sessionRepository, session);
+        _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(math.Revisions);
+        _mathCheckClient.CheckAsync(Arg.Any<AiMathCheckRequest>(), Arg.Any<CancellationToken>()).Returns(new AiMathCheckResult(MathAnswerVerdict.Unchecked, null, []));
+        _timeProvider.GetUtcNow().Returns(session.Deadline.GetValueOrDefault().AddSeconds(31));
+
+        await _handler.Handle(new AutoSubmitExamCommand(session.Id), TestContext.Current.CancellationToken);
+
+        session.SubmittedAt.Should().NotBeNull();
+        session.Attempts.Should().ContainSingle().Which.ReadFeedback().Should().Be(GradeFeedback.MathUnchecked);
+        await _questionMasteryRepository.DidNotReceive().AddRangeAsync(Arg.Any<List<QuestionMastery>>(), Arg.Any<CancellationToken>());
         await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 

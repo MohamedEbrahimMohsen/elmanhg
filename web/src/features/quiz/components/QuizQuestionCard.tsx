@@ -2,9 +2,11 @@ import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AskTeacherLink } from '@/features/askTeacher';
 import { QuestionView } from '@/features/questions';
-import { PaywallDialog } from '@/features/subscription';
+import { useSession } from '@/features/session';
+import { LazyPaywallDialog } from '@/features/subscription';
 import type { SessionItemResult } from '@/shared/api/generated/model';
 import { choiceReview } from '../api/correctAnswer';
+import { mathDraftOwnerFor } from '../api/mathDraftOwner';
 import { fromAnswerPayload, toQuizQuestion } from '../api/quizItem';
 import { useQuizAnswer } from '../hooks/useQuizAnswer';
 import { FeedbackPanel } from './FeedbackPanel';
@@ -33,7 +35,8 @@ export function QuizQuestionCard({
   const { t } = useTranslation('quiz');
   const headingId = useId();
   const question = toQuizQuestion(item);
-  const quiz = useQuizAnswer(sessionId, item, question);
+  const draftOwner = mathDraftOwnerFor(useSession()?.userId, sessionId, item.questionId);
+  const quiz = useQuizAnswer(sessionId, item, question, draftOwner);
   const attempt = item.attempt;
   const answer = attempt ? fromAnswerPayload(question, attempt.answer) : quiz.answer;
 
@@ -55,6 +58,7 @@ export function QuizQuestionCard({
         onAnswerChange={quiz.setAnswer}
         disabled={attempt !== null || quiz.isChecking}
         review={attempt ? choiceReview(question, item.correctAnswer) : undefined}
+        mathDraftOwner={draftOwner}
       />
       {quiz.showRequired ? (
         <p role="alert" className="text-caption text-danger">
@@ -84,7 +88,7 @@ export function QuizQuestionCard({
         onCheck={quiz.check}
         onNext={onNext}
       />
-      <PaywallDialog reason={quiz.paywall} onClose={quiz.closePaywall} />
+      <LazyPaywallDialog reason={quiz.paywall} onClose={quiz.closePaywall} />
     </article>
   );
 }

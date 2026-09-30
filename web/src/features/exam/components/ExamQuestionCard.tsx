@@ -1,10 +1,12 @@
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { QuestionView, type QuestionAnswer } from '@/features/questions';
-import { toQuizQuestion } from '@/features/quiz';
+import { mathDraftOwnerFor, toQuizQuestion } from '@/features/quiz';
+import { useSession } from '@/features/session';
 import type { ExamItemResult } from '@/shared/api/generated/model';
 
 export interface ExamQuestionCardProps {
+  sessionId: string;
   item: ExamItemResult;
   total: number;
   answer: QuestionAnswer;
@@ -12,10 +14,11 @@ export interface ExamQuestionCardProps {
   disabled: boolean;
 }
 
-export function ExamQuestionCard({ item, total, answer, onChange, disabled }: ExamQuestionCardProps) {
+export function ExamQuestionCard({ sessionId, item, total, answer, onChange, disabled }: ExamQuestionCardProps) {
   const { t } = useTranslation('exam');
   const headingId = useId();
   const question = toQuizQuestion(item);
+  const draftOwner = mathDraftOwnerFor(useSession()?.userId, sessionId, item.questionId);
 
   return (
     <article
@@ -31,7 +34,13 @@ export function ExamQuestionCard({ item, total, answer, onChange, disabled }: Ex
         </span>
         <span className="text-caption text-text-muted">{t('exam.marks', { count: Number(item.maxScore) })}</span>
       </div>
-      <QuestionView question={question} answer={answer} onAnswerChange={onChange} disabled={disabled} />
+      <QuestionView
+        question={question}
+        answer={answer}
+        onAnswerChange={onChange}
+        disabled={disabled}
+        mathDraftOwner={draftOwner}
+      />
     </article>
   );
 }

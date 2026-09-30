@@ -3,6 +3,7 @@ using Core.Identity.Tokens.CurrentUser;
 using Core.Localization;
 using Elmanhg.Application.Exams.Shared;
 using Elmanhg.Application.Exceptions;
+using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.EssayGrading;
@@ -22,7 +23,7 @@ using System.Security.Claims;
 
 namespace Elmanhg.Application.Exams.StartMultiUnitExam;
 
-public sealed class StartMultiUnitExamHandler(ISessionRepository sessionRepository, ISubjectRepository subjectRepository, ICurriculumUnitRepository unitRepository, ILessonRepository lessonRepository, ILessonOpeningRepository lessonOpeningRepository, IQuestionRepository questionRepository, IExamBlueprintRepository examBlueprintRepository, IQuestionMasteryRepository questionMasteryRepository, IEssayGradeRepository essayGradeRepository, ISubscriptionRepository subscriptionRepository, IOptions<ExamsOptions> examsOptions, IOptions<ExamBlueprintsOptions> examBlueprintsOptions, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, Random random, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer) : IRequestHandler<StartMultiUnitExamCommand, ExamSessionResult>
+public sealed class StartMultiUnitExamHandler(ISessionRepository sessionRepository, ISubjectRepository subjectRepository, ICurriculumUnitRepository unitRepository, ILessonRepository lessonRepository, ILessonOpeningRepository lessonOpeningRepository, IQuestionRepository questionRepository, IExamBlueprintRepository examBlueprintRepository, IQuestionMasteryRepository questionMasteryRepository, IEssayGradeRepository essayGradeRepository, ISubscriptionRepository subscriptionRepository, IOptions<ExamsOptions> examsOptions, IOptions<ExamBlueprintsOptions> examBlueprintsOptions, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, Random random, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer, IAiMathCheckClient mathCheckClient) : IRequestHandler<StartMultiUnitExamCommand, ExamSessionResult>
 {
     public async Task<ExamSessionResult> Handle(StartMultiUnitExamCommand request, CancellationToken cancellationToken)
     {
@@ -66,7 +67,7 @@ public sealed class StartMultiUnitExamHandler(ISessionRepository sessionReposito
         var revisions = await questionRepository.GetRevisionsAsync(session.Items.Select(x => x.QuestionId).ToList(), cancellationToken).ConfigureAwait(false);
         if (open is not null && open.IsPastDeadline(now, examsOptions.Value.DeadlineGrace))
         {
-            await ExamSubmission.SubmitAsync(open, revisions, questionRepository, questionMasteryRepository, essayGradeRepository, threshold, now, cancellationToken).ConfigureAwait(false);
+            await ExamSubmission.SubmitAsync(open, revisions, questionRepository, questionMasteryRepository, essayGradeRepository, mathCheckClient, threshold, now, cancellationToken).ConfigureAwait(false);
         }
         else if (open is not null)
         {

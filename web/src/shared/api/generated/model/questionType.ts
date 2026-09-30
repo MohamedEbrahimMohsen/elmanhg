@@ -15,4 +15,5 @@ export const QuestionType = {
   Fill: 'Fill',
   Short: 'Short',
   Essay: 'Essay',
+  MathSteps: 'MathSteps',
 } as const;

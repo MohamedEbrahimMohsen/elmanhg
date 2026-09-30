@@ -1,4 +1,5 @@
 import type { DeepPartialSkipArrayKey } from 'react-hook-form';
+import type { MathStepsPayload } from '@/features/mathSteps';
 import type { QuestionValues } from '../schemas/questionEditorSchema';
 
 export interface StudentQuestion {
@@ -15,6 +16,7 @@ export interface QuestionAnswer {
   trueFalse: boolean | null;
   blanks: Record<string, string>;
   text: string;
+  math: MathStepsPayload;
 }
 
 export interface ChoiceReview {
@@ -22,7 +24,7 @@ export interface ChoiceReview {
 }
 
 export function emptyAnswer(): QuestionAnswer {
-  return { optionIds: [], trueFalse: null, blanks: {}, text: '' };
+  return { optionIds: [], trueFalse: null, blanks: {}, text: '', math: { steps: [], finalAnswer: '' } };
 }
 
 export function toStudentQuestion(values: DeepPartialSkipArrayKey<QuestionValues>): StudentQuestion {
@@ -55,5 +57,7 @@ export function toAnswerPayload(question: StudentQuestion, answer: QuestionAnswe
       return { text: answer.text };
     case 'Essay':
       return { text: answer.text };
+    case 'MathSteps':
+      return { steps: answer.math.steps, finalAnswer: answer.math.finalAnswer };
   }
 }

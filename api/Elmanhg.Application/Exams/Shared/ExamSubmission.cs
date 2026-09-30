@@ -1,4 +1,6 @@
 using Elmanhg.Application.Questions.Shared;
+using Elmanhg.Application.Questions.Shared.Grading;
+using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.Mastery;
 using Elmanhg.Domain.Questions;
@@ -14,7 +16,7 @@ public static class ExamSubmission
     // Exam questions share one page, so an exam essay has no observable writing time (like every exam attempt).
     private const int ExamEssayTimeTakenMilliseconds = 0;
 
-    public static async Task SubmitAsync(Session session, IReadOnlyCollection<QuestionRevision> revisions, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, IEssayGradeRepository essayGradeRepository, decimal correctThreshold, DateTimeOffset now, CancellationToken cancellationToken)
+    public static async Task SubmitAsync(Session session, IReadOnlyCollection<QuestionRevision> revisions, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, IEssayGradeRepository essayGradeRepository, IAiMathCheckClient mathCheckClient, decimal correctThreshold, DateTimeOffset now, CancellationToken cancellationToken)
     {
         if (session.IsSubmitted)
         {
@@ -29,10 +31,15 @@ public static class ExamSubmission
         var essayIds = written
             .Select(x => x.Item.QuestionId)
             .ToHashSet();
-        var grades = session.Items
-            .Where(x => x.SavedAnswer is not null && !essayIds.Contains(x.QuestionId))
-            .ToDictionary(x => x.QuestionId, x => Grade(FindRevision(revisions, x), x.SavedAnswer ?? string.Empty));
-        var attempts = session.SubmitExam(grades, essayIds, now);
+        Dictionary<Guid, QuestionGrade> grades = [];
+        foreach (var item in session.Items.Where(x => x.SavedAnswer is not null && !essayIds.Contains(x.QuestionId)))
+        {
+            grades[item.QuestionId] = await GradeAsync(FindRevision(revisions, item), item.SavedAnswer!, mathCheckClient, cancellationToken).ConfigureAwait(false);
+        }
+
+        var attempts = session.SubmitExam(grades, essayIds, now)
+            .Where(x => !grades[x.QuestionId].AwaitsReview)
+            .ToList();
         if (written.Count > 0)
         {
             var questions = await questionRepository.FindAsync(x => essayIds.Contains(x.Id), cancellationToken, include: query => query.IgnoreQueryFilters(), asNoTracking: true).ConfigureAwait(false);
@@ -84,9 +91,9 @@ public static class ExamSubmission
         return QuestionAnswerRules.TryReadWrittenEssay(revision.ReadSnapshot().Type, document.RootElement, out var text) ? text : null;
     }
 
-    private static QuestionGrade Grade(QuestionRevision revision, string answer)
+    private static async Task<QuestionGrade> GradeAsync(QuestionRevision revision, string answer, IAiMathCheckClient mathCheckClient, CancellationToken cancellationToken)
     {
         using var document = JsonDocument.Parse(answer);
-        return revision.Grade(document.RootElement);
+        return await AnswerGrader.GradeAsync(revision, document.RootElement, mathCheckClient, cancellationToken).ConfigureAwait(false);
     }
 }

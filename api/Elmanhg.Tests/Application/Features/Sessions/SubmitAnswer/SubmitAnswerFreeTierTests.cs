@@ -4,6 +4,7 @@ using Core.Localization;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Sessions.Shared;
 using Elmanhg.Application.Sessions.SubmitAnswer;
+using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.Lessons;
@@ -47,7 +48,7 @@ public sealed class SubmitAnswerFreeTierTests
         _lessonRepository.GetPublishedSiblingPositionsAsync(lesson.Id, Arg.Any<CancellationToken>()).Returns([LessonPosition.Of(lesson), new LessonPosition(Guid.NewGuid(), lesson.UnitId, 2, lesson.CreationDate)]);
         SubscriptionRepositoryStub.Stub(_subscriptionRepository);
         StubUsedToday(0);
-        _handler = new SubmitAnswerHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _lessonRepository, _subscriptionRepository, _essayGradeRepository, Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), Options.Create(new ContentOptions { QuestionEssayAnswerMaxLength = 20000 }), Options.Create(new SessionsOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>());
+        _handler = new SubmitAnswerHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _lessonRepository, _subscriptionRepository, _essayGradeRepository, Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), Options.Create(new ContentOptions { QuestionEssayAnswerMaxLength = 20000 }), Options.Create(new SessionsOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), Substitute.For<IAiMathCheckClient>());
     }
 
     [Fact]

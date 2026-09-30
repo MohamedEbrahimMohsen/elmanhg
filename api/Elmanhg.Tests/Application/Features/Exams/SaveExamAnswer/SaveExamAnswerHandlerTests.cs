@@ -4,6 +4,7 @@ using Elmanhg.Application.Exams.SaveExamAnswer;
 using Elmanhg.Application.Exams.Shared;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Domain.Questions.Schemas;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Sessions;
@@ -123,6 +124,36 @@ public sealed class SaveExamAnswerHandlerTests
     {
         await AssertThrowsAsync<ApplicationValidationCoreException>(Command($$"""{"optionId":"b","padding":"{{new string('x', 4000)}}"}"""), ErrorCodes.AttemptAnswerTooLong);
         _session.Items[0].SavedAnswer.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Handle_MathStepsAnswerOverLimits_ThrowsAttemptAnswerTooLong()
+    {
+        var (session, math) = StartMathExam();
+        var finalAnswer = new string('x', 201);
+
+        await AssertThrowsAsync<ApplicationValidationCoreException>(new SaveExamAnswerCommand(session.Id, math.Id, QuestionBuilder.Json($$"""{"finalAnswer":"{{finalAnswer}}"}""")), ErrorCodes.AttemptAnswerTooLong);
+        session.GetItem(math.Id)!.SavedAnswer.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Handle_MathStepsAnswer_SavesCanonicalAnswer()
+    {
+        var (session, math) = StartMathExam();
+
+        await _handler.Handle(new SaveExamAnswerCommand(session.Id, math.Id, QuestionBuilder.Json("""{"steps":[" 2x = 4 ",""],"finalAnswer":" x=2 "}""")), TestContext.Current.CancellationToken);
+
+        QuestionJson.AreEquivalent(session.GetItem(math.Id)!.SavedAnswer!, """{"steps":["2x = 4"],"finalAnswer":"x=2"}""").Should().BeTrue();
+        await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    private (Session Session, Question Math) StartMathExam()
+    {
+        var math = _builder.Questions.MathSteps().Approved().Build();
+        var session = Session.StartUnitExam(_builder.StudentId, _builder.Questions.Unit, _builder.Blueprint(1), [math], [_builder.Questions.Lesson], false, ExamSessionBuilder.Now);
+        SessionRepositoryStub.StubFind(_sessionRepository, session);
+        _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(math.Revisions);
+        return (session, math);
     }
 
     private SaveExamAnswerCommand Command(string answer) => new(_session.Id, _questions[0].Id, QuestionBuilder.Json(answer));

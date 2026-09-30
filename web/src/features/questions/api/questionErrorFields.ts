@@ -34,4 +34,8 @@ export const questionErrorFields: ServerErrorFields<QuestionValues> = {
   QUESTION_MODEL_ANSWERS_COUNT_INVALID: 'modelAnswers',
   QUESTION_MODEL_ANSWER_REQUIRED: 'modelAnswers',
   QUESTION_MODEL_ANSWER_TOO_LONG: 'modelAnswers',
+  QUESTION_MATH_ANSWERS_INVALID: 'mathAnswers',
+  QUESTION_MATH_FORM_INVALID: 'mathForm',
+  QUESTION_MATH_TOLERANCE_INVALID: 'mathTolerance',
+  QUESTION_MATH_TOLERANCE_FORM_CONFLICT: 'mathTolerance',
 };

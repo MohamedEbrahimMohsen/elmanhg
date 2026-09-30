@@ -50,6 +50,7 @@ export const StartQuizSessionResponse = zod.object({
   "score": zod.union([zod.number(),zod.stringFormat('double', startQuizSessionResponseItemsItemAttemptTwoScoreRegExpTwo)]),
   "normalisedScore": zod.union([zod.number(),zod.stringFormat('double', startQuizSessionResponseItemsItemAttemptTwoNormalisedScoreRegExpTwo)]),
   "outcome": zod.string(),
+  "awaitsReview": zod.boolean(),
   "feedback": zod.string().nullable(),
   "timeTakenMilliseconds": zod.union([zod.int(),zod.stringFormat('int32', startQuizSessionResponseItemsItemAttemptTwoTimeTakenMillisecondsRegExpTwo)]),
   "createdAt": zod.iso.datetime({"offset":true})
@@ -99,6 +100,7 @@ export const GetSessionResponse = zod.object({
   "score": zod.union([zod.number(),zod.stringFormat('double', getSessionResponseItemsItemAttemptTwoScoreRegExpTwo)]),
   "normalisedScore": zod.union([zod.number(),zod.stringFormat('double', getSessionResponseItemsItemAttemptTwoNormalisedScoreRegExpTwo)]),
   "outcome": zod.string(),
+  "awaitsReview": zod.boolean(),
   "feedback": zod.string().nullable(),
   "timeTakenMilliseconds": zod.union([zod.int(),zod.stringFormat('int32', getSessionResponseItemsItemAttemptTwoTimeTakenMillisecondsRegExpTwo)]),
   "createdAt": zod.iso.datetime({"offset":true})
@@ -144,6 +146,7 @@ export const SubmitSessionAnswerResponse = zod.object({
   "score": zod.union([zod.number(),zod.stringFormat('double', submitSessionAnswerResponseAttemptTwoScoreRegExpTwo)]),
   "normalisedScore": zod.union([zod.number(),zod.stringFormat('double', submitSessionAnswerResponseAttemptTwoNormalisedScoreRegExpTwo)]),
   "outcome": zod.string(),
+  "awaitsReview": zod.boolean(),
   "feedback": zod.string().nullable(),
   "timeTakenMilliseconds": zod.union([zod.int(),zod.stringFormat('int32', submitSessionAnswerResponseAttemptTwoTimeTakenMillisecondsRegExpTwo)]),
   "createdAt": zod.iso.datetime({"offset":true})
@@ -192,6 +195,7 @@ export const FinishSessionResponse = zod.object({
   "score": zod.union([zod.number(),zod.stringFormat('double', finishSessionResponseItemsItemAttemptTwoScoreRegExpTwo)]),
   "normalisedScore": zod.union([zod.number(),zod.stringFormat('double', finishSessionResponseItemsItemAttemptTwoNormalisedScoreRegExpTwo)]),
   "outcome": zod.string(),
+  "awaitsReview": zod.boolean(),
   "feedback": zod.string().nullable(),
   "timeTakenMilliseconds": zod.union([zod.int(),zod.stringFormat('int32', finishSessionResponseItemsItemAttemptTwoTimeTakenMillisecondsRegExpTwo)]),
   "createdAt": zod.iso.datetime({"offset":true})

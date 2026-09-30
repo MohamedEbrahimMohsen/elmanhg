@@ -31,7 +31,7 @@ export const GetUnitExamOverviewResponse = zod.object({
   "isSubjectDefault": zod.boolean(),
   "questionCount": zod.union([zod.int(),zod.stringFormat('int32', getUnitExamOverviewResponseBlueprintTwoQuestionCountRegExpTwo)]),
   "typeCounts": zod.array(zod.object({
-  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay']),
+  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'MathSteps']),
   "required": zod.union([zod.int(),zod.stringFormat('int32', getUnitExamOverviewResponseBlueprintTwoTypeCountsItemRequiredRegExpTwo)]),
   "available": zod.union([zod.int(),zod.stringFormat('int32', getUnitExamOverviewResponseBlueprintTwoTypeCountsItemAvailableRegExpTwo)])
 })),
@@ -114,6 +114,7 @@ export const StartUnitExamResponse = zod.object({
   "score": zod.union([zod.number(),zod.stringFormat('double', startUnitExamResponseItemsItemAttemptTwoScoreRegExpTwo)]),
   "normalisedScore": zod.union([zod.number(),zod.stringFormat('double', startUnitExamResponseItemsItemAttemptTwoNormalisedScoreRegExpTwo)]),
   "outcome": zod.string(),
+  "awaitsReview": zod.boolean(),
   "feedback": zod.string().nullable(),
   "timeTakenMilliseconds": zod.union([zod.int(),zod.stringFormat('int32', startUnitExamResponseItemsItemAttemptTwoTimeTakenMillisecondsRegExpTwo)]),
   "createdAt": zod.iso.datetime({"offset":true})
@@ -263,6 +264,7 @@ export const StartMultiUnitExamResponse = zod.object({
   "score": zod.union([zod.number(),zod.stringFormat('double', startMultiUnitExamResponseItemsItemAttemptTwoScoreRegExpTwo)]),
   "normalisedScore": zod.union([zod.number(),zod.stringFormat('double', startMultiUnitExamResponseItemsItemAttemptTwoNormalisedScoreRegExpTwo)]),
   "outcome": zod.string(),
+  "awaitsReview": zod.boolean(),
   "feedback": zod.string().nullable(),
   "timeTakenMilliseconds": zod.union([zod.int(),zod.stringFormat('int32', startMultiUnitExamResponseItemsItemAttemptTwoTimeTakenMillisecondsRegExpTwo)]),
   "createdAt": zod.iso.datetime({"offset":true})
@@ -329,7 +331,7 @@ export const PreviewMultiUnitExamResponse = zod.object({
   "isSubjectDefault": zod.boolean(),
   "questionCount": zod.union([zod.int(),zod.stringFormat('int32', previewMultiUnitExamResponseBlueprintQuestionCountRegExpTwo)]),
   "typeCounts": zod.array(zod.object({
-  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay']),
+  "type": zod.enum(['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'MathSteps']),
   "required": zod.union([zod.int(),zod.stringFormat('int32', previewMultiUnitExamResponseBlueprintTypeCountsItemRequiredRegExpTwo)]),
   "available": zod.union([zod.int(),zod.stringFormat('int32', previewMultiUnitExamResponseBlueprintTypeCountsItemAvailableRegExpTwo)])
 })),
@@ -413,6 +415,7 @@ export const GetExamSessionResponse = zod.object({
   "score": zod.union([zod.number(),zod.stringFormat('double', getExamSessionResponseItemsItemAttemptTwoScoreRegExpTwo)]),
   "normalisedScore": zod.union([zod.number(),zod.stringFormat('double', getExamSessionResponseItemsItemAttemptTwoNormalisedScoreRegExpTwo)]),
   "outcome": zod.string(),
+  "awaitsReview": zod.boolean(),
   "feedback": zod.string().nullable(),
   "timeTakenMilliseconds": zod.union([zod.int(),zod.stringFormat('int32', getExamSessionResponseItemsItemAttemptTwoTimeTakenMillisecondsRegExpTwo)]),
   "createdAt": zod.iso.datetime({"offset":true})
@@ -543,6 +546,7 @@ export const SubmitExamResponse = zod.object({
   "score": zod.union([zod.number(),zod.stringFormat('double', submitExamResponseItemsItemAttemptTwoScoreRegExpTwo)]),
   "normalisedScore": zod.union([zod.number(),zod.stringFormat('double', submitExamResponseItemsItemAttemptTwoNormalisedScoreRegExpTwo)]),
   "outcome": zod.string(),
+  "awaitsReview": zod.boolean(),
   "feedback": zod.string().nullable(),
   "timeTakenMilliseconds": zod.union([zod.int(),zod.stringFormat('int32', submitExamResponseItemsItemAttemptTwoTimeTakenMillisecondsRegExpTwo)]),
   "createdAt": zod.iso.datetime({"offset":true})

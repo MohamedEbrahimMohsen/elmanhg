@@ -14,6 +14,7 @@ export interface AttemptResult {
   /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
   normalisedScore: number | string;
   outcome: string;
+  awaitsReview: boolean;
   /** @nullable */
   feedback: string | null;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
