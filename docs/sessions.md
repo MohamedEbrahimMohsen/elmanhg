@@ -47,7 +47,7 @@ The served questions are chosen and written when the session starts and never ch
 | `Answer` | `answer_json` | jsonb, the canonical form of the typed answer (unknown properties dropped). |
 | `Score` | `score` | numeric(9,2) |
 | `NormalisedScore` | `normalised_score` | numeric(5,4), 0 to 1 |
-| `GradedBy` | `graded_by` | `Auto`, `AI`, `Teacher`. Every v1 type and a blank essay are `Auto`; a written essay is `AI` (#119). |
+| `GradedBy` | `graded_by` | `Auto`, `AI`, `Teacher`. Every deterministic type (the v1 types and drag-and-drop) and a blank essay are `Auto`; a written essay is `AI` (#119). |
 | `Grade` | `grade_json?` | jsonb, the serialised `GradeFeedback` (null when the grader gives none). |
 | `TimeTakenMilliseconds` | `time_taken_ms` | See Time taken. |
 | `CreatedAt` | `created_at` | |
@@ -100,7 +100,7 @@ Written essays are graded asynchronously by the AI grader against the served rev
 
 A MathSteps answer goes through `AnswerGrader`: the final answer is checked by the AI service's CAS ([math-cas.md](math-cas.md)); every other type is graded locally by `QuestionGrader`. If the AI service cannot be reached, the verdict is `unchecked` (provisional score 0, feedback kind `mathUnchecked`): the attempt is still recorded, is left out of mastery, and waits for teacher review (#128).
 
-The validator checks that the answer is a JSON object no longer than the largest of `Sessions:AnswerMaxLength`, `Sessions:EssayAnswerMaxLength` and `Sessions:MathStepsAnswerMaxLength`. The handler then checks the shape for the served type (422 `QUESTION_ANSWER_INVALID`), the raw length for that type (422 `ATTEMPT_ANSWER_TOO_LONG`: `EssayAnswerMaxLength` for an essay, `MathStepsAnswerMaxLength` for a MathSteps answer, `AnswerMaxLength` for every other type), the MathSteps step and final-answer caps (422 `ATTEMPT_ANSWER_TOO_LONG`) and, for an essay, the text length (422 `QUESTION_ESSAY_ANSWER_TOO_LONG` over `Content:QuestionEssayAnswerMaxLength`), so a malformed answer never reaches the grader.
+The validator checks that the answer is a JSON object no longer than the largest of `Sessions:AnswerMaxLength`, `Sessions:EssayAnswerMaxLength`, `Sessions:MathStepsAnswerMaxLength` and `Sessions:DragDropAnswerMaxLength`. The handler then checks the shape for the served type (422 `QUESTION_ANSWER_INVALID`), the raw length for that type (422 `ATTEMPT_ANSWER_TOO_LONG`: `EssayAnswerMaxLength` for an essay, `MathStepsAnswerMaxLength` for a MathSteps answer, `DragDropAnswerMaxLength` for a drag-and-drop answer, `AnswerMaxLength` for every other type), the MathSteps step and final-answer caps and the drag-and-drop placement caps (422 `ATTEMPT_ANSWER_TOO_LONG`) and, for an essay, the text length (422 `QUESTION_ESSAY_ANSWER_TOO_LONG` over `Content:QuestionEssayAnswerMaxLength`), so a malformed answer never reaches the grader.
 
 ## Idempotency
 
@@ -169,6 +169,9 @@ Session commands are not audited (`docs/audit-log.md`, "Not audited"): the attem
 | `Sessions:MathStepsMaxCount` | 20 | Steps in a MathSteps answer. |
 | `Sessions:MathStepMaxLength` | 500 | Characters per MathSteps step. |
 | `Sessions:MathFinalAnswerMaxLength` | 200 | Characters in a MathSteps final answer. |
+| `Sessions:DragDropAnswerMaxLength` | 4000 | Maximum raw length of a drag-and-drop answer's JSON. |
+| `Sessions:DragDropPlacementsMaxCount` | 20 | Placements (zones) in a drag-and-drop answer. |
+| `Sessions:DragDropPlacedItemsMaxCount` | 30 | Item ids across all placements of a drag-and-drop answer. |
 | `Mastery:CorrectThreshold` | 0.8 | Normalised score at or above which an attempt counts as correct (PRD §7.3); used by selection and mastery (`docs/mastery.md`). |
 
 The app fails to start unless `MinQuizSize <= DefaultQuizSize <= MaxQuizSize`.
@@ -197,7 +200,7 @@ History: `GET /api/progress/sessions` (`docs/progress.md`).
 | `SESSION_QUESTION_COUNT_INVALID` | 422 | `questionCount` outside `[MinQuizSize, MaxQuizSize]`. |
 | `SESSION_QUESTION_NOT_FOUND` | 404 | The question is not part of the session. |
 | `SESSION_ALREADY_IN_PROGRESS` | 409 | A concurrent start for the same lesson won the race; retry to resume. |
-| `ATTEMPT_ANSWER_TOO_LONG` | 422 | The answer JSON is over its type's cap (`EssayAnswerMaxLength` for an essay, `MathStepsAnswerMaxLength` for MathSteps, else `AnswerMaxLength`), or a MathSteps answer is over one of the `Math*` caps. |
+| `ATTEMPT_ANSWER_TOO_LONG` | 422 | The answer JSON is over its type's cap (`EssayAnswerMaxLength` for an essay, `MathStepsAnswerMaxLength` for MathSteps, else `AnswerMaxLength`), or a MathSteps answer is over one of the `Math*` caps, or a drag-and-drop answer is over `DragDropAnswerMaxLength` or one of the `DragDrop*Count` caps. |
 | `QUESTION_ESSAY_ANSWER_TOO_LONG` | 422 | An essay is longer than `Content:QuestionEssayAnswerMaxLength`. |
 | `MATH_CHECK_UNAVAILABLE` | 503 | Only when the .NET math-check fake runs in Production (a misconfiguration); an unreachable AI service grades `unchecked` instead. |
 | `ATTEMPT_TIME_TAKEN_INVALID` | 422 | Negative `timeTakenMilliseconds`. |
@@ -221,4 +224,5 @@ History: `GET /api/progress/sessions` (`docs/progress.md`).
 - "تدريب جديد" starts the smallest of 5/10/20 that is at least the number of questions served.
 - "اسأل المساعد" opens the avatar panel with the answered question as its context ([avatar.md](avatar.md)).
 - **Essay card (#119):** a plain-text RTL editor with a live word count against `maxWords` (over-limit state), characters left near 20 000 and a 20 000 cap. The draft autosaves to the device (`localStorage` key `elmanhg.essayDraft.<studentId>.<sessionId>.<questionId>`, 800 ms after the last change and when the page is hidden or left, kept 7 days) and is restored with «استعدنا مسودتك المحفوظة.». «أرسل الإجابة» is blocked for an empty essay or one over the word limit; a successful submit removes the draft. The submitted essay is shown read-only with the grade status («جارٍ تصحيح إجابتك…», «قيد المراجعة» or the verdict with criterion marks and justification) and the explanation. When the grade lands, the session and mastery queries are refreshed.
+- **Drag-and-drop card (#126):** the diagram (its image URL comes from the server) with numbered zone buttons, a zone list and the item bank. The student drags an item onto a zone (mouse, touch or pen), or chooses an item and then a zone on the image or «ضعه هنا» in the zone list (tap or keyboard); Escape clears the choice or cancels a drag. Each zone in the list offers move earlier/later when it holds two or more items and «أعد إلى البنك» for each item; a full zone refuses a new item. Every action is announced in a live region. «تحقّق» with nothing placed asks for an answer. After checking, each item shows «في مكانه الصحيح», «في مكان خاطئ» or «لم يوضع» (icon and text), the feedback line gives the tally, and «الأماكن الصحيحة» shows the key on the diagram. The diagram stays left to right in Arabic; the canvas and its strings load only for a drag-and-drop question.
 - The result page counts written essays as answered, reviews them with their grade status, and notes that the score is provisional while any essay is being graded.

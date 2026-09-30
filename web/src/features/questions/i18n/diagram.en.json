@@ -47,12 +47,10 @@
     }
   },
   "preview": {
-    "showKey": "Show correct placements",
-    "dragDropGradingHint": "«Try the answer» is not available for drag-and-drop questions yet."
+    "showKey": "Show correct placements"
   },
   "view": {
     "diagramMissing": "The diagram image has not been uploaded yet.",
-    "diagramBank": "Items to place",
     "diagramKeyTitle": "Correct placements",
     "diagramKeyZone": "Zone {number}: {items}",
     "diagramKeyOrdered": "Zone {number}, in order: {items}",

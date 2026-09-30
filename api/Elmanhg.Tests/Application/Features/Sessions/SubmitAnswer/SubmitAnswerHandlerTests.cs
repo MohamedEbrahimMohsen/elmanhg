@@ -5,6 +5,7 @@ using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Sessions.SubmitAnswer;
 using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Lessons;
@@ -52,7 +53,7 @@ public sealed class SubmitAnswerHandlerTests
         _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(_questions[0].Revisions);
         _timeProvider.GetUtcNow().Returns(T0);
         SubscriptionRepositoryStub.Stub(_subscriptionRepository, SubscriptionRepositoryStub.EntitledBase(_builder.StudentId, T0));
-        _handler = new SubmitAnswerHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _lessonRepository, _subscriptionRepository, _essayGradeRepository, Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), Options.Create(new ContentOptions { QuestionEssayAnswerMaxLength = 20000 }), Options.Create(new SessionsOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), _mathCheckClient);
+        _handler = new SubmitAnswerHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _lessonRepository, _subscriptionRepository, _essayGradeRepository, Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), Options.Create(new ContentOptions { QuestionEssayAnswerMaxLength = 20000 }), Options.Create(new SessionsOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), _mathCheckClient, Substitute.For<IFileStorage>());
     }
 
     private Guid QuestionId => _questions[0].Id;
@@ -335,6 +336,33 @@ public sealed class SubmitAnswerHandlerTests
     private void ReplyMath(MathAnswerVerdict verdict) => _mathCheckClient.CheckAsync(Arg.Any<AiMathCheckRequest>(), Arg.Any<CancellationToken>()).Returns(new AiMathCheckResult(verdict, null, []));
 
     private static SubmitAnswerCommand MathCommand(Session session, Question math, string answer) => new(session.Id, math.Id, QuestionBuilder.Json(answer), 1000);
+
+    [Fact]
+    public async Task Handle_DragDropAnswer_RecordsPartialAttempt()
+    {
+        var command = StartDragDropQuiz("""{"placements":[{"zoneId":"z1","itemIds":["i1","i2"]}]}""");
+
+        var result = await _handler.Handle(command, TestContext.Current.CancellationToken);
+
+        (result.Attempt!.Outcome, result.Attempt.Score).Should().Be(("Partial", 2m));
+        await _sessionRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_DragDropNullItemId_ThrowsQuestionAnswerInvalid()
+    {
+        var command = StartDragDropQuiz("""{"placements":[{"zoneId":"z1","itemIds":[null]}]}""");
+
+        await AssertThrowsAsync<ApplicationValidationCoreException>(command, ErrorCodes.QuestionAnswerInvalid);
+    }
+
+    private SubmitAnswerCommand StartDragDropQuiz(string answer)
+    {
+        var session = _builder.BuildWithDragDrop();
+        SessionRepositoryStub.StubFind(_sessionRepository, session);
+        _questionRepository.GetRevisionsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns(new QuestionBuilder().DragDrop().Approved().Build().Revisions);
+        return new SubmitAnswerCommand(session.Id, session.Items[1].QuestionId, QuestionBuilder.Json(answer), 1000);
+    }
 
     private SubmitAnswerCommand Command(string answer) => new(_session.Id, QuestionId, QuestionBuilder.Json(answer), 1000);
 

@@ -76,11 +76,19 @@ public sealed class GradeQuestionDraftValidatorTests
     }
 
     [Fact]
-    public void Validate_DragDrop_ReturnsQuestionTypeNotGradableOnly()
+    public void Validate_DragDropWithPlacements_ReturnsNoAnswerErrors()
     {
-        var codes = Codes(new GradeQuestionDraftQuery(DragDropFields(), Json("{}")));
+        var codes = Codes(new GradeQuestionDraftQuery(DragDropFields(), Json("""{"placements":[{"zoneId":"z1","itemIds":["i1"]}]}""")));
 
-        codes.Should().Contain(ErrorCodes.QuestionTypeNotGradable).And.NotContain(ErrorCodes.QuestionAnswerInvalid);
+        codes.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Validate_DragDropUnreadableAnswer_ReturnsQuestionAnswerInvalid()
+    {
+        var codes = Codes(new GradeQuestionDraftQuery(DragDropFields(), Json("""{"placements":[{"zoneId":"z1","itemIds":[null]}]}""")));
+
+        codes.Should().Contain(ErrorCodes.QuestionAnswerInvalid);
     }
 
     private List<string> Codes(GradeQuestionDraftQuery query)

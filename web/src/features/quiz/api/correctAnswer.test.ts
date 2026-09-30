@@ -101,10 +101,23 @@ describe('correctAnswer', () => {
     expect(choiceReview(essay, {})).toBeUndefined();
   });
 
-  it('describes no correct answer or choice review for drag-and-drop', () => {
-    const dragDrop = question('DragDrop');
+  it('describes the diagram key of a drag-and-drop question', () => {
+    const diagram = {
+      image: { url: '/api/media/question-diagrams/l/abc.png', width: 800, height: 600, alt: 'Plant cell' },
+      zones: [{ id: 'z1', x: 10, y: 10, width: 20, height: 15, capacity: 2 }],
+      items: [{ id: 'i1', text: 'Nucleus' }],
+    };
+    const diagramKey = [{ zoneId: 'z1', itemIds: ['i1'], ordered: false }];
 
-    expect(describeCorrectAnswer(dragDrop, { zones: [] })).toBeNull();
-    expect(choiceReview(dragDrop, { zones: [] })).toBeUndefined();
+    expect(describeCorrectAnswer(question('DragDrop', { diagram }), { zones: diagramKey })).toEqual({
+      kind: 'diagram',
+      diagram,
+      diagramKey,
+    });
+    expect(choiceReview(question('DragDrop', { diagram }), { zones: diagramKey })).toEqual({
+      correctKeys: [],
+      diagramKey,
+    });
+    expect(describeCorrectAnswer(question('DragDrop'), { zones: diagramKey })).toBeNull();
   });
 });

@@ -4,7 +4,10 @@ import { http, HttpResponse } from 'msw';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getGetLessonMockHandler, getUploadDiagramImageMockHandler } from '@/shared/api/generated/lessons/lessons.msw';
 import type { LessonDetailResult } from '@/shared/api/generated/model';
-import { getCreateQuestionMockHandler } from '@/shared/api/generated/questions/questions.msw';
+import {
+  getCreateQuestionMockHandler,
+  getGradeQuestionDraftMockHandler,
+} from '@/shared/api/generated/questions/questions.msw';
 import { axe } from '@/test/axe';
 import { server } from '@/test/msw/server';
 import { renderApp } from '@/test/renderWithProviders';
@@ -234,14 +237,37 @@ describe('NewQuestionPage drag and drop', () => {
     await user.type(screen.getByLabelText('Item 2'), 'Engine');
     const preview = within(screen.getByRole('region', { name: 'Student preview' }));
 
-    expect(preview.getByRole('img', { name: 'Plant cell' })).toBeInTheDocument();
+    expect(await preview.findByRole('img', { name: 'Plant cell' })).toBeInTheDocument();
     const bank = within(preview.getByRole('region', { name: 'Items to place' }));
     expect(bank.getAllByRole('listitem').map((item) => item.textContent)).toEqual(['Nucleus', 'Engine']);
-    expect(preview.queryByRole('button', { name: 'Try the answer' })).not.toBeInTheDocument();
-    expect(preview.getByText('«Try the answer» is not available for drag-and-drop questions yet.')).toBeInTheDocument();
+    expect(preview.getByRole('button', { name: 'Try the answer' })).toBeInTheDocument();
     await user.click(preview.getByRole('checkbox', { name: 'Show correct placements' }));
     expect(preview.getByText('Zone 1: Nucleus')).toBeInTheDocument();
     expect(preview.getByText('Distractors (stay unplaced): Engine')).toBeInTheDocument();
+  });
+
+  it('grades a drag-and-drop answer with the test grader', async () => {
+    let body: unknown = null;
+    server.use(
+      getGradeQuestionDraftMockHandler(async ({ request }) => {
+        body = await request.json();
+        return { score: 1, normalisedScore: 1, outcome: 'Correct', maxScore: 1, feedback: 'All items placed.' };
+      }),
+    );
+    const user = userEvent.setup();
+    await openDragDropEditor(user);
+    await fillBasics(user);
+    await drawZone(user);
+    await user.type(screen.getByLabelText('Item 1'), 'Nucleus');
+    await user.selectOptions(screen.getByLabelText('Correct zone for item 1'), 'Zone 1');
+    const preview = within(screen.getByRole('region', { name: 'Student preview' }));
+
+    await user.click(await preview.findByRole('button', { name: 'Nucleus' }));
+    await user.click(preview.getByRole('button', { name: 'Place here (Nucleus in zone 1)' }));
+    await user.click(preview.getByRole('button', { name: 'Try the answer' }));
+
+    expect(await preview.findByText('All items placed.')).toBeInTheDocument();
+    expect(body).toEqual(expect.objectContaining({ answer: { placements: [{ zoneId: 'z1', itemIds: ['i1'] }] } }));
   });
 
   it('has no axe violations', async () => {

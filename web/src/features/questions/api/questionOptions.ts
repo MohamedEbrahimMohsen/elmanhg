@@ -19,6 +19,7 @@ export const servedQuestionTypes = [
   'Short',
   'Essay',
   'MathSteps',
+  'DragDrop',
 ] as const satisfies readonly QuestionType[];
 
 export const questionDifficulties = ['Easy', 'Medium', 'Hard'] as const satisfies readonly QuestionDifficulty[];

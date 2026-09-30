@@ -1,0 +1,42 @@
+{
+  "canvasLabel": "Diagram",
+  "hint": "Drag each item to its zone on the diagram, or choose an item and then its zone. Leave items that belong nowhere in the bank.",
+  "missing": "The diagram image has not been uploaded yet.",
+  "zoneButton": "Zone {number}: {count} of {capacity} items",
+  "zonesTitle": "Zones",
+  "zone": "Zone {number}",
+  "zoneFill": "{count}/{capacity}",
+  "zoneEmpty": "Empty",
+  "zoneFull": "Full",
+  "placeHere": "Place here",
+  "placeHereTarget": "({item} in zone {number})",
+  "moveUp": "Move {item} earlier",
+  "moveDown": "Move {item} later",
+  "returnToBank": "Return {item} to the bank",
+  "bank": "Items to place",
+  "bankEmpty": "All items are placed.",
+  "announce": {
+    "picked": "{item} selected. Choose a zone.",
+    "cleared": "Selection cleared.",
+    "placed": "{item} placed in zone {number}, position {position}.",
+    "full": "Zone {number} is full.",
+    "selectFirst": "Choose an item first.",
+    "returned": "{item} returned to the bank.",
+    "moved": "{item} moved to position {position} in zone {number}."
+  },
+  "mark": {
+    "correct": "in the right place",
+    "wrong": "in the wrong place",
+    "missed": "not placed"
+  },
+  "key": {
+    "canvasLabel": "Correct placements: {alt}",
+    "title": "Correct placements",
+    "zone": "Zone {number}: {items}",
+    "zoneOrdered": "Zone {number}, in order: {items}",
+    "zoneEmpty": "Zone {number}: stays empty",
+    "distractors": "Stay in the bank: {items}",
+    "listSeparator": ", ",
+    "orderSeparator": " → "
+  }
+}

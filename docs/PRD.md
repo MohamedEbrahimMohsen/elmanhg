@@ -120,7 +120,7 @@ Transitions: **Publish** Draft or Archived → Published (sets `published_at`). 
 | Field | Values |
 |---|---|
 | Validation status | Pending · Approved · Rejected |
-| Servable (derived, not stored) | `Approved AND lesson.state == Published AND question.not_retired` AND type != DragDrop (until the student canvas ships, E16.S2) |
+| Servable (derived, not stored) | `Approved AND lesson.state == Published AND question.not_retired` |
 
 Rules:
 - A question is created as Pending. Only a Teacher assigned to the question's subject can Approve or Reject.
@@ -161,9 +161,11 @@ Every answer produces a **score in [0, max_score]** and a **normalised score in 
 | Short answer (numeric/text) | v1 | String or number | Numeric: tolerance ±x or %; Text: accepted list with normalisation | No |
 | Essay | v2 | Plain text (Arabic, multi-paragraph) | LLM grader with rubric (criteria + weights) and model answer. Returns score per criterion + justification. | Yes |
 | Math with steps | v2 | Ordered list of steps (LaTeX/text) + final answer | Final answer: CAS equivalence check (SymPy). Steps: LLM against model solution, per-step credit. | Yes |
-| Science drag-and-drop | v2 | Map of item → drop zone (per-zone order when the zone is ordered) | Deterministic: each item's zone vs correct zone; optional order constraints | Per item |
+| Science drag-and-drop | v2 | Map of item → drop zone (per-zone order when the zone is ordered) | Deterministic per item: each keyed item's zone (and position in an ordered zone) vs the key; each distractor placed cancels one right item | Per item |
 
 Math with steps: until step grading (E15.S3) the score is the final answer's CAS verdict (1 or 0); each question sets a required form and an optional numeric tolerance (docs/question-schemas.md, docs/math-cas.md). A final answer the CAS cannot check (for example, the AI service is down) is recorded with a provisional 0 for teacher review (§8.3); the student sees «قيد المراجعة» instead of a verdict, with no correct answer, and the quiz or exam score is marked provisional.
+
+Science drag-and-drop: the answer lists, per zone, the items placed there in order. Each item the key places scores when it sits in its key zone (at its key position when the zone is ordered); each placed item the key places nowhere cancels one right item. Score = max(0, (right − distractors placed) ÷ keyed items); an answer that places nothing is unanswered. Exact rules in docs/question-schemas.md.
 
 Per-type `body` and `grading_spec` JSON shapes: `docs/question-schemas.md`.
 Answer shapes and the exact grading rules (normalisation, numeric parsing, rounding) are in the same document.
@@ -547,7 +549,7 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 
 ## 17. Key business rules (single list, for implementation reference)
 
-1. Servable = Approved ∧ Lesson Published ∧ not retired. Derived, never stored; drag-and-drop questions are not servable until the student canvas ships.
+1. Servable = Approved ∧ Lesson Published ∧ not retired. Derived, never stored.
 2. Content edit on an Approved question → Pending, version + 1. Historical attempts keep the old version.
 3. Only a Teacher assigned to the subject may validate. Admins cannot.
 4. Rejection requires a reason.

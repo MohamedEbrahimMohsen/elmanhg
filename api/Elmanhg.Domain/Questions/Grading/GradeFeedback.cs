@@ -28,4 +28,9 @@ public sealed record GradeFeedback(GradeFeedbackKind Kind, int Right, int Wrong,
     {
         return new(GradeFeedbackKind.BlankTally, right, 0, total);
     }
+
+    public static GradeFeedback PlacementTally(int right, int wrong, int total)
+    {
+        return new(GradeFeedbackKind.PlacementTally, right, wrong, total);
+    }
 }

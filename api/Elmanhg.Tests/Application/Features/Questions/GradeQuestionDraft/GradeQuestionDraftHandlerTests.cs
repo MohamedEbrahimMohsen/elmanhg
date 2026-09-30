@@ -165,6 +165,58 @@ public sealed class GradeQuestionDraftHandlerTests
         await _mathCheckClient.DidNotReceive().CheckAsync(Arg.Any<AiMathCheckRequest>(), Arg.Any<CancellationToken>());
     }
 
+    [Fact]
+    public async Task Handle_DragDrop_ReturnsPerItemGradeWithTally()
+    {
+        _localizer.GetMessage("GRADE_FEEDBACK_PLACEMENT_TALLY", Arg.Any<string?>(), Arg.Is<Dictionary<string, object>?>(x => x != null && x["right"].Equals(3) && x["wrong"].Equals(0) && x["total"].Equals(4))).Returns("placements");
+
+        var result = await _handler.Handle(new GradeQuestionDraftQuery(DragDropFields(), Json("""{"placements":[{"zoneId":"z1","itemIds":["i1","i2"]},{"zoneId":"z2","itemIds":["i4"]}]}""")), TestContext.Current.CancellationToken);
+
+        result.Should().Be(new QuestionGradeResult(3m, 0.75m, "Partial", 4, "placements"));
+    }
+
+    [Fact]
+    public async Task Handle_DragDropOverPlacementCap_ThrowsAttemptAnswerTooLong()
+    {
+        var handler = new GradeQuestionDraftHandler(_richTextSanitizer, new RichTextExtractor(), _lessonRepository, _unitRepository, _subjectRepository, _essayGradingClient, Options.Create(new EssayGradingOptions()), _localizer, _mathCheckClient, Options.Create(new SessionsOptions { DragDropPlacementsMaxCount = 1 }));
+
+        var act = () => handler.Handle(new GradeQuestionDraftQuery(DragDropFields(), Json("""{"placements":[{"zoneId":"z1","itemIds":["i1"]},{"zoneId":"z2","itemIds":["i4"]}]}""")), TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<ApplicationValidationCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.AttemptAnswerTooLong);
+    }
+
+    [Fact]
+    public async Task Handle_DragDropOverRawCap_ThrowsAttemptAnswerTooLong()
+    {
+        var padding = new string('x', 4001);
+
+        var act = () => _handler.Handle(new GradeQuestionDraftQuery(DragDropFields(), Json($$"""{"placements":[{"zoneId":"z1","itemIds":["i1"]}],"pad":"{{padding}}"}""")), TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<ApplicationValidationCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.AttemptAnswerTooLong);
+    }
+
+    [Fact]
+    public async Task Handle_DragDropAtRawCap_Grades()
+    {
+        var envelope = """{"placements":[{"zoneId":"z1","itemIds":["i1"]}],"pad":""}""".Length;
+        var answer = $$"""{"placements":[{"zoneId":"z1","itemIds":["i1"]}],"pad":"{{new string('x', 4000 - envelope)}}"}""";
+
+        var result = await _handler.Handle(new GradeQuestionDraftQuery(DragDropFields(), Json(answer)), TestContext.Current.CancellationToken);
+
+        answer.Length.Should().Be(4000);
+        result.MaxScore.Should().Be(4);
+    }
+
+    [Fact]
+    public async Task Handle_McqOverRawCap_ThrowsAttemptAnswerTooLong()
+    {
+        var padding = new string('x', 4001);
+
+        var act = () => _handler.Handle(new GradeQuestionDraftQuery(McqFields(), Json($$"""{"optionId":"b","pad":"{{padding}}"}""")), TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<ApplicationValidationCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.AttemptAnswerTooLong);
+    }
+
     private static AiEssayGradingResult Reply(decimal confidence) => new([new AiEssayCriterionScore("c1", 1, "Partly correct.")], 1, 2, "Good definition; add an example.", confidence, "claude-sonnet-5", "v1", 900, 150, "end_turn", 0.004m);
 
     private void StubContext(QuestionBuilder questions)

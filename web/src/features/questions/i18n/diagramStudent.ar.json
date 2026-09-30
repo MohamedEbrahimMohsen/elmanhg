@@ -1,0 +1,42 @@
+{
+  "canvasLabel": "الرسم",
+  "hint": "اسحب كل عنصر إلى منطقته في الرسم، أو اختر العنصر ثم اختر المنطقة. اترك العناصر التي لا مكان لها في البنك.",
+  "missing": "لم تُرفع صورة الرسم بعد.",
+  "zoneButton": "المنطقة {number}: {count} من {capacity} عناصر",
+  "zonesTitle": "المناطق",
+  "zone": "المنطقة {number}",
+  "zoneFill": "{count}/{capacity}",
+  "zoneEmpty": "فارغة",
+  "zoneFull": "ممتلئة",
+  "placeHere": "ضعه هنا",
+  "placeHereTarget": "(«{item}» في المنطقة {number})",
+  "moveUp": "قدّم «{item}»",
+  "moveDown": "أخّر «{item}»",
+  "returnToBank": "أعد «{item}» إلى البنك",
+  "bank": "عناصر للوضع",
+  "bankEmpty": "وُضعت كل العناصر.",
+  "announce": {
+    "picked": "اخترت «{item}». اختر منطقة.",
+    "cleared": "أُلغي الاختيار.",
+    "placed": "وُضع «{item}» في المنطقة {number}، في الموضع {position}.",
+    "full": "المنطقة {number} ممتلئة.",
+    "selectFirst": "اختر عنصرًا أولًا.",
+    "returned": "أُعيد «{item}» إلى البنك.",
+    "moved": "نُقل «{item}» إلى الموضع {position} في المنطقة {number}."
+  },
+  "mark": {
+    "correct": "في مكانه الصحيح",
+    "wrong": "في مكان خاطئ",
+    "missed": "لم يوضع"
+  },
+  "key": {
+    "canvasLabel": "الأماكن الصحيحة: {alt}",
+    "title": "الأماكن الصحيحة",
+    "zone": "المنطقة {number}: {items}",
+    "zoneOrdered": "المنطقة {number} بالترتيب: {items}",
+    "zoneEmpty": "المنطقة {number}: تبقى فارغة",
+    "distractors": "تبقى في البنك: {items}",
+    "listSeparator": "، ",
+    "orderSeparator": " ← "
+  }
+}

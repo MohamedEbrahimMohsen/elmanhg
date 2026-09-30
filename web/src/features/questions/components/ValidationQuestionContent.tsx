@@ -25,7 +25,7 @@ export function ValidationQuestionContent({ question, values }: ValidationQuesti
       <section aria-label={t('validation.detail.preview')} className={cardClassName}>
         <h2 className="font-display text-h3 font-semibold">{t('validation.detail.preview')}</h2>
         {values.type === 'DragDrop' ? (
-          <DragDropPreview stem={values.stem} diagram={toDiagramModel(values)} showKey />
+          <DragDropPreview stem={values.stem} diagram={toDiagramModel(values)} />
         ) : (
           <QuestionView
             question={toStudentQuestion(values)}

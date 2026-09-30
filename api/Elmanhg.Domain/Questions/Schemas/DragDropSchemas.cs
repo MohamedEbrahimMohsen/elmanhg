@@ -11,3 +11,7 @@ public sealed record DragDropBody(DiagramImage? Image, List<DiagramZone>? Zones,
 public sealed record DiagramZoneKey(string? ZoneId, List<string>? ItemIds, bool? Ordered);
 
 public sealed record DragDropGradingSpec(List<DiagramZoneKey>? Zones);
+
+public sealed record DiagramPlacement(string? ZoneId, List<string?>? ItemIds);
+
+public sealed record DragDropAnswer(List<DiagramPlacement?>? Placements);

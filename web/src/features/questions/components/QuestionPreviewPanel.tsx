@@ -27,15 +27,20 @@ export function QuestionPreviewPanel({ lessonId }: QuestionPreviewPanelProps) {
   const { getValues } = useFormContext<QuestionValues>();
   const { grade, result, errorCode, isPending } = useTestGrade(lessonId);
   const isEssay = values.type === 'Essay';
+  const isDragDrop = values.type === 'DragDrop';
 
-  if (values.type === 'DragDrop') {
-    return (
-      <section
-        aria-label={t('preview.title')}
-        className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5"
-      >
-        <h2 className="font-display text-h2 font-bold">{t('preview.title')}</h2>
-        <DragDropPreview stem={values.stem ?? ''} diagram={toDiagramModel(values)} showKey={showKey} />
+  return (
+    <section
+      aria-label={t('preview.title')}
+      className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5"
+    >
+      <h2 className="font-display text-h2 font-bold">{t('preview.title')}</h2>
+      {isDragDrop && showKey ? (
+        <DragDropPreview stem={values.stem ?? ''} diagram={toDiagramModel(values)} />
+      ) : (
+        <QuestionView question={question} answer={answer} onAnswerChange={setAnswer} />
+      )}
+      {isDragDrop ? (
         <label className="flex min-h-11 items-center gap-2.5 text-ui">
           <input
             type="checkbox"
@@ -47,18 +52,7 @@ export function QuestionPreviewPanel({ lessonId }: QuestionPreviewPanelProps) {
           />
           {t('questionsDiagram:preview.showKey')}
         </label>
-        <p className="text-caption text-text-muted">{t('questionsDiagram:preview.dragDropGradingHint')}</p>
-      </section>
-    );
-  }
-
-  return (
-    <section
-      aria-label={t('preview.title')}
-      className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5"
-    >
-      <h2 className="font-display text-h2 font-bold">{t('preview.title')}</h2>
-      <QuestionView question={question} answer={answer} onAnswerChange={setAnswer} />
+      ) : null}
       {isEssay ? <p className="text-caption text-text-muted">{t('preview.essayGradingHint')}</p> : null}
       <div>
         <Button

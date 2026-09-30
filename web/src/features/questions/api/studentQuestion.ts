@@ -1,6 +1,9 @@
 import type { DeepPartialSkipArrayKey } from 'react-hook-form';
 import type { MathStepsPayload } from '@/features/mathSteps';
 import type { QuestionValues } from '../schemas/questionEditorSchema';
+import type { DiagramKey, StudentDiagram } from '../schemas/studentDiagramSchema';
+import { toPlacementsPayload, type DiagramPlacements } from './diagramPlacement';
+import { studentDiagramFromValues } from './studentDiagram';
 
 export interface StudentQuestion {
   type: QuestionValues['type'];
@@ -9,6 +12,7 @@ export interface StudentQuestion {
   blankIds: string[];
   answerKind: 'numeric' | 'text' | null;
   maxWords?: number | null | undefined;
+  diagram?: StudentDiagram | null | undefined;
 }
 
 export interface QuestionAnswer {
@@ -17,14 +21,16 @@ export interface QuestionAnswer {
   blanks: Record<string, string>;
   text: string;
   math: MathStepsPayload;
+  placements: DiagramPlacements;
 }
 
 export interface ChoiceReview {
   correctKeys: readonly string[];
+  diagramKey?: DiagramKey | undefined;
 }
 
 export function emptyAnswer(): QuestionAnswer {
-  return { optionIds: [], trueFalse: null, blanks: {}, text: '', math: { steps: [], finalAnswer: '' } };
+  return { optionIds: [], trueFalse: null, blanks: {}, text: '', math: { steps: [], finalAnswer: '' }, placements: {} };
 }
 
 export function toStudentQuestion(values: DeepPartialSkipArrayKey<QuestionValues>): StudentQuestion {
@@ -36,6 +42,7 @@ export function toStudentQuestion(values: DeepPartialSkipArrayKey<QuestionValues
     blankIds: (values.blanks ?? []).map((blank) => blank.id ?? ''),
     answerKind: type === 'Short' ? (values.answerKind ?? 'numeric') : null,
     maxWords: type === 'Essay' && /^\d+$/.test(values.maxWords ?? '') ? Number(values.maxWords) : null,
+    diagram: type === 'DragDrop' ? studentDiagramFromValues(values) : null,
   };
 }
 
@@ -60,6 +67,6 @@ export function toAnswerPayload(question: StudentQuestion, answer: QuestionAnswe
     case 'MathSteps':
       return { steps: answer.math.steps, finalAnswer: answer.math.finalAnswer };
     case 'DragDrop':
-      return {};
+      return { placements: question.diagram ? toPlacementsPayload(question.diagram, answer.placements) : [] };
   }
 }

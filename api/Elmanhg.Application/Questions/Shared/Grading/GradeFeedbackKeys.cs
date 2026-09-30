@@ -10,6 +10,7 @@ public static class GradeFeedbackKeys
     public const string MathWrongForm = "GRADE_FEEDBACK_MATH_WRONG_FORM";
     public const string MathUnreadable = "GRADE_FEEDBACK_MATH_UNREADABLE";
     public const string MathUnchecked = "GRADE_FEEDBACK_MATH_UNCHECKED";
+    public const string PlacementTally = "GRADE_FEEDBACK_PLACEMENT_TALLY";
     public const string RightArgument = "right";
     public const string WrongArgument = "wrong";
     public const string TotalArgument = "total";

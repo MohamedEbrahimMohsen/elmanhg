@@ -19,6 +19,7 @@ public static class QuestionAnswerRules
             QuestionType.Short => QuestionSchemaReader.TryRead<ShortAnswer>(answer, out _),
             QuestionType.Essay => QuestionSchemaReader.TryRead<EssayAnswer>(answer, out var essay) && essay.Text is not null,
             QuestionType.MathSteps => MathStepsAnswerRules.CanRead(answer),
+            QuestionType.DragDrop => DragDropAnswerRules.CanRead(answer),
             _ => false,
         };
     }
@@ -34,6 +35,7 @@ public static class QuestionAnswerRules
             QuestionType.Short => QuestionSchemaReader.Serialize(QuestionSchemaReader.Read<ShortAnswer>(answer)),
             QuestionType.Essay => QuestionSchemaReader.Serialize(new EssayAnswer(QuestionSchemaReader.Read<EssayAnswer>(answer).Text!.Trim())),
             QuestionType.MathSteps => MathStepsAnswerRules.Canonicalize(answer),
+            QuestionType.DragDrop => DragDropAnswerRules.Canonicalize(answer),
             _ => throw new InvalidOperationException("Unsupported question type."),
         };
     }
@@ -48,12 +50,18 @@ public static class QuestionAnswerRules
 
     public static bool IsRawAnswerTooLong(QuestionType type, JsonElement answer, SessionsOptions options) => answer.GetRawText().Length > RawAnswerMaxLength(type, options);
 
-    public static bool ExceedsLimits(QuestionType type, JsonElement answer, SessionsOptions options) => type == QuestionType.MathSteps && MathStepsAnswerRules.ExceedsLimits(answer, options);
+    public static bool ExceedsLimits(QuestionType type, JsonElement answer, SessionsOptions options) => type switch
+    {
+        QuestionType.MathSteps => MathStepsAnswerRules.ExceedsLimits(answer, options),
+        QuestionType.DragDrop => DragDropAnswerRules.ExceedsLimits(answer, options),
+        _ => false,
+    };
 
     private static int RawAnswerMaxLength(QuestionType type, SessionsOptions options) => type switch
     {
         QuestionType.Essay => options.EssayAnswerMaxLength,
         QuestionType.MathSteps => options.MathStepsAnswerMaxLength,
+        QuestionType.DragDrop => options.DragDropAnswerMaxLength,
         _ => options.AnswerMaxLength,
     };
 }

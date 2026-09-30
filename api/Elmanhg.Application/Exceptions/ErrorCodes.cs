@@ -125,7 +125,6 @@ public static class ErrorCodes
     public const string QuestionModelAnswersCountInvalid = "QUESTION_MODEL_ANSWERS_COUNT_INVALID";
     public const string QuestionModelAnswerRequired = "QUESTION_MODEL_ANSWER_REQUIRED";
     public const string QuestionModelAnswerTooLong = "QUESTION_MODEL_ANSWER_TOO_LONG";
-    public const string QuestionTypeNotGradable = "QUESTION_TYPE_NOT_GRADABLE";
     public const string QuestionDiagramImageTypeInvalid = "QUESTION_DIAGRAM_IMAGE_TYPE_INVALID";
     public const string QuestionDiagramImageInvalid = "QUESTION_DIAGRAM_IMAGE_INVALID";
     public const string QuestionDiagramImageAltRequired = "QUESTION_DIAGRAM_IMAGE_ALT_REQUIRED";

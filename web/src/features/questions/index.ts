@@ -4,6 +4,14 @@ export { NewQuestionPage } from './pages/NewQuestionPage';
 export { QuestionView } from './components/QuestionView';
 export { EssayCriteriaList } from './components/EssayCriteriaList';
 export { questionListSearchSchema, type QuestionListSearch } from './schemas/questionListSearchSchema';
+export { LazyDragDropCorrectAnswer } from './components/LazyDragDropCorrectAnswer';
+export {
+  studentDiagramBodySchema,
+  diagramKeySchema,
+  type StudentDiagram,
+  type DiagramKey,
+} from './schemas/studentDiagramSchema';
+export { fromPlacementsPayload, type DiagramPlacements } from './api/diagramPlacement';
 export {
   emptyAnswer,
   toAnswerPayload,

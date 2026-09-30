@@ -38,7 +38,7 @@ Indexes (partial, unique, soft-delete aware):
 
 ## Rules
 
-- **Shortfall (PRD §17 rule 8):** a blueprint cannot be saved when, for any type, the required count is greater than the number of servable questions of that type. Servable is `ServableQuestionSpecification` (Approved, lesson Published, not retired, not drag-and-drop (until #126)). The check is `ExamBlueprintShortfall.Find`, enforced by the entity on create and update, and mirrored on the web by `findShortfall`.
+- **Shortfall (PRD §17 rule 8):** a blueprint cannot be saved when, for any type, the required count is greater than the number of servable questions of that type. Servable is `ServableQuestionSpecification` (Approved, lesson Published, not retired). The check is `ExamBlueprintShortfall.Find`, enforced by the entity on create and update, and mirrored on the web by `findShortfall`.
 - **Pool:** the subject default is checked against the subject's whole servable pool (all its units). A unit blueprint is checked against its own unit's pool only.
 - **A default that is short for one unit** is not an error. The unit card shows a warning («عجز حالي في هذه الوحدة»), computed on the client; the exam start (#81) re-checks.
 - **Difficulty mix** is optional: Easy/Medium/Hard as whole percentages 0–100 that sum to 100. It is a **target**, not part of the save check. The generator (#81) follows it as far as the pool allows.
@@ -71,7 +71,7 @@ Controller `api/exam-blueprints`, policy `Blueprints.Manage` (admin only) on eve
 
 | Method | Route | Name | Body | Response |
 |---|---|---|---|---|
-| GET | `/api/exam-blueprints/subjects/{subjectId}` | `GetSubjectExamBlueprints` | — | 200 `SubjectExamBlueprintsResult`: the default, every unit (by order) with its blueprint or null, and servable counts for every served type (the seven served types: the five v1 types, Essay and MathSteps; zeros included) for the subject and for each unit |
+| GET | `/api/exam-blueprints/subjects/{subjectId}` | `GetSubjectExamBlueprints` | — | 200 `SubjectExamBlueprintsResult`: the default, every unit (by order) with its blueprint or null, and servable counts for every served type (all eight question types: the five v1 types, Essay, MathSteps and DragDrop; zeros included) for the subject and for each unit |
 | PUT | `/api/exam-blueprints/subjects/{subjectId}` | `SaveSubjectExamBlueprint` | `ExamBlueprintInput` | 200 `ExamBlueprintResult` |
 | PUT | `/api/exam-blueprints/units/{unitId}` | `SaveUnitExamBlueprint` | `ExamBlueprintInput` | 200 `ExamBlueprintResult` |
 | DELETE | `/api/exam-blueprints/{examBlueprintId}` | `DeleteExamBlueprint` | — | 200 |

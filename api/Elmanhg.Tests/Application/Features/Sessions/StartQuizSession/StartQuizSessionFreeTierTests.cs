@@ -5,6 +5,7 @@ using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Sessions.Shared;
 using Elmanhg.Application.Sessions.StartQuizSession;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
@@ -50,7 +51,7 @@ public sealed class StartQuizSessionFreeTierTests
         SessionRepositoryStub.StubFind(_sessionRepository);
         SubscriptionRepositoryStub.Stub(_subscriptionRepository);
         StubUsedToday(0);
-        _handler = new StartQuizSessionHandler(_sessionRepository, _lessonRepository, _questionRepository, _subscriptionRepository, Options.Create(new SessionsOptions()), Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), new Random(42), _timeProvider, _currentUserService, Substitute.For<ILocalizer>());
+        _handler = new StartQuizSessionHandler(_sessionRepository, _lessonRepository, _questionRepository, _subscriptionRepository, Options.Create(new SessionsOptions()), Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), new Random(42), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), Substitute.For<IFileStorage>());
     }
 
     private Guid LessonId => _builder.Questions.Lesson.Id;

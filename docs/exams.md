@@ -41,7 +41,7 @@ Example: 10 Mcq with a 30/50/20 mix targets 3 Easy, 5 Medium and 2 Hard. With no
 - `PUT /api/exams/{sessionId}/answers/{questionId}` saves the canonical answer on the item (`SessionItem.SavedAnswer`, jsonb, and `AnswerSavedAt`). It overwrites the previous draft and creates no attempt. A wrong shape for the served type is 422 `QUESTION_ANSWER_INVALID`; any readable shape is kept, including a cleared answer (which grades 0).
 - A save after `Deadline + Exams:DeadlineGraceSeconds` (30 s) returns 400 `EXAM_TIME_EXPIRED`. The grace absorbs the client's last in-flight save at 0:00.
 - A save on a submitted exam returns 400 `SESSION_ALREADY_SUBMITTED`.
-- **Essays (#119)** save like every other answer (`{ "text": "…" }`, autosaved as the student writes). An essay longer than `Content:QuestionEssayAnswerMaxLength` is 422 `QUESTION_ESSAY_ANSWER_TOO_LONG`. The raw JSON cap is `Sessions:EssayAnswerMaxLength` for an essay, `Sessions:MathStepsAnswerMaxLength` for a MathSteps answer and `Sessions:AnswerMaxLength` for every other type (422 `ATTEMPT_ANSWER_TOO_LONG`).
+- **Essays (#119)** save like every other answer (`{ "text": "…" }`, autosaved as the student writes). An essay longer than `Content:QuestionEssayAnswerMaxLength` is 422 `QUESTION_ESSAY_ANSWER_TOO_LONG`. The raw JSON cap is `Sessions:EssayAnswerMaxLength` for an essay, `Sessions:MathStepsAnswerMaxLength` for a MathSteps answer, `Sessions:DragDropAnswerMaxLength` for a drag-and-drop answer and `Sessions:AnswerMaxLength` for every other type (422 `ATTEMPT_ANSWER_TOO_LONG`).
 - **What is revealed.** While open, items carry `savedAnswer` only; `attempt`, `correctAnswer` and `explanation` are null. After submission, every item carries `correctAnswer` and `explanation`, and answered items carry `attempt`.
 - `GET /api/exams/{sessionId}` never mutates; a refresh resumes with the saved answers.
 - The quiz endpoints (`/api/sessions/{id}/answers` and `/finish`) return 404 `SESSION_NOT_FOUND` for an exam id.
@@ -175,7 +175,7 @@ Policy `Assessments.Take` (Students and Admins). Teachers get 403, anonymous cal
 | `Exams:WeakestObjectiveCount` | 3 | Objectives shown in the weakest list (1–20). |
 | `Exams:RequireAllLessonsOpened` | false | When true, a student must have opened every Published lesson of the unit (or of every selected unit) before a new exam starts. |
 
-`Sessions:AnswerMaxLength` caps a saved answer (`Sessions:EssayAnswerMaxLength` for an essay, `Sessions:MathStepsAnswerMaxLength` for MathSteps), as for quizzes.
+`Sessions:AnswerMaxLength` caps a saved answer (`Sessions:EssayAnswerMaxLength` for an essay, `Sessions:MathStepsAnswerMaxLength` for MathSteps, `Sessions:DragDropAnswerMaxLength` for drag-and-drop), as for quizzes.
 
 ## Student screens (web)
 

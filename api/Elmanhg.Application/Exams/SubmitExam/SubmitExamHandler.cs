@@ -5,6 +5,7 @@ using Elmanhg.Application.Exams.Shared;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
@@ -18,7 +19,7 @@ using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.Exams.SubmitExam;
 
-public sealed class SubmitExamHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, IEssayGradeRepository essayGradeRepository, ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IOptions<ExamsOptions> examsOptions, IOptions<MasteryOptions> masteryOptions, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer, IAiMathCheckClient mathCheckClient) : IRequestHandler<SubmitExamCommand, ExamSessionResult>
+public sealed class SubmitExamHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, IEssayGradeRepository essayGradeRepository, ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IOptions<ExamsOptions> examsOptions, IOptions<MasteryOptions> masteryOptions, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer, IAiMathCheckClient mathCheckClient, IFileStorage fileStorage) : IRequestHandler<SubmitExamCommand, ExamSessionResult>
 {
     public async Task<ExamSessionResult> Handle(SubmitExamCommand request, CancellationToken cancellationToken)
     {
@@ -41,6 +42,6 @@ public sealed class SubmitExamHandler(ISessionRepository sessionRepository, IQue
 
         await sessionRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return await ExamSessionResultLoader.LoadAsync(session, revisions, questionRepository, lessonRepository, unitRepository, subjectRepository, threshold, examsOptions.Value.WeakestObjectiveCount, now, localizer, cancellationToken).ConfigureAwait(false);
+        return await ExamSessionResultLoader.LoadAsync(session, revisions, questionRepository, lessonRepository, unitRepository, subjectRepository, threshold, examsOptions.Value.WeakestObjectiveCount, now, localizer, fileStorage, cancellationToken).ConfigureAwait(false);
     }
 }

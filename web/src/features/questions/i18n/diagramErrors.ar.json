@@ -1,6 +1,5 @@
 {
   "errors": {
-    "QUESTION_TYPE_NOT_GRADABLE": "لا يصحح المصحح التجريبي هذا النوع من الاسئلة بعد.",
     "QUESTION_DIAGRAM_IMAGE_TYPE_INVALID": "استخدم صورة PNG او JPEG او WebP.",
     "QUESTION_DIAGRAM_IMAGE_INVALID": "ارفع صورة الرسم مرة اخرى: الصورة غير موجودة او غير صالحة.",
     "QUESTION_DIAGRAM_IMAGE_ALT_REQUIRED": "اكتب وصفا لصورة الرسم.",

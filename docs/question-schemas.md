@@ -13,7 +13,7 @@ The wire names are the `QuestionType` enum values. v1 grading follows PRD §6.
 - `Short`: a number or a string. Numeric within a tolerance (absolute or percent); text against an accepted list with normalisation.
 - `Essay` (v2): plain-text answer (student input is #119), graded by the AI grader against the rubric and model answers ([essay-grading.md](essay-grading.md)); a blank answer is graded at once as Unanswered.
 - `MathSteps` (v2): steps plus a final answer. The final answer is checked by the CAS (#122, [math-cas.md](math-cas.md)); the steps are stored for step grading (#123).
-- `DragDrop` (v2): a diagram with drop zones and draggable items (#125); the student canvas and per-item grader are #126. Not servable until #126.
+- `DragDrop` (v2): a diagram with drop zones and draggable items (#125), answered on the student canvas and graded per item (#126).
 
 ## Body vs grading spec
 
@@ -122,6 +122,7 @@ Canonical JSON, exactly as stored. Keys are camelCase; enum values are camelCase
 - `width` and `height` are the image's pixel size, 1 to `Content:QuestionDiagramImageDimensionMax`. The editor reads them in the browser; they only reserve the aspect ratio.
 - `alt` is required plain text, trimmed, at most `Content:QuestionDiagramImageAltMaxLength`.
 - **Zones** are rectangles in percent of the image: `x` from the image's left edge and `y` from its top. They are physical and never mirrored in right-to-left layouts (it is a picture). Every value is 0 to 100 with at most two decimals; `width` and `height` are at least `Content:QuestionDiagramZoneMinSizePercent`; the zone lies inside the image. Zones may touch but must not overlap. Values are compared in whole hundredths, so float sums never cross a bound.
+- **Dropping on the student canvas** (client only; the server receives zone ids): the drop point becomes an unrounded percent of the canvas, and it lands in the zone with `x ≤ px < x + width` and `y ≤ py < y + height`, compared in hundredths (half-open, so two touching zones never share a point: a point on a shared edge belongs to the zone that starts there). An edge on the image border (`x + width = 100` or `y + height = 100`) is closed. A point in no zone drops nothing.
 - `capacity` (1 to `Content:QuestionDiagramZoneCapacityMax`) is how many items the zone holds. The student sees it; it reveals nothing about which items go there.
 - **Items** are plain text, trimmed, at most `Content:QuestionDiagramItemTextMaxLength`. Body order is the bank order.
 - **Key**: the spec lists every body zone exactly once, in body order. An empty `itemIds` means the zone must stay empty. An item placed in no zone is a distractor: its correct place is the bank. At least one item is placed. `ordered: true` means the zone's items must be in the listed order and needs at least two items. Unordered `itemIds` are stored in body item order; ordered ones keep the author's order.
@@ -249,8 +250,8 @@ A non-integer `maxWords`, criterion `points` or level `points` does not read as 
 
 ## Servable
 
-- Servable = Approved ∧ lesson Published ∧ not retired ∧ not drag-and-drop (until the student canvas, #126) (PRD §5.3, §17 rule 1). It is derived on every read and never stored.
-- `ServableQuestionSpecification.ServedTypes` lists every type except `DragDrop` (the five v1 types `Mcq`, `Multi`, `TrueFalse`, `Fill`, `Short`, plus `Essay`, #119, and `MathSteps`, #122) for per-type listings such as blueprint servable counts.
+- Servable = Approved ∧ lesson Published ∧ not retired (PRD §5.3, §17 rule 1). It is derived on every read and never stored.
+- `ServableQuestionSpecification.ServedTypes` lists every type (the five v1 types `Mcq`, `Multi`, `TrueFalse`, `Fill`, `Short`, plus `Essay`, #119, `MathSteps`, #122, and `DragDrop`, #126) for per-type listings such as blueprint servable counts.
 - `ServableQuestionSpecification` (`Elmanhg.Domain/Questions`) is the only definition. `WhereServable(questions, lessons)` composes the rule into SQL; `IsSatisfiedBy(question, lesson)` runs compiled copies of the same expressions in memory.
 - Every serving query (quizzes, exams, blueprints, anything a student is shown) must filter through `WhereServable`. Admin reads never filter by it: `GET /api/questions` lists every status and annotates each item with `isServable`, and `GET /api/lessons` returns `servableQuestionCount` next to `questionCount`.
 - `GET /api/questions/servable-count` is anonymous and returns `{"count": n}`, the platform-wide total shown on the landing page. It is cached in `IMemoryCache` under `questions:servable-count`.
@@ -304,11 +305,15 @@ A student's answer (and the `answer` of `POST /api/questions/grade-draft`) is a 
 {"steps":["2x = 4"],"finalAnswer":"x = 2"}
 ```
 
-**DragDrop**: defined with the student canvas (#126).
+**DragDrop** (`placements` optional; each placement has a string `zoneId` and optional `itemIds` of strings, in the order they sit in the zone; an item in no placement is in the bank). A null placement, a missing or non-string `zoneId`, or a null item id gets `422 QUESTION_ANSWER_INVALID`. Canonicalising drops placements with no items, drops unknown properties and keeps the order. The raw answer is at most `Sessions:DragDropAnswerMaxLength` characters (4000), with at most `Sessions:DragDropPlacementsMaxCount` placements (20) and `Sessions:DragDropPlacedItemsMaxCount` item ids across all placements (30), else `422 ATTEMPT_ANSWER_TOO_LONG` (quiz answer, exam save and `grade-draft`).
+
+```json
+{"placements":[{"zoneId":"z1","itemIds":["i2","i1"]},{"zoneId":"z2","itemIds":["i4","i3"]}]}
+```
 
 ## Grading
 
-The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of the stored grading spec, the max score and the answer. `POST /api/questions/grade-draft` (admin, `Content.Manage`) validates an unsaved draft with the same rules as create and update, canonicalises it, and grades the `answer` with the same graders; it saves nothing and is not audited. Attempts reuse the same graders.
+The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of the stored grading spec, the max score and the answer. `POST /api/questions/grade-draft` (admin, `Content.Manage`) validates an unsaved draft with the same rules as create and update, canonicalises it, and grades the `answer` with the same graders; the answer's raw JSON is capped per type exactly as on the quiz answer (`Sessions:AnswerMaxLength`, or `EssayAnswerMaxLength`, `MathStepsAnswerMaxLength` or `DragDropAnswerMaxLength` for those types; [sessions.md](sessions.md)), else `422 ATTEMPT_ANSWER_TOO_LONG`. It saves nothing and is not audited. Attempts reuse the same graders.
 
 - **Mcq, TrueFalse**: exact match (1 or 0). A missing `optionId` or `value` is unanswered and scores 0.
 - **Multi**: the rule uses three counts:
@@ -322,17 +327,24 @@ The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of
 - **Short text**: the normalised answer must equal one of the normalised accepted answers.
 - **Essay**: the AI grader awards points per rubric criterion ([essay-grading.md](essay-grading.md)); `QuestionGrader.GradeEssay` turns them into `Σ awarded ÷ Σ criterion points`, scaled by the max score like every other type. The model's own total is never used. `grade-draft` grades essays synchronously through the AI grader (`503 ESSAY_GRADING_UNAVAILABLE` when it fails) and adds an `essay` detail (criteria, justification, confidence, model, prompt version, cost); a blank essay scores 0 (Unanswered) without calling the grader.
 - **MathSteps**: only the final answer is graded until step grading (#123), through `AnswerGrader` and the AI service's CAS check ([math-cas.md](math-cas.md)); every other type grades locally without the AI service. `equivalent` scores 1, every other verdict 0. A blank final answer is Unanswered (0) without calling the AI service, even with steps. `QuestionGrader.Grade` does not grade MathSteps; `QuestionGrader.GradeMathSteps(maxScore, verdict)` scales the verdict like every other type. When the AI service cannot be reached the verdict is `unchecked`: the answer is still recorded with a provisional 0, left out of mastery, and waits for teacher review (#128); nothing is lost and no submit fails.
-- **DragDrop** is graded per item by #126; until then `grade-draft` returns `422 QUESTION_TYPE_NOT_GRADABLE`.
+- **DragDrop**: graded per item (`DragDropGrader`). The credit units are the keyed items `K` (the items the key places in a zone).
+  - The answer is read tolerantly: a placement whose zone is not in the key is ignored; a repeated zone uses its first entry; an item id repeated across placements counts only where it first appears; a null id is skipped.
+  - `right`: keyed items that sit in their key zone and, when that zone is `ordered`, at their key position (the index in the zone's resolved list). An unordered zone accepts any order.
+  - `wrong`: placed ids the key places nowhere (distractors or unknown ids). A keyed item in the wrong zone or position is simply not right; it costs nothing more.
+  - The score is 1 when `right = K` and `wrong = 0`, else `max(0, (right − wrong) / K)`. An answer that places no item in a known zone is unanswered and scores 0.
+  - Capacity is not checked by the grader (the canvas enforces it); an over-full zone cannot earn more, because each keyed item counts once.
+  - Example: key z1 {i1, i2} unordered, z2 [i4, i3] ordered; the answer z1 [i2, i1], z2 [i3, i4] has `right` 2 (both z1 items), `wrong` 0, and scores 2/4.
 - An answer that normalises to empty never matches.
 - **Normalisation** (PRD §6.2): the student answer and every accepted answer go through the same steps. Always, in this order: drop unpaired UTF-16 surrogates and the noncharacter U+FFFE (both make NFC fail), and invisible marks (U+061C, U+200B–U+200F, U+202A–U+202E, U+2060, U+2066–U+2069, U+FEFF), so none of them can split a letter from its mark; Unicode NFC (so a decomposed hamza or madda, such as ا + U+0654, becomes أ); map ، (U+060C) to `,` and ی (U+06CC) to ي (U+064A). Then the question's `normalization` rules (see **Fill** and **Short** above), each applied only when on. Finally the answer is always trimmed. With `collapseWhitespace` off, inner whitespace is kept verbatim (tabs and runs included); the ends are still trimmed. Hamza seats (ئ ؤ ء) are never unified.
 - **Numeric parsing**: numeric answers ignore the question's `normalization` rules and use a fixed profile: every rule on except the three letter rules. After normalisation, `٬` (U+066C, the Arabic thousands separator) is removed, then `٫` (U+066B) and `,` become `.`, and `−` (U+2212) becomes `-`; the rest must be a plain decimal number: an optional leading sign, digits and one decimal point (invariant culture). Exponents such as `9.8e0`, inner whitespace, thousands separators other than `٬`, and anything else (such as a trailing unit) do not parse and score 0. `,` always means a decimal point, so `1,000` reads as 1.
 - **Result**: the normalised score is in [0, 1]. The outcome is `Correct` (≥ 1), `Partial` (> 0) or `Incorrect`. `score = round(normalised × maxScore, 2)` and `normalisedScore = round(normalised, 4)`, both rounding half away from zero.
 - **Feedback**: every grade carries an optional feedback line, returned as `feedback`. It is localised to the request language (`Accept-Language`, Arabic by default) and is `null` when there is nothing to add.
-  - An unanswered answer returns «لم تتم الإجابة عن السؤال.» / "No answer was given." This rule is checked first; the rules below apply only to an answer that is not unanswered. An answer is unanswered when: Mcq `optionId` or TrueFalse `value` is missing; Multi has no non-null id; every Fill blank is missing or normalises to empty; a text Short answer normalises to empty; a numeric Short answer normalises to empty under the numeric profile.
+  - An unanswered answer returns «لم تتم الإجابة عن السؤال.» / "No answer was given." This rule is checked first; the rules below apply only to an answer that is not unanswered. An answer is unanswered when: Mcq `optionId` or TrueFalse `value` is missing; Multi has no non-null id; every Fill blank is missing or normalises to empty; a text Short answer normalises to empty; a numeric Short answer normalises to empty under the numeric profile; a DragDrop answer places no item in a known zone.
   - A Multi answer that is not exactly the correct set returns «الاختيارات الصحيحة: {right} من {total}، والخاطئة: {wrong}.» / "Correct choices: {right} of {total}; wrong choices: {wrong}." This applies in both partial-credit modes.
   - A Fill answer with two or more blanks that is not fully correct returns «الفراغات الصحيحة: {right} من {total}.» / "Correct blanks: {right} of {total}." A single-blank Fill returns `null`.
   - A numeric Short answer that does not parse as a number returns «اكتب الإجابة رقمًا فقط، بدون وحدات.» / "Write the answer as a plain number, without units." A number outside the tolerance returns `null`: a direction hint would reveal part of the answer.
   - A MathSteps final answer returns one of four lines: «صُحّحت الإجابة النهائية فقط، وتُصحَّح الخطوات لاحقًا.» / "Only the final answer was graded; the steps are graded later." (equivalent or not equivalent); «اكتب الإجابة النهائية بالصورة التي يطلبها السؤال.» / "Write the final answer in the form the question asks for." (wrong form; it tells the student to change the form without revealing the answer); «تعذّرت قراءة الإجابة النهائية. اكتبها بالرموز الرياضية، مثل x = 2.» / "The final answer could not be read. …" (unreadable); «تعذّر التحقق من الإجابة النهائية آليًا، وسيراجعها معلمك.» / "The final answer could not be checked automatically. Your teacher will review it." (unchecked).
+  - A DragDrop answer that is not fully correct returns «العناصر في أماكنها الصحيحة: {right} من {total}، والعناصر المشتِّتة الموضوعة: {wrong}.» / "Items in the right place: {right} of {total}; distractors placed: {wrong}." It never says which items are wrong.
   - Every other case returns `null`.
 
   The feedback never contains the verdict, the correct answer or the explanation.

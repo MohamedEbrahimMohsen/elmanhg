@@ -4,7 +4,9 @@ import {
   emptyAnswer,
   essayBodySchema,
   fillBodySchema,
+  fromPlacementsPayload,
   shortBodySchema,
+  studentDiagramBodySchema,
   type QuestionAnswer,
   type StudentQuestion,
 } from '@/features/questions';
@@ -12,7 +14,16 @@ import type { SessionItemResult } from '@/shared/api/generated/model';
 
 export type QuizItemContent = Omit<SessionItemResult, 'pendingAnswer'>;
 
-export const quizQuestionTypes = ['Mcq', 'Multi', 'TrueFalse', 'Fill', 'Short', 'Essay', 'MathSteps'] as const;
+export const quizQuestionTypes = [
+  'Mcq',
+  'Multi',
+  'TrueFalse',
+  'Fill',
+  'Short',
+  'Essay',
+  'MathSteps',
+  'DragDrop',
+] as const;
 
 const answerPayloadSchema = z.object({
   optionId: z.string().nullish(),
@@ -22,6 +33,7 @@ const answerPayloadSchema = z.object({
   text: z.string().nullish(),
   steps: z.array(z.string()).optional(),
   finalAnswer: z.string().nullish(),
+  placements: z.array(z.object({ zoneId: z.string(), itemIds: z.array(z.string()) })).optional(),
 });
 
 export function toQuizQuestion(item: QuizItemContent): StudentQuestion {
@@ -34,6 +46,7 @@ export function toQuizQuestion(item: QuizItemContent): StudentQuestion {
     blankIds: type === 'Fill' ? fillBodySchema.parse(item.body).blanks.map((blank) => blank.id) : [],
     answerKind: type === 'Short' ? shortBodySchema.parse(item.body).answerKind : null,
     maxWords: type === 'Essay' ? (essayBodySchema.safeParse(item.body).data?.maxWords ?? null) : null,
+    diagram: type === 'DragDrop' ? studentDiagramBodySchema.parse(item.body) : null,
   };
 }
 
@@ -42,7 +55,7 @@ export function fromAnswerPayload(question: StudentQuestion, payload: unknown): 
   if (!parsed.success) {
     return emptyAnswer();
   }
-  const { optionId, optionIds, value, blanks, text, steps, finalAnswer } = parsed.data;
+  const { optionId, optionIds, value, blanks, text, steps, finalAnswer, placements } = parsed.data;
   const answer = emptyAnswer();
   switch (question.type) {
     case 'Mcq':
@@ -60,7 +73,7 @@ export function fromAnswerPayload(question: StudentQuestion, payload: unknown): 
     case 'MathSteps':
       return { ...answer, math: { steps: steps ?? [], finalAnswer: finalAnswer ?? '' } };
     case 'DragDrop':
-      return answer;
+      return { ...answer, placements: fromPlacementsPayload(placements ?? []) };
   }
 }
 
@@ -80,7 +93,7 @@ export function isAnswerEmpty(question: StudentQuestion, answer: QuestionAnswer)
     case 'MathSteps':
       return answer.math.finalAnswer.trim() === '';
     case 'DragDrop':
-      return true;
+      return Object.values(answer.placements).every((ids) => ids.length === 0);
   }
 }
 
@@ -90,5 +103,8 @@ export function questionImageSources(item: QuizItemContent): string[] {
   const sources = htmls.flatMap((html) =>
     Array.from(new DOMParser().parseFromString(html, 'text/html').images, (image) => image.getAttribute('src') ?? ''),
   );
+  if (item.type === 'DragDrop') {
+    sources.push(studentDiagramBodySchema.safeParse(item.body).data?.image.url ?? '');
+  }
   return [...new Set(sources.filter((src) => src !== ''))];
 }

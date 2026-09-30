@@ -129,16 +129,20 @@ public sealed class DragDropQuestionEndpointTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task PostGradeDraft_DragDrop_Returns422QuestionTypeNotGradable()
+    public async Task PostGradeDraft_DragDrop_ReturnsPerItemGrade()
     {
         var (_, lessonId) = await SeedLessonAsync();
         using var admin = await AdminClientAsync();
-        var request = new { type = "DragDrop", stem = "<p>Label the plant cell.</p>", body = Json(DragDropBodyJson), gradingSpec = Json(DragDropSpecJson), difficulty = "Medium", maxScore = 4, lessonId, answer = Json("{}") };
+        var answer = Json("""{"placements":[{"zoneId":"z1","itemIds":["i1","i2"]},{"zoneId":"z2","itemIds":["i4"]}]}""");
+        var request = new { type = "DragDrop", stem = "<p>Label the plant cell.</p>", body = Json(DragDropBodyJson), gradingSpec = Json(DragDropSpecJson), difficulty = "Medium", maxScore = 4, lessonId, answer };
 
         using var response = await admin.PostAsJsonAsync($"{Route}/grade-draft", request, TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
-        (await ReadCodeAsync(response)).Should().Be("QUESTION_TYPE_NOT_GRADABLE");
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken);
+        body.GetProperty("score").GetDecimal().Should().Be(3m);
+        body.GetProperty("outcome").GetString().Should().Be("Partial");
+        body.GetProperty("feedback").GetString().Should().NotBeNullOrEmpty();
     }
 
     private static object DragDropRequest(Guid lessonId, string body, string gradingSpec)
