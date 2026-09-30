@@ -133,6 +133,17 @@ A story that adds an options section holding a secret or a per-host value must a
 | `OtpDelivery__Sms__AuthHeaderName` / `__BodyTemplate` / `__MessageTemplate` | empty / empty / Arabic default | no |
 | `OtpDelivery__Sms__AuthHeaderValue` | empty | **yes** |
 
+### Users and invitations (`api.env`, [docs/user-administration.md](user-administration.md))
+
+| Variable | Default | Secret |
+|---|---|---|
+| `Users__ListMaxPageSize` / `Users__SearchMaxLength` | `100` / `256` | no |
+| `Users__ActiveStatusCacheSeconds` | `30` | no; 0 to 300, how long a suspension can take to reach another API instance; 0 checks the database on every request |
+| `InvitationEmail__AcceptInviteUrl` | empty | no; `https://<SITE_ADDRESS>/accept-invite`, required when `OtpDelivery__Email__Provider=Resend` |
+| `InvitationEmail__Subject` | Arabic default | no |
+
+The invitation email is sent through the same Resend account as the email OTP (`OtpDelivery__Email__ApiKey` and `__FromAddress`). With the fake email provider no invitation email leaves the API, and the admin shares the link shown after the invite.
+
 ### Payments (`api.env`, [docs/paymob.md](paymob.md))
 
 | Variable | Default | Secret |

@@ -192,7 +192,7 @@ Numeric answers ignore the per-question rules and must be a plain decimal (`docs
 
 ### 7.1 Navigation
 
-1. Landing (live servable counter, value props, plans) → sign up (phone + one-time code, or email + password) → choose subjects of interest (skippable; editable later from Home). Students with an email account can also sign in with a one-time code sent to that email; teachers and admins always sign in with email and password.
+1. Landing (live servable counter, value props, plans) → sign up (phone + one-time code, or email + password) → choose subjects of interest (skippable; editable later from Home). Students with an email account can also sign in with a one-time code sent to that email; teachers and admins always sign in with email and password. An invited teacher or admin sets their first password at `/accept-invite` after proving the email with a one-time code.
 2. Home: subjects with per-subject mastery and "next recommended lesson".
 3. Subject → Units (ordered, with mastery %) → Lessons (ordered, with mastery %).
 4. Lesson page tabs: Explanation · Objectives · Summary · Practice.
@@ -366,9 +366,15 @@ Every chart except Content is filterable by date range (Cairo days); Content is 
 
 ### 10.4 User management
 
-- Students: search, view profile and progress, suspend, grant complimentary subscription.
-- Teachers: invite, assign/unassign subjects, deactivate.
-- Admins: invite, deactivate. At least one active admin must always remain.
+- One page, `/admin/users`, with Students, Teachers and Admins tabs. Each tab has server-side search and paging. Search matches the name (any part), the full mobile number or the full email; a partial number or email matches nothing.
+- Contact data is always masked on these screens (`010*****678`, `m***@example.test`).
+- Students: search, view profile, progress and session history, suspend and reactivate, grant a complimentary subscription.
+- Teachers: invite, assign/unassign subjects, deactivate and reactivate.
+- Admins: invite, deactivate and reactivate. At least one active admin must always remain, and an admin can never deactivate their own account.
+- Suspending or deactivating signs the user out everywhere: sign-in and token refresh stop at once, and an access token already issued is refused on its next request.
+- Invitations: the invite creates the account without a password and emails the `/accept-invite` link when email delivery is configured; the admin can also copy the link. The link carries no email or secret. The invitee proves the email with a one-time code and chooses a password. An invitation does not expire; an admin can deactivate a pending invitee.
+- Complimentary grant: Base (any period sold) or Ask a Teacher (monthly, and only with an active Base), free of charge, starting now. A plan the student already holds cannot be granted. The grant is audited and shows as «مجاني» in the student's subscriptions.
+- Rules, endpoints and error codes: `docs/user-administration.md`.
 
 ### 10.5 Assistant conversations
 
@@ -391,7 +397,7 @@ Prices, billing periods and quotas are configuration (`Subscriptions` section, s
 ### 11.2 Paymob integration
 
 - Card and mobile wallet via Paymob checkout. Checkout creates a pending payment and redirects to Paymob's unified checkout; the return page only reads the payment status and never activates a plan. A plan already held cannot be bought again until its renewal window opens, and Ask a Teacher needs an active Base. Configuration and go-live: `docs/paymob.md`.
-- Subscription state is driven **only by Paymob-verified events**: HMAC-verified webhooks, or Paymob's response to an admin refund. The client never sets entitlement.
+- Subscription state is driven **only by Paymob-verified events**: HMAC-verified webhooks, or Paymob's response to an admin refund; or by an admin's complimentary grant (§10.4). The client never sets entitlement.
 - States: Active · PastDue · Cancelled · Expired (Trialing is not used in v1). Access is derived from state and dates, never stored: Active and PastDue grant access until the end of the paid period plus the grace period; Cancelled grants access until the end of the paid period; Expired grants none. Ask a Teacher grants access only while Base does.
 - Grace period on failed renewal: 3 days, then downgrade to Free.
 - v1 has no automatic charge: the student renews by paying again from 7 days before the period end (configurable), and the new period continues from the old end.
@@ -552,7 +558,7 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 9. Exam retakes unlimited; best score displayed; all kept.
 10. Avatar never reveals answers during an in-progress exam.
 11. Ask a Teacher: 24h SLA from submission (a follow-up opens a new 24h window); one follow-up per thread; voice always transcribed; training record is text only.
-12. Subscription entitlement changes only through Paymob-verified events: HMAC-verified webhooks, or Paymob's response to an admin refund. The client never sets entitlement.
+12. Subscription entitlement changes only through Paymob-verified events: HMAC-verified webhooks, or Paymob's response to an admin refund; or through an admin's complimentary grant (§10.4). The client never sets entitlement.
 13. Every content change and validation decision is audit-logged.
 
 ---

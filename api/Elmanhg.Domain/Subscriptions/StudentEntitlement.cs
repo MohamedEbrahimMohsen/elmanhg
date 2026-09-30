@@ -37,6 +37,19 @@ public sealed record StudentEntitlement(Subscription? BaseSubscription, Subscrip
         }
     }
 
+    public void EnsureCanGrant(SubscriptionPlan plan)
+    {
+        if (plan == SubscriptionPlan.AskTeacher && BaseSubscription is null)
+        {
+            throw new BusinessRuleViolationCoreException(ErrorCodes.ComplimentaryRequiresBase);
+        }
+
+        if (Held(plan) is not null)
+        {
+            throw new BusinessRuleViolationCoreException(ErrorCodes.ComplimentaryPlanAlreadyActive);
+        }
+    }
+
     private static Subscription? Latest(List<Subscription> entitled, SubscriptionPlan plan, TimeSpan gracePeriod)
     {
         return entitled

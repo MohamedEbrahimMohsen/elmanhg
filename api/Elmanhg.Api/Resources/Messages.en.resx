@@ -420,6 +420,26 @@
   <data name="TRAINING_EXPORT_NOT_PENDING" xml:space="preserve"><value>The export is no longer being prepared.</value></data>
   <data name="TRAINING_EXPORT_NOT_READY" xml:space="preserve"><value>The export is not ready yet.</value></data>
   <data name="TRAINING_EXPORT_EXPIRED" xml:space="preserve"><value>The export file has expired and was deleted. Request a new export.</value></data>
+  <data name="USER_LIST_PAGE_NUMBER_INVALID" xml:space="preserve"><value>Page number must be 1 or more.</value></data>
+  <data name="USER_LIST_PAGE_SIZE_INVALID" xml:space="preserve"><value>Page size is out of range.</value></data>
+  <data name="USER_LIST_ROLE_INVALID" xml:space="preserve"><value>Unknown user type.</value></data>
+  <data name="USER_LIST_STATUS_INVALID" xml:space="preserve"><value>Unknown account status.</value></data>
+  <data name="USER_LIST_SEARCH_TOO_LONG" xml:space="preserve"><value>Search text is too long.</value></data>
+  <data name="USER_ID_REQUIRED" xml:space="preserve"><value>User id is required.</value></data>
+  <data name="USER_INVITE_ROLE_INVALID" xml:space="preserve"><value>Only teachers and admins can be invited.</value></data>
+  <data name="USER_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>This account was changed by someone else. Reload and try again.</value></data>
+  <data name="STUDENT_ID_REQUIRED" xml:space="preserve"><value>Student id is required.</value></data>
+  <data name="STUDENT_NOT_FOUND" xml:space="preserve"><value>Student not found.</value></data>
+  <data name="COMPLIMENTARY_PLAN_INVALID" xml:space="preserve"><value>Choose a valid plan.</value></data>
+  <data name="COMPLIMENTARY_PERIOD_INVALID" xml:space="preserve"><value>Choose a valid period.</value></data>
+  <data name="COMPLIMENTARY_PERIOD_UNAVAILABLE" xml:space="preserve"><value>This plan is not offered for that period.</value></data>
+  <data name="INVITATION_NOT_FOUND" xml:space="preserve"><value>There is no pending invitation for this email.</value></data>
+  <data name="PASSWORD_REJECTED" xml:space="preserve"><value>This password was not accepted. Choose another one.</value></data>
+  <data name="USER_CANNOT_SUSPEND_SELF" xml:space="preserve"><value>You cannot deactivate your own account.</value></data>
+  <data name="LAST_ACTIVE_ADMIN" xml:space="preserve"><value>At least one active admin must remain.</value></data>
+  <data name="USER_NOT_SUSPENDED" xml:space="preserve"><value>This account is already active.</value></data>
+  <data name="COMPLIMENTARY_REQUIRES_BASE" xml:space="preserve"><value>Ask a Teacher needs an active Base plan first.</value></data>
+  <data name="COMPLIMENTARY_PLAN_ALREADY_ACTIVE" xml:space="preserve"><value>The student already has this plan.</value></data>
   <data name="QUESTION_MATH_ANSWERS_INVALID" xml:space="preserve"><value>Add one or more accepted final answers, none empty or too long, up to the allowed maximum.</value></data>
   <data name="QUESTION_MATH_FORM_INVALID" xml:space="preserve"><value>Choose a valid required form.</value></data>
   <data name="QUESTION_MATH_TOLERANCE_INVALID" xml:space="preserve"><value>Enter a tolerance of zero or more together with absolute or percent, or leave both empty.</value></data>

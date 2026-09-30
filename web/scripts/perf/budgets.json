@@ -29,6 +29,15 @@
         "src/routes/admin/index.tsx?tsr-split=component"
       ],
       "maxKb": 230
+    },
+    {
+      "name": "admin-users",
+      "entries": [
+        "index.html",
+        "src/routes/admin/route.tsx?tsr-split=component",
+        "src/routes/admin/users.tsx?tsr-split=component"
+      ],
+      "maxKb": 270
     }
   ]
 }

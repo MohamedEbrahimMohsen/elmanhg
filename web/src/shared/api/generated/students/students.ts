@@ -28,6 +28,12 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AdminSubscriptionResult,
+  GetStudentSessionHistoryParams,
+  GrantComplimentarySubscriptionRequest,
+  PageDataOfSessionHistoryItemResult,
+  StudentProfileResult,
+  StudentProgressResult,
   SubjectInterestsRequest,
   SubjectInterestsResult
 } from '../model';
@@ -280,4 +286,544 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getSaveSubjectInterestsMutationOptions(options), queryClient);
+    }
+    export const getGetStudentProfileUrl = (studentId: string,) => {
+
+
+
+
+  return `/api/students/${studentId}`
+}
+
+export const getStudentProfile = async (studentId: string, options?: Parameters<typeof http>[1]): Promise<StudentProfileResult> => {
+
+  return http<StudentProfileResult>(getGetStudentProfileUrl(studentId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStudentProfileQueryKey = (studentId: string,) => {
+    return [
+    `/api/students/${studentId}`
+    ] as const;
+    }
+
+
+export const getGetStudentProfileQueryOptions = <TData = Awaited<ReturnType<typeof getStudentProfile>>, TError = unknown>(studentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentProfile>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentProfileQueryKey(studentId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentProfile>>> = ({ signal }) => getStudentProfile(studentId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: studentId !== null && studentId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudentProfile>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetStudentProfileQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentProfile>>>
+export type GetStudentProfileQueryError = unknown
+
+
+export function useGetStudentProfile<TData = Awaited<ReturnType<typeof getStudentProfile>>, TError = unknown>(
+ studentId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentProfile>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStudentProfile>>,
+          TError,
+          Awaited<ReturnType<typeof getStudentProfile>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStudentProfile<TData = Awaited<ReturnType<typeof getStudentProfile>>, TError = unknown>(
+ studentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentProfile>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStudentProfile>>,
+          TError,
+          Awaited<ReturnType<typeof getStudentProfile>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStudentProfile<TData = Awaited<ReturnType<typeof getStudentProfile>>, TError = unknown>(
+ studentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentProfile>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetStudentProfile<TData = Awaited<ReturnType<typeof getStudentProfile>>, TError = unknown>(
+ studentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentProfile>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetStudentProfileQueryOptions(studentId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetStudentProfileSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getStudentProfile>>, TError = unknown>(studentId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getStudentProfile>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentProfileQueryKey(studentId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentProfile>>> = ({ signal }) => getStudentProfile(studentId, { signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getStudentProfile>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetStudentProfileSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentProfile>>>
+export type GetStudentProfileSuspenseQueryError = unknown
+
+
+export function useGetStudentProfileSuspense<TData = Awaited<ReturnType<typeof getStudentProfile>>, TError = unknown>(
+ studentId: string, options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getStudentProfile>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStudentProfileSuspense<TData = Awaited<ReturnType<typeof getStudentProfile>>, TError = unknown>(
+ studentId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getStudentProfile>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStudentProfileSuspense<TData = Awaited<ReturnType<typeof getStudentProfile>>, TError = unknown>(
+ studentId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getStudentProfile>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetStudentProfileSuspense<TData = Awaited<ReturnType<typeof getStudentProfile>>, TError = unknown>(
+ studentId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getStudentProfile>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetStudentProfileSuspenseQueryOptions(studentId,options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetStudentProgressUrl = (studentId: string,) => {
+
+
+
+
+  return `/api/students/${studentId}/progress`
+}
+
+export const getStudentProgress = async (studentId: string, options?: Parameters<typeof http>[1]): Promise<StudentProgressResult> => {
+
+  return http<StudentProgressResult>(getGetStudentProgressUrl(studentId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStudentProgressQueryKey = (studentId: string,) => {
+    return [
+    `/api/students/${studentId}/progress`
+    ] as const;
+    }
+
+
+export const getGetStudentProgressQueryOptions = <TData = Awaited<ReturnType<typeof getStudentProgress>>, TError = unknown>(studentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentProgress>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentProgressQueryKey(studentId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentProgress>>> = ({ signal }) => getStudentProgress(studentId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: studentId !== null && studentId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudentProgress>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetStudentProgressQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentProgress>>>
+export type GetStudentProgressQueryError = unknown
+
+
+export function useGetStudentProgress<TData = Awaited<ReturnType<typeof getStudentProgress>>, TError = unknown>(
+ studentId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentProgress>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStudentProgress>>,
+          TError,
+          Awaited<ReturnType<typeof getStudentProgress>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStudentProgress<TData = Awaited<ReturnType<typeof getStudentProgress>>, TError = unknown>(
+ studentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentProgress>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStudentProgress>>,
+          TError,
+          Awaited<ReturnType<typeof getStudentProgress>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStudentProgress<TData = Awaited<ReturnType<typeof getStudentProgress>>, TError = unknown>(
+ studentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentProgress>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetStudentProgress<TData = Awaited<ReturnType<typeof getStudentProgress>>, TError = unknown>(
+ studentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentProgress>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetStudentProgressQueryOptions(studentId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetStudentProgressSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getStudentProgress>>, TError = unknown>(studentId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getStudentProgress>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentProgressQueryKey(studentId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentProgress>>> = ({ signal }) => getStudentProgress(studentId, { signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getStudentProgress>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetStudentProgressSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentProgress>>>
+export type GetStudentProgressSuspenseQueryError = unknown
+
+
+export function useGetStudentProgressSuspense<TData = Awaited<ReturnType<typeof getStudentProgress>>, TError = unknown>(
+ studentId: string, options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getStudentProgress>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStudentProgressSuspense<TData = Awaited<ReturnType<typeof getStudentProgress>>, TError = unknown>(
+ studentId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getStudentProgress>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStudentProgressSuspense<TData = Awaited<ReturnType<typeof getStudentProgress>>, TError = unknown>(
+ studentId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getStudentProgress>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetStudentProgressSuspense<TData = Awaited<ReturnType<typeof getStudentProgress>>, TError = unknown>(
+ studentId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getStudentProgress>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetStudentProgressSuspenseQueryOptions(studentId,options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetStudentSessionHistoryUrl = (studentId: string,
+    params?: GetStudentSessionHistoryParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/students/${studentId}/sessions?${stringifiedParams}` : `/api/students/${studentId}/sessions`
+}
+
+export const getStudentSessionHistory = async (studentId: string,
+    params?: GetStudentSessionHistoryParams, options?: Parameters<typeof http>[1]): Promise<PageDataOfSessionHistoryItemResult> => {
+
+  return http<PageDataOfSessionHistoryItemResult>(getGetStudentSessionHistoryUrl(studentId,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStudentSessionHistoryQueryKey = (studentId: string,
+    params?: GetStudentSessionHistoryParams,) => {
+    return [
+    `/api/students/${studentId}/sessions`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetStudentSessionHistoryQueryOptions = <TData = Awaited<ReturnType<typeof getStudentSessionHistory>>, TError = unknown>(studentId: string,
+    params?: GetStudentSessionHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentSessionHistory>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentSessionHistoryQueryKey(studentId,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentSessionHistory>>> = ({ signal }) => getStudentSessionHistory(studentId,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: studentId !== null && studentId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudentSessionHistory>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetStudentSessionHistoryQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentSessionHistory>>>
+export type GetStudentSessionHistoryQueryError = unknown
+
+
+export function useGetStudentSessionHistory<TData = Awaited<ReturnType<typeof getStudentSessionHistory>>, TError = unknown>(
+ studentId: string,
+    params: undefined |  GetStudentSessionHistoryParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentSessionHistory>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStudentSessionHistory>>,
+          TError,
+          Awaited<ReturnType<typeof getStudentSessionHistory>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStudentSessionHistory<TData = Awaited<ReturnType<typeof getStudentSessionHistory>>, TError = unknown>(
+ studentId: string,
+    params?: GetStudentSessionHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentSessionHistory>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStudentSessionHistory>>,
+          TError,
+          Awaited<ReturnType<typeof getStudentSessionHistory>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStudentSessionHistory<TData = Awaited<ReturnType<typeof getStudentSessionHistory>>, TError = unknown>(
+ studentId: string,
+    params?: GetStudentSessionHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentSessionHistory>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetStudentSessionHistory<TData = Awaited<ReturnType<typeof getStudentSessionHistory>>, TError = unknown>(
+ studentId: string,
+    params?: GetStudentSessionHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStudentSessionHistory>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetStudentSessionHistoryQueryOptions(studentId,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetStudentSessionHistorySuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getStudentSessionHistory>>, TError = unknown>(studentId: string,
+    params?: GetStudentSessionHistoryParams, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getStudentSessionHistory>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentSessionHistoryQueryKey(studentId,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentSessionHistory>>> = ({ signal }) => getStudentSessionHistory(studentId,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getStudentSessionHistory>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetStudentSessionHistorySuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentSessionHistory>>>
+export type GetStudentSessionHistorySuspenseQueryError = unknown
+
+
+export function useGetStudentSessionHistorySuspense<TData = Awaited<ReturnType<typeof getStudentSessionHistory>>, TError = unknown>(
+ studentId: string,
+    params: undefined |  GetStudentSessionHistoryParams, options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getStudentSessionHistory>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStudentSessionHistorySuspense<TData = Awaited<ReturnType<typeof getStudentSessionHistory>>, TError = unknown>(
+ studentId: string,
+    params?: GetStudentSessionHistoryParams, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getStudentSessionHistory>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStudentSessionHistorySuspense<TData = Awaited<ReturnType<typeof getStudentSessionHistory>>, TError = unknown>(
+ studentId: string,
+    params?: GetStudentSessionHistoryParams, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getStudentSessionHistory>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetStudentSessionHistorySuspense<TData = Awaited<ReturnType<typeof getStudentSessionHistory>>, TError = unknown>(
+ studentId: string,
+    params?: GetStudentSessionHistoryParams, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getStudentSessionHistory>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetStudentSessionHistorySuspenseQueryOptions(studentId,params,options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGrantComplimentarySubscriptionUrl = (studentId: string,) => {
+
+
+
+
+  return `/api/students/${studentId}/complimentary-subscriptions`
+}
+
+export const grantComplimentarySubscription = async (studentId: string,
+    grantComplimentarySubscriptionRequest: GrantComplimentarySubscriptionRequest, options?: Parameters<typeof http>[1]): Promise<AdminSubscriptionResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return http<AdminSubscriptionResult>(getGrantComplimentarySubscriptionUrl(studentId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(grantComplimentarySubscriptionRequest)
+  }
+);}
+
+
+
+
+
+export const getGrantComplimentarySubscriptionMutationKey = () => ['grantComplimentarySubscription'] as const;
+
+export const getGrantComplimentarySubscriptionMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof grantComplimentarySubscription>>, TError,GrantComplimentarySubscriptionMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof grantComplimentarySubscription>>, TError,GrantComplimentarySubscriptionMutationVariables, TContext> => {
+
+const mutationKey = getGrantComplimentarySubscriptionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof grantComplimentarySubscription>>, GrantComplimentarySubscriptionMutationVariables> = (props) => {
+          const {studentId,data} = props ?? {};
+
+          return  grantComplimentarySubscription(studentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GrantComplimentarySubscriptionMutationResult = NonNullable<Awaited<ReturnType<typeof grantComplimentarySubscription>>>
+    export type GrantComplimentarySubscriptionMutationBody = GrantComplimentarySubscriptionRequest
+    export type GrantComplimentarySubscriptionMutationError = unknown
+    export type GrantComplimentarySubscriptionMutationVariables = {studentId: string;data: GrantComplimentarySubscriptionRequest}
+
+    export const useGrantComplimentarySubscription = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof grantComplimentarySubscription>>, TError,GrantComplimentarySubscriptionMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof grantComplimentarySubscription>>,
+        TError,
+        GrantComplimentarySubscriptionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getGrantComplimentarySubscriptionMutationOptions(options), queryClient);
     }

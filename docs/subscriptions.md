@@ -189,9 +189,23 @@ Every gate loads entitlement through `StudentEntitlementLoader.LoadAsync` before
 | GET | `/api/payments?status&plan&needsReview&studentId&reference&from&to&pageNumber&pageSize` | `Payments.Manage` (Admin) | `PageData<AdminPaymentResult>`; `422 PAYMENT_LOG_*` |
 | POST | `/api/payments/{paymentId}/refund` + header `Idempotency-Key` | `Payments.Manage` (Admin) | `AdminPaymentResult`; `400 PAYMENT_ALREADY_REFUNDED` / `PAYMENT_NOT_REFUNDABLE` / `PAYMENT_REFUND_DECLINED`; `404 PAYMENT_NOT_FOUND`; `409` concurrency; `422` validation; `503 PAYMENT_GATEWAY_UNAVAILABLE` |
 | POST | `/api/payments/{paymentId}/review-resolution` | `Payments.Manage` (Admin) | `AdminPaymentResult`; `400 PAYMENT_REVIEW_NOT_OPEN`; `404 PAYMENT_NOT_FOUND`; `409` concurrency |
+| POST | `/api/students/{studentId}/complimentary-subscriptions` body `{ plan, period }` | `Users.Manage` (Admin) | `AdminSubscriptionResult` (`isComplimentary: true`); `400 COMPLIMENTARY_REQUIRES_BASE` / `COMPLIMENTARY_PLAN_ALREADY_ACTIVE` / `COMPLIMENTARY_PERIOD_UNAVAILABLE`; `404 STUDENT_NOT_FOUND`; `422 STUDENT_ID_REQUIRED` / `COMPLIMENTARY_PLAN_INVALID` / `COMPLIMENTARY_PERIOD_INVALID` |
 | POST | `/api/payments/paymob/webhook?hmac=` | anonymous (HMAC), not in OpenAPI | `PaymentNotificationResult`; `401 PAYMOB_WEBHOOK_SIGNATURE_INVALID`; `400 PAYMOB_WEBHOOK_PAYLOAD_INVALID` / `PAYMENT_NOTIFICATION_MISMATCH`; `404 PAYMENT_NOT_FOUND`; `409` concurrency, `PAYMENT_TRANSACTION_ALREADY_RECORDED` or `PAYMENT_NOT_SETTLED` |
 
 Enum values travel as PascalCase strings. The web page `/student/subscription` shows the subscribe header, the current plan, the Free / Base / Ask a Teacher plan cards and the paged payment log (hidden when empty). Each Base plan card has one subscribe button per configured period ("Subscribe monthly", "Subscribe for a term", "Subscribe yearly"); the Ask a Teacher card has one subscribe button, disabled with a visible hint while the student has no Base. An active plan shows its Active badge and no button until its renewal window opens (`canRenew`), then one Renew button per period ("Renew monthly", "Renew for a term", "Renew yearly"; "Renew" for Ask a Teacher). The Free card has none. Every subscribe or renew button is disabled while a checkout is starting. Each Active or PastDue line of the current-plan card has a Danger "Cancel" button that opens a confirm dialog ("You keep access until {date}"); confirming cancels, updates the card from the response and shows a toast. An Active plan past its period end (`inGracePeriod`) reads "period ended, available until {entitledUntil}".
+
+## Complimentary grants
+
+An admin can give a student Base or Ask a Teacher free of charge (PRD §10.4) with `POST /api/students/{studentId}/complimentary-subscriptions`. It is the one way besides a Paymob-verified event that entitlement changes (PRD §17 rule 12).
+
+- Only a Student can receive a grant; any other id returns 404 `STUDENT_NOT_FOUND`.
+- The plan and period must be sold by the catalogue (`PriceFor`): Base in every configured period, Ask a Teacher monthly only. Otherwise 400 `COMPLIMENTARY_PERIOD_UNAVAILABLE`. The months come from the catalogue.
+- Ask a Teacher needs an entitled Base (400 `COMPLIMENTARY_REQUIRES_BASE`).
+- A plan the student already holds (entitled) is refused with 400 `COMPLIMENTARY_PLAN_ALREADY_ACTIVE`, so paid and free time never mix in one subscription and a refund (`RevokePaidPeriod`) only ever removes paid time.
+- The grant starts now: `Subscription.Start(studentId, plan, period, months, now, paymobReference: null, createdBy: adminId)`. There is no Payment row.
+- A subscription with a null `PaymobReference` is complimentary. Every paid path sets the reference, so no new column is needed; `AdminSubscriptionResult.isComplimentary` exposes it, and MRR already counts such a subscription as 0 ([dashboard.md](dashboard.md)).
+- The grant is audited as `Subscription.GrantComplimentary` with the subscription as the resource and a created diff ([audit-log.md](audit-log.md)).
+- A grant is not revoked early; it lapses like any other subscription.
 
 ## For later stories
 
@@ -199,4 +213,4 @@ Enum values travel as PascalCase strings. The web page `/student/subscription` s
 - **#100** (done): checkout, the Pending payment, the fake gateway and the result page (see Checkout).
 - **#101** (done): the webhook, renewal, the lapse sweep and the student cancel (see above).
 - **#102** (done): `PaymentStatus.Refunded`, admin refunds, signed refund and void callbacks, and the admin payment log with its review queue (see Refunds and Admin payment log). Automatic detection of overlapping subscriptions (the known limit under Webhook) is a follow-up issue.
-- **#106** grants complimentary plans with `Subscription.Start(..., paymobReference: null, ...)`.
+- **#106** (done): complimentary grants (see Complimentary grants).

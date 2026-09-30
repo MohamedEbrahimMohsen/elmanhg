@@ -19,7 +19,9 @@
     "email": "Email",
     "password": "Password",
     "passwordHint": "At least 8 characters, including a number",
-    "code": "Verification code"
+    "code": "Verification code",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password"
   },
   "actions": {
     "sendCode": "Send code",
@@ -30,7 +32,8 @@
     "createAccount": "Create account",
     "changeEmail": "Change email",
     "useEmailCode": "Sign in with a code instead",
-    "usePassword": "Sign in with a password instead"
+    "usePassword": "Sign in with a password instead",
+    "setPassword": "Save password and sign in"
   },
   "otp": {
     "sentViaWhatsApp": "We sent a 6-digit code to {recipient} on WhatsApp.",
@@ -44,6 +47,14 @@
     "passwordLength": "Password must be at least 8 characters.",
     "passwordDigit": "Password must include a number.",
     "code": "Enter the 6-digit code.",
-    "displayNameLength": "Name must be 100 characters or fewer."
+    "displayNameLength": "Name must be 100 characters or fewer.",
+    "passwordMismatch": "Passwords do not match."
+  },
+  "acceptInvite": {
+    "title": "Accept your invitation",
+    "intro": "Enter the email the admin invited, confirm it with a code, then choose your password.",
+    "passwordIntro": "Choose the password you will sign in with.",
+    "haveAccount": "Already set a password?",
+    "signIn": "Sign in"
   }
 }

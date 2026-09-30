@@ -11,5 +11,6 @@ export { loginSearchSchema } from './schemas/loginSearchSchema';
 export { restoreSession, installAuthHandlers, startSession, clearSession, toSession } from './authSession';
 export { LoginPage } from './pages/LoginPage';
 export { SignUpPage } from './pages/SignUpPage';
+export { AcceptInvitePage } from './pages/AcceptInvitePage';
 
 export const sessionLocales = { ar, en };

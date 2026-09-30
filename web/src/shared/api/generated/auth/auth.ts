@@ -15,6 +15,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AcceptInvitationCommand,
   AuthResult,
   GenerateOTPCommand,
   GenerateOTPResult,
@@ -600,6 +601,87 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getLoginWithEmailCodeMutationOptions(options), queryClient);
+    }
+    export const getAcceptInvitationUrl = () => {
+
+
+
+
+  return `/api/auth/invitations/accept`
+}
+
+export const acceptInvitation = async (acceptInvitationCommand: AcceptInvitationCommand, options?: Parameters<typeof http>[1]): Promise<AuthResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return http<AuthResult>(getAcceptInvitationUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(acceptInvitationCommand)
+  }
+);}
+
+
+
+
+
+export const getAcceptInvitationMutationKey = () => ['acceptInvitation'] as const;
+
+export const getAcceptInvitationMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptInvitation>>, TError,AcceptInvitationMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof acceptInvitation>>, TError,AcceptInvitationMutationVariables, TContext> => {
+
+const mutationKey = getAcceptInvitationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof acceptInvitation>>, AcceptInvitationMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  acceptInvitation(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AcceptInvitationMutationResult = NonNullable<Awaited<ReturnType<typeof acceptInvitation>>>
+    export type AcceptInvitationMutationBody = AcceptInvitationCommand
+    export type AcceptInvitationMutationError = unknown
+    export type AcceptInvitationMutationVariables = {data: AcceptInvitationCommand}
+
+    export const useAcceptInvitation = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptInvitation>>, TError,AcceptInvitationMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof acceptInvitation>>,
+        TError,
+        AcceptInvitationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAcceptInvitationMutationOptions(options), queryClient);
     }
     export const getRefreshAccessTokenUrl = () => {
 
