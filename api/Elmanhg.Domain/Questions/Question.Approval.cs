@@ -23,7 +23,7 @@ public partial class Question
         ValidatedAt = now;
         UpdatedBy = assignment.TeacherId;
         UpdationDate = now;
-        Decisions.Add(QuestionDecision.Create(Id, Version, QuestionDecisionOutcome.Approved, null, Difficulty, changedFrom, assignment.TeacherId, now));
+        Decisions.Add(QuestionDecision.Create(Id, Version, QuestionDecisionOutcome.Approved, null, Difficulty, changedFrom, assignment.TeacherId, SubmittedAt, now));
         RaiseDomainEvent(new QuestionApproved(Id, LessonId));
     }
 
@@ -42,7 +42,7 @@ public partial class Question
         ValidatedAt = now;
         UpdatedBy = assignment.TeacherId;
         UpdationDate = now;
-        Decisions.Add(QuestionDecision.Create(Id, Version, QuestionDecisionOutcome.Rejected, RejectionReason, Difficulty, null, assignment.TeacherId, now));
+        Decisions.Add(QuestionDecision.Create(Id, Version, QuestionDecisionOutcome.Rejected, RejectionReason, Difficulty, null, assignment.TeacherId, SubmittedAt, now));
         RaiseDomainEvent(new QuestionRejected(Id, LessonId));
     }
 

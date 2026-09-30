@@ -405,4 +405,6 @@
   <data name="CONTENT_SEARCH_QUERY_TOO_LONG" xml:space="preserve"><value>نص البحث أطول من المسموح.</value></data>
   <data name="CONTENT_SEARCH_TOP_INVALID" xml:space="preserve"><value>عدد النتائج المطلوبة غير صالح.</value></data>
   <data name="CONTENT_EMBEDDING_DIMENSIONS_INVALID" xml:space="preserve"><value>أبعاد التمثيل الرقمي للمحتوى غير متوافقة.</value></data>
+  <data name="DASHBOARD_DATE_RANGE_INVALID" xml:space="preserve"><value>يجب أن يكون تاريخ النهاية في نفس يوم تاريخ البداية أو بعده.</value></data>
+  <data name="DASHBOARD_DATE_RANGE_TOO_WIDE" xml:space="preserve"><value>الفترة الزمنية أطول من الحد المسموح.</value></data>
 </root>

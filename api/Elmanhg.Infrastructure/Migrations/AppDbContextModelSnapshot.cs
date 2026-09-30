@@ -355,6 +355,36 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.ToTable("FunnelEvents");
                 });
 
+            modelBuilder.Entity("Elmanhg.Domain.Analytics.UserActivityDay", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("Day")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("FirstSeenAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Day");
+
+                    b.HasIndex(new[] { "UserId", "Day" }, "IX_UserActivityDays_UserId_Day")
+                        .IsUnique();
+
+                    b.ToTable("UserActivityDays");
+                });
+
             modelBuilder.Entity("Elmanhg.Domain.Avatar.AvatarConversation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -821,6 +851,8 @@ namespace Elmanhg.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
+                    b.HasIndex("Role", "CreationDate");
+
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
@@ -1167,10 +1199,15 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<string>("Reason")
                         .HasColumnType("text");
 
+                    b.Property<DateTimeOffset>("SubmittedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("Version")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DecidedAt");
 
                     b.HasIndex("QuestionId", "DecidedAt");
 
@@ -1372,6 +1409,8 @@ namespace Elmanhg.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
 
                     b.HasIndex("QuestionId");
 
@@ -1662,6 +1701,8 @@ namespace Elmanhg.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CompletedAt");
+
                     b.HasIndex("CreationDate");
 
                     b.HasIndex("SubscriptionId");
@@ -1810,6 +1851,8 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.HasIndex("AudioUrl")
                         .HasFilter("\"AudioUrl\" IS NOT NULL");
 
+                    b.HasIndex("CreatedAt");
+
                     b.HasIndex("ImageUrl")
                         .HasFilter("\"ImageUrl\" IS NOT NULL");
 
@@ -1931,6 +1974,8 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("TeacherId");
+
+                    b.HasIndex("Kind", "OccurredAt");
 
                     b.HasIndex("ThreadId", "Kind", "SlaDueAt")
                         .IsUnique();
@@ -2321,6 +2366,15 @@ namespace Elmanhg.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Elmanhg.Domain.Analytics.UserActivityDay", b =>
+                {
+                    b.HasOne("Elmanhg.Domain.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Elmanhg.Domain.Avatar.AvatarConversation", b =>

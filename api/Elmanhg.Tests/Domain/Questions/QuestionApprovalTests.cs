@@ -27,6 +27,17 @@ public sealed class QuestionApprovalTests
     }
 
     [Fact]
+    public void Approve_Pending_RecordsSubmittedAtOnDecision()
+    {
+        var question = _builder.Build();
+        var assignment = TeacherSubject.Create(User.CreateTeacher("Teacher", "teacher@example.com"), _builder.Subject, Guid.NewGuid());
+
+        question.Approve(assignment, question.Version);
+
+        question.Decisions.Single().SubmittedAt.Should().Be(question.SubmittedAt);
+    }
+
+    [Fact]
     public void Approve_AssignmentForOtherSubject_ThrowsQuestionValidatorNotAssigned()
     {
         var question = _builder.Build();

@@ -4418,6 +4418,462 @@
         }
       }
     },
+    "/api/dashboard/students": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "operationId": "GetDashboardStudents",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentMetricsResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentMetricsResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentMetricsResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/subscribers": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "operationId": "GetDashboardSubscribers",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriberMetricsResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriberMetricsResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriberMetricsResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/content": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "operationId": "GetDashboardContent",
+        "parameters": [
+          {
+            "name": "subjectId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentMetricsResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentMetricsResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentMetricsResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/solve-rate": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "operationId": "GetDashboardSolveRate",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "subjectId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SolveRateMetricsResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SolveRateMetricsResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SolveRateMetricsResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/success-rate": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "operationId": "GetDashboardSuccessRate",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "subjectId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessRateMetricsResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessRateMetricsResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessRateMetricsResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/validation": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "operationId": "GetDashboardValidation",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "subjectId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationMetricsResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationMetricsResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationMetricsResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/ask-teacher": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "operationId": "GetDashboardAskTeacher",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "subjectId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AskTeacherMetricsResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AskTeacherMetricsResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AskTeacherMetricsResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/payments": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "operationId": "GetDashboardPayments",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentMetricsResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentMetricsResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentMetricsResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/funnel": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "operationId": "GetDashboardFunnel",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FunnelMetricsResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FunnelMetricsResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FunnelMetricsResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/lessons/{lessonId}/content-chunks/search": {
       "post": {
         "tags": [
@@ -6074,6 +6530,110 @@
           }
         }
       },
+      "AskTeacherMetricsResult": {
+        "required": [
+          "from",
+          "to",
+          "subjectId",
+          "openThreads",
+          "awaitingReply",
+          "overdueNow",
+          "slaBreaches",
+          "replies",
+          "repliedWithinSla",
+          "slaComplianceRate",
+          "medianReplySeconds",
+          "generatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "subjectId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "openThreads": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "awaitingReply": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "overdueNow": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "slaBreaches": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "replies": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "repliedWithinSla": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "slaComplianceRate": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "medianReplySeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "AskTeacherPlanResult": {
         "required": [
           "monthlyQuestions",
@@ -6590,6 +7150,123 @@
           }
         }
       },
+      "ContentMetricsResult": {
+        "required": [
+          "subjectId",
+          "subjects",
+          "units",
+          "lessonsDraft",
+          "lessonsPublished",
+          "lessonsArchived",
+          "questionsPending",
+          "questionsApproved",
+          "questionsRejected",
+          "questionsRetired",
+          "questionsByType",
+          "servableTotal",
+          "generatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "subjectId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "subjects": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "units": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "lessonsDraft": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "lessonsPublished": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "lessonsArchived": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "questionsPending": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "questionsApproved": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "questionsRejected": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "questionsRetired": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "questionsByType": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionTypeCountResult"
+            }
+          },
+          "servableTotal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "CreateLessonRequest": {
         "required": [
           "unitId",
@@ -6735,6 +7412,27 @@
           "id": {
             "type": "string",
             "format": "uuid"
+          }
+        }
+      },
+      "DailyValueResult": {
+        "required": [
+          "date",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "value": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
           }
         }
       },
@@ -7678,6 +8376,84 @@
           "OnboardingCompleted",
           "FirstQuizAnswered"
         ]
+      },
+      "FunnelMetricsResult": {
+        "required": [
+          "from",
+          "to",
+          "steps",
+          "completedJourneys",
+          "medianLandingToFirstAnswerSeconds",
+          "generatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FunnelStepResult"
+            }
+          },
+          "completedJourneys": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "medianLandingToFirstAnswerSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FunnelStepResult": {
+        "required": [
+          "type",
+          "visitors",
+          "conversionFromPrevious"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/FunnelEventType"
+          },
+          "visitors": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "conversionFromPrevious": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
       },
       "GenerateOTPCommand": {
         "required": [
@@ -8939,6 +9715,74 @@
           }
         }
       },
+      "PaymentMetricsResult": {
+        "required": [
+          "from",
+          "to",
+          "succeeded",
+          "failed",
+          "refunds",
+          "revenue",
+          "refunded",
+          "netRevenue",
+          "revenueByDay",
+          "generatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "succeeded": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "failed": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "refunds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "revenue": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "refunded": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "netRevenue": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "revenueByDay": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailyValueResult"
+            }
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "PaymentResult": {
         "required": [
           "id",
@@ -9010,6 +9854,26 @@
           },
           "askTeacher": {
             "$ref": "#/components/schemas/AskTeacherPlanResult"
+          }
+        }
+      },
+      "PlanCountResult": {
+        "required": [
+          "plan",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "plan": {
+            "$ref": "#/components/schemas/SubscriptionPlan"
+          },
+          "count": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -9458,6 +10322,26 @@
           "Short",
           "Essay"
         ]
+      },
+      "QuestionTypeCountResult": {
+        "required": [
+          "type",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/QuestionType"
+          },
+          "count": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
       },
       "QuestionValidationStatus": {
         "enum": [
@@ -9984,6 +10868,101 @@
           }
         }
       },
+      "SolveRateDayResult": {
+        "required": [
+          "date",
+          "attempts",
+          "activeStudents"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "attempts": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "activeStudents": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "SolveRateMetricsResult": {
+        "required": [
+          "from",
+          "to",
+          "subjectId",
+          "attempts",
+          "activeStudentDays",
+          "attemptsPerActiveStudentPerDay",
+          "daily",
+          "generatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "subjectId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "attempts": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "activeStudentDays": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "attemptsPerActiveStudentPerDay": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "daily": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SolveRateDayResult"
+            }
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "StartCheckoutCommand": {
         "required": [
           "plan",
@@ -10237,6 +11216,80 @@
           },
           "isLocked": {
             "type": "boolean"
+          }
+        }
+      },
+      "StudentMetricsResult": {
+        "required": [
+          "from",
+          "to",
+          "total",
+          "newInRange",
+          "newThisWeek",
+          "activeToday",
+          "activeThisMonth",
+          "dailyActive",
+          "generatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "newInRange": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "newThisWeek": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "activeToday": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "activeThisMonth": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "dailyActive": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailyValueResult"
+            }
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -10838,6 +11891,66 @@
           }
         }
       },
+      "SubscriberMetricsResult": {
+        "required": [
+          "from",
+          "to",
+          "activeSubscriptions",
+          "activeByPlan",
+          "churnedInRange",
+          "churnedThisMonth",
+          "monthlyRecurringRevenue",
+          "generatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "activeSubscriptions": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "activeByPlan": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlanCountResult"
+            }
+          },
+          "churnedInRange": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "churnedThisMonth": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "monthlyRecurringRevenue": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "SubscriptionPlan": {
         "enum": [
           "Base",
@@ -10906,6 +12019,137 @@
           "Cancelled",
           "Expired"
         ]
+      },
+      "SuccessRateGroupResult": {
+        "required": [
+          "id",
+          "name",
+          "parentId",
+          "attempts",
+          "correct",
+          "rate"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "attempts": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "correct": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "rate": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "SuccessRateMetricsResult": {
+        "required": [
+          "from",
+          "to",
+          "subjectId",
+          "attempts",
+          "correct",
+          "rate",
+          "bySubject",
+          "byUnit",
+          "byLesson",
+          "generatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "subjectId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "attempts": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "correct": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "rate": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "bySubject": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SuccessRateGroupResult"
+            }
+          },
+          "byUnit": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SuccessRateGroupResult"
+            }
+          },
+          "byLesson": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SuccessRateGroupResult"
+            }
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       },
       "TeacherInboxFilter": {
         "enum": [
@@ -11386,6 +12630,40 @@
           },
           "hasUnreadReply": {
             "type": "boolean"
+          }
+        }
+      },
+      "TeacherThroughputResult": {
+        "required": [
+          "teacherId",
+          "displayName",
+          "approved",
+          "rejected"
+        ],
+        "type": "object",
+        "properties": {
+          "teacherId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "approved": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "rejected": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -11967,6 +13245,87 @@
           }
         }
       },
+      "ValidationMetricsResult": {
+        "required": [
+          "from",
+          "to",
+          "subjectId",
+          "pendingBacklog",
+          "approved",
+          "rejected",
+          "medianSecondsToDecision",
+          "byTeacher",
+          "dailyDecisions",
+          "generatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "subjectId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "pendingBacklog": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "approved": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "rejected": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "medianSecondsToDecision": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "byTeacher": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeacherThroughputResult"
+            }
+          },
+          "dailyDecisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailyValueResult"
+            }
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "ValidationQuestionDetailResult": {
         "required": [
           "id",
@@ -12497,6 +13856,9 @@
     },
     {
       "name": "ExamBlueprints"
+    },
+    {
+      "name": "Dashboard"
     },
     {
       "name": "ContentRetrieval"

@@ -358,7 +358,7 @@ The subject default is checked against the subject's whole servable pool; a unit
 | Payments | Successful / failed transactions, revenue by day, refunds |
 | Sign-up funnel | Distinct visitors per step: landing viewed → sign-up started → account created → onboarding done → first quiz answer, plus median landing-to-first-answer time (`docs/analytics.md`) |
 
-All charts filterable by date range and subject.
+Every chart except Content is filterable by date range (Cairo days); Content is a current snapshot with no date range. Content, Solve rate, Success rate, Validation and Ask a Teacher are also filterable by subject; Students, Subscribers, Payments and the Sign-up funnel have no subject dimension. Definitions, caching and endpoints: `docs/dashboard.md`.
 
 ### 10.4 User management
 
@@ -492,6 +492,7 @@ LessonContentChunk(id, lesson_id, section[Explanation|Objectives|Summary|Questio
 LessonContentIndex(id, lesson_id, source_updated_at, questions_updated_at?, chunk_count, embedding_model?, indexed_at)
 
 FunnelEvent(id, anonymous_id, user_id?, type[LandingViewed|SignUpStarted|SignUpCompleted|OnboardingCompleted|FirstQuizAnswered], occurred_at)  -- docs/analytics.md
+UserActivityDay(id, user_id, day, first_seen_at)  -- one row per user per Cairo day; DAU/MAU (docs/dashboard.md)
 
 AuditLog(id, actor_id, actor_name, actor_role, action, entity, entity_id, outcome, error_code, diff_json, trace_id, created_at)  -- append-only
 ```
