@@ -99,6 +99,27 @@ public sealed class ContentOptions
     [Range(1, int.MaxValue)]
     public int QuestionEssayAnswerMaxLength { get; set; } = 20000;
 
+    [Range(1, int.MaxValue)]
+    public int QuestionDiagramZonesMaxCount { get; set; } = 20;
+
+    [Range(1, int.MaxValue)]
+    public int QuestionDiagramItemsMaxCount { get; set; } = 30;
+
+    [Range(1, int.MaxValue)]
+    public int QuestionDiagramZoneCapacityMax { get; set; } = 10;
+
+    [Range(1, int.MaxValue)]
+    public int QuestionDiagramItemTextMaxLength { get; set; } = 100;
+
+    [Range(1, int.MaxValue)]
+    public int QuestionDiagramImageAltMaxLength { get; set; } = 300;
+
+    [Range(1, int.MaxValue)]
+    public int QuestionDiagramImageDimensionMax { get; set; } = 10000;
+
+    [Range(1, 50)]
+    public int QuestionDiagramZoneMinSizePercent { get; set; } = 2;
+
     [Range(1, 3600)]
     public int ServableCountCacheSeconds { get; set; } = 60;
 }

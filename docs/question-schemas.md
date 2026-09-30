@@ -1,6 +1,6 @@
 # Question schemas
 
-The storage contract for a question's `Body` and `GradingSpec` (PRD §5.4, §6). The schema records (`Elmanhg.Domain.Questions.Schemas`), the per-type rules (`Elmanhg.Application.Questions.Shared.*QuestionRules`), the graders (`Elmanhg.Domain.Questions.Grading`), this document and the web question editor change together.
+The storage contract for a question's `Body` and `GradingSpec` (PRD §5.4, §6). The schema records (`Elmanhg.Domain.Questions.Schemas`), the per-type rules (`Elmanhg.Application.Questions.Shared.*QuestionRules`; drag-and-drop is `DragDropSchemas` checked by `DragDropQuestionRules`, `DiagramZoneRules` and `DiagramKeyRules`), the graders (`Elmanhg.Domain.Questions.Grading`), this document and the web question editor change together.
 
 ## Types
 
@@ -13,6 +13,7 @@ The wire names are the `QuestionType` enum values. v1 grading follows PRD §6.
 - `Short`: a number or a string. Numeric within a tolerance (absolute or percent); text against an accepted list with normalisation.
 - `Essay` (v2): plain-text answer (student input is #119), graded by the AI grader against the rubric and model answers ([essay-grading.md](essay-grading.md)); a blank answer is graded at once as Unanswered.
 - `MathSteps` (v2): steps plus a final answer. The final answer is checked by the CAS (#122, [math-cas.md](math-cas.md)); the steps are stored for step grading (#123).
+- `DragDrop` (v2): a diagram with drop zones and draggable items (#125); the student canvas and per-item grader are #126. Not servable until #126.
 
 ## Body vs grading spec
 
@@ -108,6 +109,26 @@ Canonical JSON, exactly as stored. Keys are camelCase; enum values are camelCase
 - Unknown fields are dropped. Accepted answers are not CAS-parsed when saved; an unparseable one is skipped when grading.
 - The grading spec is revealed after answering, like every other type (the first accepted answer is shown).
 
+**DragDrop** (v2): the body is the diagram the student sees: the image, the numbered drop zones and the item bank. The spec is the answer key.
+
+```json
+{"image":{"key":"question-diagrams/0b5c1f4e-3d2a-4c8e-9f1a-2b3c4d5e6f70/0123456789abcdef0123456789abcdef.png","width":800,"height":600,"alt":"Plant cell"},"zones":[{"id":"z1","x":10,"y":10,"width":20,"height":15,"capacity":2},{"id":"z2","x":50,"y":40,"width":30,"height":20.5,"capacity":2}],"items":[{"id":"i1","text":"Nucleus"},{"id":"i2","text":"Vacuole"},{"id":"i3","text":"Wall"},{"id":"i4","text":"Membrane"},{"id":"i5","text":"Engine"}]}
+```
+```json
+{"zones":[{"zoneId":"z1","itemIds":["i1","i2"],"ordered":false},{"zoneId":"z2","itemIds":["i4","i3"],"ordered":true}]}
+```
+
+- **Image**: `key` is a storage key, never a URL. It must be a key the diagram upload writes: `question-diagrams/{lessonId}/{32 hex}.png|jpg|jpeg|webp` (lower case). `{lessonId}` must be the question's own lesson: create, update and resubmit reject a key uploaded to another lesson with 422 `QUESTION_DIAGRAM_IMAGE_INVALID`, so later orphan cleanup can reason per lesson. `POST /api/lessons/{lessonId}/diagram-images` (`Content.Manage`, multipart `file`) stores a PNG, JPEG or WebP (checked by extension, content type and magic bytes; size cap `Content:LessonImageMaxSizeInMb`) through the file storage and returns `{key, url}`. Because only a key is stored, a body can never point at another host (no hot-linked images or tracking pixels). The public URL is resolved when the question is read: `GET /api/questions/{id}` and the teacher validation detail add `image.url` (`FileStorage:PublicBaseUrl` + key) to the returned body. `url` is never stored; a `url` sent on create or update is dropped.
+- `width` and `height` are the image's pixel size, 1 to `Content:QuestionDiagramImageDimensionMax`. The editor reads them in the browser; they only reserve the aspect ratio.
+- `alt` is required plain text, trimmed, at most `Content:QuestionDiagramImageAltMaxLength`.
+- **Zones** are rectangles in percent of the image: `x` from the image's left edge and `y` from its top. They are physical and never mirrored in right-to-left layouts (it is a picture). Every value is 0 to 100 with at most two decimals; `width` and `height` are at least `Content:QuestionDiagramZoneMinSizePercent`; the zone lies inside the image. Zones may touch but must not overlap. Values are compared in whole hundredths, so float sums never cross a bound.
+- `capacity` (1 to `Content:QuestionDiagramZoneCapacityMax`) is how many items the zone holds. The student sees it; it reveals nothing about which items go there.
+- **Items** are plain text, trimmed, at most `Content:QuestionDiagramItemTextMaxLength`. Body order is the bank order.
+- **Key**: the spec lists every body zone exactly once, in body order. An empty `itemIds` means the zone must stay empty. An item placed in no zone is a distractor: its correct place is the bank. At least one item is placed. `ordered: true` means the zone's items must be in the listed order and needs at least two items. Unordered `itemIds` are stored in body item order; ordered ones keep the author's order.
+- Zone and item ids use the id format below (the editor generates `z1`, `z2`, … and `i1`, `i2`, …).
+- The body carries no answer: zones have no label (the student sees 1, 2, …) and the bank order is independent of any zone.
+- The diagram is rendered by React as SVG from this model. No SVG or HTML is ever stored, and every text is rendered as a text node.
+
 `normalization` (PRD §6.2) holds the answer-normalisation rules of fill and text short answers. Each rule can be switched off per question; every rule defaults to `true`:
 
 | Key | Effect when `true` | Default |
@@ -166,10 +187,29 @@ A request whose `body` or `gradingSpec` breaks a rule gets `422` with the code b
 | MathSteps | `form`, when present, is a defined form (an unknown name does not read: `QUESTION_GRADING_SPEC_INVALID`) | `QUESTION_MATH_FORM_INVALID` |
 | MathSteps | `tolerance` ≥ 0 and `toleranceMode` both present, or both absent | `QUESTION_MATH_TOLERANCE_INVALID` |
 | MathSteps | a tolerance only with the `equivalent` form | `QUESTION_MATH_TOLERANCE_FORM_CONFLICT` |
+| DragDrop | `image` is present, `key` is a stored diagram key of the question's lesson (checked when saving), and `width`/`height` are 1 to `Content:QuestionDiagramImageDimensionMax` | `QUESTION_DIAGRAM_IMAGE_INVALID` |
+| DragDrop | `image.alt` is not blank | `QUESTION_DIAGRAM_IMAGE_ALT_REQUIRED` |
+| DragDrop | `image.alt` is at most `Content:QuestionDiagramImageAltMaxLength` after trimming | `QUESTION_DIAGRAM_IMAGE_ALT_TOO_LONG` |
+| DragDrop | 1 to `Content:QuestionDiagramZonesMaxCount` zones | `QUESTION_DIAGRAM_ZONES_COUNT_INVALID` |
+| DragDrop | every zone id matches the id format | `QUESTION_DIAGRAM_ZONE_ID_INVALID` |
+| DragDrop | zone ids are unique | `QUESTION_DIAGRAM_ZONE_ID_DUPLICATE` |
+| DragDrop | every zone is 0–100 with at most two decimals, at least `Content:QuestionDiagramZoneMinSizePercent` wide and high, and inside the image | `QUESTION_DIAGRAM_ZONE_BOUNDS_INVALID` |
+| DragDrop | no two zones overlap (touching is allowed) | `QUESTION_DIAGRAM_ZONES_OVERLAP` |
+| DragDrop | every zone's `capacity` is 1 to `Content:QuestionDiagramZoneCapacityMax` | `QUESTION_DIAGRAM_ZONE_CAPACITY_INVALID` |
+| DragDrop | 1 to `Content:QuestionDiagramItemsMaxCount` items | `QUESTION_DIAGRAM_ITEMS_COUNT_INVALID` |
+| DragDrop | every item id matches the id format | `QUESTION_DIAGRAM_ITEM_ID_INVALID` |
+| DragDrop | item ids are unique | `QUESTION_DIAGRAM_ITEM_ID_DUPLICATE` |
+| DragDrop | every item has text | `QUESTION_DIAGRAM_ITEM_TEXT_REQUIRED` |
+| DragDrop | item text is at most `Content:QuestionDiagramItemTextMaxLength` after trimming | `QUESTION_DIAGRAM_ITEM_TEXT_TOO_LONG` |
+| DragDrop | the key lists every zone once, and only those zones | `QUESTION_DIAGRAM_KEY_ZONES_MISMATCH` |
+| DragDrop | the key places only known items, each at most once | `QUESTION_DIAGRAM_KEY_ITEM_INVALID` |
+| DragDrop | no zone has more key items than its `capacity` | `QUESTION_DIAGRAM_ZONE_OVER_CAPACITY` |
+| DragDrop | at least one item is placed | `QUESTION_DIAGRAM_KEY_EMPTY` |
+| DragDrop | an `ordered` zone has at least two items | `QUESTION_DIAGRAM_ORDER_INVALID` |
 
 A non-integer `maxWords`, criterion `points` or level `points` does not read as the type's shape and fails with `QUESTION_BODY_INVALID` / `QUESTION_GRADING_SPEC_INVALID`.
 
-- **Id format** (option, blank and rubric criterion ids): `^[a-z0-9-]{1,20}$`. Ids are referenced from grading specs and `[[id]]` placeholders, so they stay short, lowercase ASCII.
+- **Id format** (option, blank, rubric criterion, diagram zone and item ids): `^[a-z0-9-]{1,20}$`. Ids are referenced from grading specs and `[[id]]` placeholders, so they stay short, lowercase ASCII.
 - **Fields** outside the body and spec (stem, explanation, difficulty, tags, max score) are checked by `QuestionFieldsValidator`. Caps: `Content:QuestionStemMaxLength`, `Content:QuestionExplanationMaxLength`, `Content:QuestionTagsMaxCount`, `Content:QuestionTagMaxLength`, `Content:QuestionMaxScoreMax` (max score is a whole number from 1).
 
 ## Canonical storage
@@ -179,6 +219,7 @@ A non-integer `maxWords`, criterion `points` or level `points` does not read as 
 - Choice option `text` is sanitised rich text, like the stem and explanation (`docs/rich-text.md`).
 - Accepted answers are plain text, trimmed. They are normalised at grading time (PRD §6.2), never at save time.
 - Fill spec entries follow the body's blank order.
+- DragDrop: keys are written in record order, `ordered` is always written, `alt` and item texts are trimmed, unknown properties (including a sent `url`) are dropped, and numbers are stored as sent (`12.5`, never `12.50`). The key follows the body's zone order.
 - Two JSON values are equal when they are semantically equal (`JsonNode.DeepEquals`), never by string comparison: PostgreSQL re-formats `jsonb` text on read.
 
 ## Versioning
@@ -208,8 +249,8 @@ A non-integer `maxWords`, criterion `points` or level `points` does not read as 
 
 ## Servable
 
-- Servable = Approved ∧ lesson Published ∧ not retired (PRD §5.3, §17 rule 1). It is derived on every read and never stored.
-- `ServableQuestionSpecification.ServedTypes` lists all seven types (the five v1 types `Mcq`, `Multi`, `TrueFalse`, `Fill`, `Short`, plus `Essay`, #119, and `MathSteps`, #122) for per-type listings such as blueprint servable counts.
+- Servable = Approved ∧ lesson Published ∧ not retired ∧ not drag-and-drop (until the student canvas, #126) (PRD §5.3, §17 rule 1). It is derived on every read and never stored.
+- `ServableQuestionSpecification.ServedTypes` lists every type except `DragDrop` (the five v1 types `Mcq`, `Multi`, `TrueFalse`, `Fill`, `Short`, plus `Essay`, #119, and `MathSteps`, #122) for per-type listings such as blueprint servable counts.
 - `ServableQuestionSpecification` (`Elmanhg.Domain/Questions`) is the only definition. `WhereServable(questions, lessons)` composes the rule into SQL; `IsSatisfiedBy(question, lesson)` runs compiled copies of the same expressions in memory.
 - Every serving query (quizzes, exams, blueprints, anything a student is shown) must filter through `WhereServable`. Admin reads never filter by it: `GET /api/questions` lists every status and annotates each item with `isServable`, and `GET /api/lessons` returns `servableQuestionCount` next to `questionCount`.
 - `GET /api/questions/servable-count` is anonymous and returns `{"count": n}`, the platform-wide total shown on the landing page. It is cached in `IMemoryCache` under `questions:servable-count`.
@@ -263,6 +304,8 @@ A student's answer (and the `answer` of `POST /api/questions/grade-draft`) is a 
 {"steps":["2x = 4"],"finalAnswer":"x = 2"}
 ```
 
+**DragDrop**: defined with the student canvas (#126).
+
 ## Grading
 
 The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of the stored grading spec, the max score and the answer. `POST /api/questions/grade-draft` (admin, `Content.Manage`) validates an unsaved draft with the same rules as create and update, canonicalises it, and grades the `answer` with the same graders; it saves nothing and is not audited. Attempts reuse the same graders.
@@ -279,6 +322,7 @@ The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of
 - **Short text**: the normalised answer must equal one of the normalised accepted answers.
 - **Essay**: the AI grader awards points per rubric criterion ([essay-grading.md](essay-grading.md)); `QuestionGrader.GradeEssay` turns them into `Σ awarded ÷ Σ criterion points`, scaled by the max score like every other type. The model's own total is never used. `grade-draft` grades essays synchronously through the AI grader (`503 ESSAY_GRADING_UNAVAILABLE` when it fails) and adds an `essay` detail (criteria, justification, confidence, model, prompt version, cost); a blank essay scores 0 (Unanswered) without calling the grader.
 - **MathSteps**: only the final answer is graded until step grading (#123), through `AnswerGrader` and the AI service's CAS check ([math-cas.md](math-cas.md)); every other type grades locally without the AI service. `equivalent` scores 1, every other verdict 0. A blank final answer is Unanswered (0) without calling the AI service, even with steps. `QuestionGrader.Grade` does not grade MathSteps; `QuestionGrader.GradeMathSteps(maxScore, verdict)` scales the verdict like every other type. When the AI service cannot be reached the verdict is `unchecked`: the answer is still recorded with a provisional 0, left out of mastery, and waits for teacher review (#128); nothing is lost and no submit fails.
+- **DragDrop** is graded per item by #126; until then `grade-draft` returns `422 QUESTION_TYPE_NOT_GRADABLE`.
 - An answer that normalises to empty never matches.
 - **Normalisation** (PRD §6.2): the student answer and every accepted answer go through the same steps. Always, in this order: drop unpaired UTF-16 surrogates and the noncharacter U+FFFE (both make NFC fail), and invisible marks (U+061C, U+200B–U+200F, U+202A–U+202E, U+2060, U+2066–U+2069, U+FEFF), so none of them can split a letter from its mark; Unicode NFC (so a decomposed hamza or madda, such as ا + U+0654, becomes أ); map ، (U+060C) to `,` and ی (U+06CC) to ي (U+064A). Then the question's `normalization` rules (see **Fill** and **Short** above), each applied only when on. Finally the answer is always trimmed. With `collapseWhitespace` off, inner whitespace is kept verbatim (tabs and runs included); the ends are still trimmed. Hamza seats (ئ ؤ ء) are never unified.
 - **Numeric parsing**: numeric answers ignore the question's `normalization` rules and use a fixed profile: every rule on except the three letter rules. After normalisation, `٬` (U+066C, the Arabic thousands separator) is removed, then `٫` (U+066B) and `,` become `.`, and `−` (U+2212) becomes `-`; the rest must be a plain decimal number: an optional leading sign, digits and one decimal point (invariant culture). Exponents such as `9.8e0`, inner whitespace, thousands separators other than `٬`, and anything else (such as a trailing unit) do not parse and score 0. `,` always means a decimal point, so `1,000` reads as 1.
@@ -295,4 +339,4 @@ The graders live in `Elmanhg.Domain.Questions.Grading` and are pure functions of
 
 ## Changing a schema
 
-A new field or rule changes the schema record, its rules, this document and the web editor in the same change. The spreadsheet import (`docs/question-import.md`) builds the same shapes from columns; a schema change updates its columns, parser and template in the same change. Essay and MathSteps are not importable (PRD §10.1). Rows already stored in the old shape need a data migration that rewrites them to the new canonical shape.
+A new field or rule changes the schema record, its rules, this document and the web editor in the same change. The spreadsheet import (`docs/question-import.md`) builds the same shapes from columns; a schema change updates its columns, parser and template in the same change. Essay, MathSteps and DragDrop are not importable (PRD §10.1). Rows already stored in the old shape need a data migration that rewrites them to the new canonical shape.

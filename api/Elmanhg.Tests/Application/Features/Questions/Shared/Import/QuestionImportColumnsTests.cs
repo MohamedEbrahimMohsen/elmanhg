@@ -32,6 +32,12 @@ public sealed class QuestionImportColumnsTests
         QuestionImportColumns.TypeForSheet(" truefalse ").Should().Be(QuestionType.TrueFalse);
     }
 
+    [Fact]
+    public void TypeForSheet_DragDropSheet_ReturnsNull()
+    {
+        QuestionImportColumns.TypeForSheet("DragDrop").Should().BeNull();
+    }
+
     [Theory]
     [InlineData("Instructions")]
     [InlineData("1")]

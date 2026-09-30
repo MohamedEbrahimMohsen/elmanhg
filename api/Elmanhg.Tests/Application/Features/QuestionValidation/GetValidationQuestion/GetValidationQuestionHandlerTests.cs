@@ -2,6 +2,7 @@ using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.QuestionValidation.GetValidationQuestion;
+using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
@@ -23,6 +24,7 @@ public sealed class GetValidationQuestionHandlerTests
     private readonly ICurriculumUnitRepository _unitRepository = Substitute.For<ICurriculumUnitRepository>();
     private readonly ISubjectRepository _subjectRepository = Substitute.For<ISubjectRepository>();
     private readonly IUserRepository _userRepository = Substitute.For<IUserRepository>();
+    private readonly IFileStorage _fileStorage = Substitute.For<IFileStorage>();
     private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
     private readonly QuestionBuilder _builder = new();
     private readonly GetValidationQuestionHandler _handler;
@@ -35,7 +37,7 @@ public sealed class GetValidationQuestionHandlerTests
         _unitRepository.GetByIdAsync(_builder.Unit.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<CurriculumUnit>, IQueryable<CurriculumUnit>>?>(), Arg.Any<bool>()).Returns(_builder.Unit);
         _subjectRepository.GetByIdAsync(_builder.Subject.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Subject>, IQueryable<Subject>>?>(), Arg.Any<bool>()).Returns(_builder.Subject);
         _userRepository.FindAsync(Arg.Any<Expression<Func<User, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<User>, IQueryable<User>>?>(), Arg.Any<Func<IQueryable<User>, IOrderedQueryable<User>>?>(), Arg.Any<bool>()).Returns([_builder.Teacher]);
-        _handler = new GetValidationQuestionHandler(_questionRepository, _teacherSubjectRepository, _lessonRepository, _unitRepository, _subjectRepository, _userRepository, _currentUserService);
+        _handler = new GetValidationQuestionHandler(_questionRepository, _teacherSubjectRepository, _lessonRepository, _unitRepository, _subjectRepository, _userRepository, _fileStorage, _currentUserService);
     }
 
     [Fact]

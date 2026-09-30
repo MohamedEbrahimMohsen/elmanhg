@@ -4337,6 +4337,62 @@
         }
       }
     },
+    "/api/lessons/{lessonId}/diagram-images": {
+      "post": {
+        "tags": [
+          "Lessons"
+        ],
+        "operationId": "UploadDiagramImage",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "$ref": "#/components/schemas/IFormFile"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadDiagramImageResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadDiagramImageResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadDiagramImageResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/exams/units/{unitId}": {
       "get": {
         "tags": [
@@ -11487,7 +11543,8 @@
           "Fill",
           "Short",
           "Essay",
-          "MathSteps"
+          "MathSteps",
+          "DragDrop"
         ]
       },
       "QuestionTypeCountResult": {
@@ -14550,6 +14607,21 @@
               "string"
             ],
             "format": "int32"
+          }
+        }
+      },
+      "UploadDiagramImageResult": {
+        "required": [
+          "key",
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
           }
         }
       },

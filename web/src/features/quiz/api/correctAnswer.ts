@@ -69,6 +69,8 @@ export function describeCorrectAnswer(question: StudentQuestion, correctAnswer: 
       const latex = spec.success ? spec.data.acceptedAnswers[0] : undefined;
       return latex ? { kind: 'math', latex } : null;
     }
+    case 'DragDrop':
+      return null;
   }
 }
 
@@ -90,6 +92,7 @@ export function choiceReview(question: StudentQuestion, correctAnswer: unknown):
     case 'Short':
     case 'Essay':
     case 'MathSteps':
+    case 'DragDrop':
       return undefined;
   }
 }

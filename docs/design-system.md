@@ -177,6 +177,10 @@ Centered, max 420 px, `--r-lg`, `--shadow-2`, overlay `rgba(29,29,31,.35)`.
 
 The math-with-steps answer ([math-input.md](math-input.md)). Each LaTeX field is white, `--r-sm`, `--border-strong`, in the system monospace at 16 px (not the 12 px mono size: smaller text makes iOS zoom on focus), `direction: ltr`. A preview box sits under each field: white, hairline border, `--r-sm`, at least 44 px tall, with horizontal scroll inside. The touch keypad is a 6×6 grid of keys, each white, `--r-sm`, `--border-strong` and at least 44 px tall, on a `--soft` panel with `--r-md`, laid out left to right. It opens under the active field. Step rows are white `--r-md` hairline cards with icon buttons for move up, move down and remove (Danger), each at least 44 px.
 
+### 5.13 Diagram canvas
+
+The drag-and-drop diagram ([question-schemas.md](question-schemas.md)). The image scales to the card width with its aspect ratio reserved. Zones are rectangles with a 2 px non-scaling stroke, and each zone has a number badge (white circle, text colour) at its top-left. Edit mode uses an Accent stroke with a 15 % Accent fill; student mode uses a muted dashed stroke on a 60 % white fill; answer-key mode uses a Success stroke with a 20 % Success fill. A zone being drawn is dashed Accent. The canvas is never mirrored in RTL: image coordinates are physical. Items are pill chips: white, `--border-strong`.
+
 ## 6. Layout and RTL
 
 - `dir="rtl"` on `html`. Logical properties only (`margin-inline-start`, `padding-inline`), never left/right.

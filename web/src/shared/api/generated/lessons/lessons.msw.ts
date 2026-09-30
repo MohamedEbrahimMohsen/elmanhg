@@ -20,6 +20,7 @@ import type {
   CreateLessonResult,
   LessonDetailResult,
   LessonResult,
+  UploadDiagramImageResult,
   UploadLessonImageResult
 } from '../model';
 
@@ -31,6 +32,8 @@ export const getCreateLessonResponseMock = (overrideResponse: Partial<Extract<Cr
 export const getGetLessonResponseMock = (overrideResponse: Partial<Extract<LessonDetailResult, object>> = {}): LessonDetailResult => (faker.helpers.arrayElement([{id: faker.string.uuid(), unitId: faker.string.uuid(), name: faker.string.alpha({length: {min: 10, max: 20}}), order: faker.helpers.arrayElement([faker.number.int(),faker.helpers.fromRegExp("^-?(?:0|[1-9]\\d*)$"),]), state: faker.string.alpha({length: {min: 10, max: 20}}), explanation: faker.string.alpha({length: {min: 10, max: 20}}), summary: faker.string.alpha({length: {min: 10, max: 20}}), videoUrl: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), objectives: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.uuid(), text: faker.string.alpha({length: {min: 10, max: 20}}), order: faker.helpers.arrayElement([faker.number.int(),faker.helpers.fromRegExp("^-?(?:0|[1-9]\\d*)$"),])})), ...overrideResponse}, {id: faker.string.uuid(), unitId: faker.string.uuid(), name: faker.string.alpha({length: {min: 10, max: 20}}), order: faker.helpers.arrayElement([faker.number.int(),faker.helpers.fromRegExp("^-?(?:0|[1-9]\\d*)$"),]), state: faker.string.alpha({length: {min: 10, max: 20}}), explanation: faker.string.alpha({length: {min: 10, max: 20}}), summary: faker.string.alpha({length: {min: 10, max: 20}}), videoUrl: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), objectives: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.uuid(), text: faker.string.alpha({length: {min: 10, max: 20}}), order: faker.helpers.arrayElement([faker.number.int(),faker.helpers.fromRegExp("^-?(?:0|[1-9]\\d*)$"),])})), ...overrideResponse}, {id: faker.string.uuid(), unitId: faker.string.uuid(), name: faker.string.alpha({length: {min: 10, max: 20}}), order: faker.helpers.arrayElement([faker.number.int(),faker.helpers.fromRegExp("^-?(?:0|[1-9]\\d*)$"),]), state: faker.string.alpha({length: {min: 10, max: 20}}), explanation: faker.string.alpha({length: {min: 10, max: 20}}), summary: faker.string.alpha({length: {min: 10, max: 20}}), videoUrl: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), objectives: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.uuid(), text: faker.string.alpha({length: {min: 10, max: 20}}), order: faker.helpers.arrayElement([faker.number.int(),faker.helpers.fromRegExp("^-?(?:0|[1-9]\\d*)$"),])})), ...overrideResponse}]))
 
 export const getUploadLessonImageResponseMock = (overrideResponse: Partial<Extract<UploadLessonImageResult, object>> = {}): UploadLessonImageResult => (faker.helpers.arrayElement([{url: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse}, {url: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse}, {url: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse}]))
+
+export const getUploadDiagramImageResponseMock = (overrideResponse: Partial<Extract<UploadDiagramImageResult, object>> = {}): UploadDiagramImageResult => (faker.helpers.arrayElement([{key: faker.string.alpha({length: {min: 10, max: 20}}), url: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse}, {key: faker.string.alpha({length: {min: 10, max: 20}}), url: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse}, {key: faker.string.alpha({length: {min: 10, max: 20}}), url: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse}]))
 
 
 export const getGetLessonsMockHandler = (overrideResponse?: LessonResult[] | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<LessonResult[]> | LessonResult[]), options?: RequestHandlerOptions) => {
@@ -140,6 +143,18 @@ export const getUploadLessonImageMockHandler = (overrideResponse?: UploadLessonI
       })
   }, options)
 }
+
+export const getUploadDiagramImageMockHandler = (overrideResponse?: UploadDiagramImageResult | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<UploadDiagramImageResult> | UploadDiagramImageResult), options?: RequestHandlerOptions) => {
+  return http.post('*/api/lessons/:lessonId/diagram-images', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getUploadDiagramImageResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 export const getLessonsMock = () => [
   getGetLessonsMockHandler(),
   getCreateLessonMockHandler(),
@@ -150,5 +165,6 @@ export const getLessonsMock = () => [
   getUnpublishLessonMockHandler(),
   getArchiveLessonMockHandler(),
   getReorderLessonMockHandler(),
-  getUploadLessonImageMockHandler()
+  getUploadLessonImageMockHandler(),
+  getUploadDiagramImageMockHandler()
 ]

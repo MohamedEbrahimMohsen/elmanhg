@@ -1,0 +1,64 @@
+{
+  "editor": {
+    "errors": {
+      "diagramImage": "ارفع صورة الرسم.",
+      "zonesCount": "ارسم منطقة إفلات واحدة على الأقل.",
+      "zonePosition": "اكتب رقمًا من 0 إلى 100 بمنزلتين عشريتين على الأكثر.",
+      "zoneSize": "اكتب 2٪ على الأقل وأبقِ المنطقة داخل الصورة.",
+      "zoneCapacity": "اكتب عددًا صحيحًا من 1 إلى 10.",
+      "zoneOverCapacity": "العناصر الصحيحة أكثر مما تتسع له المنطقة.",
+      "zoneOrder": "المنطقة المرتبة تحتاج عنصرين صحيحين على الأقل.",
+      "zonesOverlap": "يجب ألا تتداخل مناطق الإفلات.",
+      "keyEmpty": "ضع عنصرًا واحدًا على الأقل في منطقة.",
+      "itemsCount": "أضف عنصرًا واحدًا على الأقل.",
+      "itemText": "اجعل العنصر 100 حرف على الأكثر."
+    },
+    "dragDrop": {
+      "imageLegend": "الرسم",
+      "imageFile": "صورة الرسم (PNG أو JPG أو WEBP)",
+      "imageUploading": "جارٍ رفع الصورة…",
+      "imageCurrent": "الصورة الحالية: {width} × {height} بكسل",
+      "imageUnreadable": "تعذّرت قراءة الصورة. جرّب ملف PNG أو JPG أو WEBP.",
+      "imageAlt": "وصف الصورة (لقارئ الشاشة)",
+      "canvasLabel": "لوحة الرسم",
+      "canvasHint": "اسحب على الصورة لرسم منطقة إفلات، أو استخدم «إضافة منطقة» واكتب موضعها.",
+      "noImage": "ارفع صورة الرسم لتبدأ رسم مناطق الإفلات.",
+      "zonesLegend": "مناطق الإفلات",
+      "zone": "المنطقة {number}",
+      "zoneX": "المنطقة {number}: البعد من اليسار (٪)",
+      "zoneY": "المنطقة {number}: البعد من الأعلى (٪)",
+      "zoneWidth": "المنطقة {number}: العرض (٪)",
+      "zoneHeight": "المنطقة {number}: الارتفاع (٪)",
+      "zoneCapacity": "المنطقة {number}: عدد العناصر التي تتسع لها",
+      "zoneOrdered": "المنطقة {number}: الترتيب مهم",
+      "zoneItems": "العناصر الصحيحة في المنطقة {number}",
+      "zoneEmpty": "لا ينتمي إليها أي عنصر؛ تبقى فارغة.",
+      "moveUp": "تحريك {item} لأعلى",
+      "moveDown": "تحريك {item} لأسفل",
+      "addZone": "إضافة منطقة",
+      "removeZone": "حذف المنطقة {number}",
+      "itemsLegend": "العناصر القابلة للسحب",
+      "itemsHint": "العنصر بلا منطقة صحيحة عنصر مشتِّت: يجب أن يتركه الطالب دون وضعه.",
+      "item": "العنصر {number}",
+      "itemZone": "المنطقة الصحيحة للعنصر {number}",
+      "noZone": "لا شيء (عنصر مشتِّت)",
+      "addItem": "إضافة عنصر",
+      "removeItem": "حذف العنصر {number}"
+    }
+  },
+  "preview": {
+    "showKey": "إظهار الأماكن الصحيحة",
+    "dragDropGradingHint": "«جرّب الإجابة» غير متاح بعد لأسئلة السحب والإفلات."
+  },
+  "view": {
+    "diagramMissing": "لم تُرفع صورة الرسم بعد.",
+    "diagramBank": "عناصر للوضع",
+    "diagramKeyTitle": "الأماكن الصحيحة",
+    "diagramKeyZone": "المنطقة {number}: {items}",
+    "diagramKeyOrdered": "المنطقة {number} بالترتيب: {items}",
+    "diagramKeyEmpty": "المنطقة {number}: تبقى فارغة",
+    "diagramDistractors": "عناصر مشتِّتة (تبقى دون وضع): {items}",
+    "listSeparator": "، ",
+    "orderSeparator": " ← "
+  }
+}

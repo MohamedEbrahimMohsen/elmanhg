@@ -186,6 +186,27 @@
   <data name="QUESTION_MODEL_ANSWERS_COUNT_INVALID" xml:space="preserve"><value>Add at least one model answer, up to the allowed maximum.</value></data>
   <data name="QUESTION_MODEL_ANSWER_REQUIRED" xml:space="preserve"><value>A model answer cannot be empty.</value></data>
   <data name="QUESTION_MODEL_ANSWER_TOO_LONG" xml:space="preserve"><value>A model answer is too long.</value></data>
+  <data name="QUESTION_TYPE_NOT_GRADABLE" xml:space="preserve"><value>The test grader does not grade this question type yet.</value></data>
+  <data name="QUESTION_DIAGRAM_IMAGE_TYPE_INVALID" xml:space="preserve"><value>Use a PNG, JPEG or WebP image.</value></data>
+  <data name="QUESTION_DIAGRAM_IMAGE_INVALID" xml:space="preserve"><value>Upload the diagram image again: it is missing or invalid.</value></data>
+  <data name="QUESTION_DIAGRAM_IMAGE_ALT_REQUIRED" xml:space="preserve"><value>Describe the diagram image.</value></data>
+  <data name="QUESTION_DIAGRAM_IMAGE_ALT_TOO_LONG" xml:space="preserve"><value>The image description is too long.</value></data>
+  <data name="QUESTION_DIAGRAM_ZONES_COUNT_INVALID" xml:space="preserve"><value>Draw at least one drop zone, up to the allowed maximum.</value></data>
+  <data name="QUESTION_DIAGRAM_ZONE_ID_INVALID" xml:space="preserve"><value>Each zone id must be 1 to 20 lowercase letters, digits or dashes.</value></data>
+  <data name="QUESTION_DIAGRAM_ZONE_ID_DUPLICATE" xml:space="preserve"><value>Zone ids must be unique.</value></data>
+  <data name="QUESTION_DIAGRAM_ZONE_BOUNDS_INVALID" xml:space="preserve"><value>Each zone must lie inside the image and be at least the minimum size.</value></data>
+  <data name="QUESTION_DIAGRAM_ZONES_OVERLAP" xml:space="preserve"><value>Drop zones must not overlap.</value></data>
+  <data name="QUESTION_DIAGRAM_ZONE_CAPACITY_INVALID" xml:space="preserve"><value>Each zone holds from one item up to the allowed maximum.</value></data>
+  <data name="QUESTION_DIAGRAM_ITEMS_COUNT_INVALID" xml:space="preserve"><value>Add at least one item, up to the allowed maximum.</value></data>
+  <data name="QUESTION_DIAGRAM_ITEM_ID_INVALID" xml:space="preserve"><value>Each item id must be 1 to 20 lowercase letters, digits or dashes.</value></data>
+  <data name="QUESTION_DIAGRAM_ITEM_ID_DUPLICATE" xml:space="preserve"><value>Item ids must be unique.</value></data>
+  <data name="QUESTION_DIAGRAM_ITEM_TEXT_REQUIRED" xml:space="preserve"><value>Give every item a text.</value></data>
+  <data name="QUESTION_DIAGRAM_ITEM_TEXT_TOO_LONG" xml:space="preserve"><value>An item text is too long.</value></data>
+  <data name="QUESTION_DIAGRAM_KEY_ZONES_MISMATCH" xml:space="preserve"><value>The answer key must list every zone once, and only those zones.</value></data>
+  <data name="QUESTION_DIAGRAM_KEY_ITEM_INVALID" xml:space="preserve"><value>The answer key places an unknown item, or one item more than once.</value></data>
+  <data name="QUESTION_DIAGRAM_ZONE_OVER_CAPACITY" xml:space="preserve"><value>A zone has more correct items than it holds.</value></data>
+  <data name="QUESTION_DIAGRAM_KEY_EMPTY" xml:space="preserve"><value>Place at least one item in a zone.</value></data>
+  <data name="QUESTION_DIAGRAM_ORDER_INVALID" xml:space="preserve"><value>An ordered zone needs at least two correct items.</value></data>
   <data name="QUESTION_ESSAY_ANSWER_TOO_LONG" xml:space="preserve"><value>The essay is longer than allowed.</value></data>
   <data name="QUESTION_OBJECTIVE_NOT_IN_LESSON" xml:space="preserve"><value>This objective does not belong to the question's lesson.</value></data>
   <data name="QUESTION_TYPE_IMMUTABLE" xml:space="preserve"><value>A question's type cannot be changed. Create a new question instead.</value></data>

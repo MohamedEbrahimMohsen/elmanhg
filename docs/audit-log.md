@@ -63,6 +63,7 @@ An array with one element per changed audited entity. Property keys are camelCas
 | CreateLesson | `Lesson.Create` | Lesson | result |
 | UpdateLesson | `Lesson.Update` | Lesson | command (the diff lists the Lesson fields and every `LessonObjective` created, modified or deleted) |
 | UploadLessonImage | `Lesson.UploadImage` | Lesson | command (no diff: only a file is written) |
+| UploadDiagramImage | `Lesson.UploadDiagramImage` | Lesson | command (no diff: only a file is written) |
 | PublishLesson | `Lesson.Publish` | Lesson | command |
 | UnpublishLesson | `Lesson.Unpublish` | Lesson | command |
 | ArchiveLesson | `Lesson.Archive` | Lesson | command |
@@ -104,7 +105,7 @@ Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUni
 - **Reads** (queries), including the audit log itself and the per-request active-user check (`CheckUserActive`). The one exception is the training-export file download (`TrainingExport.Download`), because it hands training data out of the system. The export worker's own commands (`RunTrainingExport`, `FailTrainingExport`) are not audited.
 - **Auth**: login, register, OTP, logout, and accepting an invitation (`AcceptInvitation`). A separate security-log concern.
 - **Noise**: access-token refresh.
-- **Evidence uploads** (Ask a Teacher images and voice): audit the decision, not the file. Lesson content images are the exception: they change content (PRD §17 rule 13), so `UploadLessonImage` is audited as `Lesson.UploadImage` with no diff.
+- **Evidence uploads** (Ask a Teacher images and voice): audit the decision, not the file. Lesson content images are the exception: they change content (PRD §17 rule 13), so `UploadLessonImage` is audited as `Lesson.UploadImage` with no diff. Drag-and-drop diagram images are audited the same way (`UploadDiagramImage` as `Lesson.UploadDiagramImage`, no diff).
 - **Review sessions and openings** (`StartReviewSession`, `RecordQuestionOpening`): a reading aid that gates bulk approval, not a content or validation change. `ReviewSession` and `ReviewSessionOpening` are not `IAuditedEntity`; the approvals they enable are audited.
 - **Quiz and exam activity** (`StartQuizSession`, `SubmitAnswer`, `FinishSession`, `StartUnitExam`, `SaveExamAnswer`, `SubmitExam`, `AutoSubmitExam`): student practice, not a content or validation change. Attempts are their own append-only log (`docs/sessions.md`).
 - **Question mastery** (`QuestionMastery`): derived from the append-only attempt log (`docs/mastery.md`); not an `IAuditedEntity`.

@@ -26,5 +26,7 @@ export function toAnswerKey(values: QuestionValues): QuestionAnswer {
       return answer;
     case 'MathSteps':
       return { ...answer, math: { steps: [], finalAnswer: values.mathAnswers[0]?.latex ?? '' } };
+    case 'DragDrop':
+      return answer;
   }
 }

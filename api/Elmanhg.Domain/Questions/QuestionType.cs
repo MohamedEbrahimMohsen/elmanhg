@@ -1,3 +1,3 @@
 namespace Elmanhg.Domain.Questions;
 
-public enum QuestionType { Mcq, Multi, TrueFalse, Fill, Short, Essay, MathSteps }
+public enum QuestionType { Mcq, Multi, TrueFalse, Fill, Short, Essay, MathSteps, DragDrop }
