@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { PlaceholderPage } from '@/features/shell';
+import { TeacherStatsPage } from '@/features/dashboard';
 
 export const Route = createFileRoute('/teacher/stats')({
-  component: () => <PlaceholderPage titleKey="nav.teacher.stats" />,
+  component: TeacherStatsPage,
 });

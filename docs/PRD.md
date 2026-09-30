@@ -287,7 +287,7 @@ The headline counter is shown on Home as "متبقّي لك X سؤال من 100,
 
 - Cannot see students' identities beyond a display name in Ask a Teacher threads.
 - Cannot see other subjects, finances, or platform dashboards.
-- Sees a personal stats card: approved/rejected counts, median decision time, SLA compliance.
+- Sees a personal stats card on the teacher home and «إحصائياتي»: approved/rejected counts, median decision time, and reply SLA compliance (with reply count and median reply time) over the last 30 Cairo days (`docs/dashboard.md`).
 
 ---
 

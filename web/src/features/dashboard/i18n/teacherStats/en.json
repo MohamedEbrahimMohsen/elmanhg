@@ -1,0 +1,16 @@
+{
+  "page": { "title": "My stats", "intro": "Your review decisions and replies to students, in Cairo days." },
+  "card": {
+    "title": "My reviews and replies",
+    "loading": "Loading {title}",
+    "error": "Could not load {title}",
+    "caption": "Review decisions from {from} to {to}",
+    "empty": "No decisions or replies in this period.",
+    "approved": "Approved: {count}",
+    "rejected": "Rejected: {count}",
+    "medianDecision": "Median time to decision: {duration}",
+    "compliance": "Reply SLA compliance: {rate}",
+    "replies": "Replies: {count} ({within} within the SLA)",
+    "medianReply": "Median reply time: {duration}"
+  }
+}

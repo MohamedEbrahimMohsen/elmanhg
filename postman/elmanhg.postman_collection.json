@@ -3669,6 +3669,41 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Get my teacher stats",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"has own stats\", function () { const b = pm.response.json(); pm.expect(b).to.have.property(\"approved\"); pm.expect(b).to.have.property(\"slaComplianceRate\"); pm.expect(b).to.have.property(\"generatedAt\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/my-stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "my-stats"
+              ],
+              "query": [
+                { "key": "from", "value": "2026-09-01", "disabled": true },
+                { "key": "to", "value": "2026-09-30", "disabled": true }
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },

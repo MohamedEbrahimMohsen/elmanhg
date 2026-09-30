@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ListChecks } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ContentErrorState, ContentListSkeleton } from '@/features/content';
+import { TeacherStatsCard } from '@/features/dashboard';
 import { useGetValidationQueueFilters } from '@/shared/api/generated/validation-queue/validation-queue';
 import { Pagination } from '@/shared/components/Pagination';
 import { Button } from '@/shared/ui/button';
@@ -93,6 +94,7 @@ export function ValidationQueuePage() {
           <p className="text-caption text-text-muted">{t('validation.queue.subjects', { subjects })}</p>
         ) : null}
       </div>
+      <TeacherStatsCard />
       <ValidationQueueFilters
         key={JSON.stringify([search.unitId, search.lessonId, search.type, search.difficulty, search.minAgeDays])}
         search={search}

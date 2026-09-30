@@ -6,7 +6,7 @@ namespace Elmanhg.Application.Dashboard.Shared;
 
 public static class DashboardFilterRules
 {
-    public static void AddDashboardFilterRules<T>(this AbstractValidator<T> validator, DashboardOptions options, TimeProvider timeProvider) where T : IDashboardRangeQuery
+    public static void AddDashboardFilterRules<T>(this AbstractValidator<T> validator, DashboardOptions options, TimeProvider timeProvider) where T : IDashboardRange
     {
         DashboardWindow Resolve(T query) => DashboardWindow.Resolve(query.From, query.To, timeProvider.GetUtcNow(), options);
 
