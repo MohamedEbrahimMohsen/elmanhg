@@ -37,8 +37,6 @@ if [ "$observability" = 1 ]; then
   set_env "$ENV_FILE" OTLP_ENDPOINT http://otel-collector:4317
   set_env "$ENV_FILE" GRAFANA_ADMIN_PASSWORD "$grafana_password"
   set_env "$ENV_FILE" GRAFANA_PORT "$grafana_port"
-  set_env "$ENV_FILE" ALERTMANAGER_CONFIG_FILE .smoke/alertmanager.yml
-  cp observability/alertmanager/alertmanager.example.yml .smoke/alertmanager.yml
   check_observability_config
 fi
 
@@ -65,7 +63,19 @@ compose run --rm --no-deps --entrypoint caddy web validate --config /etc/caddy/C
 if [ "$observability" = 1 ]; then
   compose run --rm --no-deps --entrypoint promtool prometheus check config /etc/prometheus/prometheus.yml
   compose run --rm --no-deps --entrypoint promtool prometheus test rules /etc/prometheus/tests/elmanhg.rules.test.yml
-  compose run --rm --no-deps --entrypoint amtool alertmanager check-config /etc/alertmanager/alertmanager.yml
+  # Alertmanager renders its config from env: check the null and both email variants (docs/observability.md §9).
+  am_null=$(compose run --rm --no-deps alertmanager --check) || fail "null Alertmanager config is invalid"
+  [[ $am_null == *'receiver: default'* && $am_null != *email_configs* ]] || fail "unconfigured Alertmanager does not use the null receiver"
+  am_email=$(compose run --rm --no-deps -e ALERTMANAGER_EMAIL_TO=alerts@example.com -e ALERTMANAGER_EMAIL_FROM=alerts@example.com \
+    -e ALERTMANAGER_SMTP_PASSWORD=smoke-placeholder-not-a-key alertmanager --check) || fail "email Alertmanager config is invalid"
+  [[ $am_email == *'receiver: email'* && $am_email == *'smtp.resend.com:587'* && $am_email == *'severity="critical"'* \
+    && $am_email == *"[${SMOKE_PROJECT_NAME:-elmanhg-smoke}]"* && $am_email != *smoke-placeholder-not-a-key* ]] \
+    || fail "email Alertmanager config is wrong or leaks the password"
+  printf 'smoke-file-placeholder\n' > .smoke/alertmanager-smtp-password
+  am_file=$(ALERTMANAGER_SMTP_PASSWORD_FILE=./.smoke/alertmanager-smtp-password compose run --rm --no-deps \
+    -e ALERTMANAGER_EMAIL_TO=alerts@example.com -e ALERTMANAGER_EMAIL_FROM=alerts@example.com alertmanager --check) \
+    || fail "file-password Alertmanager config is invalid"
+  [[ $am_file == *'receiver: email'* && $am_file != *smoke-file-placeholder* ]] || fail "Alertmanager ignores the password file or leaks it"
   compose run --rm --no-deps otel-collector validate --config=/etc/otelcol-contrib/config.yaml
 fi
 
@@ -199,6 +209,15 @@ if [ "$observability" = 1 ]; then
   eventually "Caddy access log redacted" loki_redacts_web
   eventually "Grafana dashboards provisioned" grafana_has_dashboards
   eventually "Alertmanager ready" alertmanager_ready
+  # The test-alert procedure from docs/observability.md §9.
+  compose exec -T alertmanager amtool alert add alertname=ElmanhgTestAlert severity=warning \
+    --annotation=summary="Smoke test alert" --alertmanager.url=http://127.0.0.1:9093 || fail "amtool could not add the test alert"
+  alertmanager_has_test_alert() {
+    local body
+    body=$(compose exec -T alertmanager amtool alert query alertname=ElmanhgTestAlert --alertmanager.url=http://127.0.0.1:9093) || return 1
+    [[ $body == *ElmanhgTestAlert* ]]
+  }
+  eventually "test alert accepted by Alertmanager" alertmanager_has_test_alert
 fi
 
 compose run --rm migrate || fail "a second migrate run failed"
