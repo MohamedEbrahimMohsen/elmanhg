@@ -69,7 +69,11 @@ check_observability_config() {
 }
 
 env_value() {
-  grep "^$1=" "$ENV_FILE" | cut -d= -f2- || true
+  local value
+  if [ -n "${!1+x}" ]; then printf '%s' "${!1}"; return; fi
+  value=$(grep "^$1=" "$ENV_FILE" | cut -d= -f2- || true)
+  [[ $value =~ ^\"(.*)\"$ || $value =~ ^\'(.*)\'$ ]] && value=${BASH_REMATCH[1]}
+  printf '%s' "$value"
 }
 
 # Fails a deploy whose alert email is half configured; the container would silently fall back to the null receiver.
@@ -82,7 +86,8 @@ check_alert_email_config() {
   [ -z "$to$from$password$password_file" ] && return 0
   if [ -n "$password_file" ]; then
     [[ $password_file == ./* || $password_file == /* ]] || fail "ALERTMANAGER_SMTP_PASSWORD_FILE must start with ./ or / (docs/observability.md §9)"
-    [ -s "$password_file" ] || fail "ALERTMANAGER_SMTP_PASSWORD_FILE $password_file is missing or empty (docs/observability.md §9)"
+    [ -f "$password_file" ] && [ -s "$password_file" ] \
+      || fail "ALERTMANAGER_SMTP_PASSWORD_FILE $password_file is not a nonempty regular file (docs/observability.md §9)"
   fi
   [ -n "$to" ] && [ -n "$from" ] && { [ -n "$password" ] || [ -n "$password_file" ]; } \
     || fail "alert email is half configured in $ENV_FILE: set ALERTMANAGER_EMAIL_TO, ALERTMANAGER_EMAIL_FROM and ALERTMANAGER_SMTP_PASSWORD or _FILE, or clear them all (docs/observability.md §9)"

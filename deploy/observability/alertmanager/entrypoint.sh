@@ -17,7 +17,7 @@ username=${ALERTMANAGER_SMTP_USERNAME:-resend}
 environment=${ALERTMANAGER_ENVIRONMENT:-elmanhg}
 
 rm -f "$password_out"
-if [ -s "$secret_file" ]; then
+if [ -f "$secret_file" ] && [ -s "$secret_file" ]; then
   tr -d '\r\n' < "$secret_file" > "$password_out"
 elif [ -n "${ALERTMANAGER_SMTP_PASSWORD:-}" ]; then
   printf '%s' "$ALERTMANAGER_SMTP_PASSWORD" | tr -d '\r\n' > "$password_out"
