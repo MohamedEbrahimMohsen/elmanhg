@@ -1,0 +1,138 @@
+# Local demo stack (README.md, Run the demo locally): the whole system built from source on http://localhost:8080,
+# every provider fake, no keys needed. Start it with scripts/demo.sh up; never use it on a server.
+# It mirrors docker-compose.prod.yml and reuses its Caddyfile; ASPNETCORE_ENVIRONMENT=Development makes the API log
+# fake OTP codes (docker compose logs api). Every secret below is a throwaway demo value, not a real one.
+name: elmanhg-demo
+
+x-api-environment: &api-environment
+  ASPNETCORE_ENVIRONMENT: Development
+  ConnectionStrings__DbConnectionString: Host=postgres;Port=5432;Database=elmanhg;Username=elmanhg;Password=demopostgrespasswordnotasecret
+  ReverseProxy__TrustedNetworks__0: 172.30.249.0/24
+  CoreJwt__Issuer: Elmanhg
+  CoreJwt__Audience: Elmanhg.Audience
+  CoreJwt__Key: demo-only-jwt-signing-key-not-a-secret-0123456789abcdef
+  CoreOtp__Secret: demo-only-otp-hmac-secret-not-a-secret-0123456789
+  TrainingData__StudentIdHashKey: demo-only-student-id-hash-key-not-a-secret-01234
+  AdminSeed__Email: admin@elmanhg.local
+  AdminSeed__Password: demo-admin-1
+  AdminSeed__DisplayName: Demo admin
+  # Plain http on localhost: the refresh cookie must not require HTTPS.
+  Auth__RefreshTokenCookieSecure: "false"
+  Payments__Provider: Fake
+  AiService__Provider: Http
+  AiService__BaseUrl: http://ai:8000
+  AiService__ServiceToken: demo-only-ai-service-token-not-a-secret-0123456789
+  FileStorage__Provider: Local
+  FileStorage__LocalRootPath: /app/App_Data/media
+  FileStorage__PublicBaseUrl: /api/media
+  LoadTestSeed__Key: demo
+  LoadTestSeed__StudentCount: "3"
+  LoadTestSeed__StudentPassword: demo-student-1
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17@sha256:cf134a767f474095eeba57e0117be8e568e011a63f33fbf252f14c9b760f8e6f
+    environment:
+      POSTGRES_DB: elmanhg
+      POSTGRES_USER: elmanhg
+      POSTGRES_PASSWORD: demopostgrespasswordnotasecret
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build:
+      context: ..
+      dockerfile: api/Dockerfile
+    image: elmanhg-demo/api
+    command: ["--MigrateAndExit=true"]
+    restart: "no"
+    environment: *api-environment
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Demo content: one subject with lessons, questions and exam blueprints, its teacher and 3 subscribed students (idempotent).
+  seed:
+    image: elmanhg-demo/api
+    pull_policy: never
+    command: ["--SeedLoadTestAndExit=true"]
+    restart: "no"
+    environment: *api-environment
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  api:
+    image: elmanhg-demo/api
+    pull_policy: never
+    restart: unless-stopped
+    environment: *api-environment
+    volumes:
+      - api-media:/app/App_Data/media
+      - api-data-protection:/home/app/.aspnet/DataProtection-Keys
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+      ai:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "--max-time", "3", "http://127.0.0.1:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+
+  ai:
+    build: ../ai
+    image: elmanhg-demo/ai
+    restart: unless-stopped
+    environment:
+      ELMANHG_AI_ENV: development
+      ELMANHG_AI_SERVICE_TOKEN: demo-only-ai-service-token-not-a-secret-0123456789
+      ELMANHG_AI_LLM_PROVIDER: fake
+      ELMANHG_AI_EMBEDDING_PROVIDER: fake
+      ELMANHG_AI_TRANSCRIPTION_PROVIDER: fake
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys, urllib.request; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3).status == 200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  web:
+    build: ../web
+    image: elmanhg-demo/web
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ":80"
+      MEDIA_ORIGIN: ""
+    ports:
+      - "${DEMO_PORT:-8080}:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:2080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.30.249.0/24
+
+volumes:
+  postgres-data:
+  api-media:
+  api-data-protection:
+  caddy-data:
+  caddy-config:

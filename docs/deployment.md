@@ -463,6 +463,8 @@ Caddy also strips the client-sent `CF-Connecting-IP`, `CF-IPCountry`, `CF-IPCity
 
 `bash deploy/load-test.sh` runs the same stack with seeded load-test data, then the pinned k6 API load and the throttled lesson-page browser run against Caddy, and saves the k6 summaries and the EXPLAIN plans in `deploy/.loadtest-results`. It fails when an API budget or the quiz-transition budget is exceeded; the lesson-page budget is advisory (a `::warning::`) until [#220](https://github.com/MohamedEbrahimMohsen/elmanhg/issues/220) meets it. Its knobs, profiles and CI placement are in [docs/performance.md](performance.md) §5.
 
+For clicking through the system rather than testing the edge, `scripts/demo.sh up` runs `deploy/docker-compose.demo.yml`: the same services built from source on `http://localhost:8080` with `ASPNETCORE_ENVIRONMENT=Development`, fake providers, throwaway demo secrets, the admin seed and the load-test seed (key `demo`) as demo content. It keeps its data until `scripts/demo.sh reset`. Logins and commands are in the README (Run the demo locally). It is never a deploy target.
+
 ## 13. Not done yet
 
 | Item | Status |

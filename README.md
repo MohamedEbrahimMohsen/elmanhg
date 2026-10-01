@@ -33,6 +33,25 @@ Arabic-first exam-prep platform for Egyptian Thanaweya Amma students. Students d
 | `ai/` | Python 3.13 FastAPI AI service (avatar chat over the Claude API), managed with uv. |
 | `deploy/` | Production/staging Docker Compose, Caddyfile, env examples, deploy/backup/restore/smoke scripts |
 
+## Run the demo locally
+
+One command builds the api, web and ai images from source and runs the whole system (postgres, migrate, demo seed, api, ai, Caddy) on `http://localhost:8080`, with every provider fake: no keys needed. Docker Desktop and Git Bash on Windows work.
+
+```bash
+scripts/demo.sh up      # build, start, seed, wait healthy, print the logins
+scripts/demo.sh logs api | grep "OTP for"   # OTP codes (the API runs as Development)
+scripts/demo.sh down    # stop, keep the data
+scripts/demo.sh reset   # stop and delete the data
+```
+
+| Role | Sign in |
+|---|---|
+| Admin | `admin@elmanhg.local` / `demo-admin-1` |
+| Teacher | `demo-teacher@loadtest.example.com` / `demo-teacher-1` (assigned to the seeded subject) |
+| Students | `demo-student-001@loadtest.example.com` / `demo-student-1` (also `-002`, `-003`; yearly Base subscription) |
+
+The seed is the load-test seed with key `demo` (subject "Load test demo" with lessons, questions and exam blueprints); re-running `up` adds nothing twice. New students can sign up with a phone or email and read the code from the log. Payments open the fake checkout; the avatar, essay and math-step grading, retrieval and transcription answer from the ai service's fakes. The stack is `deploy/docker-compose.demo.yml`; its secrets are throwaway demo values, never use it on a server. `DEMO_PORT` changes the port.
+
 ## Run the backend locally
 
 ```bash
