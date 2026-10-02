@@ -65,9 +65,9 @@ All state is saved in `localStorage` under the key `elmanhg.v1`. Click **إعا�
 Essay and math-with-steps questions are marked **v2**:
 - Essay uses a keyword-overlap heuristic with a fake AI justification.
 - Math-with-steps checks only the final answer ("تصحيح الخطوات في الإصدار 2").
-- The built app grades the math final answer with a SymPy CAS check (equivalent forms, tolerance, form rules; #122) and, when a question has a steps weight, grades the steps with Claude against a model solution (#123), showing «جارٍ تصحيح إجابتك…» and then the per-step marks or «قيد المراجعة». The prototype does not simulate this.
+- The built app grades the math final answer with a SymPy CAS check (equivalent forms, tolerance, form rules; #122) and, when a question has a steps weight, grades the steps with the LLM (OpenAI-compatible, docs/ai-service.md) against a model solution (#123), showing «جارٍ تصحيح إجابتك…» and then the per-step marks or «قيد المراجعة». The prototype does not simulate this.
 
-The built app replaces the prototype's essay keyword list with a rubric (criteria, points, levels) and model answers (#117); essays are served since #119, and students write them in an RTL plain-text editor. The built app grades essays with Claude against the rubric (#118) instead of the keyword heuristic.
+The built app replaces the prototype's essay keyword list with a rubric (criteria, points, levels) and model answers (#117); essays are served since #119, and students write them in an RTL plain-text editor. The built app grades essays with the LLM (OpenAI-compatible, docs/ai-service.md) against the rubric (#118) instead of the keyword heuristic.
 
 The prototype has no drag-and-drop type. The built app authors diagram questions (image, drop zones, items, correct zones, zone order) with a student preview (#125); they are served since #126: students place items on a canvas and are graded per item.
 

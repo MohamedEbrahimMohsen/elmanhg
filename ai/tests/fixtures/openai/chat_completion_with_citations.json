@@ -1,0 +1,1 @@
+{"id":"chatcmpl-02","object":"chat.completion","created":1790000000,"model":"gpt-5.6-luna","choices":[{"index":0,"message":{"role":"assistant","content":"1. المقاومة = فرق الجهد ÷ شدة التيار [explanation-2].\n2. إذن R = 4 أوم [explanation-1, explanation-2].","refusal":null},"finish_reason":"stop"}],"usage":{"prompt_tokens":300,"completion_tokens":60,"total_tokens":360}}

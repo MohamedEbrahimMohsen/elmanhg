@@ -2,7 +2,7 @@
 
 ## Overview
 
-A `MathSteps` question (v2) can carry a **model solution** and a **steps weight**. When the weight is above 0, Claude grades the student's working against the model solution: 0, 1 or 2 points per model-solution step, each with a one-sentence reason, plus a one-paragraph Arabic justification and a confidence. The AI service does the grading (`POST /v1/math-step-grades`, [ai-service.md](ai-service.md)); the .NET API owns everything else:
+A `MathSteps` question (v2) can carry a **model solution** and a **steps weight**. When the weight is above 0, the LLM (OpenAI-compatible, [ai-service.md](ai-service.md)) grades the student's working against the model solution: 0, 1 or 2 points per model-solution step, each with a one-sentence reason, plus a one-paragraph Arabic justification and a confidence. The AI service does the grading (`POST /v1/math-step-grades`, [ai-service.md](ai-service.md)); the .NET API owns everything else:
 
 - The step credit is combined with the CAS final-answer verdict ([math-cas.md](math-cas.md)) into one score, and the score always comes from `MathStepsGrader.Combine`, never from the model's own total.
 - Students are graded **asynchronously** whenever step grading is needed or the final-answer check failed. Each deferred answer gets one `MathStepGrade` row, which the `math-step-grading` background worker checks, grades and applies, retrying with backoff. The student polls the grade.

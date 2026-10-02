@@ -21,6 +21,7 @@ async def post_with_retries(
     sleep: Callable[[float], Awaitable[None]],
     failure_event: str,
     model: str,
+    provider: str = PROVIDER,
 ) -> httpx2.Response:
     status_code: int | None = None
     error_type = "HTTPStatusError"
@@ -39,7 +40,7 @@ async def post_with_retries(
             await sleep(RETRY_BASE_SECONDS * 2**attempt)
     logger.warning(
         failure_event,
-        provider=PROVIDER,
+        provider=provider,
         model=model,
         status_code=status_code,
         error_type=error_type,

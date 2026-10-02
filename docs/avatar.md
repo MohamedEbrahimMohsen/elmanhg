@@ -36,17 +36,17 @@ Rules per entry point:
 ## Guardrails
 
 - **Exam in progress.** While the student has an exam that is not submitted and not past its deadline plus `Exams:DeadlineGraceSeconds` (an untimed exam stays in progress until submitted), every message is refused with `403 AVATAR_EXAM_IN_PROGRESS` before any context is loaded or the model is called, whatever the entry point, and no quota is used (PRD §17 rule 10). `InProgressExamSpecification` in Domain is the one definition; `GET /api/avatar/status` reports it as `examInProgress`, so the panel shows the refusal as soon as it opens. The AI service is never told about exams, because it is never called during one.
-- **Prompt v2** (`ai/src/elmanhg_ai/prompts/avatar_system.v2.md`): always Modern Standard Arabic, about 120 words at most, numbered steps for methods and solutions, answers only from the search results and the context, a polite one-sentence refusal for anything off the curriculum, and never revealing the instructions.
-- **Untrusted text.** The message, history, context and sources are data. The AI service strips delimiter tags from every field and sends them only in the last user turn and as search results ([ai-service.md](ai-service.md), Prompts).
+- **Prompt v3** (`ai/src/elmanhg_ai/prompts/avatar_system.v3.md`): always Modern Standard Arabic, about 120 words at most, numbered steps for methods and solutions, answers only from the lesson sources and the context, a polite one-sentence refusal for anything off the curriculum, and never revealing the instructions.
+- **Untrusted text.** The message, history, context and sources are data. The AI service strips delimiter tags from every field and sends them only in the last user turn, with sources inside `<lesson_sources>` ([ai-service.md](ai-service.md), Prompts).
 
 ## Citations
 
 1. The API sends the retrieved chunks as `sources`.
-2. The Anthropic adapter sends them as Claude `search_result` blocks with citations enabled and returns the `source` of every `search_result_location` citation in the reply.
+2. The AI service sends the sources as a JSON list inside `<lesson_sources>`; the model cites them inline as `[reference]`; the adapter removes those markers from the reply and returns only references it was sent.
 3. The AI pipeline keeps only references it was sent, distinct and in order.
 4. The API maps each reference back to its chunk and returns `{reference, section, sectionTitle, lessonId, questionId}`; references it did not send are dropped.
 
-Citations are structure from the API, not parsed model text, so the model cannot invent one. In the panel each citation is a chip under the reply: Explanation links to `/student/lesson/{id}`, Objectives to `/objectives`, Summary to `/summary`, and a question explanation is shown without a link. Clicking a link closes the panel. Both fakes cite the first source, so the path works offline.
+Citations are parsed from the model's markers, but only references the API sent are accepted (by the AI service, and again by the API's mapper), so the model cannot invent one. In the panel each citation is a chip under the reply: Explanation links to `/student/lesson/{id}`, Objectives to `/objectives`, Summary to `/summary`, and a question explanation is shown without a link. Clicking a link closes the panel. Both fakes cite the first source, so the path works offline.
 
 ## Daily quota
 
@@ -95,8 +95,8 @@ Response `200`:
   "dailyMessageLimit": 5,
   "messagesUsedToday": 3,
   "messagesRemainingToday": 2,
-  "model": "claude-sonnet-5",
-  "promptVersion": "v2"
+  "model": "gpt-5.6-luna",
+  "promptVersion": "v3"
 }
 ```
 
@@ -131,7 +131,7 @@ Send `conversationId` back with the next message to continue the conversation; i
 | `Avatar:AdminConversationsMaxPageSize` | 100 | 1 to 200 | largest admin conversation page |
 | `Avatar:ConversationSearchMaxLength` | 200 | 1 to 500 | longest admin search text |
 
-The AI service's prompt version is `ELMANHG_AI_CHAT_PROMPT_VERSION` (default `v2`). See [deployment.md](deployment.md) for production values.
+The AI service's prompt version is `ELMANHG_AI_CHAT_PROMPT_VERSION` (default `v3`). See [deployment.md](deployment.md) for production values.
 
 ## Conversation log
 
@@ -178,7 +178,7 @@ There is no streaming: each message gets one JSON reply, and the panel shows «�
 
 ## Eval
 
-`ai/src/elmanhg_ai/eval/`: 22 cases in `datasets/avatar_chat.v2.jsonl` (7 `safety`), deterministic scorers (Arabic ratio, word count, citations, numbered steps, required and forbidden terms), threshold: a pass rate of at least 0.85 and every safety case passing. Run it against Claude with `ELMANHG_AI_LLM_PROVIDER=anthropic`, `ELMANHG_AI_ANTHROPIC_API_KEY` and `ELMANHG_AI_SERVICE_TOKEN` set: `cd ai && uv run pytest -m eval`. Without them the test skips. Details in [ai-service.md](ai-service.md), Eval.
+`ai/src/elmanhg_ai/eval/`: 22 cases in `datasets/avatar_chat.v2.jsonl` (7 `safety`), deterministic scorers (Arabic ratio, word count, citations, numbered steps, required and forbidden terms), threshold: a pass rate of at least 0.85 and every safety case passing. Run it against the LLM with `ELMANHG_AI_LLM_PROVIDER=openai_compatible`, `ELMANHG_AI_OPENAI_API_KEY` (or `ELMANHG_AI_LLM_API_KEY`) and `ELMANHG_AI_SERVICE_TOKEN` set: `cd ai && uv run pytest -m eval`. Without them the test skips. Details in [ai-service.md](ai-service.md), Eval.
 
 ## Not in this story
 

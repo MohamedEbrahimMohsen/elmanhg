@@ -49,7 +49,7 @@ Three files sit next to `docker-compose.prod.yml` on the host, plus an optional 
 | `ai.env` | the `ai` container | every `ELMANHG_AI_*` |
 | `secrets/alertmanager-smtp-password` (optional, profile `observability`) | the `alertmanager` container | the Resend API key for alert email; owned by 65534 (`nobody`), `chmod 400`, in a `chmod 700` folder ([docs/observability.md](observability.md), Alert delivery) |
 
-The API never sees the AI provider keys (Anthropic, OpenAI), and the AI service never sees the JWT key.
+The API never sees the AI provider keys (LLM, OpenAI), and the AI service never sees the JWT key.
 
 Precedence inside the API container, highest first:
 1. Compose `environment:` (computed values: connection string, trusted proxy network, AI base URL, file storage).
@@ -293,15 +293,17 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | Variable | Default | Notes |
 |---|---|---|
 | `ELMANHG_AI_SERVICE_TOKEN` | required | secret, at least 32 characters |
-| `ELMANHG_AI_LLM_PROVIDER` | `fake` | `anthropic` to go live |
-| `ELMANHG_AI_ANTHROPIC_API_KEY` | unset | secret; required for `anthropic` |
-| `ELMANHG_AI_CHAT_MODEL` | `claude-sonnet-5` | |
+| `ELMANHG_AI_LLM_PROVIDER` | `fake` | `openai_compatible` to go live |
+| `ELMANHG_AI_LLM_BASE_URL` | `https://api.openai.com/v1` | any OpenAI-compatible Chat Completions endpoint, https only (Gemini, DeepSeek: [ai-service.md](ai-service.md)) |
+| `ELMANHG_AI_LLM_API_KEY` | unset | secret, optional; empty reuses `ELMANHG_AI_OPENAI_API_KEY`. One of the two is required for `openai_compatible` |
+| `ELMANHG_AI_LLM_STRUCTURED_OUTPUT` / `_MAX_TOKENS_FIELD` / `_REASONING_EFFORT` | `json_schema` / `max_completion_tokens` / `low` | DeepSeek: `json_object` / `max_tokens` / `default` |
+| `ELMANHG_AI_CHAT_MODEL` | `gpt-5.6-luna` | placeholder; confirm against the provider's model list at go-live |
 | `ELMANHG_AI_LOG_LEVEL` / `ELMANHG_AI_LOG_FORMAT` | `INFO` / `json` | |
-| `ELMANHG_AI_CHAT_PROMPT_VERSION` | `v2` | the production Avatar prompt; `v1` is kept for history |
+| `ELMANHG_AI_CHAT_PROMPT_VERSION` | `v3` | the production Avatar prompt; `v1` and `v2` are kept for history |
 | `ELMANHG_AI_CHAT_MAX_SOURCES` / `ELMANHG_AI_CHAT_MAX_SOURCE_CHARS` | `20` / `8000` | retrieved lesson chunks per message / per chunk |
 | `ELMANHG_AI_CHAT_MAX_TOKENS` / `_MAX_HISTORY_MESSAGES` / `_MAX_MESSAGE_CHARS` / `_MAX_CONTEXT_CHARS` | `1024` / `20` / `4000` / `60000` | |
 | `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` / `ELMANHG_AI_MODEL_MAX_RETRIES` | `20` / `1` | |
-| `ELMANHG_AI_MODEL_INPUT_USD_PER_MILLION_TOKENS` / `_OUTPUT_USD_PER_MILLION_TOKENS` | `3` / `15` | cost logging and the `costUsd` stored per reply |
+| `ELMANHG_AI_MODEL_INPUT_USD_PER_MILLION_TOKENS` / `_OUTPUT_USD_PER_MILLION_TOKENS` | `0.20` / `1.20` | cost logging and the `costUsd` stored per reply; one pair for all three pipelines |
 | `ELMANHG_AI_EMBEDDING_PROVIDER` | `fake` | `openai` to go live |
 | `ELMANHG_AI_OPENAI_API_KEY` | unset | secret; required for `openai` |
 | `ELMANHG_AI_EMBEDDING_MODEL` | `text-embedding-3-small` | |
@@ -313,9 +315,9 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | `ELMANHG_AI_TRANSCRIPTION_TIMEOUT_SECONDS` | `60` | per call; with one retry it stays under `AiService__TranscriptionTimeoutSeconds` |
 | `ELMANHG_AI_TRANSCRIPTION_MAX_AUDIO_BYTES` / `ELMANHG_AI_TRANSCRIPTION_MAX_DURATION_SECONDS` | `10485760` / `600` | per recording |
 | `ELMANHG_AI_TRANSCRIPTION_USD_PER_MINUTE` | `0.006` | cost logging only |
-| `ELMANHG_AI_ESSAY_GRADING_MODEL` | `claude-sonnet-5` | essay grading uses the Claude provider and key above |
+| `ELMANHG_AI_ESSAY_GRADING_MODEL` | `gpt-5.6-luna` | essay grading uses the LLM provider and key above |
 | `ELMANHG_AI_ESSAY_GRADING_TIMEOUT_SECONDS` | `45` | per call; with one retry (about 91 s) it stays under `AiService__EssayGradingTimeoutSeconds` |
-| `ELMANHG_AI_MATH_STEP_GRADING_MODEL` / `ELMANHG_AI_MATH_STEP_GRADING_TIMEOUT_SECONDS` | `claude-sonnet-5` / `45` | math step grading uses the Claude provider and key above; with one retry it stays under `AiService__MathStepGradingTimeoutSeconds` (100) |
+| `ELMANHG_AI_MATH_STEP_GRADING_MODEL` / `ELMANHG_AI_MATH_STEP_GRADING_TIMEOUT_SECONDS` | `gpt-5.6-luna` / `45` | math step grading uses the LLM provider and key above; with one retry it stays under `AiService__MathStepGradingTimeoutSeconds` (100) |
 | `ELMANHG_AI_CAS_MAX_EXPANSION_TERMS` | `500` | the CAS rejects an answer whose expansion would exceed this many terms as unreadable ([docs/math-cas.md](math-cas.md)) |
 | `ELMANHG_AI_CAS_TIMEOUT_SECONDS` | `5` | hard timeout of one SymPy check; on a timeout only the offending worker slot is killed and restarted in the background, and the other slots are untouched ([docs/math-cas.md](math-cas.md)) |
 | `ELMANHG_AI_CAS_WORKERS` / `ELMANHG_AI_CAS_WORKER_MEMORY_MB` | `2` / `1024` | CAS worker processes and their address-space cap (POSIX) |

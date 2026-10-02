@@ -59,11 +59,11 @@ def estimate_cost_usd(input_tokens: int, output_tokens: int, settings: Settings)
 
 
 def build_model_client(settings: Settings) -> ModelClient:
-    from elmanhg_ai.clients.anthropic_model import AnthropicModelClient
     from elmanhg_ai.clients.fake_model import FakeModelClient
+    from elmanhg_ai.clients.openai_compatible_model import OpenAiCompatibleModelClient
 
     match settings.llm_provider:
         case "fake":
             return FakeModelClient()
-        case "anthropic":
-            return AnthropicModelClient.from_settings(settings)
+        case "openai_compatible":
+            return OpenAiCompatibleModelClient.from_settings(settings)

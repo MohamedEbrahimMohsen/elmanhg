@@ -15,8 +15,8 @@ Shared contract rules (errors, pagination, idempotency, versioning): global skil
 These override the sections below for this repo.
 
 1. Stack pin: Python 3.13 (`ai/.python-version`), uv 0.12.17, package `elmanhg_ai` under `ai/src/`, settings prefix `ELMANHG_AI_`.
-2. LLM: the Claude API through the `anthropic` SDK (pinned `==`) inside `clients/anthropic_model.py`, behind the `ModelClient` protocol in `clients/model.py`. There is **no LiteLLM**. `FakeModelClient` is the default (`ELMANHG_AI_LLM_PROVIDER=fake`). The anthropic 1.x `messages.create` has no `temperature`, so none is set.
-3. HTTP library: `httpx2` (anthropic's transport). Never add `httpx`, `requests` or `respx`.
+2. LLM: any OpenAI-compatible Chat Completions endpoint (OpenAI by default; Gemini or DeepSeek by base URL) through raw `httpx2` calls in `clients/openai_compatible_model.py`, behind the `ModelClient` protocol in `clients/model.py`. No `openai` or `anthropic` SDK and no LiteLLM; the Anthropic API is never used (dev decision 2026-10-01). `FakeModelClient` is the default (`ELMANHG_AI_LLM_PROVIDER=fake`). No `temperature` is sent.
+3. HTTP library: `httpx2`, shared by every provider adapter through `clients/openai_http.py`. Never add `httpx`, `requests` or `respx`.
 4. No database, SQLAlchemy or Alembic until a story needs one. Ignore §9 until then.
 5. OpenTelemetry (from E13.S2): `core/telemetry.py` builds the tracer and meter providers (OTLP/gRPC only when `ELMANHG_AI_OTLP_ENDPOINT` is set); FastAPI is instrumented there; model and embedding calls are measured by the `clients/metered.py` wrappers applied in `lifespan`. Do not add OTLP log handlers: logs leave through stdout (docs/observability.md).
 6. No Postman for `ai/`: the service is internal, and the .NET API's Postman collection covers user-facing endpoints.

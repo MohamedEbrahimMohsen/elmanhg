@@ -145,7 +145,7 @@ Rules live in `deploy/observability/prometheus/rules/elmanhg.rules.yml`, and eac
 | `ApiUnhandledErrors` | any `UNHANDLED_EXCEPTION` in 10 m | warning | Errors across services; find the trace by its id and fix the bug |
 | `ProviderUnavailable` | ≥ 5 `AI_SERVICE_UNAVAILABLE`, `OTP_CHANNEL_UNAVAILABLE` or `PAYMENT_GATEWAY_UNAVAILABLE` in 15 m | warning | Check the provider's status page and the matching `*.env` keys |
 | `OtpDeliveryFailing` | ≥ 5 failed OTP sends in 15 m | critical | Nobody can sign in: check the WhatsApp or Resend credentials and quotas ([docs/otp-delivery.md](otp-delivery.md)) |
-| `AiModelErrors` | ≥ 5 failed model or embedding calls in 15 m | warning | Business → AI calls shows the `error.type`; check the Anthropic or OpenAI key and status |
+| `AiModelErrors` | ≥ 5 failed model or embedding calls in 15 m | warning | Business → AI calls shows the `error.type`; check the LLM or OpenAI key and the provider's status |
 | `ClientErrorSpike` | ≥ 50 browser errors in 15 m | warning | Loki: `{service_name="elmanhg-api"} |= "Client error from"`; usually a bad web deploy |
 | `PaymentNotificationNeedsReview` | any `FlaggedForReview` notification in 1 h | warning | Resolve it in the admin payment log ([docs/paymob.md](paymob.md)) |
 | `ApiHotPathSlow` | p95 of a sessions/exams/browse route > 1 s over 15 m with > 0.05 rps, for 15 m | warning | Service health → API p95 by route; compare with the [docs/performance.md](performance.md) budgets; check the DB ([docs/performance.md](performance.md) §6) and recent deploys |

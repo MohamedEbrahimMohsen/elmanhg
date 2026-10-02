@@ -2,7 +2,7 @@
 
 ## Overview
 
-Essays (question type `Essay`, v2) are graded by Claude against the rubric a teacher wrote for the question ([question-schemas.md](question-schemas.md), Essay). The AI service (`POST /v1/essay-grades`, [ai-service.md](ai-service.md)) returns points per rubric criterion with a reason for each, a one-paragraph Arabic justification and a confidence. The .NET API owns everything else:
+Essays (question type `Essay`, v2) are graded by the LLM (OpenAI-compatible, [ai-service.md](ai-service.md)) against the rubric a teacher wrote for the question ([question-schemas.md](question-schemas.md), Essay). The AI service (`POST /v1/essay-grades`, [ai-service.md](ai-service.md)) returns points per rubric criterion with a reason for each, a one-paragraph Arabic justification and a confidence. The .NET API owns everything else:
 
 - Students are graded **asynchronously**. Each answered essay gets one `EssayGrade` row, which the `essay-grading` background worker grades, retrying with backoff. The student polls the grade.
 - The admin «جرّب الإجابة» in the question editor grades **synchronously**: `POST /api/questions/grade-draft` calls the grader directly, stores nothing and does not retry.
