@@ -3,6 +3,7 @@ using Elmanhg.Infrastructure.Data.Context;
 using Elmanhg.Tests.Fixtures.Paymob;
 using Elmanhg.Tests.Integration.Auth;
 using Elmanhg.Tests.Integration.Authorization;
+using Elmanhg.Tests.Integration.Configuration;
 using Elmanhg.Tests.Integration.Infrastructure;
 using Elmanhg.Tests.Integration.Payments;
 using FluentAssertions;
@@ -17,6 +18,7 @@ using static Elmanhg.Tests.Integration.Sessions.SessionTestData;
 
 namespace Elmanhg.Tests.Integration.Subscriptions;
 
+[Collection(RuntimeSettingsCollection.Name)]
 public sealed class PaymobRefundWebhookEndpointTests(ApiFactory factory)
 {
     private const long OrderId = 217503754;
@@ -35,6 +37,22 @@ public sealed class PaymobRefundWebhookEndpointTests(ApiFactory factory)
         (response.StatusCode, await OutcomeAsync(response)).Should().Be((HttpStatusCode.OK, "Refunded"));
         var stored = await ReadAsync(payment.Id);
         (stored.Status, stored.RefundTransactionId, stored.RefundedBy).Should().Be((PaymentStatus.Refunded, refundId.ToString(), (Guid?)null));
+        (await GetTierAsync(client)).Should().Be("Free");
+    }
+
+    [Fact]
+    public async Task Post_SignedFullRefundWhileRefundsOff_StillMarksRefunded()
+    {
+        await PaymentsTestData.SetRefundsEnabledAsync(factory, false, CancellationToken);
+        var (student, client) = await SignedInFreeStudentAsync(factory);
+        var (payment, _) = await PaymentsTestData.SeedSucceededAsync(factory, student.Id, DateTimeOffset.UtcNow.AddDays(-1), null, CancellationToken);
+        var refundId = NewTransactionId();
+
+        using var response = await PostSignedAsync(RefundPayload(payment, refundId, 19900));
+
+        (response.StatusCode, await OutcomeAsync(response)).Should().Be((HttpStatusCode.OK, "Refunded"));
+        var stored = await ReadAsync(payment.Id);
+        (stored.Status, stored.RefundTransactionId).Should().Be((PaymentStatus.Refunded, refundId.ToString()));
         (await GetTierAsync(client)).Should().Be("Free");
     }
 

@@ -1,4 +1,8 @@
-import type { AdminPaymentResult, PageDataOfAdminPaymentResult } from '@/shared/api/generated/model';
+import type {
+  AdminPaymentResult,
+  PageDataOfAdminPaymentResult,
+  PaymentSettingsResult,
+} from '@/shared/api/generated/model';
 
 export const adminPaymentId = 'f6f6f6f6-f6f6-4f6f-8f6f-f6f6f6f6f6f6';
 export const adminPaymentStudentId = 'a7a7a7a7-a7a7-4a7a-8a7a-a7a7a7a7a7a7';
@@ -35,4 +39,8 @@ export function paymentLogPage(
   totalPages = 1,
 ): PageDataOfAdminPaymentResult {
   return { items, pageNumber, pageSize: 20, totalItems: items.length, totalPages };
+}
+
+export function paymentSettings(overrides: Partial<PaymentSettingsResult> = {}): PaymentSettingsResult {
+  return { refundsEnabled: true, ...overrides };
 }

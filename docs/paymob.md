@@ -8,7 +8,7 @@ Students pay for Base and Ask a Teacher through Paymob's **unified checkout** (c
 
 | Value | Adapter | Use |
 |---|---|---|
-| `Fake` (default) | `FakePaymentGateway` | Development, tests, CI and the build-time OpenAPI run; a non-Production host (staging) only with `AllowFakePayments=true`. No keys needed. |
+| `Fake` (default) | `FakePaymentGateway` | Development (the switch defaults on), tests, CI and the build-time OpenAPI run; any other non-Production host only with `AllowFakePayments=true`. No keys needed. |
 | `Paymob` | `PaymobPaymentGateway` | Real payments through the Paymob Intention API, and admin refunds through the Paymob refund API (section 9). |
 
 `Fake` is the default in code, in `appsettings.example.json` and in the test host.
@@ -21,7 +21,7 @@ All keys live under `Payments` (environment variables use `__`, for example `Pay
 |---|---|---|---|
 | `Provider` | `Fake` | no | `Fake` or `Paymob` |
 | `FakeCheckoutPath` | `/student/fake-checkout` | no | Web route of the simulated checkout page; the payment id is appended |
-| `AllowFakePayments` | `false` | no | Lets the fake run outside Development (staging without Paymob keys). Ignored in Production. |
+| `AllowFakePayments` | unset: `true` in Development, `false` elsewhere | no | The fake serves only when true. Must not be true in Production (boot fails). |
 | `AttemptTimeoutSeconds` | `10` | no | 1–15, per HTTP attempt |
 | `TotalTimeoutSeconds` | `30` | no | 1–120 |
 | `Paymob:BaseUrl` | `https://accept.paymob.com` | no | API host (Egypt) |
@@ -40,6 +40,7 @@ All keys live under `Payments` (environment variables use `__`, for example `Pay
 
 - `AttemptTimeoutSeconds` must not exceed `TotalTimeoutSeconds`; `FakeCheckoutPath` must be an in-app path.
 - With `Provider=Paymob` only: `SecretKey`, `PublicKey`, `RedirectionUrl`, `BillingCountry` and `HmacSecret` are required; `IntegrationIds` needs at least one positive id; `BaseUrl`, `CheckoutUrl`, `RedirectionUrl` and (when set) `NotificationUrl` must be absolute `https` URLs.
+- `AllowFakePayments=true` with `ASPNETCORE_ENVIRONMENT=Production` fails the boot.
 - The fake is never checked for Paymob keys. There is no silent fallback: choosing `Paymob` without its keys fails the boot.
 
 ## 4. The Intention API flow
@@ -79,7 +80,7 @@ The adapter was built and tested against a stubbed HTTP handler only; no Paymob 
 
 With `Provider=Fake`, checkout returns the in-app path `{FakeCheckoutPath}/{paymentId}`. That page shows the plan and amount and offers **success**, **failure** and **cancel**. Success and failure call `POST /api/subscriptions/payments/{paymentId}/fake-completion { succeeded }`, which runs the same `PaymentSettlement.Succeed` / `Fail` the webhook calls, so the entitlement changes server-side exactly as it does with Paymob. There is no extra re-check: like the webhook, a success for a plan the student already holds extends it. Only a Pending payment can be completed (400 `PAYMENT_NOT_PENDING`).
 
-**Environment lock:** the fake works in Development, and in any other non-Production environment only when `Payments:AllowFakePayments=true` (the test host sets it). Otherwise it refuses checkout (503 `PAYMENT_GATEWAY_UNAVAILABLE`) and fake completion (404 `FAKE_CHECKOUT_UNAVAILABLE`), and in `Production` it always refuses, so a misconfigured server can never grant free plans. With `Provider=Paymob`, fake completion is always 404.
+**Environment lock:** the fake serves only when `Payments:AllowFakePayments` is true (unset: true in Development, false elsewhere; the test host sets it). Otherwise it refuses checkout (503 `PAYMENT_GATEWAY_UNAVAILABLE`), refunds (503) and fake completion (404 `FAKE_CHECKOUT_UNAVAILABLE`). Production can never turn it on: the API refuses to start. A local `appsettings.json` copied before #256 may still hold `"AllowFakePayments": false`; delete that key. With `Provider=Paymob`, fake completion is always 404.
 
 ## 7. Going live
 
@@ -141,5 +142,7 @@ Nothing is saved locally unless Paymob confirms the refund. Bodies and keys are 
 **No retries.** The refund call is not idempotent at Paymob (no idempotency key is documented), so the typed client keeps `Retry.DisableForUnsafeHttpMethods()`: a POST is sent once. A timeout after Paymob processed the refund leaves the payment Succeeded locally; the signed reversal callback then marks it Refunded.
 
 **The fake.** With `Provider=Fake`, `RefundAsync` returns `fake-refund-{paymentId:N}` at once. Where the fake is locked (section 6) it refuses with 503 `PAYMENT_GATEWAY_UNAVAILABLE`, like fake checkout.
+
+**Feature flag.** Admin refunds are behind the `features.refundsEnabled` flag, off by default (docs/subscriptions.md → Refunds). Signed reversal callbacks (section 8) are applied whatever the flag says.
 
 **Void.** There is no separate void call; see section 5.

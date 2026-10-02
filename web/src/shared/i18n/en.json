@@ -218,6 +218,7 @@
     "PAYMENT_REFUND_REASON_TOO_LONG": "The refund reason is too long.",
     "PAYMENT_REFUND_IDEMPOTENCY_KEY_REQUIRED": "The Idempotency-Key header must be a non-empty UUID.",
     "PAYMENT_REFUND_DECLINED": "Paymob declined the refund. Check the transaction in the Paymob dashboard.",
+    "PAYMENT_REFUNDS_DISABLED": "Refunds are turned off. An admin can turn them on in Configuration.",
     "PAYMENT_NOT_SETTLED": "The payment has not been settled yet.",
     "PAYMENT_LOG_PAGE_NUMBER_INVALID": "The page number must be 1 or more.",
     "PAYMENT_LOG_PAGE_SIZE_INVALID": "The page size is not valid.",

@@ -351,6 +351,7 @@
   <data name="PAYMENT_REFUND_REASON_TOO_LONG" xml:space="preserve"><value>The refund reason is too long.</value></data>
   <data name="PAYMENT_REFUND_IDEMPOTENCY_KEY_REQUIRED" xml:space="preserve"><value>The Idempotency-Key header must be a non-empty UUID.</value></data>
   <data name="PAYMENT_REFUND_DECLINED" xml:space="preserve"><value>Paymob declined the refund. Check the transaction in the Paymob dashboard.</value></data>
+  <data name="PAYMENT_REFUNDS_DISABLED" xml:space="preserve"><value>Refunds are turned off. An admin can turn them on in Configuration.</value></data>
   <data name="PAYMENT_NOT_SETTLED" xml:space="preserve"><value>The payment has not been settled yet.</value></data>
   <data name="PAYMENT_LOG_PAGE_NUMBER_INVALID" xml:space="preserve"><value>The page number must be 1 or more.</value></data>
   <data name="PAYMENT_LOG_PAGE_SIZE_INVALID" xml:space="preserve"><value>The page size is not valid.</value></data>

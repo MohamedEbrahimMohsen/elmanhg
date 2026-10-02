@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { AdminPaymentResult } from '@/shared/api/generated/model';
+import { useRefundsEnabled } from '../hooks/useRefundsEnabled';
 import { PaymentLogRow } from './PaymentLogRow';
 
 export interface PaymentLogTableProps {
@@ -13,6 +14,7 @@ const headerKeys = ['date', 'student', 'plan', 'amount', 'status', 'reference', 
 
 export function PaymentLogTable({ items, onRefund, onKeep, onStudent }: PaymentLogTableProps) {
   const { t } = useTranslation('payments');
+  const { data: refundsEnabled } = useRefundsEnabled();
 
   return (
     <div className="overflow-x-auto rounded-lg border border-border bg-surface shadow-1">
@@ -33,7 +35,14 @@ export function PaymentLogTable({ items, onRefund, onKeep, onStudent }: PaymentL
         </thead>
         <tbody>
           {items.map((item) => (
-            <PaymentLogRow key={item.id} item={item} onRefund={onRefund} onKeep={onKeep} onStudent={onStudent} />
+            <PaymentLogRow
+              key={item.id}
+              item={item}
+              refundsOff={refundsEnabled === false}
+              onRefund={onRefund}
+              onKeep={onKeep}
+              onStudent={onStudent}
+            />
           ))}
         </tbody>
       </table>

@@ -73,6 +73,10 @@
       "reasonTooLong": "The refund reason is too long."
     }
   },
+  "refundsOff": {
+    "title": "Refunds are turned off",
+    "body": "Refunds from this page are paused until an admin turns on \"Allow refunds from the payment log\" in Configuration. Refunds made in the Paymob dashboard are still recorded here."
+  },
   "resolve": {
     "title": "Keep this payment?",
     "body": "The review closes; the payment and the plan stay as they are.",

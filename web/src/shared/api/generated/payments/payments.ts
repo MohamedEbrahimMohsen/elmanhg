@@ -31,6 +31,7 @@ import type {
   AdminPaymentResult,
   GetPaymentLogParams,
   PageDataOfAdminPaymentResult,
+  PaymentSettingsResult,
   RefundPaymentHeaders,
   RefundPaymentRequest
 } from '../model';
@@ -199,6 +200,152 @@ export function useGetPaymentLogSuspense<TData = Awaited<ReturnType<typeof getPa
  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetPaymentLogSuspenseQueryOptions(params,options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetPaymentSettingsUrl = () => {
+
+
+
+
+  return `/api/payments/settings`
+}
+
+export const getPaymentSettings = async ( options?: Parameters<typeof http>[1]): Promise<PaymentSettingsResult> => {
+
+  return http<PaymentSettingsResult>(getGetPaymentSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPaymentSettingsQueryKey = () => {
+    return [
+    `/api/payments/settings`
+    ] as const;
+    }
+
+
+export const getGetPaymentSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getPaymentSettings>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPaymentSettings>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPaymentSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPaymentSettings>>> = ({ signal }) => getPaymentSettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPaymentSettings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPaymentSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof getPaymentSettings>>>
+export type GetPaymentSettingsQueryError = unknown
+
+
+export function useGetPaymentSettings<TData = Awaited<ReturnType<typeof getPaymentSettings>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPaymentSettings>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPaymentSettings>>,
+          TError,
+          Awaited<ReturnType<typeof getPaymentSettings>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPaymentSettings<TData = Awaited<ReturnType<typeof getPaymentSettings>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPaymentSettings>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPaymentSettings>>,
+          TError,
+          Awaited<ReturnType<typeof getPaymentSettings>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPaymentSettings<TData = Awaited<ReturnType<typeof getPaymentSettings>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPaymentSettings>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetPaymentSettings<TData = Awaited<ReturnType<typeof getPaymentSettings>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPaymentSettings>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPaymentSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetPaymentSettingsSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getPaymentSettings>>, TError = unknown>( options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getPaymentSettings>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPaymentSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPaymentSettings>>> = ({ signal }) => getPaymentSettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getPaymentSettings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetPaymentSettingsSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getPaymentSettings>>>
+export type GetPaymentSettingsSuspenseQueryError = unknown
+
+
+export function useGetPaymentSettingsSuspense<TData = Awaited<ReturnType<typeof getPaymentSettings>>, TError = unknown>(
+  options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getPaymentSettings>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPaymentSettingsSuspense<TData = Awaited<ReturnType<typeof getPaymentSettings>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getPaymentSettings>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPaymentSettingsSuspense<TData = Awaited<ReturnType<typeof getPaymentSettings>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getPaymentSettings>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetPaymentSettingsSuspense<TData = Awaited<ReturnType<typeof getPaymentSettings>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getPaymentSettings>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPaymentSettingsSuspenseQueryOptions(options)
 
   const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
