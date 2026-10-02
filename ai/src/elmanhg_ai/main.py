@@ -73,6 +73,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         "service.started",
         env=settings.env,
         llm_provider=settings.llm_provider,
+        llm_base_url=settings.llm_base_url,
+        llm_structured_output=settings.llm_structured_output,
         chat_model=settings.chat_model,
         prompt_version=settings.chat_prompt_version,
         essay_grading_model=settings.essay_grading_model,

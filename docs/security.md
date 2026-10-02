@@ -175,7 +175,7 @@ No outbound URL comes from user input. Every HTTP client is a typed client whose
 | SMS OTP (disabled) | none | `OtpDelivery:Sms:Url` |
 | Object storage (R2 or S3) | none | `FileStorage:S3ServiceUrl` |
 
-The ai service calls Anthropic and OpenAI through their SDKs with fixed hosts ([ai-service.md](ai-service.md)).
+The ai service calls the configured OpenAI-compatible LLM endpoint (`ELMANHG_AI_LLM_BASE_URL`, https only) and OpenAI (embeddings, Whisper) over `httpx2`, with hosts fixed by config ([ai-service.md](ai-service.md)).
 
 ## 10. Logging and audit
 

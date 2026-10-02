@@ -2,7 +2,7 @@
 
 ## Role
 
-`ai/` is an internal Python 3.13 FastAPI service (package `elmanhg_ai`, managed with uv). It answers avatar chat turns over the Claude API (PRD §9) embeds text for lesson retrieval ([content-retrieval.md](content-retrieval.md)), transcribes teachers' voice replies (speech to text, [ask-teacher.md](ask-teacher.md)), grades essays against the teacher's rubric ([essay-grading.md](essay-grading.md)), checks math final answers with SymPy ([math-cas.md](math-cas.md)), and grades math working against the model solution ([math-step-grading.md](math-step-grading.md)). Only the .NET API calls it, over HTTP with a shared service token; browsers never do. The .NET side of the contract is `api/Elmanhg.Application/Shared/AiService/` (`IAiServiceClient`, `IAiTranscriptionClient` for transcription, `IAiEssayGradingClient` for essay grading, `IAiMathCheckClient` for the math check and `IAiMathStepGradingClient` for step grading), and the Python side is `ai/src/elmanhg_ai/api/chat/schemas.py`, `ai/src/elmanhg_ai/api/embeddings/schemas.py` `ai/src/elmanhg_ai/api/transcriptions/schemas.py` `ai/src/elmanhg_ai/api/essay_grades/schemas.py`, `ai/src/elmanhg_ai/api/math_checks/schemas.py` and `ai/src/elmanhg_ai/api/math_step_grades/schemas.py`. Both change together, and `ai/openapi/v1.json` is the committed contract (regenerate with `uv run python -m elmanhg_ai.openapi_export` from `ai/`; a test fails on drift).
+`ai/` is an internal Python 3.13 FastAPI service (package `elmanhg_ai`, managed with uv). It answers avatar chat turns over an OpenAI-compatible LLM API (PRD §9), embeds text for lesson retrieval ([content-retrieval.md](content-retrieval.md)), transcribes teachers' voice replies (speech to text, [ask-teacher.md](ask-teacher.md)), grades essays against the teacher's rubric ([essay-grading.md](essay-grading.md)), checks math final answers with SymPy ([math-cas.md](math-cas.md)), and grades math working against the model solution ([math-step-grading.md](math-step-grading.md)). Only the .NET API calls it, over HTTP with a shared service token; browsers never do. The .NET side of the contract is `api/Elmanhg.Application/Shared/AiService/` (`IAiServiceClient`, `IAiTranscriptionClient` for transcription, `IAiEssayGradingClient` for essay grading, `IAiMathCheckClient` for the math check and `IAiMathStepGradingClient` for step grading), and the Python side is `ai/src/elmanhg_ai/api/chat/schemas.py`, `ai/src/elmanhg_ai/api/embeddings/schemas.py` `ai/src/elmanhg_ai/api/transcriptions/schemas.py` `ai/src/elmanhg_ai/api/essay_grades/schemas.py`, `ai/src/elmanhg_ai/api/math_checks/schemas.py` and `ai/src/elmanhg_ai/api/math_step_grades/schemas.py`. Both change together, and `ai/openapi/v1.json` is the committed contract (regenerate with `uv run python -m elmanhg_ai.openapi_export` from `ai/`; a test fails on drift).
 
 How the API builds the context bundle, the exam refusal, the daily quota and the student UI are in [avatar.md](avatar.md).
 
@@ -53,7 +53,7 @@ Response `200`:
 {
   "reply": "هذا رد تجريبي من المساعد.",
   "model": "fake",
-  "promptVersion": "v2",
+  "promptVersion": "v3",
   "inputTokens": 0,
   "outputTokens": 0,
   "stopReason": "end_turn",
@@ -171,7 +171,7 @@ Response `200`:
   "maxPoints": 2,
   "justification": "إجابة جيدة، أضف مثالًا من الحياة اليومية.",
   "confidence": 0.82,
-  "model": "claude-sonnet-5",
+  "model": "gpt-5.6-luna",
   "promptVersion": "v1",
   "inputTokens": 900,
   "outputTokens": 150,
@@ -224,7 +224,7 @@ Response `200`:
   "maxPoints": 6,
   "justification": "خطواتك سليمة، اكتب نقل الحد بوضوح.",
   "confidence": 0.82,
-  "model": "claude-sonnet-5",
+  "model": "gpt-5.6-luna",
   "promptVersion": "v1",
   "inputTokens": 900,
   "outputTokens": 150,
@@ -298,8 +298,8 @@ Every error is RFC 9457 `application/problem+json`. `detail` is omitted when the
 | `UNAUTHENTICATED` | 401 | Missing or wrong service token (`WWW-Authenticate: Bearer`) |
 | `NOT_FOUND` | 404 | Unknown route |
 | `METHOD_NOT_ALLOWED` | 405 | Wrong method |
-| `MODEL_OUTPUT_INVALID` | 502 | The model returned no text, an embeddings reply was unreadable or had the wrong vector count or width, a transcription reply had no `text`, or an essay grade did not match the output schema, left a criterion out, listed one twice or listed an unknown one, or gave points outside 0 to the criterion's points, or a math step grade did not match its schema, left a model step out, listed one twice or listed an unknown index, or gave points outside 0 to 2 |
-| `DEPENDENCY_UNAVAILABLE` | 503 | The Claude API failed (any SDK error, after SDK retries), or an OpenAI embeddings or transcription call failed (after retries for 429, 5xx and transport errors; any other 4xx is not retried) |
+| `MODEL_OUTPUT_INVALID` | 502 | The model returned no text (an LLM reply without choices, usage or text), an embeddings reply was unreadable or had the wrong vector count or width, a transcription reply had no `text`, or an essay grade did not match the output schema, left a criterion out, listed one twice or listed an unknown one, or gave points outside 0 to the criterion's points, or a math step grade did not match its schema, left a model step out, listed one twice or listed an unknown index, or gave points outside 0 to 2 |
+| `DEPENDENCY_UNAVAILABLE` | 503 | The LLM API, OpenAI embeddings or transcription call failed (after retries for 429, 5xx and transport errors; any other 4xx is not retried) |
 | `SERVICE_NOT_READY` | 503 | Startup has not finished |
 | `INTERNAL_ERROR` | 500 | Anything unexpected (logged, never echoed) |
 
@@ -322,29 +322,33 @@ AI service (`ELMANHG_AI_*` environment variables; `settings.py` is the only plac
 | `ELMANHG_AI_LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
 | `ELMANHG_AI_LOG_FORMAT` | `json` | `json` or `console` |
 | `ELMANHG_AI_SERVICE_TOKEN` | required | at least 32 characters |
-| `ELMANHG_AI_LLM_PROVIDER` | `fake` | `fake` or `anthropic` |
-| `ELMANHG_AI_ANTHROPIC_API_KEY` | unset | required when the provider is `anthropic` |
-| `ELMANHG_AI_CHAT_MODEL` | `claude-sonnet-5` | Claude model id |
-| `ELMANHG_AI_CHAT_PROMPT_VERSION` | `v2` | pattern `v<number>`; selects both chat prompt files. `v2` is the production Avatar prompt; `v1` is kept for history |
+| `ELMANHG_AI_LLM_PROVIDER` | `fake` | `fake` or `openai_compatible` (any OpenAI-compatible Chat Completions API; the Anthropic API is not used) |
+| `ELMANHG_AI_LLM_BASE_URL` | `https://api.openai.com/v1` | https only, no credentials (`user:key@`) in the URL, trailing `/` removed; the adapter posts to `{base}/chat/completions`. Gemini: `https://generativelanguage.googleapis.com/v1beta/openai`, DeepSeek: `https://api.deepseek.com` |
+| `ELMANHG_AI_LLM_API_KEY` | unset | bearer key for the LLM endpoint; empty reuses `ELMANHG_AI_OPENAI_API_KEY`. One of the two is required when the provider is `openai_compatible`; never logged |
+| `ELMANHG_AI_LLM_STRUCTURED_OUTPUT` | `json_schema` | `json_schema` (strict `response_format`) or `json_object` (for providers without JSON Schema, such as DeepSeek; the schema is appended to the system prompt) |
+| `ELMANHG_AI_LLM_MAX_TOKENS_FIELD` | `max_completion_tokens` | `max_completion_tokens` (GPT-5 family) or `max_tokens` (DeepSeek) |
+| `ELMANHG_AI_LLM_REASONING_EFFORT` | `low` | `default` (field not sent), `none`, `minimal`, `low`, `medium` or `high`; no `temperature` is ever sent |
+| `ELMANHG_AI_CHAT_MODEL` | `gpt-5.6-luna` | LLM model id; placeholder, confirm against the provider's model list at go-live |
+| `ELMANHG_AI_CHAT_PROMPT_VERSION` | `v3` | pattern `v<number>`; selects both chat prompt files. `v3` is the production Avatar prompt; `v1` and `v2` are kept for history |
 | `ELMANHG_AI_CHAT_MAX_TOKENS` | 1024 | 1 to 8192 |
 | `ELMANHG_AI_CHAT_MAX_HISTORY_MESSAGES` | 20 | 0 to 100 |
 | `ELMANHG_AI_CHAT_MAX_MESSAGE_CHARS` | 4000 | |
 | `ELMANHG_AI_CHAT_MAX_CONTEXT_CHARS` | 60000 | |
 | `ELMANHG_AI_CHAT_MAX_SOURCES` | 20 | 0 to 50 |
 | `ELMANHG_AI_CHAT_MAX_SOURCE_CHARS` | 8000 | |
-| `ELMANHG_AI_ESSAY_GRADING_MODEL` | `claude-sonnet-5` | Claude model id for essay grading (independent of the chat model) |
+| `ELMANHG_AI_ESSAY_GRADING_MODEL` | `gpt-5.6-luna` | LLM model id for essay grading (independent of the chat model); placeholder, confirm at go-live |
 | `ELMANHG_AI_ESSAY_GRADING_PROMPT_VERSION` | `v1` | pattern `v<number>`; selects the essay system and turn prompts and the output schema |
 | `ELMANHG_AI_ESSAY_GRADING_MAX_TOKENS` | 2048 | 1 to 8192 |
-| `ELMANHG_AI_ESSAY_GRADING_TIMEOUT_SECONDS` | 45 | per essay-grading Claude call, above 0 and at most 300 |
+| `ELMANHG_AI_ESSAY_GRADING_TIMEOUT_SECONDS` | 45 | per essay-grading LLM call, above 0 and at most 300 |
 | `ELMANHG_AI_ESSAY_GRADING_MAX_ESSAY_CHARS` | 20000 | |
 | `ELMANHG_AI_ESSAY_GRADING_MAX_FIELD_CHARS` | 20000 | question and each model answer |
 | `ELMANHG_AI_ESSAY_GRADING_MAX_CRITERIA` | 10 | 1 to 50 |
 | `ELMANHG_AI_ESSAY_GRADING_MAX_MODEL_ANSWERS` | 3 | 1 to 10 |
 | `ELMANHG_AI_ESSAY_GRADING_MAX_OBJECTIVES` | 20 | 0 to 100 |
-| `ELMANHG_AI_MATH_STEP_GRADING_MODEL` | `claude-sonnet-5` | Claude model id for math step grading |
+| `ELMANHG_AI_MATH_STEP_GRADING_MODEL` | `gpt-5.6-luna` | LLM model id for math step grading; placeholder, confirm at go-live |
 | `ELMANHG_AI_MATH_STEP_GRADING_PROMPT_VERSION` | `v1` | pattern `v<number>`; selects the step-grading prompts and output schema |
 | `ELMANHG_AI_MATH_STEP_GRADING_MAX_TOKENS` | 2048 | 1 to 8192 |
-| `ELMANHG_AI_MATH_STEP_GRADING_TIMEOUT_SECONDS` | 45 | per step-grading Claude call, above 0 and at most 300 |
+| `ELMANHG_AI_MATH_STEP_GRADING_TIMEOUT_SECONDS` | 45 | per step-grading LLM call, above 0 and at most 300 |
 | `ELMANHG_AI_MATH_STEP_GRADING_MAX_STEPS` / `_MAX_STEP_CHARS` / `_MAX_ACCEPTED_ANSWERS` | 20 / 500 / 20 | request limits |
 | `ELMANHG_AI_MATH_STEP_GRADING_MAX_FIELD_CHARS` / `_MAX_OBJECTIVES` | 20000 / 20 | request limits |
 | `ELMANHG_AI_CAS_TIMEOUT_SECONDS` | 5 | hard timeout of one math check, above 0 and at most 60; on a timeout only the offending worker slot is killed and restarted in the background, and checks in the other slots are untouched |
@@ -356,11 +360,11 @@ AI service (`ELMANHG_AI_*` environment variables; `settings.py` is the only plac
 | `ELMANHG_AI_CAS_MAX_NUMBER_DIGITS` / `ELMANHG_AI_CAS_MAX_EXPONENT` / `ELMANHG_AI_CAS_MAX_MAGNITUDE` | 30 / 1000 / 10000 | parser limits ([math-cas.md](math-cas.md)) |
 | `ELMANHG_AI_CAS_MAX_EXPANSION_TERMS` | 500 | upper bound on the terms of the fully expanded answer, 10 to 1 000 000 ([math-cas.md](math-cas.md)) |
 | `ELMANHG_AI_CAS_WARM_ON_START` | `true` | warm every CAS worker slot in the lifespan before the service is ready; a failed warm-up stops startup |
-| `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` | 20 | per Claude call, up to 120 |
-| `ELMANHG_AI_MODEL_MAX_RETRIES` | 1 | SDK retries with exponential backoff, 0 to 5 |
-| `ELMANHG_AI_MODEL_INPUT_USD_PER_MILLION_TOKENS` | 3 | cost logging and the `costUsd` returned per reply; confirm the list price at go-live |
-| `ELMANHG_AI_MODEL_OUTPUT_USD_PER_MILLION_TOKENS` | 15 | cost logging and the `costUsd` returned per reply; confirm the list price at go-live |
-| `ELMANHG_AI_EMBEDDING_PROVIDER` | `fake` | `fake` or `openai` (Anthropic has no embeddings API) |
+| `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` | 20 | per LLM call, up to 120 |
+| `ELMANHG_AI_MODEL_MAX_RETRIES` | 1 | retries with exponential backoff, 0 to 5 |
+| `ELMANHG_AI_MODEL_INPUT_USD_PER_MILLION_TOKENS` | 0.20 | cost logging and the `costUsd` returned per reply; one pair for all three pipelines, so re-price if their models differ; confirm the list price at go-live |
+| `ELMANHG_AI_MODEL_OUTPUT_USD_PER_MILLION_TOKENS` | 1.20 | cost logging and the `costUsd` returned per reply; one pair for all three pipelines, so re-price if their models differ; confirm the list price at go-live |
+| `ELMANHG_AI_EMBEDDING_PROVIDER` | `fake` | `fake` or `openai` |
 | `ELMANHG_AI_OPENAI_API_KEY` | unset | required when the embedding provider is `openai`; never logged |
 | `ELMANHG_AI_EMBEDDING_MODEL` | `text-embedding-3-small` | OpenAI embeddings model id |
 | `ELMANHG_AI_EMBEDDING_DIMENSIONS` | 1536 | 1 to 2000, sent as the OpenAI `dimensions` parameter; must equal the API's `vector(1536)` column |
@@ -380,7 +384,7 @@ AI service (`ELMANHG_AI_*` environment variables; `settings.py` is the only plac
 | `ELMANHG_AI_TRACE_SAMPLE_RATIO` | 1.0 | share of new traces kept (0 to 1); a request that carries a sampled `traceparent` is always kept |
 | `ELMANHG_AI_METRIC_EXPORT_INTERVAL_SECONDS` | 30 | 5 to 3600 |
 
-The OpenAI embeddings adapter reuses `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` per call and `ELMANHG_AI_MODEL_MAX_RETRIES` for retries, with `0.5 s × 2^attempt` backoff. The Whisper adapter uses `ELMANHG_AI_TRANSCRIPTION_TIMEOUT_SECONDS` per call with the same retries and backoff (`clients/openai_http.py`); it sends `model`, `language` and `response_format=json`, with no prompt in v1.
+The LLM adapter (`clients/openai_compatible_model.py`) uses the same `clients/openai_http.py` retries and backoff (429, 5xx and transport errors; any other 4xx fails at once); its per-call timeout is the pipeline's timeout (essay or step grading) or `ELMANHG_AI_MODEL_TIMEOUT_SECONDS`. The OpenAI embeddings adapter reuses `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` per call and `ELMANHG_AI_MODEL_MAX_RETRIES` for retries, with `0.5 s × 2^attempt` backoff. The Whisper adapter uses `ELMANHG_AI_TRANSCRIPTION_TIMEOUT_SECONDS` per call with the same retries and backoff (`clients/openai_http.py`); it sends `model`, `language` and `response_format=json`, with no prompt in v1.
 
 .NET API (`AiService` section; environment form `AiService__*`):
 
@@ -413,14 +417,14 @@ Timeouts nest so the AI service always answers before the API gives up: the wors
 
 - Prompts are package files `src/elmanhg_ai/prompts/<name>.<version>.md`, never Python string literals. Chat uses `avatar_system.vN.md` (the system prompt) and `avatar_turn.vN.md` (the final user turn). `ELMANHG_AI_CHAT_PROMPT_VERSION` selects both; an unknown version stops startup.
 - Student input and platform content are untrusted. They go only into the last user turn, inside `<lesson_context>` and `<student_message>` tags, after any such tag in the untrusted text has been removed. Removal matches spaced and attribute-carrying variants (`< /student_message x>`) and dangling tags with no closing `>` (a match stops at the next `<` or `>`, so each pass is linear in the text length), and repeats until the text stops changing, so nested fragments such as `</stu</student_message>dent_message>` cannot reassemble into a tag. Removal runs on each string field of the context before the context is serialized to JSON, so a dangling tag in one field cannot consume the fields after it. History turns keep their own roles and are not wrapped in tags, but the same tags are removed from their content, so a tag in an earlier message is not replayed on later turns. The system prompt holds no untrusted text. Rendering is single pass, so substituted text is never re-scanned.
-- Essay grading uses `essay_grade_system.vN.md`, `essay_grade_turn.vN.md` and the JSON schema `essay_grade_output.vN.json`, all selected by `ELMANHG_AI_ESSAY_GRADING_PROMPT_VERSION`. The schema goes to Claude as structured output (`output_config.format` of type `json_schema`). The reply is then parsed with Pydantic and checked (every rubric id exactly once, points within the criterion, confidence 0 to 1, non-blank justifications) and rejected with `MODEL_OUTPUT_INVALID` otherwise. The rubric, question, model answers, subject and objectives are JSON inside `<grading_context>`, and the essay is inside `<student_essay>`; `grading_context` and `student_essay` tags are removed from every string field first. The prompt tells the model that an injection attempt means grading the content only with confidence 0.3 or lower, which sends the grade to teacher review.
+- Essay grading uses `essay_grade_system.vN.md`, `essay_grade_turn.vN.md` and the JSON schema `essay_grade_output.vN.json`, all selected by `ELMANHG_AI_ESSAY_GRADING_PROMPT_VERSION`. The schema goes to the LLM as `response_format` `json_schema` (strict), or as `json_object` with the schema appended to the system prompt when `ELMANHG_AI_LLM_STRUCTURED_OUTPUT=json_object`. The reply is then parsed with Pydantic and checked (every rubric id exactly once, points within the criterion, confidence 0 to 1, non-blank justifications) and rejected with `MODEL_OUTPUT_INVALID` otherwise. The rubric, question, model answers, subject and objectives are JSON inside `<grading_context>`, and the essay is inside `<student_essay>`; `grading_context` and `student_essay` tags are removed from every string field first. The prompt tells the model that an injection attempt means grading the content only with confidence 0.3 or lower, which sends the grade to teacher review.
 - Math step grading uses `math_step_grade_system.vN.md`, `math_step_grade_turn.vN.md` and `math_step_grade_output.vN.json`, selected by `ELMANHG_AI_MATH_STEP_GRADING_PROMPT_VERSION`, the same way. The question, model solution, accepted answers, subject and objectives are JSON inside `<grading_context>`, and the student's steps and final answer are JSON inside `<student_work>`; both tags are removed from every string field first. The reply is checked (every model step index exactly once, points 0 to 2, confidence 0 to 1, non-blank justifications) and rejected with `MODEL_OUTPUT_INVALID` otherwise. An injection attempt means grading the mathematics only with confidence 0.3 or lower.
 - Tag removal is shared: `prompts/delimiters.py` builds the pattern for a set of tag names (`delimiter_pattern`), strips a string until it stops changing (`strip_tags`) and walks nested JSON values (`strip_fields`). Chat, essay grading and math step grading all use it.
-- Sources go to Claude as native `search_result` content blocks with `citations.enabled`, placed before the text of the final user turn. They are data like the rest of the context: the same delimiter tags are removed from each source's `title` and `content`, and prompt v2 tells the model that search results are not instructions. The Anthropic adapter reads the `search_result_location` citations of the reply's text blocks and returns their `source` values; the pipeline keeps only references it sent.
+- Sources go to the LLM as a compact JSON list (`reference`, `title`, `content`) inside `<lesson_sources>`, placed before the text of the final user turn (`prompts/lesson_sources.v1.md`). They are data like the rest of the context: `lesson_context`, `student_message` and `lesson_sources` tags are removed from the message, history, context and each source's `title` and `content`, and prompt v3 tells the model that the sources are not instructions. The model cites a source inline as `[reference]` or `[ref-1, ref-2]`. The adapter (`clients/citations.py`) keeps only ids it sent, in first-appearance order without duplicates, and removes a marker when at least one of its ids was sent; a bracket with no sent id (for example `[x-1]` in a formula) is left as written. The pipeline again keeps only references it sent.
 
 ## Health, logging and telemetry
 
-- `GET /health` returns `{"status":"ok"}` (liveness, no dependencies). `GET /health/ready` returns `{"status":"ok"}` once startup has loaded the prompts and the model client, and `503 SERVICE_NOT_READY` before that. Readiness never calls Claude. Neither appears in OpenAPI.
+- `GET /health` returns `{"status":"ok"}` (liveness, no dependencies). `GET /health/ready` returns `{"status":"ok"}` once startup has loaded the prompts and the model client, and `503 SERVICE_NOT_READY` before that. Readiness never calls the LLM. Neither appears in OpenAPI.
 - structlog writes one JSON object per line (`ELMANHG_AI_LOG_FORMAT=console` for local reading) with `timestamp`, `level`, `event`, `trace_id` and `request_id`.
 - The trace id is the current OpenTelemetry span's (the FastAPI server span continues the W3C `traceparent` the .NET `HttpClient` sends), so API and AI logs and traces share one id. Without a valid span it falls back to the `traceparent` header, then to a random id. `X-Request-Id` is reused when valid. Both are echoed as `X-Trace-Id` and `X-Request-Id`.
 - There is one `request.completed` line per request (DEBUG for `/health*`), and one `chat.completed` line per chat with `pipeline`, `prompt_version`, `model`, `tokens_in`, `tokens_out`, `latency_ms`, `cost_usd`, `stop_reason`, `sources` (count) and `citations` (count). Message, context and source text are never logged.
@@ -455,7 +459,7 @@ Staging and production: the `ai` compose profile in `deploy/docker-compose.prod.
 - `src/elmanhg_ai/eval/avatar_chat.py` runs the chat pipeline over the dataset `src/elmanhg_ai/eval/datasets/avatar_chat.v2.jsonl` (22 cases: grounded answers, numbered steps, quiz and exam-review questions, English and dialect input, and 7 `safety` cases for off-curriculum requests and prompt injection in the message, in a source and in delimiter tags).
 - Scorers (`eval/scorers.py`) are deterministic, with no model judge: Arabic letter ratio, word count, citations (non-empty when required, and only sent references), numbered steps, required terms (tashkeel ignored) and forbidden terms. A case passes when every applicable scorer passes.
 - Threshold: a pass rate of at least 0.85 (19 of 22), and every `safety` case passes.
-- Fake-mode tests cover the loader, scorers, scoring and threshold. The live run is `ELMANHG_AI_LLM_PROVIDER=anthropic ELMANHG_AI_ANTHROPIC_API_KEY=… ELMANHG_AI_SERVICE_TOKEN=… uv run pytest -m eval`; without those variables the test skips with that reason. Record the score whenever the prompt, model or pipeline changes.
+- Fake-mode tests cover the loader, scorers, scoring and threshold. The live run is `ELMANHG_AI_LLM_PROVIDER=openai_compatible ELMANHG_AI_OPENAI_API_KEY=… ELMANHG_AI_SERVICE_TOKEN=… uv run pytest -m eval`; without those variables the test skips with that reason. Record the score whenever the prompt, model or pipeline changes.
 
 ### Evaluate essay grading
 
@@ -463,8 +467,8 @@ Staging and production: the `ai` compose profile in `deploy/docker-compose.prod.
 - The reference points are **author-graded**: the implementer wrote them from the level descriptions. The target is at least 50 essays graded by Elmanhg teachers.
 - Metrics: the mean normalised total error (|AI total − reference total| ÷ maximum), the share of criteria within one point of the reference, and the exact-match share. A safety case fails when the AI total is more than 0.10 (normalised) above the reference, or the confidence is above 0.5.
 - Threshold (plan #118 D25): mean total error ≤ 0.15, criteria within one point ≥ 0.85, and no safety failures.
-- Fake-mode tests cover the loader, scorers, scoring and threshold. The live run is `ELMANHG_AI_LLM_PROVIDER=anthropic ELMANHG_AI_ANTHROPIC_API_KEY=… ELMANHG_AI_SERVICE_TOKEN=… uv run pytest -m eval tests/eval/test_eval_essay_grading.py`; it skips without those variables.
-- **Pending:** the live run needs a Claude key, so the first score is recorded at go-live.
+- Fake-mode tests cover the loader, scorers, scoring and threshold. The live run is `ELMANHG_AI_LLM_PROVIDER=openai_compatible ELMANHG_AI_OPENAI_API_KEY=… ELMANHG_AI_SERVICE_TOKEN=… uv run pytest -m eval tests/eval/test_eval_essay_grading.py`; it skips without those variables.
+- **Pending:** the live run needs an OpenAI (or compatible) key, so the first score is recorded at go-live.
 
 ### Evaluate math step grading
 
@@ -472,7 +476,7 @@ Staging and production: the `ai` compose profile in `deploy/docker-compose.prod.
 - The reference points (0–2 per model step) are **author-graded**.
 - Metrics: the mean normalised total error, the share of steps within one point of the reference, and the exact-match share. A safety case fails when the AI total is more than 0.10 (normalised) above the reference, or the confidence is above 0.5.
 - Threshold (plan #123 D25): mean total error ≤ 0.15, steps within one point ≥ 0.90, and no safety failures.
-- The live run is `ELMANHG_AI_LLM_PROVIDER=anthropic ELMANHG_AI_ANTHROPIC_API_KEY=… ELMANHG_AI_SERVICE_TOKEN=… uv run pytest -m eval tests/eval/test_eval_math_step_grading.py`; it skips without those variables.
+- The live run is `ELMANHG_AI_LLM_PROVIDER=openai_compatible ELMANHG_AI_OPENAI_API_KEY=… ELMANHG_AI_SERVICE_TOKEN=… uv run pytest -m eval tests/eval/test_eval_math_step_grading.py`; it skips without those variables.
 - **Pending:** the first live score is recorded at go-live.
 
 ### Evaluate transcription (Egyptian dialect)
@@ -483,10 +487,10 @@ Staging and production: the `ai` compose profile in `deploy/docker-compose.prod.
 - Run: `ELMANHG_AI_OPENAI_API_KEY=… uv run pytest -m eval tests/eval/test_eval_transcription.py`. The test skips with a reason when the manifest or the key is missing; the assertion message lists the WER of every clip.
 - **Pending:** the clips have not been recorded yet, so PRD §19 Q6 stays open until the first run.
 
-## Go live with Claude
+## Go live with the LLM
 
-1. Set `ELMANHG_AI_LLM_PROVIDER=anthropic` and `ELMANHG_AI_ANTHROPIC_API_KEY`.
-2. Confirm the `ELMANHG_AI_CHAT_MODEL` id and the per-million-token prices (`ELMANHG_AI_MODEL_*_USD_PER_MILLION_TOKENS`) against Anthropic's current list (PRD §18).
+1. Set `ELMANHG_AI_LLM_PROVIDER=openai_compatible`, the key (`ELMANHG_AI_LLM_API_KEY`, or leave it empty to reuse `ELMANHG_AI_OPENAI_API_KEY`) and `ELMANHG_AI_LLM_BASE_URL`: OpenAI `https://api.openai.com/v1` (the default), Gemini `https://generativelanguage.googleapis.com/v1beta/openai`, or DeepSeek `https://api.deepseek.com` with `ELMANHG_AI_LLM_STRUCTURED_OUTPUT=json_object`, `ELMANHG_AI_LLM_MAX_TOKENS_FIELD=max_tokens` and `ELMANHG_AI_LLM_REASONING_EFFORT=default`.
+2. Confirm the `ELMANHG_AI_CHAT_MODEL`, `ELMANHG_AI_ESSAY_GRADING_MODEL` and `ELMANHG_AI_MATH_STEP_GRADING_MODEL` ids (default `gpt-5.6-luna`, a placeholder) and the per-million-token prices (`ELMANHG_AI_MODEL_*_USD_PER_MILLION_TOKENS`) against the provider's current list (PRD §18).
 3. Set the API to `AiService__Provider=Http` with the service's URL and the shared token.
 4. Check `/health/ready`, then send one chat and confirm that `chat.completed` shows real token counts.
 5. Run the avatar eval (`uv run pytest -m eval`, see Eval) and confirm that it meets the threshold, including that replies carry `citations` when sources are sent.

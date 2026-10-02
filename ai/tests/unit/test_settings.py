@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pytest
 from pydantic import SecretStr, ValidationError
 
@@ -7,12 +9,12 @@ VALID_TOKEN = "a" * 32
 SECRET_TOKEN = "real-secret-QZX-service-token-0123456789"
 
 
-def test_settings_defaults_select_fake_provider_and_v2_prompt() -> None:
+def test_settings_defaults_select_fake_provider_and_v3_prompt() -> None:
     settings = Settings(service_token=SecretStr(VALID_TOKEN))
 
     assert settings.llm_provider == "fake"
-    assert settings.chat_model == "claude-sonnet-5"
-    assert settings.chat_prompt_version == "v2"
+    assert settings.chat_model == "gpt-5.6-luna"
+    assert settings.chat_prompt_version == "v3"
     assert settings.chat_max_tokens == 1024
     assert settings.chat_max_sources == 20
     assert settings.chat_max_source_chars == 8000
@@ -25,11 +27,11 @@ def test_settings_short_service_token_raises_validation_error() -> None:
     assert error.value.errors()[0]["loc"] == ("service_token",)
 
 
-def test_settings_anthropic_without_api_key_raises_validation_error() -> None:
+def test_settings_openai_compatible_without_any_key_raises_validation_error() -> None:
     with pytest.raises(ValidationError) as error:
-        Settings(service_token=SecretStr(VALID_TOKEN), llm_provider="anthropic")
+        Settings(service_token=SecretStr(VALID_TOKEN), llm_provider="openai_compatible")
 
-    assert "anthropic_api_key is required" in str(error.value)
+    assert "llm_api_key or openai_api_key is required" in str(error.value)
 
 
 def test_settings_short_service_token_error_hides_token_value(
@@ -46,18 +48,19 @@ def test_settings_short_service_token_error_hides_token_value(
     assert "short-s" not in message
 
 
-def test_settings_anthropic_without_api_key_error_hides_token_value(
+def test_settings_openai_compatible_without_any_key_error_hides_token_value(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setenv("ELMANHG_AI_SERVICE_TOKEN", SECRET_TOKEN)
-    monkeypatch.setenv("ELMANHG_AI_LLM_PROVIDER", "anthropic")
-    monkeypatch.delenv("ELMANHG_AI_ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.setenv("ELMANHG_AI_LLM_PROVIDER", "openai_compatible")
+    monkeypatch.delenv("ELMANHG_AI_LLM_API_KEY", raising=False)
+    monkeypatch.delenv("ELMANHG_AI_OPENAI_API_KEY", raising=False)
 
     with pytest.raises(ValidationError) as error:
         Settings()
 
     message = str(error.value)
-    assert "anthropic_api_key is required" in message
+    assert "llm_api_key or openai_api_key is required" in message
     assert SECRET_TOKEN not in message
     assert SECRET_TOKEN[:6] not in message
     assert SECRET_TOKEN[-6:] not in message
@@ -156,10 +159,10 @@ def test_settings_trace_sample_ratio_above_one_raises() -> None:
     assert error.value.errors()[0]["loc"] == ("trace_sample_ratio",)
 
 
-def test_settings_defaults_essay_grading_sonnet_v1() -> None:
+def test_settings_defaults_essay_grading_budget_model_v1() -> None:
     settings = Settings(service_token=SecretStr(VALID_TOKEN))
 
-    assert settings.essay_grading_model == "claude-sonnet-5"
+    assert settings.essay_grading_model == "gpt-5.6-luna"
     assert settings.essay_grading_prompt_version == "v1"
     assert settings.essay_grading_max_tokens == 2048
     assert settings.essay_grading_timeout_seconds == 45.0
@@ -182,7 +185,7 @@ def test_settings_essay_grading_timeout_above_300_raises_validation_error() -> N
 def test_settings_math_step_grading_defaults() -> None:
     settings = Settings(service_token=SecretStr(VALID_TOKEN))
 
-    assert settings.math_step_grading_model == "claude-sonnet-5"
+    assert settings.math_step_grading_model == "gpt-5.6-luna"
     assert settings.math_step_grading_prompt_version == "v1"
     assert settings.math_step_grading_max_tokens == 2048
     assert settings.math_step_grading_timeout_seconds == 45.0
@@ -221,3 +224,65 @@ def test_settings_production_placeholder_error_hides_token_value(
         Settings()
 
     assert "QZX-secret" not in str(error.value)
+
+
+def test_settings_defaults_llm_openai_base_url_json_schema_and_budget_prices() -> None:
+    settings = Settings(service_token=SecretStr(VALID_TOKEN))
+
+    assert settings.llm_base_url == "https://api.openai.com/v1"
+    assert settings.llm_api_key is None
+    assert settings.llm_structured_output == "json_schema"
+    assert settings.llm_max_tokens_field == "max_completion_tokens"
+    assert settings.llm_reasoning_effort == "low"
+    assert settings.model_input_usd_per_million_tokens == Decimal("0.20")
+    assert settings.model_output_usd_per_million_tokens == Decimal("1.20")
+
+
+def test_settings_openai_compatible_with_only_openai_key_is_accepted() -> None:
+    settings = Settings(
+        service_token=SecretStr(VALID_TOKEN),
+        llm_provider="openai_compatible",
+        openai_api_key=SecretStr("test-key"),
+    )
+
+    assert settings.llm_provider == "openai_compatible"
+    assert settings.llm_api_key is None
+
+
+def test_settings_blank_llm_api_key_is_none() -> None:
+    settings = Settings(service_token=SecretStr(VALID_TOKEN), llm_api_key=SecretStr("  "))
+
+    assert settings.llm_api_key is None
+
+
+def test_settings_llm_base_url_without_https_raises_validation_error() -> None:
+    with pytest.raises(ValidationError) as error:
+        Settings(service_token=SecretStr(VALID_TOKEN), llm_base_url="http://api.openai.com/v1")
+
+    assert error.value.errors()[0]["loc"] == ("llm_base_url",)
+
+
+def test_settings_llm_base_url_with_userinfo_raises_validation_error_without_echoing() -> None:
+    with pytest.raises(ValidationError) as error:
+        Settings(
+            service_token=SecretStr(VALID_TOKEN),
+            llm_base_url="https://user:sk-secret@api.deepseek.com",
+        )
+
+    assert error.value.errors()[0]["loc"] == ("llm_base_url",)
+    assert "sk-secret" not in str(error.value)
+
+
+def test_settings_llm_base_url_trailing_slash_is_stripped() -> None:
+    settings = Settings(
+        service_token=SecretStr(VALID_TOKEN), llm_base_url="https://api.deepseek.com/"
+    )
+
+    assert settings.llm_base_url == "https://api.deepseek.com"
+
+
+def test_settings_anthropic_provider_raises_validation_error() -> None:
+    with pytest.raises(ValidationError) as error:
+        Settings(service_token=SecretStr(VALID_TOKEN), llm_provider="anthropic")
+
+    assert error.value.errors()[0]["loc"] == ("llm_provider",)

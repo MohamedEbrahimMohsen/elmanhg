@@ -1,5 +1,6 @@
 import base64
 from collections.abc import AsyncIterator, Callable, Iterator
+from decimal import Decimal
 from pathlib import Path
 from typing import Any, Final
 
@@ -34,6 +35,10 @@ def settings() -> Settings:
         llm_provider="fake",
         log_format="json",
         cas_warm_on_start=False,
+        essay_grading_model="claude-sonnet-5",
+        math_step_grading_model="claude-sonnet-5",
+        model_input_usd_per_million_tokens=Decimal("3"),
+        model_output_usd_per_million_tokens=Decimal("15"),
     )
 
 
@@ -172,14 +177,6 @@ def log_capture(app: FastAPI) -> Iterator[LogCapture]:
     structlog.configure(processors=[structlog.contextvars.merge_contextvars, capture])
     yield capture
     structlog.reset_defaults()
-
-
-@pytest.fixture
-def anthropic_fixture() -> Callable[[str], str]:
-    def read(name: str) -> str:
-        return (FIXTURES / "anthropic" / name).read_text(encoding="utf-8")
-
-    return read
 
 
 @pytest.fixture

@@ -74,3 +74,23 @@ def test_essay_grade_output_schema_v1_closes_every_object() -> None:
     assert criterion["additionalProperties"] is False
     assert set(schema["required"]) == {"criteria", "justification", "confidence"}
     assert set(criterion["required"]) == {"criterionId", "justification", "points"}
+
+
+def test_load_chat_prompts_v3_system_describes_lesson_sources_and_citations() -> None:
+    prompts = load_chat_prompts("v3")
+
+    assert "<lesson_sources>" in prompts.system.text
+    assert "[explanation-1]" in prompts.system.text
+    assert "{{" not in prompts.system.text
+    assert "{{context}}" in prompts.turn.text
+    assert "{{message}}" in prompts.turn.text
+    assert prompts.version == "v3"
+
+
+def test_load_client_prompts_have_their_placeholders() -> None:
+    sources = load_prompt("lesson_sources", "v1")
+    json_output = load_prompt("json_output", "v1")
+
+    assert "{{sources}}" in sources.text
+    assert "{{turn}}" in sources.text
+    assert "{{schema}}" in json_output.text

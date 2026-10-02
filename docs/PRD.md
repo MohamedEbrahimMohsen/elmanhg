@@ -574,8 +574,8 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 
 - **Backend**: .NET 10, DDD/CQRS, PostgreSQL (JSONB for question bodies; pgvector for Avatar retrieval).
 - **AI/grading service**: Python FastAPI — LLM grading (v2), SymPy CAS checks (v2), Avatar embeddings + generation (v1). Retrieval search itself runs in the .NET API over pgvector (see `docs/content-retrieval.md`), speech-to-text through OpenAI Whisper (v1; the API's background worker schedules and retries it).
-- **LLM**: Claude API. Confirm current model IDs and pricing at build time.
-- **Embeddings**: OpenAI text-embedding-3-small (1536) through the AI service; Anthropic has no embeddings API. Fake by default.
+- **LLM**: any OpenAI-compatible Chat Completions API, set by base URL, key and model per pipeline. The default is OpenAI's budget tier (`gpt-5.6-luna`, $0.20/$1.20 per million tokens as of Aug 2026); Gemini 3.1 Flash-Lite and DeepSeek V4-Flash work through the same adapter. Never the Anthropic API (dev decision 2026-10-01). Confirm the model ids and prices at go-live.
+- **Embeddings**: OpenAI text-embedding-3-small (1536) through the AI service; the chat adapter reuses this OpenAI key unless a separate LLM key is set. Fake by default.
 - **Frontend**: React + TypeScript, shadcn/ui, i18next RTL. v2 adds a math input with LaTeX preview, a drag-and-drop canvas, and a rich Arabic editor.
 - **Media**: S3-compatible object storage for images and audio; private media (question photos, voice replies) is served only through the API after an access check.
 - **Jobs / realtime**: background jobs for grading, transcription, SLA reminders; the web polls for essay grade results (#118); SignalR for teacher replies.

@@ -12,7 +12,7 @@ The rules for ALL implementation work in this repo. The stack: **.NET 10 · ASP.
    - Every **tunable or environment-dependent value** (limits, caps, URLs, container/queue names, feature switches, allowed extensions) lives in `appsettings.json`, bound through a `[Topic]Options` class with a `public const string SectionName`.
    - Every **true invariant** (values that must never change or the product breaks — e.g. a wire-format version string, a hash prefix another system parses) is a **named constant with a WHY comment**, never an inline literal.
    - If unsure which it is: options.
-4. **Secrets are NEVER committed.** Not in `appsettings.json`, not in code, not in deployment parameters. Local secrets go in `.env` (gitignored, `.env.example` committed); deployed secrets go in the host's environment variables (`Section__Key` double-underscore convention). External providers without credentials (Paymob, SMS, Claude API, transcription) run behind an interface with a `Fake*` implementation selected by config.
+4. **Secrets are NEVER committed.** Not in `appsettings.json`, not in code, not in deployment parameters. Local secrets go in `.env` (gitignored, `.env.example` committed); deployed secrets go in the host's environment variables (`Section__Key` double-underscore convention). External providers without credentials (Paymob, SMS, LLM API, transcription) run behind an interface with a `Fake*` implementation selected by config.
 5. **The domain stays tested.** Every aggregate behaviour, every handler branch, and every validator rule lands with its test — see `conventions/dotnet-testing.md`. A guard clause without a test that trips it is untested.
 6. **Zero-cost bias.** Any change that adds an always-on resource or paid tier needs explicit approval first.
 
@@ -153,7 +153,7 @@ public sealed class ProvisioningOptions
 
 - `web/`: governed by `.claude/skills/react-feature/SKILL.md` (React 19 + TypeScript strict + Vite 8 + Tailwind v4 + shadcn + TanStack Query + i18next RTL). Every visual value is a token from `.claude/design-system.md` (Glass, light only). Screen content and flow come from `prototype/`.
 - No magic values: API base URL and tunables come from Vite env (`import.meta.env.VITE_*`) with `.env.example` committed, real `.env.local` gitignored.
-- `ai/`: Python 3.13 FastAPI service (uv, committed `uv.lock`, pydantic v2, structlog, ruff, mypy strict, pytest), governed by `.claude/skills/python-feature/SKILL.md`. It is called only by the .NET API over HTTP with a shared service token (`Authorization: Bearer`; contract in `docs/ai-service.md`). Every model/provider call sits behind `clients/model.py` with a fake for tests and offline runs; the Claude API adapter is switched on by config. Prompt text built from student input is treated as untrusted.
+- `ai/`: Python 3.13 FastAPI service (uv, committed `uv.lock`, pydantic v2, structlog, ruff, mypy strict, pytest), governed by `.claude/skills/python-feature/SKILL.md`. It is called only by the .NET API over HTTP with a shared service token (`Authorization: Bearer`; contract in `docs/ai-service.md`). Every model/provider call sits behind `clients/model.py` with a fake for tests and offline runs; the OpenAI-compatible LLM adapter (`clients/openai_compatible_model.py`: OpenAI by default, Gemini or DeepSeek by base URL) is switched on by config. The Anthropic API is not used (dev decision 2026-10-01). Prompt text built from student input is treated as untrusted.
 
 ---
 

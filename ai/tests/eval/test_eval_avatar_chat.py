@@ -9,8 +9,8 @@ from elmanhg_ai.settings import Settings
 pytestmark = pytest.mark.eval
 
 SKIP_REASON = (
-    "set ELMANHG_AI_SERVICE_TOKEN, ELMANHG_AI_LLM_PROVIDER=anthropic and "
-    "ELMANHG_AI_ANTHROPIC_API_KEY to run the avatar eval"
+    "set ELMANHG_AI_SERVICE_TOKEN, ELMANHG_AI_LLM_PROVIDER=openai_compatible and "
+    "ELMANHG_AI_LLM_API_KEY or ELMANHG_AI_OPENAI_API_KEY to run the avatar eval"
 )
 
 
@@ -19,7 +19,7 @@ async def test_eval_avatar_chat_v2_meets_threshold() -> None:
         settings = Settings()
     except ValidationError:
         pytest.skip(SKIP_REASON)
-    if settings.llm_provider != "anthropic":
+    if settings.llm_provider != "openai_compatible":
         pytest.skip(SKIP_REASON)
     model = build_model_client(settings)
     try:
