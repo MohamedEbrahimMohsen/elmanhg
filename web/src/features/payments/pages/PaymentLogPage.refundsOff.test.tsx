@@ -1,6 +1,6 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { http, HttpResponse } from 'msw';
+import { delay, http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import type { AdminPaymentResult } from '@/shared/api/generated/model';
 import {
@@ -48,8 +48,11 @@ describe('PaymentLogPage refunds off', () => {
 
     const row = await screen.findByRole('row', { name: /Mona Ali/ });
 
-    expect(within(row).getByRole('button', { name: 'Refund' })).toBeEnabled();
+    await waitFor(() => {
+      expect(within(row).getByRole('button', { name: 'Refund' })).toBeEnabled();
+    });
     expect(screen.queryByRole('note')).not.toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('shows the refunds-off error in the dialog and then the notice when the server refuses', async () => {
@@ -66,6 +69,9 @@ describe('PaymentLogPage refunds off', () => {
     await openPayments();
 
     const row = await screen.findByRole('row', { name: /Mona Ali/ });
+    await waitFor(() => {
+      expect(within(row).getByRole('button', { name: 'Refund' })).toBeEnabled();
+    });
     await user.click(within(row).getByRole('button', { name: 'Refund' }));
     const dialog = await screen.findByRole('dialog');
     await user.type(within(dialog).getByLabelText('Refund reason'), 'Duplicate charge');
@@ -79,6 +85,47 @@ describe('PaymentLogPage refunds off', () => {
     expect(
       within(screen.getByRole('row', { name: /Mona Ali/ })).getByRole('button', { name: 'Refund' }),
     ).toBeDisabled();
+  });
+
+  it('keeps the refund button disabled with no notice while the setting is loading', async () => {
+    serveLog(() => adminPayment());
+    server.use(
+      http.get('*/api/payments/settings', async () => {
+        await delay('infinite');
+        return HttpResponse.json(paymentSettings());
+      }),
+    );
+    await openPayments();
+
+    const row = await screen.findByRole('row', { name: /Mona Ali/ });
+
+    expect(within(row).getByRole('button', { name: 'Refund' })).toBeDisabled();
+    expect(screen.queryByRole('note')).not.toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('keeps the refund button disabled and offers a retry when the setting fails to load', async () => {
+    serveLog(() => adminPayment());
+    server.use(
+      http.get('*/api/payments/settings', () => HttpResponse.json({ code: 'UNHANDLED_EXCEPTION' }, { status: 500 })),
+    );
+    const user = userEvent.setup();
+    await openPayments();
+
+    const alert = await screen.findByRole('alert');
+    const row = await screen.findByRole('row', { name: /Mona Ali/ });
+
+    expect(alert).toHaveTextContent('Could not check whether refunds are turned on.');
+    expect(within(row).getByRole('button', { name: 'Refund' })).toBeDisabled();
+    expect(screen.queryByRole('note')).not.toBeInTheDocument();
+
+    server.use(getGetPaymentSettingsMockHandler(paymentSettings({ refundsEnabled: true })));
+    await user.click(within(alert).getByRole('button', { name: 'Retry' }));
+
+    await waitFor(() => {
+      expect(within(row).getByRole('button', { name: 'Refund' })).toBeEnabled();
+    });
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('renders the refunds-off notice in Arabic', async () => {

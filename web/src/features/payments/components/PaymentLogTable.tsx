@@ -38,7 +38,7 @@ export function PaymentLogTable({ items, onRefund, onKeep, onStudent }: PaymentL
             <PaymentLogRow
               key={item.id}
               item={item}
-              refundsOff={refundsEnabled === false}
+              refundsEnabled={refundsEnabled}
               onRefund={onRefund}
               onKeep={onKeep}
               onStudent={onStudent}

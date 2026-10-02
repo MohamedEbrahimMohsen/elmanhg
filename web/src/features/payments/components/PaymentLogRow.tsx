@@ -8,7 +8,7 @@ import { refundsOffNoticeId } from './RefundsOffNotice';
 
 export interface PaymentLogRowProps {
   item: AdminPaymentResult;
-  refundsOff: boolean;
+  refundsEnabled: boolean | undefined;
   onRefund: (item: AdminPaymentResult) => void;
   onKeep: (item: AdminPaymentResult) => void;
   onStudent: (studentId: string) => void;
@@ -17,7 +17,7 @@ export interface PaymentLogRowProps {
 const cellClassName = 'px-2.5 py-2.25 align-top text-caption';
 const captionClassName = 'block text-caption text-text-muted';
 
-export function PaymentLogRow({ item, refundsOff, onRefund, onKeep, onStudent }: PaymentLogRowProps) {
+export function PaymentLogRow({ item, refundsEnabled, onRefund, onKeep, onStudent }: PaymentLogRowProps) {
   const { t, i18n } = useTranslation('payments');
   const lng = i18n.resolvedLanguage ?? i18n.language;
   const date = (value: string) =>
@@ -79,8 +79,8 @@ export function PaymentLogRow({ item, refundsOff, onRefund, onKeep, onStudent }:
             <Button
               variant="danger"
               size="sm"
-              disabled={refundsOff}
-              aria-describedby={refundsOff ? refundsOffNoticeId : undefined}
+              disabled={refundsEnabled !== true}
+              aria-describedby={refundsEnabled === false ? refundsOffNoticeId : undefined}
               onClick={() => {
                 onRefund(item);
               }}
