@@ -47,6 +47,10 @@ export const GetPaymentLogResponse = zod.object({
   "totalPages": zod.union([zod.int(),zod.stringFormat('int64', getPaymentLogResponseTotalPagesRegExpTwo)]).optional()
 })
 
+export const GetPaymentSettingsResponse = zod.object({
+  "refundsEnabled": zod.boolean()
+})
+
 export const RefundPaymentParams = zod.object({
   "paymentId": zod.uuid()
 })

@@ -32,7 +32,7 @@ Object storage is available from #96: a managed S3-compatible service (Cloudflar
 | `ELMANHG_AI_ENV` | `development` | `production` | `production` |
 | How it deploys | not deployed | `deploy` workflow or `bash deploy.sh <tag>` on the host | `deploy` workflow (with a required reviewer) or `bash deploy.sh <tag>` |
 | Providers | fakes (OTP, payments, AI) | real OTP channel; Paymob test mode or the fake payment gateway; fake or real AI | all real |
-| `Payments__AllowFakePayments` | not needed (Development allows the fake) | `true` only while staging runs `Payments__Provider=Fake` | ignored: Production always refuses the fake |
+| `Payments__AllowFakePayments` | not needed (unset means true in Development) | `true` only while staging runs `Payments__Provider=Fake` | leave `false`: the API refuses to start with `true` |
 
 - Staging needs a real OTP channel (Email through Resend is enough). The fake OTP channel logs codes in Development only, so nobody can sign in to a staging host with it ([docs/otp-delivery.md](otp-delivery.md) §6).
 - Staging exposes nothing extra: `/scalar` and `/openapi` are mapped outside Production, but Caddy proxies only `/api/*`.
@@ -168,7 +168,7 @@ The reminders reuse the WhatsApp and Resend credentials of the OTP channels. On/
 | Variable | Default | Secret |
 |---|---|---|
 | `Payments__Provider` | `Fake` | no |
-| `Payments__AllowFakePayments` | `false` | no; lets the fake run outside Development, ignored in Production |
+| `Payments__AllowFakePayments` | unset: `true` in Development, `false` elsewhere | no; the fake serves only when true; refused at boot in Production |
 | `Payments__FakeCheckoutPath` | `/student/fake-checkout` | no |
 | `Payments__AttemptTimeoutSeconds` / `Payments__TotalTimeoutSeconds` | `10` / `30` | no |
 | `Payments__Paymob__BaseUrl` / `__CheckoutUrl` / `__BillingCountry` | Paymob Egypt / `EG` | no |

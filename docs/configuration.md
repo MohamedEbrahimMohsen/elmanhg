@@ -28,6 +28,7 @@ Errors: `RUNTIME_SETTING_KEY_REQUIRED` and `RUNTIME_SETTING_VALUE_INVALID` (422)
 | Key | Group | Type | Range | Default from |
 |---|---|---|---|---|
 | `features.examsRequireAllLessonsOpened` | Features | Boolean | – | `Exams:RequireAllLessonsOpened` |
+| `features.refundsEnabled` | Features | Boolean | – | `false` (constant, no Options key) |
 | `askTeacher.replySlaHours` | AskTeacher | Integer | 1–168 | `Subscriptions:AskTeacherReplySlaHours` |
 | `askTeacher.firstReminderAfterHours` | AskTeacher | Integer | 1–167 | `AskTeacher:FirstReminderAfterHours` |
 | `askTeacher.secondReminderAfterHours` | AskTeacher | Integer | 1–167 | `AskTeacher:SecondReminderAfterHours` |
@@ -53,7 +54,7 @@ Cross-setting rules: first reminder < second reminder < reply time (`ASK_TEACHER
 ## 3. How it works
 
 - **Storage.** Table `RuntimeSettingOverrides`: one row per key that has ever been overridden, `Key` (unique, `IX_RuntimeSettingOverrides_Key`), `Value` (jsonb, nullable) and an xmin concurrency token. A null `Value` means "use the default". The first override inserts the row; Reset sets `Value` to null and never deletes the row, so the audit diff always shows the before and after value.
-- **Defaults.** The default of each setting is the deployment value of the Options key in the table above, so behaviour is unchanged until an admin overrides it. A stored value that no longer fits its definition is ignored and the default is used.
+- **Defaults.** The default of each setting is the deployment value of the Options key in the table above (or the constant shown there), so behaviour is unchanged until an admin overrides it. A stored value that no longer fits its definition is ignored and the default is used.
 - **Typed definition.** Each setting is declared once with its type (`Integer`, `Decimal`, `Boolean`, `Choice`, `ChoiceList`), range or allowed values, and an Arabic and English label and description. Values travel as plain JSON: number, `true`/`false`, string, array of strings.
 - **Cache.** Every API instance caches the effective values for `RuntimeSettings:CacheSeconds` (default 30, range 1–3600). Update and reset clear the cache on the instance that handled them, so the change takes effect at once there.
 - **Startup validation.** The API refuses to start when a configured default is outside its runtime definition (for example `AskTeacher__ImageMaxSizeInMb=12`) or a key is registered twice.
@@ -73,7 +74,7 @@ Cross-setting rules: first reminder < second reminder < reply time (`ASK_TEACHER
    RuntimeSettingDefinition.ForInteger(ReplySlaHours, RuntimeSettingGroup.AskTeacher, subscriptionsOptions.Value.AskTeacherReplySlaHours, 1, 168, new LocalizedText("…", "Teacher reply time (hours)"), new LocalizedText("…", "How long a teacher has to reply…"))
    ```
 
-   Factories: `ForInteger`, `ForDecimal`, `ForBoolean`, `ForChoice`, `ForChoiceList`.
+   Factories: `ForInteger`, `ForDecimal`, `ForBoolean`, `ForChoice`, `ForChoiceList`. A flag with no deployment value uses a constant default (for example `features.refundsEnabled`, `false`).
 3. For a new group, add a member to `RuntimeSettingGroup` (its position is the page order) and register the class: `services.AddSingleton<IRuntimeSettingDefinitions, XRuntimeSettings>()`.
 4. Read it where it is used: `await runtimeSettings.GetAsync(XRuntimeSettings.Key, cancellationToken)`, or `GetValuesAsync` for several keys.
 5. Put a rule that spans settings in the group's `Constraints`.
@@ -90,7 +91,7 @@ Complex values are not runtime settings. They get their own aggregate, table and
 - **Environment**: the host environment name.
 - **Integrations**: `otpWhatsApp`, `otpEmail`, `otpSms`, `invitationEmail`, `teacherReminderWhatsApp`, `teacherReminderEmail`, `payments`, `fileStorage`, `aiService`, each with its provider and mode: Fake (a built-in fake, or a disabled OTP channel, which also uses the fake), Local (local-disk file storage) or Real. `teacherReminderWhatsApp` is also Fake while no reminder template is set (`OutOfAppReminders:WhatsAppTemplateName`, [otp-delivery.md §10](otp-delivery.md)).
 - **AI service**: when `AiService:Provider=Http` the API calls the AI service `GET /v1/configuration` ([ai-service.md](ai-service.md)) and shows its LLM provider, chat, essay and math-step models, embedding and transcription provider and model, and whether its API keys are set. With the Fake provider the status is "not used"; when the call fails or does not answer within `AiService:ConfigurationTimeoutSeconds` (5 s) the status is "unreachable" (logged as a Warning) and the rest of the page still renders.
-- **Safety switches**: `Payments:AllowFakePayments`, shown on or off. Never editable from the UI or the API.
+- **Safety switches**: `Payments:AllowFakePayments`, its effective value (unset: true in Development, false elsewhere), shown on or off. Never editable from the UI or the API; the API refuses to start with it true in Production.
 - **Secrets**: the keys checked by the production placeholder guard ([security.md](security.md)), each shown as set or not set. Set means not blank and not a `change-me` placeholder. Only `{ key, isSet }` is returned; secret values never leave the process.
 
 ## 7. Not runtime-editable

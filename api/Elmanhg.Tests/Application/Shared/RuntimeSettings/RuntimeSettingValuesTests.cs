@@ -67,6 +67,7 @@ public sealed class RuntimeSettingValuesTests
         var act = () => new object[]
         {
             values.Get(FeatureFlagRuntimeSettings.ExamsRequireAllLessonsOpened),
+            values.Get(FeatureFlagRuntimeSettings.RefundsEnabled),
             values.Get(AskTeacherRuntimeSettings.ReplySlaHours),
             values.Get(AskTeacherRuntimeSettings.FirstReminderAfterHours),
             values.Get(AskTeacherRuntimeSettings.SecondReminderAfterHours),

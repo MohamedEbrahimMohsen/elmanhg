@@ -3,9 +3,11 @@ using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Payments.RefundPayment;
 using Elmanhg.Application.Shared.Payments;
+using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.SharedKernel;
 using Elmanhg.Domain.Subscriptions;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -25,6 +27,7 @@ public sealed class RefundPaymentHandlerTests
     private readonly IPaymentGateway _paymentGateway = Substitute.For<IPaymentGateway>();
     private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
     private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
+    private readonly FakeRuntimeSettings _runtimeSettings = new FakeRuntimeSettings().Set(FeatureFlagRuntimeSettings.RefundsEnabled, true);
     private readonly List<Payment> _payments = [];
     private readonly List<Subscription> _subscriptions = [];
     private readonly User _student = User.CreateStudentWithEmail("Mona Ali", "mona@example.com");
@@ -42,7 +45,7 @@ public sealed class RefundPaymentHandlerTests
         _userRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<User>, IQueryable<User>>?>(), Arg.Any<Func<IQueryable<User>, IOrderedQueryable<User>>?>(), Arg.Any<bool>())
             .Returns(call => new[] { _student }.FirstOrDefault(call.Arg<Expression<Func<User, bool>>>().Compile()));
         _paymentGateway.RefundAsync(Arg.Any<PaymentRefundRequest>(), Arg.Any<CancellationToken>()).Returns(new PaymentRefund(GatewayRefundId));
-        _handler = new RefundPaymentHandler(_paymentRepository, _subscriptionRepository, _userRepository, _paymentGateway, _currentUserService, _timeProvider);
+        _handler = new RefundPaymentHandler(_paymentRepository, _subscriptionRepository, _userRepository, _paymentGateway, _currentUserService, _timeProvider, _runtimeSettings);
     }
 
     [Fact]
@@ -143,6 +146,31 @@ public sealed class RefundPaymentHandlerTests
         var act = () => Handle(Guid.NewGuid(), "Reason", Guid.NewGuid());
 
         (await act.Should().ThrowAsync<UnauthorizedCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.UserNotAuthenticated);
+        await _paymentRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_RefundsDisabled_ThrowsRefundsDisabledWithoutGatewayCall()
+    {
+        _runtimeSettings.Set(FeatureFlagRuntimeSettings.RefundsEnabled, false);
+        var (payment, _) = AddSucceeded();
+
+        var act = () => Handle(payment.Id, "Reason", Guid.NewGuid());
+
+        (await act.Should().ThrowAsync<BusinessRuleViolationCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.PaymentRefundsDisabled);
+        await _paymentGateway.DidNotReceive().RefundAsync(Arg.Any<PaymentRefundRequest>(), Arg.Any<CancellationToken>());
+        await _paymentRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+        payment.Status.Should().Be(PaymentStatus.Succeeded);
+    }
+
+    [Fact]
+    public async Task Handle_RefundsDisabledWithUnknownPayment_ThrowsRefundsDisabledBeforeLookup()
+    {
+        _runtimeSettings.Set(FeatureFlagRuntimeSettings.RefundsEnabled, false);
+
+        var act = () => Handle(Guid.NewGuid(), "Reason", Guid.NewGuid());
+
+        (await act.Should().ThrowAsync<BusinessRuleViolationCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.PaymentRefundsDisabled);
         await _paymentRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 

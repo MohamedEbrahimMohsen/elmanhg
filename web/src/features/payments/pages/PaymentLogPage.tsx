@@ -11,6 +11,7 @@ import { PaymentLogTable } from '../components/PaymentLogTable';
 import { PaymentLogTableSkeleton } from '../components/PaymentLogTableSkeleton';
 import { PaymentLogTabs } from '../components/PaymentLogTabs';
 import { RefundPaymentDialog } from '../components/RefundPaymentDialog';
+import { RefundsOffNotice } from '../components/RefundsOffNotice';
 import { ResolveReviewDialog } from '../components/ResolveReviewDialog';
 import { usePaymentLog } from '../hooks/usePaymentLog';
 import { usePaymentLogSearch } from '../hooks/usePaymentLogSearch';
@@ -82,6 +83,7 @@ export function PaymentLogPage() {
         onApply={applyFilters}
         onClear={clearFilters}
       />
+      <RefundsOffNotice />
       {renderContent()}
       {refundTarget ? (
         <RefundPaymentDialog

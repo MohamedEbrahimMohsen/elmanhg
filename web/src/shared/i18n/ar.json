@@ -218,6 +218,7 @@
     "PAYMENT_REFUND_REASON_TOO_LONG": "سبب الاسترداد طويل جدا.",
     "PAYMENT_REFUND_IDEMPOTENCY_KEY_REQUIRED": "ترويسة Idempotency-Key مطلوبة ويجب ان تكون UUID غير فارغ.",
     "PAYMENT_REFUND_DECLINED": "رفضت Paymob الاسترداد. راجع المعاملة في لوحة Paymob.",
+    "PAYMENT_REFUNDS_DISABLED": "الاسترداد متوقف حاليًا. يمكن للمدير تفعيله من صفحة الإعدادات.",
     "PAYMENT_NOT_SETTLED": "لم تتم تسوية الدفع بعد.",
     "PAYMENT_LOG_PAGE_NUMBER_INVALID": "رقم الصفحة يجب ان يكون 1 او اكثر.",
     "PAYMENT_LOG_PAGE_SIZE_INVALID": "حجم الصفحة غير صالح.",

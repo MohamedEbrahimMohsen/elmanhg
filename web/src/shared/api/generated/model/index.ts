@@ -162,6 +162,7 @@ export * from './pageDataOfValidationQueueItemResult';
 export * from './paymentMetricsResult';
 export * from './paymentResult';
 export * from './paymentReviewReason';
+export * from './paymentSettingsResult';
 export * from './paymentStatus';
 export * from './planCatalogueResult';
 export * from './planCountResult';

@@ -12,13 +12,11 @@ namespace Elmanhg.Infrastructure.Hosting;
 
 public sealed class InfrastructureConfigurationReader(IOptions<OtpDeliveryOptions> otpDeliveryOptions, IOptions<OutOfAppReminderOptions> outOfAppReminderOptions, IOptions<PaymentsOptions> paymentsOptions, IOptions<FileStorageOptions> fileStorageOptions, IOptions<AiServiceOptions> aiServiceOptions, IConfiguration configuration, IHostEnvironment hostEnvironment, HttpAiConfigurationClient aiConfigurationClient) : IInfrastructureConfigurationReader
 {
-    private const string AllowFakePaymentsKey = "Payments:AllowFakePayments";
-
     public async Task<InfrastructureConfigurationResult> ReadAsync(CancellationToken cancellationToken)
     {
         var payments = paymentsOptions.Value;
         var integrations = InfrastructureIntegrations.Describe(otpDeliveryOptions.Value, outOfAppReminderOptions.Value, payments, fileStorageOptions.Value, aiServiceOptions.Value);
-        List<SafetySwitchResult> safetySwitches = [new(AllowFakePaymentsKey, payments.AllowFakePayments)];
+        List<SafetySwitchResult> safetySwitches = [new(PaymentsOptions.AllowFakePaymentsKey, payments.AllowFakePayments)];
         var secrets = ConfigurationSecrets.Keys
             .Select(key => new SecretStatusResult(key, ConfigurationSecrets.IsSet(configuration[key])))
             .ToList();

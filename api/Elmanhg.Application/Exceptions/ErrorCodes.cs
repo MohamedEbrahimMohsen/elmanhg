@@ -253,6 +253,7 @@ public static class ErrorCodes
     public const string PaymentRefundReasonTooLong = "PAYMENT_REFUND_REASON_TOO_LONG";
     public const string PaymentRefundIdempotencyKeyRequired = "PAYMENT_REFUND_IDEMPOTENCY_KEY_REQUIRED";
     public const string PaymentRefundDeclined = "PAYMENT_REFUND_DECLINED";
+    public const string PaymentRefundsDisabled = "PAYMENT_REFUNDS_DISABLED";
     public const string PaymentNotSettled = "PAYMENT_NOT_SETTLED";
     public const string PaymentLogPageNumberInvalid = "PAYMENT_LOG_PAGE_NUMBER_INVALID";
     public const string PaymentLogPageSizeInvalid = "PAYMENT_LOG_PAGE_SIZE_INVALID";
