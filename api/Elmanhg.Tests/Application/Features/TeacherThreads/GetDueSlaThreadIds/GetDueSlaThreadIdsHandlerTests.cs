@@ -1,6 +1,7 @@
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.TeacherThreads.GetDueSlaThreadIds;
 using Elmanhg.Domain.TeacherThreads;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -19,7 +20,7 @@ public sealed class GetDueSlaThreadIdsHandlerTests
         List<Guid> excluded = [Guid.NewGuid()];
         List<Guid> ids = [Guid.NewGuid(), Guid.NewGuid()];
         repository.GetSlaDueIdsAsync(now, TimeSpan.FromHours(24), TimeSpan.FromHours(12), TimeSpan.FromHours(20), excluded, 50, Arg.Any<CancellationToken>()).Returns(ids);
-        var handler = new GetDueSlaThreadIdsHandler(repository, Options.Create(new AskTeacherOptions()), Options.Create(new SubscriptionsOptions { AskTeacherReplySlaHours = 24 }), timeProvider);
+        var handler = new GetDueSlaThreadIdsHandler(repository, Options.Create(new AskTeacherOptions()), new FakeRuntimeSettings(subscriptions: new SubscriptionsOptions { AskTeacherReplySlaHours = 24 }, askTeacher: new AskTeacherOptions()), timeProvider);
 
         var result = await handler.Handle(new GetDueSlaThreadIdsQuery(excluded), TestContext.Current.CancellationToken);
 

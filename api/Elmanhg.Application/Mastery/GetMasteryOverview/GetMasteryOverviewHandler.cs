@@ -3,6 +3,7 @@ using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Mastery.Shared;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
@@ -15,7 +16,7 @@ using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.Mastery.GetMasteryOverview;
 
-public sealed class GetMasteryOverviewHandler(IQuestionMasteryRepository questionMasteryRepository, ISessionRepository sessionRepository, ISubjectRepository subjectRepository, ILessonRepository lessonRepository, IUserRepository userRepository, ISubscriptionRepository subscriptionRepository, IOptions<ProgressOptions> progressOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, TimeProvider timeProvider, ICurrentUserService currentUserService) : IRequestHandler<GetMasteryOverviewQuery, MasteryOverviewResult>
+public sealed class GetMasteryOverviewHandler(IQuestionMasteryRepository questionMasteryRepository, ISessionRepository sessionRepository, ISubjectRepository subjectRepository, ILessonRepository lessonRepository, IUserRepository userRepository, ISubscriptionRepository subscriptionRepository, IOptions<ProgressOptions> progressOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, TimeProvider timeProvider, ICurrentUserService currentUserService, IRuntimeSettings runtimeSettings) : IRequestHandler<GetMasteryOverviewQuery, MasteryOverviewResult>
 {
     public async Task<MasteryOverviewResult> Handle(GetMasteryOverviewQuery request, CancellationToken cancellationToken)
     {
@@ -35,7 +36,7 @@ public sealed class GetMasteryOverviewHandler(IQuestionMasteryRepository questio
         var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(now, zone).DateTime);
         var activeDays = await sessionRepository.GetQuizActivityDaysAsync(userId, options.StreakTimeZone, now.AddDays(-options.StreakMaxDays), cancellationToken).ConfigureAwait(false);
 
-        var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, userId, subscriptionsOptions.Value, now, cancellationToken).ConfigureAwait(false);
+        var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, runtimeSettings, userId, subscriptionsOptions.Value, now, cancellationToken).ConfigureAwait(false);
         var candidates = entitlement.OpenLessonsPerUnit is null ? lessons : await OpenLessonsAsync(lessons, entitlement.OpenLessonsPerUnit, cancellationToken).ConfigureAwait(false);
         var next = NextLessonRecommendation.Pick(candidates);
         var nextLesson = next is null ? null : await lessonRepository.GetByIdAsync(next.LessonId, cancellationToken, asNoTracking: true).ConfigureAwait(false);

@@ -95,7 +95,7 @@ The web polls it every 2 s while the status is `Pending` (`useEssayGrade`), and 
 | `EssayGrading:SweepBatchSize` | 5 | 1 to 100 grades per sweep |
 | `EssayGrading:MaxAttempts` | 4 | 1 to 10; after the last failure the grade is `InReview` / `GradingFailed` |
 | `EssayGrading:RetryBaseDelaySeconds` | 30 | 1 to 3600; doubles each retry |
-| `EssayGrading:ReviewConfidenceThreshold` | 0.7 | 0 to 1; a lower confidence goes to teacher review |
+| `EssayGrading:ReviewConfidenceThreshold` | 0.7 | 0 to 1; a lower confidence goes to teacher review. The default of the runtime setting `grading.essayReviewConfidenceThreshold` ([configuration.md](configuration.md)) |
 | `EssayGrading:ContextFieldMaxLength` | 20000 | 1 to 100000 characters per context field sent to the grader |
 | `AiService:EssayGradingTimeoutSeconds` | 100 | the essay client's attempt and total timeout; above the AI service's worst case of about 91 s |
 | `Content:QuestionEssayAnswerMaxLength` | 20000 | the longest essay `grade-draft`, the quiz answer and the exam save accept |

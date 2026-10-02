@@ -13,6 +13,7 @@ using Elmanhg.Domain.Sessions.Selection;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Tests.Application.Features.Subscriptions;
 using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -50,7 +51,7 @@ public sealed class StartQuizSessionHandlerTests
         SessionRepositoryStub.StubFind(_sessionRepository);
         _timeProvider.GetUtcNow().Returns(T0);
         SubscriptionRepositoryStub.Stub(_subscriptionRepository, SubscriptionRepositoryStub.EntitledBase(_builder.StudentId, T0));
-        _handler = new StartQuizSessionHandler(_sessionRepository, _lessonRepository, _questionRepository, _subscriptionRepository, Options.Create(new SessionsOptions()), Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), new Random(Seed), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), Substitute.For<IFileStorage>());
+        _handler = new StartQuizSessionHandler(_sessionRepository, _lessonRepository, _questionRepository, _subscriptionRepository, Options.Create(new SessionsOptions()), Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), new Random(Seed), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), Substitute.For<IFileStorage>(), new FakeRuntimeSettings());
     }
 
     private Guid LessonId => _builder.Questions.Lesson.Id;

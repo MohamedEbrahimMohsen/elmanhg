@@ -11,6 +11,7 @@ using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Units;
 using Elmanhg.Infrastructure.RichText;
 using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -201,5 +202,5 @@ public sealed class GradeMathStepsHandlerTests
         await _mathStepGradeRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
-    private Task Handle(Guid gradeId) => new GradeMathStepsHandler(_mathStepGradeRepository, _questionRepository, _lessonRepository, _unitRepository, _subjectRepository, new RichTextExtractor(), _mathStepGradingClient, Options.Create(new MathStepGradingOptions()), _timeProvider).Handle(new GradeMathStepsCommand(gradeId), TestContext.Current.CancellationToken);
+    private Task Handle(Guid gradeId) => new GradeMathStepsHandler(_mathStepGradeRepository, _questionRepository, _lessonRepository, _unitRepository, _subjectRepository, new RichTextExtractor(), _mathStepGradingClient, Options.Create(new MathStepGradingOptions()), _timeProvider, new FakeRuntimeSettings()).Handle(new GradeMathStepsCommand(gradeId), TestContext.Current.CancellationToken);
 }

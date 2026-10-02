@@ -15,6 +15,7 @@ import {
   MessageCircleQuestion,
   MessagesSquare,
   ScrollText,
+  Settings,
   Users,
   type LucideIcon,
 } from 'lucide-react';
@@ -155,6 +156,13 @@ export const navByRole: Record<Role, RoleNav> = {
         labelKey: 'nav.admin.export',
         icon: Download,
         capability: 'trainingDataExport',
+      },
+      {
+        key: 'configuration',
+        to: '/admin/configuration',
+        labelKey: 'nav.admin.configuration',
+        icon: Settings,
+        capability: 'configurationManage',
       },
     ],
     tabBarKeys: ['dashboard', 'content', 'questions'],

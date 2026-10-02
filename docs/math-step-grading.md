@@ -124,7 +124,7 @@ The web polls it every 2 s while `Pending` (`useMathStepGrade`). `MathStepGradeS
 | `MathStepGrading:SweepBatchSize` | 5 | 1 to 100 grades per sweep |
 | `MathStepGrading:MaxAttempts` | 4 | 1 to 10 |
 | `MathStepGrading:RetryBaseDelaySeconds` | 30 | 1 to 3600; doubles each retry |
-| `MathStepGrading:ReviewConfidenceThreshold` | 0.7 | 0 to 1; a lower confidence goes to teacher review |
+| `MathStepGrading:ReviewConfidenceThreshold` | 0.7 | 0 to 1; a lower confidence goes to teacher review. The default of the runtime setting `grading.mathStepReviewConfidenceThreshold` ([configuration.md](configuration.md)) |
 | `MathStepGrading:ContextFieldMaxLength` | 20000 | 1 to 100000 characters per context field |
 | `MathStepGrading:CheckPermitLimit` | 10 | 1 to 1000 quiz math checks per student per window |
 | `MathStepGrading:CheckWindowSeconds` | 60 | 1 to 3600 |

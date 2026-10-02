@@ -5578,6 +5578,117 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Configuration",
+      "description": "Admin only (Configuration.Manage). Sign in as an admin first so accessToken is set.",
+      "item": [
+        {
+          "name": "Get runtime settings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns groups\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "settings"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update runtime setting",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"is overridden\", function () { pm.expect(pm.response.json().isOverridden).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/settings/plans.freeDailyQuizQuestions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "settings", "plans.freeDailyQuizQuestions"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": 10\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reset runtime setting",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"uses the default\", function () { pm.expect(pm.response.json().isOverridden).to.eql(false); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/settings/plans.freeDailyQuizQuestions/reset",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "settings", "plans.freeDailyQuizQuestions", "reset"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get infrastructure configuration",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"secrets carry only key and isSet\", function () { const secrets = pm.response.json().secrets; pm.expect(secrets).to.be.an(\"array\"); secrets.forEach(function (secret) { pm.expect(Object.keys(secret).sort()).to.eql([\"isSet\", \"key\"]); }); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/infrastructure",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "infrastructure"]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,9 @@
+{
+  "errors": {
+    "RUNTIME_SETTING_KEY_REQUIRED": "مفتاح الإعداد مطلوب.",
+    "RUNTIME_SETTING_VALUE_INVALID": "القيمة غير صالحة لهذا الإعداد أو خارج الحدود المسموح بها.",
+    "RUNTIME_SETTING_NOT_FOUND": "الإعداد غير موجود.",
+    "RUNTIME_SETTING_MODIFIED_CONCURRENTLY": "عدّل شخص آخر هذا الإعداد في نفس الوقت. حدّث الصفحة وحاول مرة أخرى.",
+    "ASK_TEACHER_REMINDER_ORDER_INVALID": "يجب أن يكون التذكير الأول قبل الثاني، والثاني قبل نهاية مهلة الرد."
+  }
+}

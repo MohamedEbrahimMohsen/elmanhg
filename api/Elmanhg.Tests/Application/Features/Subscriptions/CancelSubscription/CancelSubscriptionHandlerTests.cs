@@ -6,6 +6,7 @@ using Elmanhg.Application.Subscriptions.CancelSubscription;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using NSubstitute;
 using System.Linq.Expressions;
@@ -31,7 +32,7 @@ public sealed class CancelSubscriptionHandlerTests
             .Returns(call => _subscriptions.FirstOrDefault(call.Arg<Expression<Func<Subscription, bool>>>().Compile()));
         _subscriptionRepository.FindAsync(Arg.Any<Expression<Func<Subscription, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Subscription>, IQueryable<Subscription>>?>(), Arg.Any<Func<IQueryable<Subscription>, IOrderedQueryable<Subscription>>?>(), Arg.Any<bool>())
             .Returns(call => _subscriptions.Where(call.Arg<Expression<Func<Subscription, bool>>>().Compile()).ToList());
-        _handler = new CancelSubscriptionHandler(_subscriptionRepository, Microsoft.Extensions.Options.Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService);
+        _handler = new CancelSubscriptionHandler(_subscriptionRepository, Microsoft.Extensions.Options.Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService, new FakeRuntimeSettings());
     }
 
     [Fact]

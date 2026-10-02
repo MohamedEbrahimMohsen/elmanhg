@@ -5,6 +5,8 @@ using Elmanhg.Application.Exams.Shared;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Shared.RuntimeSettings;
+using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.EssayGrading;
@@ -26,7 +28,7 @@ using System.Security.Claims;
 
 namespace Elmanhg.Application.Exams.StartUnitExam;
 
-public sealed class StartUnitExamHandler(ISessionRepository sessionRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, ILessonRepository lessonRepository, ILessonOpeningRepository lessonOpeningRepository, IQuestionRepository questionRepository, IExamBlueprintRepository examBlueprintRepository, IQuestionMasteryRepository questionMasteryRepository, IEssayGradeRepository essayGradeRepository, IMathStepGradeRepository mathStepGradeRepository, ISubscriptionRepository subscriptionRepository, IOptions<ExamsOptions> examsOptions, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, Random random, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer, IAiMathCheckClient mathCheckClient, IFileStorage fileStorage) : IRequestHandler<StartUnitExamCommand, ExamSessionResult>
+public sealed class StartUnitExamHandler(ISessionRepository sessionRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, ILessonRepository lessonRepository, ILessonOpeningRepository lessonOpeningRepository, IQuestionRepository questionRepository, IExamBlueprintRepository examBlueprintRepository, IQuestionMasteryRepository questionMasteryRepository, IEssayGradeRepository essayGradeRepository, IMathStepGradeRepository mathStepGradeRepository, ISubscriptionRepository subscriptionRepository, IOptions<ExamsOptions> examsOptions, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, Random random, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer, IAiMathCheckClient mathCheckClient, IFileStorage fileStorage, IRuntimeSettings runtimeSettings) : IRequestHandler<StartUnitExamCommand, ExamSessionResult>
 {
     public async Task<ExamSessionResult> Handle(StartUnitExamCommand request, CancellationToken cancellationToken)
     {
@@ -75,11 +77,12 @@ public sealed class StartUnitExamHandler(ISessionRepository sessionRepository, I
         var isTestMode = currentUserService.GetClaim(ClaimTypes.Role) == nameof(UserRole.Admin);
         if (!isTestMode)
         {
-            var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, userId, subscriptionsOptions.Value, now, cancellationToken).ConfigureAwait(false);
+            var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, runtimeSettings, userId, subscriptionsOptions.Value, now, cancellationToken).ConfigureAwait(false);
             FreeTierGate.EnsureCanTakeExams(entitlement);
         }
 
-        if (examsOptions.Value.RequireAllLessonsOpened && !isTestMode)
+        var requireAllLessonsOpened = await runtimeSettings.GetAsync(FeatureFlagRuntimeSettings.ExamsRequireAllLessonsOpened, cancellationToken).ConfigureAwait(false);
+        if (requireAllLessonsOpened && !isTestMode)
         {
             await ExamLessonGate.EnsureOpenedAsync(userId, [unit.Id], lessonRepository, lessonOpeningRepository, cancellationToken).ConfigureAwait(false);
         }

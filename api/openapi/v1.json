@@ -6034,6 +6034,175 @@
         }
       }
     },
+    "/api/configuration/settings": {
+      "get": {
+        "tags": [
+          "Configuration"
+        ],
+        "operationId": "GetRuntimeSettings",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RuntimeSettingGroupResult"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RuntimeSettingGroupResult"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RuntimeSettingGroupResult"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/configuration/settings/{key}": {
+      "put": {
+        "tags": [
+          "Configuration"
+        ],
+        "operationId": "UpdateRuntimeSetting",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRuntimeSettingRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRuntimeSettingRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRuntimeSettingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeSettingResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeSettingResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeSettingResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/configuration/settings/{key}/reset": {
+      "post": {
+        "tags": [
+          "Configuration"
+        ],
+        "operationId": "ResetRuntimeSetting",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeSettingResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeSettingResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeSettingResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/configuration/infrastructure": {
+      "get": {
+        "tags": [
+          "Configuration"
+        ],
+        "operationId": "GetInfrastructureConfiguration",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfrastructureConfigurationResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfrastructureConfigurationResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfrastructureConfigurationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/browse/subjects/{subjectId}": {
       "get": {
         "tags": [
@@ -7699,6 +7868,59 @@
             ]
           }
         }
+      },
+      "AiServiceConfigurationResult": {
+        "required": [
+          "llmProvider",
+          "chatModel",
+          "essayGradingModel",
+          "mathStepGradingModel",
+          "embeddingProvider",
+          "embeddingModel",
+          "transcriptionProvider",
+          "transcriptionModel",
+          "secrets"
+        ],
+        "type": "object",
+        "properties": {
+          "llmProvider": {
+            "type": "string"
+          },
+          "chatModel": {
+            "type": "string"
+          },
+          "essayGradingModel": {
+            "type": "string"
+          },
+          "mathStepGradingModel": {
+            "type": "string"
+          },
+          "embeddingProvider": {
+            "type": "string"
+          },
+          "embeddingModel": {
+            "type": "string"
+          },
+          "transcriptionProvider": {
+            "type": "string"
+          },
+          "transcriptionModel": {
+            "type": "string"
+          },
+          "secrets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SecretStatusResult"
+            }
+          }
+        }
+      },
+      "AiServiceStatus": {
+        "enum": [
+          "NotUsed",
+          "Reachable",
+          "Unreachable"
+        ]
       },
       "ApproveQuestionRequest": {
         "required": [
@@ -10338,6 +10560,53 @@
           }
         }
       },
+      "InfrastructureConfigurationResult": {
+        "required": [
+          "environment",
+          "integrations",
+          "safetySwitches",
+          "secrets",
+          "aiServiceStatus",
+          "aiService"
+        ],
+        "type": "object",
+        "properties": {
+          "environment": {
+            "type": "string"
+          },
+          "integrations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IntegrationProviderResult"
+            }
+          },
+          "safetySwitches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafetySwitchResult"
+            }
+          },
+          "secrets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SecretStatusResult"
+            }
+          },
+          "aiServiceStatus": {
+            "$ref": "#/components/schemas/AiServiceStatus"
+          },
+          "aiService": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AiServiceConfigurationResult"
+              }
+            ]
+          }
+        }
+      },
       "InProgressExamResult": {
         "required": [
           "sessionId",
@@ -10350,6 +10619,36 @@
             "format": "uuid"
           },
           "isThisUnit": {
+            "type": "boolean"
+          }
+        }
+      },
+      "IntegrationMode": {
+        "enum": [
+          "Fake",
+          "Local",
+          "Real"
+        ]
+      },
+      "IntegrationProviderResult": {
+        "required": [
+          "integration",
+          "provider",
+          "mode",
+          "isEnabled"
+        ],
+        "type": "object",
+        "properties": {
+          "integration": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/IntegrationMode"
+          },
+          "isEnabled": {
             "type": "boolean"
           }
         }
@@ -12748,6 +13047,139 @@
           }
         }
       },
+      "RuntimeSettingGroup": {
+        "enum": [
+          "Features",
+          "AskTeacher",
+          "PlanLimits",
+          "Grading",
+          "Uploads"
+        ]
+      },
+      "RuntimeSettingGroupResult": {
+        "required": [
+          "group",
+          "settings"
+        ],
+        "type": "object",
+        "properties": {
+          "group": {
+            "$ref": "#/components/schemas/RuntimeSettingGroup"
+          },
+          "settings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuntimeSettingResult"
+            }
+          }
+        }
+      },
+      "RuntimeSettingResult": {
+        "required": [
+          "key",
+          "group",
+          "type",
+          "value",
+          "defaultValue",
+          "isOverridden",
+          "minimum",
+          "maximum",
+          "allowedValues",
+          "labelArabic",
+          "labelEnglish",
+          "descriptionArabic",
+          "descriptionEnglish",
+          "updatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "group": {
+            "$ref": "#/components/schemas/RuntimeSettingGroup"
+          },
+          "type": {
+            "$ref": "#/components/schemas/RuntimeSettingType"
+          },
+          "value": {
+            "$ref": "#/components/schemas/JsonElement"
+          },
+          "defaultValue": {
+            "$ref": "#/components/schemas/JsonElement"
+          },
+          "isOverridden": {
+            "type": "boolean"
+          },
+          "minimum": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "maximum": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "allowedValues": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "labelArabic": {
+            "type": "string"
+          },
+          "labelEnglish": {
+            "type": "string"
+          },
+          "descriptionArabic": {
+            "type": "string"
+          },
+          "descriptionEnglish": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "RuntimeSettingType": {
+        "enum": [
+          "Integer",
+          "Decimal",
+          "Boolean",
+          "Choice",
+          "ChoiceList"
+        ]
+      },
+      "SafetySwitchResult": {
+        "required": [
+          "key",
+          "isOn"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "isOn": {
+            "type": "boolean"
+          }
+        }
+      },
       "SaveExamAnswerRequest": {
         "required": [
           "answer"
@@ -12784,6 +13216,21 @@
               "null",
               "boolean"
             ]
+          }
+        }
+      },
+      "SecretStatusResult": {
+        "required": [
+          "key",
+          "isSet"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "isSet": {
+            "type": "boolean"
           }
         }
       },
@@ -15583,6 +16030,17 @@
           }
         }
       },
+      "UpdateRuntimeSettingRequest": {
+        "required": [
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/JsonElement"
+          }
+        }
+      },
       "UploadDiagramImageResult": {
         "required": [
           "key",
@@ -16423,6 +16881,9 @@
     },
     {
       "name": "ContentRetrieval"
+    },
+    {
+      "name": "Configuration"
     },
     {
       "name": "Browse"

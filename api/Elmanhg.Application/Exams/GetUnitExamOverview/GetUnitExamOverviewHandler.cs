@@ -3,7 +3,8 @@ using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.ExamBlueprints.Shared;
 using Elmanhg.Application.Exams.Shared;
 using Elmanhg.Application.Exceptions;
-using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Shared.RuntimeSettings;
+using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
@@ -12,12 +13,11 @@ using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Units;
 using MediatR;
-using Microsoft.Extensions.Options;
 using System.Security.Claims;
 
 namespace Elmanhg.Application.Exams.GetUnitExamOverview;
 
-public sealed class GetUnitExamOverviewHandler(ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IExamBlueprintRepository examBlueprintRepository, IQuestionRepository questionRepository, ISessionRepository sessionRepository, ILessonRepository lessonRepository, ILessonOpeningRepository lessonOpeningRepository, IOptions<ExamsOptions> examsOptions, ICurrentUserService currentUserService) : IRequestHandler<GetUnitExamOverviewQuery, UnitExamOverviewResult>
+public sealed class GetUnitExamOverviewHandler(ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IExamBlueprintRepository examBlueprintRepository, IQuestionRepository questionRepository, ISessionRepository sessionRepository, ILessonRepository lessonRepository, ILessonOpeningRepository lessonOpeningRepository, IRuntimeSettings runtimeSettings, ICurrentUserService currentUserService) : IRequestHandler<GetUnitExamOverviewQuery, UnitExamOverviewResult>
 {
     public async Task<UnitExamOverviewResult> Handle(GetUnitExamOverviewQuery request, CancellationToken cancellationToken)
     {
@@ -44,7 +44,8 @@ public sealed class GetUnitExamOverviewHandler(ICurriculumUnitRepository unitRep
         var available = ServableTypeCounts.ForUnit(await questionRepository.CountServableByUnitAndTypeAsync(unit.SubjectId, cancellationToken).ConfigureAwait(false), unit.Id);
         var openExam = await sessionRepository.FirstOrDefaultAsync(x => x.StudentId == userId && x.Kind != SessionKind.Quiz && x.SubmittedAt == null, cancellationToken, asNoTracking: true).ConfigureAwait(false);
         var isTestMode = currentUserService.GetClaim(ClaimTypes.Role) == nameof(UserRole.Admin);
-        var unopened = examsOptions.Value.RequireAllLessonsOpened && !isTestMode ? await ExamLessonGate.CountUnopenedAsync(userId, [unit.Id], lessonRepository, lessonOpeningRepository, cancellationToken).ConfigureAwait(false) : 0;
+        var requireAllLessonsOpened = await runtimeSettings.GetAsync(FeatureFlagRuntimeSettings.ExamsRequireAllLessonsOpened, cancellationToken).ConfigureAwait(false);
+        var unopened = requireAllLessonsOpened && !isTestMode ? await ExamLessonGate.CountUnopenedAsync(userId, [unit.Id], lessonRepository, lessonOpeningRepository, cancellationToken).ConfigureAwait(false) : 0;
         return UnitExamOverviewResultGenerator.Generate(unit, subject, blueprint, available, openExam, unopened);
     }
 }

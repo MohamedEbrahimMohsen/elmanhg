@@ -1,0 +1,9 @@
+{
+  "errors": {
+    "RUNTIME_SETTING_KEY_REQUIRED": "The setting key is required.",
+    "RUNTIME_SETTING_VALUE_INVALID": "The value is not valid for this setting or is outside its allowed range.",
+    "RUNTIME_SETTING_NOT_FOUND": "The setting was not found.",
+    "RUNTIME_SETTING_MODIFIED_CONCURRENTLY": "Someone else changed this setting at the same time. Refresh and try again.",
+    "ASK_TEACHER_REMINDER_ORDER_INVALID": "The first reminder must come before the second, and the second before the end of the reply time."
+  }
+}

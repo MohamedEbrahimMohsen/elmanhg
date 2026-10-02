@@ -10,6 +10,7 @@ using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Domain.Units;
 using Elmanhg.Tests.Application.Features.Subscriptions;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -51,7 +52,7 @@ public sealed class GetStudentLessonFreeTierTests
         _questionMasteryRepository.GetLessonCountsAsync(_studentId, _subject.Id, Arg.Any<CancellationToken>()).Returns([]);
         _timeProvider.GetUtcNow().Returns(Now);
         SubscriptionRepositoryStub.Stub(_subscriptionRepository);
-        _handler = new GetStudentLessonHandler(_lessonRepository, _unitRepository, _subjectRepository, _questionMasteryRepository, _subscriptionRepository, Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService);
+        _handler = new GetStudentLessonHandler(_lessonRepository, _unitRepository, _subjectRepository, _questionMasteryRepository, _subscriptionRepository, Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService, new FakeRuntimeSettings());
     }
 
     [Fact]

@@ -14,6 +14,7 @@ using Elmanhg.Domain.Mastery;
 using Elmanhg.Domain.MathStepGrading;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.ReviewSessions;
+using Elmanhg.Domain.RuntimeSettings;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Subscriptions;
@@ -130,6 +131,14 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         {
             throw new ConflictCoreException(ErrorCodes.GradeModifiedConcurrently, innerException: exception);
         }
+        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is RuntimeSettingOverride))
+        {
+            throw new ConflictCoreException(ErrorCodes.RuntimeSettingModifiedConcurrently, innerException: exception);
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: RuntimeSettingKeyIndex })
+        {
+            throw new ConflictCoreException(ErrorCodes.RuntimeSettingModifiedConcurrently, innerException: exception);
+        }
         catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: PaymobTransactionIndex or PaymentRefundTransactionIndex })
         {
             throw new ConflictCoreException(ErrorCodes.PaymentTransactionAlreadyRecorded, innerException: exception);
@@ -207,6 +216,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         ConfigureMathStepGrades(modelBuilder);
         ConfigureTrainingExports(modelBuilder);
         ConfigureIssuedRefreshTokens(modelBuilder);
+        ConfigureRuntimeSettings(modelBuilder);
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
 
@@ -665,5 +675,6 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         modelBuilder.Entity<EssayGradeTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<TrainingExport>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<IssuedRefreshToken>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<RuntimeSettingOverride>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

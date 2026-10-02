@@ -5,6 +5,7 @@ using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.TeacherThreads;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -27,7 +28,7 @@ public sealed class GetMyTeacherStatsHandlerTests
         _currentUserService.UserId.Returns(_callerId);
         _questionRepository.GetDecisionStatsAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>()).Returns(new QuestionDecisionStats());
         _teacherThreadRepository.GetReplyStatsAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>()).Returns(new TeacherReplyStats());
-        _handler = new GetMyTeacherStatsHandler(_questionRepository, _teacherThreadRepository, _currentUserService, _timeProvider, Options.Create(new DashboardOptions()), Options.Create(new SubscriptionsOptions { AskTeacherReplySlaHours = 24 }));
+        _handler = new GetMyTeacherStatsHandler(_questionRepository, _teacherThreadRepository, _currentUserService, _timeProvider, Options.Create(new DashboardOptions()), new FakeRuntimeSettings(subscriptions: new SubscriptionsOptions { AskTeacherReplySlaHours = 24 }));
     }
 
     [Fact]

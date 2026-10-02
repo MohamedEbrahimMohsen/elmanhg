@@ -2,6 +2,7 @@ using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.Subscriptions;
 using MediatR;
@@ -10,7 +11,7 @@ using DomainErrorCodes = Elmanhg.Domain.SharedKernel.Exceptions.ErrorCodes;
 
 namespace Elmanhg.Application.Subscriptions.CancelSubscription;
 
-public sealed class CancelSubscriptionHandler(ISubscriptionRepository subscriptionRepository, IOptions<SubscriptionsOptions> subscriptionsOptions, TimeProvider timeProvider, ICurrentUserService currentUserService) : IRequestHandler<CancelSubscriptionCommand, EntitlementResult>
+public sealed class CancelSubscriptionHandler(ISubscriptionRepository subscriptionRepository, IOptions<SubscriptionsOptions> subscriptionsOptions, TimeProvider timeProvider, ICurrentUserService currentUserService, IRuntimeSettings runtimeSettings) : IRequestHandler<CancelSubscriptionCommand, EntitlementResult>
 {
     public async Task<EntitlementResult> Handle(CancelSubscriptionCommand request, CancellationToken cancellationToken)
     {
@@ -31,6 +32,6 @@ public sealed class CancelSubscriptionHandler(ISubscriptionRepository subscripti
         subscription.Cancel(now);
         await subscriptionRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return await StudentEntitlementLoader.LoadAsync(subscriptionRepository, userId, options, now, cancellationToken).ConfigureAwait(false);
+        return await StudentEntitlementLoader.LoadAsync(subscriptionRepository, runtimeSettings, userId, options, now, cancellationToken).ConfigureAwait(false);
     }
 }

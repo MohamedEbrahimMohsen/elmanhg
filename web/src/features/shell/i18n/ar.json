@@ -26,7 +26,8 @@
       "payments": "المدفوعات",
       "audit": "سجل التدقيق",
       "avatarConversations": "محادثات المساعد",
-      "export": "تصدير البيانات"
+      "export": "تصدير البيانات",
+      "configuration": "الإعدادات"
     }
   },
   "role": {

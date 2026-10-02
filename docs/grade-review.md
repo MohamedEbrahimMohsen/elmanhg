@@ -9,7 +9,7 @@ Teachers review AI grades that wait in review, in the subjects they are assigned
 - `EssayGrade` rows with `Status = InReview`: reason `LowConfidence` or `GradingFailed` ([essay-grading.md](essay-grading.md)).
 - `MathStepGrade` rows with `Status = InReview`: reason `LowConfidence`, `GradingFailed` or `FinalAnswerUnchecked` ([math-step-grading.md](math-step-grading.md)).
 - Grades from admin test-mode sessions are never listed or counted, and opening or reviewing one directly returns 404 `GRADE_REVIEW_NOT_FOUND`.
-- Routing to review uses the existing thresholds `EssayGrading:ReviewConfidenceThreshold` and `MathStepGrading:ReviewConfidenceThreshold` (0.7). They are applied when the grade completes; review adds no threshold of its own.
+- Routing to review uses the existing thresholds `EssayGrading:ReviewConfidenceThreshold` and `MathStepGrading:ReviewConfidenceThreshold` (0.7), the defaults of the runtime settings `grading.essayReviewConfidenceThreshold` and `grading.mathStepReviewConfidenceThreshold` ([configuration.md](configuration.md)). They are applied when the grade completes; review adds no threshold of its own.
 - Legacy `mathUnchecked` attempts written before #123 are not listed ([math-cas.md](math-cas.md)).
 - One list per subject and kind (`Essay` or `MathSteps`), oldest first (`RequestedAt`, then `Id`), paged.
 

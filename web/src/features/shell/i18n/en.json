@@ -26,7 +26,8 @@
       "payments": "Payments",
       "audit": "Audit log",
       "avatarConversations": "Assistant conversations",
-      "export": "Data export"
+      "export": "Data export",
+      "configuration": "Configuration"
     }
   },
   "role": {

@@ -1,3 +1,4 @@
+using Elmanhg.Application.Configuration.Shared;
 using Elmanhg.Application.Shared.RichText;
 using Elmanhg.Application.Shared.Spreadsheets;
 using Elmanhg.Domain.Analytics;
@@ -11,6 +12,7 @@ using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.ReviewSessions;
+using Elmanhg.Domain.RuntimeSettings;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Subscriptions;
@@ -36,6 +38,7 @@ using Elmanhg.Infrastructure.Payments;
 using Elmanhg.Infrastructure.Questions;
 using Elmanhg.Infrastructure.ReviewSessions;
 using Elmanhg.Infrastructure.RichText;
+using Elmanhg.Infrastructure.RuntimeSettings;
 using Elmanhg.Infrastructure.Sessions;
 using Elmanhg.Infrastructure.Spreadsheets;
 using Elmanhg.Infrastructure.Storage;
@@ -98,6 +101,8 @@ public static class DependencyInjection
         services.AddScoped<IMathStepGradeRepository, MathStepGradeRepository>();
         services.AddScoped<IEssayGradeTrainingRecordRepository, EssayGradeTrainingRecordRepository>();
         services.AddScoped<ITrainingExportRepository, TrainingExportRepository>();
+        services.AddScoped<IRuntimeSettingOverrideRepository, RuntimeSettingOverrideRepository>();
+        services.AddScoped<IInfrastructureConfigurationReader, InfrastructureConfigurationReader>();
         return services;
     }
 }

@@ -174,6 +174,7 @@ The invitation email is sent through the same Resend account as the email OTP (`
 | `AiService__ServiceToken` | empty | secret; same value as `ELMANHG_AI_SERVICE_TOKEN` |
 | `AiService__AttemptTimeoutSeconds` / `AiService__TotalTimeoutSeconds` | `45` / `50` | |
 | `AiService__BaseUrl` | set by compose | `http://ai:8000` |
+| `AiService__ConfigurationTimeoutSeconds` | `5` | 1 to 30; the admin Configuration page's AI status call gives up after this and shows the service as unreachable ([configuration.md](configuration.md) §6) |
 
 ### Content retrieval (`api.env`, [docs/content-retrieval.md](content-retrieval.md))
 
@@ -203,7 +204,7 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | `Avatar__AdminConversationsMaxPageSize` | `100` | 1 to 200 |
 | `Avatar__ConversationSearchMaxLength` | `200` | 1 to 500 |
 
-The daily message limits (Free 5, Base 50) are `Subscriptions__FreeDailyAvatarMessages` and `Subscriptions__BaseDailyAvatarMessages`.
+The daily message limits (Free 5, Base 50) are `Subscriptions__FreeDailyAvatarMessages` and `Subscriptions__BaseDailyAvatarMessages`, the defaults of runtime settings an admin can change on the Configuration page ([configuration.md](configuration.md)).
 
 ### Rate limits (`api.env`, [docs/security.md](security.md))
 
@@ -226,25 +227,25 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | Variable | Default | Notes |
 |---|---|---|
 | `AskTeacher__QuestionTextMaxLength` | `2000` | 1 to 20000 |
-| `AskTeacher__ImageMaxSizeInMb` | `5` | 1 to 20 |
+| `AskTeacher__ImageMaxSizeInMb` | `5` | 1 to 9 (a larger value stops the boot: the runtime setting is capped at 9 MB); default of a runtime setting ([configuration.md](configuration.md)) |
 | `AskTeacher__ThreadListMaxPageSize` | `50` | 1 to 100 |
 | `AskTeacher__ReplyTextMaxLength` | `4000` | 1 to 20000 |
-| `AskTeacher__VoiceMaxSizeInMb` / `AskTeacher__VoiceMaxDurationSeconds` | `5` / `180` | 1 to 25 / 10 to 600 |
+| `AskTeacher__VoiceMaxSizeInMb` / `AskTeacher__VoiceMaxDurationSeconds` | `5` / `180` | 1 to 9 (a larger size stops the boot) / 10 to 600; default of a runtime setting ([configuration.md](configuration.md)) |
 | `AskTeacher__TranscriptionLanguage` | `ar` | two lower-case letters |
 | `AskTeacher__TranscriptionSweepEnabled` | `true` | the voice transcription worker |
 | `AskTeacher__TranscriptionSweepIntervalSeconds` / `AskTeacher__TranscriptionSweepBatchSize` | `5` / `5` | 1 to 3600 / 1 to 100 |
 | `AskTeacher__TranscriptionMaxAttempts` / `AskTeacher__TranscriptionRetryBaseDelaySeconds` | `4` / `15` | 1 to 10 / 1 to 3600 (retries at 15, 30, 60 s) |
 | `AskTeacher__SlaSweepEnabled` | `true` | the `ask-teacher-sla` reminder and breach worker |
 | `AskTeacher__SlaSweepIntervalSeconds` / `AskTeacher__SlaSweepBatchSize` | `60` / `50` | 1 to 3600 / 1 to 500 |
-| `AskTeacher__FirstReminderAfterHours` / `AskTeacher__SecondReminderAfterHours` | `12` / `20` | 1 to 168 each, hours into the reply window; startup fails unless first < second < `Subscriptions__AskTeacherReplySlaHours` |
+| `AskTeacher__FirstReminderAfterHours` / `AskTeacher__SecondReminderAfterHours` | `12` / `20` | 1 to 167 each, hours into the reply window; startup fails unless first < second < `Subscriptions__AskTeacherReplySlaHours`; default of a runtime setting ([configuration.md](configuration.md)) |
 | `AskTeacher__ReminderListMaxCount` | `20` | 1 to 100, the «تذكيرات» card on the teacher inbox |
 | `AiService__TranscriptionTimeoutSeconds` | `150` | 1 to 600; above the AI service's worst case (about 121 s) |
 | `AiService__EssayGradingTimeoutSeconds` | `100` | 1 to 600; above the AI service's essay-grading worst case (about 91 s) |
 | `AiService__MathCheckTimeoutSeconds` | `15` | 1 to 120; the math final-answer check's attempt and total timeout (no POST retry). A timeout or outage grades the answer «unchecked» for teacher review ([docs/math-cas.md](math-cas.md)) |
 | `Sessions__MathStepsAnswerMaxLength` / `Sessions__MathStepsMaxCount` / `Sessions__MathStepMaxLength` / `Sessions__MathFinalAnswerMaxLength` | `24000` / `20` / `500` / `200` | raw JSON cap and caps on a math-with-steps answer (422 `ATTEMPT_ANSWER_TOO_LONG`) |
 | `Sessions__DragDropAnswerMaxLength` / `Sessions__DragDropPlacementsMaxCount` / `Sessions__DragDropPlacedItemsMaxCount` | `4000` / `20` / `30` | raw JSON cap, placements and placed items in a drag-and-drop answer (422 `ATTEMPT_ANSWER_TOO_LONG`) |
-| `EssayGrading__SweepEnabled` / `EssayGrading__ReviewConfidenceThreshold` | `true` / `0.7` | the essay-grading worker, and the confidence below which a teacher reviews the grade ([docs/essay-grading.md](essay-grading.md)) |
-| `MathStepGrading__SweepEnabled` / `MathStepGrading__ReviewConfidenceThreshold` / `MathStepGrading__CheckPermitLimit` | `true` / `0.7` / `10` | the math-step-grading worker, the confidence below which a teacher reviews a step grade, and the quiz math checks per student per minute ([docs/math-step-grading.md](math-step-grading.md)) |
+| `EssayGrading__SweepEnabled` / `EssayGrading__ReviewConfidenceThreshold` | `true` / `0.7` | the essay-grading worker, and the confidence below which a teacher reviews the grade ([docs/essay-grading.md](essay-grading.md)); default of a runtime setting ([configuration.md](configuration.md)) |
+| `MathStepGrading__SweepEnabled` / `MathStepGrading__ReviewConfidenceThreshold` / `MathStepGrading__CheckPermitLimit` | `true` / `0.7` / `10` | the math-step-grading worker, the confidence below which a teacher reviews a step grade, and the quiz math checks per student per minute ([docs/math-step-grading.md](math-step-grading.md)); default of a runtime setting ([configuration.md](configuration.md)) |
 | `GradeReview__CommentMaxLength` / `GradeReview__QueueMaxPageSize` | `2000` / `50` | 1 to 10000 characters in a teacher's review note / 1 to 100 rows per review-queue page ([docs/grade-review.md](grade-review.md)) |
 | `TrainingExports__SweepEnabled` / `TrainingExports__SweepIntervalSeconds` / `TrainingExports__SweepBatchSize` | `true` / `15` / `2` | the `training-export` worker that writes JSONL files ([docs/training-data.md](training-data.md), Export); 1 to 3600 / 1 to 20 |
 | `TrainingExports__MaxAttempts` / `TrainingExports__RetryBaseDelaySeconds` | `3` / `60` | 1 to 10 / 1 to 3600; after the last failure the export is `Failed` |
@@ -252,7 +253,8 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | `TrainingExports__ReadBatchSize` / `TrainingExports__MaxRangeDays` / `TrainingExports__ListMaxPageSize` | `500` / `366` / `50` | 10 to 5000 rows per page read / 1 to 3660 / 1 to 100 |
 | `TrainingExports__RetentionDays` | `7` | 1 to 365; completed export files are deleted after this many days |
 | `TrainingExports__RetentionSweepEnabled` / `TrainingExports__RetentionSweepIntervalSeconds` / `TrainingExports__RetentionSweepBatchSize` | `true` / `3600` / `20` | the `training-export-retention` worker; 1 to 86400 / 1 to 100 |
-| `Subscriptions__AskTeacherMonthlyQuestions` / `Subscriptions__AskTeacherReplySlaHours` | `20` / `24` | the add-on's monthly quota and reply SLA ([docs/subscriptions.md](subscriptions.md)) |
+| `RuntimeSettings__CacheSeconds` | `30` | 1 to 3600; how long an API instance caches runtime settings ([docs/configuration.md](configuration.md)) |
+| `Subscriptions__AskTeacherMonthlyQuestions` / `Subscriptions__AskTeacherReplySlaHours` | `20` / `24` | the add-on's monthly quota and reply SLA ([docs/subscriptions.md](subscriptions.md)); default of a runtime setting ([configuration.md](configuration.md)) |
 
 Question photos and teachers' voice replies are stored under `teacher-threads/` (in the `api-media` volume with `Local`, in the bucket with `S3`) and are private: the API serves them only to the owning student, a teacher of the subject or an admin. Caddy proxies all of `/api/*` to the API, so never serve `/api/media` straight from the volume or the bucket at the edge. With `Local`, the media backup (section 9) includes them. Voice replies are transcribed by the API's background worker through the AI service, so with `AiService__Provider=Http` the `ai` profile must be on; otherwise the drafts fail after their retries and the teacher types the text.
 

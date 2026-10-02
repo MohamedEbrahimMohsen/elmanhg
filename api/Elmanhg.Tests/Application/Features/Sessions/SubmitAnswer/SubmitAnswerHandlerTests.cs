@@ -20,6 +20,7 @@ using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Tests.Application.Features.Mastery;
 using Elmanhg.Tests.Application.Features.Subscriptions;
 using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -58,7 +59,7 @@ public sealed class SubmitAnswerHandlerTests
         _timeProvider.GetUtcNow().Returns(T0);
         _mathCheckRateLimiter.TryAcquire(Arg.Any<Guid>()).Returns(true);
         SubscriptionRepositoryStub.Stub(_subscriptionRepository, SubscriptionRepositoryStub.EntitledBase(_builder.StudentId, T0));
-        _handler = new SubmitAnswerHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _lessonRepository, _subscriptionRepository, _essayGradeRepository, _mathStepGradeRepository, Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), Options.Create(new ContentOptions { QuestionEssayAnswerMaxLength = 20000 }), Options.Create(new SessionsOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), _mathCheckClient, _mathCheckRateLimiter, Substitute.For<IFileStorage>());
+        _handler = new SubmitAnswerHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _lessonRepository, _subscriptionRepository, _essayGradeRepository, _mathStepGradeRepository, Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), Options.Create(new ContentOptions { QuestionEssayAnswerMaxLength = 20000 }), Options.Create(new SessionsOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), _mathCheckClient, _mathCheckRateLimiter, Substitute.For<IFileStorage>(), new FakeRuntimeSettings());
     }
 
     private Guid QuestionId => _questions[0].Id;

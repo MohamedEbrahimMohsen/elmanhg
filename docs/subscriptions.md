@@ -29,6 +29,8 @@ The plan catalogue lives in configuration, section `Subscriptions` (`Subscriptio
 | `RefundReasonMaxLength` | `500` | Longest refund reason an admin can enter (1–2000). |
 | `PaymentLogReferenceMaxLength` | `100` | Longest `reference` filter of the admin payment log (1–100). |
 
+`FreeDailyQuizQuestions`, `FreeDailyAvatarMessages`, `FreeOpenLessonsPerUnit`, `BaseDailyAvatarMessages`, `AskTeacherMonthlyQuestions` and `AskTeacherReplySlaHours` are defaults: an admin can override them at runtime on the Configuration page (`plans.*`, `askTeacher.replySlaHours`, [configuration.md](configuration.md)). Prices, currency, grace period and renewal window are not runtime-editable.
+
 Placeholder prices ship in `appsettings.example.json` (and the test host): Base 19900 / 69900 / 179900 (199 / 699 / 1,799 EGP for 1 / 4 / 12 months) and Ask a Teacher 9900 (99 EGP a month). Final prices are still open (PRD §19 Q1); copy the section into your local `appsettings.json` and change the numbers.
 
 ## Money
@@ -153,7 +155,7 @@ Entitlement stays read-time, so the sweep is status bookkeeping for the UI and d
 
 ## Free tier gates
 
-Every gate loads entitlement through `StudentEntitlementLoader.LoadAsync` before any write and throws 403 `ForbiddenCoreException` from `FreeTierGate` (`Application/Subscriptions/Shared`). A failed lookup throws and nothing is saved (fail closed). The limits come only from `SubscriptionsOptions` through `EntitlementResult`.
+Every gate loads entitlement through `StudentEntitlementLoader.LoadAsync` before any write and throws 403 `ForbiddenCoreException` from `FreeTierGate` (`Application/Subscriptions/Shared`). A failed lookup throws and nothing is saved (fail closed). The limits come from the runtime plan-limit settings (defaults from `SubscriptionsOptions`, [configuration.md](configuration.md)) through `EntitlementResult`.
 
 - **What counts toward the daily quiz quota:** new `Attempt` rows in non-test `Quiz` sessions whose `CreatedAt` falls on today's date in `DailyQuotaTimeZone` (`ISessionRepository.CountQuizAttemptsOnDayAsync`, SQL `AT TIME ZONE`). A replayed identical answer creates no row and does not count. Exam answers do not count.
 - **Quiz start** (`POST /api/sessions/quiz`): a locked lesson returns `403 LESSON_LOCKED` (start and resume). A **new** session when used ≥ limit returns `403 QUIZ_DAILY_LIMIT_REACHED` (context `limit`). Resuming an open session is allowed; its answers are still gated. The size of a new session is not capped to the remaining quota.

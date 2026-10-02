@@ -4,6 +4,7 @@ using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.TeacherThreads;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -24,7 +25,7 @@ public sealed class GetAskTeacherMetricsHandlerTests
     {
         _timeProvider.GetUtcNow().Returns(Now);
         _teacherThreadRepository.GetReplyStatsAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>()).Returns(new TeacherReplyStats());
-        _handler = new GetAskTeacherMetricsHandler(_teacherThreadRepository, _teacherThreadSlaEventRepository, _subjectRepository, _timeProvider, Options.Create(new DashboardOptions()), Options.Create(new SubscriptionsOptions { AskTeacherReplySlaHours = 24 }));
+        _handler = new GetAskTeacherMetricsHandler(_teacherThreadRepository, _teacherThreadSlaEventRepository, _subjectRepository, _timeProvider, Options.Create(new DashboardOptions()), new FakeRuntimeSettings(subscriptions: new SubscriptionsOptions { AskTeacherReplySlaHours = 24 }));
     }
 
     [Fact]

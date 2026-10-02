@@ -9,7 +9,7 @@ public sealed class AskTeacherOptions
     [Range(1, 20000)]
     public int QuestionTextMaxLength { get; set; } = 2000;
 
-    [Range(1, 20)]
+    [Range(1, 9)]
     public int ImageMaxSizeInMb { get; set; } = 5;
 
     [Range(1, 100)]
@@ -18,7 +18,7 @@ public sealed class AskTeacherOptions
     [Range(1, 20000)]
     public int ReplyTextMaxLength { get; set; } = 4000;
 
-    [Range(1, 25)]
+    [Range(1, 9)]
     public int VoiceMaxSizeInMb { get; set; } = 5;
 
     [Range(10, 600)]
@@ -50,10 +50,10 @@ public sealed class AskTeacherOptions
     [Range(1, 500)]
     public int SlaSweepBatchSize { get; set; } = 50;
 
-    [Range(1, 168)]
+    [Range(1, 167)]
     public int FirstReminderAfterHours { get; set; } = 12;
 
-    [Range(1, 168)]
+    [Range(1, 167)]
     public int SecondReminderAfterHours { get; set; } = 20;
 
     [Range(1, 100)]

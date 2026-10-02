@@ -1,6 +1,7 @@
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.TeacherThreads.CreateTeacherThread;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -9,84 +10,84 @@ namespace Elmanhg.Tests.Application.Features.TeacherThreads.CreateTeacherThread;
 
 public sealed class CreateTeacherThreadValidatorTests
 {
-    private readonly CreateTeacherThreadValidator _validator = new(Options.Create(new AskTeacherOptions()));
+    private readonly CreateTeacherThreadValidator _validator = new(Options.Create(new AskTeacherOptions()), new FakeRuntimeSettings());
 
     [Fact]
-    public void Validate_TextWithOneContext_Passes()
+    public async Task Validate_TextWithOneContext_Passes()
     {
-        var result = _validator.Validate(Command(image: File("photo.png", "image/png", 16)));
+        var result = await _validator.ValidateAsync(Command(image: File("photo.png", "image/png", 16)), TestContext.Current.CancellationToken);
 
         result.IsValid.Should().BeTrue();
     }
 
     [Fact]
-    public void Validate_BlankText_FailsTextRequired()
+    public async Task Validate_BlankText_FailsTextRequired()
     {
-        var result = _validator.Validate(Command(text: "   "));
+        var result = await _validator.ValidateAsync(Command(text: "   "), TestContext.Current.CancellationToken);
 
         result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.TeacherThreadTextRequired);
     }
 
     [Fact]
-    public void Validate_TextOverMax_FailsTextTooLong()
+    public async Task Validate_TextOverMax_FailsTextTooLong()
     {
-        var result = _validator.Validate(Command(text: new string('a', 2001)));
+        var result = await _validator.ValidateAsync(Command(text: new string('a', 2001)), TestContext.Current.CancellationToken);
 
         result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.TeacherThreadTextTooLong);
     }
 
     [Fact]
-    public void Validate_NoContext_FailsContextInvalid()
+    public async Task Validate_NoContext_FailsContextInvalid()
     {
-        var result = _validator.Validate(new CreateTeacherThreadCommand("Why?", null, null, null, null));
+        var result = await _validator.ValidateAsync(new CreateTeacherThreadCommand("Why?", null, null, null, null), TestContext.Current.CancellationToken);
 
         result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.TeacherThreadContextInvalid);
     }
 
     [Fact]
-    public void Validate_TwoContexts_FailsContextInvalid()
+    public async Task Validate_TwoContexts_FailsContextInvalid()
     {
-        var result = _validator.Validate(new CreateTeacherThreadCommand("Why?", Guid.NewGuid(), null, Guid.NewGuid(), null));
+        var result = await _validator.ValidateAsync(new CreateTeacherThreadCommand("Why?", Guid.NewGuid(), null, Guid.NewGuid(), null), TestContext.Current.CancellationToken);
 
         result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.TeacherThreadContextInvalid);
     }
 
     [Fact]
-    public void Validate_EmptyGuidContext_FailsContextInvalid()
+    public async Task Validate_EmptyGuidContext_FailsContextInvalid()
     {
-        var result = _validator.Validate(new CreateTeacherThreadCommand("Why?", null, Guid.Empty, null, null));
+        var result = await _validator.ValidateAsync(new CreateTeacherThreadCommand("Why?", null, Guid.Empty, null, null), TestContext.Current.CancellationToken);
 
         result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.TeacherThreadContextInvalid);
     }
 
     [Fact]
-    public void Validate_SvgExtension_FailsImageTypeInvalid()
+    public async Task Validate_SvgExtension_FailsImageTypeInvalid()
     {
-        var result = _validator.Validate(Command(image: File("photo.svg", "image/png", 4)));
+        var result = await _validator.ValidateAsync(Command(image: File("photo.svg", "image/png", 4)), TestContext.Current.CancellationToken);
 
         result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.TeacherThreadImageTypeInvalid);
     }
 
     [Fact]
-    public void Validate_PngNameWithTextContentType_FailsImageTypeInvalid()
+    public async Task Validate_PngNameWithTextContentType_FailsImageTypeInvalid()
     {
-        var result = _validator.Validate(Command(image: File("photo.png", "text/html", 4)));
+        var result = await _validator.ValidateAsync(Command(image: File("photo.png", "text/html", 4)), TestContext.Current.CancellationToken);
 
         result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.TeacherThreadImageTypeInvalid);
     }
 
     [Fact]
-    public void Validate_ImageOverMaxSize_FailsImageTooLarge()
+    public async Task Validate_ImageOverMaxSize_FailsImageTooLarge()
     {
-        var result = _validator.Validate(Command(image: File("photo.png", "image/png", (5 * 1024 * 1024) + 1)));
+        var result = await _validator.ValidateAsync(Command(image: File("photo.png", "image/png", (5 * 1024 * 1024) + 1)), TestContext.Current.CancellationToken);
 
         result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.TeacherThreadImageTooLarge);
     }
 
     [Fact]
-    public void Validate_HtmlBytesNamedPng_FailsImageTypeInvalid()
+    public async Task Validate_HtmlBytesNamedPng_FailsImageTypeInvalid()
     {
-        var result = _validator.Validate(Command(image: File("photo.png", "image/png", 16, "<html><script>"u8.ToArray())));
+        var result = await _validator.ValidateAsync(Command(image: File("photo.png", "image/png", 16, "<html><script>"u8.ToArray())), TestContext.Current.CancellationToken);
 
         result.Errors.Select(x => x.ErrorCode).Should().ContainSingle().Which.Should().Be(ErrorCodes.TeacherThreadImageTypeInvalid);
     }

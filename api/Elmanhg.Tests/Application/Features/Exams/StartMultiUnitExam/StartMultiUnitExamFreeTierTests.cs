@@ -22,6 +22,7 @@ using Elmanhg.Domain.Units;
 using Elmanhg.Tests.Application.Features.Sessions;
 using Elmanhg.Tests.Application.Features.Subscriptions;
 using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -77,7 +78,7 @@ public sealed class StartMultiUnitExamFreeTierTests
         _questionMasteryRepository.FindAsync(Arg.Any<Expression<Func<QuestionMastery, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<QuestionMastery>, IQueryable<QuestionMastery>>?>(), Arg.Any<Func<IQueryable<QuestionMastery>, IOrderedQueryable<QuestionMastery>>?>(), Arg.Any<bool>())
             .Returns(new List<QuestionMastery>());
         SubscriptionRepositoryStub.Stub(_subscriptionRepository);
-        _handler = new StartMultiUnitExamHandler(_sessionRepository, _subjectRepository, _unitRepository, _lessonRepository, _lessonOpeningRepository, _questionRepository, _examBlueprintRepository, _questionMasteryRepository, _essayGradeRepository, _mathStepGradeRepository, _subscriptionRepository, _examsOptions, Options.Create(new ExamBlueprintsOptions()), Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), new Random(42), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), Substitute.For<IAiMathCheckClient>(), Substitute.For<IFileStorage>());
+        _handler = new StartMultiUnitExamHandler(_sessionRepository, _subjectRepository, _unitRepository, _lessonRepository, _lessonOpeningRepository, _questionRepository, _examBlueprintRepository, _questionMasteryRepository, _essayGradeRepository, _mathStepGradeRepository, _subscriptionRepository, _examsOptions, Options.Create(new ExamBlueprintsOptions()), Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), new Random(42), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), Substitute.For<IAiMathCheckClient>(), Substitute.For<IFileStorage>(), new FakeRuntimeSettings());
     }
 
     [Fact]

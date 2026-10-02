@@ -275,6 +275,19 @@ Limits (`400 VALIDATION_FAILED`):
 | `ELMANHG_AI_CAS_MAX_EXPECTED` | 20 | `TOO_MANY_ITEMS` on `expected` |
 | `ELMANHG_AI_CAS_MAX_EXPECTED_CHARS` | 500 | `TOO_LONG` on `expected[i]` |
 
+### `GET /v1/configuration`
+
+operationId `configuration_get_configuration`. Read-only: which providers and models the service runs and whether its API keys are set. The API calls it only when `AiService:Provider=Http`, for the admin Configuration page ([configuration.md](configuration.md), §6); a failed call shows the AI service as unreachable there.
+
+Response `200`:
+
+```json
+{ "llmProvider": "openai_compatible", "chatModel": "gpt-5.6-luna", "essayGradingModel": "gpt-5.6-luna", "mathStepGradingModel": "gpt-5.6-luna", "embeddingProvider": "openai", "embeddingModel": "text-embedding-3-small", "transcriptionProvider": "openai", "transcriptionModel": "whisper-1", "secrets": [{ "key": "ELMANHG_AI_LLM_API_KEY", "isSet": true }, { "key": "ELMANHG_AI_OPENAI_API_KEY", "isSet": true }] }
+```
+
+- `secrets` holds only `{ key, isSet }`. Set means not blank and not a `change-me` placeholder. Key values and `ELMANHG_AI_LLM_BASE_URL` are never returned or logged.
+- `401 UNAUTHENTICATED` without the service token.
+
 ## Errors
 
 Every error is RFC 9457 `application/problem+json`. `detail` is omitted when the status is 500 or above, and `errors` appears only for `VALIDATION_FAILED`. Titles are English only: the one caller, the .NET API, maps any failure to its own localised `AI_SERVICE_UNAVAILABLE` (503).
@@ -399,6 +412,7 @@ The LLM adapter (`clients/openai_compatible_model.py`) uses the same `clients/op
 | `AiService:EssayGradingTimeoutSeconds` | 100 | 1 to 600; the attempt and total timeout of the separate essay-grading client |
 | `AiService:MathCheckTimeoutSeconds` | 15 | 1 to 120; the attempt and total timeout of the separate math-check client |
 | `AiService:MathStepGradingTimeoutSeconds` | 100 | 1 to 600; the attempt and total timeout of the separate step-grading client |
+| `AiService:ConfigurationTimeoutSeconds` | 5 | 1 to 30; the attempt and total timeout of the admin Configuration page's status call ([configuration.md](configuration.md) §6), after which the service shows as unreachable |
 
 Timeouts nest so the AI service always answers before the API gives up: the worst case in Python is about 41 s (20 s × 2 attempts), and the API waits up to 45 s per attempt, 50 s in total. Transcription nests the same way: at most about 121 s in Python (60 s × 2 attempts), under the API's 150 s. Essay grading too: at most about 91 s in Python (45 s × 2 attempts), under the API's 100 s. The API never retries the POST; a failed transcription or essay grade is retried later by its worker. Math step grading nests like essays: at most about 91 s in Python (45 s × 2 attempts), under the API's 100 s. The math check nests too: 5 s of CAS work under the API's 15 s; the lifespan warms the CAS worker slots, so the first check pays no cold start. A failed math check is deferred and retried by the `math-step-grading` worker.
 

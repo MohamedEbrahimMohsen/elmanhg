@@ -24,6 +24,12 @@ describe('can', () => {
     expect(can('student', 'avatarConversationsView')).toBe(false);
   });
 
+  it('grants an admin configuration management and denies other roles', () => {
+    expect(can('admin', 'configurationManage')).toBe(true);
+    expect(can('teacher', 'configurationManage')).toBe(false);
+    expect(can('student', 'configurationManage')).toBe(false);
+  });
+
   it('denies an admin question validation', () => {
     expect(can('admin', 'questionsValidate')).toBe(false);
   });
