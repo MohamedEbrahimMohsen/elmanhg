@@ -63,11 +63,14 @@ Citations are parsed from the model's markers, but only references the API sent 
 |---|---|---|---|---|
 | GET | `/api/avatar/status` | `Avatar.Chat` (Student) | — | `AvatarStatusResult` |
 | POST | `/api/avatar/messages` | `Avatar.Chat` (Student) | `SendAvatarMessageCommand` | `AvatarReplyResult` |
+| GET | `/api/avatar/my-conversations` | `Avatar.Chat` (Student) | query `pageNumber` (1), `pageSize` (20) | `PageData<StudentAvatarConversationResult>` |
+| GET | `/api/avatar/my-conversations/{conversationId}` | `Avatar.Chat` (Student) | — | `StudentAvatarConversationDetailResult` |
+| DELETE | `/api/avatar/my-conversations/{conversationId}` | `Avatar.Chat` (Student) | — | empty `200` |
 
 `GET /api/avatar/status`:
 
 ```json
-{ "examInProgress": false, "tier": "Free", "dailyMessageLimit": 5, "messagesUsedToday": 2, "messagesRemainingToday": 3, "messageMaxLength": 2000, "maxHistoryMessages": 10 }
+{ "examInProgress": false, "tier": "Free", "dailyMessageLimit": 5, "messagesUsedToday": 2, "messagesRemainingToday": 3, "messageMaxLength": 2000, "maxHistoryMessages": 10, "conversationDeletionEnabled": true }
 ```
 
 `POST /api/avatar/messages`:
@@ -117,6 +120,8 @@ Send `conversationId` back with the next message to continue the conversation; i
 | `LESSON_LOCKED` | 403 | Free student, locked lesson |
 | `AI_SERVICE_UNAVAILABLE` | 503 | the AI service failed; nothing is counted |
 | `USER_NOT_AUTHENTICATED` | 401 | no signed-in user |
+| `AVATAR_CONVERSATION_ID_REQUIRED` | 422 | the history detail or delete has an empty conversation id |
+| `AVATAR_CONVERSATION_DELETION_DISABLED` | 400 | the admin turned off `features.studentsCanDeleteAvatarChats` |
 
 ## Configuration
 
@@ -130,6 +135,7 @@ Send `conversationId` back with the next message to continue the conversation; i
 | `Avatar:ContextFieldMaxLength` | 8000 | 500 to 8000 | per long context field |
 | `Avatar:AdminConversationsMaxPageSize` | 100 | 1 to 200 | largest admin conversation page |
 | `Avatar:ConversationSearchMaxLength` | 200 | 1 to 500 | longest admin search text |
+| `Avatar:StudentConversationsMaxPageSize` | 50 | 1 to 100 | largest page of the student's own history |
 
 The AI service's prompt version is `ELMANHG_AI_CHAT_PROMPT_VERSION` (default `v3`). See [deployment.md](deployment.md) for production values.
 
@@ -141,11 +147,22 @@ The AI service's prompt version is `ELMANHG_AI_CHAT_PROMPT_VERSION` (default `v3
 - **Context JSON** (camelCase keys and enums, nulls omitted): `{ "bundle": <the context bundle sent>, "sources": [{ "reference", "title", "content" }] }`, exactly what the model read, including the source content.
 - **Citations JSON**: the mapped citations returned to the student, `[{ "reference", "section", "sectionTitle", "lessonId", "questionId" }]`.
 - **Cost** is the AI service's `costUsd` for the reply ([ai-service.md](ai-service.md)); the fake returns 0.
-- **Append-only.** Triggers reject `UPDATE`, `DELETE` and `TRUNCATE` on `AvatarMessages`, with the same `reject_append_only_mutation()` as the attempt log. `AvatarConversations` stays mutable for `LastMessageAt` and `MessageCount`.
+- **Append-only.** Triggers reject `UPDATE`, `DELETE` and `TRUNCATE` on `AvatarMessages`. `AvatarConversations` stays mutable for `LastMessageAt` and `MessageCount`.
+- **Erasure exemption (#271).** The row trigger on `AvatarMessages` (and on `AvatarTrainingRecords`) is `reject_avatar_mutation_unless_erasing()`. It lets a row through only for a `DELETE` whose `ConversationId` equals the transaction-local setting `elmanhg.erase_avatar_conversation`; everything else raises `'% is append-only'` (P0001). `UPDATE` is always rejected, even during an erasure. The only code that sets the setting is the migration-owned function `erase_avatar_conversation(uuid)`: it sets the setting to that one id, deletes the conversation's training rows and messages, clears the setting and returns the number of messages deleted. A `DELETE` outside the function, or for another conversation, is rejected; the setting ends with the transaction. The `TRUNCATE` triggers still use `reject_append_only_mutation()`. This guards against application bugs, not against the database owner, who could drop the triggers anyway.
 - **Concurrency.** Two messages sent at once in one conversation collide on the row version or on the position index. The second returns `409 AVATAR_CONVERSATION_MODIFIED_CONCURRENTLY`, and its usage row rolls back with it.
-- **Privacy.** Rows are keyed by the real student id (operational data; each exchange is also copied to `AvatarTrainingRecords` under a hashed id, see [training-data.md](training-data.md)). The send command is not audited, so no message text reaches `AuditLogs`, and no log line carries message text. The admin view shows the student's display name only (no phone or email). Teachers have no access. A student can only continue their own conversation id; there is no student history view.
-- **Retention.** Kept indefinitely in v1: there is no purge job, and no endpoint deletes a conversation or a message. The retention period and the erasure path are open in the retention and privacy checklist of [training-data.md](training-data.md) (dev decision #215).
+- **Privacy.** Rows are keyed by the real student id (operational data; each exchange is also copied to `AvatarTrainingRecords` under a hashed id, see [training-data.md](training-data.md)). The send command is not audited, so no message text reaches `AuditLogs`, and no log line carries message text. The admin view shows the student's display name only (no phone or email). Teachers have no access. A student can only read, continue or delete their own conversations (see [Student history](#student-history)). Deleting a chat erases its messages and training copies, and soft-deletes the conversation with `MessageCount` 0; the `AvatarMessageUsages` rows stay, because they hold no text and count toward the daily limit. The deletion is audited as `AvatarConversation.Delete` (student actor, conversation id, `isDeleted` and `messageCount` in the diff) without any message text.
+- **Retention.** Kept until the student deletes the chat (dev decision on #215, 2026-10-02). There is no purge job. A JSONL export file that was already written is not recalled: later exports no longer contain the conversation, a completed export file still on the server is deleted when its retention ends (`TrainingExports:RetentionDays`, 7 by default), an export running during the delete may include rows it already read, and files an admin already downloaded are outside the platform.
 - **Consumers.** #110 (JSONL export) reads `AvatarTrainingRecords` ([training-data.md](training-data.md)).
+
+## Student history
+
+A student sees their own past chats inside the assistant panel («محادثاتي السابقة»), newest `LastMessageAt` first. Each item has the lesson or subject name, the entry point, the date and the first question; the detail has every message with its text and citations only (no model, tokens, cost, context or stop reason).
+
+- **Reopen.** Opening a chat loads its messages into the panel with its context; the next message is sent with its `conversationId` through the usual send path, with the same checks (context match, lesson lock, exam).
+- **Delete.** After a confirmation («حذف هذه المحادثة؟»), `DELETE /api/avatar/my-conversations/{id}` runs in one transaction: it loads the conversation by id and owner, calls `erase_avatar_conversation`, soft-deletes the conversation and saves. A racing send or delete returns `409 AVATAR_CONVERSATION_MODIFIED_CONCURRENTLY` and the erasure rolls back. A deleted chat is gone from the student list and detail, the admin list and detail (`404`), and a send with its id returns `404 AVATAR_CONVERSATION_NOT_FOUND`. Deleting never gives back today's messages.
+- **Exam gate.** During an exam in progress, the list and the detail return `403 AVATAR_EXAM_IN_PROGRESS` and the panel hides the history button (PRD §17 rule 10). Delete is not gated.
+- **Runtime flag.** `features.studentsCanDeleteAvatarChats` (Configuration page, Features, on by default). When off, delete returns `400 AVATAR_CONVERSATION_DELETION_DISABLED`, `GET /api/avatar/status` reports `conversationDeletionEnabled: false` and the panel hides the delete buttons; students can still read and continue their chats.
+- Another student's id, or an unknown id, is `404 AVATAR_CONVERSATION_NOT_FOUND`. Teachers and admins get `403`.
 
 ## Admin view
 
@@ -173,6 +190,7 @@ There is no streaming: each message gets one JSON reply, and the panel shows «�
 - The composer has «سؤالك» and «إرسال». It is disabled during an exam, at the daily limit and while a reply is pending.
 - Outcomes stay inline as notices in the conversation, not toasts: the exam refusal, the daily-limit notice (with «اشترك» for Free students), «المساعد غير متاح الآن» and a generic failure notice. After every send, successful or not, the status is refreshed.
 - If the status cannot load, the panel shows «تعذّر تحميل المساعد.» with «إعادة المحاولة».
+- The header has «محادثاتي السابقة» (hidden during an exam). The history view lists the student's chats with loading, empty («لا توجد محادثات سابقة بعد.»), error with «إعادة المحاولة», and pages of 20. Each item reopens the chat; its delete button opens the confirmation «حذف هذه المحادثة؟» and a toast reports the result. «العودة إلى المحادثة» returns to the chat. Deleting the chat that is open in the panel clears it; a send that finds the chat gone shows «هذه المحادثة لم تعد موجودة…» and the next message starts a new chat.
 - Opening a different context starts a new conversation; reopening the same one keeps it. The panel keeps the `conversationId` of the open context and sends it with each message; reloading the page starts a new conversation.
 - Admins read the log in «محادثات المساعد» (see Admin view): a filterable list, and each conversation with every reply's model, prompt version, tokens, cost, stop reason, sources and the context sent.
 
@@ -182,6 +200,6 @@ There is no streaming: each message gets one JSON reply, and the panel shows «�
 
 ## Not in this story
 
-- A student history view, and a retention purge (#215).
+- A retention purge (#215: chats are kept until the student deletes them).
 - A per-student concurrency cap on avatar calls: added by #115 (see Daily quota).
 - Ask a Teacher (E9).

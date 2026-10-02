@@ -86,6 +86,8 @@ Migrations `AddTrainingRecords` and `AddTrainingExports` add these triggers on t
 
 The entities have no mutating method.
 
+`AddAvatarConversationErasure` (#271) switches the `AvatarTrainingRecords` row trigger (and the `AvatarMessages` one) to `reject_avatar_mutation_unless_erasing()`: a `DELETE` passes only when the row's `ConversationId` equals the transaction-local setting `elmanhg.erase_avatar_conversation`, which only the migration-owned `erase_avatar_conversation(uuid)` sets and clears. `UPDATE` is always rejected and the `TRUNCATE` trigger is unchanged. A student deleting a chat therefore removes its training rows with it ([avatar.md](avatar.md), Conversation log). No other training table has an erasure path.
+
 ## Export
 
 Admins (policy `TrainingData.Export`) export one source at a time as JSONL at `#/admin/export`.
@@ -97,6 +99,8 @@ Admins (policy `TrainingData.Export`) export one source at a time as JSONL at `#
 4. `GET /api/training-exports` lists exports newest first; the page polls every 5 s while any export is `Pending`.
 5. `GET /api/training-exports/{id}/file` is admin-only (`TrainingData.Export`) and audited (`TrainingExport.Download`). It streams the stored file through the API as an `application/x-ndjson` attachment with `Cache-Control: private, no-store`. The web fetches it with the admin's bearer token and saves the blob, so no download link or capability URL exists that could leak. `Pending`/`Failed` → `409 TRAINING_EXPORT_NOT_READY`; past retention → `409 TRAINING_EXPORT_EXPIRED`; unknown id or missing file → `404 TRAINING_EXPORT_NOT_FOUND`.
 6. `training-exports/` is private in both media paths: `PublicMediaMiddleware` (S3) and `PublicMediaFileProvider` (Local) return 404 for it, so `/api/media/training-exports/...` never serves a file.
+
+**Already-exported files.** Deleting an avatar chat (#271) does not recall JSONL that was already written. Later exports no longer contain the conversation; a completed file still on the server is deleted when its retention ends (below); an export running during the delete may include the rows it already read; files an admin already downloaded are outside the platform.
 
 **Retention.** A completed file is kept for `TrainingExports:RetentionDays` (default 7) from `CompletedAt` (`ExpiresAt`). `TrainingExportRetentionWorker` (kill switch `TrainingExports:RetentionSweepEnabled`, every `RetentionSweepIntervalSeconds`, batches of `RetentionSweepBatchSize`) sends `ExpireTrainingExportCommand` (audited as `TrainingExport.Expire`, system actor): it deletes the stored file, then marks the export `Expired` and clears its `FileKey`. The same sweep also picks up every `Failed` export that still has a `FileKey` (a file, possibly partial, from its last attempt), deletes the file at once and clears the key; the export stays `Failed`. The delete happens before the save, so a failed save is retried by the next sweep (deleting a missing file is a no-op). The export row stays as the record of what was exported.
 
@@ -135,8 +139,8 @@ The student id, names, phone, email, the teacher id, audio and image URLs, the s
 - [ ] Names typed in free text are not stripped (residual risk, #215).
 - [x] Source ids (`AttemptId`, `ConversationId`, message ids, `ThreadId`, `EssayGradeId`, id keys inside JSON) are never exported raw; conversations and threads are grouped by scoped HMAC keys (Export, Raw ids). Inside the database they can still be joined by anyone with database access.
 - [x] Export files are private, downloaded only by an admin through the audited API, and deleted after `TrainingExports:RetentionDays` (default 7).
-- [ ] **Retention period**: dev decision pending (#215). Until then, operational and training data are kept indefinitely with no purge job.
-- [ ] **Student erasure path**: dev decision pending (#215). The triggers block DELETE, so erasure needs a migration-owned privileged procedure. Anyone holding the key can re-link hashes to ids.
+- [x] **Retention period**: decided on #215 (2026-10-02): avatar chats are kept until the student deletes them; there is no purge job.
+- [x] **Student erasure path** for avatar conversations (#271): deleting a chat erases its messages and training rows through `erase_avatar_conversation(uuid)`. Other sources (attempts, teacher threads, essay grades) and whole-account erasure are not offered. Anyone holding the key can re-link hashes to ids.
 - [ ] **Notice or consent** that interactions are used for training: dev or legal decision (#215).
 - [x] Only the Admin export job reads these tables (PRD §16 "Export training data"); no other API reads them.
 

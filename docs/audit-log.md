@@ -103,8 +103,9 @@ An array with one element per changed audited entity. Property keys are camelCas
 | CreateExamPeriod | `ExamPeriod.Create` | ExamPeriod | result |
 | UpdateExamPeriod | `ExamPeriod.Update` | ExamPeriod | command |
 | DeleteExamPeriod | `ExamPeriod.Delete` | ExamPeriod | command |
+| DeleteMyAvatarConversation | `AvatarConversation.Delete` | AvatarConversation | command (student actor; the diff shows `isDeleted` and `messageCount` → 0; no message text) |
 
-Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`, `ExamBlueprint`, `Subscription`, `Payment`, `TrainingExport`, `EssayGrade`, `MathStepGrade`, `RuntimeSettingOverride`, `ExamPeriod`.
+Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`, `ExamBlueprint`, `Subscription`, `Payment`, `TrainingExport`, `EssayGrade`, `MathStepGrade`, `RuntimeSettingOverride`, `ExamPeriod`, `AvatarConversation`.
 
 `QuestionRevision` and `QuestionDecision` rows are an append-only history and are not diffed.
 

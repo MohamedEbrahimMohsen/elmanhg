@@ -29,6 +29,7 @@ Errors: `RUNTIME_SETTING_KEY_REQUIRED` and `RUNTIME_SETTING_VALUE_INVALID` (422)
 |---|---|---|---|---|
 | `features.examsRequireAllLessonsOpened` | Features | Boolean | – | `Exams:RequireAllLessonsOpened` |
 | `features.refundsEnabled` | Features | Boolean | – | `false` (constant, no Options key) |
+| `features.studentsCanDeleteAvatarChats` | Features | Boolean | – | `true` (constant, no Options key) |
 | `askTeacher.replySlaHours` | AskTeacher | Integer | 1–168 | `Subscriptions:AskTeacherReplySlaHours` |
 | `askTeacher.firstReminderAfterHours` | AskTeacher | Integer | 1–167 | `AskTeacher:FirstReminderAfterHours` |
 | `askTeacher.secondReminderAfterHours` | AskTeacher | Integer | 1–167 | `AskTeacher:SecondReminderAfterHours` |

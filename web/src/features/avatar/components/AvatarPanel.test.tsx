@@ -161,6 +161,35 @@ describe('AvatarPanel', () => {
     expect(screen.getByRole('button', { name: 'Assistant' })).toBeInTheDocument();
   });
 
+  it('starts a new conversation after the open one no longer exists', async () => {
+    const bodies: SendAvatarMessageCommand[] = [];
+    let call = 0;
+    server.use(
+      http.post('*/api/avatar/messages', async ({ request }) => {
+        bodies.push((await request.json()) as SendAvatarMessageCommand);
+        call += 1;
+        return call === 2
+          ? HttpResponse.json({ code: 'AVATAR_CONVERSATION_NOT_FOUND' }, { status: 404 })
+          : HttpResponse.json(avatarReply());
+      }),
+    );
+    const { user, panel } = await openPanel();
+
+    await ask(user, panel, 'First question');
+    await within(panel).findByText(avatarReply().reply);
+    await ask(user, panel, 'Second question');
+    expect(
+      await within(panel).findByText('This chat no longer exists. Your next message starts a new chat.'),
+    ).toBeInTheDocument();
+    await ask(user, panel, 'Third question');
+
+    await waitFor(() => {
+      expect(bodies).toHaveLength(3);
+    });
+    expect(bodies[1]?.conversationId).toBe(avatarConversationId);
+    expect(bodies[2]?.conversationId).toBeNull();
+  });
+
   it('renders right to left in Arabic', async () => {
     const { panel } = await openPanel('ar');
 

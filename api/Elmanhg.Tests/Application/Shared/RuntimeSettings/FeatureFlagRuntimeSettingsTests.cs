@@ -16,4 +16,14 @@ public sealed class FeatureFlagRuntimeSettingsTests
 
         (refunds.Group, refunds.Type, refunds.DefaultValue.GetBoolean()).Should().Be((RuntimeSettingGroup.Features, RuntimeSettingType.Boolean, false));
     }
+
+    [Fact]
+    public void Definitions_StudentsCanDeleteAvatarChats_IsBooleanFeatureFlagDefaultingOn()
+    {
+        var definitions = new FeatureFlagRuntimeSettings(Microsoft.Extensions.Options.Options.Create(new ExamsOptions())).Definitions;
+
+        var deletion = definitions.Single(x => x.Key == "features.studentsCanDeleteAvatarChats");
+
+        (deletion.Group, deletion.Type, deletion.DefaultValue.GetBoolean()).Should().Be((RuntimeSettingGroup.Features, RuntimeSettingType.Boolean, true));
+    }
 }

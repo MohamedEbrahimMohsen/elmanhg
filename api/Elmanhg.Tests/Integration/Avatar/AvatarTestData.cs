@@ -1,4 +1,5 @@
 using Elmanhg.Domain.Avatar;
+using Elmanhg.Domain.TrainingData;
 using Elmanhg.Infrastructure.Data.Context;
 using Elmanhg.Tests.Integration.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ namespace Elmanhg.Tests.Integration.Avatar;
 public static class AvatarTestData
 {
     public const string Route = "/api/avatar";
+    public const string MyConversationsRoute = $"{Route}/my-conversations";
 
     private static CancellationToken CancellationToken => TestContext.Current.CancellationToken;
 
@@ -44,6 +46,27 @@ public static class AvatarTestData
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         return await context.AvatarConversations.AsNoTracking().Include(x => x.Messages).SingleOrDefaultAsync(x => x.Id == conversationId, CancellationToken).ConfigureAwait(false);
+    }
+
+    public static Task<HttpResponseMessage> GetMyConversationsAsync(HttpClient client, string query) => client.GetAsync($"{MyConversationsRoute}{query}", CancellationToken);
+
+    public static Task<HttpResponseMessage> GetMyConversationAsync(HttpClient client, Guid conversationId) => client.GetAsync($"{MyConversationsRoute}/{conversationId}", CancellationToken);
+
+    public static Task<HttpResponseMessage> DeleteMyConversationAsync(HttpClient client, Guid conversationId) => client.DeleteAsync($"{MyConversationsRoute}/{conversationId}", CancellationToken);
+
+    public static async Task<AvatarConversation?> ReadConversationIncludingDeletedAsync(ApiFactory factory, Guid conversationId)
+    {
+        using var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        // The soft-delete filter hides a deleted conversation; these tests assert its tombstone.
+        return await context.AvatarConversations.IgnoreQueryFilters().AsNoTracking().Include(x => x.Messages).SingleOrDefaultAsync(x => x.Id == conversationId, CancellationToken).ConfigureAwait(false);
+    }
+
+    public static async Task<List<AvatarTrainingRecord>> ReadTrainingRecordsAsync(ApiFactory factory, Guid conversationId)
+    {
+        using var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        return await context.AvatarTrainingRecords.AsNoTracking().Where(x => x.ConversationId == conversationId).ToListAsync(CancellationToken).ConfigureAwait(false);
     }
 
     public static async Task<List<AvatarMessageUsage>> ReadUsageAsync(ApiFactory factory, Guid studentId)
