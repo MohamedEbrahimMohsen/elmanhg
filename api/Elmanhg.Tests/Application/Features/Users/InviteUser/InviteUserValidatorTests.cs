@@ -1,9 +1,12 @@
+using Core.OTP;
+using Core.Validation;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Users.InviteUser;
 using Elmanhg.Domain.Identity;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
+using DomainErrorCodes = Elmanhg.Domain.SharedKernel.Exceptions.ErrorCodes;
 
 namespace Elmanhg.Tests.Application.Features.Users.InviteUser;
 
@@ -11,7 +14,7 @@ public sealed class InviteUserValidatorTests
 {
     private const string Email = "teacher@elmanhg.test";
 
-    private readonly InviteUserValidator _validator = new(Options.Create(new AuthOptions { DisplayNameMaxLength = 100, EmailMaxLength = 256 }));
+    private readonly InviteUserValidator _validator = new(Options.Create(new AuthOptions { DisplayNameMaxLength = 100, EmailMaxLength = 256 }), Options.Create(new OtpOptions { PhoneCodes = ["010", "011", "012", "015"], PhoneLength = 11 }));
 
     [Fact]
     public void Validate_ValidTeacher_Passes()
@@ -67,5 +70,29 @@ public sealed class InviteUserValidatorTests
         var result = _validator.Validate(new InviteUserCommand(UserRole.Admin, "Admin", new string('a', 250) + "@elmanhg.test"));
 
         result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.EmailTooLong);
+    }
+
+    [Fact]
+    public void Validate_TeacherWithValidPhone_Passes()
+    {
+        var result = _validator.Validate(new InviteUserCommand(UserRole.Teacher, "Teacher", Email, "01512345678"));
+
+        result.IsValid.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Validate_TeacherWithInvalidPhone_FailsWithInvalidCellularCode()
+    {
+        var result = _validator.Validate(new InviteUserCommand(UserRole.Teacher, "Teacher", Email, "02012345678"));
+
+        result.Errors.Select(x => x.ErrorCode).Should().Contain(ValidationErrors.ValidationPhoneNumberInvalidCellulerCode);
+    }
+
+    [Fact]
+    public void Validate_AdminWithPhone_FailsWithPhoneNumberTeachersOnly()
+    {
+        var result = _validator.Validate(new InviteUserCommand(UserRole.Admin, "Admin", Email, "01012345678"));
+
+        result.Errors.Select(x => x.ErrorCode).Should().Equal(DomainErrorCodes.PhoneNumberTeachersOnly);
     }
 }

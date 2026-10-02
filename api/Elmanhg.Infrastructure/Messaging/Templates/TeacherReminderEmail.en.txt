@@ -1,0 +1,8 @@
+A student question is waiting
+
+Hello {{name}},
+A student question in {{subject}} (lesson {{lesson}}) is waiting for your reply.
+Reply by: {{deadline}}
+Open the question: {{link}}
+
+This is the only out-of-app reminder for this question.

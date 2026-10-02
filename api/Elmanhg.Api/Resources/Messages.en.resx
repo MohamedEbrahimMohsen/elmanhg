@@ -237,6 +237,7 @@
   <data name="UNIT_HAS_LESSONS" xml:space="preserve"><value>This unit has lessons and cannot be deleted.</value></data>
   <data name="CONTENT_ORDER_INVALID" xml:space="preserve"><value>Order must be 1 or more.</value></data>
   <data name="USER_NOT_TEACHER" xml:space="preserve"><value>Subjects can only be assigned to teachers.</value></data>
+  <data name="PHONE_NUMBER_TEACHERS_ONLY" xml:space="preserve"><value>A WhatsApp number can be set for teachers only.</value></data>
   <data name="AUDIT_LOG_PAGE_NUMBER_INVALID" xml:space="preserve"><value>Page number must be 1 or more.</value></data>
   <data name="AUDIT_LOG_PAGE_SIZE_INVALID" xml:space="preserve"><value>Page size is out of the allowed range.</value></data>
   <data name="AUDIT_LOG_FILTER_TOO_LONG" xml:space="preserve"><value>Filter text is too long.</value></data>

@@ -18,7 +18,7 @@ public sealed class RuntimeSettingRegistryTests
     {
         var definitions = _registry.Definitions;
 
-        definitions.Should().HaveCount(14);
+        definitions.Should().HaveCount(17);
         definitions.Select(x => x.Group).Should().BeInAscendingOrder();
         definitions[0].Key.Should().Be("features.examsRequireAllLessonsOpened");
     }

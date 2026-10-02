@@ -1,6 +1,7 @@
 using Elmanhg.Application.Configuration.Shared;
 using Elmanhg.Infrastructure.AiService;
 using Elmanhg.Infrastructure.Invitations;
+using Elmanhg.Infrastructure.Messaging;
 using Elmanhg.Infrastructure.OtpDelivery;
 using Elmanhg.Infrastructure.OtpDelivery.Email;
 using Elmanhg.Infrastructure.OtpDelivery.Sms;
@@ -12,7 +13,7 @@ namespace Elmanhg.Infrastructure.Hosting;
 
 public static class InfrastructureIntegrations
 {
-    public static List<IntegrationProviderResult> Describe(OtpDeliveryOptions otpDelivery, PaymentsOptions payments, FileStorageOptions fileStorage, AiServiceOptions aiService)
+    public static List<IntegrationProviderResult> Describe(OtpDeliveryOptions otpDelivery, OutOfAppReminderOptions outOfAppReminders, PaymentsOptions payments, FileStorageOptions fileStorage, AiServiceOptions aiService)
     {
         var usesResend = InvitationEmailServiceCollectionExtensions.UsesResend(otpDelivery.Email);
         var fileStorageProvider = fileStorage.Provider ?? FileStorageProvider.Local;
@@ -22,6 +23,8 @@ public static class InfrastructureIntegrations
             Channel("otpEmail", otpDelivery.Email.Enabled, otpDelivery.Email.Provider.ToString(), otpDelivery.Email.Provider == EmailProvider.Fake),
             Channel("otpSms", otpDelivery.Sms.Enabled, otpDelivery.Sms.Provider.ToString(), otpDelivery.Sms.Provider == SmsProvider.Fake),
             new("invitationEmail", usesResend ? nameof(EmailProvider.Resend) : nameof(EmailProvider.Fake), usesResend ? IntegrationMode.Real : IntegrationMode.Fake, true),
+            new("teacherReminderWhatsApp", otpDelivery.WhatsApp.Provider.ToString(), MessagingServiceCollectionExtensions.UsesMeta(otpDelivery.WhatsApp, outOfAppReminders) ? IntegrationMode.Real : IntegrationMode.Fake, otpDelivery.WhatsApp.Enabled),
+            new("teacherReminderEmail", usesResend ? nameof(EmailProvider.Resend) : nameof(EmailProvider.Fake), usesResend ? IntegrationMode.Real : IntegrationMode.Fake, true),
             new("payments", payments.Provider.ToString(), payments.Provider == PaymentProvider.Fake ? IntegrationMode.Fake : IntegrationMode.Real, true),
             new("fileStorage", fileStorageProvider.ToString(), fileStorageProvider == FileStorageProvider.S3 ? IntegrationMode.Real : IntegrationMode.Local, true),
             new("aiService", aiService.Provider.ToString(), aiService.Provider == AiServiceProvider.Http ? IntegrationMode.Real : IntegrationMode.Fake, true),

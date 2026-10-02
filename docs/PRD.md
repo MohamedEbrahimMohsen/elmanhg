@@ -376,7 +376,7 @@ Every chart except Content is filterable by date range (Cairo days); Content is 
 - One page, `/admin/users`, with Students, Teachers and Admins tabs. Each tab has server-side search and paging. Search matches the name (any part), the full mobile number or the full email; a partial number or email matches nothing.
 - Contact data is always masked on these screens (`010*****678`, `m***@example.test`).
 - Students: search, view profile, progress and session history, suspend and reactivate, grant a complimentary subscription.
-- Teachers: invite, assign/unassign subjects, deactivate and reactivate.
+- Teachers: invite (with an optional WhatsApp number), set or remove the WhatsApp number, assign/unassign subjects, deactivate and reactivate.
 - Admins: invite, deactivate and reactivate. At least one active admin must always remain, and an admin can never deactivate their own account.
 - Suspending or deactivating signs the user out everywhere: sign-in and token refresh stop at once, and an access token already issued is refused on its next request.
 - Invitations: the invite creates the account without a password and emails the `/accept-invite` link when email delivery is configured; the admin can also copy the link. The link carries no email or secret. The invitee proves the email with a one-time code and chooses a password. An invitation does not expire; an admin can deactivate a pending invitee.
@@ -392,7 +392,7 @@ Admins see the students' Avatar conversations, most recent first, with search by
 Admins see everything configurable on one page, `#/admin/configuration` (nav «الإعدادات»), policy `Configuration.Manage`.
 
 - **Runtime settings and feature flags.** Stored in the database, cached for at most `RuntimeSettings:CacheSeconds` (30 s by default) and cleared on every change, so a change takes effect without a restart. Each setting has a typed definition (type, range or allowed values, Arabic and English label and description); a value outside it is refused. The default is the deployment value from configuration; an admin can override it and reset it back to the default. Every change and reset is audit-logged with the old and new value.
-- **v1 settings:** the unit-exam lesson-open gate (feature flag); the Ask a Teacher reply time and the two reminder hours (first < second < reply time); the Free, Base and Ask a Teacher quotas; the essay and math-step review thresholds; the student photo size and the teacher voice size and length limits.
+- **v1 settings:** the unit-exam lesson-open gate (feature flag); the Ask a Teacher reply time and the two reminder hours (first < second < reply time); the out-of-app teacher reminder (on/off, channels, stage); the Free, Base and Ask a Teacher quotas; the essay and math-step review thresholds; the student photo size and the teacher voice size and length limits.
 - **Read-only infrastructure:** the environment; the provider of each integration and whether it is fake, local or real; the AI service models; safety switches such as `Payments:AllowFakePayments` (never editable from the UI); and whether each secret is set. Secret values are never returned.
 
 The full list, the reasons some values are not runtime-editable, and how a story adds a setting are in [configuration.md](configuration.md).
@@ -432,7 +432,7 @@ Prices, billing periods and quotas are configuration (`Subscriptions` section, s
 1. Student (with add-on) opens "اسأل معلّم" from a lesson or question, or the quiz attempt being asked about. Context (subject/unit/lesson/question) is attached automatically; student writes text and may attach an image (e.g. a photo of their work).
    Each new question counts against the monthly quota, which resets on the 1st of each calendar month in `DailyQuotaTimeZone` (Africa/Cairo); a follow-up does not count. The student may attach one photo (PNG, JPG or WEBP). Photos are private: only the owning student, a teacher assigned to the thread's subject, or an admin can open one (`docs/ask-teacher.md`).
 2. The thread is routed to the queue of teachers assigned to that subject. First teacher to claim it owns it.
-3. SLA clock starts at submission. Reminders to the teacher at 12h and 20h by default; the reply time and both reminder hours are runtime settings (§10.6); admin alert on breach. A follow-up starts a new 24-hour window; the clock never pauses.
+3. SLA clock starts at submission. Reminders to the teacher at 12h and 20h by default; the reply time and both reminder hours are runtime settings (§10.6); admin alert on breach. A follow-up starts a new 24-hour window; the clock never pauses. Once per question, at a configurable reminder stage (default the second), the reminder also goes out of the app, on WhatsApp and by email, to the claimer, or to every teacher of the subject while unclaimed. On/off, channels and stage are runtime settings (§10.6). Delivery and templates: docs/otp-delivery.md §10.
 4. Teacher replies with **text or voice**. Voice is recorded in-browser, stored, and transcribed to Arabic text automatically. The teacher sees the transcript and can correct it before sending.
 5. Student receives the reply (audio player + text). Student may send **one** follow-up on the same thread; the teacher replies once more; the thread then closes. Anything further is a new question against the monthly quota.
 6. Student rates the answer (1–5). Ratings are visible to admin.
@@ -512,6 +512,7 @@ TeacherThread(id, student_id, teacher_id?, subject_id, context_json, status[Open
 TeacherMessage(id, thread_id, sender_id, kind[Text|Voice], text, image_url?, audio_url?, audio_duration_seconds?, transcript_final bool, student_read_at?, created_at)
 TeacherVoiceDraft(id, thread_id, teacher_id, audio_key, audio_url, audio_duration_seconds, status[Pending|Ready|Failed|Sent], transcript?, transcription_model?, attempts, next_attempt_at?, recorded_at, transcribed_at?, sent_message_id?)  -- transcription job; docs/ask-teacher.md
 TeacherThreadSlaEvent(id, thread_id, kind[FirstReminder|SecondReminder|Breach], sla_due_at, teacher_id?, occurred_at)  -- one per SLA window and stage; reminders and breach record (docs/ask-teacher.md)
+TeacherThreadOutOfAppReminder(id, thread_id unique, stage[FirstReminder|SecondReminder], sla_due_at, occurred_at)  -- at most one per thread; marker of the one out-of-app reminder (docs/ask-teacher.md)
 
 AvatarConversation(id, student_id, entry_point, subject_id?, unit_id?, lesson_id?, session_id?, question_id?, started_at, last_message_at, message_count)  -- docs/avatar.md
 AvatarMessage(id, conversation_id, position, role[Student|Assistant], text, created_at, model?, prompt_version?, input_tokens?, output_tokens?, cost_usd?, stop_reason?, history_message_count?, context_json?, citations_json?)  -- append-only; replies carry the context bundle, model and prompt version

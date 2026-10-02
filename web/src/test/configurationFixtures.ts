@@ -87,6 +87,8 @@ export function infrastructure(
       { integration: 'otpEmail', provider: 'Fake', mode: 'Fake', isEnabled: true },
       { integration: 'otpSms', provider: 'Http', mode: 'Fake', isEnabled: false },
       { integration: 'invitationEmail', provider: 'Fake', mode: 'Fake', isEnabled: true },
+      { integration: 'teacherReminderWhatsApp', provider: 'Fake', mode: 'Fake', isEnabled: true },
+      { integration: 'teacherReminderEmail', provider: 'Fake', mode: 'Fake', isEnabled: true },
       { integration: 'payments', provider: 'Fake', mode: 'Fake', isEnabled: true },
       { integration: 'fileStorage', provider: 'Local', mode: 'Local', isEnabled: true },
       { integration: 'aiService', provider: 'Fake', mode: 'Fake', isEnabled: true },

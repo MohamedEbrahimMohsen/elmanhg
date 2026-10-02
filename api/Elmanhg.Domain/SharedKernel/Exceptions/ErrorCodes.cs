@@ -11,6 +11,7 @@ public static class ErrorCodes
 
     // TEACHERS
     public const string UserNotTeacher = "USER_NOT_TEACHER";
+    public const string PhoneNumberTeachersOnly = "PHONE_NUMBER_TEACHERS_ONLY";
 
     // CONTENT
     public const string SubjectHasUnits = "SUBJECT_HAS_UNITS";

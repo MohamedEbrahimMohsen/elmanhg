@@ -31,3 +31,13 @@ export const UnassignTeacherSubjectParams = zod.object({
 
 export const UnassignTeacherSubjectResponse = zod.unknown()
 
+export const SetTeacherPhoneNumberParams = zod.object({
+  "teacherId": zod.uuid()
+})
+
+export const SetTeacherPhoneNumberBody = zod.object({
+  "phoneNumber": zod.string().nullable()
+})
+
+export const SetTeacherPhoneNumberResponse = zod.unknown()
+

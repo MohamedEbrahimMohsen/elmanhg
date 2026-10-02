@@ -207,6 +207,7 @@ export * from './sessionHistoryItemResult';
 export * from './sessionHistoryKind';
 export * from './sessionItemResult';
 export * from './sessionResult';
+export * from './setTeacherPhoneNumberRequest';
 export * from './solveRateDayResult';
 export * from './solveRateMetricsResult';
 export * from './startCheckoutCommand';

@@ -36,4 +36,17 @@ public partial class User
         UpdatedBy = reactivatedBy;
         UpdationDate = DateTimeOffset.UtcNow;
     }
+
+    public void SetContactPhoneNumber(string? phoneNumber, Guid updatedBy)
+    {
+        if (Role != UserRole.Teacher)
+        {
+            throw new BusinessRuleViolationCoreException(ErrorCodes.PhoneNumberTeachersOnly);
+        }
+
+        PhoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? null : phoneNumber.Trim();
+        PhoneNumberConfirmed = false;
+        UpdatedBy = updatedBy;
+        UpdationDate = DateTimeOffset.UtcNow;
+    }
 }

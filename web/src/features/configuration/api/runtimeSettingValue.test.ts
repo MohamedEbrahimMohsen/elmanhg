@@ -24,7 +24,7 @@ describe('runtimeSettingValue', () => {
 
   it('joins a choice list', () => {
     expect(format(choiceListSetting(), ['Email', 'WhatsApp'], 'en')).toBe('WhatsApp, Email');
-    expect(format(choiceListSetting(), ['Email', 'WhatsApp'], 'ar')).toBe('WhatsApp، Email');
+    expect(format(choiceListSetting(), ['Email', 'WhatsApp'], 'ar')).toBe('واتساب، البريد الإلكتروني');
   });
 
   it('shows None for an empty list', () => {

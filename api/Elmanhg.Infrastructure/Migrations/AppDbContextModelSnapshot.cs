@@ -2366,6 +2366,40 @@ namespace Elmanhg.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Elmanhg.Domain.TeacherThreads.TeacherThreadOutOfAppReminder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("SlaDueAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Stage")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("ThreadId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ThreadId")
+                        .IsUnique();
+
+                    b.ToTable("TeacherThreadOutOfAppReminders");
+                });
+
             modelBuilder.Entity("Elmanhg.Domain.TeacherThreads.TeacherThreadSlaEvent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3643,6 +3677,15 @@ namespace Elmanhg.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Elmanhg.Domain.TeacherThreads.TeacherThreadOutOfAppReminder", b =>
+                {
+                    b.HasOne("Elmanhg.Domain.TeacherThreads.TeacherThread", null)
+                        .WithMany()
+                        .HasForeignKey("ThreadId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Elmanhg.Domain.TeacherThreads.TeacherThreadSlaEvent", b =>

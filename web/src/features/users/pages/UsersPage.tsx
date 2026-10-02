@@ -8,6 +8,7 @@ import { Button } from '@/shared/ui/button';
 import { hasActiveFilters } from '../api/userListParams';
 import { GrantPlanDialog, type GrantPlanTarget } from '../components/GrantPlanDialog';
 import { InviteUserDialog } from '../components/InviteUserDialog';
+import { TeacherPhoneDialog } from '../components/TeacherPhoneDialog';
 import { UserFiltersForm } from '../components/UserFiltersForm';
 import { UserListEmptyState } from '../components/UserListEmptyState';
 import { UserListSkeleton } from '../components/UserListSkeleton';
@@ -34,6 +35,7 @@ export function UsersPage() {
   const [statusTarget, setStatusTarget] = useState<UserSummaryResult | null>(null);
   const [inviteRole, setInviteRole] = useState<'Teacher' | 'Admin' | null>(null);
   const [grantTarget, setGrantTarget] = useState<GrantPlanTarget | null>(null);
+  const [phoneTarget, setPhoneTarget] = useState<UserSummaryResult | null>(null);
   const invitableRole = tab === 'teachers' ? 'Teacher' : tab === 'admins' ? 'Admin' : null;
 
   const renderContent = () => {
@@ -59,6 +61,7 @@ export function UsersPage() {
           onGrant={(item, plan) => {
             setGrantTarget({ studentId: item.id, displayName: item.displayName, plan });
           }}
+          onEditPhone={setPhoneTarget}
         />
         {data.totalPages > 1 ? (
           <Pagination page={data.pageNumber} totalPages={data.totalPages} onPageChange={setPage} />
@@ -109,6 +112,12 @@ export function UsersPage() {
         target={grantTarget}
         onOpenChange={whenClosed(() => {
           setGrantTarget(null);
+        })}
+      />
+      <TeacherPhoneDialog
+        target={phoneTarget}
+        onOpenChange={whenClosed(() => {
+          setPhoneTarget(null);
         })}
       />
     </section>

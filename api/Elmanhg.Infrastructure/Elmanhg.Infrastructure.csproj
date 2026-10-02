@@ -23,6 +23,7 @@
   <ItemGroup>
     <EmbeddedResource Include="OtpDelivery\Email\Templates\*" LogicalName="Elmanhg.Infrastructure.OtpDelivery.Email.Templates.%(Filename)%(Extension)" />
     <EmbeddedResource Include="Invitations\Templates\*" LogicalName="Elmanhg.Infrastructure.Invitations.Templates.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Messaging\Templates\*" WithCulture="false" LogicalName="Elmanhg.Infrastructure.Messaging.Templates.%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>

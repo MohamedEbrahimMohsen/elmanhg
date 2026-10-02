@@ -83,4 +83,12 @@ public sealed class InviteUserHandlerTests
         (await act.Should().ThrowAsync<UnauthorizedCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.UserNotAuthenticated);
         await _userManager.DidNotReceive().CreateAsync(Arg.Any<User>());
     }
+
+    [Fact]
+    public async Task Handle_TeacherWithPhone_CreatesTeacherWithUnconfirmedPhone()
+    {
+        var result = await _handler.Handle(new InviteUserCommand(UserRole.Teacher, "Teacher", Email, "01012345678"), TestContext.Current.CancellationToken);
+
+        await _userManager.Received(1).CreateAsync(Arg.Is<User>(x => x.Id == result.UserId && x.PhoneNumber == "01012345678" && !x.PhoneNumberConfirmed && x.UserName == Email));
+    }
 }

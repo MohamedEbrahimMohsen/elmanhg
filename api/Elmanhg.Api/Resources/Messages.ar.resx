@@ -237,6 +237,7 @@
   <data name="UNIT_HAS_LESSONS" xml:space="preserve"><value>لا يمكن حذف الوحدة لانها تحتوي على دروس.</value></data>
   <data name="CONTENT_ORDER_INVALID" xml:space="preserve"><value>الترتيب يجب ان يكون 1 او اكثر.</value></data>
   <data name="USER_NOT_TEACHER" xml:space="preserve"><value>يمكن اسناد المواد الى المعلمين فقط.</value></data>
+  <data name="PHONE_NUMBER_TEACHERS_ONLY" xml:space="preserve"><value>يمكن ضبط رقم واتساب للمعلّمين فقط.</value></data>
   <data name="AUDIT_LOG_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة يجب ان يكون 1 او اكثر.</value></data>
   <data name="AUDIT_LOG_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة خارج النطاق المسموح.</value></data>
   <data name="AUDIT_LOG_FILTER_TOO_LONG" xml:space="preserve"><value>نص التصفية طويل جدا.</value></data>

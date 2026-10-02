@@ -60,8 +60,19 @@ export const getUnassignTeacherSubjectMockHandler = (overrideResponse?: void | (
       })
   }, options)
 }
+
+export const getSetTeacherPhoneNumberMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.put('*/api/teachers/:teacherId/phone-number', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 200
+      })
+  }, options)
+}
 export const getTeachersMock = () => [
   getGetTeachersMockHandler(),
   getAssignTeacherSubjectMockHandler(),
-  getUnassignTeacherSubjectMockHandler()
+  getUnassignTeacherSubjectMockHandler(),
+  getSetTeacherPhoneNumberMockHandler()
 ]

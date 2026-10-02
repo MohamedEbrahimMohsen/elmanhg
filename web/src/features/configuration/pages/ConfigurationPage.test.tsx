@@ -194,6 +194,48 @@ describe('ConfigurationPage', () => {
     });
   });
 
+  it('labels the out-of-app reminder choices and saves a new stage', async () => {
+    const user = userEvent.setup();
+    openPage(
+      settingGroups(
+        choiceSetting({
+          key: 'askTeacher.outOfAppReminderChannels',
+          group: 'AskTeacher',
+          labelEnglish: 'Out-of-app reminder channels',
+          allowedValues: ['WhatsApp', 'Email', 'Both'],
+          value: 'Both',
+          defaultValue: 'Both',
+        }),
+        choiceSetting({
+          key: 'askTeacher.outOfAppReminderStage',
+          group: 'AskTeacher',
+          labelEnglish: 'Out-of-app reminder stage',
+          allowedValues: ['FirstReminder', 'SecondReminder'],
+          value: 'SecondReminder',
+          defaultValue: 'SecondReminder',
+        }),
+      ),
+    );
+    const bodies = captureBodies();
+    const channels = await rowOf('Out-of-app reminder channels');
+    const stage = await rowOf('Out-of-app reminder stage');
+
+    expect(channels.getByRole('option', { name: 'Both' })).toBeInTheDocument();
+    await user.selectOptions(stage.getByLabelText('New value'), 'First reminder');
+    await user.click(stage.getByRole('button', { name: 'Save' }));
+
+    await vi.waitFor(() => {
+      expect(bodies).toEqual([{ value: 'FirstReminder' }]);
+    });
+  });
+
+  it('lists the teacher reminder providers read-only', async () => {
+    openPage();
+
+    expect(await screen.findByRole('row', { name: /Teacher reminder by WhatsApp/ })).toHaveTextContent('Fake');
+    expect(screen.getByRole('row', { name: /Teacher reminder by email/ })).toBeInTheDocument();
+  });
+
   it('shows providers, the safety switch and secret status read-only', async () => {
     openPage();
 
