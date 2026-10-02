@@ -28,9 +28,12 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  CreateExamPeriodCommand,
+  ExamPeriodResult,
   InfrastructureConfigurationResult,
   RuntimeSettingGroupResult,
   RuntimeSettingResult,
+  UpdateExamPeriodRequest,
   UpdateRuntimeSettingRequest
 } from '../model';
 
@@ -497,3 +500,379 @@ export function useGetInfrastructureConfigurationSuspense<TData = Awaited<Return
 
 
 
+export const getGetExamPeriodsUrl = () => {
+
+
+
+
+  return `/api/configuration/exam-periods`
+}
+
+export const getExamPeriods = async ( options?: Parameters<typeof http>[1]): Promise<ExamPeriodResult[]> => {
+
+  return http<ExamPeriodResult[]>(getGetExamPeriodsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetExamPeriodsQueryKey = () => {
+    return [
+    `/api/configuration/exam-periods`
+    ] as const;
+    }
+
+
+export const getGetExamPeriodsQueryOptions = <TData = Awaited<ReturnType<typeof getExamPeriods>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExamPeriods>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetExamPeriodsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getExamPeriods>>> = ({ signal }) => getExamPeriods({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getExamPeriods>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetExamPeriodsQueryResult = NonNullable<Awaited<ReturnType<typeof getExamPeriods>>>
+export type GetExamPeriodsQueryError = unknown
+
+
+export function useGetExamPeriods<TData = Awaited<ReturnType<typeof getExamPeriods>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExamPeriods>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getExamPeriods>>,
+          TError,
+          Awaited<ReturnType<typeof getExamPeriods>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetExamPeriods<TData = Awaited<ReturnType<typeof getExamPeriods>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExamPeriods>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getExamPeriods>>,
+          TError,
+          Awaited<ReturnType<typeof getExamPeriods>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetExamPeriods<TData = Awaited<ReturnType<typeof getExamPeriods>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExamPeriods>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetExamPeriods<TData = Awaited<ReturnType<typeof getExamPeriods>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExamPeriods>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetExamPeriodsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetExamPeriodsSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getExamPeriods>>, TError = unknown>( options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getExamPeriods>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetExamPeriodsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getExamPeriods>>> = ({ signal }) => getExamPeriods({ signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getExamPeriods>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetExamPeriodsSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getExamPeriods>>>
+export type GetExamPeriodsSuspenseQueryError = unknown
+
+
+export function useGetExamPeriodsSuspense<TData = Awaited<ReturnType<typeof getExamPeriods>>, TError = unknown>(
+  options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getExamPeriods>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetExamPeriodsSuspense<TData = Awaited<ReturnType<typeof getExamPeriods>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getExamPeriods>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetExamPeriodsSuspense<TData = Awaited<ReturnType<typeof getExamPeriods>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getExamPeriods>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetExamPeriodsSuspense<TData = Awaited<ReturnType<typeof getExamPeriods>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getExamPeriods>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetExamPeriodsSuspenseQueryOptions(options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getCreateExamPeriodUrl = () => {
+
+
+
+
+  return `/api/configuration/exam-periods`
+}
+
+export const createExamPeriod = async (createExamPeriodCommand: CreateExamPeriodCommand, options?: Parameters<typeof http>[1]): Promise<ExamPeriodResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return http<ExamPeriodResult>(getCreateExamPeriodUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(createExamPeriodCommand)
+  }
+);}
+
+
+
+
+
+export const getCreateExamPeriodMutationKey = () => ['createExamPeriod'] as const;
+
+export const getCreateExamPeriodMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createExamPeriod>>, TError,CreateExamPeriodMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof createExamPeriod>>, TError,CreateExamPeriodMutationVariables, TContext> => {
+
+const mutationKey = getCreateExamPeriodMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createExamPeriod>>, CreateExamPeriodMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createExamPeriod(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateExamPeriodMutationResult = NonNullable<Awaited<ReturnType<typeof createExamPeriod>>>
+    export type CreateExamPeriodMutationBody = CreateExamPeriodCommand
+    export type CreateExamPeriodMutationError = unknown
+    export type CreateExamPeriodMutationVariables = {data: CreateExamPeriodCommand}
+
+    export const useCreateExamPeriod = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createExamPeriod>>, TError,CreateExamPeriodMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createExamPeriod>>,
+        TError,
+        CreateExamPeriodMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateExamPeriodMutationOptions(options), queryClient);
+    }
+    export const getUpdateExamPeriodUrl = (examPeriodId: string,) => {
+
+
+
+
+  return `/api/configuration/exam-periods/${examPeriodId}`
+}
+
+export const updateExamPeriod = async (examPeriodId: string,
+    updateExamPeriodRequest: UpdateExamPeriodRequest, options?: Parameters<typeof http>[1]): Promise<ExamPeriodResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return http<ExamPeriodResult>(getUpdateExamPeriodUrl(examPeriodId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(updateExamPeriodRequest)
+  }
+);}
+
+
+
+
+
+export const getUpdateExamPeriodMutationKey = () => ['updateExamPeriod'] as const;
+
+export const getUpdateExamPeriodMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateExamPeriod>>, TError,UpdateExamPeriodMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateExamPeriod>>, TError,UpdateExamPeriodMutationVariables, TContext> => {
+
+const mutationKey = getUpdateExamPeriodMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateExamPeriod>>, UpdateExamPeriodMutationVariables> = (props) => {
+          const {examPeriodId,data} = props ?? {};
+
+          return  updateExamPeriod(examPeriodId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateExamPeriodMutationResult = NonNullable<Awaited<ReturnType<typeof updateExamPeriod>>>
+    export type UpdateExamPeriodMutationBody = UpdateExamPeriodRequest
+    export type UpdateExamPeriodMutationError = unknown
+    export type UpdateExamPeriodMutationVariables = {examPeriodId: string;data: UpdateExamPeriodRequest}
+
+    export const useUpdateExamPeriod = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateExamPeriod>>, TError,UpdateExamPeriodMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateExamPeriod>>,
+        TError,
+        UpdateExamPeriodMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateExamPeriodMutationOptions(options), queryClient);
+    }
+    export const getDeleteExamPeriodUrl = (examPeriodId: string,) => {
+
+
+
+
+  return `/api/configuration/exam-periods/${examPeriodId}`
+}
+
+export const deleteExamPeriod = async (examPeriodId: string, options?: Parameters<typeof http>[1]): Promise<void> => {
+
+  return http<void>(getDeleteExamPeriodUrl(examPeriodId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteExamPeriodMutationKey = () => ['deleteExamPeriod'] as const;
+
+export const getDeleteExamPeriodMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteExamPeriod>>, TError,DeleteExamPeriodMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteExamPeriod>>, TError,DeleteExamPeriodMutationVariables, TContext> => {
+
+const mutationKey = getDeleteExamPeriodMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteExamPeriod>>, DeleteExamPeriodMutationVariables> = (props) => {
+          const {examPeriodId} = props ?? {};
+
+          return  deleteExamPeriod(examPeriodId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteExamPeriodMutationResult = NonNullable<Awaited<ReturnType<typeof deleteExamPeriod>>>
+
+    export type DeleteExamPeriodMutationError = unknown
+    export type DeleteExamPeriodMutationVariables = {examPeriodId: string}
+
+    export const useDeleteExamPeriod = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteExamPeriod>>, TError,DeleteExamPeriodMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteExamPeriod>>,
+        TError,
+        DeleteExamPeriodMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteExamPeriodMutationOptions(options), queryClient);
+    }

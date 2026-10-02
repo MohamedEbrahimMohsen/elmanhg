@@ -4,6 +4,7 @@ using Elmanhg.Application.TeacherThreads.CreateTeacherThread;
 using Elmanhg.Application.TeacherThreads.FollowUpTeacherThread;
 using Elmanhg.Application.TeacherThreads.GetMyTeacherThread;
 using Elmanhg.Application.TeacherThreads.GetMyTeacherThreads;
+using Elmanhg.Application.TeacherThreads.GetTeacherReplyDeadline;
 using Elmanhg.Application.TeacherThreads.GetTeacherThreadContext;
 using Elmanhg.Application.TeacherThreads.MarkTeacherThreadRead;
 using Elmanhg.Application.TeacherThreads.RateTeacherThread;
@@ -27,6 +28,15 @@ public class TeacherThreadsController(IMediator mediator) : ControllerBase
     public async Task<ActionResult> GetTeacherThreadContext([FromQuery] Guid? lessonId, [FromQuery] Guid? questionId, [FromQuery] Guid? attemptId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetTeacherThreadContextQuery(lessonId, questionId, attemptId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("reply-deadline", Name = "GetTeacherReplyDeadline")]
+    [Authorize(Policy = DefaultCodes.AskTeacherSubmit)]
+    [ProducesResponseType<TeacherReplyDeadlineResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetTeacherReplyDeadline(CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetTeacherReplyDeadlineQuery(), cancellationToken);
         return Ok(result);
     }
 

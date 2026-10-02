@@ -1,7 +1,9 @@
+import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApiError, unhandledErrorCode } from '@/shared/lib/apiError';
 import { Button } from '@/shared/ui/button';
 import { ConfigurationSkeleton } from '../components/ConfigurationSkeleton';
+import { ExamPeriodsSection } from '../components/ExamPeriodsSection';
 import { InfrastructureSection } from '../components/InfrastructureSection';
 import { RuntimeSettingGroupCard } from '../components/RuntimeSettingGroupCard';
 import { useGetRuntimeSettings } from '../hooks/useRuntimeSettings';
@@ -35,7 +37,12 @@ export function ConfigurationPage() {
     if (data.length === 0) {
       return <p className="text-ui text-text-muted">{t('settings.empty')}</p>;
     }
-    return data.map((group) => <RuntimeSettingGroupCard key={group.group} group={group} />);
+    return data.map((group) => (
+      <Fragment key={group.group}>
+        <RuntimeSettingGroupCard group={group} />
+        {group.group === 'SlaCalendar' ? <ExamPeriodsSection /> : null}
+      </Fragment>
+    ));
   };
 
   return (

@@ -86,7 +86,7 @@ The same attempts as Solve rate. An attempt is correct when its normalised score
 | `overdueNow` | Open threads whose SLA deadline has passed, now. |
 | `slaBreaches` | Breach events recorded by the SLA sweep in the range. |
 | `replies` | Teacher messages sent in the range. |
-| `repliedWithinSla` | Replies whose wait (from the latest earlier student message in the thread) is at most `Subscriptions:AskTeacherReplySlaHours`. A follow-up starts a new wait (`docs/ask-teacher.md`). |
+| `repliedWithinSla` | Replies whose SLA window has no Breach event (the SLA sweep records breaches over the reply calendar; a reply less than one sweep interval late counts as within). The window is the latest earlier student message in the thread, so a follow-up starts a new one (`docs/ask-teacher.md`). |
 | `slaComplianceRate` | `repliedWithinSla ÷ replies`. |
 | `medianReplySeconds` | Median wait over those replies. |
 

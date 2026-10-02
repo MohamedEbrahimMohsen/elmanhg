@@ -29,6 +29,15 @@ export const GetTeacherThreadContextResponse = zod.object({
   "attemptId": zod.uuid().nullable()
 })
 
+export const getTeacherReplyDeadlineResponseReplySlaHoursRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const GetTeacherReplyDeadlineResponse = zod.object({
+  "replySlaHours": zod.union([zod.int(),zod.stringFormat('int32', getTeacherReplyDeadlineResponseReplySlaHoursRegExpTwo)]),
+  "slaDueAt": zod.iso.datetime({"offset":true}),
+  "skipsUncountedDays": zod.boolean()
+})
+
 export const getMyTeacherThreadsResponsePageNumberRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const getMyTeacherThreadsResponsePageSizeRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
 export const getMyTeacherThreadsResponseTotalItemsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');

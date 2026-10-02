@@ -17,8 +17,6 @@ namespace Elmanhg.Tests.Integration.TeacherThreads;
 
 public sealed class TeacherThreadSlaSweepTests(ApiFactory factory)
 {
-    private static readonly TimeSpan ReplySla = TimeSpan.FromHours(24);
-
     private static CancellationToken CancellationToken => TestContext.Current.CancellationToken;
 
     [Fact]
@@ -32,7 +30,7 @@ public sealed class TeacherThreadSlaSweepTests(ApiFactory factory)
         using var scope = factory.Services.CreateScope();
         var events = await scope.ServiceProvider.GetRequiredService<AppDbContext>().TeacherThreadSlaEvents.AsNoTracking().Where(x => x.ThreadId == thread.Id).ToListAsync(CancellationToken);
         events.Select(x => x.Kind).Should().BeEquivalentTo([TeacherThreadSlaEventKind.FirstReminder, TeacherThreadSlaEventKind.SecondReminder, TeacherThreadSlaEventKind.Breach]);
-        events.Should().OnlyContain(x => x.SlaDueAt == thread.SlaDueAt);
+        events.Should().OnlyContain(x => x.WindowStartedAt == thread.SlaWindowStartedAt && x.SlaDueAt == thread.SlaDueAt);
     }
 
     [Fact]
@@ -46,12 +44,12 @@ public sealed class TeacherThreadSlaSweepTests(ApiFactory factory)
         using (var seedScope = factory.Services.CreateScope())
         {
             var context = seedScope.ServiceProvider.GetRequiredService<AppDbContext>();
-            context.TeacherThreadSlaEvents.Add(TeacherThreadSlaEvent.Record(recorded.Id, TeacherThreadSlaEventKind.FirstReminder, recorded.SlaDueAt, null, submittedAt.AddHours(12)));
+            context.TeacherThreadSlaEvents.Add(TeacherThreadSlaEvent.Record(recorded.Id, TeacherThreadSlaEventKind.FirstReminder, recorded.SlaWindowStartedAt, recorded.SlaDueAt, null, submittedAt.AddHours(12)));
             await context.SaveChangesAsync(CancellationToken);
         }
 
         using var scope = factory.Services.CreateScope();
-        var ids = await scope.ServiceProvider.GetRequiredService<ITeacherThreadRepository>().GetSlaDueIdsAsync(due.SubmittedAt.AddHours(13), ReplySla, TimeSpan.FromHours(12), TimeSpan.FromHours(20), [], 100000, CancellationToken);
+        var ids = await scope.ServiceProvider.GetRequiredService<ITeacherThreadRepository>().GetSlaDueIdsAsync(due.SubmittedAt.AddHours(13), [], 100000, CancellationToken);
 
         ids.Should().Contain(due.Id);
         ids.Should().NotContain([recorded.Id, answered.Id]);

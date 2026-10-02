@@ -16,6 +16,7 @@ using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.ReviewSessions;
 using Elmanhg.Domain.RuntimeSettings;
 using Elmanhg.Domain.Sessions;
+using Elmanhg.Domain.SlaCalendars;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Domain.TeacherThreads;
@@ -135,6 +136,10 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         {
             throw new ConflictCoreException(ErrorCodes.RuntimeSettingModifiedConcurrently, innerException: exception);
         }
+        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is ExamPeriod))
+        {
+            throw new ConflictCoreException(ErrorCodes.ExamPeriodModifiedConcurrently, innerException: exception);
+        }
         catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: RuntimeSettingKeyIndex })
         {
             throw new ConflictCoreException(ErrorCodes.RuntimeSettingModifiedConcurrently, innerException: exception);
@@ -218,6 +223,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         ConfigureTrainingExports(modelBuilder);
         ConfigureIssuedRefreshTokens(modelBuilder);
         ConfigureRuntimeSettings(modelBuilder);
+        ConfigureSlaCalendars(modelBuilder);
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
 
@@ -465,6 +471,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.HasIndex(x => new { x.StudentId, x.SubmittedAt });
             builder.HasIndex(x => new { x.SubjectId, x.Status, x.SubmittedAt });
             builder.HasIndex(x => new { x.Status, x.SlaDueAt });
+            builder.Property(x => x.SlaScheduleFingerprint).IsRequired().HasMaxLength(Sha256HexLength);
             builder.ToTable(x => x.HasCheckConstraint("CK_TeacherThreads_Rating", "\"Rating\" IS NULL OR \"Rating\" BETWEEN 1 AND 5"));
         });
         modelBuilder.Entity<TeacherMessage>(builder =>
@@ -504,7 +511,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.Property(x => x.Kind).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.HasOne<TeacherThread>().WithMany().HasForeignKey(x => x.ThreadId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.TeacherId).OnDelete(DeleteBehavior.Restrict);
-            builder.HasIndex(x => new { x.ThreadId, x.Kind, x.SlaDueAt }).IsUnique();
+            builder.HasIndex(x => new { x.ThreadId, x.Kind, x.WindowStartedAt }).IsUnique();
             builder.HasIndex(x => new { x.Kind, x.OccurredAt });
         });
     }
@@ -678,5 +685,6 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         modelBuilder.Entity<TrainingExport>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<IssuedRefreshToken>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<RuntimeSettingOverride>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<ExamPeriod>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

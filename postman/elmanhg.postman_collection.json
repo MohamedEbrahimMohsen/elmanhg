@@ -44,7 +44,8 @@
     { "key": "studentId", "value": "" },
     { "key": "invitedUserId", "value": "" },
     { "key": "invitedEmail", "value": "invited.teacher@elmanhg.local" },
-    { "key": "invitePassword", "value": "Invited2026" }
+    { "key": "invitePassword", "value": "Invited2026" },
+    { "key": "examPeriodId", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -3672,6 +3673,31 @@
       "name": "AskTeacher",
       "item": [
         {
+          "name": "Get reply deadline",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200 or 403\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 403]); });",
+                  "if (pm.response.code === 200) { pm.test(\"returns the deadline\", function () { pm.expect(pm.response.json()).to.have.property(\"slaDueAt\"); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teacher-threads/reply-deadline",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "teacher-threads", "reply-deadline"]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Get thread context",
           "event": [
             {
@@ -5714,6 +5740,116 @@
               "raw": "{{baseUrl}}/api/configuration/infrastructure",
               "host": ["{{baseUrl}}"],
               "path": ["api", "configuration", "infrastructure"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create exam period",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns the period\", function () { pm.expect(pm.response.json().name).to.eql(\"Final exams\"); });",
+                  "pm.collectionVariables.set(\"examPeriodId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/exam-periods",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "exam-periods"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Final exams\",\n  \"startDate\": \"2027-06-01\",\n  \"endDate\": \"2027-07-15\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get exam periods",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns a list\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/exam-periods",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "exam-periods"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update exam period",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"saves the new name\", function () { pm.expect(pm.response.json().name).to.eql(\"Final exams (second round)\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/exam-periods/{{examPeriodId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "exam-periods", "{{examPeriodId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Final exams (second round)\",\n  \"startDate\": \"2027-06-05\",\n  \"endDate\": \"2027-07-20\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete exam period",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/exam-periods/{{examPeriodId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "exam-periods", "{{examPeriodId}}"]
             }
           },
           "response": []

@@ -10,6 +10,7 @@ public sealed class TeacherThreadFollowUpTests
 {
     private static readonly DateTimeOffset SubmittedAt = TeacherThreadBuilder.DefaultSubmittedAt;
     private static readonly TimeSpan ReplySla = TimeSpan.FromHours(24);
+    private static readonly TeacherThreadSlaPolicy SlaPolicy = TeacherThreadSlaPolicies.WallClock();
     private readonly Guid _teacherId = Guid.NewGuid();
 
     [Fact]
@@ -18,9 +19,10 @@ public sealed class TeacherThreadFollowUpTests
         var thread = new TeacherThreadBuilder().AnsweredBy(_teacherId).Build();
         var askedAt = SubmittedAt.AddHours(5);
 
-        thread.FollowUp("Can you show the units?", askedAt.AddTicks(7), ReplySla);
+        thread.FollowUp("Can you show the units?", askedAt.AddTicks(7), SlaPolicy);
 
         (thread.Status, thread.SlaDueAt, thread.UpdationDate, thread.UpdatedBy).Should().Be((TeacherThreadStatus.Open, askedAt + ReplySla, askedAt, (Guid?)thread.StudentId));
+        thread.SlaWindowStartedAt.Should().Be(askedAt);
         thread.Messages.Should().HaveCount(3);
         (thread.Messages.Last().SenderId, thread.Messages.Last().Text, thread.Messages.Last().CreatedAt).Should().Be((thread.StudentId, "Can you show the units?", askedAt));
     }
@@ -48,7 +50,7 @@ public sealed class TeacherThreadFollowUpTests
     {
         var thread = new TeacherThreadBuilder().AnsweredBy(_teacherId).Build();
 
-        var act = () => thread.FollowUp("   ", SubmittedAt.AddHours(5), ReplySla);
+        var act = () => thread.FollowUp("   ", SubmittedAt.AddHours(5), SlaPolicy);
 
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.TeacherMessageTextRequired);
         thread.Messages.Should().HaveCount(2);
@@ -102,7 +104,7 @@ public sealed class TeacherThreadFollowUpTests
         var status = thread.Status;
         var messageCount = thread.Messages.Count;
 
-        var act = () => thread.FollowUp("Can you show the units?", SubmittedAt.AddHours(8), ReplySla);
+        var act = () => thread.FollowUp("Can you show the units?", SubmittedAt.AddHours(8), SlaPolicy);
 
         act.Should().Throw<ConflictCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.TeacherThreadFollowUpNotAllowed);
         (thread.Status, thread.Messages.Count).Should().Be((status, messageCount));

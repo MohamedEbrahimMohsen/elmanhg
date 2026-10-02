@@ -499,4 +499,14 @@
   <data name="RUNTIME_SETTING_NOT_FOUND" xml:space="preserve"><value>The setting was not found.</value></data>
   <data name="RUNTIME_SETTING_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>Someone else changed this setting at the same time. Refresh and try again.</value></data>
   <data name="ASK_TEACHER_REMINDER_ORDER_INVALID" xml:space="preserve"><value>The first reminder must come before the second, and the second before the end of the reply time.</value></data>
+  <data name="SLA_CALENDAR_WEEKEND_DAYS_INVALID" xml:space="preserve"><value>At least one day of the week must count.</value></data>
+  <data name="EXAM_PERIOD_ID_REQUIRED" xml:space="preserve"><value>The exam period id is required.</value></data>
+  <data name="EXAM_PERIOD_NAME_REQUIRED" xml:space="preserve"><value>Enter a name for the exam period.</value></data>
+  <data name="EXAM_PERIOD_NAME_TOO_LONG" xml:space="preserve"><value>The exam period name is too long.</value></data>
+  <data name="EXAM_PERIOD_START_DATE_REQUIRED" xml:space="preserve"><value>Choose the first day of the period.</value></data>
+  <data name="EXAM_PERIOD_END_DATE_REQUIRED" xml:space="preserve"><value>Choose the last day of the period.</value></data>
+  <data name="EXAM_PERIOD_DATE_RANGE_INVALID" xml:space="preserve"><value>The last day must be on or after the first day.</value></data>
+  <data name="EXAM_PERIOD_TOO_LONG" xml:space="preserve"><value>The exam period is longer than allowed.</value></data>
+  <data name="EXAM_PERIOD_NOT_FOUND" xml:space="preserve"><value>The exam period was not found.</value></data>
+  <data name="EXAM_PERIOD_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>Someone else changed this exam period at the same time. Refresh and try again.</value></data>
 </root>

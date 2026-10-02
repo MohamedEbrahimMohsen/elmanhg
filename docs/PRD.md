@@ -32,7 +32,7 @@ Elmanhg is an Arabic-first web platform for Thanaweya Amma students. Content is 
 | Free → paid conversion | ≥ 5% within 30 days |
 | Weekly active / monthly active | ≥ 40% |
 | Median questions answered per active day | ≥ 25 |
-| Ask a Teacher SLA compliance | ≥ 95% replied within 24h |
+| Ask a Teacher SLA compliance | ≥ 95% replied within the SLA (24 counted hours over the reply calendar, §12.3) |
 | Question approval backlog | < 7 days median from creation to decision |
 
 ---
@@ -392,7 +392,7 @@ Admins see the students' Avatar conversations, most recent first, with search by
 Admins see everything configurable on one page, `#/admin/configuration` (nav «الإعدادات»), policy `Configuration.Manage`.
 
 - **Runtime settings and feature flags.** Stored in the database, cached for at most `RuntimeSettings:CacheSeconds` (30 s by default) and cleared on every change, so a change takes effect without a restart. Each setting has a typed definition (type, range or allowed values, Arabic and English label and description); a value outside it is refused. The default is the deployment value from configuration; an admin can override it and reset it back to the default. Every change and reset is audit-logged with the old and new value.
-- **v1 settings:** the unit-exam lesson-open gate (feature flag); the Ask a Teacher reply time and the two reminder hours (first < second < reply time); the out-of-app teacher reminder (on/off, channels, stage); the Free, Base and Ask a Teacher quotas; the essay and math-step review thresholds; the student photo size and the teacher voice size and length limits.
+- **v1 settings:** the unit-exam lesson-open gate (feature flag); the Ask a Teacher reply time and the two reminder hours (first < second < reply time); the out-of-app teacher reminder (on/off, channels, stage); the Ask a Teacher reply calendar (skip weekends, weekend days, time zone) and its exam periods (§12.3); the Free, Base and Ask a Teacher quotas; the essay and math-step review thresholds; the student photo size and the teacher voice size and length limits.
 - **Read-only infrastructure:** the environment; the provider of each integration and whether it is fake, local or real; the AI service models; safety switches such as `Payments:AllowFakePayments` (never editable from the UI); and whether each secret is set. Secret values are never returned.
 
 The full list, the reasons some values are not runtime-editable, and how a story adds a setting are in [configuration.md](configuration.md).
@@ -432,7 +432,7 @@ Prices, billing periods and quotas are configuration (`Subscriptions` section, s
 1. Student (with add-on) opens "اسأل معلّم" from a lesson or question, or the quiz attempt being asked about. Context (subject/unit/lesson/question) is attached automatically; student writes text and may attach an image (e.g. a photo of their work).
    Each new question counts against the monthly quota, which resets on the 1st of each calendar month in `DailyQuotaTimeZone` (Africa/Cairo); a follow-up does not count. The student may attach one photo (PNG, JPG or WEBP). Photos are private: only the owning student, a teacher assigned to the thread's subject, or an admin can open one (`docs/ask-teacher.md`).
 2. The thread is routed to the queue of teachers assigned to that subject. First teacher to claim it owns it.
-3. SLA clock starts at submission. Reminders to the teacher at 12h and 20h by default; the reply time and both reminder hours are runtime settings (§10.6); admin alert on breach. A follow-up starts a new 24-hour window; the clock never pauses. Once per question, at a configurable reminder stage (default the second), the reminder also goes out of the app, on WhatsApp and by email, to the claimer, or to every teacher of the subject while unclaimed. On/off, channels and stage are runtime settings (§10.6). Delivery and templates: docs/otp-delivery.md §10.
+3. SLA clock starts at submission and counts hours over the reply calendar (§12.3). Reminders to the teacher at 12h and 20h by default; the reply time and both reminder hours are runtime settings (§10.6); admin alert on breach. A follow-up starts a new window of the same length. Once per question, at a configurable reminder stage (default the second, at its calendar time), the reminder also goes out of the app, on WhatsApp and by email, to the claimer, or to every teacher of the subject while unclaimed. On/off, channels and stage are runtime settings (§10.6). Delivery and templates: docs/otp-delivery.md §10.
 4. Teacher replies with **text or voice**. Voice is recorded in-browser, stored, and transcribed to Arabic text automatically. The teacher sees the transcript and can correct it before sending.
 5. Student receives the reply (audio player + text). Student may send **one** follow-up on the same thread; the teacher replies once more; the thread then closes. Anything further is a new question against the monthly quota.
 6. Student rates the answer (1–5). Ratings are visible to admin.
@@ -441,6 +441,15 @@ Prices, billing periods and quotas are configuration (`Subscriptions` section, s
 
 - Audio files are kept for playback.
 - **The training record is text only** (§13): question text, attached context ids, final corrected transcript, rating.
+
+### 12.3 Reply calendar
+
+- **Counted hours.** The reply time and both reminder hours count real elapsed time that falls on counted days. A day is a calendar date in the calendar's time zone, from its local midnight to the next (so a daylight-saving day counts its real 23 or 25 hours). A day counts when skipping weekends is off, or it is not a weekend day, or it lies inside an exam period. A window that starts on a day that does not count starts at the next counted day's midnight. Defaults: skip weekends on, weekend Friday and Saturday, time zone Africa/Cairo.
+- **Exam periods.** Each has a name and an inclusive first and last day; every day inside one counts, weekends included. Admins add, edit and delete them on the Configuration page under the reply calendar card (§10.6), and every change is audit-logged.
+- **Applying changes.** Deadlines and reminder times are stored on the question. When the calendar, an exam period, the reply time or a reminder hour changes, open questions are recomputed at the next SLA sweep from the same window start. Reminders already sent are not resent, and a recorded breach stays.
+- **Who sees the deadline.** Students see the deadline before sending a question and on the thread; teachers see it in the inbox countdown. SLA compliance counts replies whose window had no breach.
+- Decided (#222): (a) the calendar is configurable as above; (b) a breach gives no refund or credit; (c) a breach fires an admin alert only.
+- Landing and plan copy state the reply hours only.
 
 ---
 
@@ -508,11 +517,12 @@ QuestionMastery(student_id, question_id, mastered bool, latest_attempt_id, lates
 Subscription(id, student_id, plan[Base|AskTeacher], period[Monthly|Termly|Yearly], status[Active|PastDue|Cancelled|Expired], current_period_start, current_period_end, cancelled_at?, expired_at?, paymob_ref?)
 Payment(id, student_id, subscription_id?, plan, period, period_months, amount_minor, currency, status[Pending|Succeeded|Failed|Refunded], paymob_txn_id?, provider_order_id?, raw_webhook_json?, completed_at?, review_reason?, review_resolved_at?, review_resolved_by?, refunded_at?, refunded_by?, refund_reason?, refund_transaction_id?, refund_idempotency_key?, created_at)  -- docs/subscriptions.md
 
-TeacherThread(id, student_id, teacher_id?, subject_id, context_json, status[Open|Answered|Closed], submitted_at, sla_due_at, claimed_at?, closed_at?, rating?)  -- docs/ask-teacher.md
+TeacherThread(id, student_id, teacher_id?, subject_id, context_json, status[Open|Answered|Closed], submitted_at, sla_window_started_at, first_reminder_due_at, second_reminder_due_at, sla_due_at, sla_schedule_fingerprint, claimed_at?, closed_at?, rating?)  -- docs/ask-teacher.md
 TeacherMessage(id, thread_id, sender_id, kind[Text|Voice], text, image_url?, audio_url?, audio_duration_seconds?, transcript_final bool, student_read_at?, created_at)
 TeacherVoiceDraft(id, thread_id, teacher_id, audio_key, audio_url, audio_duration_seconds, status[Pending|Ready|Failed|Sent], transcript?, transcription_model?, attempts, next_attempt_at?, recorded_at, transcribed_at?, sent_message_id?)  -- transcription job; docs/ask-teacher.md
-TeacherThreadSlaEvent(id, thread_id, kind[FirstReminder|SecondReminder|Breach], sla_due_at, teacher_id?, occurred_at)  -- one per SLA window and stage; reminders and breach record (docs/ask-teacher.md)
+TeacherThreadSlaEvent(id, thread_id, kind[FirstReminder|SecondReminder|Breach], window_started_at, sla_due_at, teacher_id?, occurred_at)  -- one per SLA window (window_started_at) and stage; reminders and breach record (docs/ask-teacher.md)
 TeacherThreadOutOfAppReminder(id, thread_id unique, stage[FirstReminder|SecondReminder], sla_due_at, occurred_at)  -- at most one per thread; marker of the one out-of-app reminder (docs/ask-teacher.md)
+ExamPeriod(id, name, start_date, end_date, created_by, created_at, updated_by?, updated_at?)  -- SLA calendar (docs/configuration.md)
 
 AvatarConversation(id, student_id, entry_point, subject_id?, unit_id?, lesson_id?, session_id?, question_id?, started_at, last_message_at, message_count)  -- docs/avatar.md
 AvatarMessage(id, conversation_id, position, role[Student|Assistant], text, created_at, model?, prompt_version?, input_tokens?, output_tokens?, cost_usd?, stop_reason?, history_message_count?, context_json?, citations_json?)  -- append-only; replies carry the context bundle, model and prompt version
@@ -555,7 +565,7 @@ AuditLog(id, actor_id, actor_name, actor_role, action, entity, entity_id, outcom
 | Dashboards / finance | – | own stats only | ✓ |
 | Payment log and refunds | – | – | ✓ |
 | Manage users / teachers | – | – | ✓ |
-| Manage configuration (runtime settings, feature flags) | – | – | ✓ |
+| Manage configuration (runtime settings, feature flags, exam periods) | – | – | ✓ |
 | View audit log | – | – | ✓ |
 | View Avatar conversations | – | – | ✓ |
 | Export training data | – | – | ✓ |
@@ -576,7 +586,7 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 8. Exams are generated from blueprints; a blueprint cannot be saved with a shortfall.
 9. Exam retakes unlimited; best score displayed; all kept.
 10. Avatar never reveals answers during an in-progress exam.
-11. Ask a Teacher: 24h SLA by default (admin-configurable, §10.6) from submission (a follow-up opens a new 24h window); one follow-up per thread; voice always transcribed; training record is text only.
+11. Ask a Teacher: 24h SLA by default (admin-configurable, §10.6) counted over the reply calendar (§12.3) from submission (a follow-up opens a new window); one follow-up per thread; voice always transcribed; training record is text only.
 12. Subscription entitlement changes only through Paymob-verified events: HMAC-verified webhooks, or Paymob's response to an admin refund; or through an admin's complimentary grant (§10.4). The client never sets entitlement.
 13. Every content change and validation decision is audit-logged.
 

@@ -249,6 +249,9 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | `AskTeacher__SlaSweepEnabled` | `true` | the `ask-teacher-sla` reminder and breach worker |
 | `AskTeacher__SlaSweepIntervalSeconds` / `AskTeacher__SlaSweepBatchSize` | `60` / `50` | 1 to 3600 / 1 to 500 |
 | `AskTeacher__FirstReminderAfterHours` / `AskTeacher__SecondReminderAfterHours` | `12` / `20` | 1 to 167 each, hours into the reply window; startup fails unless first < second < `Subscriptions__AskTeacherReplySlaHours`; default of a runtime setting ([configuration.md](configuration.md)) |
+| `SlaCalendar__SkipWeekends` / `SlaCalendar__WeekendDays` / `SlaCalendar__TimeZone` | `true` / `Friday,Saturday` / `Africa/Cairo` | the reply calendar: whether weekend days pause the SLA clock, which days (comma-separated day names, at least one day must count) and the IANA zone whose day boundaries apply; the zone must be in `SlaCalendar__AllowedTimeZones`; defaults of runtime settings ([configuration.md](configuration.md)) |
+| `SlaCalendar__AllowedTimeZones` | `Africa/Cairo,Asia/Riyadh,Asia/Dubai,Asia/Kuwait,UTC` | the zones an admin may pick; an unknown id stops the boot |
+| `SlaCalendar__ExamPeriodNameMaxLength` / `SlaCalendar__ExamPeriodMaxDays` | `100` / `120` | 1 to 500 / 1 to 366; caps on an exam period ([ask-teacher.md](ask-teacher.md)) |
 | `AskTeacher__ReminderListMaxCount` | `20` | 1 to 100, the «تذكيرات» card on the teacher inbox |
 | `AiService__TranscriptionTimeoutSeconds` | `150` | 1 to 600; above the AI service's worst case (about 121 s) |
 | `AiService__EssayGradingTimeoutSeconds` | `100` | 1 to 600; above the AI service's essay-grading worst case (about 91 s) |

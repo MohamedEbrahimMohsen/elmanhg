@@ -381,6 +381,18 @@ public static class ErrorCodes
     public const string RuntimeSettingModifiedConcurrently = "RUNTIME_SETTING_MODIFIED_CONCURRENTLY";
     public const string AskTeacherReminderOrderInvalid = "ASK_TEACHER_REMINDER_ORDER_INVALID";
 
+    // SLA CALENDAR
+    public const string SlaCalendarWeekendDaysInvalid = "SLA_CALENDAR_WEEKEND_DAYS_INVALID";
+    public const string ExamPeriodIdRequired = "EXAM_PERIOD_ID_REQUIRED";
+    public const string ExamPeriodNameRequired = "EXAM_PERIOD_NAME_REQUIRED";
+    public const string ExamPeriodNameTooLong = "EXAM_PERIOD_NAME_TOO_LONG";
+    public const string ExamPeriodStartDateRequired = "EXAM_PERIOD_START_DATE_REQUIRED";
+    public const string ExamPeriodEndDateRequired = "EXAM_PERIOD_END_DATE_REQUIRED";
+    public const string ExamPeriodDateRangeInvalid = "EXAM_PERIOD_DATE_RANGE_INVALID";
+    public const string ExamPeriodTooLong = "EXAM_PERIOD_TOO_LONG";
+    public const string ExamPeriodNotFound = "EXAM_PERIOD_NOT_FOUND";
+    public const string ExamPeriodModifiedConcurrently = "EXAM_PERIOD_MODIFIED_CONCURRENTLY";
+
     // PLATFORM
     public const string TooManyRequests = "TOO_MANY_REQUESTS";
     public const string AdminSeedFailed = "ADMIN_SEED_FAILED";

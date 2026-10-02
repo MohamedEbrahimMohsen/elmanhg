@@ -1,7 +1,9 @@
+using Core.Errors;
 using Elmanhg.Application.Shared.Observability;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.TeacherThreads.GetDueSlaThreadIds;
 using Elmanhg.Application.TeacherThreads.ProcessTeacherThreadSla;
+using Elmanhg.Application.TeacherThreads.RescheduleTeacherThreadSlas;
 using MediatR;
 using Microsoft.Extensions.Options;
 
@@ -33,6 +35,7 @@ public sealed class TeacherThreadSlaWorker(IServiceScopeFactory scopeFactory, IO
     private async Task SweepAsync(int batchSize, CancellationToken stoppingToken)
     {
         using var run = jobMetrics.StartRun(JobName);
+        await RescheduleAsync(batchSize, stoppingToken).ConfigureAwait(false);
         var threadIds = await ListDueAsync(stoppingToken).ConfigureAwait(false);
         if (threadIds is null)
         {
@@ -55,6 +58,24 @@ public sealed class TeacherThreadSlaWorker(IServiceScopeFactory scopeFactory, IO
 
             run.ItemFailed();
             _deferredIds.Add(threadId);
+        }
+    }
+
+    private async Task RescheduleAsync(int batchSize, CancellationToken stoppingToken)
+    {
+        try
+        {
+            int rescheduled;
+            do
+            {
+                await using var scope = scopeFactory.CreateAsyncScope();
+                rescheduled = await scope.ServiceProvider.GetRequiredService<ISender>().Send(new RescheduleTeacherThreadSlasCommand(batchSize), stoppingToken).ConfigureAwait(false);
+            }
+            while (rescheduled == batchSize);
+        }
+        catch (Exception exception) when (!stoppingToken.IsCancellationRequested)
+        {
+            logger.Log(exception is ConflictCoreException ? LogLevel.Warning : LogLevel.Error, exception, "Rescheduling Ask a Teacher SLA deadlines failed.");
         }
     }
 

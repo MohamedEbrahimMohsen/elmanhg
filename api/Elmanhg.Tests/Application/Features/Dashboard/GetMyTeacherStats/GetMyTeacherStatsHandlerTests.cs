@@ -5,7 +5,6 @@ using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.TeacherThreads;
-using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -27,8 +26,8 @@ public sealed class GetMyTeacherStatsHandlerTests
         _timeProvider.GetUtcNow().Returns(Now);
         _currentUserService.UserId.Returns(_callerId);
         _questionRepository.GetDecisionStatsAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>()).Returns(new QuestionDecisionStats());
-        _teacherThreadRepository.GetReplyStatsAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>()).Returns(new TeacherReplyStats());
-        _handler = new GetMyTeacherStatsHandler(_questionRepository, _teacherThreadRepository, _currentUserService, _timeProvider, Options.Create(new DashboardOptions()), new FakeRuntimeSettings(subscriptions: new SubscriptionsOptions { AskTeacherReplySlaHours = 24 }));
+        _teacherThreadRepository.GetReplyStatsAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>()).Returns(new TeacherReplyStats());
+        _handler = new GetMyTeacherStatsHandler(_questionRepository, _teacherThreadRepository, _currentUserService, _timeProvider, Options.Create(new DashboardOptions()));
     }
 
     [Fact]
@@ -40,14 +39,14 @@ public sealed class GetMyTeacherStatsHandlerTests
 
         (await act.Should().ThrowAsync<UnauthorizedCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.UserNotAuthenticated);
         await _questionRepository.DidNotReceive().GetDecisionStatsAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>());
-        await _teacherThreadRepository.DidNotReceive().GetReplyStatsAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>());
+        await _teacherThreadRepository.DidNotReceive().GetReplyStatsAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task Handle_ReturnsCallerDecisionAndReplyStats()
     {
         _questionRepository.GetDecisionStatsAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>(), null, _callerId, Arg.Any<CancellationToken>()).Returns(new QuestionDecisionStats { Approved = 5, Rejected = 2, MedianSecondsToDecision = 7199.6 });
-        _teacherThreadRepository.GetReplyStatsAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>(), null, _callerId, Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>()).Returns(new TeacherReplyStats { Replies = 20, RepliedWithinSla = 19, MedianReplySeconds = 3600.4 });
+        _teacherThreadRepository.GetReplyStatsAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>(), null, _callerId, Arg.Any<CancellationToken>()).Returns(new TeacherReplyStats { Replies = 20, RepliedWithinSla = 19, MedianReplySeconds = 3600.4 });
 
         var result = await _handler.Handle(new GetMyTeacherStatsQuery(null, null), TestContext.Current.CancellationToken);
 
@@ -83,7 +82,7 @@ public sealed class GetMyTeacherStatsHandlerTests
         var result = await _handler.Handle(new GetMyTeacherStatsQuery(new DateOnly(2026, 1, 5), new DateOnly(2026, 1, 10)), TestContext.Current.CancellationToken);
 
         await _questionRepository.Received(1).GetDecisionStatsAsync(start, end, null, _callerId, Arg.Any<CancellationToken>());
-        await _teacherThreadRepository.Received(1).GetReplyStatsAsync(start, end, null, _callerId, TimeSpan.FromHours(24), Arg.Any<CancellationToken>());
+        await _teacherThreadRepository.Received(1).GetReplyStatsAsync(start, end, null, _callerId, Arg.Any<CancellationToken>());
         result.From.Should().Be(new DateOnly(2026, 1, 5));
         result.To.Should().Be(new DateOnly(2026, 1, 10));
     }

@@ -1,5 +1,6 @@
 import type {
   AiServiceConfigurationResult,
+  ExamPeriodResult,
   InfrastructureConfigurationResult,
   RuntimeSettingGroup,
   RuntimeSettingGroupResult,
@@ -117,4 +118,34 @@ export function reachableAi(): InfrastructureConfigurationResult {
     secrets: [{ key: 'ELMANHG_AI_OPENAI_API_KEY', isSet: true }],
   };
   return infrastructure({ aiServiceStatus: 'Reachable', aiService });
+}
+
+export function slaCalendarSetting(overrides: Partial<RuntimeSettingResult> = {}): RuntimeSettingResult {
+  return runtimeSetting({
+    key: 'slaCalendar.skipWeekends',
+    group: 'SlaCalendar',
+    type: 'Boolean',
+    value: true,
+    defaultValue: true,
+    minimum: null,
+    maximum: null,
+    labelArabic: 'استبعاد أيام العطلة',
+    labelEnglish: 'Skip weekends',
+    descriptionArabic: 'عند التفعيل لا تحتسب أيام العطلة خارج فترات الامتحانات من مهلة الرد والتذكيرات.',
+    descriptionEnglish:
+      'When on, weekend days outside exam periods do not count toward the reply time and the reminders.',
+    ...overrides,
+  });
+}
+
+export function examPeriod(overrides: Partial<ExamPeriodResult> = {}): ExamPeriodResult {
+  return {
+    id: 'c7c7c7c7-c7c7-4c7c-8c7c-c7c7c7c7c7c7',
+    name: 'Final exams',
+    startDate: '2026-06-01',
+    endDate: '2026-07-15',
+    createdAt: '2026-05-20T09:00:00Z',
+    updatedAt: null,
+    ...overrides,
+  };
 }

@@ -1,6 +1,5 @@
 using Elmanhg.Application.Shared.Messaging;
 using Elmanhg.Application.Shared.Observability;
-using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.Realtime;
 using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Application.TeacherThreads.ProcessTeacherThreadSla;
@@ -14,7 +13,6 @@ using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Diagnostics.Metrics.Testing;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NSubstitute;
 using System.Diagnostics.Metrics;
 using System.Linq.Expressions;
@@ -47,7 +45,7 @@ public sealed class ProcessTeacherThreadSlaHandlerTests
         _slaEventRepository.AddAsync(Arg.Do<TeacherThreadSlaEvent>(_added.Add), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
         _teacherSubjectRepository.FindAsync(Arg.Any<Expression<Func<TeacherSubject, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<TeacherSubject>, IQueryable<TeacherSubject>>?>(), Arg.Any<Func<IQueryable<TeacherSubject>, IOrderedQueryable<TeacherSubject>>?>(), Arg.Any<bool>())
             .Returns(call => _assignments.Where(call.Arg<Expression<Func<TeacherSubject, bool>>>().Compile()).ToList());
-        _handler = new ProcessTeacherThreadSlaHandler(_teacherThreadRepository, _slaEventRepository, _teacherSubjectRepository, _notifier, Substitute.For<ITeacherThreadOutOfAppReminderRepository>(), Substitute.For<IUserRepository>(), Array.Empty<IMessageChannel>(), new ElmanhgMetrics(_meterFactory), new FakeRuntimeSettings(subscriptions: new SubscriptionsOptions { AskTeacherReplySlaHours = 24 }, askTeacher: new AskTeacherOptions()).Set(OutOfAppReminderRuntimeSettings.Enabled, false), _timeProvider, Substitute.For<ILogger<ProcessTeacherThreadSlaHandler>>());
+        _handler = new ProcessTeacherThreadSlaHandler(_teacherThreadRepository, _slaEventRepository, _teacherSubjectRepository, _notifier, Substitute.For<ITeacherThreadOutOfAppReminderRepository>(), Substitute.For<IUserRepository>(), Array.Empty<IMessageChannel>(), new ElmanhgMetrics(_meterFactory), new FakeRuntimeSettings().Set(OutOfAppReminderRuntimeSettings.Enabled, false), _timeProvider, Substitute.For<ILogger<ProcessTeacherThreadSlaHandler>>());
     }
 
     [Fact]
@@ -129,6 +127,31 @@ public sealed class ProcessTeacherThreadSlaHandlerTests
     }
 
     [Fact]
+    public async Task Handle_StageRecordedForEarlierWindow_RecordsAgainForCurrentWindow()
+    {
+        var thread = Seed(new TeacherThreadBuilder().ClaimedBy(_teacherId), SubmittedAt.AddHours(13));
+        Record(thread, TeacherThreadSlaEventKind.FirstReminder, thread.SlaWindowStartedAt.AddHours(-30));
+
+        await Handle(thread);
+
+        var recorded = _added.Should().ContainSingle().Subject;
+        (recorded.Kind, recorded.WindowStartedAt).Should().Be((TeacherThreadSlaEventKind.FirstReminder, thread.SlaWindowStartedAt));
+        await _slaEventRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_RecordsWindowStartAndDeadline()
+    {
+        var thread = Seed(new TeacherThreadBuilder().WithSlaPolicy(TeacherThreadSlaPolicies.CairoWeekends()).ClaimedBy(_teacherId), new DateTimeOffset(2026, 10, 4, 0, 30, 0, TimeSpan.Zero));
+
+        await Handle(thread);
+
+        var recorded = _added.Should().ContainSingle().Subject;
+        (recorded.Kind, recorded.WindowStartedAt, recorded.SlaDueAt).Should().Be((TeacherThreadSlaEventKind.FirstReminder, SubmittedAt, new DateTimeOffset(2026, 10, 4, 12, 0, 0, TimeSpan.Zero)));
+        await _slaEventRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task Handle_AnsweredThread_DoesNothing()
     {
         var thread = Seed(new TeacherThreadBuilder().AnsweredBy(_teacherId), SubmittedAt.AddHours(30));
@@ -156,7 +179,9 @@ public sealed class ProcessTeacherThreadSlaHandlerTests
         return thread;
     }
 
-    private void Record(TeacherThread thread, TeacherThreadSlaEventKind kind) => _recorded.Add(TeacherThreadSlaEvent.Record(thread.Id, kind, thread.SlaDueAt, thread.TeacherId, SubmittedAt.AddHours(12)));
+    private void Record(TeacherThread thread, TeacherThreadSlaEventKind kind) => Record(thread, kind, thread.SlaWindowStartedAt);
+
+    private void Record(TeacherThread thread, TeacherThreadSlaEventKind kind, DateTimeOffset windowStartedAt) => _recorded.Add(TeacherThreadSlaEvent.Record(thread.Id, kind, windowStartedAt, thread.SlaDueAt, thread.TeacherId, SubmittedAt.AddHours(12)));
 
     private Guid Assign()
     {

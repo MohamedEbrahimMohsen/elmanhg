@@ -55,4 +55,25 @@ public sealed class AskTeacherMetricsEndpointTests(ApiFactory factory)
         body.GetProperty("slaComplianceRate").GetDecimal().Should().Be(1m);
         body.GetProperty("medianReplySeconds").GetInt64().Should().BeGreaterThan(0);
     }
+
+    [Fact]
+    public async Task Get_SubjectFilter_ReplyAfterBreach_IsNotWithinSla()
+    {
+        var now = TimeProvider.System.GetUtcNow();
+        var subjectId = await ContentTestData.SeedSubjectAsync(factory, "Oceanography", 1, CancellationToken);
+        var student = await ScopeTestData.SeedStudentAsync(factory, CancellationToken);
+        var (_, teacherClient) = await TeacherInboxTestData.SignedInTeacherForAsync(factory, subjectId);
+        var thread = await TeacherInboxTestData.SeedThreadAsync(factory, new TeacherThreadBuilder().ForStudent(student.Id).WithContext(TeacherInboxTestData.ContextFor(subjectId)).SubmittedAt(now.AddHours(-2)).Build());
+        await SeedBreachAsync(factory, thread, now.AddHours(-1));
+        using var claim = await teacherClient.PostAsync($"{TeacherInboxTestData.Route}/{thread.Id}/claim", null, CancellationToken);
+        using var reply = await teacherClient.PostAsJsonAsync($"{TeacherInboxTestData.Route}/{thread.Id}/replies", new { text = "Because force equals mass times acceleration." }, CancellationToken);
+        using var client = await AdminClientAsync(factory);
+
+        var body = await GetJsonAsync(client, $"ask-teacher?subjectId={subjectId}");
+
+        (claim.StatusCode, reply.StatusCode).Should().Be((HttpStatusCode.OK, HttpStatusCode.OK));
+        body.GetProperty("replies").GetInt32().Should().Be(1);
+        body.GetProperty("repliedWithinSla").GetInt32().Should().Be(0);
+        body.GetProperty("slaComplianceRate").GetDecimal().Should().Be(0m);
+    }
 }

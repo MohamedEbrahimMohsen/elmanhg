@@ -2,7 +2,6 @@ using Elmanhg.Application.Shared.Messaging;
 using Elmanhg.Application.Shared.Observability;
 using Elmanhg.Application.Shared.Realtime;
 using Elmanhg.Application.Shared.RuntimeSettings;
-using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.TeacherThreads;
@@ -22,14 +21,13 @@ public sealed class ProcessTeacherThreadSlaHandler(ITeacherThreadRepository teac
         }
 
         var now = timeProvider.GetUtcNow();
-        var values = await runtimeSettings.GetValuesAsync(cancellationToken).ConfigureAwait(false);
-        var due = thread.DueSlaStages(now, TimeSpan.FromHours(values.Get(AskTeacherRuntimeSettings.ReplySlaHours)), TimeSpan.FromHours(values.Get(AskTeacherRuntimeSettings.FirstReminderAfterHours)), TimeSpan.FromHours(values.Get(AskTeacherRuntimeSettings.SecondReminderAfterHours)));
+        var due = thread.DueSlaStages(now);
         if (due.Count == 0)
         {
             return;
         }
 
-        var recorded = await teacherThreadSlaEventRepository.FindAsync(x => x.ThreadId == thread.Id && x.SlaDueAt == thread.SlaDueAt, cancellationToken, asNoTracking: true).ConfigureAwait(false);
+        var recorded = await teacherThreadSlaEventRepository.FindAsync(x => x.ThreadId == thread.Id && x.WindowStartedAt == thread.SlaWindowStartedAt, cancellationToken, asNoTracking: true).ConfigureAwait(false);
         var missing = due
             .Except(recorded.Select(x => x.Kind))
             .ToList();
@@ -40,9 +38,10 @@ public sealed class ProcessTeacherThreadSlaHandler(ITeacherThreadRepository teac
 
         foreach (var kind in missing)
         {
-            await teacherThreadSlaEventRepository.AddAsync(TeacherThreadSlaEvent.Record(thread.Id, kind, thread.SlaDueAt, thread.TeacherId, now), cancellationToken).ConfigureAwait(false);
+            await teacherThreadSlaEventRepository.AddAsync(TeacherThreadSlaEvent.Record(thread.Id, kind, thread.SlaWindowStartedAt, thread.SlaDueAt, thread.TeacherId, now), cancellationToken).ConfigureAwait(false);
         }
 
+        var values = await runtimeSettings.GetValuesAsync(cancellationToken).ConfigureAwait(false);
         var outOfAppChannels = await OutOfAppTeacherReminder.ClaimAsync(thread, missing, values, teacherThreadOutOfAppReminderRepository, now, cancellationToken).ConfigureAwait(false);
         await teacherThreadSlaEventRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

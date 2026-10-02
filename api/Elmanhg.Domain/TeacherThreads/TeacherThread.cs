@@ -9,7 +9,11 @@ public partial class TeacherThread : AuditEntity
     public string Context { get; private set; } = "{}";
     public TeacherThreadStatus Status { get; private set; }
     public DateTimeOffset SubmittedAt { get; private set; }
+    public DateTimeOffset SlaWindowStartedAt { get; private set; }
+    public DateTimeOffset FirstReminderDueAt { get; private set; }
+    public DateTimeOffset SecondReminderDueAt { get; private set; }
     public DateTimeOffset SlaDueAt { get; private set; }
+    public string SlaScheduleFingerprint { get; private set; } = string.Empty;
     public Guid? TeacherId { get; private set; }
     public DateTimeOffset? ClaimedAt { get; private set; }
     public DateTimeOffset? ClosedAt { get; private set; }
@@ -19,7 +23,7 @@ public partial class TeacherThread : AuditEntity
 
     private TeacherThread(Guid id, Guid? createdBy) : base(id, createdBy) { }
 
-    public static TeacherThread Submit(Guid studentId, TeacherThreadContext context, string text, string? imageUrl, DateTimeOffset submittedAt, TimeSpan replySla)
+    public static TeacherThread Submit(Guid studentId, TeacherThreadContext context, string text, string? imageUrl, DateTimeOffset submittedAt, TeacherThreadSlaPolicy slaPolicy)
     {
         var at = ToMicroseconds(submittedAt);
         var thread = new TeacherThread(Guid.NewGuid(), studentId)
@@ -29,8 +33,8 @@ public partial class TeacherThread : AuditEntity
             Context = context.ToJson(),
             Status = TeacherThreadStatus.Open,
             SubmittedAt = at,
-            SlaDueAt = at + replySla,
         };
+        thread.ApplySlaSchedule(slaPolicy.ScheduleFrom(at));
         thread.Messages.Add(TeacherMessage.CreateText(thread.Id, studentId, text, imageUrl, at));
         return thread;
     }

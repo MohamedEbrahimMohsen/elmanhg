@@ -1,10 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import type { TeacherReplyDeadlineResult } from '@/shared/api/generated/model';
 import { Form } from '@/shared/form/Form';
 import { FormRootError } from '@/shared/form/FormRootError';
 import { SubmitButton } from '@/shared/form/SubmitButton';
 import { TextAreaField } from '@/shared/form/TextAreaField';
+import { formatDate, formatNumber } from '@/shared/lib/format';
 import { useCreateThread } from '../hooks/useCreateThread';
 import { askTeacherFormSchema, type AskTeacherFormValues } from '../schemas/askTeacherFormSchema';
 import type { AskTeacherNewSearch } from '../schemas/askTeacherNewSearchSchema';
@@ -14,11 +16,12 @@ import { LessonPicker } from './LessonPicker';
 
 export interface AskTeacherFormProps {
   search: AskTeacherNewSearch;
-  replySlaHours: number | undefined;
+  replyDeadline: TeacherReplyDeadlineResult | undefined;
 }
 
-export function AskTeacherForm({ search, replySlaHours }: AskTeacherFormProps) {
-  const { t } = useTranslation('askTeacher');
+export function AskTeacherForm({ search, replyDeadline }: AskTeacherFormProps) {
+  const { t, i18n } = useTranslation('askTeacher');
+  const lng = i18n.resolvedLanguage ?? i18n.language;
   const hasContext = Boolean(search.lessonId ?? search.questionId ?? search.attemptId);
   const { submit } = useCreateThread(search);
   const form = useForm<AskTeacherFormValues>({
@@ -42,9 +45,20 @@ export function AskTeacherForm({ search, replySlaHours }: AskTeacherFormProps) {
       {hasContext ? <AttachedContext search={search} /> : <LessonPicker />}
       <TextAreaField<AskTeacherFormValues> name="text" label={t('form.text')} description={t('form.textHint')} />
       <ImageField />
-      {replySlaHours === undefined ? null : (
-        <p className="text-caption text-text-muted">{t('form.slaNote', { hours: replySlaHours })}</p>
+      {replyDeadline === undefined ? null : (
+        <p className="text-caption text-text-muted">
+          {t('form.slaNote', {
+            hours: formatNumber(Number(replyDeadline.replySlaHours), lng),
+            date: formatDate(new Date(replyDeadline.slaDueAt), lng, 'arabic-indic', {
+              dateStyle: 'full',
+              timeStyle: 'short',
+            }),
+          })}
+        </p>
       )}
+      {replyDeadline?.skipsUncountedDays ? (
+        <p className="text-caption text-text-muted">{t('form.slaCalendarNote')}</p>
+      ) : null}
       <FormRootError />
       <SubmitButton>{t('form.send')}</SubmitButton>
     </Form>

@@ -14,11 +14,11 @@ public sealed class RuntimeSettingRegistryTests
     private readonly RuntimeSettingRegistry _registry = FakeRuntimeSettings.DefaultRegistry();
 
     [Fact]
-    public void Definitions_DefaultOptions_FourteenOrderedByGroup()
+    public void Definitions_DefaultOptions_TwentyOrderedByGroup()
     {
         var definitions = _registry.Definitions;
 
-        definitions.Should().HaveCount(17);
+        definitions.Should().HaveCount(20);
         definitions.Select(x => x.Group).Should().BeInAscendingOrder();
         definitions[0].Key.Should().Be("features.examsRequireAllLessonsOpened");
     }

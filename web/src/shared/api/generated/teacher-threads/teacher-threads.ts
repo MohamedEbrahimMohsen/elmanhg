@@ -34,6 +34,7 @@ import type {
   GetTeacherThreadContextParams,
   PageDataOfTeacherThreadSummaryResult,
   RateTeacherThreadRequest,
+  TeacherReplyDeadlineResult,
   TeacherThreadContextResult,
   TeacherThreadResult
 } from '../model';
@@ -202,6 +203,152 @@ export function useGetTeacherThreadContextSuspense<TData = Awaited<ReturnType<ty
  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTeacherThreadContextSuspenseQueryOptions(params,options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetTeacherReplyDeadlineUrl = () => {
+
+
+
+
+  return `/api/teacher-threads/reply-deadline`
+}
+
+export const getTeacherReplyDeadline = async ( options?: Parameters<typeof http>[1]): Promise<TeacherReplyDeadlineResult> => {
+
+  return http<TeacherReplyDeadlineResult>(getGetTeacherReplyDeadlineUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTeacherReplyDeadlineQueryKey = () => {
+    return [
+    `/api/teacher-threads/reply-deadline`
+    ] as const;
+    }
+
+
+export const getGetTeacherReplyDeadlineQueryOptions = <TData = Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTeacherReplyDeadlineQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeacherReplyDeadline>>> = ({ signal }) => getTeacherReplyDeadline({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTeacherReplyDeadlineQueryResult = NonNullable<Awaited<ReturnType<typeof getTeacherReplyDeadline>>>
+export type GetTeacherReplyDeadlineQueryError = unknown
+
+
+export function useGetTeacherReplyDeadline<TData = Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeacherReplyDeadline>>,
+          TError,
+          Awaited<ReturnType<typeof getTeacherReplyDeadline>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeacherReplyDeadline<TData = Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeacherReplyDeadline>>,
+          TError,
+          Awaited<ReturnType<typeof getTeacherReplyDeadline>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeacherReplyDeadline<TData = Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetTeacherReplyDeadline<TData = Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTeacherReplyDeadlineQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetTeacherReplyDeadlineSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError = unknown>( options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTeacherReplyDeadlineQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeacherReplyDeadline>>> = ({ signal }) => getTeacherReplyDeadline({ signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetTeacherReplyDeadlineSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getTeacherReplyDeadline>>>
+export type GetTeacherReplyDeadlineSuspenseQueryError = unknown
+
+
+export function useGetTeacherReplyDeadlineSuspense<TData = Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError = unknown>(
+  options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeacherReplyDeadlineSuspense<TData = Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeacherReplyDeadlineSuspense<TData = Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetTeacherReplyDeadlineSuspense<TData = Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTeacherReplyDeadline>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTeacherReplyDeadlineSuspenseQueryOptions(options)
 
   const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

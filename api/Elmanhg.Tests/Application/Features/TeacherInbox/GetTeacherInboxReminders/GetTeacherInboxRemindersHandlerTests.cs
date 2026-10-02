@@ -47,11 +47,11 @@ public sealed class GetTeacherInboxRemindersHandlerTests
     public async Task Handle_Teacher_PassesAssignedSubjectsAndReturnsLatestReminderKind()
     {
         var bothReminders = Seed(new TeacherThreadBuilder());
-        Record(bothReminders, TeacherThreadSlaEventKind.FirstReminder, bothReminders.SlaDueAt);
-        Record(bothReminders, TeacherThreadSlaEventKind.SecondReminder, bothReminders.SlaDueAt);
+        Record(bothReminders, TeacherThreadSlaEventKind.FirstReminder, bothReminders.SlaWindowStartedAt);
+        Record(bothReminders, TeacherThreadSlaEventKind.SecondReminder, bothReminders.SlaWindowStartedAt);
         var followedUp = Seed(new TeacherThreadBuilder().AnsweredBy(_teacher.Id).FollowedUp());
-        Record(followedUp, TeacherThreadSlaEventKind.SecondReminder, followedUp.SlaDueAt.AddHours(-2));
-        Record(followedUp, TeacherThreadSlaEventKind.FirstReminder, followedUp.SlaDueAt);
+        Record(followedUp, TeacherThreadSlaEventKind.SecondReminder, followedUp.SlaWindowStartedAt.AddHours(-3));
+        Record(followedUp, TeacherThreadSlaEventKind.FirstReminder, followedUp.SlaWindowStartedAt);
 
         var result = await _handler.Handle(new GetTeacherInboxRemindersQuery(), TestContext.Current.CancellationToken);
 
@@ -88,5 +88,5 @@ public sealed class GetTeacherInboxRemindersHandlerTests
         return thread;
     }
 
-    private void Record(TeacherThread thread, TeacherThreadSlaEventKind kind, DateTimeOffset slaDueAt) => _events.Add(TeacherThreadSlaEvent.Record(thread.Id, kind, slaDueAt, thread.TeacherId, Now));
+    private void Record(TeacherThread thread, TeacherThreadSlaEventKind kind, DateTimeOffset windowStartedAt) => _events.Add(TeacherThreadSlaEvent.Record(thread.Id, kind, windowStartedAt, thread.SlaDueAt, thread.TeacherId, Now));
 }

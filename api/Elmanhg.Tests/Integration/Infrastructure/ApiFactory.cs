@@ -74,6 +74,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("AskTeacher:SlaSweepEnabled", "false");
         builder.UseSetting("RuntimeSettings:CacheSeconds", "30");
         builder.UseSetting("OutOfAppReminders:ThreadLinkBaseUrl", "https://elmanhg.test/teacher/thread");
+        // Tests run on any weekday and assert wall-clock deadlines; calendar tests turn skipping on through a runtime override.
+        builder.UseSetting("SlaCalendar:SkipWeekends", "false");
         builder.UseSetting("TrainingData:StudentIdHashKey", TestStudentIdHashKey);
         // Parallel tests share this host and the "unknown" client partition; RateLimiting tests set their own limits.
         builder.UseSetting("RateLimiting:AuthRefreshPermitLimit", "100000");
