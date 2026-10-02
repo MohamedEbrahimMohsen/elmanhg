@@ -176,7 +176,7 @@ Response `200`:
   "inputTokens": 900,
   "outputTokens": 150,
   "stopReason": "end_turn",
-  "costUsd": 0.00495
+  "costUsd": 0.00036
 }
 ```
 
@@ -229,7 +229,7 @@ Response `200`:
   "inputTokens": 900,
   "outputTokens": 150,
   "stopReason": "end_turn",
-  "costUsd": 0.00495
+  "costUsd": 0.00036
 }
 ```
 
