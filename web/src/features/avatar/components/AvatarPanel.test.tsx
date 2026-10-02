@@ -2,13 +2,22 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { getGetAvatarStatusQueryKey } from '@/shared/api/generated/avatar/avatar';
 import {
   getGetAvatarStatusMockHandler,
+  getGetMyAvatarConversationsMockHandler,
   getSendAvatarMessageMockHandler,
 } from '@/shared/api/generated/avatar/avatar.msw';
 import { getMasteryMock } from '@/shared/api/generated/mastery/mastery.msw';
 import type { AvatarStatusResult, SendAvatarMessageCommand } from '@/shared/api/generated/model';
-import { avatarConversationId, avatarReply, avatarStatus, freeAvatarStatus } from '@/test/avatarFixtures';
+import {
+  avatarConversationId,
+  avatarReply,
+  avatarStatus,
+  freeAvatarStatus,
+  myAvatarConversation,
+  myAvatarConversationsPage,
+} from '@/test/avatarFixtures';
 import { axe } from '@/test/axe';
 import { browseLessonId } from '@/test/browseFixtures';
 import { server } from '@/test/msw/server';
@@ -104,6 +113,20 @@ describe('AvatarPanel', () => {
     expect(await within(panel).findByText(/I cannot help while an exam is in progress/)).toBeInTheDocument();
     expect(within(panel).getByRole('textbox', { name: 'Your question' })).toBeDisabled();
     expect(within(panel).getByRole('button', { name: 'Send' })).toBeDisabled();
+  });
+
+  it('leaves the history view and shows the exam notice when an exam starts', async () => {
+    server.use(getGetMyAvatarConversationsMockHandler(myAvatarConversationsPage([myAvatarConversation()])));
+    const { user, panel, queryClient } = await openPanel();
+    await user.click(await within(panel).findByRole('button', { name: 'Past chats' }));
+    expect(await within(panel).findAllByRole('listitem')).toHaveLength(1);
+
+    useStatus(avatarStatus({ examInProgress: true }));
+    await queryClient.invalidateQueries({ queryKey: getGetAvatarStatusQueryKey() });
+
+    expect(await within(panel).findByText(/I cannot help while an exam is in progress/)).toBeInTheDocument();
+    expect(within(panel).queryByRole('heading', { name: 'Past chats' })).not.toBeInTheDocument();
+    expect(within(panel).queryByRole('button', { name: 'Back to the chat' })).not.toBeInTheDocument();
   });
 
   it('shows the daily limit notice with a subscribe link for a free student', async () => {

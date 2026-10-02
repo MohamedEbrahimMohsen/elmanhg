@@ -3,15 +3,17 @@ import { Dialog } from 'radix-ui';
 import { useTranslation } from 'react-i18next';
 import type { AvatarStatusResult } from '@/shared/api/generated/model';
 import { Button } from '@/shared/ui/button';
+import type { AvatarView } from '../hooks/avatarReducer';
 import { useAvatar } from '../hooks/useAvatar';
 
 export interface AvatarPanelHeaderProps {
+  view: AvatarView;
   status?: AvatarStatusResult | undefined;
 }
 
-export function AvatarPanelHeader({ status }: AvatarPanelHeaderProps) {
+export function AvatarPanelHeader({ view, status }: AvatarPanelHeaderProps) {
   const { t } = useTranslation('avatar');
-  const { state, dispatch } = useAvatar();
+  const { dispatch } = useAvatar();
 
   return (
     <div className="flex items-center justify-between gap-2">
@@ -20,7 +22,7 @@ export function AvatarPanelHeader({ status }: AvatarPanelHeaderProps) {
         {t('panel.title')}
       </Dialog.Title>
       <div className="flex items-center gap-1">
-        {state.view === 'chat' && status !== undefined && !status.examInProgress ? (
+        {view === 'chat' && status !== undefined && !status.examInProgress ? (
           <Button
             variant="ghost"
             className="min-w-11 px-0"
@@ -32,7 +34,7 @@ export function AvatarPanelHeader({ status }: AvatarPanelHeaderProps) {
             <History aria-hidden className="size-5" />
           </Button>
         ) : null}
-        {state.view === 'history' ? (
+        {view === 'history' ? (
           <Button
             variant="ghost"
             onClick={() => {

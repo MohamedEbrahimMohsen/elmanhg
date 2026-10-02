@@ -28,6 +28,14 @@ public sealed class GetMyAvatarConversationsValidatorTests
     }
 
     [Fact]
+    public void Validate_PageOffsetOverflowsInt_FailsWithPageNumberInvalid()
+    {
+        var result = _validator.Validate(new GetMyAvatarConversationsQuery(PageNumber: int.MaxValue, PageSize: 20));
+
+        Codes(result).Should().Equal(ErrorCodes.AvatarConversationsPageNumberInvalid);
+    }
+
+    [Fact]
     public void Validate_PageSizeZero_FailsWithPageSizeInvalid()
     {
         var result = _validator.Validate(new GetMyAvatarConversationsQuery(PageSize: 0));
