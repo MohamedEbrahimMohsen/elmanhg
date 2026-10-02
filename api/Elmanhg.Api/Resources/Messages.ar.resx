@@ -352,6 +352,7 @@
   <data name="PAYMENT_REFUND_REASON_TOO_LONG" xml:space="preserve"><value>سبب الاسترداد طويل جدا.</value></data>
   <data name="PAYMENT_REFUND_IDEMPOTENCY_KEY_REQUIRED" xml:space="preserve"><value>ترويسة Idempotency-Key مطلوبة ويجب ان تكون UUID غير فارغ.</value></data>
   <data name="PAYMENT_REFUND_DECLINED" xml:space="preserve"><value>رفضت Paymob الاسترداد. راجع المعاملة في لوحة Paymob.</value></data>
+  <data name="PAYMENT_REFUNDS_DISABLED" xml:space="preserve"><value>الاسترداد متوقف حاليًا. يمكن للمدير تفعيله من صفحة الإعدادات.</value></data>
   <data name="PAYMENT_NOT_SETTLED" xml:space="preserve"><value>لم تتم تسوية الدفع بعد.</value></data>
   <data name="PAYMENT_LOG_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة يجب ان يكون 1 او اكثر.</value></data>
   <data name="PAYMENT_LOG_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة غير صالح.</value></data>

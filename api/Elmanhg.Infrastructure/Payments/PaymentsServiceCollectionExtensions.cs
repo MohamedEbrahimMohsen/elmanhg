@@ -1,6 +1,8 @@
 using Elmanhg.Application.Shared.Payments;
 using Elmanhg.Infrastructure.Payments.Paymob;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
 
@@ -10,7 +12,7 @@ public static class PaymentsServiceCollectionExtensions
 {
     public static IServiceCollection AddPayments(this IServiceCollection services)
     {
-        services.AddOptions<PaymentsOptions>().BindConfiguration(PaymentsOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<PaymentsOptions>().BindConfiguration(PaymentsOptions.SectionName).PostConfigure<IConfiguration, IHostEnvironment>(ApplyAllowFakePaymentsDefault).ValidateDataAnnotations().ValidateOnStart();
         services.AddSingleton<IValidateOptions<PaymentsOptions>, PaymentsOptionsValidator>();
         services.AddHttpClient<PaymobPaymentGateway>((serviceProvider, client) => client.BaseAddress = new Uri(Options(serviceProvider).Paymob.BaseUrl.TrimEnd('/') + "/"))
             .AddStandardResilienceHandler()
@@ -30,6 +32,14 @@ public static class PaymentsServiceCollectionExtensions
             _ => throw new InvalidOperationException("Unsupported Payments:Provider."),
         });
         return services;
+    }
+
+    private static void ApplyAllowFakePaymentsDefault(PaymentsOptions options, IConfiguration configuration, IHostEnvironment hostEnvironment)
+    {
+        if (string.IsNullOrWhiteSpace(configuration[PaymentsOptions.AllowFakePaymentsKey]))
+        {
+            options.AllowFakePayments = hostEnvironment.IsDevelopment();
+        }
     }
 
     private static PaymentsOptions Options(IServiceProvider serviceProvider) => serviceProvider.GetRequiredService<IOptions<PaymentsOptions>>().Value;

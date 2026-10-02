@@ -211,7 +211,7 @@ Every external provider sits behind an interface with a fake or local implementa
 
 | Provider | Fake (where it lives) | Real adapter | Config keys | Switch steps |
 |---|---|---|---|---|
-| **Paymob** payments | `api/Elmanhg.Infrastructure/Payments/FakePaymentGateway.cs`, plus the web fake checkout page (`web/src/features/subscription/pages/FakeCheckoutPage.tsx`). Works in Development; elsewhere only with `Payments__AllowFakePayments=true`; Production always refuses it. | `Payments/Paymob/PaymobPaymentGateway.cs` (Intention API, HMAC webhook, refunds) | `Payments__Provider=Paymob`, `Payments__Paymob__SecretKey`, `__PublicKey`, `__HmacSecret`, `__IntegrationIds__0`, `__IntegrationIds__1`, `__RedirectionUrl`, `__NotificationUrl` | `docs/paymob.md` §7: create the card and wallet integrations, copy the keys and HMAC secret, set the keys, then work through §5 with a test-mode payment before taking money (#189, #191, #193) |
+| **Paymob** payments | `api/Elmanhg.Infrastructure/Payments/FakePaymentGateway.cs`, plus the web fake checkout page (`web/src/features/subscription/pages/FakeCheckoutPage.tsx`). Serves only when `Payments__AllowFakePayments` is true (unset: true in Development, false elsewhere); the API refuses to start with it true in Production. | `Payments/Paymob/PaymobPaymentGateway.cs` (Intention API, HMAC webhook, refunds); admin refunds also need `features.refundsEnabled` on (Configuration page) | `Payments__Provider=Paymob`, `Payments__Paymob__SecretKey`, `__PublicKey`, `__HmacSecret`, `__IntegrationIds__0`, `__IntegrationIds__1`, `__RedirectionUrl`, `__NotificationUrl` | `docs/paymob.md` §7: create the card and wallet integrations, copy the keys and HMAC secret, set the keys, then work through §5 with a test-mode payment before taking money (#189, #191, #193) |
 | **OTP: WhatsApp** (enabled) | `api/Elmanhg.Infrastructure/OtpDelivery/FakeOtpChannel.cs`: logs the code to the console in Development only, and a warning without the code elsewhere | `OtpDelivery/WhatsApp/MetaWhatsAppOtpChannel.cs` (Meta Cloud API template message) | `OtpDelivery__WhatsApp__Provider=Meta`, `__PhoneNumberId`, `__AccessToken`, `__TemplateName`, optionally `__CopyCodeButton=false` | `docs/otp-delivery.md` §5: Meta app and WhatsApp Business Account, an approved Arabic AUTHENTICATION template, a permanent system-user token, then the keys (#185) |
 | **OTP: Email** (enabled) | same `FakeOtpChannel` | `OtpDelivery/Email/ResendEmailOtpChannel.cs` | `OtpDelivery__Email__Provider=Resend`, `__ApiKey`, `__FromAddress` | `docs/otp-delivery.md` §6: verify the sending domain in Resend, create a sending-only key, set the keys. A staging host needs at least this channel, because the fake cannot deliver codes there |
 | **OTP: SMS** (built, disabled) | same `FakeOtpChannel` | `OtpDelivery/Sms/HttpSmsOtpChannel.cs` (generic HTTP gateway) | `OtpDelivery__Sms__Enabled=true`, `__Provider=Http`, `__Url`, `__ContentType`, `__BodyTemplate`, optionally `__AuthHeaderName` / `__AuthHeaderValue`; `OtpDelivery__DefaultPhoneChannel=Sms` to prefer it | `docs/otp-delivery.md` §7: pick the telecom, fill in its URL and body template. With WhatsApp on, SMS is only the fallback |
@@ -247,7 +247,7 @@ The "Verified by" column says where each command is exercised: **CI** means a wo
 
 | Part | Command | Verified by |
 |---|---|---|
-| Config | `cp .env.example .env` and `cp api/Elmanhg.Api/appsettings.example.json api/Elmanhg.Api/appsettings.json` | local. After a story that adds config keys, copy the new sections again, or startup validation fails |
+| Config | `cp .env.example .env` and `cp api/Elmanhg.Api/appsettings.example.json api/Elmanhg.Api/appsettings.json` | local. After a story that adds config keys, copy the new sections again, or startup validation fails. If your local `appsettings.json` still has `Payments:AllowFakePayments: false`, delete the key, or fake checkout returns 503. |
 | Database | `docker compose up -d postgres` | local |
 | Migrations | `dotnet tool restore`, then `dotnet ef database update --project api/Elmanhg.Infrastructure --startup-project api/Elmanhg.Api` | local; CI runs `dotnet ef migrations has-pending-model-changes` and `migrations script --idempotent` |
 | API | `dotnet run --project api/Elmanhg.Api --launch-profile http`, then `curl http://localhost:5080/health` (→ `Healthy`); docs at `http://localhost:5080/scalar/v1` | local |
@@ -277,6 +277,7 @@ To make the API use the ai service, set `AiService__Provider=Http`, `AiService__
 | 2026-09-29 | Independent stories may run in parallel lanes (linked worktrees). |
 | 2026-09-30 | Build credential-pending features now; keys come later (applied to the invitation email in #106). |
 | 2026-10-01 | Never use an Anthropic API key; run the AI features on the cheapest good model through one OpenAI-compatible adapter (#257). |
+| 2026-10-01 | #189: an explicit `Payments:AllowFakePayments` switch. #193: hold refunds and keep the code behind the `features.refundsEnabled` flag, off by default (#256). |
 
 ### Taken at the plan gate (auto-approved), changing product behaviour
 
@@ -316,7 +317,7 @@ Taken from the open follow-up issues. The first group matters most before go-liv
 
 | Issue | Gap or risk |
 |---|---|
-| #193 | **Money consistency:** after Paymob confirms a refund, the local save still uses the request's cancellation token, so a closed tab can leave Paymob refunded but the local payment and subscription unchanged. A `pending` refund is reported as declined; two partial refunds adding up to the full amount leave access granted. |
+| #193 | **Money consistency:** after Paymob confirms a refund, the local save still uses the request's cancellation token, so a closed tab can leave Paymob refunded but the local payment and subscription unchanged. A `pending` refund is reported as declined; two partial refunds adding up to the full amount leave access granted. Admin refunds are off by default (`features.refundsEnabled`) until this is resolved. |
 | #220 | The lesson page p75 cold load is 2.96 s against the 2 s budget (Lighthouse mobile). The CI browser gate is advisory until it is met. No CDN yet, and no full 50-student load run. |
 | #233 | The Postman collection cannot run top to bottom: it unassigns the teacher and deletes the subject before later steps, and "Approve essay question" can fail as already approved. Not run by CI (newman). |
 | #233 | Graded-but-unapplied essay grades are retried every sweep without a cap and can block all pending grading. |

@@ -5077,7 +5077,7 @@
     },
     {
       "name": "AdminPayments",
-      "description": "Admin only (Payments.Manage). Sign in as an admin first. Refund uses checkoutPaymentId from the Subscriptions folder (fake-completed). A refund needs an Idempotency-Key header.",
+      "description": "Admin only (Payments.Manage). Sign in as an admin first. Refund uses checkoutPaymentId from the Subscriptions folder (fake-completed). A refund needs an Idempotency-Key header and the features.refundsEnabled flag on (off by default): run \"Turn on refunds\" first; \"Reset refunds flag\" turns it back off.",
       "item": [
         {
           "name": "Get payment log",
@@ -5140,6 +5140,60 @@
                 { "key": "pageNumber", "value": "1" },
                 { "key": "pageSize", "value": "20" }
               ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get payment settings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"has refunds flag\", function () { pm.expect(typeof pm.response.json().refundsEnabled).to.eql(\"boolean\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "settings"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Turn on refunds",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/settings/features.refundsEnabled",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "settings", "features.refundsEnabled"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": true\n}",
+              "options": { "raw": { "language": "json" } }
             }
           },
           "response": []
@@ -5236,6 +5290,30 @@
               "mode": "raw",
               "raw": "{\n  \"reason\": \"Duplicate charge\"\n}",
               "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reset refunds flag",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/settings/features.refundsEnabled/reset",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "settings", "features.refundsEnabled", "reset"]
             }
           },
           "response": []

@@ -3843,6 +3843,36 @@
         }
       }
     },
+    "/api/payments/settings": {
+      "get": {
+        "tags": [
+          "Payments"
+        ],
+        "operationId": "GetPaymentSettings",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentSettingsResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentSettingsResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentSettingsResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/payments/{paymentId}/refund": {
       "post": {
         "tags": [
@@ -12325,6 +12355,17 @@
           "AskTeacherWithoutBase",
           "PartialRefundAtProvider"
         ]
+      },
+      "PaymentSettingsResult": {
+        "required": [
+          "refundsEnabled"
+        ],
+        "type": "object",
+        "properties": {
+          "refundsEnabled": {
+            "type": "boolean"
+          }
+        }
       },
       "PaymentStatus": {
         "enum": [

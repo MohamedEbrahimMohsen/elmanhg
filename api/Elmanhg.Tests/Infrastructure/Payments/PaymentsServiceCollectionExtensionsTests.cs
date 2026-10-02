@@ -78,11 +78,64 @@ public sealed class PaymentsServiceCollectionExtensionsTests
         handler.CallCount.Should().Be(1);
     }
 
-    private static ServiceProvider BuildProvider(Dictionary<string, string?> settings, Action<IServiceCollection>? configure = null)
+    [Fact]
+    public void AddPayments_AllowFakePaymentsUnsetInDevelopment_DefaultsToTrue()
+    {
+        using var provider = BuildProvider([], environmentName: "Development");
+
+        provider.GetRequiredService<IOptions<PaymentsOptions>>().Value.AllowFakePayments.Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData("Staging")]
+    [InlineData("Production")]
+    [InlineData("Testing")]
+    public void AddPayments_AllowFakePaymentsUnsetOutsideDevelopment_DefaultsToFalse(string environmentName)
+    {
+        using var provider = BuildProvider([], environmentName: environmentName);
+
+        provider.GetRequiredService<IOptions<PaymentsOptions>>().Value.AllowFakePayments.Should().BeFalse();
+    }
+
+    [Fact]
+    public void AddPayments_AllowFakePaymentsFalseInDevelopment_KeepsFalse()
+    {
+        using var provider = BuildProvider(new() { [PaymentsOptions.AllowFakePaymentsKey] = "false" }, environmentName: "Development");
+        using var scope = provider.CreateScope();
+
+        provider.GetRequiredService<IOptions<PaymentsOptions>>().Value.AllowFakePayments.Should().BeFalse();
+        scope.ServiceProvider.GetRequiredService<IPaymentGateway>().SupportsSimulatedCompletion.Should().BeFalse();
+    }
+
+    [Fact]
+    public void AddPayments_AllowFakePaymentsTrueInProduction_FailsStartupValidation()
+    {
+        using var provider = BuildProvider(new() { [PaymentsOptions.AllowFakePaymentsKey] = "true" }, environmentName: "Production");
+
+        var act = () => provider.GetRequiredService<IStartupValidator>().Validate();
+
+        act.Should().Throw<OptionsValidationException>().WithMessage("*AllowFakePayments*");
+    }
+
+    [Fact]
+    public void AddPayments_AllowFakePaymentsTrueInStaging_ResolvesServingFakeGateway()
+    {
+        using var provider = BuildProvider(new() { [PaymentsOptions.AllowFakePaymentsKey] = "true" }, environmentName: "Staging");
+        using var scope = provider.CreateScope();
+
+        var gateway = scope.ServiceProvider.GetRequiredService<IPaymentGateway>();
+
+        gateway.Should().BeOfType<FakePaymentGateway>();
+        gateway.SupportsSimulatedCompletion.Should().BeTrue();
+    }
+
+    private static ServiceProvider BuildProvider(Dictionary<string, string?> settings, Action<IServiceCollection>? configure = null, string environmentName = "Testing")
     {
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddSingleton(Substitute.For<IHostEnvironment>());
+        var hostEnvironment = Substitute.For<IHostEnvironment>();
+        hostEnvironment.EnvironmentName.Returns(environmentName);
+        services.AddSingleton(hostEnvironment);
         services.AddSingleton<IConfiguration>(new ConfigurationBuilder().AddInMemoryCollection(settings).Build());
         services.AddPayments();
         configure?.Invoke(services);

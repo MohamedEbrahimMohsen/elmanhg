@@ -1,5 +1,6 @@
 using Elmanhg.Tests.Integration.Auth;
 using Elmanhg.Tests.Integration.Authorization;
+using Elmanhg.Tests.Integration.Configuration;
 using Elmanhg.Tests.Integration.Infrastructure;
 using Elmanhg.Tests.Integration.Payments;
 using FluentAssertions;
@@ -10,6 +11,7 @@ using static Elmanhg.Tests.Integration.Sessions.SessionTestData;
 
 namespace Elmanhg.Tests.Integration.Subscriptions;
 
+[Collection(RuntimeSettingsCollection.Name)]
 public sealed class PaymentHistoryEndpointTests(ApiFactory factory)
 {
     private const string PaymentsPath = $"{SubscriptionTestData.SubscriptionsRoute}/payments";
@@ -60,6 +62,7 @@ public sealed class PaymentHistoryEndpointTests(ApiFactory factory)
     [Fact]
     public async Task Get_StudentWithRefundedPayment_ListsRefundedStatus()
     {
+        await PaymentsTestData.SetRefundsEnabledAsync(factory, true, CancellationToken);
         var (student, client) = await SignedInFreeStudentAsync(factory);
         var payment = await SubscriptionTestData.SeedCompletedPaymentAsync(factory, student.Id, succeeded: true, 19900, CancellationToken);
         using var admin = await PaymentsTestData.AdminClientAsync(factory, CancellationToken);
