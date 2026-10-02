@@ -206,6 +206,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         ConfigureTeacherThreads(modelBuilder);
         ConfigureTeacherVoiceDrafts(modelBuilder);
         ConfigureTeacherThreadSlaEvents(modelBuilder);
+        ConfigureTeacherThreadOutOfAppReminders(modelBuilder);
         ConfigureTeacherSubjects(modelBuilder);
         ConfigureFunnelEvents(modelBuilder);
         ConfigureUserActivityDays(modelBuilder);
@@ -660,6 +661,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         modelBuilder.Entity<TeacherMessage>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<TeacherVoiceDraft>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<TeacherThreadSlaEvent>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<TeacherThreadOutOfAppReminder>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<FunnelEvent>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<UserActivityDay>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<LessonContentChunk>().HasQueryFilter(x => !x.IsDeleted);

@@ -62,6 +62,8 @@
     "otpEmail": "رمز الدخول بالبريد",
     "otpSms": "رمز الدخول عبر الرسائل القصيرة",
     "invitationEmail": "بريد الدعوات",
+    "teacherReminderWhatsApp": "تذكير المعلّم عبر واتساب",
+    "teacherReminderEmail": "تذكير المعلّم بالبريد الإلكتروني",
     "payments": "المدفوعات",
     "fileStorage": "تخزين الملفات",
     "aiService": "خدمة الذكاء الاصطناعي"
@@ -83,5 +85,11 @@
     "embeddings": "التضمين",
     "transcription": "التفريغ الصوتي"
   },
-  "choices": {}
+  "choices": {
+    "WhatsApp": "واتساب",
+    "Email": "البريد الإلكتروني",
+    "Both": "كلاهما",
+    "FirstReminder": "التذكير الأول",
+    "SecondReminder": "التذكير الثاني"
+  }
 }

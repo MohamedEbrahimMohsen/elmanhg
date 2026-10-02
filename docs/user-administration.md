@@ -7,13 +7,14 @@ Admins manage every account from `/admin/users` (PRD §10.4): students, teachers
 | Method | Route | Policy | Request | Response |
 |---|---|---|---|---|
 | GET | `/api/users` | `Users.Manage` | query `role` (`Student` default, `Teacher`, `Admin`), `search?`, `status?` (`Active`, `Suspended`), `pageNumber` = 1, `pageSize` = 20 | 200 `PageData<UserSummaryResult>`; 422 `USER_LIST_*` |
-| POST | `/api/users/invitations` | `Users.Manage` | `{ role: Teacher \| Admin, displayName, email }` | 200 `InviteUserResult { userId, emailSent }`; 409 `EMAIL_ALREADY_REGISTERED`; 422 |
+| POST | `/api/users/invitations` | `Users.Manage` | `{ role: Teacher \| Admin, displayName, email, phoneNumber? }` (`phoneNumber` teachers only) | 200 `InviteUserResult { userId, emailSent }`; 409 `EMAIL_ALREADY_REGISTERED`; 422 (including `PHONE_NUMBER_TEACHERS_ONLY` / `VALIDATION_PHONE_NUMBER_*`) |
 | POST | `/api/users/{userId}/suspend` | `Users.Manage` | — | 200; 400 `USER_CANNOT_SUSPEND_SELF` / `LAST_ACTIVE_ADMIN` / `USER_ALREADY_SUSPENDED`; 404 `USER_NOT_FOUND`; 409 `USER_MODIFIED_CONCURRENTLY` |
 | POST | `/api/users/{userId}/reactivate` | `Users.Manage` | — | 200; 400 `USER_NOT_SUSPENDED`; 404; 409 |
 | GET | `/api/students/{studentId}` | `Users.Manage` | — | 200 `StudentProfileResult`; 404 `STUDENT_NOT_FOUND` |
 | GET | `/api/students/{studentId}/progress` | `Progress.ViewAny` | — | 200 `StudentProgressResult` ([progress.md](progress.md), Admin view) |
 | GET | `/api/students/{studentId}/sessions` | `Progress.ViewAny` | `kind?`, `pageNumber`, `pageSize` | 200 `PageData<SessionHistoryItemResult>` |
 | POST | `/api/students/{studentId}/complimentary-subscriptions` | `Users.Manage` | `{ plan, period }` | 200 `AdminSubscriptionResult`; see [subscriptions.md](subscriptions.md), Complimentary grants |
+| PUT | `/api/teachers/{teacherId}/phone-number` | `Users.Manage` | `{ phoneNumber: string \| null }` (null removes it) | 200; 400 `PHONE_NUMBER_TEACHERS_ONLY`; 404 `USER_NOT_FOUND`; 409 `USER_MODIFIED_CONCURRENTLY`; 422 `VALIDATION_PHONE_NUMBER_*` / `TEACHER_ID_REQUIRED` |
 | POST | `/api/auth/invitations/accept` | anonymous, credential rate limit | `{ verificationId, password }` | 200 `AuthResult` plus the refresh cookie; 400 `OTP_*` / `PASSWORD_REJECTED`; 403 `USER_SUSPENDED`; 404 `INVITATION_NOT_FOUND`; 422 |
 
 Both policies are Admin only (PRD §16). Teacher subject assignment reuses `POST`/`DELETE /api/teachers/{teacherId}/subjects/{subjectId}`.
@@ -54,6 +55,15 @@ An invitation never expires; an admin can deactivate a pending invitee, which al
 - Search is server-side. It matches the display name (case-insensitive, any part), the **exact** mobile number, or the **exact** email (case-insensitive, through the normalised email). A partial number or email matches nothing, so the search cannot be used to enumerate contacts.
 - Results are ordered newest account first. The existing admin payment log (#102) is unchanged.
 
+## Teacher WhatsApp number
+
+- Optional. An admin sets it in the invite dialog (teachers only) or sets, changes or removes it from the teacher row on `/admin/users` («رقم واتساب»). There is no teacher self-service: teachers have no profile or settings page.
+- Same format as the student phone sign-in: `CoreOtp:PhoneCodes` and `CoreOtp:PhoneLength` (11 digits starting with 010, 011, 012 or 015); the value is stored trimmed in the user's phone number column (`User.SetContactPhoneNumber`).
+- Not verified (`PhoneNumberConfirmed` stays false) and not unique: a teacher may share a number with their own student account.
+- Never used for sign-in: phone sign-in and registration look users up by user name, and a teacher's user name is the email, so phone sign-in with a teacher's number still returns 404 `PHONE_NUMBER_NOT_REGISTERED`.
+- Masked in every list (`maskedPhone`); the full number is never returned. Audited as `Teacher.SetPhoneNumber` without a diff, so the number never reaches the audit log; no log line carries it.
+- Used by the one out-of-app reminder per Ask a Teacher question ([ask-teacher.md](ask-teacher.md) → SLA); a teacher without a number gets the email reminder only.
+
 ## Complimentary grants
 
 See [subscriptions.md](subscriptions.md), Complimentary grants. The web offers «منح الأساسية» to a Free student and «منح اسأل معلّم» to a Base student without the add-on, both from the list row and the student page.
@@ -79,6 +89,7 @@ The invitation email reuses `OtpDelivery:Email` (`Enabled`, `Provider`, `BaseUrl
 | `USER_LIST_SEARCH_TOO_LONG` | 422 | `search` longer than `Users:SearchMaxLength`. |
 | `USER_ID_REQUIRED` / `STUDENT_ID_REQUIRED` | 422 | Empty id. |
 | `USER_INVITE_ROLE_INVALID` | 422 | Invite role other than Teacher or Admin. |
+| `PHONE_NUMBER_TEACHERS_ONLY` | 400 / 422 | A WhatsApp number set for a non-teacher (400 from `PUT …/phone-number`, 422 on an admin invite). |
 | `USER_NOT_FOUND` / `STUDENT_NOT_FOUND` | 404 | Unknown user, or an id that is not a student. |
 | `USER_CANNOT_SUSPEND_SELF` | 400 | An admin suspends their own account. |
 | `LAST_ACTIVE_ADMIN` | 400 | The last active admin would be deactivated. |
@@ -90,4 +101,4 @@ The invitation email reuses `OtpDelivery:Email` (`Enabled`, `Provider`, `BaseUrl
 
 ## Audit
 
-`User.Invite` (resource id from the result), `User.Suspend` and `User.Reactivate` (from the command) and `Subscription.GrantComplimentary` (from the result, with a diff) are audited. `User` is not an audited entity, so the user rows carry no diff. Accepting an invitation is auth and is not audited. See [audit-log.md](audit-log.md).
+`User.Invite` (resource id from the result), `User.Suspend` and `User.Reactivate` (from the command), `Teacher.SetPhoneNumber` (resource id = the teacher, from the command) and `Subscription.GrantComplimentary` (from the result, with a diff) are audited. `User` is not an audited entity, so the user rows carry no diff. Accepting an invitation is auth and is not audited. See [audit-log.md](audit-log.md).

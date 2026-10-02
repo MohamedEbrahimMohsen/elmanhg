@@ -62,6 +62,8 @@
     "otpEmail": "Sign-in code by email",
     "otpSms": "Sign-in code by SMS",
     "invitationEmail": "Invitation email",
+    "teacherReminderWhatsApp": "Teacher reminder by WhatsApp",
+    "teacherReminderEmail": "Teacher reminder by email",
     "payments": "Payments",
     "fileStorage": "File storage",
     "aiService": "AI service"
@@ -83,5 +85,11 @@
     "embeddings": "Embeddings",
     "transcription": "Transcription"
   },
-  "choices": {}
+  "choices": {
+    "WhatsApp": "WhatsApp",
+    "Email": "Email",
+    "Both": "Both",
+    "FirstReminder": "First reminder",
+    "SecondReminder": "Second reminder"
+  }
 }

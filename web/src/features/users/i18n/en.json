@@ -70,7 +70,9 @@
     "copy": "Copy link",
     "copied": "Link copied.",
     "close": "Done",
-    "createdToast": "Invitation created."
+    "createdToast": "Invitation created.",
+    "phone": "WhatsApp number (optional)",
+    "phoneHint": "For reminders about student questions. Example: 01012345678"
   },
   "subjects": {
     "label": "Subjects assigned to {name}",
@@ -151,12 +153,24 @@
     "loading": "Loading history…",
     "errorTitle": "Could not load history"
   },
+  "teacherPhone": {
+    "edit": "WhatsApp number",
+    "title": "WhatsApp number for {name}",
+    "current": "Current number: {phone}",
+    "none": "No number yet.",
+    "label": "New WhatsApp number",
+    "save": "Save",
+    "remove": "Remove number",
+    "savedToast": "WhatsApp number saved.",
+    "removedToast": "WhatsApp number removed."
+  },
   "validation": {
     "searchTooLong": "Search is too long.",
     "displayNameLength": "Name must be 100 characters or fewer.",
     "email": "Enter a valid email address.",
     "emailLength": "Email is too long.",
     "planRequired": "Choose a plan.",
-    "periodRequired": "Choose a period."
+    "periodRequired": "Choose a period.",
+    "phone": "Enter an 11-digit mobile number starting with 010, 011, 012 or 015."
   }
 }

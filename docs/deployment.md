@@ -152,6 +152,17 @@ A story that adds an options section holding a secret or a per-host value must a
 
 The invitation email is sent through the same Resend account as the email OTP (`OtpDelivery__Email__ApiKey` and `__FromAddress`). With the fake email provider no invitation email leaves the API, and the admin shares the link shown after the invite.
 
+### Out-of-app teacher reminders (`api.env`, [docs/otp-delivery.md](otp-delivery.md) §10)
+
+| Variable | Default | Secret |
+|---|---|---|
+| `OutOfAppReminders__WhatsAppTemplateName` / `__WhatsAppLanguageCode` / `__WhatsAppThreadButton` | empty / `ar` / `true` | no; empty keeps WhatsApp reminders on the fake |
+| `OutOfAppReminders__EmailLanguage` / `__EmailSubjectArabic` / `__EmailSubjectEnglish` | `ar` / Arabic default / English default | no |
+| `OutOfAppReminders__ThreadLinkBaseUrl` | empty | no; `https://<SITE_ADDRESS>/teacher/thread`, required when `OtpDelivery__Email__Provider=Resend` |
+| `OutOfAppReminders__TimeZone` | `Africa/Cairo` | no |
+
+The reminders reuse the WhatsApp and Resend credentials of the OTP channels. On/off, channels and stage are runtime settings on the Configuration page.
+
 ### Payments (`api.env`, [docs/paymob.md](paymob.md))
 
 | Variable | Default | Secret |

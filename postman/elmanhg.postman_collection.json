@@ -507,6 +507,36 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Set teacher phone number",
+          "description": "Sets the teacher's WhatsApp number used by the out-of-app reminder. Send \"phoneNumber\": null to remove the number. Same format as the student phone sign-in (11 digits, 010/011/012/015). Teachers only (400 PHONE_NUMBER_TEACHERS_ONLY).",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/teachers/{{teacherId}}/phone-number",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "teachers", "{{teacherId}}", "phone-number"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phoneNumber\": \"01012345678\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -561,7 +591,7 @@
         },
         {
           "name": "Invite teacher",
-          "description": "Creates a password-less teacher and, when Resend is configured, emails the /accept-invite link. The email is never part of the link.",
+          "description": "Creates a password-less teacher and, when Resend is configured, emails the /accept-invite link. The email is never part of the link. phoneNumber is optional and teachers only (the WhatsApp number for reminders); omit it or send null for none.",
           "event": [
             {
               "listen": "test",
@@ -595,7 +625,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"role\": \"Teacher\",\n  \"displayName\": \"Invited teacher\",\n  \"email\": \"{{invitedEmail}}\"\n}",
+              "raw": "{\n  \"role\": \"Teacher\",\n  \"displayName\": \"Invited teacher\",\n  \"email\": \"{{invitedEmail}}\",\n  \"phoneNumber\": \"01012345678\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

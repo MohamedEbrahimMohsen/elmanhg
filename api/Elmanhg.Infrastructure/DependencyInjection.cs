@@ -32,6 +32,7 @@ using Elmanhg.Infrastructure.Hosting;
 using Elmanhg.Infrastructure.Identity;
 using Elmanhg.Infrastructure.Lessons;
 using Elmanhg.Infrastructure.Mastery;
+using Elmanhg.Infrastructure.Messaging;
 using Elmanhg.Infrastructure.Invitations;
 using Elmanhg.Infrastructure.OtpDelivery;
 using Elmanhg.Infrastructure.Payments;
@@ -60,6 +61,7 @@ public static class DependencyInjection
     {
         services.AddOtpDelivery();
         services.AddInvitationEmail();
+        services.AddMessaging();
         services.AddPayments();
         services.AddAiService();
         services.AddFileStorage();
@@ -88,6 +90,7 @@ public static class DependencyInjection
         services.AddScoped<ITeacherThreadRepository, TeacherThreadRepository>();
         services.AddScoped<ITeacherVoiceDraftRepository, TeacherVoiceDraftRepository>();
         services.AddScoped<ITeacherThreadSlaEventRepository, TeacherThreadSlaEventRepository>();
+        services.AddScoped<ITeacherThreadOutOfAppReminderRepository, TeacherThreadOutOfAppReminderRepository>();
         services.AddScoped<IFunnelEventRepository, FunnelEventRepository>();
         services.AddScoped<IUserActivityDayRepository, UserActivityDayRepository>();
         services.AddScoped<ILessonContentChunkRepository, LessonContentChunkRepository>();

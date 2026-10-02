@@ -231,6 +231,38 @@ public sealed class UsersEndpointTests(ApiFactory factory)
         (await ReadCodeAsync(response, CancellationToken)).Should().Be("USER_NOT_SUSPENDED");
     }
 
+    [Fact]
+    public async Task Post_InviteTeacherWithPhone_StoresNumber()
+    {
+        var email = AuthTestClient.NewEmail();
+        using var admin = await AdminClientAsync();
+
+        using var response = await admin.PostAsJsonAsync(InvitationsRoute, new { role = "Teacher", displayName = "New teacher", email, phoneNumber = "01012345678" }, CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var userId = (await ReadBodyAsync(response, CancellationToken)).GetProperty("userId").GetGuid();
+        var stored = await ReadUserAsync(factory, userId, CancellationToken);
+        (stored.PhoneNumber, stored.PhoneNumberConfirmed).Should().Be(("01012345678", false));
+        using var list = await admin.GetAsync($"{UsersRoute}?role=Teacher&search={email}", CancellationToken);
+        (await list.Content.ReadAsStringAsync(CancellationToken)).Should().NotContain("01012345678");
+        var item = (await ReadBodyAsync(list, CancellationToken)).GetProperty("items").EnumerateArray().Should().ContainSingle().Subject;
+        item.GetProperty("maskedPhone").GetString().Should().Be("010*****678");
+    }
+
+    [Fact]
+    public async Task Post_InviteAdminWithPhone_Returns422PhoneNumberTeachersOnly()
+    {
+        var email = AuthTestClient.NewEmail();
+        using var admin = await AdminClientAsync();
+
+        using var response = await admin.PostAsJsonAsync(InvitationsRoute, new { role = "Admin", displayName = "New admin", email, phoneNumber = "01012345678" }, CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await ReadCodeAsync(response, CancellationToken)).Should().Be("PHONE_NUMBER_TEACHERS_ONLY");
+        using var list = await admin.GetAsync($"{UsersRoute}?role=Admin&search={email}", CancellationToken);
+        (await ReadBodyAsync(list, CancellationToken)).GetProperty("items").GetArrayLength().Should().Be(0);
+    }
+
     private async Task<HttpClient> AdminClientAsync()
     {
         var admin = await ScopeTestData.SeedAdminAsync(factory, CancellationToken).ConfigureAwait(false);

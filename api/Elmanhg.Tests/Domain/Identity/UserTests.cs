@@ -288,4 +288,39 @@ public sealed class UserTests
 
         teacher.CanBeSuspendedBy(Guid.NewGuid(), 0).Should().BeFalse();
     }
+
+    [Fact]
+    public void SetContactPhoneNumber_Teacher_SetsTrimmedUnconfirmedNumberAndStamps()
+    {
+        var teacher = User.CreateTeacher("Teacher", "teacher@elmanhg.test");
+        var adminId = Guid.NewGuid();
+
+        teacher.SetContactPhoneNumber(" 01012345678 ", adminId);
+
+        (teacher.PhoneNumber, teacher.PhoneNumberConfirmed, teacher.UpdatedBy, teacher.UserName).Should().Be(("01012345678", false, (Guid?)adminId, "teacher@elmanhg.test"));
+    }
+
+    [Fact]
+    public void SetContactPhoneNumber_Null_ClearsNumber()
+    {
+        var teacher = User.CreateTeacher("Teacher", "teacher@elmanhg.test");
+        teacher.SetContactPhoneNumber("01012345678", Guid.NewGuid());
+
+        teacher.SetContactPhoneNumber(null, Guid.NewGuid());
+
+        teacher.PhoneNumber.Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData(UserRole.Admin)]
+    [InlineData(UserRole.Student)]
+    public void SetContactPhoneNumber_NotTeacher_ThrowsPhoneNumberTeachersOnly(UserRole role)
+    {
+        var user = role == UserRole.Admin ? User.CreateAdmin("Admin", "admin@elmanhg.test") : User.CreateStudentWithEmail("Student", "student@elmanhg.test");
+
+        var act = () => user.SetContactPhoneNumber("01012345678", Guid.NewGuid());
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.PhoneNumberTeachersOnly);
+        user.PhoneNumber.Should().BeNull();
+    }
 }

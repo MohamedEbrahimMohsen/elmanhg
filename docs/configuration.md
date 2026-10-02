@@ -28,6 +28,9 @@ Errors: `RUNTIME_SETTING_KEY_REQUIRED` and `RUNTIME_SETTING_VALUE_INVALID` (422)
 | `askTeacher.replySlaHours` | AskTeacher | Integer | 1–168 | `Subscriptions:AskTeacherReplySlaHours` |
 | `askTeacher.firstReminderAfterHours` | AskTeacher | Integer | 1–167 | `AskTeacher:FirstReminderAfterHours` |
 | `askTeacher.secondReminderAfterHours` | AskTeacher | Integer | 1–167 | `AskTeacher:SecondReminderAfterHours` |
+| `askTeacher.outOfAppReminderEnabled` | AskTeacher | Boolean | – | `AskTeacher:OutOfAppReminderEnabled` |
+| `askTeacher.outOfAppReminderChannels` | AskTeacher | Choice | `WhatsApp`, `Email`, `Both` | `AskTeacher:OutOfAppReminderChannels` |
+| `askTeacher.outOfAppReminderStage` | AskTeacher | Choice | `FirstReminder`, `SecondReminder` | `AskTeacher:OutOfAppReminderStage` |
 | `plans.freeDailyQuizQuestions` | PlanLimits | Integer | 0–1000 | `Subscriptions:FreeDailyQuizQuestions` |
 | `plans.freeDailyAvatarMessages` | PlanLimits | Integer | 0–1000 | `Subscriptions:FreeDailyAvatarMessages` |
 | `plans.freeOpenLessonsPerUnit` | PlanLimits | Integer | 0–100 | `Subscriptions:FreeOpenLessonsPerUnit` |
@@ -77,7 +80,7 @@ Complex values (for example the exam periods of the SLA calendar, #254) are not 
 ## 6. Infrastructure section (read-only)
 
 - **Environment**: the host environment name.
-- **Integrations**: `otpWhatsApp`, `otpEmail`, `otpSms`, `invitationEmail`, `payments`, `fileStorage`, `aiService`, each with its provider and mode: Fake (a built-in fake, or a disabled OTP channel, which also uses the fake), Local (local-disk file storage) or Real.
+- **Integrations**: `otpWhatsApp`, `otpEmail`, `otpSms`, `invitationEmail`, `teacherReminderWhatsApp`, `teacherReminderEmail`, `payments`, `fileStorage`, `aiService`, each with its provider and mode: Fake (a built-in fake, or a disabled OTP channel, which also uses the fake), Local (local-disk file storage) or Real. `teacherReminderWhatsApp` is also Fake while no reminder template is set (`OutOfAppReminders:WhatsAppTemplateName`, [otp-delivery.md §10](otp-delivery.md)).
 - **AI service**: when `AiService:Provider=Http` the API calls the AI service `GET /v1/configuration` ([ai-service.md](ai-service.md)) and shows its LLM provider, chat, essay and math-step models, embedding and transcription provider and model, and whether its API keys are set. With the Fake provider the status is "not used"; when the call fails or does not answer within `AiService:ConfigurationTimeoutSeconds` (5 s) the status is "unreachable" (logged as a Warning) and the rest of the page still renders.
 - **Safety switches**: `Payments:AllowFakePayments`, its effective value (unset: true in Development, false elsewhere), shown on or off. Never editable from the UI or the API; the API refuses to start with it true in Production.
 - **Secrets**: the keys checked by the production placeholder guard ([security.md](security.md)), each shown as set or not set. Set means not blank and not a `change-me` placeholder. Only `{ key, isSet }` is returned; secret values never leave the process.
@@ -93,6 +96,7 @@ Complex values (for example the exam periods of the SLA calendar, #254) are not 
 | Text and field lengths, page sizes, cache seconds | Schema and contract caps tied to column widths and AI-service limits. |
 | `Content:LessonImageMaxSizeInMb`, `QuestionImportMaxFileSizeInMb` | Admin authoring caps and the import parse-time bound (#153). |
 | `AskTeacher:TranscriptionLanguage` | Part of the AI-service contract. |
+| `OutOfAppReminders:*` (template name, language, link, time zone) | Tied to the Meta template approval and the site host ([otp-delivery.md §10](otp-delivery.md)). |
 | All infrastructure | Set by environment variables at deploy time (§6). |
 
 ## 8. Known limits

@@ -1,6 +1,7 @@
 using Elmanhg.Application.Configuration.Shared;
 using Elmanhg.Infrastructure.AiService;
 using Elmanhg.Infrastructure.Hosting;
+using Elmanhg.Infrastructure.Messaging;
 using Elmanhg.Infrastructure.OtpDelivery;
 using Elmanhg.Infrastructure.OtpDelivery.Email;
 using Elmanhg.Infrastructure.OtpDelivery.Sms;
@@ -24,6 +25,7 @@ public sealed class InfrastructureConfigurationReaderTests
     private const string RealSecret = "not-a-secret-config-probe-7f3a91c2";
     private readonly StubHttpMessageHandler _handler = new() { ResponseBody = HttpAiConfigurationClientTests.ReplyBody };
     private readonly OtpDeliveryOptions _otpDelivery = new() { WhatsApp = new WhatsAppOtpOptions { Enabled = true }, Email = new EmailOtpOptions { Enabled = true }, Sms = new SmsOtpOptions { Enabled = true } };
+    private readonly OutOfAppReminderOptions _outOfAppReminders = new();
     private readonly PaymentsOptions _payments = new();
     private readonly FileStorageOptions _fileStorage = new();
     private AiServiceOptions _aiService = AiServiceTestSettings.Fake();
@@ -34,7 +36,7 @@ public sealed class InfrastructureConfigurationReaderTests
     {
         var result = await ReadAsync();
 
-        result.Integrations.Select(x => (x.Integration, x.Mode)).Should().Equal(("otpWhatsApp", IntegrationMode.Fake), ("otpEmail", IntegrationMode.Fake), ("otpSms", IntegrationMode.Fake), ("invitationEmail", IntegrationMode.Fake), ("payments", IntegrationMode.Fake), ("fileStorage", IntegrationMode.Local), ("aiService", IntegrationMode.Fake));
+        result.Integrations.Select(x => (x.Integration, x.Mode)).Should().Equal(("otpWhatsApp", IntegrationMode.Fake), ("otpEmail", IntegrationMode.Fake), ("otpSms", IntegrationMode.Fake), ("invitationEmail", IntegrationMode.Fake), ("teacherReminderWhatsApp", IntegrationMode.Fake), ("teacherReminderEmail", IntegrationMode.Fake), ("payments", IntegrationMode.Fake), ("fileStorage", IntegrationMode.Local), ("aiService", IntegrationMode.Fake));
         (result.AiServiceStatus, result.AiService).Should().Be((AiServiceStatus.NotUsed, (AiServiceConfigurationResult?)null));
         _handler.CallCount.Should().Be(0);
     }
@@ -45,6 +47,7 @@ public sealed class InfrastructureConfigurationReaderTests
         _otpDelivery.WhatsApp.Provider = WhatsAppProvider.Meta;
         _otpDelivery.Email.Provider = EmailProvider.Resend;
         _otpDelivery.Sms.Provider = SmsProvider.Http;
+        _outOfAppReminders.WhatsAppTemplateName = "elmanhg_teacher_reminder";
         _payments.Provider = PaymentProvider.Paymob;
         _fileStorage.Provider = FileStorageProvider.S3;
         _aiService = AiServiceTestSettings.WithHttp();
@@ -54,6 +57,17 @@ public sealed class InfrastructureConfigurationReaderTests
         result.Integrations.Should().OnlyContain(x => x.Mode == IntegrationMode.Real);
         result.AiServiceStatus.Should().Be(AiServiceStatus.Reachable);
         result.AiService!.ChatModel.Should().Be("gpt-5.6-luna");
+    }
+
+    [Fact]
+    public async Task ReadAsync_MetaWithoutReminderTemplate_ReportsTeacherReminderWhatsAppFake()
+    {
+        _otpDelivery.WhatsApp.Provider = WhatsAppProvider.Meta;
+
+        var result = await ReadAsync();
+
+        var modes = result.Integrations.ToDictionary(x => x.Integration, x => x.Mode);
+        (modes["otpWhatsApp"], modes["teacherReminderWhatsApp"]).Should().Be((IntegrationMode.Real, IntegrationMode.Fake));
     }
 
     [Fact]
@@ -110,7 +124,7 @@ public sealed class InfrastructureConfigurationReaderTests
         var aiOptions = Microsoft.Extensions.Options.Options.Create(_aiService);
         var client = new HttpAiConfigurationClient(new HttpClient(_handler) { BaseAddress = new Uri("http://ai.test/") }, aiOptions, NullLogger<HttpAiConfigurationClient>.Instance);
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(_configuration).Build();
-        var reader = new InfrastructureConfigurationReader(Microsoft.Extensions.Options.Options.Create(_otpDelivery), Microsoft.Extensions.Options.Options.Create(_payments), Microsoft.Extensions.Options.Options.Create(_fileStorage), aiOptions, configuration, environment, client);
+        var reader = new InfrastructureConfigurationReader(Microsoft.Extensions.Options.Options.Create(_otpDelivery), Microsoft.Extensions.Options.Options.Create(_outOfAppReminders), Microsoft.Extensions.Options.Options.Create(_payments), Microsoft.Extensions.Options.Options.Create(_fileStorage), aiOptions, configuration, environment, client);
         return reader.ReadAsync(TestContext.Current.CancellationToken);
     }
 }
