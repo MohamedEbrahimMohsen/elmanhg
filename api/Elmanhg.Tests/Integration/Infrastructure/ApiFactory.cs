@@ -198,6 +198,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Avatar:ContextFieldMaxLength"] = "8000",
             ["Avatar:AdminConversationsMaxPageSize"] = "100",
             ["Avatar:ConversationSearchMaxLength"] = "200",
+            ["Avatar:StudentConversationsMaxPageSize"] = "50",
             ["Payments:Provider"] = "Fake",
             ["Payments:FakeCheckoutPath"] = "/student/fake-checkout",
             ["Payments:AllowFakePayments"] = "true",

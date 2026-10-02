@@ -214,6 +214,7 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | `Avatar__ContextFieldMaxLength` | `8000` | 500 to 8000; keeps the context bundle under `ELMANHG_AI_CHAT_MAX_CONTEXT_CHARS` |
 | `Avatar__AdminConversationsMaxPageSize` | `100` | 1 to 200 |
 | `Avatar__ConversationSearchMaxLength` | `200` | 1 to 500 |
+| `Avatar__StudentConversationsMaxPageSize` | `50` | 1 to 100 |
 
 The daily message limits (Free 5, Base 50) are `Subscriptions__FreeDailyAvatarMessages` and `Subscriptions__BaseDailyAvatarMessages`, the defaults of runtime settings an admin can change on the Configuration page ([configuration.md](configuration.md)).
 

@@ -30,7 +30,10 @@ import type {
 import type {
   AvatarReplyResult,
   AvatarStatusResult,
-  SendAvatarMessageCommand
+  GetMyAvatarConversationsParams,
+  PageDataOfStudentAvatarConversationResult,
+  SendAvatarMessageCommand,
+  StudentAvatarConversationDetailResult
 } from '../model';
 
 import { http } from '../../../lib/http';
@@ -281,4 +284,370 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getSendAvatarMessageMutationOptions(options), queryClient);
+    }
+    export const getGetMyAvatarConversationsUrl = (params?: GetMyAvatarConversationsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/avatar/my-conversations?${stringifiedParams}` : `/api/avatar/my-conversations`
+}
+
+export const getMyAvatarConversations = async (params?: GetMyAvatarConversationsParams, options?: Parameters<typeof http>[1]): Promise<PageDataOfStudentAvatarConversationResult> => {
+
+  return http<PageDataOfStudentAvatarConversationResult>(getGetMyAvatarConversationsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyAvatarConversationsQueryKey = (params?: GetMyAvatarConversationsParams,) => {
+    return [
+    `/api/avatar/my-conversations`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetMyAvatarConversationsQueryOptions = <TData = Awaited<ReturnType<typeof getMyAvatarConversations>>, TError = unknown>(params?: GetMyAvatarConversationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversations>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyAvatarConversationsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyAvatarConversations>>> = ({ signal }) => getMyAvatarConversations(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMyAvatarConversationsQueryResult = NonNullable<Awaited<ReturnType<typeof getMyAvatarConversations>>>
+export type GetMyAvatarConversationsQueryError = unknown
+
+
+export function useGetMyAvatarConversations<TData = Awaited<ReturnType<typeof getMyAvatarConversations>>, TError = unknown>(
+ params: undefined |  GetMyAvatarConversationsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversations>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyAvatarConversations>>,
+          TError,
+          Awaited<ReturnType<typeof getMyAvatarConversations>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyAvatarConversations<TData = Awaited<ReturnType<typeof getMyAvatarConversations>>, TError = unknown>(
+ params?: GetMyAvatarConversationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversations>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyAvatarConversations>>,
+          TError,
+          Awaited<ReturnType<typeof getMyAvatarConversations>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyAvatarConversations<TData = Awaited<ReturnType<typeof getMyAvatarConversations>>, TError = unknown>(
+ params?: GetMyAvatarConversationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversations>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetMyAvatarConversations<TData = Awaited<ReturnType<typeof getMyAvatarConversations>>, TError = unknown>(
+ params?: GetMyAvatarConversationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversations>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMyAvatarConversationsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetMyAvatarConversationsSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getMyAvatarConversations>>, TError = unknown>(params?: GetMyAvatarConversationsParams, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversations>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyAvatarConversationsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyAvatarConversations>>> = ({ signal }) => getMyAvatarConversations(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetMyAvatarConversationsSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getMyAvatarConversations>>>
+export type GetMyAvatarConversationsSuspenseQueryError = unknown
+
+
+export function useGetMyAvatarConversationsSuspense<TData = Awaited<ReturnType<typeof getMyAvatarConversations>>, TError = unknown>(
+ params: undefined |  GetMyAvatarConversationsParams, options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversations>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyAvatarConversationsSuspense<TData = Awaited<ReturnType<typeof getMyAvatarConversations>>, TError = unknown>(
+ params?: GetMyAvatarConversationsParams, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversations>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyAvatarConversationsSuspense<TData = Awaited<ReturnType<typeof getMyAvatarConversations>>, TError = unknown>(
+ params?: GetMyAvatarConversationsParams, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversations>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetMyAvatarConversationsSuspense<TData = Awaited<ReturnType<typeof getMyAvatarConversations>>, TError = unknown>(
+ params?: GetMyAvatarConversationsParams, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversations>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMyAvatarConversationsSuspenseQueryOptions(params,options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetMyAvatarConversationUrl = (conversationId: string,) => {
+
+
+
+
+  return `/api/avatar/my-conversations/${conversationId}`
+}
+
+export const getMyAvatarConversation = async (conversationId: string, options?: Parameters<typeof http>[1]): Promise<StudentAvatarConversationDetailResult> => {
+
+  return http<StudentAvatarConversationDetailResult>(getGetMyAvatarConversationUrl(conversationId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyAvatarConversationQueryKey = (conversationId: string,) => {
+    return [
+    `/api/avatar/my-conversations/${conversationId}`
+    ] as const;
+    }
+
+
+export const getGetMyAvatarConversationQueryOptions = <TData = Awaited<ReturnType<typeof getMyAvatarConversation>>, TError = unknown>(conversationId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversation>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyAvatarConversationQueryKey(conversationId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyAvatarConversation>>> = ({ signal }) => getMyAvatarConversation(conversationId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: conversationId !== null && conversationId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversation>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMyAvatarConversationQueryResult = NonNullable<Awaited<ReturnType<typeof getMyAvatarConversation>>>
+export type GetMyAvatarConversationQueryError = unknown
+
+
+export function useGetMyAvatarConversation<TData = Awaited<ReturnType<typeof getMyAvatarConversation>>, TError = unknown>(
+ conversationId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversation>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyAvatarConversation>>,
+          TError,
+          Awaited<ReturnType<typeof getMyAvatarConversation>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyAvatarConversation<TData = Awaited<ReturnType<typeof getMyAvatarConversation>>, TError = unknown>(
+ conversationId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversation>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyAvatarConversation>>,
+          TError,
+          Awaited<ReturnType<typeof getMyAvatarConversation>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyAvatarConversation<TData = Awaited<ReturnType<typeof getMyAvatarConversation>>, TError = unknown>(
+ conversationId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversation>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetMyAvatarConversation<TData = Awaited<ReturnType<typeof getMyAvatarConversation>>, TError = unknown>(
+ conversationId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversation>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMyAvatarConversationQueryOptions(conversationId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetMyAvatarConversationSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof getMyAvatarConversation>>, TError = unknown>(conversationId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversation>>, TError, TData>>, request?: SecondParameter<typeof http>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyAvatarConversationQueryKey(conversationId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyAvatarConversation>>> = ({ signal }) => getMyAvatarConversation(conversationId, { signal, ...requestOptions });
+
+
+
+
+
+   return  queryOptionsBuilder({ queryKey, ...queryOptions, queryFn: queryOptions?.queryFn ?? queryFn}) as UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversation>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> } & { throwOnError?: ((this: never, error: TError) => boolean) & { readonly __inferenceOnly: never } }
+}
+
+export type GetMyAvatarConversationSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof getMyAvatarConversation>>>
+export type GetMyAvatarConversationSuspenseQueryError = unknown
+
+
+export function useGetMyAvatarConversationSuspense<TData = Awaited<ReturnType<typeof getMyAvatarConversation>>, TError = unknown>(
+ conversationId: string, options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversation>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyAvatarConversationSuspense<TData = Awaited<ReturnType<typeof getMyAvatarConversation>>, TError = unknown>(
+ conversationId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversation>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyAvatarConversationSuspense<TData = Awaited<ReturnType<typeof getMyAvatarConversation>>, TError = unknown>(
+ conversationId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversation>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetMyAvatarConversationSuspense<TData = Awaited<ReturnType<typeof getMyAvatarConversation>>, TError = unknown>(
+ conversationId: string, options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof getMyAvatarConversation>>, TError, TData>>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMyAvatarConversationSuspenseQueryOptions(conversationId,options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getDeleteMyAvatarConversationUrl = (conversationId: string,) => {
+
+
+
+
+  return `/api/avatar/my-conversations/${conversationId}`
+}
+
+export const deleteMyAvatarConversation = async (conversationId: string, options?: Parameters<typeof http>[1]): Promise<void> => {
+
+  return http<void>(getDeleteMyAvatarConversationUrl(conversationId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteMyAvatarConversationMutationKey = () => ['deleteMyAvatarConversation'] as const;
+
+export const getDeleteMyAvatarConversationMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteMyAvatarConversation>>, TError,DeleteMyAvatarConversationMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteMyAvatarConversation>>, TError,DeleteMyAvatarConversationMutationVariables, TContext> => {
+
+const mutationKey = getDeleteMyAvatarConversationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteMyAvatarConversation>>, DeleteMyAvatarConversationMutationVariables> = (props) => {
+          const {conversationId} = props ?? {};
+
+          return  deleteMyAvatarConversation(conversationId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteMyAvatarConversationMutationResult = NonNullable<Awaited<ReturnType<typeof deleteMyAvatarConversation>>>
+
+    export type DeleteMyAvatarConversationMutationError = unknown
+    export type DeleteMyAvatarConversationMutationVariables = {conversationId: string}
+
+    export const useDeleteMyAvatarConversation = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteMyAvatarConversation>>, TError,DeleteMyAvatarConversationMutationVariables, TContext>, request?: SecondParameter<typeof http>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteMyAvatarConversation>>,
+        TError,
+        DeleteMyAvatarConversationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteMyAvatarConversationMutationOptions(options), queryClient);
     }

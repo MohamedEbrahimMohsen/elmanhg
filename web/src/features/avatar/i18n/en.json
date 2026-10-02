@@ -16,7 +16,9 @@
     "statusError": "The assistant could not load.",
     "retry": "Retry",
     "typing": "The assistant is typing…",
-    "messages": "Conversation"
+    "messages": "Conversation",
+    "history": "Past chats",
+    "backToChat": "Back to the chat"
   },
   "greeting": {
     "lesson": "Hi! I am your assistant for \"{title}\". Ask me about any part of the explanation or the objectives.",
@@ -29,7 +31,8 @@
     "dailyLimitFree": "You have reached the free plan's daily limit ({limit} messages). Subscribe to the Base plan for a higher limit.",
     "subscribe": "Subscribe",
     "unavailable": "The assistant is not available right now. Try again in a moment.",
-    "generic": "Your message could not be sent. Try again."
+    "generic": "Your message could not be sent. Try again.",
+    "conversationGone": "This chat no longer exists. Your next message starts a new chat."
   },
   "composer": {
     "label": "Your question",
@@ -48,5 +51,32 @@
     }
   },
   "you": "You",
-  "assistant": "Assistant"
+  "assistant": "Assistant",
+  "history": {
+    "title": "Past chats",
+    "loading": "Loading your chats…",
+    "error": "Your chats could not load.",
+    "empty": "You have no past chats yet.",
+    "general": "General",
+    "meta": "{entryPoint} · {date}",
+    "entryPoint": {
+      "Lesson": "Lesson",
+      "QuizQuestion": "Practice question",
+      "ExamReview": "Exam review",
+      "Global": "General"
+    },
+    "delete": "Delete chat: {title}",
+    "openFailed": "The chat could not open. Try again."
+  },
+  "deleteDialog": {
+    "title": "Delete this chat?",
+    "body": "The chat and all its messages will be deleted for good. Today's message count does not change.",
+    "cancel": "Cancel",
+    "confirm": "Delete"
+  },
+  "toast": {
+    "deleted": "The chat was deleted.",
+    "deleteFailed": "The chat could not be deleted. Try again.",
+    "deleteDisabled": "Deleting chats is not available right now."
+  }
 }

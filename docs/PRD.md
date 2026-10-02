@@ -327,6 +327,14 @@ An in-app assistant for students, scoped to the platform's content.
 - Rate-limited per student per day: Free 5, Base 50 (defaults from `Subscriptions` configuration; an admin can change them at runtime, §10.6). A message counts once the assistant has replied; the day follows `Subscriptions:DailyQuotaTimeZone`.
 - Model and prompt versions, tokens and cost are recorded on every reply for later evaluation, with the context bundle and search results that were sent (`docs/avatar.md`, Conversation log).
 
+### 9.4 History and deletion
+
+- A student sees their own past assistant chats inside the assistant panel («محادثاتي السابقة»), newest first, each with its lesson or subject, date and first question. They can reopen a chat and keep chatting in it.
+- A student can delete a chat after a confirmation. Deleting erases its messages and their training copies (§13), hides it from every view (the student's history, the admin view), and is audit-logged without any message text. Deleting never gives back today's messages: the daily limit is unchanged.
+- During an exam in progress the history is refused, like the assistant itself (§9.2).
+- Admins can turn deletion off (`features.studentsCanDeleteAvatarChats`, on by default, §10.6); students then still see and continue their chats.
+- Chats are kept until the student deletes them; there is no automatic purge. See `docs/avatar.md`, Student history.
+
 ---
 
 ## 10. Admin experience
@@ -392,7 +400,7 @@ Admins see the students' Avatar conversations, most recent first, with search by
 Admins see everything configurable on one page, `#/admin/configuration` (nav «الإعدادات»), policy `Configuration.Manage`.
 
 - **Runtime settings and feature flags.** Stored in the database, cached for at most `RuntimeSettings:CacheSeconds` (30 s by default) and cleared on every change, so a change takes effect without a restart. Each setting has a typed definition (type, range or allowed values, Arabic and English label and description); a value outside it is refused. The default is the deployment value from configuration; an admin can override it and reset it back to the default. Every change and reset is audit-logged with the old and new value.
-- **v1 settings:** the unit-exam lesson-open gate (feature flag); the Ask a Teacher reply time and the two reminder hours (first < second < reply time); the out-of-app teacher reminder (on/off, channels, stage); the Ask a Teacher reply calendar (skip weekends, weekend days, time zone) and its exam periods (§12.3); the Free, Base and Ask a Teacher quotas; the essay and math-step review thresholds; the student photo size and the teacher voice size and length limits; the payment-log refunds flag (feature flag, off by default).
+- **v1 settings:** the unit-exam lesson-open gate (feature flag); the Ask a Teacher reply time and the two reminder hours (first < second < reply time); the out-of-app teacher reminder (on/off, channels, stage); the Ask a Teacher reply calendar (skip weekends, weekend days, time zone) and its exam periods (§12.3); the Free, Base and Ask a Teacher quotas; the essay and math-step review thresholds; the student photo size and the teacher voice size and length limits; the payment-log refunds flag (feature flag, off by default); students can delete assistant chats (feature flag, on by default).
 - **Read-only infrastructure:** the environment; the provider of each integration and whether it is fake, local or real; the AI service models; safety switches such as `Payments:AllowFakePayments` (never editable from the UI); and whether each secret is set. Secret values are never returned.
 
 The full list, the reasons some values are not runtime-editable, and how a story adds a setting are in [configuration.md](configuration.md).
@@ -465,7 +473,7 @@ Everything below is written to append-only tables, keyed by anonymised student i
 | AI grading (v2) | Student answer, rubric, AI score + justification, teacher override (if any) |
 | Attempts | Every answer, score, time taken — for difficulty calibration |
 
-The anonymised id is an HMAC-SHA256 of the student id under a server secret. Admin test-mode sessions are not recorded. AI grades are recorded when the grader completes (`EssayGradeTrainingRecords`); a teacher review adds a `TeacherReviewed` row (#128). Tables, triggers and the privacy checklist: `docs/training-data.md`.
+The anonymised id is an HMAC-SHA256 of the student id under a server secret. Admin test-mode sessions are not recorded. When a student deletes an assistant chat (§9.4), its Avatar training records are erased with it through a single migration-owned database function; the other sources have no erasure path. AI grades are recorded when the grader completes (`EssayGradeTrainingRecords`); a teacher review adds a `TeacherReviewed` row (#128). Tables, triggers and the privacy checklist: `docs/training-data.md`.
 
 Exports (admin only): JSONL per source, date-ranged, optionally per subject, with PII stripped (contact data masked in texts, raw source ids never exported). An export is prepared in the background, downloaded only by an admin through the audited API, and its file is deleted after a configurable retention (7 days by default).
 
