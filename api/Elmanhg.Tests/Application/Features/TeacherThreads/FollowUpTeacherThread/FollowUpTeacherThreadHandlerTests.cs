@@ -5,6 +5,7 @@ using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.TeacherThreads.FollowUpTeacherThread;
 using Elmanhg.Domain.TeacherThreads;
 using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -31,7 +32,7 @@ public sealed class FollowUpTeacherThreadHandlerTests
         _timeProvider.GetUtcNow().Returns(Now);
         _teacherThreadRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<TeacherThread, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<TeacherThread>, IQueryable<TeacherThread>>?>(), Arg.Any<Func<IQueryable<TeacherThread>, IOrderedQueryable<TeacherThread>>?>(), Arg.Any<bool>())
             .Returns(call => _threads.FirstOrDefault(call.Arg<Expression<Func<TeacherThread, bool>>>().Compile()));
-        _handler = new FollowUpTeacherThreadHandler(_teacherThreadRepository, Options.Create(new SubscriptionsOptions { AskTeacherReplySlaHours = 24 }), _timeProvider, _currentUserService);
+        _handler = new FollowUpTeacherThreadHandler(_teacherThreadRepository, new FakeRuntimeSettings(subscriptions: new SubscriptionsOptions { AskTeacherReplySlaHours = 24 }), _timeProvider, _currentUserService);
     }
 
     [Fact]

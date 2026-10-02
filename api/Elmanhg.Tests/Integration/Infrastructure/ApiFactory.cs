@@ -20,7 +20,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     private const string PostgresImage = "pgvector/pgvector:pg17";
     private const string TestingEnvironment = "Testing";
     // Signs nothing outside this in-memory host; the JwtBearer options delegate only requires it to be non-empty.
-    private const string TestJwtKey = "elmanhg-tests-signing-key-not-a-secret-0123456789";
+    public const string TestJwtKey = "elmanhg-tests-signing-key-not-a-secret-0123456789";
     // Keys only the HMAC of OTP codes inside this in-memory host; codes are read back from OtpOutbox.
     private const string TestOtpSecret = "elmanhg-tests-otp-secret";
 
@@ -69,6 +69,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("TrainingExports:RetentionSweepEnabled", "false");
         // The sweep would race tests that record SLA events through the mediator.
         builder.UseSetting("AskTeacher:SlaSweepEnabled", "false");
+        builder.UseSetting("RuntimeSettings:CacheSeconds", "30");
         builder.UseSetting("TrainingData:StudentIdHashKey", TestStudentIdHashKey);
         // Parallel tests share this host and the "unknown" client partition; RateLimiting tests set their own limits.
         builder.UseSetting("RateLimiting:AuthRefreshPermitLimit", "100000");
@@ -142,6 +143,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Sessions:DragDropPlacementsMaxCount"] = "20",
             ["Sessions:DragDropPlacedItemsMaxCount"] = "30",
             ["AiService:MathCheckTimeoutSeconds"] = "15",
+            ["AiService:ConfigurationTimeoutSeconds"] = "5",
             ["Mastery:CorrectThreshold"] = "0.8",
             ["Progress:StreakTimeZone"] = "Africa/Cairo",
             ["Progress:StreakMaxDays"] = "365",

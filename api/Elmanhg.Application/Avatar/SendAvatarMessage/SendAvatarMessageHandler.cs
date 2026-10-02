@@ -5,6 +5,7 @@ using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.RichText;
+using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.Avatar;
 using Elmanhg.Domain.Lessons;
@@ -18,7 +19,7 @@ using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.Avatar.SendAvatarMessage;
 
-public sealed partial class SendAvatarMessageHandler(ISessionRepository sessionRepository, ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IQuestionRepository questionRepository, ISubscriptionRepository subscriptionRepository, IAvatarMessageUsageRepository avatarMessageUsageRepository, IAvatarConversationRepository avatarConversationRepository, IRichTextExtractor richTextExtractor, IAiServiceClient aiServiceClient, ISender sender, IOptions<AvatarOptions> avatarOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, IOptions<ExamsOptions> examsOptions, IOptions<ContentRetrievalOptions> contentRetrievalOptions, TimeProvider timeProvider, ICurrentUserService currentUserService) : IRequestHandler<SendAvatarMessageCommand, AvatarReplyResult>
+public sealed partial class SendAvatarMessageHandler(ISessionRepository sessionRepository, ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IQuestionRepository questionRepository, ISubscriptionRepository subscriptionRepository, IAvatarMessageUsageRepository avatarMessageUsageRepository, IAvatarConversationRepository avatarConversationRepository, IRichTextExtractor richTextExtractor, IAiServiceClient aiServiceClient, ISender sender, IOptions<AvatarOptions> avatarOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, IOptions<ExamsOptions> examsOptions, IOptions<ContentRetrievalOptions> contentRetrievalOptions, TimeProvider timeProvider, ICurrentUserService currentUserService, IRuntimeSettings runtimeSettings) : IRequestHandler<SendAvatarMessageCommand, AvatarReplyResult>
 {
     public async Task<AvatarReplyResult> Handle(SendAvatarMessageCommand request, CancellationToken cancellationToken)
     {
@@ -30,7 +31,7 @@ public sealed partial class SendAvatarMessageHandler(ISessionRepository sessionR
         var userId = currentUserService.UserId.Value;
         var now = timeProvider.GetUtcNow();
         await AvatarGate.EnsureNoExamInProgressAsync(userId, sessionRepository, examsOptions.Value, now, cancellationToken).ConfigureAwait(false);
-        var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, userId, subscriptionsOptions.Value, now, cancellationToken).ConfigureAwait(false);
+        var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, runtimeSettings, userId, subscriptionsOptions.Value, now, cancellationToken).ConfigureAwait(false);
         var used = await AvatarGate.EnsureMessageAvailableAsync(entitlement, userId, avatarMessageUsageRepository, subscriptionsOptions.Value, now, cancellationToken).ConfigureAwait(false);
         var conversation = await LoadConversationAsync(request, userId, cancellationToken).ConfigureAwait(false);
         var context = await LoadContextAsync(request, userId, entitlement, cancellationToken).ConfigureAwait(false);

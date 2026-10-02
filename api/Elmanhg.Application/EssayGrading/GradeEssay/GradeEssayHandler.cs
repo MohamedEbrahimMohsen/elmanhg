@@ -4,6 +4,8 @@ using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.RichText;
+using Elmanhg.Application.Shared.RuntimeSettings;
+using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
@@ -14,7 +16,7 @@ using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.EssayGrading.GradeEssay;
 
-public sealed class GradeEssayHandler(IEssayGradeRepository essayGradeRepository, IQuestionRepository questionRepository, ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IRichTextExtractor richTextExtractor, IAiEssayGradingClient essayGradingClient, IOptions<EssayGradingOptions> essayGradingOptions, TimeProvider timeProvider) : IRequestHandler<GradeEssayCommand>
+public sealed class GradeEssayHandler(IEssayGradeRepository essayGradeRepository, IQuestionRepository questionRepository, ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IRichTextExtractor richTextExtractor, IAiEssayGradingClient essayGradingClient, IOptions<EssayGradingOptions> essayGradingOptions, TimeProvider timeProvider, IRuntimeSettings runtimeSettings) : IRequestHandler<GradeEssayCommand>
 {
     public async Task Handle(GradeEssayCommand request, CancellationToken cancellationToken)
     {
@@ -34,7 +36,7 @@ public sealed class GradeEssayHandler(IEssayGradeRepository essayGradeRepository
         var aiRequest = EssayGradingRequestFactory.Create(snapshot.Stem, snapshot.GradingSpec?.ToJsonString() ?? "{}", grade.ReadAnswerText(), context, richTextExtractor, options.ContextFieldMaxLength);
         var result = await essayGradingClient.GradeAsync(aiRequest, cancellationToken).ConfigureAwait(false);
         var questionGrade = revision.GradeEssay(EssayAssessments.Awards(result));
-        grade.Complete(EssayAssessments.From(aiRequest, result), questionGrade, options.ReviewConfidenceThreshold, timeProvider.GetUtcNow());
+        grade.Complete(EssayAssessments.From(aiRequest, result), questionGrade, await runtimeSettings.GetAsync(GradingRuntimeSettings.EssayReviewConfidenceThreshold, cancellationToken).ConfigureAwait(false), timeProvider.GetUtcNow());
 
         await essayGradeRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }

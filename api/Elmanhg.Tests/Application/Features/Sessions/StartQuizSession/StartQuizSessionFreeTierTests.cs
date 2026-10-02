@@ -14,6 +14,7 @@ using Elmanhg.Domain.Sessions.Selection;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Tests.Application.Features.Subscriptions;
 using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -51,7 +52,7 @@ public sealed class StartQuizSessionFreeTierTests
         SessionRepositoryStub.StubFind(_sessionRepository);
         SubscriptionRepositoryStub.Stub(_subscriptionRepository);
         StubUsedToday(0);
-        _handler = new StartQuizSessionHandler(_sessionRepository, _lessonRepository, _questionRepository, _subscriptionRepository, Options.Create(new SessionsOptions()), Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), new Random(42), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), Substitute.For<IFileStorage>());
+        _handler = new StartQuizSessionHandler(_sessionRepository, _lessonRepository, _questionRepository, _subscriptionRepository, Options.Create(new SessionsOptions()), Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), new Random(42), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), Substitute.For<IFileStorage>(), new FakeRuntimeSettings());
     }
 
     private Guid LessonId => _builder.Questions.Lesson.Id;

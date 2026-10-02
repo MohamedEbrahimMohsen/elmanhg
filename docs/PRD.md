@@ -51,7 +51,7 @@ Elmanhg is an Arabic-first web platform for Thanaweya Amma students. Content is 
 
 ### 3.3 Admin
 - Platform owner / content operations.
-- Authors all content, manages users and teachers, sees all dashboards and finances.
+- Authors all content, manages users and teachers, sees all dashboards and finances, and changes runtime settings on the Configuration page (§10.6).
 
 ---
 
@@ -176,8 +176,8 @@ Answer shapes and the exact grading rules (normalisation, numeric parsing, round
 - Output is structured JSON: per-criterion score, total, one-paragraph Arabic justification, confidence.
 - Low-confidence grades (below a configurable threshold) are queued for teacher review before the score is final. The student sees "قيد المراجعة" in the meantime.
 - A teacher may override any AI grade. Overrides are training data (§13).
-- Decided (#118): the threshold is `EssayGrading:ReviewConfidenceThreshold` (default 0.7); a grade the AI cannot produce after `EssayGrading:MaxAttempts` also goes to teacher review; grading is a background job with retries; the admin test grader grades essays synchronously ([essay-grading.md](essay-grading.md)).
-- Decided (#123): math step grading returns 0–2 points per model-solution step with a justification each, a one-paragraph justification and a confidence; the threshold is `MathStepGrading:ReviewConfidenceThreshold` (default 0.7); grading and failed final-answer checks are retried in the background (`MathStepGrading:MaxAttempts`, 4) before going to teacher review; the admin test grader grades steps synchronously ([math-step-grading.md](math-step-grading.md)).
+- Decided (#118): the threshold is `EssayGrading:ReviewConfidenceThreshold` (default 0.7); a grade the AI cannot produce after `EssayGrading:MaxAttempts` also goes to teacher review; grading is a background job with retries; the admin test grader grades essays synchronously ([essay-grading.md](essay-grading.md)). Admins can change the threshold at runtime (§10.6).
+- Decided (#123): math step grading returns 0–2 points per model-solution step with a justification each, a one-paragraph justification and a confidence; the threshold is `MathStepGrading:ReviewConfidenceThreshold` (default 0.7); grading and failed final-answer checks are retried in the background (`MathStepGrading:MaxAttempts`, 4) before going to teacher review; the admin test grader grades steps synchronously ([math-step-grading.md](math-step-grading.md)). Admins can change the threshold at runtime (§10.6).
 - Decided (#128): teachers accept or override the AI grades that land in review (§8.3); a grade the AI applied directly is final and is not re-opened, because attempts are append-only. Accept and override both write the attempt with `graded_by = Teacher` ([grade-review.md](grade-review.md)).
 
 ### 6.2 Answer normalisation (Arabic)
@@ -240,7 +240,7 @@ The headline counter is shown on Home as "متبقّي لك X سؤال من 100,
 
 ### 7.4 Unit exam
 
-- Available once the student has opened every lesson in the unit (configurable; default: no gate).
+- Available once the student has opened every lesson in the unit (a runtime feature flag on the Configuration page, §10.6; default: no gate).
 - Generated from the unit's **exam blueprint** (§10.2): fixed counts per question type and optionally per difficulty.
 - Selection prefers questions **not** already mastered, then random. Questions are drawn across all lessons in the unit.
 - Optional time limit set in the blueprint.
@@ -324,7 +324,7 @@ An in-app assistant for students, scoped to the platform's content.
 
 ### 9.3 Limits
 
-- Rate-limited per student per day: Free 5, Base 50 (`Subscriptions` configuration). A message counts once the assistant has replied; the day follows `Subscriptions:DailyQuotaTimeZone`.
+- Rate-limited per student per day: Free 5, Base 50 (defaults from `Subscriptions` configuration; an admin can change them at runtime, §10.6). A message counts once the assistant has replied; the day follows `Subscriptions:DailyQuotaTimeZone`.
 - Model and prompt versions, tokens and cost are recorded on every reply for later evaluation, with the context bundle and search results that were sent (`docs/avatar.md`, Conversation log).
 
 ---
@@ -387,6 +387,16 @@ Every chart except Content is filterable by date range (Cairo days); Content is 
 
 Admins see the students' Avatar conversations, most recent first, with search by message text or student name and filters by entry point and date. Each conversation shows every message and, per reply, the model, prompt version, tokens, cost, citations and the context sent. See `docs/avatar.md`.
 
+### 10.6 Configuration
+
+Admins see everything configurable on one page, `#/admin/configuration` (nav «الإعدادات»), policy `Configuration.Manage`.
+
+- **Runtime settings and feature flags.** Stored in the database, cached for at most `RuntimeSettings:CacheSeconds` (30 s by default) and cleared on every change, so a change takes effect without a restart. Each setting has a typed definition (type, range or allowed values, Arabic and English label and description); a value outside it is refused. The default is the deployment value from configuration; an admin can override it and reset it back to the default. Every change and reset is audit-logged with the old and new value.
+- **v1 settings:** the unit-exam lesson-open gate (feature flag); the Ask a Teacher reply time and the two reminder hours (first < second < reply time); the Free, Base and Ask a Teacher quotas; the essay and math-step review thresholds; the student photo size and the teacher voice size and length limits.
+- **Read-only infrastructure:** the environment; the provider of each integration and whether it is fake, local or real; the AI service models; safety switches such as `Payments:AllowFakePayments` (never editable from the UI); and whether each secret is set. Secret values are never returned.
+
+The full list, the reasons some values are not runtime-editable, and how a story adds a setting are in [configuration.md](configuration.md).
+
 ---
 
 ## 11. Subscriptions and payments
@@ -399,7 +409,7 @@ Admins see the students' Avatar conversations, most recent first, with search by
 | Base (monthly / termly / yearly) | Unlimited quizzes and exams; full progress; Avatar with higher limit |
 | Ask a Teacher (add-on, monthly) | Requires Base. N questions/month (configurable, e.g. 20) with 24-hour reply SLA |
 
-Prices, billing periods and quotas are configuration (`Subscriptions` section, see `docs/subscriptions.md`), not code. Base is sold monthly (1 month), termly (4 months) and yearly (12 months); Ask a Teacher monthly only. Shipped defaults: Free 10 quiz questions/day, 5 Avatar messages/day, first lesson of each unit; Base 50 Avatar messages/day; Ask a Teacher 20 questions/month with a 24-hour SLA. Prices have no default and must be configured; money is stored in minor units (piastres) with an ISO 4217 currency.
+Prices, billing periods and quotas are configuration (`Subscriptions` section, see `docs/subscriptions.md`), not code. Quotas (not prices) can be changed at runtime by an admin (§10.6); the configured values are the defaults. Base is sold monthly (1 month), termly (4 months) and yearly (12 months); Ask a Teacher monthly only. Shipped defaults: Free 10 quiz questions/day, 5 Avatar messages/day, first lesson of each unit; Base 50 Avatar messages/day; Ask a Teacher 20 questions/month with a 24-hour SLA. Prices have no default and must be configured; money is stored in minor units (piastres) with an ISO 4217 currency.
 
 ### 11.2 Paymob integration
 
@@ -422,7 +432,7 @@ Prices, billing periods and quotas are configuration (`Subscriptions` section, s
 1. Student (with add-on) opens "اسأل معلّم" from a lesson or question, or the quiz attempt being asked about. Context (subject/unit/lesson/question) is attached automatically; student writes text and may attach an image (e.g. a photo of their work).
    Each new question counts against the monthly quota, which resets on the 1st of each calendar month in `DailyQuotaTimeZone` (Africa/Cairo); a follow-up does not count. The student may attach one photo (PNG, JPG or WEBP). Photos are private: only the owning student, a teacher assigned to the thread's subject, or an admin can open one (`docs/ask-teacher.md`).
 2. The thread is routed to the queue of teachers assigned to that subject. First teacher to claim it owns it.
-3. SLA clock starts at submission. Reminders to the teacher at 12h and 20h; admin alert on breach. A follow-up starts a new 24-hour window; the clock never pauses.
+3. SLA clock starts at submission. Reminders to the teacher at 12h and 20h by default; the reply time and both reminder hours are runtime settings (§10.6); admin alert on breach. A follow-up starts a new 24-hour window; the clock never pauses.
 4. Teacher replies with **text or voice**. Voice is recorded in-browser, stored, and transcribed to Arabic text automatically. The teacher sees the transcript and can correct it before sending.
 5. Student receives the reply (audio player + text). Student may send **one** follow-up on the same thread; the teacher replies once more; the thread then closes. Anything further is a new question against the monthly quota.
 6. Student rates the answer (1–5). Ratings are visible to admin.
@@ -544,6 +554,7 @@ AuditLog(id, actor_id, actor_name, actor_role, action, entity, entity_id, outcom
 | Dashboards / finance | – | own stats only | ✓ |
 | Payment log and refunds | – | – | ✓ |
 | Manage users / teachers | – | – | ✓ |
+| Manage configuration (runtime settings, feature flags) | – | – | ✓ |
 | View audit log | – | – | ✓ |
 | View Avatar conversations | – | – | ✓ |
 | Export training data | – | – | ✓ |
@@ -564,7 +575,7 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 8. Exams are generated from blueprints; a blueprint cannot be saved with a shortfall.
 9. Exam retakes unlimited; best score displayed; all kept.
 10. Avatar never reveals answers during an in-progress exam.
-11. Ask a Teacher: 24h SLA from submission (a follow-up opens a new 24h window); one follow-up per thread; voice always transcribed; training record is text only.
+11. Ask a Teacher: 24h SLA by default (admin-configurable, §10.6) from submission (a follow-up opens a new 24h window); one follow-up per thread; voice always transcribed; training record is text only.
 12. Subscription entitlement changes only through Paymob-verified events: HMAC-verified webhooks, or Paymob's response to an admin refund; or through an admin's complimentary grant (§10.4). The client never sets entitlement.
 13. Every content change and validation decision is audit-logged.
 

@@ -11,6 +11,7 @@ using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Domain.Units;
 using Elmanhg.Tests.Application.Features.Subscriptions;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -47,7 +48,7 @@ public sealed class GetStudentUnitHandlerTests
         _sessionRepository.GetBestExamScoresAsync(_studentId, Arg.Any<CancellationToken>()).Returns([]);
         _timeProvider.GetUtcNow().Returns(Now);
         SubscriptionRepositoryStub.Stub(_subscriptionRepository, SubscriptionRepositoryStub.EntitledBase(_studentId, Now));
-        _handler = new GetStudentUnitHandler(_unitRepository, _subjectRepository, _lessonRepository, _questionMasteryRepository, _sessionRepository, _subscriptionRepository, Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService);
+        _handler = new GetStudentUnitHandler(_unitRepository, _subjectRepository, _lessonRepository, _questionMasteryRepository, _sessionRepository, _subscriptionRepository, Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService, new FakeRuntimeSettings());
     }
 
     [Fact]

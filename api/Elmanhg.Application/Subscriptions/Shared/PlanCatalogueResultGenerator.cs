@@ -6,14 +6,14 @@ namespace Elmanhg.Application.Subscriptions.Shared;
 
 public static class PlanCatalogueResultGenerator
 {
-    public static PlanCatalogueResult Generate(SubscriptionsOptions options)
+    public static PlanCatalogueResult Generate(SubscriptionsOptions options, PlanLimits limits, int replySlaHours)
     {
-        var free = new FreePlanResult(options.FreeDailyQuizQuestions, options.FreeDailyAvatarMessages, options.FreeOpenLessonsPerUnit);
+        var free = new FreePlanResult(limits.FreeDailyQuizQuestions, limits.FreeDailyAvatarMessages, limits.FreeOpenLessonsPerUnit);
         var basePrices = options.BasePrices
             .OrderBy(x => x.Value.Months)
             .Select(x => new PlanPriceResult(x.Key, x.Value.Months, new Money(x.Value.AmountMinor, options.Currency)))
             .ToList();
-        var askTeacher = new AskTeacherPlanResult(options.AskTeacherMonthlyQuestions, options.AskTeacherReplySlaHours, [new PlanPriceResult(BillingPeriod.Monthly, SubscriptionsOptions.AskTeacherPeriodMonths, new Money(options.AskTeacherMonthlyPriceMinor, options.Currency))]);
-        return new PlanCatalogueResult(free, new BasePlanResult(options.BaseDailyAvatarMessages, basePrices), askTeacher);
+        var askTeacher = new AskTeacherPlanResult(limits.AskTeacherMonthlyQuestions, replySlaHours, [new PlanPriceResult(BillingPeriod.Monthly, SubscriptionsOptions.AskTeacherPeriodMonths, new Money(options.AskTeacherMonthlyPriceMinor, options.Currency))]);
+        return new PlanCatalogueResult(free, new BasePlanResult(limits.BaseDailyAvatarMessages, basePrices), askTeacher);
     }
 }

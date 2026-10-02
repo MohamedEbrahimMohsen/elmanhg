@@ -4,6 +4,7 @@ using Elmanhg.Application.Exams.GetUnitExamOverview;
 using Elmanhg.Application.Exams.Shared;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
@@ -13,6 +14,7 @@ using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Units;
 using Elmanhg.Tests.Application.Features.Sessions;
 using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -30,7 +32,7 @@ public sealed class GetUnitExamOverviewHandlerTests
     private readonly ISessionRepository _sessionRepository = Substitute.For<ISessionRepository>();
     private readonly ILessonRepository _lessonRepository = Substitute.For<ILessonRepository>();
     private readonly ILessonOpeningRepository _lessonOpeningRepository = Substitute.For<ILessonOpeningRepository>();
-    private readonly IOptions<ExamsOptions> _examsOptions = Options.Create(new ExamsOptions());
+    private readonly FakeRuntimeSettings _runtimeSettings = new();
     private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
     private readonly ExamSessionBuilder _builder = new();
     private readonly List<ExamBlueprint> _blueprints = [];
@@ -53,7 +55,7 @@ public sealed class GetUnitExamOverviewHandlerTests
             .Returns(call => _lessons.Where(call.Arg<Expression<Func<Lesson, bool>>>().Compile()).ToList());
         _lessonOpeningRepository.FindAsync(Arg.Any<Expression<Func<LessonOpening, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<LessonOpening>, IQueryable<LessonOpening>>?>(), Arg.Any<Func<IQueryable<LessonOpening>, IOrderedQueryable<LessonOpening>>?>(), Arg.Any<bool>())
             .Returns(call => _openings.Where(call.Arg<Expression<Func<LessonOpening, bool>>>().Compile()).ToList());
-        _handler = new GetUnitExamOverviewHandler(_unitRepository, _subjectRepository, _examBlueprintRepository, _questionRepository, _sessionRepository, _lessonRepository, _lessonOpeningRepository, _examsOptions, _currentUserService);
+        _handler = new GetUnitExamOverviewHandler(_unitRepository, _subjectRepository, _examBlueprintRepository, _questionRepository, _sessionRepository, _lessonRepository, _lessonOpeningRepository, _runtimeSettings, _currentUserService);
     }
 
     private CurriculumUnit Unit => _builder.Questions.Unit;
@@ -157,7 +159,7 @@ public sealed class GetUnitExamOverviewHandlerTests
     [Fact]
     public async Task Handle_GateOnLessonsUnopened_ReturnsUnopenedCount()
     {
-        _examsOptions.Value.RequireAllLessonsOpened = true;
+        _runtimeSettings.Set(FeatureFlagRuntimeSettings.ExamsRequireAllLessonsOpened, true);
         var lessons = AddPublishedLessons(3);
         _openings.Add(LessonOpening.Record(_builder.StudentId, lessons[0], ExamSessionBuilder.Now));
 
@@ -169,7 +171,7 @@ public sealed class GetUnitExamOverviewHandlerTests
     [Fact]
     public async Task Handle_GateOnAdmin_ReturnsZeroUnopened()
     {
-        _examsOptions.Value.RequireAllLessonsOpened = true;
+        _runtimeSettings.Set(FeatureFlagRuntimeSettings.ExamsRequireAllLessonsOpened, true);
         _currentUserService.GetClaim(ClaimTypes.Role).Returns(nameof(UserRole.Admin));
         AddPublishedLessons(2);
 

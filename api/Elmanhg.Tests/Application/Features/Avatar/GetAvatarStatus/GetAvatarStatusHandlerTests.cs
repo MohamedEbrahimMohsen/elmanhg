@@ -9,6 +9,7 @@ using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Tests.Application.Features.Subscriptions;
 using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -33,7 +34,7 @@ public sealed class GetAvatarStatusHandlerTests
         AvatarTestData.StubSessions(_sessionRepository);
         SubscriptionRepositoryStub.Stub(_subscriptionRepository);
         AvatarTestData.StubUsedToday(_usageRepository, 0);
-        _handler = new GetAvatarStatusHandler(_sessionRepository, _subscriptionRepository, _usageRepository, Options.Create(new AvatarOptions()), Options.Create(new SubscriptionsOptions()), Options.Create(new ExamsOptions()), _timeProvider, _currentUserService);
+        _handler = new GetAvatarStatusHandler(_sessionRepository, _subscriptionRepository, _usageRepository, Options.Create(new AvatarOptions()), Options.Create(new SubscriptionsOptions()), Options.Create(new ExamsOptions()), _timeProvider, _currentUserService, new FakeRuntimeSettings());
     }
 
     [Fact]

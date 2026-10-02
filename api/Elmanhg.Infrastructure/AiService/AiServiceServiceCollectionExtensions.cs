@@ -82,6 +82,20 @@ public static class AiServiceServiceCollectionExtensions
                 resilience.CircuitBreaker.SamplingDuration = timeout * 2;
                 resilience.Retry.DisableForUnsafeHttpMethods();
             });
+        services.AddHttpClient<HttpAiConfigurationClient>((serviceProvider, client) =>
+            {
+                client.BaseAddress = new Uri(Options(serviceProvider).BaseUrl.TrimEnd('/') + "/");
+                client.Timeout = Timeout.InfiniteTimeSpan;
+            })
+            .AddStandardResilienceHandler()
+            .Configure((resilience, serviceProvider) =>
+            {
+                var timeout = TimeSpan.FromSeconds(Options(serviceProvider).ConfigurationTimeoutSeconds);
+                resilience.AttemptTimeout.Timeout = timeout;
+                resilience.TotalRequestTimeout.Timeout = timeout;
+                resilience.CircuitBreaker.SamplingDuration = timeout * 2;
+                resilience.Retry.DisableForUnsafeHttpMethods();
+            });
         services.AddScoped<FakeAiServiceClient>();
         services.AddScoped<FakeAiTranscriptionClient>();
         services.AddScoped<FakeAiEssayGradingClient>();

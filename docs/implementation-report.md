@@ -203,6 +203,8 @@ These need credentials, accounts or a host that the run did not have. None can b
 
 ## 4. Fakes and how to switch each to real
 
+The admin Configuration page (`#/admin/configuration`, `docs/configuration.md`) shows read-only which of these providers is fake, local or real, the AI service models, `Payments:AllowFakePayments`, and whether each secret is set; it never shows a secret value.
+
 Note: on hosts, `deploy/api.env.example` already sets `AiService__Provider=Http`, so the API always calls the ai service; the fakes that remain on a host are inside the ai service (its `ELMANHG_AI_*_PROVIDER` settings). `AiService:Provider=Fake` is the local and test default only.
 
 Every external provider sits behind an interface with a fake or local implementation, selected by config. Fakes are the default, so development, tests and CI need no keys. Each real adapter is built and tested against a stubbed HTTP handler, but none has been run against the live provider. All values below are placeholders; set the real ones in the host's `api.env` / `ai.env` (`docs/deployment.md` §3–§4), never in the repo.

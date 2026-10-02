@@ -1,0 +1,87 @@
+{
+  "page": {
+    "title": "Configuration",
+    "intro": "Everything configurable in the system. The settings and feature flags below take effect at once, without a restart, and every change is written to the audit log."
+  },
+  "settings": {
+    "loading": "Loading settings…",
+    "errorTitle": "Could not load the settings.",
+    "empty": "No editable settings."
+  },
+  "groups": {
+    "Features": { "title": "Feature flags", "description": "Turn features on or off without a restart." },
+    "AskTeacher": { "title": "Ask a Teacher", "description": "Reply time and teacher reminders." },
+    "PlanLimits": {
+      "title": "Plan limits",
+      "description": "Limits of the Free plan, the Base plan and the Ask a Teacher add-on."
+    },
+    "Grading": {
+      "title": "AI grading",
+      "description": "The confidence below which an AI grade goes to teacher review."
+    },
+    "Uploads": { "title": "Upload limits", "description": "Allowed photo and voice recording sizes and lengths." }
+  },
+  "row": {
+    "newValue": "New value",
+    "default": "Default: {value}",
+    "overridden": "Changed",
+    "usingDefault": "Default",
+    "updatedAt": "Changed on {date}",
+    "save": "Save",
+    "reset": "Reset to default",
+    "enabled": "Enabled",
+    "on": "On",
+    "off": "Off",
+    "none": "None"
+  },
+  "validation": {
+    "required": "This field is required.",
+    "number": "Enter a number.",
+    "integer": "Enter a whole number.",
+    "range": "Enter a value between {min} and {max}.",
+    "choice": "Choose from the available values."
+  },
+  "toast": {
+    "saved": "Setting saved.",
+    "reset": "Default restored.",
+    "failed": "Could not save the setting."
+  },
+  "infrastructure": {
+    "title": "Infrastructure (read-only)",
+    "intro": "These values are set through environment variables at deploy time and cannot be changed here. Secret values are never shown.",
+    "environment": "Environment",
+    "integrationsTitle": "Providers",
+    "columns": { "integration": "Service", "provider": "Provider", "mode": "Mode" },
+    "modes": { "Fake": "Fake", "Local": "Local", "Real": "Real" },
+    "disabled": "Disabled",
+    "loading": "Loading infrastructure…",
+    "errorTitle": "Could not load the infrastructure."
+  },
+  "integrations": {
+    "otpWhatsApp": "Sign-in code by WhatsApp",
+    "otpEmail": "Sign-in code by email",
+    "otpSms": "Sign-in code by SMS",
+    "invitationEmail": "Invitation email",
+    "payments": "Payments",
+    "fileStorage": "File storage",
+    "aiService": "AI service"
+  },
+  "safety": {
+    "title": "Safety switches",
+    "note": "Not editable here, because they could let fake payments through or bypass security.",
+    "allowFakePayments": "Allow fake payments"
+  },
+  "secrets": { "title": "Secrets", "set": "Set", "notSet": "Not set" },
+  "ai": {
+    "title": "AI service",
+    "notUsed": "The API uses its built-in fakes and does not call the AI service.",
+    "unreachable": "The AI service could not be reached.",
+    "llm": "Language model",
+    "chat": "Assistant",
+    "essay": "Essay grading",
+    "math": "Math step grading",
+    "embeddings": "Embeddings",
+    "transcription": "Transcription"
+  },
+  "choices": {}
+}

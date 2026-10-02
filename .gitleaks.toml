@@ -8,6 +8,6 @@ description = "Reviewed example and test placeholder values; matched against the
 regexTarget = "secret"
 regexes = [
   '''^change-me(-(Admin1|QZX-secret-token-0123456789|UNIQUE-4711|generate-a-unique-signing-key-of-at-least-32-bytes|local-ai-service-token-0123456789|local-minio|local-only|local-otp-hmac-secret|openssl-rand-base64-48|openssl-rand-hex-32|openssl-rand-hex-32-placeholder|value))?$''',
-  '''^(ci-only-service-token-not-a-secret-0123|elmanhg-development-training-student-id-key-not-a-secret|elmanhg-tests-signing-key-not-a-secret-0123456789|not-a-secret-9c8b7a|not-a-secret-jwt-key-k2VqB8xR0dLm4pW7|not-a-secret-otp-0f1e2d3c4b5a6978)$''',
+  '''^(ci-only-service-token-not-a-secret-0123|elmanhg-development-training-student-id-key-not-a-secret|elmanhg-tests-signing-key-not-a-secret-0123456789|not-a-secret-9c8b7a|not-a-secret-config-probe-7f3a91c2|not-a-secret-jwt-key-k2VqB8xR0dLm4pW7|not-a-secret-otp-0f1e2d3c4b5a6978)$''',
   '''^(loadpostgres|smokegrafana|smokeminio|smokepostgres)passwordnotasecret$''',
 ]

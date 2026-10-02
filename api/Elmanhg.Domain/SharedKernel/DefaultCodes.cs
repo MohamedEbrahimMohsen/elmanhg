@@ -27,4 +27,7 @@ public static class DefaultCodes
     public const string TrainingDataExport = "TrainingData.Export";
     public const string AvatarChat = "Avatar.Chat";
     public const string AvatarConversationsView = "AvatarConversations.View";
+
+    // CONFIGURATION
+    public const string ConfigurationManage = "Configuration.Manage";
 }

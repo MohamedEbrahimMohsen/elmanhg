@@ -12,6 +12,7 @@ using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Domain.Units;
 using Elmanhg.Tests.Application.Features.Subscriptions;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -45,7 +46,7 @@ public sealed class GetMasteryOverviewHandlerTests
         StubActivity([]);
         StubCounts([]);
         SubscriptionRepositoryStub.Stub(_subscriptionRepository, SubscriptionRepositoryStub.EntitledBase(_studentId, new DateTimeOffset(2026, 9, 28, 12, 0, 0, TimeSpan.Zero)));
-        _handler = new GetMasteryOverviewHandler(_questionMasteryRepository, _sessionRepository, _subjectRepository, _lessonRepository, _userRepository, _subscriptionRepository, Options.Create(new ProgressOptions()), Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService);
+        _handler = new GetMasteryOverviewHandler(_questionMasteryRepository, _sessionRepository, _subjectRepository, _lessonRepository, _userRepository, _subscriptionRepository, Options.Create(new ProgressOptions()), Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService, new FakeRuntimeSettings());
     }
 
     [Fact]

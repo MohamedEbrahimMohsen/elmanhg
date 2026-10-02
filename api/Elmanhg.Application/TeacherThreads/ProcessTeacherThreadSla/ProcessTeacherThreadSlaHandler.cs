@@ -1,15 +1,15 @@
 using Elmanhg.Application.Shared.Observability;
-using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.Realtime;
+using Elmanhg.Application.Shared.RuntimeSettings;
+using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.TeacherThreads;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.TeacherThreads.ProcessTeacherThreadSla;
 
-public sealed class ProcessTeacherThreadSlaHandler(ITeacherThreadRepository teacherThreadRepository, ITeacherThreadSlaEventRepository teacherThreadSlaEventRepository, ITeacherSubjectRepository teacherSubjectRepository, ITeacherThreadNotifier teacherThreadNotifier, ElmanhgMetrics metrics, IOptions<AskTeacherOptions> askTeacherOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, TimeProvider timeProvider, ILogger<ProcessTeacherThreadSlaHandler> logger) : IRequestHandler<ProcessTeacherThreadSlaCommand>
+public sealed class ProcessTeacherThreadSlaHandler(ITeacherThreadRepository teacherThreadRepository, ITeacherThreadSlaEventRepository teacherThreadSlaEventRepository, ITeacherSubjectRepository teacherSubjectRepository, ITeacherThreadNotifier teacherThreadNotifier, ElmanhgMetrics metrics, IRuntimeSettings runtimeSettings, TimeProvider timeProvider, ILogger<ProcessTeacherThreadSlaHandler> logger) : IRequestHandler<ProcessTeacherThreadSlaCommand>
 {
     public async Task Handle(ProcessTeacherThreadSlaCommand request, CancellationToken cancellationToken)
     {
@@ -20,8 +20,8 @@ public sealed class ProcessTeacherThreadSlaHandler(ITeacherThreadRepository teac
         }
 
         var now = timeProvider.GetUtcNow();
-        var askTeacher = askTeacherOptions.Value;
-        var due = thread.DueSlaStages(now, TimeSpan.FromHours(subscriptionsOptions.Value.AskTeacherReplySlaHours), TimeSpan.FromHours(askTeacher.FirstReminderAfterHours), TimeSpan.FromHours(askTeacher.SecondReminderAfterHours));
+        var values = await runtimeSettings.GetValuesAsync(cancellationToken).ConfigureAwait(false);
+        var due = thread.DueSlaStages(now, TimeSpan.FromHours(values.Get(AskTeacherRuntimeSettings.ReplySlaHours)), TimeSpan.FromHours(values.Get(AskTeacherRuntimeSettings.FirstReminderAfterHours)), TimeSpan.FromHours(values.Get(AskTeacherRuntimeSettings.SecondReminderAfterHours)));
         if (due.Count == 0)
         {
             return;

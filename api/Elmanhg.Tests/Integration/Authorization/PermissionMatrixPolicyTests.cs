@@ -31,6 +31,7 @@ public sealed class PermissionMatrixPolicyTests(ApiFactory factory)
         { "Users.Manage", "Student", false }, { "Users.Manage", "Teacher", false }, { "Users.Manage", "Admin", true },
         { "AuditLog.View", "Student", false }, { "AuditLog.View", "Teacher", false }, { "AuditLog.View", "Admin", true },
         { "TrainingData.Export", "Student", false }, { "TrainingData.Export", "Teacher", false }, { "TrainingData.Export", "Admin", true },
+        { "Configuration.Manage", "Student", false }, { "Configuration.Manage", "Teacher", false }, { "Configuration.Manage", "Admin", true },
     };
 
     [Theory]

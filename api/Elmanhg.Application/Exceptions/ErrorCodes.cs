@@ -374,6 +374,13 @@ public static class ErrorCodes
     public const string TrainingExportNotFound = "TRAINING_EXPORT_NOT_FOUND";
     public const string TrainingExportModifiedConcurrently = "TRAINING_EXPORT_MODIFIED_CONCURRENTLY";
 
+    // CONFIGURATION
+    public const string RuntimeSettingKeyRequired = "RUNTIME_SETTING_KEY_REQUIRED";
+    public const string RuntimeSettingValueInvalid = "RUNTIME_SETTING_VALUE_INVALID";
+    public const string RuntimeSettingNotFound = "RUNTIME_SETTING_NOT_FOUND";
+    public const string RuntimeSettingModifiedConcurrently = "RUNTIME_SETTING_MODIFIED_CONCURRENTLY";
+    public const string AskTeacherReminderOrderInvalid = "ASK_TEACHER_REMINDER_ORDER_INVALID";
+
     // PLATFORM
     public const string TooManyRequests = "TOO_MANY_REQUESTS";
     public const string AdminSeedFailed = "ADMIN_SEED_FAILED";

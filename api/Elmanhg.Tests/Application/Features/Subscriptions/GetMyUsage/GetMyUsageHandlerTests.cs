@@ -8,6 +8,7 @@ using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Domain.TeacherThreads;
 using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using NSubstitute;
 using System.Linq.Expressions;
@@ -30,7 +31,7 @@ public sealed class GetMyUsageHandlerTests
         _currentUserService.UserId.Returns(_studentId);
         _timeProvider.GetUtcNow().Returns(Now);
         SubscriptionRepositoryStub.Stub(_subscriptionRepository);
-        _handler = new GetMyUsageHandler(_subscriptionRepository, _sessionRepository, _teacherThreadRepository, Microsoft.Extensions.Options.Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService);
+        _handler = new GetMyUsageHandler(_subscriptionRepository, _sessionRepository, _teacherThreadRepository, Microsoft.Extensions.Options.Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService, new FakeRuntimeSettings());
     }
 
     [Fact]

@@ -733,6 +733,76 @@
           ]
         }
       ]
+    },
+    {
+      "key": "E18",
+      "title": "Configuration and go-live decisions",
+      "labels": ["v1", "admin", "backend", "frontend", "ai", "payments", "infra"],
+      "description": "Decisions the dev took on 2026-10-01 after the first full run: a runtime Configuration page with feature flags, a configurable SLA calendar, one-time out-of-app reminders for teachers, payment safety switches, a cheaper LLM provider instead of Anthropic, and email alerts. Epic #252.",
+      "stories": [
+        {
+          "title": "Runtime settings, feature flags and admin Configuration page",
+          "description": "As an admin I have one Configuration page that shows everything configurable in the system. I can change business settings and feature flags at runtime. I can also see, read-only, which providers are real or fake and whether each secret is set.",
+          "tasks": [
+            "Setting registry and typed runtime-settings store: a database table and migration, a cache with invalidation, and a typed accessor for handlers",
+            "Admin API: list settings by group, with the current value, the default and whether it is overridden; update one setting, with validation; reset a setting to its default; a read-only section for infrastructure and secret status",
+            "Seed the registry with the existing business options that are safe to change at runtime: Ask a Teacher SLA and reminder hours, upload limits, free-tier limits, grading thresholds, and similar",
+            "Admin Configuration page in ar/en (RTL): grouped sections, an editor for each setting type, validation errors, reset, and the read-only infrastructure section",
+            "Docs: the PRD admin section and docs/implementation-report.md §4 point to the page"
+          ]
+        },
+        {
+          "title": "Configurable SLA calendar with exam periods",
+          "description": "As an admin I configure how the Ask a Teacher SLA clock counts time. On normal days it skips weekends; during exam periods every day counts.",
+          "tasks": [
+            "SLA calendar settings and exam periods: stored through the E18.S1 settings store, with exam-period CRUD for admins",
+            "Calendar-aware deadline and reminder times, used by the SLA sweep, the due-thread query and the inbox and student views",
+            "Admin UI for the calendar and exam periods inside the Configuration page",
+            "Tests across weekend, exam-period and time-zone boundaries",
+            "PRD: update the Ask a Teacher SLA section and close #222 a–c"
+          ]
+        },
+        {
+          "title": "One-time out-of-app teacher reminder (WhatsApp and email)",
+          "description": "As a teacher I get one reminder outside the app, on WhatsApp and by email, when a student question in my subjects is close to its SLA deadline. That way I don't miss it when I'm not logged in.",
+          "tasks": [
+            "A notification channel abstraction for non-OTP messages (WhatsApp template message, email) that reuses the #171 adapters and config",
+            "Send the one-time reminder from the SLA sweep, with an idempotency marker on the thread",
+            "Settings and Configuration page entries; the fake channel logs in Development",
+            "Tests: sent only once, claimed versus unclaimed recipients, one channel failing without affecting the other",
+            "Docs: the PRD section on Ask a Teacher reminders, plus the new template and variables in docs/otp-delivery.md or a messaging doc"
+          ]
+        },
+        {
+          "title": "Payment safety switches: AllowFakePayments and refunds flag",
+          "description": "As the owner I want payments to be safe while we launch. Fake payments can run only where they are explicitly allowed, and the refund flow stays off until we decide to open it.",
+          "tasks": [
+            "`AllowFakePayments` option and startup validation, plus docs: the deployment and Paymob docs and the env examples",
+            "Refunds feature flag through the E18.S1 settings store: API guard and admin UI state",
+            "Tests for both switches",
+            "Docs: the PRD payments and refunds section, and the implementation report"
+          ]
+        },
+        {
+          "title": "OpenAI-compatible LLM provider replacing Anthropic",
+          "description": "As the owner I want the AI features to run on a cheap model that is still good, and never on the Anthropic API. The AI features are the avatar tutor, essay grading and math step grading.",
+          "tasks": [
+            "OpenAI-compatible model client to replace the Anthropic client: timeouts, retries, usage and cost metering, and error mapping",
+            "The citation protocol and its parsing for the avatar chat, and structured output for the two grading pipelines",
+            "Settings, env examples, the deploy compose file and docs: the constitution stack, the PRD AI section and implementation report §4",
+            "Unit tests with recorded fixtures, and the eval harness pointed at the new client"
+          ]
+        },
+        {
+          "title": "Email alert receiver",
+          "description": "As the owner I receive production alerts by email.",
+          "tasks": [
+            "An Alertmanager email receiver over SMTP (Resend SMTP by default)",
+            "Route all current alert rules to the email receiver, with sensible grouping and repeat intervals",
+            "docs/observability.md and docs/deployment.md: the variables, and how to send a test alert"
+          ]
+        }
+      ]
     }
   ]
 }

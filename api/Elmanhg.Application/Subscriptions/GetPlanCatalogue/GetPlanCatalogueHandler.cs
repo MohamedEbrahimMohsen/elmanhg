@@ -1,14 +1,17 @@
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Shared.RuntimeSettings;
+using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Application.Subscriptions.Shared;
 using MediatR;
 using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.Subscriptions.GetPlanCatalogue;
 
-public sealed class GetPlanCatalogueHandler(IOptions<SubscriptionsOptions> subscriptionsOptions) : IRequestHandler<GetPlanCatalogueQuery, PlanCatalogueResult>
+public sealed class GetPlanCatalogueHandler(IOptions<SubscriptionsOptions> subscriptionsOptions, IRuntimeSettings runtimeSettings) : IRequestHandler<GetPlanCatalogueQuery, PlanCatalogueResult>
 {
-    public Task<PlanCatalogueResult> Handle(GetPlanCatalogueQuery request, CancellationToken cancellationToken)
+    public async Task<PlanCatalogueResult> Handle(GetPlanCatalogueQuery request, CancellationToken cancellationToken)
     {
-        return Task.FromResult(PlanCatalogueResultGenerator.Generate(subscriptionsOptions.Value));
+        var values = await runtimeSettings.GetValuesAsync(cancellationToken).ConfigureAwait(false);
+        return PlanCatalogueResultGenerator.Generate(subscriptionsOptions.Value, PlanLimits.From(values), values.Get(AskTeacherRuntimeSettings.ReplySlaHours));
     }
 }

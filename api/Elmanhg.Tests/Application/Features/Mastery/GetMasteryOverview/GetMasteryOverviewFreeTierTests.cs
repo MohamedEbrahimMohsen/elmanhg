@@ -9,6 +9,7 @@ using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Domain.Units;
 using Elmanhg.Tests.Application.Features.Subscriptions;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -44,7 +45,7 @@ public sealed class GetMasteryOverviewFreeTierTests
         _sessionRepository.GetQuizActivityDaysAsync(_studentId, Arg.Any<string>(), Arg.Any<DateTimeOffset>(), Arg.Any<CancellationToken>()).Returns(new List<DateOnly>());
         _questionMasteryRepository.GetLessonCountsAsync(_studentId, null, Arg.Any<CancellationToken>()).Returns([Count(unit, _first, 10, 5), Count(unit, _second, 10, 1)]);
         SubscriptionRepositoryStub.Stub(_subscriptionRepository);
-        _handler = new GetMasteryOverviewHandler(_questionMasteryRepository, _sessionRepository, _subjectRepository, _lessonRepository, _userRepository, _subscriptionRepository, Options.Create(new ProgressOptions()), Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService);
+        _handler = new GetMasteryOverviewHandler(_questionMasteryRepository, _sessionRepository, _subjectRepository, _lessonRepository, _userRepository, _subscriptionRepository, Options.Create(new ProgressOptions()), Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService, new FakeRuntimeSettings());
     }
 
     [Fact]

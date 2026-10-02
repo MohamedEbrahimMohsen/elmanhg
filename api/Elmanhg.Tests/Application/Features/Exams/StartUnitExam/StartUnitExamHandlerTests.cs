@@ -5,6 +5,7 @@ using Elmanhg.Application.Exams.StartUnitExam;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.ExamBlueprints;
@@ -21,6 +22,7 @@ using Elmanhg.Domain.Units;
 using Elmanhg.Tests.Application.Features.Sessions;
 using Elmanhg.Tests.Application.Features.Subscriptions;
 using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -52,6 +54,7 @@ public sealed class StartUnitExamHandlerTests
     private readonly List<QuestionMastery> _masteries = [];
     private readonly List<LessonOpening> _openings = [];
     private readonly IOptions<ExamsOptions> _examsOptions = Options.Create(new ExamsOptions());
+    private readonly FakeRuntimeSettings _runtimeSettings = new();
     private readonly StartUnitExamHandler _handler;
 
     public StartUnitExamHandlerTests()
@@ -76,7 +79,7 @@ public sealed class StartUnitExamHandlerTests
         _questionMasteryRepository.FindAsync(Arg.Any<Expression<Func<QuestionMastery, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<QuestionMastery>, IQueryable<QuestionMastery>>?>(), Arg.Any<Func<IQueryable<QuestionMastery>, IOrderedQueryable<QuestionMastery>>?>(), Arg.Any<bool>())
             .Returns(call => _masteries.Where(call.Arg<Expression<Func<QuestionMastery, bool>>>().Compile()).ToList());
         SubscriptionRepositoryStub.Stub(_subscriptionRepository, SubscriptionRepositoryStub.EntitledBase(_builder.StudentId, ExamSessionBuilder.Now.AddMinutes(1)));
-        _handler = new StartUnitExamHandler(_sessionRepository, _unitRepository, _subjectRepository, _lessonRepository, _lessonOpeningRepository, _questionRepository, _examBlueprintRepository, _questionMasteryRepository, _essayGradeRepository, _mathStepGradeRepository, _subscriptionRepository, _examsOptions, Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), new Random(42), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), Substitute.For<IAiMathCheckClient>(), Substitute.For<IFileStorage>());
+        _handler = new StartUnitExamHandler(_sessionRepository, _unitRepository, _subjectRepository, _lessonRepository, _lessonOpeningRepository, _questionRepository, _examBlueprintRepository, _questionMasteryRepository, _essayGradeRepository, _mathStepGradeRepository, _subscriptionRepository, _examsOptions, Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), new Random(42), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), Substitute.For<IAiMathCheckClient>(), Substitute.For<IFileStorage>(), _runtimeSettings);
     }
 
     private CurriculumUnit Unit => _builder.Questions.Unit;
@@ -187,7 +190,7 @@ public sealed class StartUnitExamHandlerTests
     [Fact]
     public async Task Handle_GateOnLessonUnopened_ThrowsExamLessonsNotOpened()
     {
-        _examsOptions.Value.RequireAllLessonsOpened = true;
+        _runtimeSettings.Set(FeatureFlagRuntimeSettings.ExamsRequireAllLessonsOpened, true);
 
         await AssertThrowsAsync<BusinessRuleViolationCoreException>(Unit.Id, ErrorCodes.ExamLessonsNotOpened);
     }
@@ -195,7 +198,7 @@ public sealed class StartUnitExamHandlerTests
     [Fact]
     public async Task Handle_GateOnAllLessonsOpened_StartsExam()
     {
-        _examsOptions.Value.RequireAllLessonsOpened = true;
+        _runtimeSettings.Set(FeatureFlagRuntimeSettings.ExamsRequireAllLessonsOpened, true);
         _openings.Add(LessonOpening.Record(_builder.StudentId, _builder.Questions.Lesson, ExamSessionBuilder.Now));
 
         var result = await _handler.Handle(new StartUnitExamCommand(Unit.Id), TestContext.Current.CancellationToken);
@@ -207,7 +210,7 @@ public sealed class StartUnitExamHandlerTests
     [Fact]
     public async Task Handle_GateOnAdmin_StartsTestModeExamWithoutOpenings()
     {
-        _examsOptions.Value.RequireAllLessonsOpened = true;
+        _runtimeSettings.Set(FeatureFlagRuntimeSettings.ExamsRequireAllLessonsOpened, true);
         _currentUserService.GetClaim(ClaimTypes.Role).Returns(nameof(UserRole.Admin));
 
         var result = await _handler.Handle(new StartUnitExamCommand(Unit.Id), TestContext.Current.CancellationToken);
@@ -219,7 +222,7 @@ public sealed class StartUnitExamHandlerTests
     [Fact]
     public async Task Handle_GateOnOpenExamSameUnit_ResumesWithoutGate()
     {
-        _examsOptions.Value.RequireAllLessonsOpened = true;
+        _runtimeSettings.Set(FeatureFlagRuntimeSettings.ExamsRequireAllLessonsOpened, true);
         var open = OpenExam();
 
         var result = await _handler.Handle(new StartUnitExamCommand(Unit.Id), TestContext.Current.CancellationToken);

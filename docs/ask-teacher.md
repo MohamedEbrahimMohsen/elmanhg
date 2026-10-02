@@ -16,7 +16,7 @@ Both tables map to PRD §15. #94 ships only the columns it writes; later stories
 | `Context` | `context_json` | jsonb snapshot, see Context. |
 | `Status` | `status` | `Open`, `Answered`, `Closed`, stored as a string. #94 only creates `Open`. |
 | `SubmittedAt` | `submitted_at` | Truncated to microseconds so the create response equals later reads. |
-| `SlaDueAt` | `sla_due_at` | `SubmittedAt + Subscriptions:AskTeacherReplySlaHours` (24). A follow-up resets it to `followUpAt + AskTeacherReplySlaHours` (#97). |
+| `SlaDueAt` | `sla_due_at` | `SubmittedAt + Subscriptions:AskTeacherReplySlaHours` (24). A follow-up resets it to `followUpAt + AskTeacherReplySlaHours` (#97). The hours are the runtime setting `askTeacher.replySlaHours` ([configuration.md](configuration.md)); a change applies to new questions and follow-ups, and the stored `SlaDueAt` of an open thread is not recomputed. |
 | `TeacherId` | `teacher_id?` | FK `Users`, restrict. The teacher (or admin) who claimed the thread; null until claimed (#95). |
 | `ClaimedAt` | `claimed_at?` | Set by the first claim, truncated to microseconds (#95). |
 | `ClosedAt` | `closed_at?` | Set when the teacher's reply to the follow-up closes the thread, or when a rating closes an `Answered` thread (#97). |
@@ -155,7 +155,7 @@ The snapshot (`TeacherThreadContext`) keeps `subjectId`, `subjectName`, `unitId`
 
 ## Options
 
-`AskTeacherOptions` (section `AskTeacher`, validated on start): `QuestionTextMaxLength` 2000, `ImageMaxSizeInMb` 5, `ThreadListMaxPageSize` 50, `ReplyTextMaxLength` 4000, and for voice replies (#96) `VoiceMaxSizeInMb` 5, `VoiceMaxDurationSeconds` 180, `TranscriptionLanguage` `ar`, `TranscriptionSweepEnabled` true, `TranscriptionSweepIntervalSeconds` 5, `TranscriptionSweepBatchSize` 5, `TranscriptionMaxAttempts` 4, `TranscriptionRetryBaseDelaySeconds` 15, and for the SLA (#97) `SlaSweepEnabled` true, `SlaSweepIntervalSeconds` 60, `SlaSweepBatchSize` 50, `FirstReminderAfterHours` 12, `SecondReminderAfterHours` 20, `ReminderListMaxCount` 20; `AskTeacherOptionsValidator` requires `FirstReminderAfterHours` < `SecondReminderAfterHours` < `Subscriptions:AskTeacherReplySlaHours`. The API's transcription call has its own timeout, `AiService:TranscriptionTimeoutSeconds` 150. The quota and the SLA stay in `SubscriptionsOptions`.
+`AskTeacherOptions` (section `AskTeacher`, validated on start): `QuestionTextMaxLength` 2000, `ImageMaxSizeInMb` 5, `ThreadListMaxPageSize` 50, `ReplyTextMaxLength` 4000, and for voice replies (#96) `VoiceMaxSizeInMb` 5, `VoiceMaxDurationSeconds` 180, `TranscriptionLanguage` `ar`, `TranscriptionSweepEnabled` true, `TranscriptionSweepIntervalSeconds` 5, `TranscriptionSweepBatchSize` 5, `TranscriptionMaxAttempts` 4, `TranscriptionRetryBaseDelaySeconds` 15, and for the SLA (#97) `SlaSweepEnabled` true, `SlaSweepIntervalSeconds` 60, `SlaSweepBatchSize` 50, `FirstReminderAfterHours` 12, `SecondReminderAfterHours` 20, `ReminderListMaxCount` 20; `AskTeacherOptionsValidator` requires `FirstReminderAfterHours` < `SecondReminderAfterHours` < `Subscriptions:AskTeacherReplySlaHours`. The reply SLA, both reminder hours, `ImageMaxSizeInMb` and the voice size and duration are the defaults of runtime settings an admin can change on the Configuration page (`askTeacher.*`, `uploads.*`, [configuration.md](configuration.md)); the runtime upload sizes are capped at 9 MB and the update keeps first < second < reply SLA. The API's transcription call has its own timeout, `AiService:TranscriptionTimeoutSeconds` 150. The quota and the SLA stay in `SubscriptionsOptions`.
 
 ## API
 
@@ -215,4 +215,4 @@ The SignalR hub `/api/hubs/notifications` (#97) requires any signed-in user (JWT
 - The recording's duration is reported by the browser; the size limit is the hard cap.
 - The transcription worker assumes a single API instance per environment (no leasing between instances). So does the SLA worker, and the SignalR hub keeps its connections in memory on that one instance.
 - Realtime pushes are best effort: a missed push is covered by the refetch when a page opens and by the reminders card.
-- Reminder timing reads the current `AskTeacherReplySlaHours`; changing it moves the reminders of windows already running.
+- Reminder timing reads the current reply SLA (the runtime setting `askTeacher.replySlaHours`); changing it moves the reminders of windows already running, while the stored `SlaDueAt` of an open thread keeps its old deadline (#254 replaces this with recomputed calendar deadlines).

@@ -1,16 +1,16 @@
+using Elmanhg.Infrastructure.Hosting;
 using Npgsql;
 
 namespace Elmanhg.Api.Hosting;
 
 public static class PlaceholderSecretGuard
 {
-    // Every secret in the committed deploy/*.env.example files starts with this marker.
-    public const string PlaceholderPrefix = "change-me";
+    public const string PlaceholderPrefix = ConfigurationSecrets.PlaceholderPrefix;
 
     private const string OtpSecretKey = "CoreOtp:Secret";
     private const string ConnectionStringKey = "ConnectionStrings:DbConnectionString";
 
-    public static readonly IReadOnlyList<string> SecretKeys = ["CoreJwt:Key", "CoreOtp:Secret", "AdminSeed:Password", "TrainingData:StudentIdHashKey", "AiService:ServiceToken", "Payments:Paymob:SecretKey", "Payments:Paymob:HmacSecret", "OtpDelivery:WhatsApp:AccessToken", "OtpDelivery:Email:ApiKey", "OtpDelivery:Sms:AuthHeaderValue", "FileStorage:S3SecretAccessKey"];
+    public static readonly IReadOnlyList<string> SecretKeys = ConfigurationSecrets.Keys;
 
     public static void EnsureReplaced(IConfiguration configuration, IHostEnvironment environment)
     {
@@ -40,5 +40,5 @@ public static class PlaceholderSecretGuard
 
     private static bool HasPlaceholderPassword(string? connectionString) => !string.IsNullOrWhiteSpace(connectionString) && IsPlaceholder(new NpgsqlConnectionStringBuilder(connectionString).Password);
 
-    private static bool IsPlaceholder(string? value) => value?.Trim().StartsWith(PlaceholderPrefix, StringComparison.OrdinalIgnoreCase) == true;
+    private static bool IsPlaceholder(string? value) => ConfigurationSecrets.IsPlaceholder(value);
 }
