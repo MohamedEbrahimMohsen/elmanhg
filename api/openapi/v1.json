@@ -1022,6 +1022,50 @@
         }
       }
     },
+    "/api/teachers/{teacherId}/phone-number": {
+      "put": {
+        "tags": [
+          "Teachers"
+        ],
+        "operationId": "SetTeacherPhoneNumber",
+        "parameters": [
+          {
+            "name": "teacherId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetTeacherPhoneNumberRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetTeacherPhoneNumberRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetTeacherPhoneNumberRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/teacher-inbox": {
       "get": {
         "tags": [
@@ -10670,6 +10714,12 @@
           "email": {
             "type": "string"
           },
+          "phoneNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
           "auditAction": {
             "type": [
               "null",
@@ -13549,6 +13599,20 @@
             "items": {
               "$ref": "#/components/schemas/SessionItemResult"
             }
+          }
+        }
+      },
+      "SetTeacherPhoneNumberRequest": {
+        "required": [
+          "phoneNumber"
+        ],
+        "type": "object",
+        "properties": {
+          "phoneNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },

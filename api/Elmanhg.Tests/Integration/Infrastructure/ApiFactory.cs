@@ -1,5 +1,6 @@
 using Core.Localization;
 using Core.OTP.Delivery;
+using Elmanhg.Application.Shared.Messaging;
 using Elmanhg.Infrastructure.Data.Context;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -33,6 +34,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     private readonly PostgreSqlContainer _database = new PostgreSqlBuilder(PostgresImage).Build();
 
     public OtpOutbox Otp { get; } = new();
+
+    public MessageOutbox Messages { get; } = new();
 
     public LessonEventLog LessonEvents { get; } = new();
 
@@ -70,6 +73,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         // The sweep would race tests that record SLA events through the mediator.
         builder.UseSetting("AskTeacher:SlaSweepEnabled", "false");
         builder.UseSetting("RuntimeSettings:CacheSeconds", "30");
+        builder.UseSetting("OutOfAppReminders:ThreadLinkBaseUrl", "https://elmanhg.test/teacher/thread");
         builder.UseSetting("TrainingData:StudentIdHashKey", TestStudentIdHashKey);
         // Parallel tests share this host and the "unknown" client partition; RateLimiting tests set their own limits.
         builder.UseSetting("RateLimiting:AuthRefreshPermitLimit", "100000");
@@ -260,6 +264,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             services.AddSingleton<IOtpChannel>(new RecordingOtpChannel(OtpChannel.WhatsApp, Otp));
             services.AddSingleton<IOtpChannel>(new RecordingOtpChannel(OtpChannel.Sms, Otp));
             services.AddSingleton<IOtpChannel>(new RecordingOtpChannel(OtpChannel.Email, Otp));
+            services.RemoveAll<IMessageChannel>();
+            services.AddSingleton<IMessageChannel>(new RecordingMessageChannel(MessageChannel.WhatsApp, Messages));
+            services.AddSingleton<IMessageChannel>(new RecordingMessageChannel(MessageChannel.Email, Messages));
             services.AddSingleton(LessonEvents);
             services.RemoveAll<ILocalizer>();
             services.AddScoped<ILocalizer>(x => new Localizer(new ApiResourceStringLocalizerFactory(x.GetRequiredService<IStringLocalizerFactory>())));

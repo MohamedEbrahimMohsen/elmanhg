@@ -64,6 +64,7 @@ public static class DependencyInjection
         services.AddSingleton<IValidateOptions<RuntimeSettingsOptions>, RuntimeSettingsOptionsValidator>();
         services.AddSingleton<IRuntimeSettingDefinitions, FeatureFlagRuntimeSettings>();
         services.AddSingleton<IRuntimeSettingDefinitions, AskTeacherRuntimeSettings>();
+        services.AddSingleton<IRuntimeSettingDefinitions, OutOfAppReminderRuntimeSettings>();
         services.AddSingleton<IRuntimeSettingDefinitions, PlanLimitRuntimeSettings>();
         services.AddSingleton<IRuntimeSettingDefinitions, GradingRuntimeSettings>();
         services.AddSingleton<IRuntimeSettingDefinitions, UploadRuntimeSettings>();

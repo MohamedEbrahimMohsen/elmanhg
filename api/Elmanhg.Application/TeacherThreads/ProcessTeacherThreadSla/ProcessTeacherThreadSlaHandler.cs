@@ -1,7 +1,9 @@
+using Elmanhg.Application.Shared.Messaging;
 using Elmanhg.Application.Shared.Observability;
 using Elmanhg.Application.Shared.Realtime;
 using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
+using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.TeacherThreads;
 using MediatR;
@@ -9,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Elmanhg.Application.TeacherThreads.ProcessTeacherThreadSla;
 
-public sealed class ProcessTeacherThreadSlaHandler(ITeacherThreadRepository teacherThreadRepository, ITeacherThreadSlaEventRepository teacherThreadSlaEventRepository, ITeacherSubjectRepository teacherSubjectRepository, ITeacherThreadNotifier teacherThreadNotifier, ElmanhgMetrics metrics, IRuntimeSettings runtimeSettings, TimeProvider timeProvider, ILogger<ProcessTeacherThreadSlaHandler> logger) : IRequestHandler<ProcessTeacherThreadSlaCommand>
+public sealed class ProcessTeacherThreadSlaHandler(ITeacherThreadRepository teacherThreadRepository, ITeacherThreadSlaEventRepository teacherThreadSlaEventRepository, ITeacherSubjectRepository teacherSubjectRepository, ITeacherThreadNotifier teacherThreadNotifier, ITeacherThreadOutOfAppReminderRepository teacherThreadOutOfAppReminderRepository, IUserRepository userRepository, IEnumerable<IMessageChannel> messageChannels, ElmanhgMetrics metrics, IRuntimeSettings runtimeSettings, TimeProvider timeProvider, ILogger<ProcessTeacherThreadSlaHandler> logger) : IRequestHandler<ProcessTeacherThreadSlaCommand>
 {
     public async Task Handle(ProcessTeacherThreadSlaCommand request, CancellationToken cancellationToken)
     {
@@ -41,6 +43,7 @@ public sealed class ProcessTeacherThreadSlaHandler(ITeacherThreadRepository teac
             await teacherThreadSlaEventRepository.AddAsync(TeacherThreadSlaEvent.Record(thread.Id, kind, thread.SlaDueAt, thread.TeacherId, now), cancellationToken).ConfigureAwait(false);
         }
 
+        var outOfAppChannels = await OutOfAppTeacherReminder.ClaimAsync(thread, missing, values, teacherThreadOutOfAppReminderRepository, now, cancellationToken).ConfigureAwait(false);
         await teacherThreadSlaEventRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         foreach (var kind in missing)
@@ -68,5 +71,9 @@ public sealed class ProcessTeacherThreadSlaHandler(ITeacherThreadRepository teac
         }
 
         await teacherThreadNotifier.NotifyReminderAsync(recipients, thread.Id, reminders.Max(), cancellationToken).ConfigureAwait(false);
+        if (outOfAppChannels.Count > 0)
+        {
+            await OutOfAppTeacherReminder.SendAsync(thread, recipients, outOfAppChannels, userRepository, messageChannels, logger, cancellationToken).ConfigureAwait(false);
+        }
     }
 }

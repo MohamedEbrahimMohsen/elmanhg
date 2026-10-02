@@ -11,6 +11,8 @@ export interface InviteUserCommand {
   displayName: string;
   email: string;
   /** @nullable */
+  phoneNumber?: string | null;
+  /** @nullable */
   auditAction?: string | null;
   /** @nullable */
   auditResourceType?: string | null;

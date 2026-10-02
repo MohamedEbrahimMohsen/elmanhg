@@ -17,6 +17,7 @@ public sealed class FakeRuntimeSettings : IRuntimeSettings
         [
             new FeatureFlagRuntimeSettings(Options.Create(exams ?? new ExamsOptions())),
             new AskTeacherRuntimeSettings(askTeacherOptions, subscriptionsOptions),
+            new OutOfAppReminderRuntimeSettings(askTeacherOptions),
             new PlanLimitRuntimeSettings(subscriptionsOptions),
             new GradingRuntimeSettings(Options.Create(essayGrading ?? new EssayGradingOptions()), Options.Create(mathStepGrading ?? new MathStepGradingOptions())),
             new UploadRuntimeSettings(askTeacherOptions),

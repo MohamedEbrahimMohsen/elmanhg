@@ -8,6 +8,7 @@ export { useSignOut } from './hooks/useSignOut';
 export { roleHome, requireRole, redirectSignedIn, requireOnboarded } from './guards';
 export { can, roleCapabilities, type Capability } from './permissions';
 export { loginSearchSchema } from './schemas/loginSearchSchema';
+export { egyptianMobilePattern } from './schemas/fields';
 export { restoreSession, installAuthHandlers, startSession, clearSession, toSession } from './authSession';
 export { LoginPage } from './pages/LoginPage';
 export { SignUpPage } from './pages/SignUpPage';

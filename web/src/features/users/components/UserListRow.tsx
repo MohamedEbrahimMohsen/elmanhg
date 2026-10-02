@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { UserSummaryResult } from '@/shared/api/generated/model';
 import { formatDate } from '@/shared/lib/format';
 import { cn } from '@/shared/lib/utils';
+import { Button } from '@/shared/ui/button';
 import type { UserListTab } from '../schemas/usersSearchSchema';
 import { TeacherSubjectsCell } from './TeacherSubjectsCell';
 import { UserActionButtons, type GrantablePlan } from './UserActionButtons';
@@ -15,11 +16,20 @@ export interface UserListRowProps {
   onSuspend: (item: UserSummaryResult) => void;
   onReactivate: (item: UserSummaryResult) => void;
   onGrant: (item: UserSummaryResult, plan: GrantablePlan) => void;
+  onEditPhone: (item: UserSummaryResult) => void;
 }
 
 const cellClassName = 'px-2.5 py-2.25 align-top text-caption';
 
-export function UserListRow({ tab, item, currentUserId, onSuspend, onReactivate, onGrant }: UserListRowProps) {
+export function UserListRow({
+  tab,
+  item,
+  currentUserId,
+  onSuspend,
+  onReactivate,
+  onGrant,
+  onEditPhone,
+}: UserListRowProps) {
   const { t, i18n } = useTranslation('users');
   const lng = i18n.resolvedLanguage ?? i18n.language;
   const contact = item.maskedPhone ?? item.maskedEmail;
@@ -77,19 +87,32 @@ export function UserListRow({ tab, item, currentUserId, onSuspend, onReactivate,
         </td>
       ) : null}
       <td className={cellClassName}>
-        <UserActionButtons
-          target={item}
-          currentUserId={currentUserId}
-          onSuspend={() => {
-            onSuspend(item);
-          }}
-          onReactivate={() => {
-            onReactivate(item);
-          }}
-          onGrant={(plan) => {
-            onGrant(item, plan);
-          }}
-        />
+        <div className="flex flex-wrap items-start gap-2">
+          <UserActionButtons
+            target={item}
+            currentUserId={currentUserId}
+            onSuspend={() => {
+              onSuspend(item);
+            }}
+            onReactivate={() => {
+              onReactivate(item);
+            }}
+            onGrant={(plan) => {
+              onGrant(item, plan);
+            }}
+          />
+          {tab === 'teachers' ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                onEditPhone(item);
+              }}
+            >
+              {t('teacherPhone.edit')}
+            </Button>
+          ) : null}
+        </div>
       </td>
     </tr>
   );

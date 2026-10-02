@@ -1,3 +1,5 @@
+using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
+using Elmanhg.Domain.TeacherThreads;
 using System.ComponentModel.DataAnnotations;
 
 namespace Elmanhg.Application.Shared.Options;
@@ -58,4 +60,12 @@ public sealed class AskTeacherOptions
 
     [Range(1, 100)]
     public int ReminderListMaxCount { get; set; } = 20;
+
+    public bool OutOfAppReminderEnabled { get; set; } = true;
+
+    [Required]
+    public string OutOfAppReminderChannels { get; set; } = OutOfAppReminderRuntimeSettings.BothChannels;
+
+    [Required]
+    public string OutOfAppReminderStage { get; set; } = nameof(TeacherThreadSlaEventKind.SecondReminder);
 }

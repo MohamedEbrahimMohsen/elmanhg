@@ -120,6 +120,32 @@ public sealed class ConfigurationEndpointTests(ApiFactory factory) : IAsyncLifet
     }
 
     [Fact]
+    public async Task Get_Settings_AsAdmin_ListsOutOfAppReminderSettings()
+    {
+        using var admin = await AdminClientAsync(factory);
+
+        var groups = await admin.GetFromJsonAsync<JsonElement>(SettingsRoute, CancellationToken);
+
+        var askTeacher = groups.EnumerateArray().Single(x => x.GetProperty("group").GetString() == "AskTeacher").GetProperty("settings").EnumerateArray().ToDictionary(x => x.GetProperty("key").GetString()!);
+        askTeacher["askTeacher.outOfAppReminderEnabled"].GetProperty("value").GetBoolean().Should().BeTrue();
+        askTeacher["askTeacher.outOfAppReminderChannels"].GetProperty("value").GetString().Should().Be("Both");
+        askTeacher["askTeacher.outOfAppReminderStage"].GetProperty("value").GetString().Should().Be("SecondReminder");
+        askTeacher["askTeacher.outOfAppReminderChannels"].GetProperty("allowedValues").EnumerateArray().Select(x => x.GetString()).Should().Equal("WhatsApp", "Email", "Both");
+        askTeacher["askTeacher.outOfAppReminderStage"].GetProperty("allowedValues").EnumerateArray().Select(x => x.GetString()).Should().Equal("FirstReminder", "SecondReminder");
+    }
+
+    [Fact]
+    public async Task Put_OutOfAppReminderStageBreach_Returns422ValueInvalid()
+    {
+        using var admin = await AdminClientAsync(factory);
+
+        using var response = await admin.PutAsJsonAsync(SettingRoute("askTeacher.outOfAppReminderStage"), new { value = "Breach" }, CancellationToken);
+
+        await ExpectProblemAsync(response, HttpStatusCode.UnprocessableEntity, "RUNTIME_SETTING_VALUE_INVALID");
+        (await ReadOverrideAsync(factory, "askTeacher.outOfAppReminderStage")).Should().BeNull();
+    }
+
+    [Fact]
     public async Task Put_AsTeacher_Returns403()
     {
         using var teacher = await TeacherClientAsync(factory);

@@ -1,6 +1,8 @@
+using Elmanhg.Application.Shared.Messaging;
 using Elmanhg.Application.Shared.Observability;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.Realtime;
+using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Application.TeacherThreads.ProcessTeacherThreadSla;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Subjects;
@@ -45,7 +47,7 @@ public sealed class ProcessTeacherThreadSlaHandlerTests
         _slaEventRepository.AddAsync(Arg.Do<TeacherThreadSlaEvent>(_added.Add), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
         _teacherSubjectRepository.FindAsync(Arg.Any<Expression<Func<TeacherSubject, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<TeacherSubject>, IQueryable<TeacherSubject>>?>(), Arg.Any<Func<IQueryable<TeacherSubject>, IOrderedQueryable<TeacherSubject>>?>(), Arg.Any<bool>())
             .Returns(call => _assignments.Where(call.Arg<Expression<Func<TeacherSubject, bool>>>().Compile()).ToList());
-        _handler = new ProcessTeacherThreadSlaHandler(_teacherThreadRepository, _slaEventRepository, _teacherSubjectRepository, _notifier, new ElmanhgMetrics(_meterFactory), new FakeRuntimeSettings(subscriptions: new SubscriptionsOptions { AskTeacherReplySlaHours = 24 }, askTeacher: new AskTeacherOptions()), _timeProvider, Substitute.For<ILogger<ProcessTeacherThreadSlaHandler>>());
+        _handler = new ProcessTeacherThreadSlaHandler(_teacherThreadRepository, _slaEventRepository, _teacherSubjectRepository, _notifier, Substitute.For<ITeacherThreadOutOfAppReminderRepository>(), Substitute.For<IUserRepository>(), Array.Empty<IMessageChannel>(), new ElmanhgMetrics(_meterFactory), new FakeRuntimeSettings(subscriptions: new SubscriptionsOptions { AskTeacherReplySlaHours = 24 }, askTeacher: new AskTeacherOptions()).Set(OutOfAppReminderRuntimeSettings.Enabled, false), _timeProvider, Substitute.For<ILogger<ProcessTeacherThreadSlaHandler>>());
     }
 
     [Fact]

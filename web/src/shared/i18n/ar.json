@@ -284,6 +284,7 @@
     "USER_LIST_SEARCH_TOO_LONG": "نص البحث طويل جدا.",
     "USER_ID_REQUIRED": "معرف المستخدم مطلوب.",
     "USER_INVITE_ROLE_INVALID": "يمكن دعوة المعلمين والمديرين فقط.",
+    "PHONE_NUMBER_TEACHERS_ONLY": "يمكن ضبط رقم واتساب للمعلّمين فقط.",
     "USER_MODIFIED_CONCURRENTLY": "تم تعديل هذا الحساب من شخص آخر. أعد التحميل وحاول مرة أخرى.",
     "STUDENT_ID_REQUIRED": "معرف الطالب مطلوب.",
     "STUDENT_NOT_FOUND": "الطالب غير موجود.",

@@ -52,6 +52,7 @@ An array with one element per changed audited entity. Property keys are camelCas
 |---|---|---|---|
 | AssignTeacherSubject | `Teacher.AssignSubject` | Teacher | command |
 | UnassignTeacherSubject | `Teacher.UnassignSubject` | Teacher | command |
+| SetTeacherPhoneNumber | `Teacher.SetPhoneNumber` | Teacher | command (no diff: `User` is not an audited entity; the number is never stored in the audit log) |
 | CreateSubject | `Subject.Create` | Subject | result |
 | UpdateSubject | `Subject.Update` | Subject | command |
 | ReorderSubject | `Subject.Reorder` | Subject | command (the diff lists every sibling whose `Order` changed) |
