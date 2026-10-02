@@ -11,11 +11,19 @@ namespace Elmanhg.Tests.Integration.Payments;
 public static class PaymentsTestData
 {
     public const string Route = "/api/payments";
+    public const string RefundsEnabledKey = "features.refundsEnabled";
 
     public static async Task<HttpClient> AdminClientAsync(ApiFactory factory, CancellationToken cancellationToken)
     {
         var admin = await ScopeTestData.SeedAdminAsync(factory, cancellationToken).ConfigureAwait(false);
         return await ScopeTestData.SignedInClientAsync(factory, admin, cancellationToken).ConfigureAwait(false);
+    }
+
+    public static async Task SetRefundsEnabledAsync(ApiFactory factory, bool enabled, CancellationToken cancellationToken)
+    {
+        using var admin = await AdminClientAsync(factory, cancellationToken).ConfigureAwait(false);
+        using var response = await admin.PutAsync($"/api/configuration/settings/{RefundsEnabledKey}", JsonContent.Create(new { value = enabled }), cancellationToken).ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
     }
 
     public static async Task<(Payment Payment, Subscription Subscription)> SeedSucceededAsync(ApiFactory factory, Guid studentId, DateTimeOffset startsAt, PaymentReviewReason? flag, CancellationToken cancellationToken)

@@ -159,10 +159,21 @@ services:
     profiles: ["observability"]
     image: prom/alertmanager:v0.34.1@sha256:e9733bafb1bdef9b00e25a21f8f99dc26a22224bf16641ad754d1649f4c3357a
     restart: unless-stopped
-    command: ["--config.file=/etc/alertmanager/alertmanager.yml", "--storage.path=/alertmanager"]
+    # entrypoint.sh renders the config from .env at start (docs/observability.md §9).
+    entrypoint: ["/bin/sh", "/etc/alertmanager/entrypoint.sh"]
+    environment:
+      ALERTMANAGER_EMAIL_TO: ${ALERTMANAGER_EMAIL_TO:-}
+      ALERTMANAGER_EMAIL_FROM: ${ALERTMANAGER_EMAIL_FROM:-}
+      ALERTMANAGER_SMTP_SMARTHOST: ${ALERTMANAGER_SMTP_SMARTHOST:-smtp.resend.com:587}
+      ALERTMANAGER_SMTP_USERNAME: ${ALERTMANAGER_SMTP_USERNAME:-resend}
+      ALERTMANAGER_SMTP_PASSWORD: ${ALERTMANAGER_SMTP_PASSWORD:-}
+      ALERTMANAGER_ENVIRONMENT: ${COMPOSE_PROJECT_NAME:-elmanhg}
     volumes:
-      - ./${ALERTMANAGER_CONFIG_FILE:-alertmanager.yml}:/etc/alertmanager/alertmanager.yml:ro
+      - ./observability/alertmanager:/etc/alertmanager:ro
+      - ${ALERTMANAGER_SMTP_PASSWORD_FILE:-./observability/alertmanager/smtp-password.placeholder}:/run/secrets/alertmanager-smtp-password:ro
       - alertmanager-data:/alertmanager
+    tmpfs:
+      - /run/alertmanager
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9093/-/ready"]
       interval: 10s

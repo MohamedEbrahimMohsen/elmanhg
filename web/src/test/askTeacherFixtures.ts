@@ -3,6 +3,7 @@ import type {
   SubjectMasteryDetailResult,
   TeacherInboxReminderResult,
   TeacherMessageResult,
+  TeacherReplyDeadlineResult,
   TeacherThreadContextResult,
   TeacherThreadResult,
   TeacherThreadSummaryResult,
@@ -186,5 +187,14 @@ export function subjectMasteryDetail(): SubjectMasteryDetailResult {
         lessons: [lesson(secondUnitLessonId, 'Sound')],
       },
     ],
+  };
+}
+
+export function teacherReplyDeadline(overrides?: Partial<TeacherReplyDeadlineResult>): TeacherReplyDeadlineResult {
+  return {
+    replySlaHours: 24,
+    slaDueAt: '2026-10-04T12:00:00Z',
+    skipsUncountedDays: true,
+    ...overrides,
   };
 }

@@ -1,8 +1,11 @@
+using Core.Errors;
 using Elmanhg.Api.Workers;
+using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Observability;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.TeacherThreads.GetDueSlaThreadIds;
 using Elmanhg.Application.TeacherThreads.ProcessTeacherThreadSla;
+using Elmanhg.Application.TeacherThreads.RescheduleTeacherThreadSlas;
 using Elmanhg.Tests.Application.Features.Shared.Observability;
 using FluentAssertions;
 using MediatR;
@@ -123,6 +126,72 @@ public sealed class TeacherThreadSlaWorkerTests
 
         runs.LastMeasurement!.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "ask-teacher-sla").And.Contain(BackgroundJobMetrics.OutcomeTag, "Failed");
         LoggedLevels().Should().Equal(LogLevel.Error);
+    }
+
+    [Fact]
+    public async Task Sweep_ReschedulesBeforeListingDueThreads()
+    {
+        _sender.Send(Arg.Any<GetDueSlaThreadIdsQuery>(), Arg.Any<CancellationToken>()).Returns(_ =>
+        {
+            Complete();
+            return Task.FromResult<List<Guid>>([]);
+        });
+
+        using var worker = await RunAsync(new AskTeacherOptions());
+
+        Received.InOrder(() =>
+        {
+            _sender.Send(Arg.Is<RescheduleTeacherThreadSlasCommand>(x => x.BatchSize == 50), Arg.Any<CancellationToken>());
+            _sender.Send(Arg.Any<GetDueSlaThreadIdsQuery>(), Arg.Any<CancellationToken>());
+        });
+    }
+
+    [Fact]
+    public async Task Sweep_FullRescheduleBatch_SendsAgainUntilShort()
+    {
+        _sender.Send(Arg.Any<RescheduleTeacherThreadSlasCommand>(), Arg.Any<CancellationToken>()).Returns(50, 3);
+        _sender.Send(Arg.Any<GetDueSlaThreadIdsQuery>(), Arg.Any<CancellationToken>()).Returns(_ =>
+        {
+            Complete();
+            return Task.FromResult<List<Guid>>([]);
+        });
+
+        using var worker = await RunAsync(new AskTeacherOptions());
+
+        await _sender.Received(2).Send(Arg.Any<RescheduleTeacherThreadSlasCommand>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Sweep_RescheduleFails_LogsErrorAndStillProcessesDueThreads()
+    {
+        var threadId = Guid.CreateVersion7();
+        _sender.Send(Arg.Any<RescheduleTeacherThreadSlasCommand>(), Arg.Any<CancellationToken>()).Returns(Task.FromException<int>(new InvalidOperationException()));
+        _sender.Send(Arg.Any<GetDueSlaThreadIdsQuery>(), Arg.Any<CancellationToken>()).Returns(Task.FromResult<List<Guid>>([threadId]));
+        _sender.Send(Arg.Is<ProcessTeacherThreadSlaCommand>(x => x.ThreadId == threadId), Arg.Any<CancellationToken>()).Returns(_ =>
+        {
+            Complete();
+            return Task.CompletedTask;
+        });
+
+        using var worker = await RunAsync(new AskTeacherOptions());
+
+        LoggedLevels().Should().Equal(LogLevel.Error);
+        await _sender.Received(1).Send(Arg.Is<ProcessTeacherThreadSlaCommand>(x => x.ThreadId == threadId), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Sweep_RescheduleLosesConcurrencyRace_LogsWarning()
+    {
+        _sender.Send(Arg.Any<RescheduleTeacherThreadSlasCommand>(), Arg.Any<CancellationToken>()).Returns(Task.FromException<int>(new ConflictCoreException(ErrorCodes.TeacherThreadModifiedConcurrently)));
+        _sender.Send(Arg.Any<GetDueSlaThreadIdsQuery>(), Arg.Any<CancellationToken>()).Returns(_ =>
+        {
+            Complete();
+            return Task.FromResult<List<Guid>>([]);
+        });
+
+        using var worker = await RunAsync(new AskTeacherOptions());
+
+        LoggedLevels().Should().Equal(LogLevel.Warning);
     }
 
     private async Task<TeacherThreadSlaWorker> RunAsync(AskTeacherOptions options)

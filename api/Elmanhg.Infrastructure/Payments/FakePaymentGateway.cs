@@ -1,16 +1,15 @@
 using Core.Errors;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Payments;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Infrastructure.Payments;
 
-public sealed class FakePaymentGateway(IOptions<PaymentsOptions> paymentsOptions, IHostEnvironment hostEnvironment) : IPaymentGateway
+public sealed class FakePaymentGateway(IOptions<PaymentsOptions> paymentsOptions) : IPaymentGateway
 {
     public bool SupportsSimulatedCompletion => IsAllowed;
 
-    private bool IsAllowed => !hostEnvironment.IsProduction() && (hostEnvironment.IsDevelopment() || paymentsOptions.Value.AllowFakePayments);
+    private bool IsAllowed => paymentsOptions.Value.AllowFakePayments;
 
     public Task<PaymentCheckout> StartCheckoutAsync(PaymentCheckoutRequest request, CancellationToken cancellationToken)
     {

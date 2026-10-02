@@ -52,6 +52,7 @@ An array with one element per changed audited entity. Property keys are camelCas
 |---|---|---|---|
 | AssignTeacherSubject | `Teacher.AssignSubject` | Teacher | command |
 | UnassignTeacherSubject | `Teacher.UnassignSubject` | Teacher | command |
+| SetTeacherPhoneNumber | `Teacher.SetPhoneNumber` | Teacher | command (no diff: `User` is not an audited entity; the number is never stored in the audit log) |
 | CreateSubject | `Subject.Create` | Subject | result |
 | UpdateSubject | `Subject.Update` | Subject | command |
 | ReorderSubject | `Subject.Reorder` | Subject | command (the diff lists every sibling whose `Order` changed) |
@@ -97,8 +98,13 @@ An array with one element per changed audited entity. Property keys are camelCas
 | GrantComplimentarySubscription | `Subscription.GrantComplimentary` | Subscription | result (the diff shows the new Subscription with a null `paymobReference`) |
 | ReviewEssayGrade | `EssayGrade.Review` | EssayGrade | command (the diff shows the status and the review fields; the student's answer never changes, so it is not in the diff) |
 | ReviewMathStepGrade | `MathStepGrade.Review` | MathStepGrade | command (the same for a math step grade) |
+| UpdateRuntimeSetting | `RuntimeSetting.Update` | RuntimeSetting | result (the diff shows `key` and `value`; a null value means the configuration default) |
+| ResetRuntimeSetting | `RuntimeSetting.Reset` | RuntimeSetting | result (the diff shows `value` → null; resetting a setting that is not overridden writes no change and the row has no diff) |
+| CreateExamPeriod | `ExamPeriod.Create` | ExamPeriod | result |
+| UpdateExamPeriod | `ExamPeriod.Update` | ExamPeriod | command |
+| DeleteExamPeriod | `ExamPeriod.Delete` | ExamPeriod | command |
 
-Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`, `ExamBlueprint`, `Subscription`, `Payment`, `TrainingExport`, `EssayGrade`, `MathStepGrade`.
+Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`, `ExamBlueprint`, `Subscription`, `Payment`, `TrainingExport`, `EssayGrade`, `MathStepGrade`, `RuntimeSettingOverride`, `ExamPeriod`.
 
 `QuestionRevision` and `QuestionDecision` rows are an append-only history and are not diffed.
 

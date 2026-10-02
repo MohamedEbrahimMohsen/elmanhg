@@ -13,6 +13,7 @@ import { Button } from '@/shared/ui/button';
 import { Dialog, DialogContent } from '@/shared/ui/dialog';
 import { useInviteUser } from '../hooks/useInviteUser';
 import { inviteUserSchema, type InviteUserValues } from '../schemas/inviteUserSchema';
+import { phoneNumberServerErrorFields } from '../schemas/teacherPhoneSchema';
 
 export interface InviteUserDialogProps {
   role: 'Teacher' | 'Admin' | null;
@@ -26,6 +27,7 @@ interface InviteDone {
 }
 
 const serverErrorFields: ServerErrorFields<InviteUserValues> = {
+  ...phoneNumberServerErrorFields,
   EMAIL_ALREADY_REGISTERED: 'email',
   EMAIL_INVALID: 'email',
   EMAIL_TOO_LONG: 'email',
@@ -40,7 +42,7 @@ export function InviteUserDialog({ role, onOpenChange }: InviteUserDialogProps) 
   const [done, setDone] = useState<InviteDone | null>(null);
   const form = useForm<InviteUserValues>({
     resolver: zodResolver(inviteUserSchema),
-    defaultValues: { displayName: '', email: '' },
+    defaultValues: { displayName: '', email: '', phoneNumber: '' },
   });
   const link = new URL(router.buildLocation({ to: '/accept-invite' }).href, document.baseURI).href;
 
@@ -88,7 +90,8 @@ export function InviteUserDialog({ role, onOpenChange }: InviteUserDialogProps) 
             form={form}
             serverErrorFields={serverErrorFields}
             onSubmit={async (values) => {
-              const result = await invite({ ...values, role: role ?? 'Teacher' });
+              const phoneNumber = role === 'Teacher' && values.phoneNumber !== '' ? values.phoneNumber : null;
+              const result = await invite({ ...values, phoneNumber, role: role ?? 'Teacher' });
               setDone({ name: values.displayName, email: values.email, emailSent: result.emailSent });
             }}
           >
@@ -101,6 +104,16 @@ export function InviteUserDialog({ role, onOpenChange }: InviteUserDialogProps) 
               autoComplete="off"
               dir="ltr"
             />
+            {role === 'Teacher' ? (
+              <TextField<InviteUserValues>
+                name="phoneNumber"
+                label={t('invite.phone')}
+                description={t('invite.phoneHint')}
+                type="tel"
+                autoComplete="off"
+                dir="ltr"
+              />
+            ) : null}
             <SubmitButton>{t('invite.submit')}</SubmitButton>
           </Form>
         )}

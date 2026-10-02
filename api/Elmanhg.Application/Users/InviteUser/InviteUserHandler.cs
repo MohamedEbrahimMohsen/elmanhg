@@ -25,6 +25,11 @@ public sealed class InviteUserHandler(UserManager<User> userManager, IInvitation
         }
 
         var user = request.Role == UserRole.Admin ? User.CreateAdmin(displayName, email) : User.CreateTeacher(displayName, email);
+        if (request.PhoneNumber is not null)
+        {
+            user.SetContactPhoneNumber(request.PhoneNumber, currentUserService.UserId.Value);
+        }
+
         var result = await userManager.CreateAsync(user).ConfigureAwait(false);
         if (!result.Succeeded)
         {

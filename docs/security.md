@@ -127,8 +127,10 @@ Not needed, therefore not allowed: no iframes (lesson videos are plain links), n
 |---|---|---|---|
 | `POST /api/lessons/{id}/images` | `.png` `.jpg` `.jpeg` `.webp` `.gif` | PNG, JPEG, `RIFF….WEBP`, `GIF87a`/`GIF89a` | `Content:LessonImageMaxSizeInMb` (5) |
 | `POST /api/lessons/{id}/diagram-images` | `.png` `.jpg` `.jpeg` `.webp` | PNG, JPEG, WEBP | `Content:LessonImageMaxSizeInMb` (5) |
-| `POST /api/teacher-threads` (photo) | `.png` `.jpg` `.jpeg` `.webp` | PNG, JPEG, WEBP | `AskTeacher:ImageMaxSizeInMb` (5) |
-| `POST /api/teacher-inbox/{id}/voice-drafts` | `.webm` `.ogg` `.m4a` `.mp4` | EBML, `OggS`, `ftyp` | `AskTeacher:VoiceMaxSizeInMb` (5) |
+| `POST /api/teacher-threads` (photo) | `.png` `.jpg` `.jpeg` `.webp` | PNG, JPEG, WEBP | `uploads.askTeacherImageMaxSizeInMb` runtime setting (default `AskTeacher:ImageMaxSizeInMb` 5, at most 9 MB) |
+| `POST /api/teacher-inbox/{id}/voice-drafts` | `.webm` `.ogg` `.m4a` `.mp4` | EBML, `OggS`, `ftyp` | `uploads.voiceReplyMaxSizeInMb` runtime setting (default `AskTeacher:VoiceMaxSizeInMb` 5, at most 9 MB) |
+
+The admin Configuration API (`GET /api/configuration/infrastructure`, [configuration.md](configuration.md)) returns only whether each secret is set (`{ key, isSet }`), never its value.
 | `POST /api/question-imports/preview` and `POST /api/question-imports` | `.xlsx` | zip `50 4B 03 04` | `Content:QuestionImportMaxFileSizeInMb` (5) |
 | `POST /api/payments/paymob/webhook` | JSON | HMAC | 64 KiB |
 
@@ -175,7 +177,7 @@ No outbound URL comes from user input. Every HTTP client is a typed client whose
 | SMS OTP (disabled) | none | `OtpDelivery:Sms:Url` |
 | Object storage (R2 or S3) | none | `FileStorage:S3ServiceUrl` |
 
-The ai service calls Anthropic and OpenAI through their SDKs with fixed hosts ([ai-service.md](ai-service.md)).
+The ai service calls the configured OpenAI-compatible LLM endpoint (`ELMANHG_AI_LLM_BASE_URL`, https only) and OpenAI (embeddings, Whisper) over `httpx2`, with hosts fixed by config ([ai-service.md](ai-service.md)).
 
 ## 10. Logging and audit
 

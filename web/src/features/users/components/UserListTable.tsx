@@ -11,6 +11,7 @@ export interface UserListTableProps {
   onSuspend: (item: UserSummaryResult) => void;
   onReactivate: (item: UserSummaryResult) => void;
   onGrant: (item: UserSummaryResult, plan: GrantablePlan) => void;
+  onEditPhone: (item: UserSummaryResult) => void;
 }
 
 const headerKeys: Record<UserListTab, readonly string[]> = {
@@ -19,7 +20,15 @@ const headerKeys: Record<UserListTab, readonly string[]> = {
   admins: ['name', 'contact', 'status', 'actions'],
 };
 
-export function UserListTable({ tab, items, currentUserId, onSuspend, onReactivate, onGrant }: UserListTableProps) {
+export function UserListTable({
+  tab,
+  items,
+  currentUserId,
+  onSuspend,
+  onReactivate,
+  onGrant,
+  onEditPhone,
+}: UserListTableProps) {
   const { t } = useTranslation('users');
 
   return (
@@ -49,6 +58,7 @@ export function UserListTable({ tab, items, currentUserId, onSuspend, onReactiva
               onSuspend={onSuspend}
               onReactivate={onReactivate}
               onGrant={onGrant}
+              onEditPhone={onEditPhone}
             />
           ))}
         </tbody>

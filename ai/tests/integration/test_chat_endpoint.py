@@ -55,7 +55,7 @@ async def test_chat_valid_request_returns_reply(
         "costUsd",
         "citations",
     }
-    assert body["promptVersion"] == "v2"
+    assert body["promptVersion"] == "v3"
     assert body["citations"] == []
     assert len(fake_model.requests) == 1
 

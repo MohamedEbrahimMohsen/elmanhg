@@ -1,10 +1,9 @@
 [project]
 name = "elmanhg-ai"
 version = "0.1.0"
-description = "Elmanhg AI service: avatar chat over the Claude API."
+description = "Elmanhg AI service: avatar chat and grading over an OpenAI-compatible LLM API."
 requires-python = ">=3.13,<3.15"
 dependencies = [
-    "anthropic==1.7.0",
     "fastapi==0.141.1",
     "httpx2==2.13.0",
     "opentelemetry-api==1.44.0",

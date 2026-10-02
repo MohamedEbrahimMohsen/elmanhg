@@ -44,7 +44,8 @@
     { "key": "studentId", "value": "" },
     { "key": "invitedUserId", "value": "" },
     { "key": "invitedEmail", "value": "invited.teacher@elmanhg.local" },
-    { "key": "invitePassword", "value": "Invited2026" }
+    { "key": "invitePassword", "value": "Invited2026" },
+    { "key": "examPeriodId", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -507,6 +508,36 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Set teacher phone number",
+          "description": "Sets the teacher's WhatsApp number used by the out-of-app reminder. Send \"phoneNumber\": null to remove the number. Same format as the student phone sign-in (11 digits, 010/011/012/015). Teachers only (400 PHONE_NUMBER_TEACHERS_ONLY).",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/teachers/{{teacherId}}/phone-number",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "teachers", "{{teacherId}}", "phone-number"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phoneNumber\": \"01012345678\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -561,7 +592,7 @@
         },
         {
           "name": "Invite teacher",
-          "description": "Creates a password-less teacher and, when Resend is configured, emails the /accept-invite link. The email is never part of the link.",
+          "description": "Creates a password-less teacher and, when Resend is configured, emails the /accept-invite link. The email is never part of the link. phoneNumber is optional and teachers only (the WhatsApp number for reminders); omit it or send null for none.",
           "event": [
             {
               "listen": "test",
@@ -595,7 +626,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"role\": \"Teacher\",\n  \"displayName\": \"Invited teacher\",\n  \"email\": \"{{invitedEmail}}\"\n}",
+              "raw": "{\n  \"role\": \"Teacher\",\n  \"displayName\": \"Invited teacher\",\n  \"email\": \"{{invitedEmail}}\",\n  \"phoneNumber\": \"01012345678\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3642,6 +3673,31 @@
       "name": "AskTeacher",
       "item": [
         {
+          "name": "Get reply deadline",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200 or 403\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 403]); });",
+                  "if (pm.response.code === 200) { pm.test(\"returns the deadline\", function () { pm.expect(pm.response.json()).to.have.property(\"slaDueAt\"); }); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/teacher-threads/reply-deadline",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "teacher-threads", "reply-deadline"]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Get thread context",
           "event": [
             {
@@ -5047,7 +5103,7 @@
     },
     {
       "name": "AdminPayments",
-      "description": "Admin only (Payments.Manage). Sign in as an admin first. Refund uses checkoutPaymentId from the Subscriptions folder (fake-completed). A refund needs an Idempotency-Key header.",
+      "description": "Admin only (Payments.Manage). Sign in as an admin first. Refund uses checkoutPaymentId from the Subscriptions folder (fake-completed). A refund needs an Idempotency-Key header and the features.refundsEnabled flag on (off by default): run \"Turn on refunds\" first; \"Reset refunds flag\" turns it back off.",
       "item": [
         {
           "name": "Get payment log",
@@ -5110,6 +5166,60 @@
                 { "key": "pageNumber", "value": "1" },
                 { "key": "pageSize", "value": "20" }
               ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get payment settings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"has refunds flag\", function () { pm.expect(typeof pm.response.json().refundsEnabled).to.eql(\"boolean\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "settings"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Turn on refunds",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/settings/features.refundsEnabled",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "settings", "features.refundsEnabled"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": true\n}",
+              "options": { "raw": { "language": "json" } }
             }
           },
           "response": []
@@ -5206,6 +5316,30 @@
               "mode": "raw",
               "raw": "{\n  \"reason\": \"Duplicate charge\"\n}",
               "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reset refunds flag",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/settings/features.refundsEnabled/reset",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "settings", "features.refundsEnabled", "reset"]
             }
           },
           "response": []
@@ -5573,6 +5707,227 @@
               "mode": "raw",
               "raw": "{\n  \"message\": \"TypeError: x is undefined\",\n  \"errorName\": \"TypeError\",\n  \"stack\": \"at App (main.js:1:1)\",\n  \"source\": \"Window\",\n  \"path\": \"/student\"\n}",
               "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Configuration",
+      "description": "Admin only (Configuration.Manage). Sign in as an admin first so accessToken is set.",
+      "item": [
+        {
+          "name": "Get runtime settings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns groups\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "settings"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update runtime setting",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"is overridden\", function () { pm.expect(pm.response.json().isOverridden).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/settings/plans.freeDailyQuizQuestions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "settings", "plans.freeDailyQuizQuestions"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": 10\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reset runtime setting",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"uses the default\", function () { pm.expect(pm.response.json().isOverridden).to.eql(false); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/settings/plans.freeDailyQuizQuestions/reset",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "settings", "plans.freeDailyQuizQuestions", "reset"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get infrastructure configuration",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"secrets carry only key and isSet\", function () { const secrets = pm.response.json().secrets; pm.expect(secrets).to.be.an(\"array\"); secrets.forEach(function (secret) { pm.expect(Object.keys(secret).sort()).to.eql([\"isSet\", \"key\"]); }); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/infrastructure",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "infrastructure"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create exam period",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns the period\", function () { pm.expect(pm.response.json().name).to.eql(\"Final exams\"); });",
+                  "pm.collectionVariables.set(\"examPeriodId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/exam-periods",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "exam-periods"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Final exams\",\n  \"startDate\": \"2027-06-01\",\n  \"endDate\": \"2027-07-15\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get exam periods",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns a list\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/exam-periods",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "exam-periods"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update exam period",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"saves the new name\", function () { pm.expect(pm.response.json().name).to.eql(\"Final exams (second round)\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/exam-periods/{{examPeriodId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "exam-periods", "{{examPeriodId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Final exams (second round)\",\n  \"startDate\": \"2027-06-05\",\n  \"endDate\": \"2027-07-20\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete exam period",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/configuration/exam-periods/{{examPeriodId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "configuration", "exam-periods", "{{examPeriodId}}"]
             }
           },
           "response": []

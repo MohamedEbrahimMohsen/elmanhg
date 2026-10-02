@@ -500,6 +500,42 @@
           }
         ]
       }
+    },
+    "/v1/configuration": {
+      "get": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Get Configuration",
+        "operationId": "configuration_get_configuration",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -681,6 +717,62 @@
           "content"
         ],
         "title": "ChatSourceIn"
+      },
+      "ConfigurationOut": {
+        "properties": {
+          "llmProvider": {
+            "type": "string",
+            "title": "Llmprovider"
+          },
+          "chatModel": {
+            "type": "string",
+            "title": "Chatmodel"
+          },
+          "essayGradingModel": {
+            "type": "string",
+            "title": "Essaygradingmodel"
+          },
+          "mathStepGradingModel": {
+            "type": "string",
+            "title": "Mathstepgradingmodel"
+          },
+          "embeddingProvider": {
+            "type": "string",
+            "title": "Embeddingprovider"
+          },
+          "embeddingModel": {
+            "type": "string",
+            "title": "Embeddingmodel"
+          },
+          "transcriptionProvider": {
+            "type": "string",
+            "title": "Transcriptionprovider"
+          },
+          "transcriptionModel": {
+            "type": "string",
+            "title": "Transcriptionmodel"
+          },
+          "secrets": {
+            "items": {
+              "$ref": "#/components/schemas/SecretStatusOut"
+            },
+            "type": "array",
+            "title": "Secrets"
+          }
+        },
+        "type": "object",
+        "required": [
+          "llmProvider",
+          "chatModel",
+          "essayGradingModel",
+          "mathStepGradingModel",
+          "embeddingProvider",
+          "embeddingModel",
+          "transcriptionProvider",
+          "transcriptionModel",
+          "secrets"
+        ],
+        "title": "ConfigurationOut"
       },
       "ContextBundleIn": {
         "properties": {
@@ -1469,6 +1561,24 @@
           "description"
         ],
         "title": "RubricLevelIn"
+      },
+      "SecretStatusOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "isSet": {
+            "type": "boolean",
+            "title": "Isset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "isSet"
+        ],
+        "title": "SecretStatusOut"
       },
       "StepGradeOut": {
         "properties": {

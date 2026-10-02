@@ -16,6 +16,7 @@ using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Tests.Application.Features.Subscriptions;
 using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -50,7 +51,7 @@ public sealed class SubmitAnswerFreeTierTests
         _lessonRepository.GetPublishedSiblingPositionsAsync(lesson.Id, Arg.Any<CancellationToken>()).Returns([LessonPosition.Of(lesson), new LessonPosition(Guid.NewGuid(), lesson.UnitId, 2, lesson.CreationDate)]);
         SubscriptionRepositoryStub.Stub(_subscriptionRepository);
         StubUsedToday(0);
-        _handler = new SubmitAnswerHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _lessonRepository, _subscriptionRepository, _essayGradeRepository, Substitute.For<IMathStepGradeRepository>(), Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), Options.Create(new ContentOptions { QuestionEssayAnswerMaxLength = 20000 }), Options.Create(new SessionsOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), Substitute.For<IAiMathCheckClient>(), Substitute.For<IMathCheckRateLimiter>(), Substitute.For<IFileStorage>());
+        _handler = new SubmitAnswerHandler(_sessionRepository, _questionRepository, _questionMasteryRepository, _lessonRepository, _subscriptionRepository, _essayGradeRepository, Substitute.For<IMathStepGradeRepository>(), Options.Create(new MasteryOptions()), Options.Create(new SubscriptionsOptions()), Options.Create(new ContentOptions { QuestionEssayAnswerMaxLength = 20000 }), Options.Create(new SessionsOptions()), _timeProvider, _currentUserService, Substitute.For<ILocalizer>(), Substitute.For<IAiMathCheckClient>(), Substitute.For<IMathCheckRateLimiter>(), Substitute.For<IFileStorage>(), new FakeRuntimeSettings());
     }
 
     [Fact]

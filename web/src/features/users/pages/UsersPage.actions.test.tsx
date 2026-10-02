@@ -8,6 +8,7 @@ import { getGrantComplimentarySubscriptionMockHandler } from '@/shared/api/gener
 import { getGetSubjectsMockHandler } from '@/shared/api/generated/subjects/subjects.msw';
 import {
   getAssignTeacherSubjectMockHandler,
+  getSetTeacherPhoneNumberMockHandler,
   getUnassignTeacherSubjectMockHandler,
 } from '@/shared/api/generated/teachers/teachers.msw';
 import {
@@ -181,7 +182,7 @@ describe('UsersPage actions', () => {
     expect(
       within(done).getByText('The invitation email was not sent, so share the link yourself.'),
     ).toBeInTheDocument();
-    expect(bodies).toEqual([{ role: 'Teacher', displayName: 'Omar', email: 'omar@example.test' }]);
+    expect(bodies).toEqual([{ role: 'Teacher', displayName: 'Omar', email: 'omar@example.test', phoneNumber: null }]);
   });
 
   it('the invite shows EMAIL_ALREADY_REGISTERED under the email field', async () => {
@@ -241,5 +242,124 @@ describe('UsersPage actions', () => {
 
     expect(await screen.findByText('Plan granted.')).toBeInTheDocument();
     expect(grants).toEqual([{ plan: 'Base', period: 'Termly' }]);
+  });
+
+  it('the invite teacher dialog sends the optional WhatsApp number', async () => {
+    const bodies: unknown[] = [];
+    serveUsers(() => []);
+    server.use(
+      getInviteUserMockHandler(async ({ request }) => {
+        bodies.push(await request.json());
+        return { userId: listTeacherId, emailSent: true };
+      }),
+    );
+    const user = userEvent.setup();
+    await openUsers('/admin/users?tab=teachers');
+
+    await user.click(await screen.findByRole('button', { name: 'Invite teacher' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Invite teacher' });
+    await user.type(within(dialog).getByLabelText('Name'), 'Omar');
+    await user.type(within(dialog).getByLabelText('Email'), 'omar@example.test');
+    await user.type(within(dialog).getByLabelText('WhatsApp number (optional)'), '01012345678');
+    await user.click(within(dialog).getByRole('button', { name: 'Create invitation' }));
+
+    expect(await screen.findByRole('dialog', { name: 'Invitation created' })).toBeInTheDocument();
+    expect(bodies).toEqual([
+      { role: 'Teacher', displayName: 'Omar', email: 'omar@example.test', phoneNumber: '01012345678' },
+    ]);
+  });
+
+  it('the invite admin dialog has no WhatsApp field', async () => {
+    const bodies: unknown[] = [];
+    serveUsers(() => []);
+    server.use(
+      getInviteUserMockHandler(async ({ request }) => {
+        bodies.push(await request.json());
+        return { userId: listAdminId, emailSent: true };
+      }),
+    );
+    const user = userEvent.setup();
+    await openUsers('/admin/users?tab=admins');
+
+    await user.click(await screen.findByRole('button', { name: 'Invite admin' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Invite admin' });
+    expect(within(dialog).queryByLabelText('WhatsApp number (optional)')).toBeNull();
+    await user.type(within(dialog).getByLabelText('Name'), 'Sara');
+    await user.type(within(dialog).getByLabelText('Email'), 'sara@example.test');
+    await user.click(within(dialog).getByRole('button', { name: 'Create invitation' }));
+
+    expect(await screen.findByRole('dialog', { name: 'Invitation created' })).toBeInTheDocument();
+    expect(bodies).toEqual([{ role: 'Admin', displayName: 'Sara', email: 'sara@example.test', phoneNumber: null }]);
+  });
+
+  it('sets a teacher WhatsApp number from the row', async () => {
+    const saved: unknown[] = [];
+    serveUsers(() => [userSummary({ ...teacher([]), maskedPhone: null, maskedEmail: 'o***@example.test' })]);
+    server.use(
+      getGetSubjectsMockHandler([physics]),
+      getSetTeacherPhoneNumberMockHandler(async ({ request, params }) => {
+        saved.push({ teacherId: params.teacherId, body: await request.json() });
+      }),
+    );
+    const user = userEvent.setup();
+    await openUsers('/admin/users?tab=teachers');
+
+    const row = await screen.findByRole('row', { name: /Omar Teacher/ });
+    await user.click(within(row).getByRole('button', { name: 'WhatsApp number' }));
+    const dialog = await screen.findByRole('dialog', { name: 'WhatsApp number for Omar Teacher' });
+    expect(within(dialog).getByText('No number yet.')).toBeInTheDocument();
+    expect(within(dialog).queryByRole('button', { name: 'Remove number' })).toBeNull();
+    await user.type(within(dialog).getByLabelText('New WhatsApp number'), '01012345678');
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('WhatsApp number saved.')).toBeInTheDocument();
+    expect(saved).toEqual([{ teacherId: listTeacherId, body: { phoneNumber: '01012345678' } }]);
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'WhatsApp number for Omar Teacher' })).toBeNull();
+    });
+  });
+
+  it('removes a teacher WhatsApp number', async () => {
+    const saved: unknown[] = [];
+    serveUsers(() => [userSummary({ ...teacher([]), maskedPhone: '010*****678' })]);
+    server.use(
+      getGetSubjectsMockHandler([physics]),
+      getSetTeacherPhoneNumberMockHandler(async ({ request }) => {
+        saved.push(await request.json());
+      }),
+    );
+    const user = userEvent.setup();
+    await openUsers('/admin/users?tab=teachers');
+
+    const row = await screen.findByRole('row', { name: /Omar Teacher/ });
+    await user.click(within(row).getByRole('button', { name: 'WhatsApp number' }));
+    const dialog = await screen.findByRole('dialog', { name: 'WhatsApp number for Omar Teacher' });
+    expect(within(dialog).getByText(/^Current number: \u2066?010\*{5}678\u2069?$/u)).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: 'Remove number' }));
+
+    expect(await screen.findByText('WhatsApp number removed.')).toBeInTheDocument();
+    expect(saved).toEqual([{ phoneNumber: null }]);
+  });
+
+  it('shows a server phone error under the field', async () => {
+    serveUsers(() => [userSummary({ ...teacher([]), maskedPhone: null })]);
+    server.use(
+      getGetSubjectsMockHandler([physics]),
+      http.put('*/api/teachers/:teacherId/phone-number', () =>
+        HttpResponse.json({ code: 'VALIDATION_PHONE_NUMBER_INVALID_CELLULAR_CODE', message: '' }, { status: 422 }),
+      ),
+    );
+    const user = userEvent.setup();
+    await openUsers('/admin/users?tab=teachers');
+
+    const row = await screen.findByRole('row', { name: /Omar Teacher/ });
+    await user.click(within(row).getByRole('button', { name: 'WhatsApp number' }));
+    const dialog = await screen.findByRole('dialog', { name: 'WhatsApp number for Omar Teacher' });
+    await user.type(within(dialog).getByLabelText('New WhatsApp number'), '01512345678');
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+    expect(await within(dialog).findByText('Mobile number must start with 010, 011, 012 or 015.')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText('New WhatsApp number')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByRole('dialog', { name: 'WhatsApp number for Omar Teacher' })).toBeInTheDocument();
   });
 });

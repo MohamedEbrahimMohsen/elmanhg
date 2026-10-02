@@ -1,9 +1,10 @@
 using Elmanhg.Infrastructure.Payments.Paymob;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Infrastructure.Payments;
 
-public sealed class PaymentsOptionsValidator : IValidateOptions<PaymentsOptions>
+public sealed class PaymentsOptionsValidator(IHostEnvironment hostEnvironment) : IValidateOptions<PaymentsOptions>
 {
     public ValidateOptionsResult Validate(string? name, PaymentsOptions options)
     {
@@ -11,6 +12,11 @@ public sealed class PaymentsOptionsValidator : IValidateOptions<PaymentsOptions>
         if (options.AttemptTimeoutSeconds > options.TotalTimeoutSeconds)
         {
             failures.Add("Payments:AttemptTimeoutSeconds must not exceed Payments:TotalTimeoutSeconds.");
+        }
+
+        if (options.AllowFakePayments && hostEnvironment.IsProduction())
+        {
+            failures.Add("Payments:AllowFakePayments must not be true in Production: the fake gateway grants plans without payment.");
         }
 
         if (options.Provider == PaymentProvider.Paymob)

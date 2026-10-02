@@ -1,0 +1,19 @@
+{
+  "errors": {
+    "RUNTIME_SETTING_KEY_REQUIRED": "The setting key is required.",
+    "RUNTIME_SETTING_VALUE_INVALID": "The value is not valid for this setting or is outside its allowed range.",
+    "RUNTIME_SETTING_NOT_FOUND": "The setting was not found.",
+    "RUNTIME_SETTING_MODIFIED_CONCURRENTLY": "Someone else changed this setting at the same time. Refresh and try again.",
+    "ASK_TEACHER_REMINDER_ORDER_INVALID": "The first reminder must come before the second, and the second before the end of the reply time.",
+    "SLA_CALENDAR_WEEKEND_DAYS_INVALID": "At least one day of the week must count.",
+    "EXAM_PERIOD_ID_REQUIRED": "The exam period id is required.",
+    "EXAM_PERIOD_NAME_REQUIRED": "Enter a name for the exam period.",
+    "EXAM_PERIOD_NAME_TOO_LONG": "The exam period name is too long.",
+    "EXAM_PERIOD_START_DATE_REQUIRED": "Choose the first day of the period.",
+    "EXAM_PERIOD_END_DATE_REQUIRED": "Choose the last day of the period.",
+    "EXAM_PERIOD_DATE_RANGE_INVALID": "The last day must be on or after the first day.",
+    "EXAM_PERIOD_TOO_LONG": "The exam period is longer than allowed.",
+    "EXAM_PERIOD_NOT_FOUND": "The exam period was not found.",
+    "EXAM_PERIOD_MODIFIED_CONCURRENTLY": "Someone else changed this exam period at the same time. Refresh and try again."
+  }
+}

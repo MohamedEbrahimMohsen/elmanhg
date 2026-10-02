@@ -33,6 +33,7 @@ public static class PermissionMatrixPolicies
             .AddPolicy(DefaultCodes.TeacherStatsViewOwn, policy => policy.RequireRole(Teacher))
             .AddPolicy(DefaultCodes.UsersManage, policy => policy.RequireRole(Admin))
             .AddPolicy(DefaultCodes.AuditLogView, policy => policy.RequireRole(Admin))
-            .AddPolicy(DefaultCodes.TrainingDataExport, policy => policy.RequireRole(Admin));
+            .AddPolicy(DefaultCodes.TrainingDataExport, policy => policy.RequireRole(Admin))
+            .AddPolicy(DefaultCodes.ConfigurationManage, policy => policy.RequireRole(Admin));
     }
 }

@@ -38,6 +38,7 @@ export const InviteUserBody = zod.object({
   "role": zod.enum(['Student', 'Teacher', 'Admin']),
   "displayName": zod.string(),
   "email": zod.string(),
+  "phoneNumber": zod.string().nullish(),
   "auditAction": zod.string().nullish(),
   "auditResourceType": zod.string().nullish(),
   "auditResourceId": zod.uuid().nullish()

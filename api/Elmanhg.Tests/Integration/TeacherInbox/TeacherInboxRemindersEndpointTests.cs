@@ -83,7 +83,7 @@ public sealed class TeacherInboxRemindersEndpointTests(ApiFactory factory)
         var thread = await SeedThreadAsync(factory, builder.ForStudent(student.Id).WithContext(ContextFor(subjectId)).Build());
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        context.TeacherThreadSlaEvents.Add(TeacherThreadSlaEvent.Record(thread.Id, TeacherThreadSlaEventKind.FirstReminder, thread.SlaDueAt, thread.TeacherId, thread.SubmittedAt.AddHours(12)));
+        context.TeacherThreadSlaEvents.Add(TeacherThreadSlaEvent.Record(thread.Id, TeacherThreadSlaEventKind.FirstReminder, thread.SlaWindowStartedAt, thread.SlaDueAt, thread.TeacherId, thread.SubmittedAt.AddHours(12)));
         await context.SaveChangesAsync(CancellationToken);
         return thread;
     }

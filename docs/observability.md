@@ -14,7 +14,7 @@ browser ──traceparent──▶ Caddy (web) ──▶ api ──traceparent�
                        Tempo   Prometheus ◀── blackbox probes (edge, api, ai)
                                  │  metrics      logs ▶ Loki
                                  ▼ alerts
-                           Alertmanager ──▶ email / webhook (host config)
+                           Alertmanager ──▶ email over SMTP (.env; Resend by default)
                        Grafana reads Prometheus, Loki, Tempo and Alertmanager
 ```
 
@@ -26,8 +26,8 @@ browser ──traceparent──▶ Caddy (web) ──▶ api ──traceparent�
 ## 2. Turning it on
 
 1. In `.env`: `COMPOSE_PROFILES=ai,observability`, `OTLP_ENDPOINT=http://otel-collector:4317`, `GRAFANA_ADMIN_PASSWORD=$(openssl rand -hex 16)`, and optionally `GRAFANA_PORT` (default 3000).
-2. `cp observability/alertmanager/alertmanager.example.yml alertmanager.yml && chmod 600 alertmanager.yml` (section 9).
-3. `bash deploy.sh sha-<7>`. It refuses the profile when the Grafana password or `alertmanager.yml` is missing, and waits for Prometheus, Alertmanager, the blackbox exporter and Grafana to be healthy.
+2. Optional, for alert email: set `ALERTMANAGER_EMAIL_TO`, `ALERTMANAGER_EMAIL_FROM` and the Resend key (`ALERTMANAGER_SMTP_PASSWORD` or `ALERTMANAGER_SMTP_PASSWORD_FILE`) in `.env` (section 9). Without them alerts go to the null receiver.
+3. `bash deploy.sh sha-<7>`. It refuses the profile when the Grafana password is missing or the alert email is half configured, and waits for Prometheus, Alertmanager, the blackbox exporter and Grafana to be healthy.
 4. Grafana listens on the host's loopback only: `ssh -L 3000:127.0.0.1:3000 deploy@<host>`, then open `http://localhost:3000` and sign in as `admin`. Sign-up and anonymous access are off. Nothing else in the stack publishes a port.
 
 Host sizing: the profile adds about 1.5 GB of RAM (memory limits: collector 256 MB, Prometheus 512 MB, Loki 512 MB, Tempo 512 MB, Grafana 256 MB, Alertmanager and blackbox 64 MB each). Use 8 GB of RAM with the profile.
@@ -145,7 +145,7 @@ Rules live in `deploy/observability/prometheus/rules/elmanhg.rules.yml`, and eac
 | `ApiUnhandledErrors` | any `UNHANDLED_EXCEPTION` in 10 m | warning | Errors across services; find the trace by its id and fix the bug |
 | `ProviderUnavailable` | ≥ 5 `AI_SERVICE_UNAVAILABLE`, `OTP_CHANNEL_UNAVAILABLE` or `PAYMENT_GATEWAY_UNAVAILABLE` in 15 m | warning | Check the provider's status page and the matching `*.env` keys |
 | `OtpDeliveryFailing` | ≥ 5 failed OTP sends in 15 m | critical | Nobody can sign in: check the WhatsApp or Resend credentials and quotas ([docs/otp-delivery.md](otp-delivery.md)) |
-| `AiModelErrors` | ≥ 5 failed model or embedding calls in 15 m | warning | Business → AI calls shows the `error.type`; check the Anthropic or OpenAI key and status |
+| `AiModelErrors` | ≥ 5 failed model or embedding calls in 15 m | warning | Business → AI calls shows the `error.type`; check the LLM or OpenAI key and the provider's status |
 | `ClientErrorSpike` | ≥ 50 browser errors in 15 m | warning | Loki: `{service_name="elmanhg-api"} |= "Client error from"`; usually a bad web deploy |
 | `PaymentNotificationNeedsReview` | any `FlaggedForReview` notification in 1 h | warning | Resolve it in the admin payment log ([docs/paymob.md](paymob.md)) |
 | `ApiHotPathSlow` | p95 of a sessions/exams/browse route > 1 s over 15 m with > 0.05 rps, for 15 m | warning | Service health → API p95 by route; compare with the [docs/performance.md](performance.md) budgets; check the DB ([docs/performance.md](performance.md) §6) and recent deploys |
@@ -157,12 +157,42 @@ Counter alerts ("any" or "≥ n in a window") sum `increase(x[w])` over series o
 
 ## 9. Alert delivery
 
-Alertmanager reads `deploy/alertmanager.yml` on the host (`ALERTMANAGER_CONFIG_FILE`), copied from `observability/alertmanager/alertmanager.example.yml`. The file is gitignored and should be `chmod 600`, because it holds SMTP passwords or webhook URLs. Alertmanager cannot expand environment variables, which is why this is a file and not `.env` keys.
+Alerts are delivered by email only. Alertmanager cannot expand environment variables, so the container's entrypoint, `deploy/observability/alertmanager/entrypoint.sh`, renders `/run/alertmanager/alertmanager.yml` from `.env` keys at every start, then runs Alertmanager. The file lives on a tmpfs: there is no host config file to copy, and nothing secret reaches the `alertmanager-data` volume. The SMTP password is copied (CR and LF stripped) to `/run/alertmanager/smtp-password` and referenced through `auth_password_file`, so it never appears in the rendered config.
 
-- The default receiver has no integrations: alerts show in Grafana (Alertmanager datasource) and in Alertmanager, but go nowhere. Live receivers are deferred until the dev adds real addresses.
-- Email: uncomment the `email` receiver. Resend SMTP: `smarthost: smtp.resend.com:587`, `auth_username: resend`, `auth_password: <Resend API key>`, `require_tls: true`, and a `from` address on a verified domain.
-- Webhook: uncomment the `webhook` receiver with the URL of any endpoint that accepts the Alertmanager payload (a chat bridge or a paging service).
-- Route critical alerts to the receiver with a `routes:` entry (`matchers: [severity="critical"]`), then `docker compose -f docker-compose.prod.yml restart alertmanager`. Grouping: by `alertname` and `severity`, 30 s wait, repeat every 4 h.
+**Null default.** With `ALERTMANAGER_EMAIL_TO`, `ALERTMANAGER_EMAIL_FROM` and the password all empty, the null receiver is rendered: the stack still starts, and alerts show in Grafana (Alertmanager datasource) and in Alertmanager, but go nowhere. A half-configured `.env` (some keys set, or a bad password file path) fails `deploy.sh`. A container started outside `deploy.sh` with missing or invalid keys logs `alertmanager-entrypoint: alert email not used: <reason>` and uses the null receiver.
+
+| Key (`.env`) | Default | Notes |
+|---|---|---|
+| `ALERTMANAGER_EMAIL_TO` | empty | recipient; a comma-separated list is accepted |
+| `ALERTMANAGER_EMAIL_FROM` | empty | sender on a domain verified in Resend |
+| `ALERTMANAGER_SMTP_SMARTHOST` | `smtp.resend.com:587` | `host:port`; 587 requires STARTTLS, `:465` uses implicit TLS |
+| `ALERTMANAGER_SMTP_USERNAME` | `resend` | |
+| `ALERTMANAGER_SMTP_PASSWORD` | empty | the Resend API key; secret |
+| `ALERTMANAGER_SMTP_PASSWORD_FILE` | empty | host path of a file holding the key; wins over `ALERTMANAGER_SMTP_PASSWORD`; starts with `./` or `/` |
+| `ALERTMANAGER_ENVIRONMENT` (set by compose) | `COMPOSE_PROJECT_NAME` | subject prefix, e.g. `[elmanhg-prod]` |
+
+Values may not contain a single quote or a line break. To keep the key out of `.env`, use a secret file (the container reads it as `nobody`, uid 65534):
+
+```bash
+mkdir -p secrets && chmod 700 secrets
+printf '%s' '<Resend API key>' > secrets/alertmanager-smtp-password
+chmod 400 secrets/alertmanager-smtp-password && sudo chown 65534:65534 secrets/alertmanager-smtp-password
+# .env: ALERTMANAGER_SMTP_PASSWORD_FILE=./secrets/alertmanager-smtp-password
+```
+
+**Routing.** Every rule goes to email, grouped by `alertname` and `severity`: 30 s wait, 5 m group interval, repeat every 4 h. Critical alerts wait 10 s and repeat every 1 h. Resolved notices are sent.
+
+**Apply changes** with `docker compose -f docker-compose.prod.yml --env-file .env up -d alertmanager` (a `restart` does not re-read `.env`).
+
+**Send a test alert:**
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env exec alertmanager amtool alert add alertname=ElmanhgTestAlert severity=warning --annotation=summary="Test alert" --alertmanager.url=http://127.0.0.1:9093
+```
+
+The firing email arrives after about 30 s. With no `--end`, the alert resolves after the default `resolve_timeout` of 5 m, and the resolved email follows within about 10 min. Delivery failures show in `docker compose -f docker-compose.prod.yml --env-file .env logs alertmanager` as `Notify for alerts failed`. `amtool` may log a warning that the annotation used the classic matcher parser; it is harmless.
+
+**Validation:** `docker compose -f docker-compose.prod.yml --env-file .env run --rm --no-deps alertmanager --check` prints the rendered config and runs `amtool check-config` on it. The smoke test checks the null, env-password and file-password variants.
 
 ## 10. External uptime monitor
 
@@ -198,7 +228,13 @@ A SaaS backend (Grafana Cloud, Honeycomb, any OTLP endpoint) can replace the loc
 | `.env` | `OTLP_ENDPOINT` | empty | `http://otel-collector:4317` with the profile, or a SaaS OTLP/gRPC URL; compose passes it to `api` and `ai` |
 | `.env` | `GRAFANA_ADMIN_PASSWORD` | empty | required with the profile |
 | `.env` | `GRAFANA_PORT` | `3000` | loopback only |
-| `.env` | `ALERTMANAGER_CONFIG_FILE` | `alertmanager.yml` | required with the profile |
+| `.env` | `ALERTMANAGER_EMAIL_TO` | empty | alert email recipient(s); section 9 |
+| `.env` | `ALERTMANAGER_EMAIL_FROM` | empty | sender on a Resend-verified domain |
+| `.env` | `ALERTMANAGER_SMTP_SMARTHOST` | `smtp.resend.com:587` | `:465` = implicit TLS |
+| `.env` | `ALERTMANAGER_SMTP_USERNAME` | `resend` | |
+| `.env` | `ALERTMANAGER_SMTP_PASSWORD` | empty | secret; Resend API key |
+| `.env` | `ALERTMANAGER_SMTP_PASSWORD_FILE` | empty | host path to the key file; wins; starts with `./` or `/` |
+| compose | `ALERTMANAGER_ENVIRONMENT` | `COMPOSE_PROJECT_NAME` | alert email subject prefix |
 | `api.env` | `Observability__ServiceName` | `elmanhg-api` | |
 | compose | `Observability__ServiceVersion` | `IMAGE_TAG` | code default `dev` |
 | compose | `Observability__OtlpEndpoint` | `OTLP_ENDPOINT` | must be an absolute http or https URI, or empty; anything else stops the API at startup |
@@ -224,6 +260,6 @@ The stores live in named volumes on the host (`prometheus-data`, `loki-data`, `t
 
 ## 15. Running it locally
 
-`bash deploy/smoke-test.sh` runs the whole stack with the profile on (`SMOKE_OBSERVABILITY=1`, the default). Before starting it validates every config: `caddy validate`, `promtool check config`, `promtool test rules`, `amtool check-config` and `otelcol validate`. After the usual checks it asserts, within 3 minutes each, that Prometheus has the API request metrics, the API and AI HTTP and model metrics, the client error metric, the job metrics, a passing edge probe and the loaded alert rules; that Tempo has the trace of a request by its `X-Trace-Id`; that Loki has API logs with that trace id and the Caddy access log line with the email redacted; that the three dashboards are provisioned; and that Alertmanager is ready.
+`bash deploy/smoke-test.sh` runs the whole stack with the profile on (`SMOKE_OBSERVABILITY=1`, the default). Before starting it validates every config: `caddy validate`, `promtool check config`, `promtool test rules`, `amtool check-config` on the null, env-password and file-password renderings, and `otelcol validate`. After the usual checks it asserts, within 3 minutes each, that Prometheus has the API request metrics, the API and AI HTTP and model metrics, the client error metric, the job metrics, a passing edge probe and the loaded alert rules; that Tempo has the trace of a request by its `X-Trace-Id`; that Loki has API logs with that trace id and the Caddy access log line with the email redacted; that the three dashboards are provisioned; and that Alertmanager is ready and accepts a test alert from `amtool`.
 
 On Windows, Docker Desktop may not expose `/var/lib/docker/containers` to the collector; run `SMOKE_OBSERVABILITY=0 bash deploy/smoke-test.sh` to skip the profile there. CI (Linux) is authoritative. Other knobs are in [docs/deployment.md](deployment.md) §12.

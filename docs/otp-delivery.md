@@ -2,6 +2,8 @@
 
 Sign-in codes (PRD §7.1) are sent through one of three **channels**: WhatsApp (Meta WhatsApp Cloud API), Email (Resend) and SMS (a generic HTTP gateway for a local telecom). `POST /api/auth/otp/send` takes `{ "phoneNumber": "010…" }` or `{ "email": "…" }` (exactly one; otherwise 422 `OTP_RECIPIENT_REQUIRED`) and returns the channel it used in `channel` (`WhatsApp`, `Sms` or `Email`). The code screen names that channel.
 
+The same WhatsApp and Resend accounts also send the one out-of-app teacher reminder per Ask a Teacher question (§10).
+
 Email codes sign in existing **student** email accounts through `POST /api/auth/login/email-code { verificationId }`. Teachers and admins get 403 `EMAIL_CODE_SIGN_IN_NOT_ALLOWED` and keep email and password. Phone sign-in and registration reject an email-verified code (400 `OTP_INVALID`), and the email-code sign-in rejects a phone-verified one.
 
 ## 1. Channels and routing
@@ -107,3 +109,50 @@ Each adapter is a typed `HttpClient` with the standard resilience handler (`Micr
 ## 9. Deployment
 
 On the host, set the `OtpDelivery__*` variables for every channel you switch on (section 2), with the secrets from the host's secret store. On a deployed host these go in `api.env`; the runbook is [docs/deployment.md](deployment.md). A staging host needs at least one real channel (Email through Resend is enough), because the fake logs codes in Development only.
+
+## 10. Non-OTP messages: teacher reminders
+
+The Ask a Teacher SLA sweep sends **one** reminder per question outside the app, on WhatsApp and/or by email ([ask-teacher.md](ask-teacher.md) → SLA → Out-of-app reminder). The on/off switch, the channels and the stage are runtime settings (`askTeacher.outOfAppReminder*`, [configuration.md](configuration.md)); everything below is deployment configuration.
+
+**Port and adapters.** `IMessageChannel` (Application, `Shared/Messaging`) sends an `OutboundMessage`; `TeacherThreadReminderMessage` is the only message type. `SendAsync` returns `false` on any provider failure and never throws (except on cancellation), so a failed reminder never fails the sweep. Adapters in `Infrastructure/Messaging`: `MetaWhatsAppMessageChannel` (Meta Cloud API, reuses the `OtpDelivery:WhatsApp` number, token and API version), `ResendEmailMessageChannel` (reuses the `OtpDelivery:Email` key and sender) and `FakeMessageChannel`.
+
+**Selection.**
+
+- WhatsApp: Meta when `OtpDelivery:WhatsApp` is enabled with `Provider=Meta` **and** `OutOfAppReminders:WhatsAppTemplateName` is set; otherwise the fake. OTP can go live before the reminder template is approved; the Configuration page then shows `teacherReminderWhatsApp` as Fake.
+- Email: Resend when `OtpDelivery:Email` is enabled with `Provider=Resend`; otherwise the fake (`teacherReminderEmail` on the Configuration page).
+
+**Configuration (`OutOfAppReminders`, none secret).**
+
+| Key | Default | Meaning |
+|---|---|---|
+| `WhatsAppTemplateName` | empty | Approved UTILITY template; empty keeps WhatsApp reminders on the fake. |
+| `WhatsAppLanguageCode` | `ar` | Template language (`ar`, `en`, `en_US`, …). |
+| `WhatsAppThreadButton` | `true` | Send the URL button parameter (the thread id). Set `false` if the template has no button. |
+| `EmailLanguage` | `ar` | `ar` or `en`: picks the email template and subject (users have no language preference). |
+| `EmailSubjectArabic` | «تذكير: سؤال طالب بانتظار ردك» | Subject when `EmailLanguage=ar`. |
+| `EmailSubjectEnglish` | "Reminder: a student question is waiting for your reply" | Subject when `EmailLanguage=en`. |
+| `ThreadLinkBaseUrl` | empty | `https://<SITE_ADDRESS>/teacher/thread`; the email links to `{ThreadLinkBaseUrl}/{threadId}`. |
+| `TimeZone` | `Africa/Cairo` | Time zone of the deadline shown in the message. |
+
+**Startup validation.** `OutOfAppReminderOptionsValidator` stops the boot when `TimeZone` is not a known time zone id, or when `ThreadLinkBaseUrl` is not an absolute `https` URL while `OtpDelivery:Email` uses Resend (or whenever it is set).
+
+**Going live: the WhatsApp utility template.**
+
+1. In the same WhatsApp Business Account, create a **UTILITY** template in Arabic (`ar`), for example `elmanhg_teacher_reminder`, with the body «تذكير: سؤال طالب في {{1}} (درس {{2}}) بانتظار ردك. موعد الرد: {{3}}.» and a **URL button** «فتح السؤال» to `https://<SITE_ADDRESS>/teacher/thread/{{1}}`. Example values: `الفيزياء`, `قوانين نيوتن`, `2026-12-01 12:00`, and a thread id for the button.
+2. Wait for approval, then set `OutOfAppReminders__WhatsAppTemplateName` (and `OutOfAppReminders__WhatsAppLanguageCode` if not `ar`).
+3. Give each teacher a WhatsApp number on `/admin/users` ([user-administration.md](user-administration.md)); a teacher without one gets the email only.
+
+| Variable | Value |
+|---|---|
+| `{{1}}` (body) | Subject name |
+| `{{2}}` (body) | Lesson name |
+| `{{3}}` (body) | Reply deadline, the thread's `SlaDueAt` as `yyyy-MM-dd HH:mm` in `TimeZone` |
+| Button `{{1}}` | Thread id (URL suffix) |
+
+**Email templates.** Embedded resources `Messaging/Templates/TeacherReminderEmail.{ar,en}.{html,txt}` with the placeholders `{{name}}`, `{{subject}}`, `{{lesson}}`, `{{deadline}}` and `{{link}}`. Values are HTML-encoded in the HTML part. Set `OutOfAppReminders__ThreadLinkBaseUrl` before switching Resend on.
+
+**Retries.** Meta: no retry (a POST without an idempotency key), as for OTP. Resend: retried with a deterministic `Idempotency-Key` `teacher-reminder-{threadId:N}-{userId:N}`, so Resend drops a duplicate send to the same teacher.
+
+**Logging.** One line per attempt with the thread id, user id, channel, message type, HTTP status and outcome: Information when delivered or skipped (no contact on file), Warning when failed. Logs never carry the phone number, the email address, the token, the API key or the message body.
+
+**Fakes.** `FakeMessageChannel` delivers nothing and reports success: in Development it logs an Information line, outside Development a Warning on every send. Tests replace both channels with recording fakes.

@@ -1,0 +1,19 @@
+{
+  "errors": {
+    "RUNTIME_SETTING_KEY_REQUIRED": "مفتاح الإعداد مطلوب.",
+    "RUNTIME_SETTING_VALUE_INVALID": "القيمة غير صالحة لهذا الإعداد أو خارج الحدود المسموح بها.",
+    "RUNTIME_SETTING_NOT_FOUND": "الإعداد غير موجود.",
+    "RUNTIME_SETTING_MODIFIED_CONCURRENTLY": "عدّل شخص آخر هذا الإعداد في نفس الوقت. حدّث الصفحة وحاول مرة أخرى.",
+    "ASK_TEACHER_REMINDER_ORDER_INVALID": "يجب أن يكون التذكير الأول قبل الثاني، والثاني قبل نهاية مهلة الرد.",
+    "SLA_CALENDAR_WEEKEND_DAYS_INVALID": "يجب أن يبقى يوم واحد على الأقل من الأسبوع محتسبا.",
+    "EXAM_PERIOD_ID_REQUIRED": "معرف فترة الامتحانات مطلوب.",
+    "EXAM_PERIOD_NAME_REQUIRED": "اسم فترة الامتحانات مطلوب.",
+    "EXAM_PERIOD_NAME_TOO_LONG": "اسم فترة الامتحانات أطول من المسموح.",
+    "EXAM_PERIOD_START_DATE_REQUIRED": "اختر أول يوم في الفترة.",
+    "EXAM_PERIOD_END_DATE_REQUIRED": "اختر آخر يوم في الفترة.",
+    "EXAM_PERIOD_DATE_RANGE_INVALID": "يجب أن يكون آخر يوم في نفس يوم البداية أو بعده.",
+    "EXAM_PERIOD_TOO_LONG": "فترة الامتحانات أطول من المسموح.",
+    "EXAM_PERIOD_NOT_FOUND": "فترة الامتحانات غير موجودة.",
+    "EXAM_PERIOD_MODIFIED_CONCURRENTLY": "عدل شخص آخر هذه الفترة في نفس الوقت. حدث الصفحة وحاول مرة أخرى."
+  }
+}

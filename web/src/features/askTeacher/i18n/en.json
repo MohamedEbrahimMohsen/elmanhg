@@ -44,7 +44,8 @@
     "textRequired": "Write your question",
     "lessonRequired": "Choose a lesson",
     "image": "Attach a photo of your work (optional)",
-    "slaNote": "Your question goes to the subject's teachers, who reply within {hours} hours.",
+    "slaNote": "Your question goes to the subject's teachers, who reply within {hours} hours: by {date} if you send it now.",
+    "slaCalendarNote": "Weekends outside exam periods do not count.",
     "send": "Send"
   },
   "toast": {

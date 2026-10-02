@@ -1,5 +1,6 @@
 using Core.Localization;
 using Core.OTP.Delivery;
+using Elmanhg.Application.Shared.Messaging;
 using Elmanhg.Infrastructure.Data.Context;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -20,7 +21,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     private const string PostgresImage = "pgvector/pgvector:pg17";
     private const string TestingEnvironment = "Testing";
     // Signs nothing outside this in-memory host; the JwtBearer options delegate only requires it to be non-empty.
-    private const string TestJwtKey = "elmanhg-tests-signing-key-not-a-secret-0123456789";
+    public const string TestJwtKey = "elmanhg-tests-signing-key-not-a-secret-0123456789";
     // Keys only the HMAC of OTP codes inside this in-memory host; codes are read back from OtpOutbox.
     private const string TestOtpSecret = "elmanhg-tests-otp-secret";
 
@@ -33,6 +34,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     private readonly PostgreSqlContainer _database = new PostgreSqlBuilder(PostgresImage).Build();
 
     public OtpOutbox Otp { get; } = new();
+
+    public MessageOutbox Messages { get; } = new();
 
     public LessonEventLog LessonEvents { get; } = new();
 
@@ -69,6 +72,10 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("TrainingExports:RetentionSweepEnabled", "false");
         // The sweep would race tests that record SLA events through the mediator.
         builder.UseSetting("AskTeacher:SlaSweepEnabled", "false");
+        builder.UseSetting("RuntimeSettings:CacheSeconds", "30");
+        builder.UseSetting("OutOfAppReminders:ThreadLinkBaseUrl", "https://elmanhg.test/teacher/thread");
+        // Tests run on any weekday and assert wall-clock deadlines; calendar tests turn skipping on through a runtime override.
+        builder.UseSetting("SlaCalendar:SkipWeekends", "false");
         builder.UseSetting("TrainingData:StudentIdHashKey", TestStudentIdHashKey);
         // Parallel tests share this host and the "unknown" client partition; RateLimiting tests set their own limits.
         builder.UseSetting("RateLimiting:AuthRefreshPermitLimit", "100000");
@@ -142,6 +149,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Sessions:DragDropPlacementsMaxCount"] = "20",
             ["Sessions:DragDropPlacedItemsMaxCount"] = "30",
             ["AiService:MathCheckTimeoutSeconds"] = "15",
+            ["AiService:ConfigurationTimeoutSeconds"] = "5",
             ["Mastery:CorrectThreshold"] = "0.8",
             ["Progress:StreakTimeZone"] = "Africa/Cairo",
             ["Progress:StreakMaxDays"] = "365",
@@ -258,6 +266,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             services.AddSingleton<IOtpChannel>(new RecordingOtpChannel(OtpChannel.WhatsApp, Otp));
             services.AddSingleton<IOtpChannel>(new RecordingOtpChannel(OtpChannel.Sms, Otp));
             services.AddSingleton<IOtpChannel>(new RecordingOtpChannel(OtpChannel.Email, Otp));
+            services.RemoveAll<IMessageChannel>();
+            services.AddSingleton<IMessageChannel>(new RecordingMessageChannel(MessageChannel.WhatsApp, Messages));
+            services.AddSingleton<IMessageChannel>(new RecordingMessageChannel(MessageChannel.Email, Messages));
             services.AddSingleton(LessonEvents);
             services.RemoveAll<ILocalizer>();
             services.AddScoped<ILocalizer>(x => new Localizer(new ApiResourceStringLocalizerFactory(x.GetRequiredService<IStringLocalizerFactory>())));

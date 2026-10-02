@@ -1,6 +1,7 @@
 from decimal import Decimal
 from functools import lru_cache
 from typing import Final, Literal, Self
+from urllib.parse import urlsplit
 
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -10,6 +11,10 @@ MIN_SERVICE_TOKEN_LENGTH: Final = 32
 # Every secret in the committed deploy/*.env.example files starts with this marker.
 PLACEHOLDER_PREFIX: Final = "change-me"
 OTLP_SCHEMES: Final = ("http://", "https://")
+HTTPS_SCHEME: Final = "https://"
+# Budget-tier placeholder: confirm the id against the provider's model list at go-live
+# (docs/ai-service.md).
+DEFAULT_LLM_MODEL: Final = "gpt-5.6-luna"
 
 
 class Settings(BaseSettings):
@@ -21,17 +26,21 @@ class Settings(BaseSettings):
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     log_format: Literal["json", "console"] = "json"
     service_token: SecretStr
-    llm_provider: Literal["fake", "anthropic"] = "fake"
-    anthropic_api_key: SecretStr | None = None
-    chat_model: str = Field(default="claude-sonnet-5", min_length=1)
-    chat_prompt_version: str = Field(default="v2", pattern=r"^v[0-9]+$")
+    llm_provider: Literal["fake", "openai_compatible"] = "fake"
+    llm_base_url: str = "https://api.openai.com/v1"
+    llm_api_key: SecretStr | None = None
+    llm_structured_output: Literal["json_schema", "json_object"] = "json_schema"
+    llm_max_tokens_field: Literal["max_completion_tokens", "max_tokens"] = "max_completion_tokens"
+    llm_reasoning_effort: Literal["default", "none", "minimal", "low", "medium", "high"] = "low"
+    chat_model: str = Field(default=DEFAULT_LLM_MODEL, min_length=1)
+    chat_prompt_version: str = Field(default="v3", pattern=r"^v[0-9]+$")
     chat_max_tokens: int = Field(default=1024, ge=1, le=8192)
     chat_max_history_messages: int = Field(default=20, ge=0, le=100)
     chat_max_message_chars: int = Field(default=4000, ge=1)
     chat_max_context_chars: int = Field(default=60000, ge=1)
     chat_max_sources: int = Field(default=20, ge=0, le=50)
     chat_max_source_chars: int = Field(default=8000, ge=1)
-    essay_grading_model: str = Field(default="claude-sonnet-5", min_length=1)
+    essay_grading_model: str = Field(default=DEFAULT_LLM_MODEL, min_length=1)
     essay_grading_prompt_version: str = Field(default="v1", pattern=r"^v[0-9]+$")
     essay_grading_max_tokens: int = Field(default=2048, ge=1, le=8192)
     essay_grading_timeout_seconds: float = Field(default=45.0, gt=0, le=300)
@@ -40,7 +49,7 @@ class Settings(BaseSettings):
     essay_grading_max_criteria: int = Field(default=10, ge=1, le=50)
     essay_grading_max_model_answers: int = Field(default=3, ge=1, le=10)
     essay_grading_max_objectives: int = Field(default=20, ge=0, le=100)
-    math_step_grading_model: str = Field(default="claude-sonnet-5", min_length=1)
+    math_step_grading_model: str = Field(default=DEFAULT_LLM_MODEL, min_length=1)
     math_step_grading_prompt_version: str = Field(default="v1", pattern=r"^v[0-9]+$")
     math_step_grading_max_tokens: int = Field(default=2048, ge=1, le=8192)
     math_step_grading_timeout_seconds: float = Field(default=45.0, gt=0, le=300)
@@ -51,8 +60,8 @@ class Settings(BaseSettings):
     math_step_grading_max_objectives: int = Field(default=20, ge=0, le=100)
     model_timeout_seconds: float = Field(default=20.0, gt=0, le=120)
     model_max_retries: int = Field(default=1, ge=0, le=5)
-    model_input_usd_per_million_tokens: Decimal = Field(default=Decimal("3"), ge=0)
-    model_output_usd_per_million_tokens: Decimal = Field(default=Decimal("15"), ge=0)
+    model_input_usd_per_million_tokens: Decimal = Field(default=Decimal("0.20"), ge=0)
+    model_output_usd_per_million_tokens: Decimal = Field(default=Decimal("1.20"), ge=0)
     embedding_provider: Literal["fake", "openai"] = "fake"
     openai_api_key: SecretStr | None = None
     embedding_model: str = Field(default="text-embedding-3-small", min_length=1)
@@ -96,6 +105,23 @@ class Settings(BaseSettings):
             raise ValueError("service_token must be at least 32 characters")
         return value
 
+    @field_validator("llm_base_url")
+    @classmethod
+    def _llm_base_url_is_https(cls, value: str) -> str:
+        url = value.strip().rstrip("/")
+        if not url.startswith(HTTPS_SCHEME) or len(url) == len(HTTPS_SCHEME):
+            raise ValueError("llm_base_url must be an https URL")
+        if "@" in urlsplit(url).netloc:
+            raise ValueError("llm_base_url must not contain credentials")
+        return url
+
+    @field_validator("llm_api_key")
+    @classmethod
+    def _blank_llm_api_key_is_none(cls, value: SecretStr | None) -> SecretStr | None:
+        if value is None or not value.get_secret_value().strip():
+            return None
+        return value
+
     @field_validator("otlp_endpoint")
     @classmethod
     def _otlp_endpoint_is_http(cls, value: str | None) -> str | None:
@@ -119,27 +145,26 @@ class Settings(BaseSettings):
         return value
 
     @model_validator(mode="after")
-    def _anthropic_needs_key(self) -> Self:
-        key = self.anthropic_api_key
-        if self.llm_provider == "anthropic" and (key is None or not key.get_secret_value().strip()):
-            raise ValueError("anthropic_api_key is required when llm_provider is anthropic")
+    def _openai_compatible_needs_key(self) -> Self:
+        if (
+            self.llm_provider == "openai_compatible"
+            and self.llm_api_key is None
+            and not _filled(self.openai_api_key)
+        ):
+            raise ValueError(
+                "llm_api_key or openai_api_key is required when llm_provider is openai_compatible"
+            )
         return self
 
     @model_validator(mode="after")
     def _openai_needs_key(self) -> Self:
-        key = self.openai_api_key
-        if self.embedding_provider == "openai" and (
-            key is None or not key.get_secret_value().strip()
-        ):
+        if self.embedding_provider == "openai" and not _filled(self.openai_api_key):
             raise ValueError("openai_api_key is required when embedding_provider is openai")
         return self
 
     @model_validator(mode="after")
     def _openai_transcription_needs_key(self) -> Self:
-        key = self.openai_api_key
-        if self.transcription_provider == "openai" and (
-            key is None or not key.get_secret_value().strip()
-        ):
+        if self.transcription_provider == "openai" and not _filled(self.openai_api_key):
             raise ValueError("openai_api_key is required when transcription_provider is openai")
         return self
 
@@ -149,6 +174,10 @@ class Settings(BaseSettings):
         if self.env == "production" and token.startswith(PLACEHOLDER_PREFIX):
             raise ValueError("service_token still holds the example placeholder")
         return self
+
+
+def _filled(key: SecretStr | None) -> bool:
+    return key is not None and bool(key.get_secret_value().strip())
 
 
 @lru_cache(maxsize=1)

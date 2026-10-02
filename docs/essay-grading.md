@@ -2,7 +2,7 @@
 
 ## Overview
 
-Essays (question type `Essay`, v2) are graded by Claude against the rubric a teacher wrote for the question ([question-schemas.md](question-schemas.md), Essay). The AI service (`POST /v1/essay-grades`, [ai-service.md](ai-service.md)) returns points per rubric criterion with a reason for each, a one-paragraph Arabic justification and a confidence. The .NET API owns everything else:
+Essays (question type `Essay`, v2) are graded by the LLM (OpenAI-compatible, [ai-service.md](ai-service.md)) against the rubric a teacher wrote for the question ([question-schemas.md](question-schemas.md), Essay). The AI service (`POST /v1/essay-grades`, [ai-service.md](ai-service.md)) returns points per rubric criterion with a reason for each, a one-paragraph Arabic justification and a confidence. The .NET API owns everything else:
 
 - Students are graded **asynchronously**. Each answered essay gets one `EssayGrade` row, which the `essay-grading` background worker grades, retrying with backoff. The student polls the grade.
 - The admin «جرّب الإجابة» in the question editor grades **synchronously**: `POST /api/questions/grade-draft` calls the grader directly, stores nothing and does not retry.
@@ -95,7 +95,7 @@ The web polls it every 2 s while the status is `Pending` (`useEssayGrade`), and 
 | `EssayGrading:SweepBatchSize` | 5 | 1 to 100 grades per sweep |
 | `EssayGrading:MaxAttempts` | 4 | 1 to 10; after the last failure the grade is `InReview` / `GradingFailed` |
 | `EssayGrading:RetryBaseDelaySeconds` | 30 | 1 to 3600; doubles each retry |
-| `EssayGrading:ReviewConfidenceThreshold` | 0.7 | 0 to 1; a lower confidence goes to teacher review |
+| `EssayGrading:ReviewConfidenceThreshold` | 0.7 | 0 to 1; a lower confidence goes to teacher review. The default of the runtime setting `grading.essayReviewConfidenceThreshold` ([configuration.md](configuration.md)) |
 | `EssayGrading:ContextFieldMaxLength` | 20000 | 1 to 100000 characters per context field sent to the grader |
 | `AiService:EssayGradingTimeoutSeconds` | 100 | the essay client's attempt and total timeout; above the AI service's worst case of about 91 s |
 | `Content:QuestionEssayAnswerMaxLength` | 20000 | the longest essay `grade-draft`, the quiz answer and the exam save accept |

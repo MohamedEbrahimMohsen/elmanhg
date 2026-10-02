@@ -237,6 +237,7 @@
   <data name="UNIT_HAS_LESSONS" xml:space="preserve"><value>This unit has lessons and cannot be deleted.</value></data>
   <data name="CONTENT_ORDER_INVALID" xml:space="preserve"><value>Order must be 1 or more.</value></data>
   <data name="USER_NOT_TEACHER" xml:space="preserve"><value>Subjects can only be assigned to teachers.</value></data>
+  <data name="PHONE_NUMBER_TEACHERS_ONLY" xml:space="preserve"><value>A WhatsApp number can be set for teachers only.</value></data>
   <data name="AUDIT_LOG_PAGE_NUMBER_INVALID" xml:space="preserve"><value>Page number must be 1 or more.</value></data>
   <data name="AUDIT_LOG_PAGE_SIZE_INVALID" xml:space="preserve"><value>Page size is out of the allowed range.</value></data>
   <data name="AUDIT_LOG_FILTER_TOO_LONG" xml:space="preserve"><value>Filter text is too long.</value></data>
@@ -351,6 +352,7 @@
   <data name="PAYMENT_REFUND_REASON_TOO_LONG" xml:space="preserve"><value>The refund reason is too long.</value></data>
   <data name="PAYMENT_REFUND_IDEMPOTENCY_KEY_REQUIRED" xml:space="preserve"><value>The Idempotency-Key header must be a non-empty UUID.</value></data>
   <data name="PAYMENT_REFUND_DECLINED" xml:space="preserve"><value>Paymob declined the refund. Check the transaction in the Paymob dashboard.</value></data>
+  <data name="PAYMENT_REFUNDS_DISABLED" xml:space="preserve"><value>Refunds are turned off. An admin can turn them on in Configuration.</value></data>
   <data name="PAYMENT_NOT_SETTLED" xml:space="preserve"><value>The payment has not been settled yet.</value></data>
   <data name="PAYMENT_LOG_PAGE_NUMBER_INVALID" xml:space="preserve"><value>The page number must be 1 or more.</value></data>
   <data name="PAYMENT_LOG_PAGE_SIZE_INVALID" xml:space="preserve"><value>The page size is not valid.</value></data>
@@ -493,4 +495,19 @@
   <data name="QUESTION_MATH_MODEL_SOLUTION_REQUIRED" xml:space="preserve"><value>Add at least one model solution step when the steps weight is above 0.</value></data>
   <data name="QUESTION_MATH_STEPS_WEIGHT_INVALID" xml:space="preserve"><value>The steps weight is a whole number from 0 to 100.</value></data>
   <data name="GRADE_FEEDBACK_MATH_STEP_TALLY" xml:space="preserve"><value>Fully correct steps: {right} of {total}.</value></data>
+  <data name="RUNTIME_SETTING_KEY_REQUIRED" xml:space="preserve"><value>The setting key is required.</value></data>
+  <data name="RUNTIME_SETTING_VALUE_INVALID" xml:space="preserve"><value>The value is not valid for this setting or is outside its allowed range.</value></data>
+  <data name="RUNTIME_SETTING_NOT_FOUND" xml:space="preserve"><value>The setting was not found.</value></data>
+  <data name="RUNTIME_SETTING_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>Someone else changed this setting at the same time. Refresh and try again.</value></data>
+  <data name="ASK_TEACHER_REMINDER_ORDER_INVALID" xml:space="preserve"><value>The first reminder must come before the second, and the second before the end of the reply time.</value></data>
+  <data name="SLA_CALENDAR_WEEKEND_DAYS_INVALID" xml:space="preserve"><value>At least one day of the week must count.</value></data>
+  <data name="EXAM_PERIOD_ID_REQUIRED" xml:space="preserve"><value>The exam period id is required.</value></data>
+  <data name="EXAM_PERIOD_NAME_REQUIRED" xml:space="preserve"><value>Enter a name for the exam period.</value></data>
+  <data name="EXAM_PERIOD_NAME_TOO_LONG" xml:space="preserve"><value>The exam period name is too long.</value></data>
+  <data name="EXAM_PERIOD_START_DATE_REQUIRED" xml:space="preserve"><value>Choose the first day of the period.</value></data>
+  <data name="EXAM_PERIOD_END_DATE_REQUIRED" xml:space="preserve"><value>Choose the last day of the period.</value></data>
+  <data name="EXAM_PERIOD_DATE_RANGE_INVALID" xml:space="preserve"><value>The last day must be on or after the first day.</value></data>
+  <data name="EXAM_PERIOD_TOO_LONG" xml:space="preserve"><value>The exam period is longer than allowed.</value></data>
+  <data name="EXAM_PERIOD_NOT_FOUND" xml:space="preserve"><value>The exam period was not found.</value></data>
+  <data name="EXAM_PERIOD_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>Someone else changed this exam period at the same time. Refresh and try again.</value></data>
 </root>

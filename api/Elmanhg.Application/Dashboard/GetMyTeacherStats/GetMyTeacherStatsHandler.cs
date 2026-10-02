@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.Dashboard.GetMyTeacherStats;
 
-public sealed class GetMyTeacherStatsHandler(IQuestionRepository questionRepository, ITeacherThreadRepository teacherThreadRepository, ICurrentUserService currentUserService, TimeProvider timeProvider, IOptions<DashboardOptions> dashboardOptions, IOptions<SubscriptionsOptions> subscriptionsOptions) : IRequestHandler<GetMyTeacherStatsQuery, MyTeacherStatsResult>
+public sealed class GetMyTeacherStatsHandler(IQuestionRepository questionRepository, ITeacherThreadRepository teacherThreadRepository, ICurrentUserService currentUserService, TimeProvider timeProvider, IOptions<DashboardOptions> dashboardOptions) : IRequestHandler<GetMyTeacherStatsQuery, MyTeacherStatsResult>
 {
     public async Task<MyTeacherStatsResult> Handle(GetMyTeacherStatsQuery request, CancellationToken cancellationToken)
     {
@@ -21,7 +21,7 @@ public sealed class GetMyTeacherStatsHandler(IQuestionRepository questionReposit
 
         var window = DashboardWindow.Resolve(request.From, request.To, timeProvider.GetUtcNow(), dashboardOptions.Value);
         var decisions = await questionRepository.GetDecisionStatsAsync(window.Start, window.End, null, teacherId, cancellationToken).ConfigureAwait(false);
-        var replies = await teacherThreadRepository.GetReplyStatsAsync(window.Start, window.End, null, teacherId, TimeSpan.FromHours(subscriptionsOptions.Value.AskTeacherReplySlaHours), cancellationToken).ConfigureAwait(false);
+        var replies = await teacherThreadRepository.GetReplyStatsAsync(window.Start, window.End, null, teacherId, cancellationToken).ConfigureAwait(false);
 
         return new MyTeacherStatsResult(window.From, window.To, decisions.Approved, decisions.Rejected, DashboardRates.Seconds(decisions.MedianSecondsToDecision), replies.Replies, replies.RepliedWithinSla, DashboardRates.Ratio(replies.RepliedWithinSla, replies.Replies, DashboardRates.RateDecimals), DashboardRates.Seconds(replies.MedianReplySeconds), window.Now);
     }

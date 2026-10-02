@@ -8,6 +8,7 @@ from typing import Final, Literal
 import structlog
 
 from elmanhg_ai.api.chat.schemas import ChatIn, ChatRole
+from elmanhg_ai.clients.citations import SOURCES_TAG
 from elmanhg_ai.clients.model import (
     ModelClient,
     ModelMessage,
@@ -23,7 +24,7 @@ from elmanhg_ai.settings import Settings
 PIPELINE_NAME: Final = "avatar_chat"
 SYSTEM_PROMPT: Final = "avatar_system"
 TURN_PROMPT: Final = "avatar_turn"
-DELIMITER_TAG: Final = delimiter_pattern("lesson_context", "student_message")
+DELIMITER_TAG: Final = delimiter_pattern("lesson_context", "student_message", SOURCES_TAG)
 MODEL_ROLES: Final[Mapping[ChatRole, Literal["user", "assistant"]]] = {
     ChatRole.USER: "user",
     ChatRole.ASSISTANT: "assistant",

@@ -5,7 +5,7 @@ namespace Elmanhg.Application.Subscriptions.Shared;
 
 public static class EntitlementResultGenerator
 {
-    public static EntitlementResult Generate(StudentEntitlement entitlement, SubscriptionsOptions options, DateTimeOffset now)
+    public static EntitlementResult Generate(StudentEntitlement entitlement, SubscriptionsOptions options, PlanLimits limits, DateTimeOffset now)
     {
         var subscriptions = new[] { entitlement.BaseSubscription, entitlement.AskTeacherSubscription }
             .OfType<Subscription>()
@@ -13,8 +13,8 @@ public static class EntitlementResultGenerator
             .ToList();
         return entitlement.Tier switch
         {
-            PlanTier.Base => new EntitlementResult(PlanTier.Base, entitlement.HasAskTeacher, true, null, options.BaseDailyAvatarMessages, null, entitlement.HasAskTeacher ? options.AskTeacherMonthlyQuestions : 0, subscriptions),
-            _ => new EntitlementResult(PlanTier.Free, false, false, options.FreeDailyQuizQuestions, options.FreeDailyAvatarMessages, options.FreeOpenLessonsPerUnit, 0, subscriptions),
+            PlanTier.Base => new EntitlementResult(PlanTier.Base, entitlement.HasAskTeacher, true, null, limits.BaseDailyAvatarMessages, null, entitlement.HasAskTeacher ? limits.AskTeacherMonthlyQuestions : 0, subscriptions),
+            _ => new EntitlementResult(PlanTier.Free, false, false, limits.FreeDailyQuizQuestions, limits.FreeDailyAvatarMessages, limits.FreeOpenLessonsPerUnit, 0, subscriptions),
         };
     }
 

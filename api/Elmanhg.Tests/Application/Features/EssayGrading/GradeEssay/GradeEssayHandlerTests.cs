@@ -11,6 +11,7 @@ using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Units;
 using Elmanhg.Infrastructure.RichText;
 using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -195,5 +196,5 @@ public sealed class GradeEssayHandlerTests
         await _essayGradeRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
-    private Task Handle(Guid gradeId) => new GradeEssayHandler(_essayGradeRepository, _questionRepository, _lessonRepository, _unitRepository, _subjectRepository, new RichTextExtractor(), _essayGradingClient, Options.Create(new EssayGradingOptions()), _timeProvider).Handle(new GradeEssayCommand(gradeId), TestContext.Current.CancellationToken);
+    private Task Handle(Guid gradeId) => new GradeEssayHandler(_essayGradeRepository, _questionRepository, _lessonRepository, _unitRepository, _subjectRepository, new RichTextExtractor(), _essayGradingClient, Options.Create(new EssayGradingOptions()), _timeProvider, new FakeRuntimeSettings()).Handle(new GradeEssayCommand(gradeId), TestContext.Current.CancellationToken);
 }

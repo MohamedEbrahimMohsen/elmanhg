@@ -15,10 +15,11 @@ public sealed class TeacherThreadTests
     [Fact]
     public void Submit_ValidInput_OpensThreadWithSlaAndFirstStudentMessage()
     {
-        var thread = TeacherThread.Submit(_studentId, _context, "  Why is F = ma?  ", "/api/media/teacher-threads/a.png", SubmittedAt, TimeSpan.FromHours(24));
+        var thread = TeacherThread.Submit(_studentId, _context, "  Why is F = ma?  ", "/api/media/teacher-threads/a.png", SubmittedAt, TeacherThreadSlaPolicies.WallClock());
 
         (thread.Status, thread.StudentId, thread.SubjectId, thread.CreatedBy).Should().Be((TeacherThreadStatus.Open, _studentId, _context.SubjectId, (Guid?)_studentId));
         (thread.SubmittedAt, thread.SlaDueAt).Should().Be((SubmittedAt, SubmittedAt.AddHours(24)));
+        (thread.SlaWindowStartedAt, thread.FirstReminderDueAt, thread.SecondReminderDueAt).Should().Be((thread.SubmittedAt, SubmittedAt.AddHours(12), SubmittedAt.AddHours(20)));
         var message = thread.Messages.Should().ContainSingle().Subject;
         (message.ThreadId, message.SenderId, message.Kind, message.Text).Should().Be((thread.Id, _studentId, TeacherMessageKind.Text, "Why is F = ma?"));
         (message.ImageUrl, message.CreatedAt).Should().Be(("/api/media/teacher-threads/a.png", SubmittedAt));
@@ -27,7 +28,7 @@ public sealed class TeacherThreadTests
     [Fact]
     public void Submit_BlankText_ThrowsTeacherMessageTextRequired()
     {
-        var act = () => TeacherThread.Submit(_studentId, _context, "   ", null, SubmittedAt, TimeSpan.FromHours(24));
+        var act = () => TeacherThread.Submit(_studentId, _context, "   ", null, SubmittedAt, TeacherThreadSlaPolicies.WallClock());
 
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.TeacherMessageTextRequired);
     }
@@ -35,7 +36,7 @@ public sealed class TeacherThreadTests
     [Fact]
     public void Submit_SubMicrosecondTime_TruncatesToMicroseconds()
     {
-        var thread = TeacherThread.Submit(_studentId, _context, "Why?", null, SubmittedAt.AddTicks(7), TimeSpan.FromHours(24));
+        var thread = TeacherThread.Submit(_studentId, _context, "Why?", null, SubmittedAt.AddTicks(7), TeacherThreadSlaPolicies.WallClock());
 
         (thread.SubmittedAt.Ticks % 10).Should().Be(0);
         (thread.SubmittedAt, thread.SlaDueAt).Should().Be((SubmittedAt, SubmittedAt.AddHours(24)));
@@ -46,7 +47,7 @@ public sealed class TeacherThreadTests
     {
         var context = new TeacherThreadContext(Guid.NewGuid(), "Physics", Guid.NewGuid(), "Mechanics", Guid.NewGuid(), "Newton's laws", Guid.NewGuid(), 3, "<p>Why?</p>", Guid.NewGuid());
 
-        var thread = TeacherThread.Submit(_studentId, context, "Why?", null, SubmittedAt, TimeSpan.FromHours(24));
+        var thread = TeacherThread.Submit(_studentId, context, "Why?", null, SubmittedAt, TeacherThreadSlaPolicies.WallClock());
 
         thread.ReadContext().Should().Be(context);
     }

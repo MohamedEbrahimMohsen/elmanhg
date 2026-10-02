@@ -1,8 +1,8 @@
 import { getRouteApi, Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ContentErrorState, ContentListSkeleton } from '@/features/content';
-import { useGetPlanCatalogue } from '@/shared/api/generated/plans/plans';
 import { useGetMyUsage } from '@/shared/api/generated/subscriptions/subscriptions';
+import { useGetTeacherReplyDeadline } from '@/shared/api/generated/teacher-threads/teacher-threads';
 import { formatNumber } from '@/shared/lib/format';
 import { AskTeacherForm } from '../components/AskTeacherForm';
 import { AskTeacherUpsell } from '../components/AskTeacherUpsell';
@@ -14,7 +14,7 @@ function AskTeacherNewContent() {
   const lng = i18n.resolvedLanguage ?? i18n.language;
   const search = routeApi.useSearch();
   const { data, error, isPending, isError, refetch } = useGetMyUsage();
-  const catalogue = useGetPlanCatalogue();
+  const deadline = useGetTeacherReplyDeadline();
 
   if (isPending) {
     return <ContentListSkeleton label={t('context.loading')} />;
@@ -48,8 +48,7 @@ function AskTeacherNewContent() {
       </div>
     );
   }
-  const replySlaHours = catalogue.data ? Number(catalogue.data.askTeacher.replySlaHours) : undefined;
-  return <AskTeacherForm search={search} replySlaHours={replySlaHours} />;
+  return <AskTeacherForm search={search} replyDeadline={deadline.data} />;
 }
 
 export function AskTeacherNewPage() {

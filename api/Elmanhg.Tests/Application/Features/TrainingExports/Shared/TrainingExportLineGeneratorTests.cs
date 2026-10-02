@@ -51,7 +51,7 @@ public sealed class TrainingExportLineGeneratorTests
         var (attemptId, teacherId) = (Guid.NewGuid(), Guid.NewGuid());
         var context = new TeacherThreadContext(Guid.NewGuid(), "Physics", Guid.NewGuid(), "Mechanics", Guid.NewGuid(), "Newton's laws", Guid.NewGuid(), 1, "stem", attemptId);
         var thread = new TeacherThreadBuilder().WithContext(context).AnsweredBy(teacherId).Build();
-        thread.FollowUp("كلمني على 010 1234 5678", TeacherThreadBuilder.DefaultSubmittedAt.AddHours(2), TimeSpan.FromHours(24));
+        thread.FollowUp("كلمني على 010 1234 5678", TeacherThreadBuilder.DefaultSubmittedAt.AddHours(2), TeacherThreadSlaPolicies.WallClock());
         thread.Reply(teacherId, "Newtons.", TeacherThreadBuilder.DefaultSubmittedAt.AddHours(3));
         var record = TeacherThreadTrainingRecord.From(thread, TeacherThreadTrainingTrigger.Closed, StudentHash, thread.ClosedAt!.Value, RecordedAt);
         _studentIdHasher.HashSourceId(TrainingExportLineGenerator.TeacherThreadScope, thread.Id).Returns("thread-key");

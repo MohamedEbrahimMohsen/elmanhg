@@ -3,10 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import type { InviteUserResult } from '@/shared/api/generated/model';
 import { getGetUsersQueryKey, useInviteUser as useInviteUserMutation } from '@/shared/api/generated/users/users';
-import type { InviteUserValues } from '../schemas/inviteUserSchema';
 
 export interface InviteUserAction {
-  invite: (values: InviteUserValues & { role: 'Teacher' | 'Admin' }) => Promise<InviteUserResult>;
+  invite: (values: {
+    role: 'Teacher' | 'Admin';
+    displayName: string;
+    email: string;
+    phoneNumber: string | null;
+  }) => Promise<InviteUserResult>;
   isPending: boolean;
 }
 

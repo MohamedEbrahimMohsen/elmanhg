@@ -1,14 +1,14 @@
-using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Shared.RuntimeSettings;
+using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using MediatR;
-using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.TeacherInbox.GetVoiceReplySettings;
 
-public sealed class GetVoiceReplySettingsHandler(IOptions<AskTeacherOptions> askTeacherOptions) : IRequestHandler<GetVoiceReplySettingsQuery, VoiceReplySettingsResult>
+public sealed class GetVoiceReplySettingsHandler(IRuntimeSettings runtimeSettings) : IRequestHandler<GetVoiceReplySettingsQuery, VoiceReplySettingsResult>
 {
-    public Task<VoiceReplySettingsResult> Handle(GetVoiceReplySettingsQuery request, CancellationToken cancellationToken)
+    public async Task<VoiceReplySettingsResult> Handle(GetVoiceReplySettingsQuery request, CancellationToken cancellationToken)
     {
-        var options = askTeacherOptions.Value;
-        return Task.FromResult(new VoiceReplySettingsResult(options.VoiceMaxDurationSeconds, options.VoiceMaxSizeInMb));
+        var values = await runtimeSettings.GetValuesAsync(cancellationToken).ConfigureAwait(false);
+        return new VoiceReplySettingsResult(values.Get(UploadRuntimeSettings.VoiceReplyMaxDurationSeconds), values.Get(UploadRuntimeSettings.VoiceReplyMaxSizeInMb));
     }
 }

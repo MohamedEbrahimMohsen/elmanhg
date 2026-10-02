@@ -16,6 +16,7 @@ using Elmanhg.Domain.Units;
 using Elmanhg.Infrastructure.RichText;
 using Elmanhg.Tests.Application.Features.Subscriptions;
 using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using MediatR;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -92,7 +93,7 @@ public static class AvatarTestData
 
         public Task<AvatarReplyResult> SendAsync(SendAvatarMessageCommand command)
         {
-            var handler = new SendAvatarMessageHandler(Sessions, Lessons, Units, Subjects, Questions, Subscriptions, Usage, Conversations, new RichTextExtractor(), Ai, Sender, Options.Create(AvatarOptions), Options.Create(new SubscriptionsOptions()), Options.Create(new ExamsOptions()), Options.Create(new ContentRetrievalOptions()), Time, CurrentUser);
+            var handler = new SendAvatarMessageHandler(Sessions, Lessons, Units, Subjects, Questions, Subscriptions, Usage, Conversations, new RichTextExtractor(), Ai, Sender, Options.Create(AvatarOptions), Options.Create(new SubscriptionsOptions()), Options.Create(new ExamsOptions()), Options.Create(new ContentRetrievalOptions()), Time, CurrentUser, new FakeRuntimeSettings());
             return handler.Handle(command, TestContext.Current.CancellationToken);
         }
 

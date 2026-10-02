@@ -1,5 +1,6 @@
 using Core.DDD.Models;
 using Elmanhg.Application.Payments.GetPaymentLog;
+using Elmanhg.Application.Payments.GetPaymentSettings;
 using Elmanhg.Application.Payments.RefundPayment;
 using Elmanhg.Application.Payments.ResolvePaymentReview;
 using Elmanhg.Application.Payments.Shared;
@@ -24,6 +25,15 @@ public class PaymentsController(IMediator mediator) : ControllerBase
     public async Task<ActionResult> GetPaymentLog([FromQuery] PaymentStatus? status, [FromQuery] SubscriptionPlan? plan, [FromQuery] Guid? studentId, [FromQuery] string? reference, [FromQuery] DateTimeOffset? from, [FromQuery] DateTimeOffset? to, [FromQuery] bool needsReview = false, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
     {
         var result = await mediator.Send(new GetPaymentLogQuery(status, plan, needsReview, studentId, reference, from, to, pageNumber, pageSize), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("settings", Name = "GetPaymentSettings")]
+    [Authorize(Policy = DefaultCodes.PaymentsManage)]
+    [ProducesResponseType<PaymentSettingsResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetPaymentSettings(CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetPaymentSettingsQuery(), cancellationToken);
         return Ok(result);
     }
 

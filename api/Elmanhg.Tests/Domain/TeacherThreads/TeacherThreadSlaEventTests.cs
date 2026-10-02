@@ -14,9 +14,10 @@ public sealed class TeacherThreadSlaEventTests
         var slaDueAt = TeacherThreadBuilder.DefaultSubmittedAt.AddHours(24);
         var occurredAt = TeacherThreadBuilder.DefaultSubmittedAt.AddHours(12);
 
-        var slaEvent = TeacherThreadSlaEvent.Record(threadId, TeacherThreadSlaEventKind.FirstReminder, slaDueAt, teacherId, occurredAt.AddTicks(9));
+        var slaEvent = TeacherThreadSlaEvent.Record(threadId, TeacherThreadSlaEventKind.FirstReminder, TeacherThreadBuilder.DefaultSubmittedAt, slaDueAt, teacherId, occurredAt.AddTicks(9));
 
         (slaEvent.ThreadId, slaEvent.Kind, slaEvent.SlaDueAt, slaEvent.TeacherId, slaEvent.OccurredAt).Should().Be((threadId, TeacherThreadSlaEventKind.FirstReminder, slaDueAt, (Guid?)teacherId, occurredAt));
+        slaEvent.WindowStartedAt.Should().Be(TeacherThreadBuilder.DefaultSubmittedAt);
         slaEvent.Id.Should().NotBeEmpty();
         slaEvent.OccurredAt.Ticks.Should().Be(occurredAt.Ticks);
     }

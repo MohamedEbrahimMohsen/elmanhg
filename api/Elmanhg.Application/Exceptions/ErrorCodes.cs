@@ -253,6 +253,7 @@ public static class ErrorCodes
     public const string PaymentRefundReasonTooLong = "PAYMENT_REFUND_REASON_TOO_LONG";
     public const string PaymentRefundIdempotencyKeyRequired = "PAYMENT_REFUND_IDEMPOTENCY_KEY_REQUIRED";
     public const string PaymentRefundDeclined = "PAYMENT_REFUND_DECLINED";
+    public const string PaymentRefundsDisabled = "PAYMENT_REFUNDS_DISABLED";
     public const string PaymentNotSettled = "PAYMENT_NOT_SETTLED";
     public const string PaymentLogPageNumberInvalid = "PAYMENT_LOG_PAGE_NUMBER_INVALID";
     public const string PaymentLogPageSizeInvalid = "PAYMENT_LOG_PAGE_SIZE_INVALID";
@@ -373,6 +374,25 @@ public static class ErrorCodes
     public const string TrainingExportPageSizeInvalid = "TRAINING_EXPORT_PAGE_SIZE_INVALID";
     public const string TrainingExportNotFound = "TRAINING_EXPORT_NOT_FOUND";
     public const string TrainingExportModifiedConcurrently = "TRAINING_EXPORT_MODIFIED_CONCURRENTLY";
+
+    // CONFIGURATION
+    public const string RuntimeSettingKeyRequired = "RUNTIME_SETTING_KEY_REQUIRED";
+    public const string RuntimeSettingValueInvalid = "RUNTIME_SETTING_VALUE_INVALID";
+    public const string RuntimeSettingNotFound = "RUNTIME_SETTING_NOT_FOUND";
+    public const string RuntimeSettingModifiedConcurrently = "RUNTIME_SETTING_MODIFIED_CONCURRENTLY";
+    public const string AskTeacherReminderOrderInvalid = "ASK_TEACHER_REMINDER_ORDER_INVALID";
+
+    // SLA CALENDAR
+    public const string SlaCalendarWeekendDaysInvalid = "SLA_CALENDAR_WEEKEND_DAYS_INVALID";
+    public const string ExamPeriodIdRequired = "EXAM_PERIOD_ID_REQUIRED";
+    public const string ExamPeriodNameRequired = "EXAM_PERIOD_NAME_REQUIRED";
+    public const string ExamPeriodNameTooLong = "EXAM_PERIOD_NAME_TOO_LONG";
+    public const string ExamPeriodStartDateRequired = "EXAM_PERIOD_START_DATE_REQUIRED";
+    public const string ExamPeriodEndDateRequired = "EXAM_PERIOD_END_DATE_REQUIRED";
+    public const string ExamPeriodDateRangeInvalid = "EXAM_PERIOD_DATE_RANGE_INVALID";
+    public const string ExamPeriodTooLong = "EXAM_PERIOD_TOO_LONG";
+    public const string ExamPeriodNotFound = "EXAM_PERIOD_NOT_FOUND";
+    public const string ExamPeriodModifiedConcurrently = "EXAM_PERIOD_MODIFIED_CONCURRENTLY";
 
     // PLATFORM
     public const string TooManyRequests = "TOO_MANY_REQUESTS";

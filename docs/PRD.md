@@ -32,7 +32,7 @@ Elmanhg is an Arabic-first web platform for Thanaweya Amma students. Content is 
 | Free → paid conversion | ≥ 5% within 30 days |
 | Weekly active / monthly active | ≥ 40% |
 | Median questions answered per active day | ≥ 25 |
-| Ask a Teacher SLA compliance | ≥ 95% replied within 24h |
+| Ask a Teacher SLA compliance | ≥ 95% replied within the SLA (24 counted hours over the reply calendar, §12.3) |
 | Question approval backlog | < 7 days median from creation to decision |
 
 ---
@@ -51,7 +51,7 @@ Elmanhg is an Arabic-first web platform for Thanaweya Amma students. Content is 
 
 ### 3.3 Admin
 - Platform owner / content operations.
-- Authors all content, manages users and teachers, sees all dashboards and finances.
+- Authors all content, manages users and teachers, sees all dashboards and finances, and changes runtime settings on the Configuration page (§10.6).
 
 ---
 
@@ -176,8 +176,8 @@ Answer shapes and the exact grading rules (normalisation, numeric parsing, round
 - Output is structured JSON: per-criterion score, total, one-paragraph Arabic justification, confidence.
 - Low-confidence grades (below a configurable threshold) are queued for teacher review before the score is final. The student sees "قيد المراجعة" in the meantime.
 - A teacher may override any AI grade. Overrides are training data (§13).
-- Decided (#118): the threshold is `EssayGrading:ReviewConfidenceThreshold` (default 0.7); a grade the AI cannot produce after `EssayGrading:MaxAttempts` also goes to teacher review; grading is a background job with retries; the admin test grader grades essays synchronously ([essay-grading.md](essay-grading.md)).
-- Decided (#123): math step grading returns 0–2 points per model-solution step with a justification each, a one-paragraph justification and a confidence; the threshold is `MathStepGrading:ReviewConfidenceThreshold` (default 0.7); grading and failed final-answer checks are retried in the background (`MathStepGrading:MaxAttempts`, 4) before going to teacher review; the admin test grader grades steps synchronously ([math-step-grading.md](math-step-grading.md)).
+- Decided (#118): the threshold is `EssayGrading:ReviewConfidenceThreshold` (default 0.7); a grade the AI cannot produce after `EssayGrading:MaxAttempts` also goes to teacher review; grading is a background job with retries; the admin test grader grades essays synchronously ([essay-grading.md](essay-grading.md)). Admins can change the threshold at runtime (§10.6).
+- Decided (#123): math step grading returns 0–2 points per model-solution step with a justification each, a one-paragraph justification and a confidence; the threshold is `MathStepGrading:ReviewConfidenceThreshold` (default 0.7); grading and failed final-answer checks are retried in the background (`MathStepGrading:MaxAttempts`, 4) before going to teacher review; the admin test grader grades steps synchronously ([math-step-grading.md](math-step-grading.md)). Admins can change the threshold at runtime (§10.6).
 - Decided (#128): teachers accept or override the AI grades that land in review (§8.3); a grade the AI applied directly is final and is not re-opened, because attempts are append-only. Accept and override both write the attempt with `graded_by = Teacher` ([grade-review.md](grade-review.md)).
 
 ### 6.2 Answer normalisation (Arabic)
@@ -240,7 +240,7 @@ The headline counter is shown on Home as "متبقّي لك X سؤال من 100,
 
 ### 7.4 Unit exam
 
-- Available once the student has opened every lesson in the unit (configurable; default: no gate).
+- Available once the student has opened every lesson in the unit (a runtime feature flag on the Configuration page, §10.6; default: no gate).
 - Generated from the unit's **exam blueprint** (§10.2): fixed counts per question type and optionally per difficulty.
 - Selection prefers questions **not** already mastered, then random. Questions are drawn across all lessons in the unit.
 - Optional time limit set in the blueprint.
@@ -324,7 +324,7 @@ An in-app assistant for students, scoped to the platform's content.
 
 ### 9.3 Limits
 
-- Rate-limited per student per day: Free 5, Base 50 (`Subscriptions` configuration). A message counts once the assistant has replied; the day follows `Subscriptions:DailyQuotaTimeZone`.
+- Rate-limited per student per day: Free 5, Base 50 (defaults from `Subscriptions` configuration; an admin can change them at runtime, §10.6). A message counts once the assistant has replied; the day follows `Subscriptions:DailyQuotaTimeZone`.
 - Model and prompt versions, tokens and cost are recorded on every reply for later evaluation, with the context bundle and search results that were sent (`docs/avatar.md`, Conversation log).
 
 ---
@@ -376,7 +376,7 @@ Every chart except Content is filterable by date range (Cairo days); Content is 
 - One page, `/admin/users`, with Students, Teachers and Admins tabs. Each tab has server-side search and paging. Search matches the name (any part), the full mobile number or the full email; a partial number or email matches nothing.
 - Contact data is always masked on these screens (`010*****678`, `m***@example.test`).
 - Students: search, view profile, progress and session history, suspend and reactivate, grant a complimentary subscription.
-- Teachers: invite, assign/unassign subjects, deactivate and reactivate.
+- Teachers: invite (with an optional WhatsApp number), set or remove the WhatsApp number, assign/unassign subjects, deactivate and reactivate.
 - Admins: invite, deactivate and reactivate. At least one active admin must always remain, and an admin can never deactivate their own account.
 - Suspending or deactivating signs the user out everywhere: sign-in and token refresh stop at once, and an access token already issued is refused on its next request.
 - Invitations: the invite creates the account without a password and emails the `/accept-invite` link when email delivery is configured; the admin can also copy the link. The link carries no email or secret. The invitee proves the email with a one-time code and chooses a password. An invitation does not expire; an admin can deactivate a pending invitee.
@@ -386,6 +386,16 @@ Every chart except Content is filterable by date range (Cairo days); Content is 
 ### 10.5 Assistant conversations
 
 Admins see the students' Avatar conversations, most recent first, with search by message text or student name and filters by entry point and date. Each conversation shows every message and, per reply, the model, prompt version, tokens, cost, citations and the context sent. See `docs/avatar.md`.
+
+### 10.6 Configuration
+
+Admins see everything configurable on one page, `#/admin/configuration` (nav «الإعدادات»), policy `Configuration.Manage`.
+
+- **Runtime settings and feature flags.** Stored in the database, cached for at most `RuntimeSettings:CacheSeconds` (30 s by default) and cleared on every change, so a change takes effect without a restart. Each setting has a typed definition (type, range or allowed values, Arabic and English label and description); a value outside it is refused. The default is the deployment value from configuration; an admin can override it and reset it back to the default. Every change and reset is audit-logged with the old and new value.
+- **v1 settings:** the unit-exam lesson-open gate (feature flag); the Ask a Teacher reply time and the two reminder hours (first < second < reply time); the out-of-app teacher reminder (on/off, channels, stage); the Ask a Teacher reply calendar (skip weekends, weekend days, time zone) and its exam periods (§12.3); the Free, Base and Ask a Teacher quotas; the essay and math-step review thresholds; the student photo size and the teacher voice size and length limits; the payment-log refunds flag (feature flag, off by default).
+- **Read-only infrastructure:** the environment; the provider of each integration and whether it is fake, local or real; the AI service models; safety switches such as `Payments:AllowFakePayments` (never editable from the UI); and whether each secret is set. Secret values are never returned.
+
+The full list, the reasons some values are not runtime-editable, and how a story adds a setting are in [configuration.md](configuration.md).
 
 ---
 
@@ -399,7 +409,7 @@ Admins see the students' Avatar conversations, most recent first, with search by
 | Base (monthly / termly / yearly) | Unlimited quizzes and exams; full progress; Avatar with higher limit |
 | Ask a Teacher (add-on, monthly) | Requires Base. N questions/month (configurable, e.g. 20) with 24-hour reply SLA |
 
-Prices, billing periods and quotas are configuration (`Subscriptions` section, see `docs/subscriptions.md`), not code. Base is sold monthly (1 month), termly (4 months) and yearly (12 months); Ask a Teacher monthly only. Shipped defaults: Free 10 quiz questions/day, 5 Avatar messages/day, first lesson of each unit; Base 50 Avatar messages/day; Ask a Teacher 20 questions/month with a 24-hour SLA. Prices have no default and must be configured; money is stored in minor units (piastres) with an ISO 4217 currency.
+Prices, billing periods and quotas are configuration (`Subscriptions` section, see `docs/subscriptions.md`), not code. Quotas (not prices) can be changed at runtime by an admin (§10.6); the configured values are the defaults. Base is sold monthly (1 month), termly (4 months) and yearly (12 months); Ask a Teacher monthly only. Shipped defaults: Free 10 quiz questions/day, 5 Avatar messages/day, first lesson of each unit; Base 50 Avatar messages/day; Ask a Teacher 20 questions/month with a 24-hour SLA. Prices have no default and must be configured; money is stored in minor units (piastres) with an ISO 4217 currency.
 
 ### 11.2 Paymob integration
 
@@ -411,7 +421,8 @@ Prices, billing periods and quotas are configuration (`Subscriptions` section, s
 - A verified payment for a plan the student already holds extends it; an Ask a Teacher payment without Base is kept and flagged for admin review.
 - The student may cancel: access continues until the paid period ends.
 - A status sweep marks lapsed plans PastDue, then Expired.
-- Full transaction log with a needs-review queue for the admin; refunds are initiated by an admin (full amount, reason required), executed in Paymob, recorded locally, and remove the time the payment bought (the plan ends at once if nothing paid remains). Signed Paymob refund callbacks have the same effect; a partial refund made in Paymob is flagged for review. Details: `docs/subscriptions.md` → Refunds.
+- Full transaction log with a needs-review queue for the admin; refunds are initiated by an admin (full amount, reason required), executed in Paymob, recorded locally, and remove the time the payment bought (the plan ends at once if nothing paid remains). Signed Paymob refund callbacks have the same effect; a partial refund made in Paymob is flagged for review. Details: `docs/subscriptions.md` → Refunds. Refunds from the app sit behind the runtime feature flag `features.refundsEnabled`, off by default (dev decision #193). While it is off, the refund API answers 400 `PAYMENT_REFUNDS_DISABLED` and the payment log disables «استرداد» with an explanation. Signed Paymob refund callbacks are always recorded and applied.
+- The fake payment gateway serves only where `Payments:AllowFakePayments` is true: unset means true in Development and false elsewhere, and the API refuses to start with it true in Production (#189). It is shown read-only on the Configuration page.
 
 ---
 
@@ -422,7 +433,7 @@ Prices, billing periods and quotas are configuration (`Subscriptions` section, s
 1. Student (with add-on) opens "اسأل معلّم" from a lesson or question, or the quiz attempt being asked about. Context (subject/unit/lesson/question) is attached automatically; student writes text and may attach an image (e.g. a photo of their work).
    Each new question counts against the monthly quota, which resets on the 1st of each calendar month in `DailyQuotaTimeZone` (Africa/Cairo); a follow-up does not count. The student may attach one photo (PNG, JPG or WEBP). Photos are private: only the owning student, a teacher assigned to the thread's subject, or an admin can open one (`docs/ask-teacher.md`).
 2. The thread is routed to the queue of teachers assigned to that subject. First teacher to claim it owns it.
-3. SLA clock starts at submission. Reminders to the teacher at 12h and 20h; admin alert on breach. A follow-up starts a new 24-hour window; the clock never pauses.
+3. SLA clock starts at submission and counts hours over the reply calendar (§12.3). Reminders to the teacher at 12h and 20h by default; the reply time and both reminder hours are runtime settings (§10.6); admin alert on breach. A follow-up starts a new window of the same length. Once per question, at a configurable reminder stage (default the second, at its calendar time), the reminder also goes out of the app, on WhatsApp and by email, to the claimer, or to every teacher of the subject while unclaimed. On/off, channels and stage are runtime settings (§10.6). Delivery and templates: docs/otp-delivery.md §10.
 4. Teacher replies with **text or voice**. Voice is recorded in-browser, stored, and transcribed to Arabic text automatically. The teacher sees the transcript and can correct it before sending.
 5. Student receives the reply (audio player + text). Student may send **one** follow-up on the same thread; the teacher replies once more; the thread then closes. Anything further is a new question against the monthly quota.
 6. Student rates the answer (1–5). Ratings are visible to admin.
@@ -431,6 +442,15 @@ Prices, billing periods and quotas are configuration (`Subscriptions` section, s
 
 - Audio files are kept for playback.
 - **The training record is text only** (§13): question text, attached context ids, final corrected transcript, rating.
+
+### 12.3 Reply calendar
+
+- **Counted hours.** The reply time and both reminder hours count real elapsed time that falls on counted days. A day is a calendar date in the calendar's time zone, from its local midnight to the next (so a daylight-saving day counts its real 23 or 25 hours). A day counts when skipping weekends is off, or it is not a weekend day, or it lies inside an exam period. A window that starts on a day that does not count starts at the next counted day's midnight. Defaults: skip weekends on, weekend Friday and Saturday, time zone Africa/Cairo.
+- **Exam periods.** Each has a name and an inclusive first and last day; every day inside one counts, weekends included. Admins add, edit and delete them on the Configuration page under the reply calendar card (§10.6), and every change is audit-logged.
+- **Applying changes.** Deadlines and reminder times are stored on the question. When the calendar, an exam period, the reply time or a reminder hour changes, open questions are recomputed at the next SLA sweep from the same window start. Reminders already sent are not resent, and a recorded breach stays.
+- **Who sees the deadline.** Students see the deadline before sending a question and on the thread; teachers see it in the inbox countdown. SLA compliance counts replies whose window had no breach.
+- Decided (#222): (a) the calendar is configurable as above; (b) a breach gives no refund or credit; (c) a breach fires an admin alert only.
+- Landing and plan copy state the reply hours only.
 
 ---
 
@@ -498,10 +518,12 @@ QuestionMastery(student_id, question_id, mastered bool, latest_attempt_id, lates
 Subscription(id, student_id, plan[Base|AskTeacher], period[Monthly|Termly|Yearly], status[Active|PastDue|Cancelled|Expired], current_period_start, current_period_end, cancelled_at?, expired_at?, paymob_ref?)
 Payment(id, student_id, subscription_id?, plan, period, period_months, amount_minor, currency, status[Pending|Succeeded|Failed|Refunded], paymob_txn_id?, provider_order_id?, raw_webhook_json?, completed_at?, review_reason?, review_resolved_at?, review_resolved_by?, refunded_at?, refunded_by?, refund_reason?, refund_transaction_id?, refund_idempotency_key?, created_at)  -- docs/subscriptions.md
 
-TeacherThread(id, student_id, teacher_id?, subject_id, context_json, status[Open|Answered|Closed], submitted_at, sla_due_at, claimed_at?, closed_at?, rating?)  -- docs/ask-teacher.md
+TeacherThread(id, student_id, teacher_id?, subject_id, context_json, status[Open|Answered|Closed], submitted_at, sla_window_started_at, first_reminder_due_at, second_reminder_due_at, sla_due_at, sla_schedule_fingerprint, claimed_at?, closed_at?, rating?)  -- docs/ask-teacher.md
 TeacherMessage(id, thread_id, sender_id, kind[Text|Voice], text, image_url?, audio_url?, audio_duration_seconds?, transcript_final bool, student_read_at?, created_at)
 TeacherVoiceDraft(id, thread_id, teacher_id, audio_key, audio_url, audio_duration_seconds, status[Pending|Ready|Failed|Sent], transcript?, transcription_model?, attempts, next_attempt_at?, recorded_at, transcribed_at?, sent_message_id?)  -- transcription job; docs/ask-teacher.md
-TeacherThreadSlaEvent(id, thread_id, kind[FirstReminder|SecondReminder|Breach], sla_due_at, teacher_id?, occurred_at)  -- one per SLA window and stage; reminders and breach record (docs/ask-teacher.md)
+TeacherThreadSlaEvent(id, thread_id, kind[FirstReminder|SecondReminder|Breach], window_started_at, sla_due_at, teacher_id?, occurred_at)  -- one per SLA window (window_started_at) and stage; reminders and breach record (docs/ask-teacher.md)
+TeacherThreadOutOfAppReminder(id, thread_id unique, stage[FirstReminder|SecondReminder], sla_due_at, occurred_at)  -- at most one per thread; marker of the one out-of-app reminder (docs/ask-teacher.md)
+ExamPeriod(id, name, start_date, end_date, created_by, created_at, updated_by?, updated_at?)  -- SLA calendar (docs/configuration.md)
 
 AvatarConversation(id, student_id, entry_point, subject_id?, unit_id?, lesson_id?, session_id?, question_id?, started_at, last_message_at, message_count)  -- docs/avatar.md
 AvatarMessage(id, conversation_id, position, role[Student|Assistant], text, created_at, model?, prompt_version?, input_tokens?, output_tokens?, cost_usd?, stop_reason?, history_message_count?, context_json?, citations_json?)  -- append-only; replies carry the context bundle, model and prompt version
@@ -544,6 +566,7 @@ AuditLog(id, actor_id, actor_name, actor_role, action, entity, entity_id, outcom
 | Dashboards / finance | – | own stats only | ✓ |
 | Payment log and refunds | – | – | ✓ |
 | Manage users / teachers | – | – | ✓ |
+| Manage configuration (runtime settings, feature flags, exam periods) | – | – | ✓ |
 | View audit log | – | – | ✓ |
 | View Avatar conversations | – | – | ✓ |
 | Export training data | – | – | ✓ |
@@ -564,7 +587,7 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 8. Exams are generated from blueprints; a blueprint cannot be saved with a shortfall.
 9. Exam retakes unlimited; best score displayed; all kept.
 10. Avatar never reveals answers during an in-progress exam.
-11. Ask a Teacher: 24h SLA from submission (a follow-up opens a new 24h window); one follow-up per thread; voice always transcribed; training record is text only.
+11. Ask a Teacher: 24h SLA by default (admin-configurable, §10.6) counted over the reply calendar (§12.3) from submission (a follow-up opens a new window); one follow-up per thread; voice always transcribed; training record is text only.
 12. Subscription entitlement changes only through Paymob-verified events: HMAC-verified webhooks, or Paymob's response to an admin refund; or through an admin's complimentary grant (§10.4). The client never sets entitlement.
 13. Every content change and validation decision is audit-logged.
 
@@ -574,8 +597,8 @@ Admins deliberately cannot approve questions. This keeps the "validated by a rea
 
 - **Backend**: .NET 10, DDD/CQRS, PostgreSQL (JSONB for question bodies; pgvector for Avatar retrieval).
 - **AI/grading service**: Python FastAPI — LLM grading (v2), SymPy CAS checks (v2), Avatar embeddings + generation (v1). Retrieval search itself runs in the .NET API over pgvector (see `docs/content-retrieval.md`), speech-to-text through OpenAI Whisper (v1; the API's background worker schedules and retries it).
-- **LLM**: Claude API. Confirm current model IDs and pricing at build time.
-- **Embeddings**: OpenAI text-embedding-3-small (1536) through the AI service; Anthropic has no embeddings API. Fake by default.
+- **LLM**: any OpenAI-compatible Chat Completions API, set by base URL, key and model per pipeline. The default is OpenAI's budget tier (`gpt-5.6-luna`, $0.20/$1.20 per million tokens as of Aug 2026); Gemini 3.1 Flash-Lite and DeepSeek V4-Flash work through the same adapter. Never the Anthropic API (dev decision 2026-10-01). Confirm the model ids and prices at go-live.
+- **Embeddings**: OpenAI text-embedding-3-small (1536) through the AI service; the chat adapter reuses this OpenAI key unless a separate LLM key is set. Fake by default.
 - **Frontend**: React + TypeScript, shadcn/ui, i18next RTL. v2 adds a math input with LaTeX preview, a drag-and-drop canvas, and a rich Arabic editor.
 - **Media**: S3-compatible object storage for images and audio; private media (question photos, voice replies) is served only through the API after an access check.
 - **Jobs / realtime**: background jobs for grading, transcription, SLA reminders; the web polls for essay grade results (#118); SignalR for teacher replies.

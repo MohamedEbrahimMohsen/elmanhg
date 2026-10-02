@@ -5,6 +5,8 @@ using Elmanhg.Application.MathStepGrading.Shared;
 using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.RichText;
+using Elmanhg.Application.Shared.RuntimeSettings;
+using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.MathStepGrading;
 using Elmanhg.Domain.Questions;
@@ -18,7 +20,7 @@ using System.Text.Json;
 
 namespace Elmanhg.Application.MathStepGrading.GradeMathSteps;
 
-public sealed class GradeMathStepsHandler(IMathStepGradeRepository mathStepGradeRepository, IQuestionRepository questionRepository, ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IRichTextExtractor richTextExtractor, IAiMathStepGradingClient mathStepGradingClient, IOptions<MathStepGradingOptions> mathStepGradingOptions, TimeProvider timeProvider) : IRequestHandler<GradeMathStepsCommand>
+public sealed class GradeMathStepsHandler(IMathStepGradeRepository mathStepGradeRepository, IQuestionRepository questionRepository, ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IRichTextExtractor richTextExtractor, IAiMathStepGradingClient mathStepGradingClient, IOptions<MathStepGradingOptions> mathStepGradingOptions, TimeProvider timeProvider, IRuntimeSettings runtimeSettings) : IRequestHandler<GradeMathStepsCommand>
 {
     public async Task Handle(GradeMathStepsCommand request, CancellationToken cancellationToken)
     {
@@ -46,7 +48,7 @@ public sealed class GradeMathStepsHandler(IMathStepGradeRepository mathStepGrade
             questionGrade = revision.GradeMathSteps(verdict, MathStepAssessments.Awards(result));
         }
 
-        grade.Complete(assessment, questionGrade, options.ReviewConfidenceThreshold, timeProvider.GetUtcNow());
+        grade.Complete(assessment, questionGrade, await runtimeSettings.GetAsync(GradingRuntimeSettings.MathStepReviewConfidenceThreshold, cancellationToken).ConfigureAwait(false), timeProvider.GetUtcNow());
 
         await mathStepGradeRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }

@@ -3,8 +3,10 @@ using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.TeacherThreads.FollowUpTeacherThread;
+using Elmanhg.Domain.SlaCalendars;
 using Elmanhg.Domain.TeacherThreads;
 using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -18,6 +20,7 @@ public sealed class FollowUpTeacherThreadHandlerTests
     private const string FollowUpText = "Can you show the units?";
     private static readonly DateTimeOffset Now = TeacherThreadBuilder.DefaultSubmittedAt.AddHours(5);
     private readonly ITeacherThreadRepository _teacherThreadRepository = Substitute.For<ITeacherThreadRepository>();
+    private readonly IExamPeriodRepository _examPeriodRepository = Substitute.For<IExamPeriodRepository>();
     private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
     private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
     private readonly Guid _studentId = Guid.NewGuid();
@@ -31,7 +34,7 @@ public sealed class FollowUpTeacherThreadHandlerTests
         _timeProvider.GetUtcNow().Returns(Now);
         _teacherThreadRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<TeacherThread, bool>>>(), Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<TeacherThread>, IQueryable<TeacherThread>>?>(), Arg.Any<Func<IQueryable<TeacherThread>, IOrderedQueryable<TeacherThread>>?>(), Arg.Any<bool>())
             .Returns(call => _threads.FirstOrDefault(call.Arg<Expression<Func<TeacherThread, bool>>>().Compile()));
-        _handler = new FollowUpTeacherThreadHandler(_teacherThreadRepository, Options.Create(new SubscriptionsOptions { AskTeacherReplySlaHours = 24 }), _timeProvider, _currentUserService);
+        _handler = new FollowUpTeacherThreadHandler(_teacherThreadRepository, _examPeriodRepository, new FakeRuntimeSettings(subscriptions: new SubscriptionsOptions { AskTeacherReplySlaHours = 24 }), _timeProvider, _currentUserService);
     }
 
     [Fact]
@@ -44,6 +47,20 @@ public sealed class FollowUpTeacherThreadHandlerTests
         (result.Status, result.CanFollowUp, result.CanRate, result.SlaDueAt).Should().Be((TeacherThreadStatus.Open, false, false, Now.AddHours(24)));
         result.Messages.Should().HaveCount(3);
         result.Messages.Last().IsFromStudent.Should().BeTrue();
+        await _teacherThreadRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_ExamPeriodCoversWeekend_CountsEveryDay()
+    {
+        var thread = Seed(new TeacherThreadBuilder().ForStudent(_studentId).AnsweredBy(_teacherId));
+        _examPeriodRepository.GetAllAsync(Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<ExamPeriod>, IQueryable<ExamPeriod>>?>(), Arg.Any<Func<IQueryable<ExamPeriod>, IOrderedQueryable<ExamPeriod>>?>(), Arg.Any<bool>())
+            .Returns([ExamPeriod.Create("Final exams", new DateOnly(2026, 10, 2), new DateOnly(2026, 10, 3), Guid.NewGuid())]);
+        var handler = new FollowUpTeacherThreadHandler(_teacherThreadRepository, _examPeriodRepository, new FakeRuntimeSettings(slaCalendar: new SlaCalendarOptions { SkipWeekends = true }), _timeProvider, _currentUserService);
+
+        var result = await handler.Handle(new FollowUpTeacherThreadCommand(thread.Id, FollowUpText), TestContext.Current.CancellationToken);
+
+        result.SlaDueAt.Should().Be(Now.AddHours(24));
         await _teacherThreadRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 

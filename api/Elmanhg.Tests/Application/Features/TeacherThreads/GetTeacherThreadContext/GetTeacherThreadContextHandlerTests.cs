@@ -11,6 +11,7 @@ using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Domain.Units;
 using Elmanhg.Tests.Application.Features.Subscriptions;
 using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using NSubstitute;
 
@@ -38,7 +39,7 @@ public sealed class GetTeacherThreadContextHandlerTests
         _unitRepository.GetByIdAsync(_content.Unit.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<CurriculumUnit>, IQueryable<CurriculumUnit>>?>(), Arg.Any<bool>()).Returns(_content.Unit);
         _subjectRepository.GetByIdAsync(_content.Subject.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Subject>, IQueryable<Subject>>?>(), Arg.Any<bool>()).Returns(_content.Subject);
         SubscriptionRepositoryStub.Stub(_subscriptionRepository, SubscriptionRepositoryStub.EntitledBase(_studentId, Now), new SubscriptionBuilder().ForStudent(_studentId).WithPlan(SubscriptionPlan.AskTeacher).StartingAt(Now.AddDays(-1)).Build());
-        _handler = new GetTeacherThreadContextHandler(_lessonRepository, _unitRepository, _subjectRepository, Substitute.For<IQuestionRepository>(), Substitute.For<ISessionRepository>(), _subscriptionRepository, Microsoft.Extensions.Options.Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService);
+        _handler = new GetTeacherThreadContextHandler(_lessonRepository, _unitRepository, _subjectRepository, Substitute.For<IQuestionRepository>(), Substitute.For<ISessionRepository>(), _subscriptionRepository, Microsoft.Extensions.Options.Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService, new FakeRuntimeSettings());
     }
 
     [Fact]

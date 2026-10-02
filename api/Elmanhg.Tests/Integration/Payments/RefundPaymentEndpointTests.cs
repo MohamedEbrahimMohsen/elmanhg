@@ -2,6 +2,7 @@ using Elmanhg.Domain.SharedKernel;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Infrastructure.Data.Context;
 using Elmanhg.Tests.Integration.Authorization;
+using Elmanhg.Tests.Integration.Configuration;
 using Elmanhg.Tests.Integration.Content;
 using Elmanhg.Tests.Integration.Infrastructure;
 using FluentAssertions;
@@ -14,9 +15,14 @@ using static Elmanhg.Tests.Integration.Sessions.SessionTestData;
 
 namespace Elmanhg.Tests.Integration.Payments;
 
-public sealed class RefundPaymentEndpointTests(ApiFactory factory)
+[Collection(RuntimeSettingsCollection.Name)]
+public sealed class RefundPaymentEndpointTests(ApiFactory factory) : IAsyncLifetime
 {
     private static CancellationToken CancellationToken => TestContext.Current.CancellationToken;
+
+    public async ValueTask InitializeAsync() => await PaymentsTestData.SetRefundsEnabledAsync(factory, true, CancellationToken);
+
+    public async ValueTask DisposeAsync() => await ConfigurationTestData.ClearOverridesAsync(factory);
 
     [Fact]
     public async Task Post_Admin_RefundsPaymentAndStudentLosesAccess()
@@ -141,6 +147,22 @@ public sealed class RefundPaymentEndpointTests(ApiFactory factory)
         var audit = await ContentTestData.ReadAuditAsync(factory, "Payment.Refund", payment.Id, CancellationToken);
         (audit.Outcome, audit.ResourceType).Should().Be(("Success", "Payment"));
         audit.Diff.Should().Contain("refundReason").And.Contain("Duplicate charge");
+    }
+
+    [Fact]
+    public async Task Post_RefundsOff_Returns400RefundsDisabledAndChangesNothing()
+    {
+        await PaymentsTestData.SetRefundsEnabledAsync(factory, false, CancellationToken);
+        var student = await ScopeTestData.SeedStudentAsync(factory, CancellationToken);
+        var (payment, subscription) = await PaymentsTestData.SeedSucceededAsync(factory, student.Id, DateTimeOffset.UtcNow, null, CancellationToken);
+        using var admin = await PaymentsTestData.AdminClientAsync(factory, CancellationToken);
+
+        using var response = await admin.SendAsync(PaymentsTestData.RefundRequest(payment.Id, "Duplicate charge", Guid.NewGuid()), CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await CodeAsync(response)).Should().Be("PAYMENT_REFUNDS_DISABLED");
+        var (stored, storedSubscription) = await ReadAsync(payment.Id, subscription.Id);
+        (stored.Status, stored.RefundTransactionId, storedSubscription.Status).Should().Be((PaymentStatus.Succeeded, (string?)null, SubscriptionStatus.Active));
     }
 
     private async Task<(Payment Payment, Subscription Subscription)> SeedRenewedAsync(Guid studentId)

@@ -21,6 +21,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminAuditRouteImport } from './routes/admin/audit'
 import { Route as AdminAvatarConversationsRouteImport } from './routes/admin/avatar-conversations'
 import { Route as AdminBlueprintsRouteImport } from './routes/admin/blueprints'
+import { Route as AdminConfigurationRouteImport } from './routes/admin/configuration'
 import { Route as AdminContentRouteImport } from './routes/admin/content'
 import { Route as AdminExportRouteImport } from './routes/admin/export'
 import { Route as AdminMoreRouteImport } from './routes/admin/more'
@@ -123,6 +124,11 @@ const AdminAvatarConversationsRoute =
 const AdminBlueprintsRoute = AdminBlueprintsRouteImport.update({
   id: '/blueprints',
   path: '/blueprints',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminConfigurationRoute = AdminConfigurationRouteImport.update({
+  id: '/configuration',
+  path: '/configuration',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminContentRoute = AdminContentRouteImport.update({
@@ -360,6 +366,7 @@ export interface FileRoutesByFullPath {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/avatar-conversations': typeof AdminAvatarConversationsRoute
   '/admin/blueprints': typeof AdminBlueprintsRoute
+  '/admin/configuration': typeof AdminConfigurationRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/export': typeof AdminExportRoute
   '/admin/more': typeof AdminMoreRoute
@@ -413,6 +420,7 @@ export interface FileRoutesByTo {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/avatar-conversations': typeof AdminAvatarConversationsRoute
   '/admin/blueprints': typeof AdminBlueprintsRoute
+  '/admin/configuration': typeof AdminConfigurationRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/export': typeof AdminExportRoute
   '/admin/more': typeof AdminMoreRoute
@@ -469,6 +477,7 @@ export interface FileRoutesById {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/avatar-conversations': typeof AdminAvatarConversationsRoute
   '/admin/blueprints': typeof AdminBlueprintsRoute
+  '/admin/configuration': typeof AdminConfigurationRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/export': typeof AdminExportRoute
   '/admin/more': typeof AdminMoreRoute
@@ -527,6 +536,7 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/avatar-conversations'
     | '/admin/blueprints'
+    | '/admin/configuration'
     | '/admin/content'
     | '/admin/export'
     | '/admin/more'
@@ -580,6 +590,7 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/avatar-conversations'
     | '/admin/blueprints'
+    | '/admin/configuration'
     | '/admin/content'
     | '/admin/export'
     | '/admin/more'
@@ -635,6 +646,7 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/avatar-conversations'
     | '/admin/blueprints'
+    | '/admin/configuration'
     | '/admin/content'
     | '/admin/export'
     | '/admin/more'
@@ -775,6 +787,13 @@ declare module '@tanstack/react-router' {
       path: '/blueprints'
       fullPath: '/admin/blueprints'
       preLoaderRoute: typeof AdminBlueprintsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/configuration': {
+      id: '/admin/configuration'
+      path: '/configuration'
+      fullPath: '/admin/configuration'
+      preLoaderRoute: typeof AdminConfigurationRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/content': {
@@ -1078,6 +1097,7 @@ interface AdminRouteRouteChildren {
   AdminAuditRoute: typeof AdminAuditRoute
   AdminAvatarConversationsRoute: typeof AdminAvatarConversationsRoute
   AdminBlueprintsRoute: typeof AdminBlueprintsRoute
+  AdminConfigurationRoute: typeof AdminConfigurationRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminExportRoute: typeof AdminExportRoute
   AdminMoreRoute: typeof AdminMoreRoute
@@ -1097,6 +1117,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminAuditRoute: AdminAuditRoute,
   AdminAvatarConversationsRoute: AdminAvatarConversationsRoute,
   AdminBlueprintsRoute: AdminBlueprintsRoute,
+  AdminConfigurationRoute: AdminConfigurationRoute,
   AdminContentRoute: AdminContentRoute,
   AdminExportRoute: AdminExportRoute,
   AdminMoreRoute: AdminMoreRoute,

@@ -237,6 +237,7 @@
   <data name="UNIT_HAS_LESSONS" xml:space="preserve"><value>لا يمكن حذف الوحدة لانها تحتوي على دروس.</value></data>
   <data name="CONTENT_ORDER_INVALID" xml:space="preserve"><value>الترتيب يجب ان يكون 1 او اكثر.</value></data>
   <data name="USER_NOT_TEACHER" xml:space="preserve"><value>يمكن اسناد المواد الى المعلمين فقط.</value></data>
+  <data name="PHONE_NUMBER_TEACHERS_ONLY" xml:space="preserve"><value>يمكن ضبط رقم واتساب للمعلّمين فقط.</value></data>
   <data name="AUDIT_LOG_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة يجب ان يكون 1 او اكثر.</value></data>
   <data name="AUDIT_LOG_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة خارج النطاق المسموح.</value></data>
   <data name="AUDIT_LOG_FILTER_TOO_LONG" xml:space="preserve"><value>نص التصفية طويل جدا.</value></data>
@@ -351,6 +352,7 @@
   <data name="PAYMENT_REFUND_REASON_TOO_LONG" xml:space="preserve"><value>سبب الاسترداد طويل جدا.</value></data>
   <data name="PAYMENT_REFUND_IDEMPOTENCY_KEY_REQUIRED" xml:space="preserve"><value>ترويسة Idempotency-Key مطلوبة ويجب ان تكون UUID غير فارغ.</value></data>
   <data name="PAYMENT_REFUND_DECLINED" xml:space="preserve"><value>رفضت Paymob الاسترداد. راجع المعاملة في لوحة Paymob.</value></data>
+  <data name="PAYMENT_REFUNDS_DISABLED" xml:space="preserve"><value>الاسترداد متوقف حاليًا. يمكن للمدير تفعيله من صفحة الإعدادات.</value></data>
   <data name="PAYMENT_NOT_SETTLED" xml:space="preserve"><value>لم تتم تسوية الدفع بعد.</value></data>
   <data name="PAYMENT_LOG_PAGE_NUMBER_INVALID" xml:space="preserve"><value>رقم الصفحة يجب ان يكون 1 او اكثر.</value></data>
   <data name="PAYMENT_LOG_PAGE_SIZE_INVALID" xml:space="preserve"><value>حجم الصفحة غير صالح.</value></data>
@@ -493,4 +495,19 @@
   <data name="QUESTION_MATH_MODEL_SOLUTION_REQUIRED" xml:space="preserve"><value>أضف خطوة واحدة على الأقل للحل النموذجي عندما يكون وزن الخطوات أكبر من صفر.</value></data>
   <data name="QUESTION_MATH_STEPS_WEIGHT_INVALID" xml:space="preserve"><value>وزن الخطوات عدد صحيح من 0 إلى 100.</value></data>
   <data name="GRADE_FEEDBACK_MATH_STEP_TALLY" xml:space="preserve"><value>خطوات صحيحة كاملة: {right} من {total}.</value></data>
+  <data name="RUNTIME_SETTING_KEY_REQUIRED" xml:space="preserve"><value>مفتاح الإعداد مطلوب.</value></data>
+  <data name="RUNTIME_SETTING_VALUE_INVALID" xml:space="preserve"><value>القيمة غير صالحة لهذا الإعداد أو خارج الحدود المسموح بها.</value></data>
+  <data name="RUNTIME_SETTING_NOT_FOUND" xml:space="preserve"><value>الإعداد غير موجود.</value></data>
+  <data name="RUNTIME_SETTING_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>عدل شخص آخر هذا الإعداد في نفس الوقت. حدث الصفحة وحاول مرة أخرى.</value></data>
+  <data name="ASK_TEACHER_REMINDER_ORDER_INVALID" xml:space="preserve"><value>يجب أن يكون التذكير الأول قبل الثاني، والثاني قبل نهاية مهلة الرد.</value></data>
+  <data name="SLA_CALENDAR_WEEKEND_DAYS_INVALID" xml:space="preserve"><value>يجب أن يبقى يوم واحد على الأقل من الأسبوع محتسبا.</value></data>
+  <data name="EXAM_PERIOD_ID_REQUIRED" xml:space="preserve"><value>معرف فترة الامتحانات مطلوب.</value></data>
+  <data name="EXAM_PERIOD_NAME_REQUIRED" xml:space="preserve"><value>اسم فترة الامتحانات مطلوب.</value></data>
+  <data name="EXAM_PERIOD_NAME_TOO_LONG" xml:space="preserve"><value>اسم فترة الامتحانات أطول من المسموح.</value></data>
+  <data name="EXAM_PERIOD_START_DATE_REQUIRED" xml:space="preserve"><value>اختر أول يوم في الفترة.</value></data>
+  <data name="EXAM_PERIOD_END_DATE_REQUIRED" xml:space="preserve"><value>اختر آخر يوم في الفترة.</value></data>
+  <data name="EXAM_PERIOD_DATE_RANGE_INVALID" xml:space="preserve"><value>يجب أن يكون آخر يوم في نفس يوم البداية أو بعده.</value></data>
+  <data name="EXAM_PERIOD_TOO_LONG" xml:space="preserve"><value>فترة الامتحانات أطول من المسموح.</value></data>
+  <data name="EXAM_PERIOD_NOT_FOUND" xml:space="preserve"><value>فترة الامتحانات غير موجودة.</value></data>
+  <data name="EXAM_PERIOD_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>عدل شخص آخر هذه الفترة في نفس الوقت. حدث الصفحة وحاول مرة أخرى.</value></data>
 </root>

@@ -62,10 +62,33 @@ profile_enabled() {
 
 check_observability_config() {
   profile_enabled observability || return 0
-  local password alertmanager_file
+  local password
   password=$(grep '^GRAFANA_ADMIN_PASSWORD=' "$ENV_FILE" | cut -d= -f2- || true)
   [ -n "$password" ] || fail "GRAFANA_ADMIN_PASSWORD is empty in $ENV_FILE; the observability profile needs it (docs/observability.md)"
-  alertmanager_file=$(grep '^ALERTMANAGER_CONFIG_FILE=' "$ENV_FILE" | cut -d= -f2- || true)
-  alertmanager_file=${alertmanager_file:-alertmanager.yml}
-  [ -f "$alertmanager_file" ] || fail "$alertmanager_file not found; copy observability/alertmanager/alertmanager.example.yml there (docs/observability.md)"
+  check_alert_email_config
+}
+
+env_value() {
+  local value
+  if [ -n "${!1+x}" ]; then printf '%s' "${!1}"; return; fi
+  value=$(grep "^$1=" "$ENV_FILE" | cut -d= -f2- || true)
+  [[ $value =~ ^\"(.*)\"$ || $value =~ ^\'(.*)\'$ ]] && value=${BASH_REMATCH[1]}
+  printf '%s' "$value"
+}
+
+# Fails a deploy whose alert email is half configured; the container would silently fall back to the null receiver.
+check_alert_email_config() {
+  local to from password password_file
+  to=$(env_value ALERTMANAGER_EMAIL_TO)
+  from=$(env_value ALERTMANAGER_EMAIL_FROM)
+  password=$(env_value ALERTMANAGER_SMTP_PASSWORD)
+  password_file=$(env_value ALERTMANAGER_SMTP_PASSWORD_FILE)
+  [ -z "$to$from$password$password_file" ] && return 0
+  if [ -n "$password_file" ]; then
+    [[ $password_file == ./* || $password_file == /* ]] || fail "ALERTMANAGER_SMTP_PASSWORD_FILE must start with ./ or / (docs/observability.md §9)"
+    [ -f "$password_file" ] && [ -s "$password_file" ] \
+      || fail "ALERTMANAGER_SMTP_PASSWORD_FILE $password_file is not a nonempty regular file (docs/observability.md §9)"
+  fi
+  [ -n "$to" ] && [ -n "$from" ] && { [ -n "$password" ] || [ -n "$password_file" ]; } \
+    || fail "alert email is half configured in $ENV_FILE: set ALERTMANAGER_EMAIL_TO, ALERTMANAGER_EMAIL_FROM and ALERTMANAGER_SMTP_PASSWORD or _FILE, or clear them all (docs/observability.md §9)"
 }

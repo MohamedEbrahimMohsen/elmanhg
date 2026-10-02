@@ -1,0 +1,1 @@
+{"id":"chatcmpl-01","object":"chat.completion","created":1790000000,"model":"gpt-5.6-luna","choices":[{"index":0,"message":{"role":"assistant","content":"الخطوة ١: طبّق قانون أوم.","refusal":null},"finish_reason":"stop"}],"usage":{"prompt_tokens":120,"completion_tokens":40,"total_tokens":160}}

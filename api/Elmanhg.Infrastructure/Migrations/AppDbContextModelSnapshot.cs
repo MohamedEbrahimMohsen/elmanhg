@@ -1736,6 +1736,53 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.ToTable("ReviewSessionOpenings");
                 });
 
+            modelBuilder.Entity("Elmanhg.Domain.RuntimeSettings.RuntimeSettingOverride", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("jsonb");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key")
+                        .IsUnique()
+                        .HasDatabaseName("IX_RuntimeSettingOverrides_Key");
+
+                    b.ToTable("RuntimeSettingOverrides");
+                });
+
             modelBuilder.Entity("Elmanhg.Domain.Sessions.Attempt", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1935,6 +1982,56 @@ namespace Elmanhg.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("SessionItems");
+                });
+
+            modelBuilder.Entity("Elmanhg.Domain.SlaCalendars.ExamPeriod", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StartDate", "EndDate");
+
+                    b.ToTable("ExamPeriods", t =>
+                        {
+                            t.HasCheckConstraint("CK_ExamPeriods_DateRange", "\"EndDate\" >= \"StartDate\"");
+                        });
                 });
 
             modelBuilder.Entity("Elmanhg.Domain.Subjects.Subject", b =>
@@ -2265,13 +2362,27 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTimeOffset>("FirstReminderDueAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
                     b.Property<int?>("Rating")
                         .HasColumnType("integer");
 
+                    b.Property<DateTimeOffset>("SecondReminderDueAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTimeOffset>("SlaDueAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SlaScheduleFingerprint")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset>("SlaWindowStartedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
@@ -2319,6 +2430,40 @@ namespace Elmanhg.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Elmanhg.Domain.TeacherThreads.TeacherThreadOutOfAppReminder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("SlaDueAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Stage")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("ThreadId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ThreadId")
+                        .IsUnique();
+
+                    b.ToTable("TeacherThreadOutOfAppReminders");
+                });
+
             modelBuilder.Entity("Elmanhg.Domain.TeacherThreads.TeacherThreadSlaEvent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2348,13 +2493,16 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<Guid>("ThreadId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset>("WindowStartedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Id");
 
                     b.HasIndex("TeacherId");
 
                     b.HasIndex("Kind", "OccurredAt");
 
-                    b.HasIndex("ThreadId", "Kind", "SlaDueAt")
+                    b.HasIndex("ThreadId", "Kind", "WindowStartedAt")
                         .IsUnique();
 
                     b.ToTable("TeacherThreadSlaEvents");
@@ -3596,6 +3744,15 @@ namespace Elmanhg.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Elmanhg.Domain.TeacherThreads.TeacherThreadOutOfAppReminder", b =>
+                {
+                    b.HasOne("Elmanhg.Domain.TeacherThreads.TeacherThread", null)
+                        .WithMany()
+                        .HasForeignKey("ThreadId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Elmanhg.Domain.TeacherThreads.TeacherThreadSlaEvent", b =>

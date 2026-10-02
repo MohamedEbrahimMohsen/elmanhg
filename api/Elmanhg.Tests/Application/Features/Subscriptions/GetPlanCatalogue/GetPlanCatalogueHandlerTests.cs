@@ -3,6 +3,7 @@ using Elmanhg.Application.Subscriptions.GetPlanCatalogue;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.SharedKernel;
 using Elmanhg.Domain.Subscriptions;
+using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 
 namespace Elmanhg.Tests.Application.Features.Subscriptions.GetPlanCatalogue;
@@ -39,5 +40,5 @@ public sealed class GetPlanCatalogueHandlerTests
         (result.AskTeacher.MonthlyQuestions, result.AskTeacher.ReplySlaHours).Should().Be((20, 24));
     }
 
-    private Task<PlanCatalogueResult> Handle() => new GetPlanCatalogueHandler(Microsoft.Extensions.Options.Options.Create(_options)).Handle(new GetPlanCatalogueQuery(), TestContext.Current.CancellationToken);
+    private Task<PlanCatalogueResult> Handle() => new GetPlanCatalogueHandler(Microsoft.Extensions.Options.Options.Create(_options), new FakeRuntimeSettings(subscriptions: _options)).Handle(new GetPlanCatalogueQuery(), TestContext.Current.CancellationToken);
 }

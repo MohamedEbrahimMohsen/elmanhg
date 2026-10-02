@@ -1,15 +1,16 @@
+using Elmanhg.Application.Shared.Messaging;
 using Elmanhg.Application.Shared.Observability;
-using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.Realtime;
+using Elmanhg.Application.Shared.RuntimeSettings;
+using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.TeacherThreads;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.TeacherThreads.ProcessTeacherThreadSla;
 
-public sealed class ProcessTeacherThreadSlaHandler(ITeacherThreadRepository teacherThreadRepository, ITeacherThreadSlaEventRepository teacherThreadSlaEventRepository, ITeacherSubjectRepository teacherSubjectRepository, ITeacherThreadNotifier teacherThreadNotifier, ElmanhgMetrics metrics, IOptions<AskTeacherOptions> askTeacherOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, TimeProvider timeProvider, ILogger<ProcessTeacherThreadSlaHandler> logger) : IRequestHandler<ProcessTeacherThreadSlaCommand>
+public sealed class ProcessTeacherThreadSlaHandler(ITeacherThreadRepository teacherThreadRepository, ITeacherThreadSlaEventRepository teacherThreadSlaEventRepository, ITeacherSubjectRepository teacherSubjectRepository, ITeacherThreadNotifier teacherThreadNotifier, ITeacherThreadOutOfAppReminderRepository teacherThreadOutOfAppReminderRepository, IUserRepository userRepository, IEnumerable<IMessageChannel> messageChannels, ElmanhgMetrics metrics, IRuntimeSettings runtimeSettings, TimeProvider timeProvider, ILogger<ProcessTeacherThreadSlaHandler> logger) : IRequestHandler<ProcessTeacherThreadSlaCommand>
 {
     public async Task Handle(ProcessTeacherThreadSlaCommand request, CancellationToken cancellationToken)
     {
@@ -20,14 +21,13 @@ public sealed class ProcessTeacherThreadSlaHandler(ITeacherThreadRepository teac
         }
 
         var now = timeProvider.GetUtcNow();
-        var askTeacher = askTeacherOptions.Value;
-        var due = thread.DueSlaStages(now, TimeSpan.FromHours(subscriptionsOptions.Value.AskTeacherReplySlaHours), TimeSpan.FromHours(askTeacher.FirstReminderAfterHours), TimeSpan.FromHours(askTeacher.SecondReminderAfterHours));
+        var due = thread.DueSlaStages(now);
         if (due.Count == 0)
         {
             return;
         }
 
-        var recorded = await teacherThreadSlaEventRepository.FindAsync(x => x.ThreadId == thread.Id && x.SlaDueAt == thread.SlaDueAt, cancellationToken, asNoTracking: true).ConfigureAwait(false);
+        var recorded = await teacherThreadSlaEventRepository.FindAsync(x => x.ThreadId == thread.Id && x.WindowStartedAt == thread.SlaWindowStartedAt, cancellationToken, asNoTracking: true).ConfigureAwait(false);
         var missing = due
             .Except(recorded.Select(x => x.Kind))
             .ToList();
@@ -38,9 +38,11 @@ public sealed class ProcessTeacherThreadSlaHandler(ITeacherThreadRepository teac
 
         foreach (var kind in missing)
         {
-            await teacherThreadSlaEventRepository.AddAsync(TeacherThreadSlaEvent.Record(thread.Id, kind, thread.SlaDueAt, thread.TeacherId, now), cancellationToken).ConfigureAwait(false);
+            await teacherThreadSlaEventRepository.AddAsync(TeacherThreadSlaEvent.Record(thread.Id, kind, thread.SlaWindowStartedAt, thread.SlaDueAt, thread.TeacherId, now), cancellationToken).ConfigureAwait(false);
         }
 
+        var values = await runtimeSettings.GetValuesAsync(cancellationToken).ConfigureAwait(false);
+        var outOfAppChannels = await OutOfAppTeacherReminder.ClaimAsync(thread, missing, values, teacherThreadOutOfAppReminderRepository, now, cancellationToken).ConfigureAwait(false);
         await teacherThreadSlaEventRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         foreach (var kind in missing)
@@ -68,5 +70,9 @@ public sealed class ProcessTeacherThreadSlaHandler(ITeacherThreadRepository teac
         }
 
         await teacherThreadNotifier.NotifyReminderAsync(recipients, thread.Id, reminders.Max(), cancellationToken).ConfigureAwait(false);
+        if (outOfAppChannels.Count > 0)
+        {
+            await OutOfAppTeacherReminder.SendAsync(thread, recipients, outOfAppChannels, userRepository, messageChannels, logger, cancellationToken).ConfigureAwait(false);
+        }
     }
 }

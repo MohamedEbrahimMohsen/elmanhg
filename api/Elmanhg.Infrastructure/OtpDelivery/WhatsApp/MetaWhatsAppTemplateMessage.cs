@@ -10,7 +10,7 @@ public sealed record MetaWhatsAppTemplateMessage([property: JsonPropertyName("me
     private const string BodyComponent = "body";
     private const string ButtonComponent = "button";
     private const string UrlButton = "url";
-    private const string CopyCodeButtonIndex = "0";
+    private const string FirstButtonIndex = "0";
     private const string TextParameter = "text";
 
     public static MetaWhatsAppTemplateMessage Create(string to, string code, WhatsAppOtpOptions options)
@@ -18,10 +18,21 @@ public sealed record MetaWhatsAppTemplateMessage([property: JsonPropertyName("me
         List<MetaWhatsAppComponent> components = [new(BodyComponent, null, null, [new(TextParameter, code)])];
         if (options.CopyCodeButton)
         {
-            components.Add(new(ButtonComponent, UrlButton, CopyCodeButtonIndex, [new(TextParameter, code)]));
+            components.Add(new(ButtonComponent, UrlButton, FirstButtonIndex, [new(TextParameter, code)]));
         }
 
         return new(MessagingProduct: WhatsAppProduct, RecipientType: IndividualRecipient, To: to, Type: TemplateType, Template: new(options.TemplateName, new(options.LanguageCode), components));
+    }
+
+    public static MetaWhatsAppTemplateMessage CreateUtility(string to, string templateName, string languageCode, IReadOnlyList<string> bodyParameters, string? urlButtonSuffix)
+    {
+        List<MetaWhatsAppComponent> components = [new(BodyComponent, null, null, [.. bodyParameters.Select(x => new MetaWhatsAppParameter(TextParameter, x))])];
+        if (urlButtonSuffix is not null)
+        {
+            components.Add(new(ButtonComponent, UrlButton, FirstButtonIndex, [new(TextParameter, urlButtonSuffix)]));
+        }
+
+        return new(MessagingProduct: WhatsAppProduct, RecipientType: IndividualRecipient, To: to, Type: TemplateType, Template: new(templateName, new(languageCode), components));
     }
 }
 

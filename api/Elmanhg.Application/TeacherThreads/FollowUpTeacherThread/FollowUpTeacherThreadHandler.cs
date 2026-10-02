@@ -1,16 +1,16 @@
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
-using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.TeacherThreads.Shared;
+using Elmanhg.Domain.SlaCalendars;
 using Elmanhg.Domain.TeacherThreads;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.TeacherThreads.FollowUpTeacherThread;
 
-public sealed class FollowUpTeacherThreadHandler(ITeacherThreadRepository teacherThreadRepository, IOptions<SubscriptionsOptions> subscriptionsOptions, TimeProvider timeProvider, ICurrentUserService currentUserService) : IRequestHandler<FollowUpTeacherThreadCommand, TeacherThreadResult>
+public sealed class FollowUpTeacherThreadHandler(ITeacherThreadRepository teacherThreadRepository, IExamPeriodRepository examPeriodRepository, IRuntimeSettings runtimeSettings, TimeProvider timeProvider, ICurrentUserService currentUserService) : IRequestHandler<FollowUpTeacherThreadCommand, TeacherThreadResult>
 {
     public async Task<TeacherThreadResult> Handle(FollowUpTeacherThreadCommand request, CancellationToken cancellationToken)
     {
@@ -22,8 +22,9 @@ public sealed class FollowUpTeacherThreadHandler(ITeacherThreadRepository teache
         var userId = currentUserService.UserId.Value;
         var thread = await teacherThreadRepository.FirstOrDefaultAsync(x => x.Id == request.ThreadId && x.StudentId == userId, cancellationToken, include: query => query.Include(x => x.Messages)).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.TeacherThreadNotFound);
 
+        var slaPolicy = await TeacherThreadSlaPolicyLoader.LoadAsync(runtimeSettings, examPeriodRepository, cancellationToken).ConfigureAwait(false);
         var now = timeProvider.GetUtcNow();
-        thread.FollowUp(request.Text ?? string.Empty, now, TimeSpan.FromHours(subscriptionsOptions.Value.AskTeacherReplySlaHours));
+        thread.FollowUp(request.Text ?? string.Empty, now, slaPolicy);
 
         await teacherThreadRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

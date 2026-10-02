@@ -5,6 +5,7 @@ export * from './avatar/avatar';
 export * from './avatar-conversations/avatar-conversations';
 export * from './browse/browse';
 export * from './client-errors/client-errors';
+export * from './configuration/configuration';
 export * from './content-retrieval/content-retrieval';
 export * from './dashboard/dashboard';
 export * from './exam-blueprints/exam-blueprints';

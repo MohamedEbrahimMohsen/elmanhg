@@ -13,7 +13,7 @@ How Elmanhg runs on a server: one Docker Compose stack per environment, one envi
 | `ai` (profile `ai`) | `elmanhg-ai` | Python AI service | no | none | `/health/ready` |
 | `otel-collector` (profile `observability`) | `otel/opentelemetry-collector-contrib` | Receives OTLP from `api` and `ai`, tails every container's log file, redacts PII, ships to the three stores | no | `otel-collector-data` | none |
 | `prometheus` (profile `observability`) | `prom/prometheus` | Metrics store (35 d), alert rules, blackbox scrapes | no | `prometheus-data` | `wget /-/ready` |
-| `alertmanager` (profile `observability`) | `prom/alertmanager` | Routes alerts; reads the host file `alertmanager.yml` | no | `alertmanager-data` | `wget /-/ready` |
+| `alertmanager` (profile `observability`) | `prom/alertmanager` | Routes alerts; renders its config from `.env` (email or null receiver) | no | `alertmanager-data` | `wget /-/ready` |
 | `blackbox` (profile `observability`) | `prom/blackbox-exporter` | HTTP probes of edge, api and ai | no | none | `wget /-/healthy` |
 | `loki` (profile `observability`) | `grafana/loki` | Log store (14 d) | no | `loki-data` | none (no probe tool in the image) |
 | `tempo` (profile `observability`) | `grafana/tempo` | Trace store (7 d) | no | `tempo-data` | none (no probe tool in the image) |
@@ -32,7 +32,7 @@ Object storage is available from #96: a managed S3-compatible service (Cloudflar
 | `ELMANHG_AI_ENV` | `development` | `production` | `production` |
 | How it deploys | not deployed | `deploy` workflow or `bash deploy.sh <tag>` on the host | `deploy` workflow (with a required reviewer) or `bash deploy.sh <tag>` |
 | Providers | fakes (OTP, payments, AI) | real OTP channel; Paymob test mode or the fake payment gateway; fake or real AI | all real |
-| `Payments__AllowFakePayments` | not needed (Development allows the fake) | `true` only while staging runs `Payments__Provider=Fake` | ignored: Production always refuses the fake |
+| `Payments__AllowFakePayments` | not needed (unset means true in Development) | `true` only while staging runs `Payments__Provider=Fake` | leave `false`: the API refuses to start with `true` |
 
 - Staging needs a real OTP channel (Email through Resend is enough). The fake OTP channel logs codes in Development only, so nobody can sign in to a staging host with it ([docs/otp-delivery.md](otp-delivery.md) §6).
 - Staging exposes nothing extra: `/scalar` and `/openapi` are mapped outside Production, but Caddy proxies only `/api/*`.
@@ -40,23 +40,23 @@ Object storage is available from #96: a managed S3-compatible service (Cloudflar
 
 ## 3. Configuration and secrets
 
-Three files sit next to `docker-compose.prod.yml` on the host, four with the `observability` profile. None is committed; the committed example files hold their shapes. Make each one `chmod 600`, owned by the deploy user.
+Three files sit next to `docker-compose.prod.yml` on the host, plus an optional `secrets/alertmanager-smtp-password` with the `observability` profile. None is committed; the committed example files hold their shapes. Make each of the three `chmod 600`, owned by the deploy user.
 
 | File | Read by | Holds |
 |---|---|---|
 | `.env` | Docker Compose (interpolation) | image registry and tag, site address, ports, network subnet, environment names, Postgres credentials, the env-file paths |
 | `api.env` | the `api` and `migrate` containers | every API `Section__Key`: JWT, OTP, admin seed, OTP delivery, payments, AI client, content retrieval |
 | `ai.env` | the `ai` container | every `ELMANHG_AI_*` |
-| `alertmanager.yml` (profile `observability`) | the `alertmanager` container | alert receivers (email, webhook); copied from `observability/alertmanager/alertmanager.example.yml` ([docs/observability.md](observability.md), Alert delivery) |
+| `secrets/alertmanager-smtp-password` (optional, profile `observability`) | the `alertmanager` container | the Resend API key for alert email; owned by 65534 (`nobody`), `chmod 400`, in a `chmod 700` folder ([docs/observability.md](observability.md), Alert delivery) |
 
-The API never sees the AI provider keys (Anthropic, OpenAI), and the AI service never sees the JWT key.
+The API never sees the AI provider keys (LLM, OpenAI), and the AI service never sees the JWT key.
 
 Precedence inside the API container, highest first:
 1. Compose `environment:` (computed values: connection string, trusted proxy network, AI base URL, file storage).
 2. `api.env`.
 3. The baked `/app/appsettings.json`, which is the committed `api/Elmanhg.Api/appsettings.example.json` (shapes and safe defaults, no secrets).
 
-Never committed: `.gitignore` covers `.env`, `/deploy/api.env`, `/deploy/ai.env`, `/deploy/alertmanager.yml`, `/deploy/backups/` and `/deploy/.smoke/`. The root `.dockerignore` keeps a developer's `appsettings.json` and `.env` out of the API image.
+Never committed: `.gitignore` covers `.env`, `/deploy/api.env`, `/deploy/ai.env`, `/deploy/secrets/`, `/deploy/backups/` and `/deploy/.smoke/`. The root `.dockerignore` keeps a developer's `appsettings.json` and `.env` out of the API image.
 
 Generating secrets:
 
@@ -103,7 +103,12 @@ A story that adds an options section holding a secret or a per-host value must a
 | `OTLP_ENDPOINT` | no | empty | OTLP/gRPC endpoint for `api` and `ai` traces and metrics; empty exports nothing. With the profile: `http://otel-collector:4317` |
 | `GRAFANA_ADMIN_PASSWORD` | with the profile | none | `openssl rand -hex 16`; `deploy.sh` refuses the profile without it |
 | `GRAFANA_PORT` | no | `3000` | loopback port Grafana listens on |
-| `ALERTMANAGER_CONFIG_FILE` | no | `alertmanager.yml` | path of the Alertmanager config, relative to the compose file; `deploy.sh` refuses the profile when it is missing |
+| `ALERTMANAGER_EMAIL_TO` | with the profile, optional | empty | alert email recipient(s), comma-separated ([docs/observability.md](observability.md) §9) |
+| `ALERTMANAGER_EMAIL_FROM` | with the profile, optional | empty | alert email sender on a Resend-verified domain |
+| `ALERTMANAGER_SMTP_SMARTHOST` | with the profile, optional | `smtp.resend.com:587` | `host:port`; `:465` uses implicit TLS |
+| `ALERTMANAGER_SMTP_USERNAME` | with the profile, optional | `resend` | |
+| `ALERTMANAGER_SMTP_PASSWORD` | with the profile, optional | empty | secret: the Resend API key |
+| `ALERTMANAGER_SMTP_PASSWORD_FILE` | with the profile, optional | empty | host path of a file holding the key, starting with `./` or `/`; wins over the password. `deploy.sh` refuses a half-configured alert email |
 | `MEDIA_ORIGIN` | no | empty | extra origin for images and audio in the SPA's Content-Security-Policy (Caddy). Leave empty while media is served from `/api/media` (the default, also with `S3`); set it (e.g. `https://media.example.com`) only if `FileStorage__PublicBaseUrl` points at another origin ([docs/security.md](security.md) §4) |
 
 ### API identity and seed (`api.env`)
@@ -147,12 +152,23 @@ A story that adds an options section holding a secret or a per-host value must a
 
 The invitation email is sent through the same Resend account as the email OTP (`OtpDelivery__Email__ApiKey` and `__FromAddress`). With the fake email provider no invitation email leaves the API, and the admin shares the link shown after the invite.
 
+### Out-of-app teacher reminders (`api.env`, [docs/otp-delivery.md](otp-delivery.md) §10)
+
+| Variable | Default | Secret |
+|---|---|---|
+| `OutOfAppReminders__WhatsAppTemplateName` / `__WhatsAppLanguageCode` / `__WhatsAppThreadButton` | empty / `ar` / `true` | no; empty keeps WhatsApp reminders on the fake |
+| `OutOfAppReminders__EmailLanguage` / `__EmailSubjectArabic` / `__EmailSubjectEnglish` | `ar` / Arabic default / English default | no |
+| `OutOfAppReminders__ThreadLinkBaseUrl` | empty | no; `https://<SITE_ADDRESS>/teacher/thread`, required when `OtpDelivery__Email__Provider=Resend` |
+| `OutOfAppReminders__TimeZone` | `Africa/Cairo` | no |
+
+The reminders reuse the WhatsApp and Resend credentials of the OTP channels. On/off, channels and stage are runtime settings on the Configuration page.
+
 ### Payments (`api.env`, [docs/paymob.md](paymob.md))
 
 | Variable | Default | Secret |
 |---|---|---|
 | `Payments__Provider` | `Fake` | no |
-| `Payments__AllowFakePayments` | `false` | no; lets the fake run outside Development, ignored in Production |
+| `Payments__AllowFakePayments` | unset: `true` in Development, `false` elsewhere | no; the fake serves only when true; refused at boot in Production |
 | `Payments__FakeCheckoutPath` | `/student/fake-checkout` | no |
 | `Payments__AttemptTimeoutSeconds` / `Payments__TotalTimeoutSeconds` | `10` / `30` | no |
 | `Payments__Paymob__BaseUrl` / `__CheckoutUrl` / `__BillingCountry` | Paymob Egypt / `EG` | no |
@@ -169,6 +185,7 @@ The invitation email is sent through the same Resend account as the email OTP (`
 | `AiService__ServiceToken` | empty | secret; same value as `ELMANHG_AI_SERVICE_TOKEN` |
 | `AiService__AttemptTimeoutSeconds` / `AiService__TotalTimeoutSeconds` | `45` / `50` | |
 | `AiService__BaseUrl` | set by compose | `http://ai:8000` |
+| `AiService__ConfigurationTimeoutSeconds` | `5` | 1 to 30; the admin Configuration page's AI status call gives up after this and shows the service as unreachable ([configuration.md](configuration.md) §6) |
 
 ### Content retrieval (`api.env`, [docs/content-retrieval.md](content-retrieval.md))
 
@@ -198,7 +215,7 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | `Avatar__AdminConversationsMaxPageSize` | `100` | 1 to 200 |
 | `Avatar__ConversationSearchMaxLength` | `200` | 1 to 500 |
 
-The daily message limits (Free 5, Base 50) are `Subscriptions__FreeDailyAvatarMessages` and `Subscriptions__BaseDailyAvatarMessages`.
+The daily message limits (Free 5, Base 50) are `Subscriptions__FreeDailyAvatarMessages` and `Subscriptions__BaseDailyAvatarMessages`, the defaults of runtime settings an admin can change on the Configuration page ([configuration.md](configuration.md)).
 
 ### Rate limits (`api.env`, [docs/security.md](security.md))
 
@@ -221,25 +238,28 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | Variable | Default | Notes |
 |---|---|---|
 | `AskTeacher__QuestionTextMaxLength` | `2000` | 1 to 20000 |
-| `AskTeacher__ImageMaxSizeInMb` | `5` | 1 to 20 |
+| `AskTeacher__ImageMaxSizeInMb` | `5` | 1 to 9 (a larger value stops the boot: the runtime setting is capped at 9 MB); default of a runtime setting ([configuration.md](configuration.md)) |
 | `AskTeacher__ThreadListMaxPageSize` | `50` | 1 to 100 |
 | `AskTeacher__ReplyTextMaxLength` | `4000` | 1 to 20000 |
-| `AskTeacher__VoiceMaxSizeInMb` / `AskTeacher__VoiceMaxDurationSeconds` | `5` / `180` | 1 to 25 / 10 to 600 |
+| `AskTeacher__VoiceMaxSizeInMb` / `AskTeacher__VoiceMaxDurationSeconds` | `5` / `180` | 1 to 9 (a larger size stops the boot) / 10 to 600; default of a runtime setting ([configuration.md](configuration.md)) |
 | `AskTeacher__TranscriptionLanguage` | `ar` | two lower-case letters |
 | `AskTeacher__TranscriptionSweepEnabled` | `true` | the voice transcription worker |
 | `AskTeacher__TranscriptionSweepIntervalSeconds` / `AskTeacher__TranscriptionSweepBatchSize` | `5` / `5` | 1 to 3600 / 1 to 100 |
 | `AskTeacher__TranscriptionMaxAttempts` / `AskTeacher__TranscriptionRetryBaseDelaySeconds` | `4` / `15` | 1 to 10 / 1 to 3600 (retries at 15, 30, 60 s) |
 | `AskTeacher__SlaSweepEnabled` | `true` | the `ask-teacher-sla` reminder and breach worker |
 | `AskTeacher__SlaSweepIntervalSeconds` / `AskTeacher__SlaSweepBatchSize` | `60` / `50` | 1 to 3600 / 1 to 500 |
-| `AskTeacher__FirstReminderAfterHours` / `AskTeacher__SecondReminderAfterHours` | `12` / `20` | 1 to 168 each, hours into the reply window; startup fails unless first < second < `Subscriptions__AskTeacherReplySlaHours` |
+| `AskTeacher__FirstReminderAfterHours` / `AskTeacher__SecondReminderAfterHours` | `12` / `20` | 1 to 167 each, hours into the reply window; startup fails unless first < second < `Subscriptions__AskTeacherReplySlaHours`; default of a runtime setting ([configuration.md](configuration.md)) |
+| `SlaCalendar__SkipWeekends` / `SlaCalendar__WeekendDays` / `SlaCalendar__TimeZone` | `true` / `Friday,Saturday` / `Africa/Cairo` | the reply calendar: whether weekend days pause the SLA clock, which days (comma-separated day names, at least one day must count) and the IANA zone whose day boundaries apply; the zone must be in `SlaCalendar__AllowedTimeZones`; defaults of runtime settings ([configuration.md](configuration.md)) |
+| `SlaCalendar__AllowedTimeZones` | `Africa/Cairo,Asia/Riyadh,Asia/Dubai,Asia/Kuwait,UTC` | the zones an admin may pick; an unknown id stops the boot |
+| `SlaCalendar__ExamPeriodNameMaxLength` / `SlaCalendar__ExamPeriodMaxDays` | `100` / `120` | 1 to 500 / 1 to 366; caps on an exam period ([ask-teacher.md](ask-teacher.md)) |
 | `AskTeacher__ReminderListMaxCount` | `20` | 1 to 100, the «تذكيرات» card on the teacher inbox |
 | `AiService__TranscriptionTimeoutSeconds` | `150` | 1 to 600; above the AI service's worst case (about 121 s) |
 | `AiService__EssayGradingTimeoutSeconds` | `100` | 1 to 600; above the AI service's essay-grading worst case (about 91 s) |
 | `AiService__MathCheckTimeoutSeconds` | `15` | 1 to 120; the math final-answer check's attempt and total timeout (no POST retry). A timeout or outage grades the answer «unchecked» for teacher review ([docs/math-cas.md](math-cas.md)) |
 | `Sessions__MathStepsAnswerMaxLength` / `Sessions__MathStepsMaxCount` / `Sessions__MathStepMaxLength` / `Sessions__MathFinalAnswerMaxLength` | `24000` / `20` / `500` / `200` | raw JSON cap and caps on a math-with-steps answer (422 `ATTEMPT_ANSWER_TOO_LONG`) |
 | `Sessions__DragDropAnswerMaxLength` / `Sessions__DragDropPlacementsMaxCount` / `Sessions__DragDropPlacedItemsMaxCount` | `4000` / `20` / `30` | raw JSON cap, placements and placed items in a drag-and-drop answer (422 `ATTEMPT_ANSWER_TOO_LONG`) |
-| `EssayGrading__SweepEnabled` / `EssayGrading__ReviewConfidenceThreshold` | `true` / `0.7` | the essay-grading worker, and the confidence below which a teacher reviews the grade ([docs/essay-grading.md](essay-grading.md)) |
-| `MathStepGrading__SweepEnabled` / `MathStepGrading__ReviewConfidenceThreshold` / `MathStepGrading__CheckPermitLimit` | `true` / `0.7` / `10` | the math-step-grading worker, the confidence below which a teacher reviews a step grade, and the quiz math checks per student per minute ([docs/math-step-grading.md](math-step-grading.md)) |
+| `EssayGrading__SweepEnabled` / `EssayGrading__ReviewConfidenceThreshold` | `true` / `0.7` | the essay-grading worker, and the confidence below which a teacher reviews the grade ([docs/essay-grading.md](essay-grading.md)); default of a runtime setting ([configuration.md](configuration.md)) |
+| `MathStepGrading__SweepEnabled` / `MathStepGrading__ReviewConfidenceThreshold` / `MathStepGrading__CheckPermitLimit` | `true` / `0.7` / `10` | the math-step-grading worker, the confidence below which a teacher reviews a step grade, and the quiz math checks per student per minute ([docs/math-step-grading.md](math-step-grading.md)); default of a runtime setting ([configuration.md](configuration.md)) |
 | `GradeReview__CommentMaxLength` / `GradeReview__QueueMaxPageSize` | `2000` / `50` | 1 to 10000 characters in a teacher's review note / 1 to 100 rows per review-queue page ([docs/grade-review.md](grade-review.md)) |
 | `TrainingExports__SweepEnabled` / `TrainingExports__SweepIntervalSeconds` / `TrainingExports__SweepBatchSize` | `true` / `15` / `2` | the `training-export` worker that writes JSONL files ([docs/training-data.md](training-data.md), Export); 1 to 3600 / 1 to 20 |
 | `TrainingExports__MaxAttempts` / `TrainingExports__RetryBaseDelaySeconds` | `3` / `60` | 1 to 10 / 1 to 3600; after the last failure the export is `Failed` |
@@ -247,7 +267,8 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | `TrainingExports__ReadBatchSize` / `TrainingExports__MaxRangeDays` / `TrainingExports__ListMaxPageSize` | `500` / `366` / `50` | 10 to 5000 rows per page read / 1 to 3660 / 1 to 100 |
 | `TrainingExports__RetentionDays` | `7` | 1 to 365; completed export files are deleted after this many days |
 | `TrainingExports__RetentionSweepEnabled` / `TrainingExports__RetentionSweepIntervalSeconds` / `TrainingExports__RetentionSweepBatchSize` | `true` / `3600` / `20` | the `training-export-retention` worker; 1 to 86400 / 1 to 100 |
-| `Subscriptions__AskTeacherMonthlyQuestions` / `Subscriptions__AskTeacherReplySlaHours` | `20` / `24` | the add-on's monthly quota and reply SLA ([docs/subscriptions.md](subscriptions.md)) |
+| `RuntimeSettings__CacheSeconds` | `30` | 1 to 3600; how long an API instance caches runtime settings ([docs/configuration.md](configuration.md)) |
+| `Subscriptions__AskTeacherMonthlyQuestions` / `Subscriptions__AskTeacherReplySlaHours` | `20` / `24` | the add-on's monthly quota and reply SLA ([docs/subscriptions.md](subscriptions.md)); default of a runtime setting ([configuration.md](configuration.md)) |
 
 Question photos and teachers' voice replies are stored under `teacher-threads/` (in the `api-media` volume with `Local`, in the bucket with `S3`) and are private: the API serves them only to the owning student, a teacher of the subject or an admin. Caddy proxies all of `/api/*` to the API, so never serve `/api/media` straight from the volume or the bucket at the edge. With `Local`, the media backup (section 9) includes them. Voice replies are transcribed by the API's background worker through the AI service, so with `AiService__Provider=Http` the `ai` profile must be on; otherwise the drafts fail after their retries and the teacher types the text.
 
@@ -288,15 +309,17 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | Variable | Default | Notes |
 |---|---|---|
 | `ELMANHG_AI_SERVICE_TOKEN` | required | secret, at least 32 characters |
-| `ELMANHG_AI_LLM_PROVIDER` | `fake` | `anthropic` to go live |
-| `ELMANHG_AI_ANTHROPIC_API_KEY` | unset | secret; required for `anthropic` |
-| `ELMANHG_AI_CHAT_MODEL` | `claude-sonnet-5` | |
+| `ELMANHG_AI_LLM_PROVIDER` | `fake` | `openai_compatible` to go live |
+| `ELMANHG_AI_LLM_BASE_URL` | `https://api.openai.com/v1` | any OpenAI-compatible Chat Completions endpoint, https only (Gemini, DeepSeek: [ai-service.md](ai-service.md)) |
+| `ELMANHG_AI_LLM_API_KEY` | unset | secret, optional; empty reuses `ELMANHG_AI_OPENAI_API_KEY`. One of the two is required for `openai_compatible` |
+| `ELMANHG_AI_LLM_STRUCTURED_OUTPUT` / `_MAX_TOKENS_FIELD` / `_REASONING_EFFORT` | `json_schema` / `max_completion_tokens` / `low` | DeepSeek: `json_object` / `max_tokens` / `default` |
+| `ELMANHG_AI_CHAT_MODEL` | `gpt-5.6-luna` | placeholder; confirm against the provider's model list at go-live |
 | `ELMANHG_AI_LOG_LEVEL` / `ELMANHG_AI_LOG_FORMAT` | `INFO` / `json` | |
-| `ELMANHG_AI_CHAT_PROMPT_VERSION` | `v2` | the production Avatar prompt; `v1` is kept for history |
+| `ELMANHG_AI_CHAT_PROMPT_VERSION` | `v3` | the production Avatar prompt; `v1` and `v2` are kept for history |
 | `ELMANHG_AI_CHAT_MAX_SOURCES` / `ELMANHG_AI_CHAT_MAX_SOURCE_CHARS` | `20` / `8000` | retrieved lesson chunks per message / per chunk |
 | `ELMANHG_AI_CHAT_MAX_TOKENS` / `_MAX_HISTORY_MESSAGES` / `_MAX_MESSAGE_CHARS` / `_MAX_CONTEXT_CHARS` | `1024` / `20` / `4000` / `60000` | |
 | `ELMANHG_AI_MODEL_TIMEOUT_SECONDS` / `ELMANHG_AI_MODEL_MAX_RETRIES` | `20` / `1` | |
-| `ELMANHG_AI_MODEL_INPUT_USD_PER_MILLION_TOKENS` / `_OUTPUT_USD_PER_MILLION_TOKENS` | `3` / `15` | cost logging and the `costUsd` stored per reply |
+| `ELMANHG_AI_MODEL_INPUT_USD_PER_MILLION_TOKENS` / `_OUTPUT_USD_PER_MILLION_TOKENS` | `0.20` / `1.20` | cost logging and the `costUsd` stored per reply; one pair for all three pipelines |
 | `ELMANHG_AI_EMBEDDING_PROVIDER` | `fake` | `openai` to go live |
 | `ELMANHG_AI_OPENAI_API_KEY` | unset | secret; required for `openai` |
 | `ELMANHG_AI_EMBEDDING_MODEL` | `text-embedding-3-small` | |
@@ -308,9 +331,9 @@ None is a secret; the baked defaults suit staging and production. Validated at s
 | `ELMANHG_AI_TRANSCRIPTION_TIMEOUT_SECONDS` | `60` | per call; with one retry it stays under `AiService__TranscriptionTimeoutSeconds` |
 | `ELMANHG_AI_TRANSCRIPTION_MAX_AUDIO_BYTES` / `ELMANHG_AI_TRANSCRIPTION_MAX_DURATION_SECONDS` | `10485760` / `600` | per recording |
 | `ELMANHG_AI_TRANSCRIPTION_USD_PER_MINUTE` | `0.006` | cost logging only |
-| `ELMANHG_AI_ESSAY_GRADING_MODEL` | `claude-sonnet-5` | essay grading uses the Claude provider and key above |
+| `ELMANHG_AI_ESSAY_GRADING_MODEL` | `gpt-5.6-luna` | essay grading uses the LLM provider and key above |
 | `ELMANHG_AI_ESSAY_GRADING_TIMEOUT_SECONDS` | `45` | per call; with one retry (about 91 s) it stays under `AiService__EssayGradingTimeoutSeconds` |
-| `ELMANHG_AI_MATH_STEP_GRADING_MODEL` / `ELMANHG_AI_MATH_STEP_GRADING_TIMEOUT_SECONDS` | `claude-sonnet-5` / `45` | math step grading uses the Claude provider and key above; with one retry it stays under `AiService__MathStepGradingTimeoutSeconds` (100) |
+| `ELMANHG_AI_MATH_STEP_GRADING_MODEL` / `ELMANHG_AI_MATH_STEP_GRADING_TIMEOUT_SECONDS` | `gpt-5.6-luna` / `45` | math step grading uses the LLM provider and key above; with one retry it stays under `AiService__MathStepGradingTimeoutSeconds` (100) |
 | `ELMANHG_AI_CAS_MAX_EXPANSION_TERMS` | `500` | the CAS rejects an answer whose expansion would exceed this many terms as unreadable ([docs/math-cas.md](math-cas.md)) |
 | `ELMANHG_AI_CAS_TIMEOUT_SECONDS` | `5` | hard timeout of one SymPy check; on a timeout only the offending worker slot is killed and restarted in the background, and the other slots are untouched ([docs/math-cas.md](math-cas.md)) |
 | `ELMANHG_AI_CAS_WORKERS` / `ELMANHG_AI_CAS_WORKER_MEMORY_MB` | `2` / `1024` | CAS worker processes and their address-space cap (POSIX) |
@@ -364,7 +387,7 @@ Every other key in `appsettings.example.json` can be overridden in `api.env` as 
 1. VPS: Ubuntu 24.04, at least 2 vCPU and 4 GB RAM (8 GB recommended with the `observability` profile, which needs about 1.5 GB). Install Docker Engine with the Compose v2.24+ plugin.
 2. DNS: an A (and AAAA) record for the site name pointing at the host. Firewall: allow 22, 80 and 443 only.
 3. `sudo mkdir -p /opt/elmanhg && sudo chown deploy:deploy /opt/elmanhg`.
-4. Copy `deploy/docker-compose.prod.yml`, `Caddyfile`, `lib.sh`, `deploy.sh`, `backup.sh`, `restore.sh` and the `observability/` folder there. Create `.env`, `api.env` and `ai.env` from the examples, fill in the secrets (section 3), and `chmod 600 .env api.env ai.env`. With the `observability` profile, also `cp observability/alertmanager/alertmanager.example.yml alertmanager.yml && chmod 600 alertmanager.yml`, set `GRAFANA_ADMIN_PASSWORD` and `OTLP_ENDPOINT=http://otel-collector:4317` in `.env` ([docs/observability.md](observability.md), Turning it on).
+4. Copy `deploy/docker-compose.prod.yml`, `Caddyfile`, `lib.sh`, `deploy.sh`, `backup.sh`, `restore.sh` and the `observability/` folder there. Create `.env`, `api.env` and `ai.env` from the examples, fill in the secrets (section 3), and `chmod 600 .env api.env ai.env`. With the `observability` profile, optionally set the alert email keys ([docs/observability.md](observability.md) §9), set `GRAFANA_ADMIN_PASSWORD` and `OTLP_ENDPOINT=http://otel-collector:4317` in `.env` ([docs/observability.md](observability.md), Turning it on).
 5. `docker login ghcr.io` (section 5), if the packages are private.
 6. `bash deploy.sh sha-<7>`.
 7. Open `https://<site>` and sign in as the seeded admin.
@@ -394,7 +417,7 @@ Give `production` a required reviewer, so every production deploy waits for appr
 
 ### What `deploy.sh` does
 
-1. Accepts only `sha-<7-40 hex>` or `main`, refuses the `observability` profile without `GRAFANA_ADMIN_PASSWORD` or the Alertmanager config file, and reads the previous tag from `.env`.
+1. Accepts only `sha-<7-40 hex>` or `main`, refuses the `observability` profile without `GRAFANA_ADMIN_PASSWORD` or with a half-configured alert email, and reads the previous tag from `.env`.
 2. Writes the new tag into `.env` and pulls the images.
 3. Takes a backup when Postgres is running (skipped on the first deploy).
 4. `docker compose run --rm migrate`: applies pending migrations while the old `api` and `web` keep serving. A failure stops the script here, before any container is replaced.
@@ -448,7 +471,7 @@ Caddy also strips the client-sent `CF-Connecting-IP`, `CF-IPCountry`, `CF-IPCity
 
 ## 12. Run the production stack locally
 
-`bash deploy/smoke-test.sh` (Docker Desktop and Git Bash on Windows work) builds the three images, validates the Caddyfile, starts the stack with plain HTTP on `http://localhost:8088`, checks the SPA, the `/api` proxy, the cache headers, the security headers (CSP, HSTS, anti-framing, no `Server`), that client-sent `CF-*` headers are stripped, the public `/api/health` and `POST /api/client-errors`, runs `migrate` a second time, takes a backup and runs the restore drill. With the `observability` profile (the default) it also validates every observability config (`promtool check config` and `test rules`, `amtool check-config`, `otelcol validate`) and waits until metrics, traces, logs linked by trace id, log redaction, probes, alert rules and the three dashboards arrive ([docs/observability.md](observability.md), Running it locally). It removes the stack and its volumes afterwards.
+`bash deploy/smoke-test.sh` (Docker Desktop and Git Bash on Windows work) builds the three images, validates the Caddyfile, starts the stack with plain HTTP on `http://localhost:8088`, checks the SPA, the `/api` proxy, the cache headers, the security headers (CSP, HSTS, anti-framing, no `Server`), that client-sent `CF-*` headers are stripped, the public `/api/health` and `POST /api/client-errors`, runs `migrate` a second time, takes a backup and runs the restore drill. With the `observability` profile (the default) it also validates every observability config (`promtool check config` and `test rules`, `amtool check-config` on the rendered Alertmanager configs, `otelcol validate`) and waits until metrics, traces, logs linked by trace id, log redaction, probes, alert rules and the three dashboards arrive, and that Alertmanager accepts a test alert ([docs/observability.md](observability.md), Running it locally). It removes the stack and its volumes afterwards.
 
 | Knob | Default | Effect |
 |---|---|---|
@@ -474,6 +497,6 @@ For clicking through the system rather than testing the edge, `scripts/demo.sh u
 | Staging OTP | needs real Resend (or WhatsApp) keys, because the fake logs codes in Development only |
 | Object storage | built (#96): `FileStorage__Provider=S3` with an R2 or S3 bucket; not yet checked against a live bucket (needs credentials) |
 | Voice transcription | built (#96): `ELMANHG_AI_TRANSCRIPTION_PROVIDER=openai`; not yet checked against Whisper (needs a key), and the Egyptian-dialect evaluation waits for recorded clips |
-| Observability (#113) | done ([docs/observability.md](observability.md)); an external uptime monitor, a vendor error tracker (Sentry) and live alert receivers are deferred |
+| Observability (#113) | done ([docs/observability.md](observability.md)); alert email over Resend SMTP is built (#258) and waits for the key and addresses; an external uptime monitor and a vendor error tracker (Sentry) are deferred |
 | Performance (#114) | done ([docs/performance.md](performance.md)); the lesson p75 budget is missed (2.96 s locally, advisory in CI) and tracked in [#220](https://github.com/MohamedEbrahimMohsen/elmanhg/issues/220); CDN deferred until the live domain |
 | Security headers (#115) | done ([docs/security.md](security.md)); HSTS takes effect once the live domain serves HTTPS |

@@ -2,6 +2,7 @@ using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Application.TeacherThreads.Shared;
 using Elmanhg.Domain.Lessons;
@@ -15,7 +16,7 @@ using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.TeacherThreads.GetTeacherThreadContext;
 
-public sealed class GetTeacherThreadContextHandler(ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IQuestionRepository questionRepository, ISessionRepository sessionRepository, ISubscriptionRepository subscriptionRepository, IOptions<SubscriptionsOptions> subscriptionsOptions, TimeProvider timeProvider, ICurrentUserService currentUserService) : IRequestHandler<GetTeacherThreadContextQuery, TeacherThreadContextResult>
+public sealed class GetTeacherThreadContextHandler(ILessonRepository lessonRepository, ICurriculumUnitRepository unitRepository, ISubjectRepository subjectRepository, IQuestionRepository questionRepository, ISessionRepository sessionRepository, ISubscriptionRepository subscriptionRepository, IOptions<SubscriptionsOptions> subscriptionsOptions, TimeProvider timeProvider, ICurrentUserService currentUserService, IRuntimeSettings runtimeSettings) : IRequestHandler<GetTeacherThreadContextQuery, TeacherThreadContextResult>
 {
     public async Task<TeacherThreadContextResult> Handle(GetTeacherThreadContextQuery request, CancellationToken cancellationToken)
     {
@@ -25,7 +26,7 @@ public sealed class GetTeacherThreadContextHandler(ILessonRepository lessonRepos
         }
 
         var userId = currentUserService.UserId.Value;
-        var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, userId, subscriptionsOptions.Value, timeProvider.GetUtcNow(), cancellationToken).ConfigureAwait(false);
+        var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, runtimeSettings, userId, subscriptionsOptions.Value, timeProvider.GetUtcNow(), cancellationToken).ConfigureAwait(false);
         if (!entitlement.HasAskTeacher)
         {
             throw new ForbiddenCoreException(ErrorCodes.AskTeacherRequiresSubscription);

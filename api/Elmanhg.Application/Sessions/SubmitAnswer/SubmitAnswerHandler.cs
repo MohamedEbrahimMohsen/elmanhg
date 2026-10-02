@@ -7,6 +7,7 @@ using Elmanhg.Application.Questions.Shared.Grading;
 using Elmanhg.Application.Sessions.Shared;
 using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.EssayGrading;
@@ -22,7 +23,7 @@ using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.Sessions.SubmitAnswer;
 
-public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, ILessonRepository lessonRepository, ISubscriptionRepository subscriptionRepository, IEssayGradeRepository essayGradeRepository, IMathStepGradeRepository mathStepGradeRepository, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, IOptions<ContentOptions> contentOptions, IOptions<SessionsOptions> sessionsOptions, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer, IAiMathCheckClient mathCheckClient, IMathCheckRateLimiter mathCheckRateLimiter, IFileStorage fileStorage) : IRequestHandler<SubmitAnswerCommand, SessionItemResult>
+public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQuestionRepository questionRepository, IQuestionMasteryRepository questionMasteryRepository, ILessonRepository lessonRepository, ISubscriptionRepository subscriptionRepository, IEssayGradeRepository essayGradeRepository, IMathStepGradeRepository mathStepGradeRepository, IOptions<MasteryOptions> masteryOptions, IOptions<SubscriptionsOptions> subscriptionsOptions, IOptions<ContentOptions> contentOptions, IOptions<SessionsOptions> sessionsOptions, TimeProvider timeProvider, ICurrentUserService currentUserService, ILocalizer localizer, IAiMathCheckClient mathCheckClient, IMathCheckRateLimiter mathCheckRateLimiter, IFileStorage fileStorage, IRuntimeSettings runtimeSettings) : IRequestHandler<SubmitAnswerCommand, SessionItemResult>
 {
     public async Task<SessionItemResult> Handle(SubmitAnswerCommand request, CancellationToken cancellationToken)
     {
@@ -90,7 +91,7 @@ public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQ
     {
         var now = timeProvider.GetUtcNow();
         var options = subscriptionsOptions.Value;
-        var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, studentId, options, now, cancellationToken).ConfigureAwait(false);
+        var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, runtimeSettings, studentId, options, now, cancellationToken).ConfigureAwait(false);
         await FreeTierGate.EnsureLessonOpenAsync(entitlement, QuizScope.FromJson(session.Scope).LessonId, lessonRepository, cancellationToken).ConfigureAwait(false);
         await FreeTierGate.EnsureQuizQuestionAvailableAsync(entitlement, studentId, sessionRepository, options, now, cancellationToken).ConfigureAwait(false);
     }
