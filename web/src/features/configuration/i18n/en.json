@@ -11,6 +11,10 @@
   "groups": {
     "Features": { "title": "Feature flags", "description": "Turn features on or off without a restart." },
     "AskTeacher": { "title": "Ask a Teacher", "description": "Reply time and teacher reminders." },
+    "SlaCalendar": {
+      "title": "Reply calendar",
+      "description": "How the Ask a Teacher reply time counts days. During an exam period every day counts."
+    },
     "PlanLimits": {
       "title": "Plan limits",
       "description": "Limits of the Free plan, the Base plan and the Ask a Teacher add-on."
@@ -90,6 +94,58 @@
     "Email": "Email",
     "Both": "Both",
     "FirstReminder": "First reminder",
-    "SecondReminder": "Second reminder"
+    "SecondReminder": "Second reminder",
+    "Sunday": "Sunday",
+    "Monday": "Monday",
+    "Tuesday": "Tuesday",
+    "Wednesday": "Wednesday",
+    "Thursday": "Thursday",
+    "Friday": "Friday",
+    "Saturday": "Saturday",
+    "Africa/Cairo": "Cairo",
+    "Asia/Riyadh": "Riyadh",
+    "Asia/Dubai": "Dubai",
+    "Asia/Kuwait": "Kuwait",
+    "UTC": "UTC"
+  },
+  "examPeriods": {
+    "title": "Exam periods",
+    "description": "Every day counts toward the reply time between these dates, weekends included. Dates follow the calendar's time zone; open questions are updated at the next check.",
+    "add": "Add exam period",
+    "loading": "Loading exam periods…",
+    "errorTitle": "Could not load the exam periods.",
+    "empty": "No exam periods yet.",
+    "range": "{start} – {end}",
+    "edit": "Edit",
+    "editLabel": "Edit {name}",
+    "delete": "Delete",
+    "deleteLabel": "Delete {name}",
+    "form": {
+      "createTitle": "Add exam period",
+      "editTitle": "Edit exam period",
+      "name": "Name",
+      "startDate": "First day",
+      "endDate": "Last day",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "deleteDialog": {
+      "title": "Delete this exam period?",
+      "body": "Weekends will count normally again during {name}. Open questions are updated at the next check.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "toast": {
+      "created": "Exam period added.",
+      "updated": "Exam period saved.",
+      "deleted": "Exam period deleted.",
+      "failed": "Could not save the exam period."
+    },
+    "validation": {
+      "nameRequired": "Enter a name.",
+      "startRequired": "Choose the first day.",
+      "endRequired": "Choose the last day.",
+      "rangeInvalid": "The last day must be on or after the first day."
+    }
   }
 }

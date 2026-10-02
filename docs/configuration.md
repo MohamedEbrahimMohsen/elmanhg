@@ -5,7 +5,7 @@ The admin Configuration page shows everything configurable in one place (PRD §1
 ## 1. What the page shows
 
 - Route `#/admin/configuration`, nav «الإعدادات» / "Configuration" (last admin item, under «المزيد» on mobile). Policy `Configuration.Manage`, Admin only; web capability `configurationManage`.
-- One card per settings group, in this order: Feature flags (`Features`), Ask a Teacher (`AskTeacher`), Plan limits (`PlanLimits`), AI grading (`Grading`), Upload limits (`Uploads`). Each setting shows its label, description, current value, a «معدّل»/«افتراضي» badge, the default, when it was last changed, an editor for its type, Save, and Reset to default when it is overridden.
+- One card per settings group, in this order: Feature flags (`Features`), Ask a Teacher (`AskTeacher`), Reply calendar (`SlaCalendar`), Plan limits (`PlanLimits`), AI grading (`Grading`), Upload limits (`Uploads`). The Exam periods section (§5) sits directly under the Reply calendar card. Each setting shows its label, description, current value, a «معدّل»/«افتراضي» badge, the default, when it was last changed, an editor for its type, Save, and Reset to default when it is overridden.
 - Then the read-only Infrastructure card (§6).
 
 API:
@@ -16,8 +16,12 @@ API:
 | PUT | `/api/configuration/settings/{key}` body `{ "value": <json> }` | the setting (`RuntimeSettingResult`) |
 | POST | `/api/configuration/settings/{key}/reset` | the setting |
 | GET | `/api/configuration/infrastructure` | `InfrastructureConfigurationResult` |
+| GET | `/api/configuration/exam-periods` | `ExamPeriodResult[]` (`id`, `name`, `startDate`, `endDate`, `createdAt`, `updatedAt`), ordered by first day, latest first |
+| POST | `/api/configuration/exam-periods` body `{ "name", "startDate", "endDate" }` | the new period (`ExamPeriodResult`) |
+| PUT | `/api/configuration/exam-periods/{examPeriodId}` body `{ "name", "startDate", "endDate" }` | the period |
+| DELETE | `/api/configuration/exam-periods/{examPeriodId}` | empty `200` |
 
-Errors: `RUNTIME_SETTING_KEY_REQUIRED` and `RUNTIME_SETTING_VALUE_INVALID` (422), `RUNTIME_SETTING_NOT_FOUND` (404), `ASK_TEACHER_REMINDER_ORDER_INVALID` (400), `RUNTIME_SETTING_MODIFIED_CONCURRENTLY` (409).
+Errors: `RUNTIME_SETTING_KEY_REQUIRED` and `RUNTIME_SETTING_VALUE_INVALID` (422), `RUNTIME_SETTING_NOT_FOUND` (404), `ASK_TEACHER_REMINDER_ORDER_INVALID` and `SLA_CALENDAR_WEEKEND_DAYS_INVALID` (400), `RUNTIME_SETTING_MODIFIED_CONCURRENTLY` (409). Exam periods: `EXAM_PERIOD_ID_REQUIRED`, `EXAM_PERIOD_NAME_REQUIRED`, `EXAM_PERIOD_NAME_TOO_LONG`, `EXAM_PERIOD_START_DATE_REQUIRED`, `EXAM_PERIOD_END_DATE_REQUIRED`, `EXAM_PERIOD_DATE_RANGE_INVALID`, `EXAM_PERIOD_TOO_LONG` (422), `EXAM_PERIOD_NOT_FOUND` (404), `EXAM_PERIOD_MODIFIED_CONCURRENTLY` (409).
 
 ## 2. Settings
 
@@ -31,6 +35,9 @@ Errors: `RUNTIME_SETTING_KEY_REQUIRED` and `RUNTIME_SETTING_VALUE_INVALID` (422)
 | `askTeacher.outOfAppReminderEnabled` | AskTeacher | Boolean | – | `AskTeacher:OutOfAppReminderEnabled` |
 | `askTeacher.outOfAppReminderChannels` | AskTeacher | Choice | `WhatsApp`, `Email`, `Both` | `AskTeacher:OutOfAppReminderChannels` |
 | `askTeacher.outOfAppReminderStage` | AskTeacher | Choice | `FirstReminder`, `SecondReminder` | `AskTeacher:OutOfAppReminderStage` |
+| `slaCalendar.skipWeekends` | SlaCalendar | Boolean | – | `SlaCalendar:SkipWeekends` (true) |
+| `slaCalendar.weekendDays` | SlaCalendar | ChoiceList | Sunday–Saturday | `SlaCalendar:WeekendDays` (`Friday,Saturday`) |
+| `slaCalendar.timeZone` | SlaCalendar | Choice | `SlaCalendar:AllowedTimeZones` | `SlaCalendar:TimeZone` (`Africa/Cairo`) |
 | `plans.freeDailyQuizQuestions` | PlanLimits | Integer | 0–1000 | `Subscriptions:FreeDailyQuizQuestions` |
 | `plans.freeDailyAvatarMessages` | PlanLimits | Integer | 0–1000 | `Subscriptions:FreeDailyAvatarMessages` |
 | `plans.freeOpenLessonsPerUnit` | PlanLimits | Integer | 0–100 | `Subscriptions:FreeOpenLessonsPerUnit` |
@@ -42,7 +49,7 @@ Errors: `RUNTIME_SETTING_KEY_REQUIRED` and `RUNTIME_SETTING_VALUE_INVALID` (422)
 | `uploads.voiceReplyMaxSizeInMb` | Uploads | Integer | 1–9 | `AskTeacher:VoiceMaxSizeInMb` |
 | `uploads.voiceReplyMaxDurationSeconds` | Uploads | Integer | 10–600 | `AskTeacher:VoiceMaxDurationSeconds` |
 
-Cross-setting rule: first reminder < second reminder < reply time (`ASK_TEACHER_REMINDER_ORDER_INVALID`), checked on update and on reset against the candidate values. Upload sizes stop at 9 MB because Kestrel accepts at most a 10 MB request body and the multipart overhead must fit.
+Cross-setting rules: first reminder < second reminder < reply time (`ASK_TEACHER_REMINDER_ORDER_INVALID`), and with skip weekends on at least one day of the week counts (`SLA_CALENDAR_WEEKEND_DAYS_INVALID`), both checked on update and on reset against the candidate values. A change to the reply time, a reminder hour or the reply calendar applies to open questions too, at the next SLA sweep ([ask-teacher.md](ask-teacher.md)). Upload sizes stop at 9 MB because Kestrel accepts at most a 10 MB request body and the multipart overhead must fit. The reply-calendar defaults are validated on start by `SlaCalendarOptionsValidator`: weekend days are `DayOfWeek` names without repeats and leave one day counted, every `AllowedTimeZones` id (comma-separated IANA ids, default `Africa/Cairo,Asia/Riyadh,Asia/Dubai,Asia/Kuwait,UTC`) resolves, and `TimeZone` is one of them.
 
 ## 3. How it works
 
@@ -75,7 +82,9 @@ Cross-setting rule: first reminder < second reminder < reply time (`ASK_TEACHER_
 
 ## 5. Custom sections
 
-Complex values (for example the exam periods of the SLA calendar, #254) are not runtime settings. They get their own aggregate, table and audited CRUD commands under `/api/configuration/<resource>` with the `Configuration.Manage` policy, and a section component that `ConfigurationPage` renders directly under the card of the related group (for example `<ExamPeriodsSection />` after the `SlaCalendar` group card).
+Complex values are not runtime settings. They get their own aggregate, table and audited CRUD commands under `/api/configuration/<resource>` with the `Configuration.Manage` policy, and a section component that `ConfigurationPage` renders directly under the card of the related group.
+
+**Exam periods (#254)** are the implemented one: `<ExamPeriodsSection />` after the `SlaCalendar` card. Table `ExamPeriods`: `Name` (plain text, at most `SlaCalendar:ExamPeriodNameMaxLength`, 100), `StartDate` and `EndDate` (`date`, both inclusive, in the calendar time zone; check constraint `CK_ExamPeriods_DateRange`), at most `SlaCalendar:ExamPeriodMaxDays` (120) days long, soft delete, xmin concurrency token, index `(StartDate, EndDate)`. Overlapping periods are allowed. Every day inside a period counts toward the Ask a Teacher reply time, weekends included. Create, update and delete are audited as `ExamPeriod.Create`, `ExamPeriod.Update` and `ExamPeriod.Delete` ([audit-log.md](audit-log.md)); open questions pick up a change at the next SLA sweep.
 
 ## 6. Infrastructure section (read-only)
 
@@ -102,4 +111,4 @@ Complex values (for example the exam periods of the SLA calendar, #254) are not 
 ## 8. Known limits
 
 - On more than one API instance, a change can take up to `RuntimeSettings:CacheSeconds` to reach the other instances. Hosting is a single VPS instance today.
-- Changing `askTeacher.replySlaHours` applies to questions submitted, and follow-ups opened, after the change; the stored deadline of an open thread is not recomputed. Reminder times of open threads are computed from that stored deadline minus the current reply time, so changing it mid-window shifts their reminders. #254 replaces this with recomputed calendar deadlines.
+- Calendar, reply-time and reminder-hour changes reach open questions at the next SLA sweep (`AskTeacher:SlaSweepIntervalSeconds`, plus up to `RuntimeSettings:CacheSeconds` for a setting); a teacher action racing that update gets `409 TEACHER_THREAD_MODIFIED_CONCURRENTLY`.

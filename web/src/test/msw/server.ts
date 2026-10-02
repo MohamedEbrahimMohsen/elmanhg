@@ -14,6 +14,8 @@ import { getGetPaymentSettingsMockHandler } from '@/shared/api/generated/payment
 import { getGetSubjectsMockHandler } from '@/shared/api/generated/subjects/subjects.msw';
 import { getGetMyUsageMockHandler } from '@/shared/api/generated/subscriptions/subscriptions.msw';
 import { getGetTeacherInboxRemindersMockHandler } from '@/shared/api/generated/teacher-inbox/teacher-inbox.msw';
+import { getGetTeacherReplyDeadlineMockHandler } from '@/shared/api/generated/teacher-threads/teacher-threads.msw';
+import { teacherReplyDeadline } from '@/test/askTeacherFixtures';
 import { avatarStatus } from '@/test/avatarFixtures';
 import { studentLesson } from '@/test/browseFixtures';
 import { dashboardHandlers } from '@/test/dashboardFixtures';
@@ -31,6 +33,7 @@ export const server = setupServer(
   getGetMyUsageMockHandler(baseUsage()),
   getGetAvatarStatusMockHandler(avatarStatus()),
   getGetTeacherInboxRemindersMockHandler([]),
+  getGetTeacherReplyDeadlineMockHandler(teacherReplyDeadline()),
   ...dashboardHandlers(),
   getGetSubjectsMockHandler([]),
   getGetPaymentSettingsMockHandler(paymentSettings()),

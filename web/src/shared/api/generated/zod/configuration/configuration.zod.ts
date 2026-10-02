@@ -12,10 +12,10 @@ export const getRuntimeSettingsResponseSettingsItemMaximumRegExpTwo = new RegExp
 
 
 export const GetRuntimeSettingsResponseItem = zod.object({
-  "group": zod.enum(['Features', 'AskTeacher', 'PlanLimits', 'Grading', 'Uploads']),
+  "group": zod.enum(['Features', 'AskTeacher', 'SlaCalendar', 'PlanLimits', 'Grading', 'Uploads']),
   "settings": zod.array(zod.object({
   "key": zod.string(),
-  "group": zod.enum(['Features', 'AskTeacher', 'PlanLimits', 'Grading', 'Uploads']),
+  "group": zod.enum(['Features', 'AskTeacher', 'SlaCalendar', 'PlanLimits', 'Grading', 'Uploads']),
   "type": zod.enum(['Integer', 'Decimal', 'Boolean', 'Choice', 'ChoiceList']),
   "value": zod.unknown(),
   "defaultValue": zod.unknown(),
@@ -46,7 +46,7 @@ export const updateRuntimeSettingResponseMaximumRegExpTwo = new RegExp('^-?(?:0|
 
 export const UpdateRuntimeSettingResponse = zod.object({
   "key": zod.string(),
-  "group": zod.enum(['Features', 'AskTeacher', 'PlanLimits', 'Grading', 'Uploads']),
+  "group": zod.enum(['Features', 'AskTeacher', 'SlaCalendar', 'PlanLimits', 'Grading', 'Uploads']),
   "type": zod.enum(['Integer', 'Decimal', 'Boolean', 'Choice', 'ChoiceList']),
   "value": zod.unknown(),
   "defaultValue": zod.unknown(),
@@ -71,7 +71,7 @@ export const resetRuntimeSettingResponseMaximumRegExpTwo = new RegExp('^-?(?:0|[
 
 export const ResetRuntimeSettingResponse = zod.object({
   "key": zod.string(),
-  "group": zod.enum(['Features', 'AskTeacher', 'PlanLimits', 'Grading', 'Uploads']),
+  "group": zod.enum(['Features', 'AskTeacher', 'SlaCalendar', 'PlanLimits', 'Grading', 'Uploads']),
   "type": zod.enum(['Integer', 'Decimal', 'Boolean', 'Choice', 'ChoiceList']),
   "value": zod.unknown(),
   "defaultValue": zod.unknown(),
@@ -118,4 +118,57 @@ export const GetInfrastructureConfigurationResponse = zod.object({
 }))
 })])
 })
+
+export const GetExamPeriodsResponseItem = zod.object({
+  "id": zod.uuid(),
+  "name": zod.string(),
+  "startDate": zod.iso.date(),
+  "endDate": zod.iso.date(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true}).nullable()
+})
+export const GetExamPeriodsResponse = zod.array(GetExamPeriodsResponseItem)
+
+export const CreateExamPeriodBody = zod.object({
+  "name": zod.string().nullable(),
+  "startDate": zod.iso.date().nullable(),
+  "endDate": zod.iso.date().nullable(),
+  "auditAction": zod.string().nullish(),
+  "auditResourceType": zod.string().nullish(),
+  "auditResourceId": zod.uuid().nullish()
+})
+
+export const CreateExamPeriodResponse = zod.object({
+  "id": zod.uuid(),
+  "name": zod.string(),
+  "startDate": zod.iso.date(),
+  "endDate": zod.iso.date(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true}).nullable()
+})
+
+export const UpdateExamPeriodParams = zod.object({
+  "examPeriodId": zod.uuid()
+})
+
+export const UpdateExamPeriodBody = zod.object({
+  "name": zod.string().nullable(),
+  "startDate": zod.iso.date().nullable(),
+  "endDate": zod.iso.date().nullable()
+})
+
+export const UpdateExamPeriodResponse = zod.object({
+  "id": zod.uuid(),
+  "name": zod.string(),
+  "startDate": zod.iso.date(),
+  "endDate": zod.iso.date(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true}).nullable()
+})
+
+export const DeleteExamPeriodParams = zod.object({
+  "examPeriodId": zod.uuid()
+})
+
+export const DeleteExamPeriodResponse = zod.unknown()
 

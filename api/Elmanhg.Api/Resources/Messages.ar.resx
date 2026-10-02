@@ -500,4 +500,14 @@
   <data name="RUNTIME_SETTING_NOT_FOUND" xml:space="preserve"><value>الإعداد غير موجود.</value></data>
   <data name="RUNTIME_SETTING_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>عدل شخص آخر هذا الإعداد في نفس الوقت. حدث الصفحة وحاول مرة أخرى.</value></data>
   <data name="ASK_TEACHER_REMINDER_ORDER_INVALID" xml:space="preserve"><value>يجب أن يكون التذكير الأول قبل الثاني، والثاني قبل نهاية مهلة الرد.</value></data>
+  <data name="SLA_CALENDAR_WEEKEND_DAYS_INVALID" xml:space="preserve"><value>يجب أن يبقى يوم واحد على الأقل من الأسبوع محتسبا.</value></data>
+  <data name="EXAM_PERIOD_ID_REQUIRED" xml:space="preserve"><value>معرف فترة الامتحانات مطلوب.</value></data>
+  <data name="EXAM_PERIOD_NAME_REQUIRED" xml:space="preserve"><value>اسم فترة الامتحانات مطلوب.</value></data>
+  <data name="EXAM_PERIOD_NAME_TOO_LONG" xml:space="preserve"><value>اسم فترة الامتحانات أطول من المسموح.</value></data>
+  <data name="EXAM_PERIOD_START_DATE_REQUIRED" xml:space="preserve"><value>اختر أول يوم في الفترة.</value></data>
+  <data name="EXAM_PERIOD_END_DATE_REQUIRED" xml:space="preserve"><value>اختر آخر يوم في الفترة.</value></data>
+  <data name="EXAM_PERIOD_DATE_RANGE_INVALID" xml:space="preserve"><value>يجب أن يكون آخر يوم في نفس يوم البداية أو بعده.</value></data>
+  <data name="EXAM_PERIOD_TOO_LONG" xml:space="preserve"><value>فترة الامتحانات أطول من المسموح.</value></data>
+  <data name="EXAM_PERIOD_NOT_FOUND" xml:space="preserve"><value>فترة الامتحانات غير موجودة.</value></data>
+  <data name="EXAM_PERIOD_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>عدل شخص آخر هذه الفترة في نفس الوقت. حدث الصفحة وحاول مرة أخرى.</value></data>
 </root>

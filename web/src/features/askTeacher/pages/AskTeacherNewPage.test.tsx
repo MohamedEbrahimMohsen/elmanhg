@@ -3,18 +3,20 @@ import userEvent from '@testing-library/user-event';
 import { delay, http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import type { Language } from '@/app/i18n';
-import type { UsageResult } from '@/shared/api/generated/model';
+import type { TeacherReplyDeadlineResult, UsageResult } from '@/shared/api/generated/model';
 import { getGetPlanCatalogueMockHandler } from '@/shared/api/generated/plans/plans.msw';
 import { getGetMyUsageMockHandler } from '@/shared/api/generated/subscriptions/subscriptions.msw';
 import {
   getCreateTeacherThreadMockHandler,
   getGetMyTeacherThreadMockHandler,
+  getGetTeacherReplyDeadlineMockHandler,
   getGetTeacherThreadContextMockHandler,
 } from '@/shared/api/generated/teacher-threads/teacher-threads.msw';
 import {
   askTeacherUsage,
   attemptId,
   contextLessonId,
+  teacherReplyDeadline,
   teacherThread,
   threadContext,
   threadId,
@@ -36,10 +38,12 @@ async function openNew(
     usage = askTeacherUsage(),
     lng = 'en',
     failContext = false,
-  }: { usage?: UsageResult; lng?: Language; failContext?: boolean } = {},
+    deadline = teacherReplyDeadline(),
+  }: { usage?: UsageResult; lng?: Language; failContext?: boolean; deadline?: TeacherReplyDeadlineResult } = {},
 ) {
   server.use(
     getGetMyUsageMockHandler(usage),
+    getGetTeacherReplyDeadlineMockHandler(deadline),
     getGetPlanCatalogueMockHandler(planCatalogue()),
     getGetTeacherThreadContextMockHandler(
       threadContext(search.includes('attemptId') ? { questionStem: attemptStem, attemptId } : {}),
@@ -188,12 +192,18 @@ describe('AskTeacherNewPage', () => {
     expect(await screen.findByText("Physics / Mechanics / Newton's laws")).toBeInTheDocument();
   });
 
-  it('shows the reply-time note from the plan catalogue', async () => {
+  it('shows the calendar-aware reply deadline', async () => {
     await openNew(`?lessonId=${contextLessonId}`);
 
-    expect(
-      await screen.findByText("Your question goes to the subject's teachers, who reply within 24 hours."),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/reply within 24 hours: by Sunday, October 4, 2026/)).toBeInTheDocument();
+    expect(screen.getByText('Weekends outside exam periods do not count.')).toBeInTheDocument();
+  });
+
+  it('hides the weekend note when no day is skipped', async () => {
+    await openNew(`?lessonId=${contextLessonId}`, { deadline: teacherReplyDeadline({ skipsUncountedDays: false }) });
+
+    expect(await screen.findByText(/reply within 24 hours/)).toBeInTheDocument();
+    expect(screen.queryByText('Weekends outside exam periods do not count.')).not.toBeInTheDocument();
   });
 
   it('disables Send while submitting', async () => {

@@ -8,6 +8,7 @@ using Elmanhg.Application.TeacherThreads.Shared;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;
+using Elmanhg.Domain.SlaCalendars;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Domain.TeacherThreads;
@@ -46,7 +47,7 @@ public sealed class CreateTeacherThreadHandlerTests
         _unitRepository.GetByIdAsync(_content.Unit.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<CurriculumUnit>, IQueryable<CurriculumUnit>>?>(), Arg.Any<bool>()).Returns(_content.Unit);
         _subjectRepository.GetByIdAsync(_content.Subject.Id, Arg.Any<CancellationToken>(), Arg.Any<Func<IQueryable<Subject>, IQueryable<Subject>>?>(), Arg.Any<bool>()).Returns(_content.Subject);
         SubscriptionRepositoryStub.Stub(_subscriptionRepository, SubscriptionRepositoryStub.EntitledBase(_studentId, Now), new SubscriptionBuilder().ForStudent(_studentId).WithPlan(SubscriptionPlan.AskTeacher).StartingAt(Now.AddDays(-1)).Build());
-        _handler = new CreateTeacherThreadHandler(_teacherThreadRepository, _subscriptionRepository, _lessonRepository, _unitRepository, _subjectRepository, Substitute.For<IQuestionRepository>(), Substitute.For<ISessionRepository>(), _fileStorage, Microsoft.Extensions.Options.Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService, new FakeRuntimeSettings());
+        _handler = CreateHandler(new FakeRuntimeSettings());
     }
 
     [Fact]
@@ -96,6 +97,20 @@ public sealed class CreateTeacherThreadHandlerTests
     }
 
     [Fact]
+    public async Task Handle_CalendarSkipsWeekend_StoresCalendarDeadline()
+    {
+        var thursdayNoon = new DateTimeOffset(2026, 10, 1, 12, 0, 0, TimeSpan.Zero);
+        _timeProvider.GetUtcNow().Returns(thursdayNoon);
+        SubscriptionRepositoryStub.Stub(_subscriptionRepository, SubscriptionRepositoryStub.EntitledBase(_studentId, thursdayNoon), new SubscriptionBuilder().ForStudent(_studentId).WithPlan(SubscriptionPlan.AskTeacher).StartingAt(thursdayNoon.AddDays(-1)).Build());
+        var handler = CreateHandler(new FakeRuntimeSettings(slaCalendar: new SlaCalendarOptions { SkipWeekends = true }));
+
+        var result = await handler.Handle(Command(), TestContext.Current.CancellationToken);
+
+        result.SlaDueAt.Should().Be(new DateTimeOffset(2026, 10, 4, 12, 0, 0, TimeSpan.Zero));
+        await _teacherThreadRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task Handle_WithImage_StoresUnderTeacherThreadsKeyAndAttachesUrl()
     {
         _fileStorage.SaveAsync(Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns("/api/media/teacher-threads/stored.png");
@@ -118,6 +133,8 @@ public sealed class CreateTeacherThreadHandlerTests
     }
 
     private CreateTeacherThreadCommand Command(Guid? lessonId = null, IFormFile? image = null) => new("Why is F = ma?", lessonId ?? _content.Lesson.Id, null, null, image);
+
+    private CreateTeacherThreadHandler CreateHandler(FakeRuntimeSettings runtimeSettings) => new(_teacherThreadRepository, _subscriptionRepository, _lessonRepository, _unitRepository, _subjectRepository, Substitute.For<IQuestionRepository>(), Substitute.For<ISessionRepository>(), _fileStorage, Microsoft.Extensions.Options.Options.Create(new SubscriptionsOptions()), _timeProvider, _currentUserService, runtimeSettings, Substitute.For<IExamPeriodRepository>());
 
     private Task<TeacherThreadResult> Handle(CreateTeacherThreadCommand command) => _handler.Handle(command, TestContext.Current.CancellationToken);
 

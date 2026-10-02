@@ -4,7 +4,6 @@ using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.TeacherThreads;
-using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -24,8 +23,8 @@ public sealed class GetAskTeacherMetricsHandlerTests
     public GetAskTeacherMetricsHandlerTests()
     {
         _timeProvider.GetUtcNow().Returns(Now);
-        _teacherThreadRepository.GetReplyStatsAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>()).Returns(new TeacherReplyStats());
-        _handler = new GetAskTeacherMetricsHandler(_teacherThreadRepository, _teacherThreadSlaEventRepository, _subjectRepository, _timeProvider, Options.Create(new DashboardOptions()), new FakeRuntimeSettings(subscriptions: new SubscriptionsOptions { AskTeacherReplySlaHours = 24 }));
+        _teacherThreadRepository.GetReplyStatsAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>()).Returns(new TeacherReplyStats());
+        _handler = new GetAskTeacherMetricsHandler(_teacherThreadRepository, _teacherThreadSlaEventRepository, _subjectRepository, _timeProvider, Options.Create(new DashboardOptions()));
     }
 
     [Fact]
@@ -42,7 +41,7 @@ public sealed class GetAskTeacherMetricsHandlerTests
     {
         _teacherThreadRepository.CountAsync(Arg.Any<CancellationToken>(), Arg.Any<Expression<Func<TeacherThread, bool>>>()).Returns(9, 6, 2);
         _teacherThreadSlaEventRepository.CountBreachesAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>(), null, Arg.Any<CancellationToken>()).Returns(3);
-        _teacherThreadRepository.GetReplyStatsAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>(), null, null, Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>()).Returns(new TeacherReplyStats { Replies = 20, RepliedWithinSla = 19, MedianReplySeconds = 3600.4 });
+        _teacherThreadRepository.GetReplyStatsAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>(), null, null, Arg.Any<CancellationToken>()).Returns(new TeacherReplyStats { Replies = 20, RepliedWithinSla = 19, MedianReplySeconds = 3600.4 });
 
         var result = await _handler.Handle(new GetAskTeacherMetricsQuery(null, null, null), TestContext.Current.CancellationToken);
 
@@ -64,13 +63,5 @@ public sealed class GetAskTeacherMetricsHandlerTests
 
         result.SlaComplianceRate.Should().BeNull();
         result.MedianReplySeconds.Should().BeNull();
-    }
-
-    [Fact]
-    public async Task Handle_PassesConfiguredReplySla()
-    {
-        await _handler.Handle(new GetAskTeacherMetricsQuery(null, null, null), TestContext.Current.CancellationToken);
-
-        await _teacherThreadRepository.Received(1).GetReplyStatsAsync(Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>(), null, null, TimeSpan.FromHours(24), Arg.Any<CancellationToken>());
     }
 }

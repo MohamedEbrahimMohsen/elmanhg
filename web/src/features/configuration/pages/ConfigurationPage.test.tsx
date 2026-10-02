@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 import {
+  getGetExamPeriodsMockHandler,
   getGetInfrastructureConfigurationMockHandler,
   getGetRuntimeSettingsMockHandler,
   getResetRuntimeSettingMockHandler,
@@ -18,6 +19,7 @@ import {
   reachableAi,
   runtimeSetting,
   settingGroups,
+  slaCalendarSetting,
 } from '@/test/configurationFixtures';
 import { server } from '@/test/msw/server';
 import { renderApp } from '@/test/renderWithProviders';
@@ -234,6 +236,34 @@ describe('ConfigurationPage', () => {
 
     expect(await screen.findByRole('row', { name: /Teacher reminder by WhatsApp/ })).toHaveTextContent('Fake');
     expect(screen.getByRole('row', { name: /Teacher reminder by email/ })).toBeInTheDocument();
+  });
+
+  it('saves the weekend days of the reply calendar', async () => {
+    const user = userEvent.setup();
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    server.use(getGetExamPeriodsMockHandler([]));
+    openPage(
+      settingGroups(
+        slaCalendarSetting({
+          key: 'slaCalendar.weekendDays',
+          type: 'ChoiceList',
+          value: [],
+          defaultValue: ['Friday', 'Saturday'],
+          allowedValues: days,
+          labelEnglish: 'Weekend days',
+        }),
+      ),
+    );
+    const bodies = captureBodies();
+    const row = await rowOf('Weekend days');
+
+    await user.click(row.getByRole('checkbox', { name: 'Saturday' }));
+    await user.click(row.getByRole('checkbox', { name: 'Friday' }));
+    await user.click(row.getByRole('button', { name: 'Save' }));
+
+    await vi.waitFor(() => {
+      expect(bodies).toEqual([{ value: ['Friday', 'Saturday'] }]);
+    });
   });
 
   it('shows providers, the safety switch and secret status read-only', async () => {

@@ -45,6 +45,6 @@ public sealed class GetTeacherInboxRemindersHandler(ITeacherThreadRepository tea
     }
 
     private static TeacherThreadSlaEventKind LatestReminder(List<TeacherThreadSlaEvent> events, TeacherThread thread) => events
-        .Where(x => x.ThreadId == thread.Id && x.SlaDueAt == thread.SlaDueAt)
+        .Where(x => x.ThreadId == thread.Id && x.WindowStartedAt == thread.SlaWindowStartedAt)
         .Max(x => x.Kind);
 }

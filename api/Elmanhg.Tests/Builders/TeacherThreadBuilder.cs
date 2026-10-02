@@ -16,6 +16,7 @@ public sealed class TeacherThreadBuilder
     private bool _followedUp;
     private bool _finalReplied;
     private int? _rating;
+    private TeacherThreadSlaPolicy _slaPolicy = TeacherThreadSlaPolicies.WallClock();
 
     public TeacherThreadBuilder ForStudent(Guid studentId)
     {
@@ -74,6 +75,12 @@ public sealed class TeacherThreadBuilder
         return this;
     }
 
+    public TeacherThreadBuilder WithSlaPolicy(TeacherThreadSlaPolicy slaPolicy)
+    {
+        _slaPolicy = slaPolicy;
+        return this;
+    }
+
     public TeacherThreadBuilder Rated(int rating)
     {
         _rating = rating;
@@ -82,7 +89,7 @@ public sealed class TeacherThreadBuilder
 
     public TeacherThread Build()
     {
-        var thread = TeacherThread.Submit(_studentId, _context, "Why is F = ma?", _imageUrl, _submittedAt, TimeSpan.FromHours(24));
+        var thread = TeacherThread.Submit(_studentId, _context, "Why is F = ma?", _imageUrl, _submittedAt, _slaPolicy);
         if (_claimedBy is { } teacherId)
         {
             thread.Claim(teacherId, _submittedAt.AddMinutes(10));
@@ -97,7 +104,7 @@ public sealed class TeacherThreadBuilder
 
             if (_followedUp)
             {
-                thread.FollowUp("Can you show the units?", _submittedAt.AddHours(2), TimeSpan.FromHours(24));
+                thread.FollowUp("Can you show the units?", _submittedAt.AddHours(2), _slaPolicy);
             }
 
             if (_finalReplied)

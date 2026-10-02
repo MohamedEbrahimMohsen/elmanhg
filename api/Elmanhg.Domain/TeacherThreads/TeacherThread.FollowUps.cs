@@ -15,7 +15,7 @@ public partial class TeacherThread
 
     public bool CanBeRated() => Rating is null && Status != TeacherThreadStatus.Open;
 
-    public TeacherMessage FollowUp(string text, DateTimeOffset askedAt, TimeSpan replySla)
+    public TeacherMessage FollowUp(string text, DateTimeOffset askedAt, TeacherThreadSlaPolicy slaPolicy)
     {
         if (!CanFollowUp())
         {
@@ -26,7 +26,7 @@ public partial class TeacherThread
         var message = TeacherMessage.CreateText(Id, StudentId, text, null, at);
         Messages.Add(message);
         Status = TeacherThreadStatus.Open;
-        SlaDueAt = at + replySla;
+        ApplySlaSchedule(slaPolicy.ScheduleFrom(at));
         UpdatedBy = StudentId;
         UpdationDate = at;
         return message;

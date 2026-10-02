@@ -11,6 +11,7 @@ export type RuntimeSettingGroup = typeof RuntimeSettingGroup[keyof typeof Runtim
 export const RuntimeSettingGroup = {
   Features: 'Features',
   AskTeacher: 'AskTeacher',
+  SlaCalendar: 'SlaCalendar',
   PlanLimits: 'PlanLimits',
   Grading: 'Grading',
   Uploads: 'Uploads',

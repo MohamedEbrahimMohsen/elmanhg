@@ -4,6 +4,7 @@ public enum RuntimeSettingGroup
 {
     Features,
     AskTeacher,
+    SlaCalendar,
     PlanLimits,
     Grading,
     Uploads,

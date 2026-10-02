@@ -27,7 +27,7 @@ public sealed class GetRuntimeSettingsHandlerTests
     {
         var result = await _handler.Handle(new GetRuntimeSettingsQuery(), TestContext.Current.CancellationToken);
 
-        result.Select(x => x.Group).Should().Equal(RuntimeSettingGroup.Features, RuntimeSettingGroup.AskTeacher, RuntimeSettingGroup.PlanLimits, RuntimeSettingGroup.Grading, RuntimeSettingGroup.Uploads);
+        result.Select(x => x.Group).Should().Equal(RuntimeSettingGroup.Features, RuntimeSettingGroup.AskTeacher, RuntimeSettingGroup.SlaCalendar, RuntimeSettingGroup.PlanLimits, RuntimeSettingGroup.Grading, RuntimeSettingGroup.Uploads);
         var sla = ReplySla(result);
         (sla.Value.GetInt32(), sla.DefaultValue.GetInt32(), sla.IsOverridden, sla.UpdatedAt).Should().Be((24, 24, false, (DateTimeOffset?)null));
     }

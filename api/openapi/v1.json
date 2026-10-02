@@ -574,6 +574,36 @@
         }
       }
     },
+    "/api/teacher-threads/reply-deadline": {
+      "get": {
+        "tags": [
+          "TeacherThreads"
+        ],
+        "operationId": "GetTeacherReplyDeadline",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherReplyDeadlineResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherReplyDeadlineResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherReplyDeadlineResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/teacher-threads": {
       "get": {
         "tags": [
@@ -6277,6 +6307,176 @@
         }
       }
     },
+    "/api/configuration/exam-periods": {
+      "get": {
+        "tags": [
+          "Configuration"
+        ],
+        "operationId": "GetExamPeriods",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExamPeriodResult"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExamPeriodResult"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExamPeriodResult"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Configuration"
+        ],
+        "operationId": "CreateExamPeriod",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExamPeriodCommand"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExamPeriodCommand"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExamPeriodCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamPeriodResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamPeriodResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamPeriodResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/configuration/exam-periods/{examPeriodId}": {
+      "put": {
+        "tags": [
+          "Configuration"
+        ],
+        "operationId": "UpdateExamPeriod",
+        "parameters": [
+          {
+            "name": "examPeriodId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateExamPeriodRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateExamPeriodRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateExamPeriodRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamPeriodResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamPeriodResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamPeriodResult"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Configuration"
+        ],
+        "operationId": "DeleteExamPeriod",
+        "parameters": [
+          {
+            "name": "examPeriodId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/browse/subjects/{subjectId}": {
       "get": {
         "tags": [
@@ -8765,6 +8965,55 @@
           }
         }
       },
+      "CreateExamPeriodCommand": {
+        "required": [
+          "name",
+          "startDate",
+          "endDate"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "startDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "endDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "auditAction": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditResourceType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditResourceId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          }
+        }
+      },
       "CreateLessonRequest": {
         "required": [
           "unitId",
@@ -9686,6 +9935,45 @@
               "string"
             ],
             "format": "double"
+          }
+        }
+      },
+      "ExamPeriodResult": {
+        "required": [
+          "id",
+          "name",
+          "startDate",
+          "endDate",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
           }
         }
       },
@@ -13142,6 +13430,7 @@
         "enum": [
           "Features",
           "AskTeacher",
+          "SlaCalendar",
           "PlanLimits",
           "Grading",
           "Uploads"
@@ -15277,6 +15566,31 @@
           }
         }
       },
+      "TeacherReplyDeadlineResult": {
+        "required": [
+          "replySlaHours",
+          "slaDueAt",
+          "skipsUncountedDays"
+        ],
+        "type": "object",
+        "properties": {
+          "replySlaHours": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "slaDueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "skipsUncountedDays": {
+            "type": "boolean"
+          }
+        }
+      },
       "TeacherResult": {
         "required": [
           "id",
@@ -16014,6 +16328,36 @@
               "string"
             ],
             "format": "int32"
+          }
+        }
+      },
+      "UpdateExamPeriodRequest": {
+        "required": [
+          "name",
+          "startDate",
+          "endDate"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "startDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "endDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
           }
         }
       },

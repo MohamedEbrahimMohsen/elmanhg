@@ -65,6 +65,9 @@ public static class DependencyInjection
         services.AddSingleton<IRuntimeSettingDefinitions, FeatureFlagRuntimeSettings>();
         services.AddSingleton<IRuntimeSettingDefinitions, AskTeacherRuntimeSettings>();
         services.AddSingleton<IRuntimeSettingDefinitions, OutOfAppReminderRuntimeSettings>();
+        services.AddOptions<SlaCalendarOptions>().BindConfiguration(SlaCalendarOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddSingleton<IValidateOptions<SlaCalendarOptions>, SlaCalendarOptionsValidator>();
+        services.AddSingleton<IRuntimeSettingDefinitions, SlaCalendarRuntimeSettings>();
         services.AddSingleton<IRuntimeSettingDefinitions, PlanLimitRuntimeSettings>();
         services.AddSingleton<IRuntimeSettingDefinitions, GradingRuntimeSettings>();
         services.AddSingleton<IRuntimeSettingDefinitions, UploadRuntimeSettings>();

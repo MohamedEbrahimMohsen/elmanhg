@@ -44,7 +44,7 @@ public static class DashboardTestData
 
     public static Task SeedFunnelEventAsync(ApiFactory factory, Guid anonymousId, FunnelEventType type, DateTimeOffset occurredAt) => SaveAsync(factory, context => context.FunnelEvents.Add(FunnelEvent.Record(anonymousId, null, type, occurredAt)));
 
-    public static Task SeedBreachAsync(ApiFactory factory, TeacherThread thread, DateTimeOffset occurredAt) => SaveAsync(factory, context => context.TeacherThreadSlaEvents.Add(TeacherThreadSlaEvent.Record(thread.Id, TeacherThreadSlaEventKind.Breach, thread.SlaDueAt, null, occurredAt)));
+    public static Task SeedBreachAsync(ApiFactory factory, TeacherThread thread, DateTimeOffset occurredAt) => SaveAsync(factory, context => context.TeacherThreadSlaEvents.Add(TeacherThreadSlaEvent.Record(thread.Id, TeacherThreadSlaEventKind.Breach, thread.SlaWindowStartedAt, thread.SlaDueAt, null, occurredAt)));
 
     public static async Task<Payment> SeedPaymentAsync(ApiFactory factory, Guid studentId, BillingPeriod period, int periodMonths, long amountMinor, PaymentStatus status, DateTimeOffset completedAt, DateTimeOffset? refundedAt = null)
     {

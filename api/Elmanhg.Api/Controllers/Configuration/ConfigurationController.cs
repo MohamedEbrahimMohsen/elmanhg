@@ -3,6 +3,11 @@ using Elmanhg.Application.Configuration.GetRuntimeSettings;
 using Elmanhg.Application.Configuration.ResetRuntimeSetting;
 using Elmanhg.Application.Configuration.Shared;
 using Elmanhg.Application.Configuration.UpdateRuntimeSetting;
+using Elmanhg.Application.SlaCalendars.CreateExamPeriod;
+using Elmanhg.Application.SlaCalendars.DeleteExamPeriod;
+using Elmanhg.Application.SlaCalendars.GetExamPeriods;
+using Elmanhg.Application.SlaCalendars.Shared;
+using Elmanhg.Application.SlaCalendars.UpdateExamPeriod;
 using Elmanhg.Domain.SharedKernel;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -49,5 +54,41 @@ public class ConfigurationController(IMediator mediator) : ControllerBase
     {
         var result = await mediator.Send(new GetInfrastructureConfigurationQuery(), cancellationToken);
         return Ok(result);
+    }
+
+    [HttpGet("exam-periods", Name = "GetExamPeriods")]
+    [Authorize(Policy = DefaultCodes.ConfigurationManage)]
+    [ProducesResponseType<List<ExamPeriodResult>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetExamPeriods(CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetExamPeriodsQuery(), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("exam-periods", Name = "CreateExamPeriod")]
+    [Authorize(Policy = DefaultCodes.ConfigurationManage)]
+    [ProducesResponseType<ExamPeriodResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> CreateExamPeriod([FromBody] CreateExamPeriodCommand command, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPut("exam-periods/{examPeriodId:guid}", Name = "UpdateExamPeriod")]
+    [Authorize(Policy = DefaultCodes.ConfigurationManage)]
+    [ProducesResponseType<ExamPeriodResult>(StatusCodes.Status200OK)]
+    public async Task<ActionResult> UpdateExamPeriod([FromRoute] Guid examPeriodId, [FromBody] UpdateExamPeriodRequest request, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new UpdateExamPeriodCommand(examPeriodId, request.Name, request.StartDate, request.EndDate), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpDelete("exam-periods/{examPeriodId:guid}", Name = "DeleteExamPeriod")]
+    [Authorize(Policy = DefaultCodes.ConfigurationManage)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> DeleteExamPeriod([FromRoute] Guid examPeriodId, CancellationToken cancellationToken)
+    {
+        await mediator.Send(new DeleteExamPeriodCommand(examPeriodId), cancellationToken);
+        return Ok();
     }
 }

@@ -127,7 +127,7 @@ public sealed class ProcessTeacherThreadSlaOutOfAppReminderTests
     {
         var claimer = Teacher(ClaimerPhone);
         var thread = Seed(new TeacherThreadBuilder().ClaimedBy(claimer.Id), SecondReminderDueAt);
-        _recorded.Add(TeacherThreadSlaEvent.Record(thread.Id, TeacherThreadSlaEventKind.SecondReminder, thread.SlaDueAt, thread.TeacherId, SubmittedAt.AddHours(20)));
+        _recorded.Add(TeacherThreadSlaEvent.Record(thread.Id, TeacherThreadSlaEventKind.SecondReminder, thread.SlaWindowStartedAt, thread.SlaDueAt, thread.TeacherId, SubmittedAt.AddHours(20)));
 
         await Handle(thread);
 
@@ -281,6 +281,30 @@ public sealed class ProcessTeacherThreadSlaOutOfAppReminderTests
         var messages = _logger.Collector.GetSnapshot().Select(x => x.Message).ToList();
         messages.Should().HaveCount(2).And.OnlyContain(x => x.Contains(thread.Id.ToString()));
         messages.Should().NotContain(x => x.Contains(ClaimerPhone) || x.Contains(claimer.Email!));
+    }
+
+    [Fact]
+    public async Task Handle_CalendarSkipsWeekend_SendsAtCalendarStageWithCalendarDeadline()
+    {
+        var claimer = Teacher(ClaimerPhone);
+        var thread = Seed(new TeacherThreadBuilder().ClaimedBy(claimer.Id).WithSlaPolicy(TeacherThreadSlaPolicies.CairoWeekends()), new DateTimeOffset(2026, 10, 4, 8, 0, 0, TimeSpan.Zero));
+
+        await Handle(thread);
+
+        _markers.Should().ContainSingle().Which.Stage.Should().Be(TeacherThreadSlaEventKind.SecondReminder);
+        SentOver(_whatsApp).Should().ContainSingle().Which.SlaDueAt.Should().Be(new DateTimeOffset(2026, 10, 4, 12, 0, 0, TimeSpan.Zero));
+    }
+
+    [Fact]
+    public async Task Handle_CalendarSkipsWeekendAtWallClockStage_DoesNotSend()
+    {
+        var claimer = Teacher(ClaimerPhone);
+        var thread = Seed(new TeacherThreadBuilder().ClaimedBy(claimer.Id).WithSlaPolicy(TeacherThreadSlaPolicies.CairoWeekends()), SecondReminderDueAt);
+
+        await Handle(thread);
+
+        _markers.Should().BeEmpty();
+        await ShouldNotHaveSent();
     }
 
     private User Teacher(string? phoneNumber)

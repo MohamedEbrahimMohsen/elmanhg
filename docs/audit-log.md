@@ -100,8 +100,11 @@ An array with one element per changed audited entity. Property keys are camelCas
 | ReviewMathStepGrade | `MathStepGrade.Review` | MathStepGrade | command (the same for a math step grade) |
 | UpdateRuntimeSetting | `RuntimeSetting.Update` | RuntimeSetting | result (the diff shows `key` and `value`; a null value means the configuration default) |
 | ResetRuntimeSetting | `RuntimeSetting.Reset` | RuntimeSetting | result (the diff shows `value` → null; resetting a setting that is not overridden writes no change and the row has no diff) |
+| CreateExamPeriod | `ExamPeriod.Create` | ExamPeriod | result |
+| UpdateExamPeriod | `ExamPeriod.Update` | ExamPeriod | command |
+| DeleteExamPeriod | `ExamPeriod.Delete` | ExamPeriod | command |
 
-Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`, `ExamBlueprint`, `Subscription`, `Payment`, `TrainingExport`, `EssayGrade`, `MathStepGrade`, `RuntimeSettingOverride`.
+Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`, `ExamBlueprint`, `Subscription`, `Payment`, `TrainingExport`, `EssayGrade`, `MathStepGrade`, `RuntimeSettingOverride`, `ExamPeriod`.
 
 `QuestionRevision` and `QuestionDecision` rows are an append-only history and are not diffed.
 

@@ -24,6 +24,7 @@ import {
 } from '../model';
 import type {
   AiServiceConfigurationResult,
+  ExamPeriodResult,
   InfrastructureConfigurationResult,
   RuntimeSettingGroupResult,
   RuntimeSettingResult
@@ -39,6 +40,12 @@ export const getResetRuntimeSettingResponseMock = (overrideResponse: Partial<Ext
 export const getGetInfrastructureConfigurationResponseAiServiceConfigurationResultMock = (overrideResponse: Partial<AiServiceConfigurationResult> = {}): AiServiceConfigurationResult => ({...{llmProvider: faker.string.alpha({length: {min: 10, max: 20}}), chatModel: faker.string.alpha({length: {min: 10, max: 20}}), essayGradingModel: faker.string.alpha({length: {min: 10, max: 20}}), mathStepGradingModel: faker.string.alpha({length: {min: 10, max: 20}}), embeddingProvider: faker.string.alpha({length: {min: 10, max: 20}}), embeddingModel: faker.string.alpha({length: {min: 10, max: 20}}), transcriptionProvider: faker.string.alpha({length: {min: 10, max: 20}}), transcriptionModel: faker.string.alpha({length: {min: 10, max: 20}}), secrets: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({key: faker.string.alpha({length: {min: 10, max: 20}}), isSet: faker.datatype.boolean()}))}, ...overrideResponse});
 
 export const getGetInfrastructureConfigurationResponseMock = (overrideResponse: Partial<Extract<InfrastructureConfigurationResult, object>> = {}): InfrastructureConfigurationResult => (faker.helpers.arrayElement([{environment: faker.string.alpha({length: {min: 10, max: 20}}), integrations: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({integration: faker.string.alpha({length: {min: 10, max: 20}}), provider: faker.string.alpha({length: {min: 10, max: 20}}), mode: faker.helpers.arrayElement(Object.values(IntegrationMode)), isEnabled: faker.datatype.boolean()})), safetySwitches: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({key: faker.string.alpha({length: {min: 10, max: 20}}), isOn: faker.datatype.boolean()})), secrets: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({key: faker.string.alpha({length: {min: 10, max: 20}}), isSet: faker.datatype.boolean()})), aiServiceStatus: faker.helpers.arrayElement(Object.values(AiServiceStatus)), aiService: faker.helpers.arrayElement([null,{...getGetInfrastructureConfigurationResponseAiServiceConfigurationResultMock()},]), ...overrideResponse}, {environment: faker.string.alpha({length: {min: 10, max: 20}}), integrations: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({integration: faker.string.alpha({length: {min: 10, max: 20}}), provider: faker.string.alpha({length: {min: 10, max: 20}}), mode: faker.helpers.arrayElement(Object.values(IntegrationMode)), isEnabled: faker.datatype.boolean()})), safetySwitches: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({key: faker.string.alpha({length: {min: 10, max: 20}}), isOn: faker.datatype.boolean()})), secrets: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({key: faker.string.alpha({length: {min: 10, max: 20}}), isSet: faker.datatype.boolean()})), aiServiceStatus: faker.helpers.arrayElement(Object.values(AiServiceStatus)), aiService: faker.helpers.arrayElement([null,{...getGetInfrastructureConfigurationResponseAiServiceConfigurationResultMock()},]), ...overrideResponse}, {environment: faker.string.alpha({length: {min: 10, max: 20}}), integrations: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({integration: faker.string.alpha({length: {min: 10, max: 20}}), provider: faker.string.alpha({length: {min: 10, max: 20}}), mode: faker.helpers.arrayElement(Object.values(IntegrationMode)), isEnabled: faker.datatype.boolean()})), safetySwitches: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({key: faker.string.alpha({length: {min: 10, max: 20}}), isOn: faker.datatype.boolean()})), secrets: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({key: faker.string.alpha({length: {min: 10, max: 20}}), isSet: faker.datatype.boolean()})), aiServiceStatus: faker.helpers.arrayElement(Object.values(AiServiceStatus)), aiService: faker.helpers.arrayElement([null,{...getGetInfrastructureConfigurationResponseAiServiceConfigurationResultMock()},]), ...overrideResponse}]))
+
+export const getGetExamPeriodsResponseMock = (): ExamPeriodResult[] => (faker.helpers.arrayElement([Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.uuid(), name: faker.string.alpha({length: {min: 10, max: 20}}), startDate: faker.date.past().toISOString().slice(0, 10), endDate: faker.date.past().toISOString().slice(0, 10), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', updatedAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null])})), Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.uuid(), name: faker.string.alpha({length: {min: 10, max: 20}}), startDate: faker.date.past().toISOString().slice(0, 10), endDate: faker.date.past().toISOString().slice(0, 10), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', updatedAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null])})), Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.uuid(), name: faker.string.alpha({length: {min: 10, max: 20}}), startDate: faker.date.past().toISOString().slice(0, 10), endDate: faker.date.past().toISOString().slice(0, 10), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', updatedAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null])}))]))
+
+export const getCreateExamPeriodResponseMock = (overrideResponse: Partial<Extract<ExamPeriodResult, object>> = {}): ExamPeriodResult => (faker.helpers.arrayElement([{id: faker.string.uuid(), name: faker.string.alpha({length: {min: 10, max: 20}}), startDate: faker.date.past().toISOString().slice(0, 10), endDate: faker.date.past().toISOString().slice(0, 10), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', updatedAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), ...overrideResponse}, {id: faker.string.uuid(), name: faker.string.alpha({length: {min: 10, max: 20}}), startDate: faker.date.past().toISOString().slice(0, 10), endDate: faker.date.past().toISOString().slice(0, 10), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', updatedAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), ...overrideResponse}, {id: faker.string.uuid(), name: faker.string.alpha({length: {min: 10, max: 20}}), startDate: faker.date.past().toISOString().slice(0, 10), endDate: faker.date.past().toISOString().slice(0, 10), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', updatedAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), ...overrideResponse}]))
+
+export const getUpdateExamPeriodResponseMock = (overrideResponse: Partial<Extract<ExamPeriodResult, object>> = {}): ExamPeriodResult => (faker.helpers.arrayElement([{id: faker.string.uuid(), name: faker.string.alpha({length: {min: 10, max: 20}}), startDate: faker.date.past().toISOString().slice(0, 10), endDate: faker.date.past().toISOString().slice(0, 10), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', updatedAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), ...overrideResponse}, {id: faker.string.uuid(), name: faker.string.alpha({length: {min: 10, max: 20}}), startDate: faker.date.past().toISOString().slice(0, 10), endDate: faker.date.past().toISOString().slice(0, 10), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', updatedAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), ...overrideResponse}, {id: faker.string.uuid(), name: faker.string.alpha({length: {min: 10, max: 20}}), startDate: faker.date.past().toISOString().slice(0, 10), endDate: faker.date.past().toISOString().slice(0, 10), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', updatedAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), ...overrideResponse}]))
 
 
 export const getGetRuntimeSettingsMockHandler = (overrideResponse?: RuntimeSettingGroupResult[] | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<RuntimeSettingGroupResult[]> | RuntimeSettingGroupResult[]), options?: RequestHandlerOptions) => {
@@ -88,9 +95,59 @@ export const getGetInfrastructureConfigurationMockHandler = (overrideResponse?: 
       })
   }, options)
 }
+
+export const getGetExamPeriodsMockHandler = (overrideResponse?: ExamPeriodResult[] | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ExamPeriodResult[]> | ExamPeriodResult[]), options?: RequestHandlerOptions) => {
+  return http.get('*/api/configuration/exam-periods', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetExamPeriodsResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getCreateExamPeriodMockHandler = (overrideResponse?: ExamPeriodResult | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ExamPeriodResult> | ExamPeriodResult), options?: RequestHandlerOptions) => {
+  return http.post('*/api/configuration/exam-periods', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getCreateExamPeriodResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getUpdateExamPeriodMockHandler = (overrideResponse?: ExamPeriodResult | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<ExamPeriodResult> | ExamPeriodResult), options?: RequestHandlerOptions) => {
+  return http.put('*/api/configuration/exam-periods/:examPeriodId', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getUpdateExamPeriodResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getDeleteExamPeriodMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.delete('*/api/configuration/exam-periods/:examPeriodId', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 200
+      })
+  }, options)
+}
 export const getConfigurationMock = () => [
   getGetRuntimeSettingsMockHandler(),
   getUpdateRuntimeSettingMockHandler(),
   getResetRuntimeSettingMockHandler(),
-  getGetInfrastructureConfigurationMockHandler()
+  getGetInfrastructureConfigurationMockHandler(),
+  getGetExamPeriodsMockHandler(),
+  getCreateExamPeriodMockHandler(),
+  getUpdateExamPeriodMockHandler(),
+  getDeleteExamPeriodMockHandler()
 ]

@@ -174,7 +174,7 @@ Items already resolved by later stories, as those issues record: #187's items in
 
 | Issue | Decision needed | What the run assumed |
 |---|---|---|
-| #222 | SLA clock pause (nights, weekends, holidays); refund or credit on a breach; escalation or reassignment; WhatsApp/email reminders | never pauses; no refund; alert only (`AskTeacherSlaBreached`); in-app reminders only |
+| #222 | SLA clock pause (nights, weekends, holidays); refund or credit on a breach; escalation or reassignment; WhatsApp/email reminders | never pauses; no refund; alert only (`AskTeacherSlaBreached`); in-app reminders only. The clock part is decided and built in #254: a configurable reply calendar (weekends skipped by default, exam periods count every day, PRD §12.3); refund and reassignment stay no |
 | #213 | Grafana, Loki and Tempo are AGPL | acceptable, because they run unmodified as separate operator containers |
 | #215 (also #229, #235) | Retention period and student erasure for avatar conversations and training records | kept indefinitely in v1, no purge or delete path; the privacy checklist is in `docs/training-data.md` |
 | #209 | Tell the student about a teacher reply over WhatsApp or email | in-app only; WhatsApp needs a separately approved Meta template |
