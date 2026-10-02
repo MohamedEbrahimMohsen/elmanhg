@@ -51,4 +51,61 @@ describe('avatarReducer', () => {
     expect(failed.messages.at(-1)).toEqual({ id: 'm3', kind: 'notice', notice: 'unavailable' });
     expect(failed.conversationId).toBe(avatarConversationId);
   });
+
+  it('shows the history and returns to the chat', () => {
+    const history = avatarReducer(conversation(), { type: 'showHistory' });
+    const chat = avatarReducer(history, { type: 'showChat' });
+
+    expect(history.view).toBe('history');
+    expect(chat.view).toBe('chat');
+    expect(chat.messages).toHaveLength(2);
+  });
+
+  it('returns to the chat view when opened from a button', () => {
+    const history = avatarReducer(conversation(), { type: 'showHistory' });
+
+    const reopened = avatarReducer(history, { type: 'open', context: lesson });
+
+    expect(reopened.view).toBe('chat');
+  });
+
+  it('resumes a past conversation with its context and messages', () => {
+    const history = avatarReducer(avatarReducer(initialAvatarState, { type: 'showHistory' }), { type: 'close' });
+    const messages = [{ id: 's1', kind: 'student', text: 'old question' }] as const;
+
+    const resumed = avatarReducer(history, {
+      type: 'resumed',
+      context: lesson,
+      conversationId: 'c-old',
+      messages: [...messages],
+    });
+
+    expect(resumed).toMatchObject({ isOpen: true, view: 'chat', context: lesson, conversationId: 'c-old' });
+    expect(resumed.messages).toEqual(messages);
+  });
+
+  it('clears the open conversation when it is deleted', () => {
+    const deleted = avatarReducer(conversation(), {
+      type: 'conversationDeleted',
+      conversationId: avatarConversationId,
+    });
+
+    expect(deleted.messages).toEqual([]);
+    expect(deleted.conversationId).toBeNull();
+  });
+
+  it('keeps the open conversation when another one is deleted', () => {
+    const state = conversation();
+
+    const deleted = avatarReducer(state, { type: 'conversationDeleted', conversationId: 'another' });
+
+    expect(deleted).toBe(state);
+  });
+
+  it('forgets the conversation id when the conversation is gone', () => {
+    const failed = avatarReducer(conversation(), { type: 'failed', notice: 'conversationGone' });
+
+    expect(failed.conversationId).toBeNull();
+    expect(failed.messages.at(-1)).toEqual({ id: 'm2', kind: 'notice', notice: 'conversationGone' });
+  });
 });

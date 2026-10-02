@@ -4,6 +4,7 @@ using Elmanhg.Application.Avatar.GetAvatarStatus;
 using Elmanhg.Application.Avatar.Shared;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Domain.Avatar;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Subscriptions;
@@ -54,7 +55,7 @@ public sealed class GetAvatarStatusHandlerTests
 
         var result = await HandleAsync();
 
-        result.Should().Be(new AvatarStatusResult(false, PlanTier.Free, 5, 2, 3, 2000, 10));
+        result.Should().Be(new AvatarStatusResult(false, PlanTier.Free, 5, 2, 3, 2000, 10, true));
     }
 
     [Fact]
@@ -88,6 +89,16 @@ public sealed class GetAvatarStatusHandlerTests
         var result = await HandleAsync();
 
         result.ExamInProgress.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Handle_DeletionTurnedOff_ReportsConversationDeletionDisabled()
+    {
+        var handler = new GetAvatarStatusHandler(_sessionRepository, _subscriptionRepository, _usageRepository, Options.Create(new AvatarOptions()), Options.Create(new SubscriptionsOptions()), Options.Create(new ExamsOptions()), _timeProvider, _currentUserService, new FakeRuntimeSettings().Set(FeatureFlagRuntimeSettings.StudentsCanDeleteAvatarChats, false));
+
+        var result = await handler.Handle(new GetAvatarStatusQuery(), TestContext.Current.CancellationToken);
+
+        result.ConversationDeletionEnabled.Should().BeFalse();
     }
 
     private Task<AvatarStatusResult> HandleAsync() => _handler.Handle(new GetAvatarStatusQuery(), TestContext.Current.CancellationToken);

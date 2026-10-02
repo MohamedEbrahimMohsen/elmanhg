@@ -423,6 +423,8 @@
   <data name="AVATAR_CONVERSATIONS_SEARCH_TOO_LONG" xml:space="preserve"><value>نص البحث طويل جدًا.</value></data>
   <data name="AVATAR_CONVERSATIONS_ENTRY_POINT_INVALID" xml:space="preserve"><value>نقطة الدخول غير معروفة.</value></data>
   <data name="AVATAR_CONVERSATIONS_DATE_RANGE_INVALID" xml:space="preserve"><value>يجب أن تكون البداية قبل النهاية.</value></data>
+  <data name="AVATAR_CONVERSATION_ID_REQUIRED" xml:space="preserve"><value>معرّف المحادثة مطلوب.</value></data>
+  <data name="AVATAR_CONVERSATION_DELETION_DISABLED" xml:space="preserve"><value>حذف المحادثات غير متاح حاليًا.</value></data>
   <data name="AI_SERVICE_UNAVAILABLE" xml:space="preserve"><value>المساعد غير متاح الآن. حاول مرة أخرى بعد قليل.</value></data>
   <data name="ESSAY_GRADE_NOT_FOUND" xml:space="preserve"><value>لم يتم العثور على تصحيح هذا المقال.</value></data>
   <data name="ESSAY_GRADING_UNAVAILABLE" xml:space="preserve"><value>مصحح الذكاء الاصطناعي غير متاح الان. حاول مرة اخرى بعد قليل.</value></data>

@@ -68,6 +68,7 @@ public sealed class RuntimeSettingValuesTests
         {
             values.Get(FeatureFlagRuntimeSettings.ExamsRequireAllLessonsOpened),
             values.Get(FeatureFlagRuntimeSettings.RefundsEnabled),
+            values.Get(FeatureFlagRuntimeSettings.StudentsCanDeleteAvatarChats),
             values.Get(AskTeacherRuntimeSettings.ReplySlaHours),
             values.Get(AskTeacherRuntimeSettings.FirstReminderAfterHours),
             values.Get(AskTeacherRuntimeSettings.SecondReminderAfterHours),

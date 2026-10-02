@@ -423,6 +423,8 @@
   <data name="AVATAR_CONVERSATIONS_SEARCH_TOO_LONG" xml:space="preserve"><value>The search text is too long.</value></data>
   <data name="AVATAR_CONVERSATIONS_ENTRY_POINT_INVALID" xml:space="preserve"><value>The entry point is not known.</value></data>
   <data name="AVATAR_CONVERSATIONS_DATE_RANGE_INVALID" xml:space="preserve"><value>The start must be before the end.</value></data>
+  <data name="AVATAR_CONVERSATION_ID_REQUIRED" xml:space="preserve"><value>The conversation id is required.</value></data>
+  <data name="AVATAR_CONVERSATION_DELETION_DISABLED" xml:space="preserve"><value>Deleting chats is turned off.</value></data>
   <data name="AI_SERVICE_UNAVAILABLE" xml:space="preserve"><value>The assistant is unavailable right now. Try again in a moment.</value></data>
   <data name="ESSAY_GRADE_NOT_FOUND" xml:space="preserve"><value>This essay grade was not found.</value></data>
   <data name="ESSAY_GRADING_UNAVAILABLE" xml:space="preserve"><value>The AI grader is unavailable right now. Try again in a moment.</value></data>

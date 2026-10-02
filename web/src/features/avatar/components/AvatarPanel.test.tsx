@@ -2,13 +2,22 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { getGetAvatarStatusQueryKey } from '@/shared/api/generated/avatar/avatar';
 import {
   getGetAvatarStatusMockHandler,
+  getGetMyAvatarConversationsMockHandler,
   getSendAvatarMessageMockHandler,
 } from '@/shared/api/generated/avatar/avatar.msw';
 import { getMasteryMock } from '@/shared/api/generated/mastery/mastery.msw';
 import type { AvatarStatusResult, SendAvatarMessageCommand } from '@/shared/api/generated/model';
-import { avatarConversationId, avatarReply, avatarStatus, freeAvatarStatus } from '@/test/avatarFixtures';
+import {
+  avatarConversationId,
+  avatarReply,
+  avatarStatus,
+  freeAvatarStatus,
+  myAvatarConversation,
+  myAvatarConversationsPage,
+} from '@/test/avatarFixtures';
 import { axe } from '@/test/axe';
 import { browseLessonId } from '@/test/browseFixtures';
 import { server } from '@/test/msw/server';
@@ -106,6 +115,20 @@ describe('AvatarPanel', () => {
     expect(within(panel).getByRole('button', { name: 'Send' })).toBeDisabled();
   });
 
+  it('leaves the history view and shows the exam notice when an exam starts', async () => {
+    server.use(getGetMyAvatarConversationsMockHandler(myAvatarConversationsPage([myAvatarConversation()])));
+    const { user, panel, queryClient } = await openPanel();
+    await user.click(await within(panel).findByRole('button', { name: 'Past chats' }));
+    expect(await within(panel).findAllByRole('listitem')).toHaveLength(1);
+
+    useStatus(avatarStatus({ examInProgress: true }));
+    await queryClient.invalidateQueries({ queryKey: getGetAvatarStatusQueryKey() });
+
+    expect(await within(panel).findByText(/I cannot help while an exam is in progress/)).toBeInTheDocument();
+    expect(within(panel).queryByRole('heading', { name: 'Past chats' })).not.toBeInTheDocument();
+    expect(within(panel).queryByRole('button', { name: 'Back to the chat' })).not.toBeInTheDocument();
+  });
+
   it('shows the daily limit notice with a subscribe link for a free student', async () => {
     useStatus(freeAvatarStatus({ messagesUsedToday: 5, messagesRemainingToday: 0 }));
 
@@ -159,6 +182,35 @@ describe('AvatarPanel', () => {
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Assistant' })).toBeInTheDocument();
+  });
+
+  it('starts a new conversation after the open one no longer exists', async () => {
+    const bodies: SendAvatarMessageCommand[] = [];
+    let call = 0;
+    server.use(
+      http.post('*/api/avatar/messages', async ({ request }) => {
+        bodies.push((await request.json()) as SendAvatarMessageCommand);
+        call += 1;
+        return call === 2
+          ? HttpResponse.json({ code: 'AVATAR_CONVERSATION_NOT_FOUND' }, { status: 404 })
+          : HttpResponse.json(avatarReply());
+      }),
+    );
+    const { user, panel } = await openPanel();
+
+    await ask(user, panel, 'First question');
+    await within(panel).findByText(avatarReply().reply);
+    await ask(user, panel, 'Second question');
+    expect(
+      await within(panel).findByText('This chat no longer exists. Your next message starts a new chat.'),
+    ).toBeInTheDocument();
+    await ask(user, panel, 'Third question');
+
+    await waitFor(() => {
+      expect(bodies).toHaveLength(3);
+    });
+    expect(bodies[1]?.conversationId).toBe(avatarConversationId);
+    expect(bodies[2]?.conversationId).toBeNull();
   });
 
   it('renders right to left in Arabic', async () => {

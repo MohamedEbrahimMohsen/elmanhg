@@ -801,6 +801,17 @@
             "Route all current alert rules to the email receiver, with sensible grouping and repeat intervals",
             "docs/observability.md and docs/deployment.md: the variables, and how to send a test alert"
           ]
+        },
+        {
+          "title": "Student AI chat history and deletion",
+          "description": "As a student I can see my past AI tutor chats, reopen one to continue it, and delete any chat I no longer want. Dev decision on #215 (2026-10-02): keep the history by default and let the student delete chats. Issue #271.",
+          "tasks": [
+            "Student conversation list and detail queries, scoped to the caller",
+            "Delete command: an erasure path through the append-only trigger, removal of the training-record copies, audit, and usage counters kept",
+            "Student history UI: list, reopen in the avatar panel, delete with confirmation; ar/en, RTL",
+            "Runtime setting and Configuration page entry",
+            "Docs: docs/avatar.md (retention, privacy, history view), docs/training-data.md (erasure), PRD avatar section, docs/configuration.md; close #215"
+          ]
         }
       ]
     }

@@ -4,6 +4,7 @@ using Elmanhg.Application.Avatar.Shared;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.RuntimeSettings;
+using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.Avatar;
 using Elmanhg.Domain.Sessions;
@@ -27,7 +28,8 @@ public sealed class GetAvatarStatusHandler(ISessionRepository sessionRepository,
         var examInProgress = await AvatarGate.IsExamInProgressAsync(userId, sessionRepository, examsOptions.Value, now, cancellationToken).ConfigureAwait(false);
         var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, runtimeSettings, userId, subscriptionsOptions.Value, now, cancellationToken).ConfigureAwait(false);
         var used = await AvatarGate.CountMessagesTodayAsync(userId, avatarMessageUsageRepository, subscriptionsOptions.Value, now, cancellationToken).ConfigureAwait(false);
+        var deletionEnabled = await runtimeSettings.GetAsync(FeatureFlagRuntimeSettings.StudentsCanDeleteAvatarChats, cancellationToken).ConfigureAwait(false);
         var limit = entitlement.DailyAvatarMessageLimit;
-        return new AvatarStatusResult(examInProgress, entitlement.Tier, limit, used, Math.Max(0, limit - used), avatarOptions.Value.MessageMaxLength, avatarOptions.Value.MaxHistoryMessages);
+        return new AvatarStatusResult(examInProgress, entitlement.Tier, limit, used, Math.Max(0, limit - used), avatarOptions.Value.MessageMaxLength, avatarOptions.Value.MaxHistoryMessages, deletionEnabled);
     }
 }

@@ -330,6 +330,8 @@ public static class ErrorCodes
     public const string AvatarConversationsSearchTooLong = "AVATAR_CONVERSATIONS_SEARCH_TOO_LONG";
     public const string AvatarConversationsEntryPointInvalid = "AVATAR_CONVERSATIONS_ENTRY_POINT_INVALID";
     public const string AvatarConversationsDateRangeInvalid = "AVATAR_CONVERSATIONS_DATE_RANGE_INVALID";
+    public const string AvatarConversationIdRequired = "AVATAR_CONVERSATION_ID_REQUIRED";
+    public const string AvatarConversationDeletionDisabled = "AVATAR_CONVERSATION_DELETION_DISABLED";
 
     // AI SERVICE
     public const string AiServiceUnavailable = "AI_SERVICE_UNAVAILABLE";

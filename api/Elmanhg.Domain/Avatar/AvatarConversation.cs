@@ -2,7 +2,7 @@ using Core.DDD.Entities;
 
 namespace Elmanhg.Domain.Avatar;
 
-public class AvatarConversation : AuditEntity
+public class AvatarConversation : AuditEntity, IAuditedEntity
 {
     public Guid StudentId { get; private set; }
     public AvatarEntryPoint EntryPoint { get; private set; }
@@ -61,6 +61,16 @@ public class AvatarConversation : AuditEntity
         UpdatedBy = StudentId;
         UpdationDate = replied;
         RaiseDomainEvent(new AvatarExchangeRecorded(this, studentMessage, assistantMessage));
+    }
+
+    public void Delete(DateTimeOffset deletedAt)
+    {
+        var at = ToMicroseconds(deletedAt);
+        SoftDelete();
+        DeletedAt = at;
+        MessageCount = 0;
+        UpdatedBy = StudentId;
+        UpdationDate = at;
     }
 
     // PostgreSQL timestamptz keeps microseconds; truncating keeps the returned result equal to what is stored.

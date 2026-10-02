@@ -176,7 +176,7 @@ Items already resolved by later stories, as those issues record: #187's items in
 |---|---|---|
 | #222 | SLA clock pause (nights, weekends, holidays); refund or credit on a breach; escalation or reassignment; WhatsApp/email reminders | never pauses; no refund; alert only (`AskTeacherSlaBreached`); in-app reminders only. The clock part is decided and built in #254: a configurable reply calendar (weekends skipped by default, exam periods count every day, PRD §12.3); refund and reassignment stay no |
 | #213 | Grafana, Loki and Tempo are AGPL | acceptable, because they run unmodified as separate operator containers |
-| #215 (also #229, #235) | Retention period and student erasure for avatar conversations and training records | kept indefinitely in v1, no purge or delete path; the privacy checklist is in `docs/training-data.md` |
+| #215 (also #229, #235) | Retention period and student erasure for avatar conversations and training records | decided (2026-10-02): avatar chats are kept until the student deletes them; per-chat erasure of messages and training copies is built in #271 (`docs/avatar.md`, Student history). Notice or consent for training use stays open; the privacy checklist is in `docs/training-data.md` |
 | #209 | Tell the student about a teacher reply over WhatsApp or email | in-app only; WhatsApp needs a separately approved Meta template |
 | #247 | Password policy | Identity defaults in `IdentityOptions` (8 characters, a digit) |
 | #231 | Dashboard default period | the UI defaults to 14 days (prototype); the API default is 30 |
@@ -328,7 +328,7 @@ Taken from the open follow-up issues. The first group matters most before go-liv
 | #158 | No concurrency token on `Question`: an admin edit committing between load and save can still end Approved on an unseen version (millisecond window). |
 | #139 | A PostgreSQL unique violation returns 500 instead of 409 in concurrent inserts (data stays correct). |
 | #247 | Expired refresh-token rows are never purged. 17 HIGH image findings from Trivy remain (reported, not blocking). |
-| #235, #215 | The training export does not scrub names typed in free text, or numbers such as a phone number in a numeric answer. Avatar conversations are kept indefinitely. |
+| #235, #215 | The training export does not scrub names typed in free text, or numbers such as a phone number in a numeric answer. Avatar chats are kept until the student deletes them; exported files are not recalled. |
 | #132 | MediatR runs without a commercial licence key and logs a warning. No coverage threshold or `dotnet format` gate in CI. |
 | #148, #146, #179 | Known flaky web tests: `RichTextEditor.test.tsx` "inserts an inline formula" and `ExamStartPage.test.tsx` under coverage. Re-run web-ci once before treating a failure as real. |
 | #153 | A large sparse spreadsheet near the 5 MB cap can take minutes to load in ClosedXML (admin-only endpoint). |

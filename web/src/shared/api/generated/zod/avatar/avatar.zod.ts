@@ -21,7 +21,8 @@ export const GetAvatarStatusResponse = zod.object({
   "messagesUsedToday": zod.union([zod.int(),zod.stringFormat('int32', getAvatarStatusResponseMessagesUsedTodayRegExpTwo)]),
   "messagesRemainingToday": zod.union([zod.int(),zod.stringFormat('int32', getAvatarStatusResponseMessagesRemainingTodayRegExpTwo)]),
   "messageMaxLength": zod.union([zod.int(),zod.stringFormat('int32', getAvatarStatusResponseMessageMaxLengthRegExpTwo)]),
-  "maxHistoryMessages": zod.union([zod.int(),zod.stringFormat('int32', getAvatarStatusResponseMaxHistoryMessagesRegExpTwo)])
+  "maxHistoryMessages": zod.union([zod.int(),zod.stringFormat('int32', getAvatarStatusResponseMaxHistoryMessagesRegExpTwo)]),
+  "conversationDeletionEnabled": zod.boolean()
 })
 
 export const SendAvatarMessageBody = zod.object({
@@ -54,4 +55,74 @@ export const SendAvatarMessageResponse = zod.object({
   "model": zod.string(),
   "promptVersion": zod.string()
 })
+
+export const getMyAvatarConversationsResponseItemsItemMessageCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMyAvatarConversationsResponsePageNumberRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMyAvatarConversationsResponsePageSizeRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMyAvatarConversationsResponseTotalItemsRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMyAvatarConversationsResponseTotalPagesRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const GetMyAvatarConversationsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.uuid(),
+  "entryPoint": zod.enum(['Lesson', 'QuizQuestion', 'ExamReview', 'Global']),
+  "subjectId": zod.uuid().nullable(),
+  "subjectName": zod.string().nullable(),
+  "lessonId": zod.uuid().nullable(),
+  "lessonName": zod.string().nullable(),
+  "sessionId": zod.uuid().nullable(),
+  "questionId": zod.uuid().nullable(),
+  "startedAt": zod.iso.datetime({"offset":true}),
+  "lastMessageAt": zod.iso.datetime({"offset":true}),
+  "messageCount": zod.union([zod.int(),zod.stringFormat('int32', getMyAvatarConversationsResponseItemsItemMessageCountRegExpTwo)]),
+  "firstQuestion": zod.string()
+})).optional(),
+  "pageNumber": zod.union([zod.int(),zod.stringFormat('int64', getMyAvatarConversationsResponsePageNumberRegExpTwo)]).optional(),
+  "pageSize": zod.union([zod.int(),zod.stringFormat('int64', getMyAvatarConversationsResponsePageSizeRegExpTwo)]).optional(),
+  "totalItems": zod.union([zod.int(),zod.stringFormat('int64', getMyAvatarConversationsResponseTotalItemsRegExpTwo)]).optional(),
+  "totalPages": zod.union([zod.int(),zod.stringFormat('int64', getMyAvatarConversationsResponseTotalPagesRegExpTwo)]).optional()
+})
+
+export const GetMyAvatarConversationParams = zod.object({
+  "conversationId": zod.uuid()
+})
+
+export const getMyAvatarConversationResponseMessageCountRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+export const getMyAvatarConversationResponseMessagesItemPositionRegExpTwo = new RegExp('^-?(?:0|[1-9]\\d*)$');
+
+
+export const GetMyAvatarConversationResponse = zod.object({
+  "id": zod.uuid(),
+  "entryPoint": zod.enum(['Lesson', 'QuizQuestion', 'ExamReview', 'Global']),
+  "subjectId": zod.uuid().nullable(),
+  "subjectName": zod.string().nullable(),
+  "lessonId": zod.uuid().nullable(),
+  "lessonName": zod.string().nullable(),
+  "sessionId": zod.uuid().nullable(),
+  "questionId": zod.uuid().nullable(),
+  "startedAt": zod.iso.datetime({"offset":true}),
+  "lastMessageAt": zod.iso.datetime({"offset":true}),
+  "messageCount": zod.union([zod.int(),zod.stringFormat('int32', getMyAvatarConversationResponseMessageCountRegExpTwo)]),
+  "messages": zod.array(zod.object({
+  "id": zod.uuid(),
+  "position": zod.union([zod.int(),zod.stringFormat('int32', getMyAvatarConversationResponseMessagesItemPositionRegExpTwo)]),
+  "role": zod.enum(['Student', 'Assistant']),
+  "text": zod.string(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "citations": zod.array(zod.object({
+  "reference": zod.string(),
+  "section": zod.enum(['Explanation', 'Objectives', 'Summary', 'QuestionExplanation']),
+  "sectionTitle": zod.string().nullable(),
+  "lessonId": zod.uuid(),
+  "questionId": zod.uuid().nullable()
+}))
+}))
+})
+
+export const DeleteMyAvatarConversationParams = zod.object({
+  "conversationId": zod.uuid()
+})
+
+export const DeleteMyAvatarConversationResponse = zod.unknown()
 

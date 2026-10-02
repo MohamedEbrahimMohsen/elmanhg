@@ -87,6 +87,30 @@ public sealed class AvatarConversationTests
         conversation.RecentMessages(0).Should().BeEmpty();
     }
 
+    [Fact]
+    public void Delete_Conversation_SoftDeletesAndZeroesMessageCount()
+    {
+        var conversation = new AvatarConversationBuilder().ForStudent(_studentId).WithExchange("q1", "r1").Build();
+        var deletedAt = StartedAt.AddDays(1);
+
+        conversation.Delete(deletedAt.AddTicks(7));
+
+        (conversation.IsDeleted, conversation.MessageCount).Should().Be((true, 0));
+        (conversation.DeletedAt, conversation.UpdationDate, conversation.UpdatedBy).Should().Be(((DateTimeOffset?)deletedAt, deletedAt, (Guid?)_studentId));
+    }
+
+    [Fact]
+    public void Delete_Conversation_KeepsContextAndTimes()
+    {
+        var conversation = AvatarConversation.Start(_studentId, AvatarEntryPoint.Lesson, null, null, LessonId, null, null, StartedAt);
+        conversation.RecordExchange("q1", AvatarConversationBuilder.Reply("r1"), StartedAt.AddMinutes(1), StartedAt.AddMinutes(2));
+
+        conversation.Delete(StartedAt.AddDays(1));
+
+        (conversation.StudentId, conversation.EntryPoint, conversation.LessonId).Should().Be((_studentId, AvatarEntryPoint.Lesson, (Guid?)LessonId));
+        (conversation.StartedAt, conversation.LastMessageAt).Should().Be((StartedAt, StartedAt.AddMinutes(2)));
+    }
+
     [Theory]
     [InlineData(AvatarEntryPoint.Lesson, AvatarEntryPoint.Lesson, true, true, true, true)]
     [InlineData(AvatarEntryPoint.Lesson, AvatarEntryPoint.Lesson, false, true, true, false)]

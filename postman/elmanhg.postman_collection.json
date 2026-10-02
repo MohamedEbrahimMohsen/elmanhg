@@ -3600,6 +3600,84 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "List my avatar conversations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns a page\", function () { pm.expect(pm.response.json().items).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/avatar/my-conversations?pageNumber=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "avatar", "my-conversations"],
+              "query": [
+                { "key": "pageNumber", "value": "1" },
+                { "key": "pageSize", "value": "20" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get my avatar conversation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"returns the messages\", function () { pm.expect(pm.response.json().messages).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/avatar/my-conversations/{{avatarConversationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "avatar", "my-conversations", "{{avatarConversationId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete my avatar conversation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/avatar/my-conversations/{{avatarConversationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "avatar", "my-conversations", "{{avatarConversationId}}"]
+            }
+          },
+          "response": []
         }
       ]
     },

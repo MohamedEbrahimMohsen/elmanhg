@@ -19,4 +19,5 @@ export interface AvatarStatusResult {
   messageMaxLength: number | string;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   maxHistoryMessages: number | string;
+  conversationDeletionEnabled: boolean;
 }

@@ -26,4 +26,7 @@ public sealed class AvatarOptions
 
     [Range(1, 500)]
     public int ConversationSearchMaxLength { get; set; } = 200;
+
+    [Range(1, 100)]
+    public int StudentConversationsMaxPageSize { get; set; } = 50;
 }
