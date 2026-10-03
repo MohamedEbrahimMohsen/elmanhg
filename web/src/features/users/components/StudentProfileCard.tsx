@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { StudentProfileResult } from '@/shared/api/generated/model';
-import { formatDate } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
 import { UserActionButtons, type GrantablePlan } from './UserActionButtons';
 import { UserStatusBadge } from './UserStatusBadge';
 
@@ -24,7 +24,7 @@ function Entry({ label, children }: { label: string; children: ReactNode }) {
 export function StudentProfileCard({ profile, onSuspend, onReactivate, onGrant }: StudentProfileCardProps) {
   const { t, i18n } = useTranslation('users');
   const lng = i18n.resolvedLanguage ?? i18n.language;
-  const date = (value: string) => formatDate(new Date(value), lng, 'latin', { dateStyle: 'medium' });
+  const date = (value: string) => formatDateTime(value, lng, 'date');
   const contact = profile.maskedPhone ?? profile.maskedEmail;
 
   return (

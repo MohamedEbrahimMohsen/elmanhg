@@ -152,7 +152,7 @@ describe('AskTeacherListPage', () => {
   it('renders right to left in Arabic', async () => {
     await openList(twoThreads, { lng: 'ar' });
 
-    expect(await screen.findByText('الرصيد الشهري: ٣ / ٢٠')).toBeInTheDocument();
+    expect(await screen.findByText('الرصيد الشهري: 3 / 20')).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('dir', 'rtl');
   });
 

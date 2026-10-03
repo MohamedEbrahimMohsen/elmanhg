@@ -7,7 +7,7 @@ describe('formatDuration', () => {
     expect(formatDuration(185, 'en')).toBe('3:05');
   });
 
-  it('uses Arabic-Indic digits in Arabic', () => {
-    expect(formatDuration(42, 'ar')).toBe('\u0660:\u0664\u0662');
+  it('uses Latin digits in Arabic (digit policy)', () => {
+    expect(formatDuration(42, 'ar')).toBe('0:42');
   });
 });

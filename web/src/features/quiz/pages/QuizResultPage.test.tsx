@@ -146,7 +146,7 @@ describe('QuizResultPage', () => {
     openResult('ar');
 
     expect(await screen.findByRole('heading', { name: 'نتيجة التدريب' })).toBeInTheDocument();
-    expect(screen.getByText('٦٧ / ١٠٠')).toBeInTheDocument();
+    expect(screen.getByText('67 / 100')).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('dir', 'rtl');
   });
 

@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import type { UserSummaryResult } from '@/shared/api/generated/model';
-import { formatDate } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/button';
 import type { UserListTab } from '../schemas/usersSearchSchema';
@@ -82,12 +82,10 @@ export function UserListRow({
         </div>
       </td>
       {tab === 'students' ? (
-        <td className={cn(cellClassName, 'whitespace-nowrap')}>
-          {formatDate(new Date(item.creationDate), lng, 'latin', { dateStyle: 'medium' })}
-        </td>
+        <td className={cn(cellClassName, 'whitespace-nowrap')}>{formatDateTime(item.creationDate, lng, 'date')}</td>
       ) : null}
       <td className={cellClassName}>
-        <div className="flex flex-wrap items-start gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <UserActionButtons
             target={item}
             currentUserId={currentUserId}

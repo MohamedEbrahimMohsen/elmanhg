@@ -147,7 +147,7 @@ describe('ProgressPage', () => {
     expect((await screen.findAllByRole('link', { name: 'درّب الآن' })).length).toBeGreaterThan(0);
     const physics = await screen.findByRole('article', { name: 'Physics' });
     const mechanics = within(physics).getByRole('row', { name: /Mechanics/ });
-    expect(within(mechanics).getByText('٥٠٪')).toBeInTheDocument();
+    expect(within(mechanics).getByText('50٪')).toBeInTheDocument();
   });
 
   it('has no axe violations', async () => {

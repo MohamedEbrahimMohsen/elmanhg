@@ -27,7 +27,7 @@ export function GradeReviewKindTabs({ kind, essayCount, mathStepsCount, onSelect
           }}
           className={pillTabClassName}
         >
-          {t(`queue.kinds.${value}`, { count: formatNumber(counts[value], lng, 'latin') })}
+          {t(`queue.kinds.${value}`, { count: formatNumber(counts[value], lng) })}
         </button>
       ))}
     </div>

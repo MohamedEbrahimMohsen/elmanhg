@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { TeacherMessageResult } from '@/shared/api/generated/model';
-import { formatDate } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
 import { cn } from '@/shared/lib/utils';
 import { ThreadAudio } from './ThreadAudio';
 import { ThreadImage } from './ThreadImage';
@@ -13,10 +13,7 @@ export interface ThreadMessageProps {
 export function ThreadMessage({ message, authorLabel }: ThreadMessageProps) {
   const { t, i18n } = useTranslation('askTeacher');
   const lng = i18n.resolvedLanguage ?? i18n.language;
-  const date = formatDate(new Date(message.createdAt), lng, 'arabic-indic', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
+  const date = formatDateTime(message.createdAt, lng);
 
   return (
     <article

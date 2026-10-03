@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import type { TeacherThreadSummaryResult } from '@/shared/api/generated/model';
-import { formatDate } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
 import { ThreadStatusBadge } from './ThreadStatusBadge';
 
 export interface ThreadListItemProps {
@@ -11,10 +11,7 @@ export interface ThreadListItemProps {
 export function ThreadListItem({ thread }: ThreadListItemProps) {
   const { t, i18n } = useTranslation('askTeacher');
   const lng = i18n.resolvedLanguage ?? i18n.language;
-  const date = formatDate(new Date(thread.submittedAt), lng, 'arabic-indic', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
+  const date = formatDateTime(thread.submittedAt, lng);
 
   return (
     <li>

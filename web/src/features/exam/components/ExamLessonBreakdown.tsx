@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import type { ExamLessonResult } from '@/shared/api/generated/model';
+import { Button } from '@/shared/ui/button';
 
 export interface ExamLessonBreakdownProps {
   lessons: ExamLessonResult[];
@@ -44,13 +45,11 @@ export function ExamLessonBreakdown({ lessons }: ExamLessonBreakdownProps) {
                   {t('result.percent', { percent: Math.round(Number(lesson.scorePercent)) })}
                 </td>
                 <td className={cellClassName}>
-                  <Link
-                    to="/student/lesson/$lessonId/practice"
-                    params={{ lessonId: lesson.lessonId }}
-                    className="rounded-sm text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
-                  >
-                    {t('result.train')}
-                  </Link>
+                  <Button asChild variant="secondary" size="sm">
+                    <Link to="/student/lesson/$lessonId/practice" params={{ lessonId: lesson.lessonId }}>
+                      {t('result.train')}
+                    </Link>
+                  </Button>
                 </td>
               </tr>
             ))}

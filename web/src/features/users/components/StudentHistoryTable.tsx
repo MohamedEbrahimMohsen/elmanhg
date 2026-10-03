@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { SessionHistoryItemResult } from '@/shared/api/generated/model';
-import { formatDate } from '@/shared/lib/format';
+import { DateTime } from '@/shared/components/DateTime';
 import { cn } from '@/shared/lib/utils';
 
 export interface StudentHistoryTableProps {
@@ -18,8 +18,7 @@ function kindKey(kind: string): string {
 }
 
 export function StudentHistoryTable({ items }: StudentHistoryTableProps) {
-  const { t, i18n } = useTranslation('users');
-  const lng = i18n.resolvedLanguage ?? i18n.language;
+  const { t } = useTranslation('users');
 
   return (
     <div className="overflow-x-auto rounded-lg border border-border bg-surface shadow-1">
@@ -42,7 +41,7 @@ export function StudentHistoryTable({ items }: StudentHistoryTableProps) {
           {items.map((item) => (
             <tr key={item.id} className="border-t border-border hover:bg-soft">
               <td className={cn(cellClassName, 'whitespace-nowrap')}>
-                {formatDate(new Date(item.startedAt), lng, 'latin', { dateStyle: 'medium', timeStyle: 'short' })}
+                <DateTime value={item.startedAt} relative />
               </td>
               <td className={cellClassName}>{t(kindKey(item.kind))}</td>
               <td className={cellClassName}>{item.scopeName ?? t('history.unknownScope')}</td>

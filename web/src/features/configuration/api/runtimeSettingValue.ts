@@ -39,7 +39,7 @@ export function settingBound(bound: number | string | null): number | null {
 }
 
 export function formatSettingNumber(value: number, lng: string): string {
-  return formatNumber(value, lng, 'latin', { maximumFractionDigits: 4 });
+  return formatNumber(value, lng, { maximumFractionDigits: 4 });
 }
 
 export function formatSettingValue(

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { AuditLogResult } from '@/shared/api/generated/model';
-import { formatDate } from '@/shared/lib/format';
+import { DateTime } from '@/shared/components/DateTime';
 import { cn } from '@/shared/lib/utils';
 import { formatDiff } from './formatDiff';
 import { OutcomeBadge } from './OutcomeBadge';
@@ -13,13 +13,12 @@ const cellClassName = 'px-2.5 py-2.25 align-top text-caption';
 const monoClassName = 'font-mono text-mono';
 
 export function AuditLogRow({ item }: AuditLogRowProps) {
-  const { t, i18n } = useTranslation('audit');
-  const lng = i18n.resolvedLanguage ?? i18n.language;
+  const { t } = useTranslation('audit');
 
   return (
     <tr className="border-t border-border hover:bg-soft">
       <td className={cn(cellClassName, 'whitespace-nowrap')}>
-        {formatDate(new Date(item.timestamp), lng, 'latin', { dateStyle: 'medium', timeStyle: 'short' })}
+        <DateTime value={item.timestamp} relative />
       </td>
       <td className={cellClassName}>
         <bdi dir="ltr">{item.actorUserName ?? t('table.system')}</bdi>

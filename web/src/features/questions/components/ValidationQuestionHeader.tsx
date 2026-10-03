@@ -21,7 +21,7 @@ export function ValidationQuestionHeader({ question }: ValidationQuestionHeaderP
     }),
     t('validation.detail.objective', { objective: question.objectiveText ?? t('validation.detail.noObjective') }),
     t('validation.detail.difficulty', { difficulty: t([`difficulties.${question.difficulty}`, question.difficulty]) }),
-    t('validation.detail.maxScore', { score: formatNumber(Number(question.maxScore), lng, 'latin') }),
+    t('validation.detail.maxScore', { score: formatNumber(Number(question.maxScore), lng) }),
     ...(question.tags.length > 0 ? [t('validation.detail.tags', { tags: question.tags.join('، ') })] : []),
   ];
 
@@ -41,7 +41,7 @@ export function ValidationQuestionHeader({ question }: ValidationQuestionHeaderP
         <h1 className="font-display text-h1 font-bold lg:text-h1-desktop">{t('validation.detail.title')}</h1>
         <QuestionStatusBadge status={question.validationStatus} />
         <span className={badgeClassName}>
-          {t('editor.versionBadge', { version: formatNumber(Number(question.version), lng, 'latin') })}
+          {t('editor.versionBadge', { version: formatNumber(Number(question.version), lng) })}
         </span>
         {question.retiredAt ? <span className={badgeClassName}>{t('validation.detail.retired')}</span> : null}
       </div>

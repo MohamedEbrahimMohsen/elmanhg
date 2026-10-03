@@ -6,7 +6,7 @@ import type { AdminPaymentResult } from '@/shared/api/generated/model';
 import { Form } from '@/shared/form/Form';
 import { FormRootError } from '@/shared/form/FormRootError';
 import { TextAreaField } from '@/shared/form/TextAreaField';
-import { formatMoney } from '@/shared/lib/format';
+import { formatMoney } from '@/shared/lib/money';
 import { Button } from '@/shared/ui/button';
 import { Dialog, DialogContent } from '@/shared/ui/dialog';
 import { useRefundPayment } from '../hooks/useRefundPayment';
@@ -31,7 +31,7 @@ export function RefundPaymentDialog({ payment, onOpenChange }: RefundPaymentDial
     resolver: zodResolver(refundPaymentSchema),
     defaultValues: { reason: '' },
   });
-  const amount = payment ? formatMoney(Number(payment.amount.amountMinor), payment.amount.currency, lng, 'latin') : '';
+  const amount = payment ? formatMoney(Number(payment.amount.amountMinor), payment.amount.currency, lng) : '';
 
   const submit = async (values: RefundPaymentValues) => {
     if (!payment) {

@@ -1,7 +1,7 @@
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AdminSubscriptionResult } from '@/shared/api/generated/model';
-import { formatDate } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
 
 export interface StudentSubscriptionsCardProps {
   subscriptions: AdminSubscriptionResult[];
@@ -15,7 +15,7 @@ export function StudentSubscriptionsCard({ subscriptions, studentName }: Student
   const { t, i18n } = useTranslation('users');
   const headingId = useId();
   const lng = i18n.resolvedLanguage ?? i18n.language;
-  const date = (value: string) => formatDate(new Date(value), lng, 'latin', { dateStyle: 'medium' });
+  const date = (value: string) => formatDateTime(value, lng, 'date');
 
   return (
     <section aria-labelledby={headingId} className="flex flex-col gap-3">

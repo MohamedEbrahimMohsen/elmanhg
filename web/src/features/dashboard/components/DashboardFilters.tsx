@@ -2,6 +2,7 @@ import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGetSubjects } from '@/shared/api/generated/subjects/subjects';
 import { Label } from '@/shared/ui/label';
+import { Select } from '@/shared/ui/select';
 import { dashboardPeriods, type DashboardPeriod, type DashboardRange } from '../api/dashboardRange';
 import { formatDay } from '../api/metricFormat';
 
@@ -12,9 +13,6 @@ export interface DashboardFiltersProps {
   onDaysChange: (days: DashboardPeriod) => void;
   onSubjectChange: (subjectId: string) => void;
 }
-
-const selectClassName =
-  'h-11 w-full rounded-sm border border-border-strong bg-surface px-3 text-ui text-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden md:w-60';
 
 export function DashboardFilters({ days, subjectId, range, onDaysChange, onSubjectChange }: DashboardFiltersProps) {
   const { t, i18n } = useTranslation('dashboard');
@@ -33,13 +31,13 @@ export function DashboardFilters({ days, subjectId, range, onDaysChange, onSubje
       <div className="flex flex-col gap-3 md:flex-row md:items-end">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={subjectFieldId}>{t('filters.subject')}</Label>
-          <select
+          <Select
             id={subjectFieldId}
             value={subjectId ?? ''}
             onChange={(event) => {
               onSubjectChange(event.target.value);
             }}
-            className={selectClassName}
+            className="md:w-60"
           >
             <option value="">{t('filters.allSubjects')}</option>
             {subjects.map((subject) => (
@@ -47,11 +45,11 @@ export function DashboardFilters({ days, subjectId, range, onDaysChange, onSubje
                 {subject.name}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={periodFieldId}>{t('filters.period')}</Label>
-          <select
+          <Select
             id={periodFieldId}
             value={String(days)}
             onChange={(event) => {
@@ -60,14 +58,14 @@ export function DashboardFilters({ days, subjectId, range, onDaysChange, onSubje
                 onDaysChange(next);
               }
             }}
-            className={selectClassName}
+            className="md:w-60"
           >
             {dashboardPeriods.map((period) => (
               <option key={period} value={String(period)}>
                 {t(`filters.periods.${String(period)}`)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
       <p className="text-caption text-text-muted">

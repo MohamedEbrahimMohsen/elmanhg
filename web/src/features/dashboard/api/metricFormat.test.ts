@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { formatAmount, formatCount, formatDay, formatElapsed, formatRate, formatRatio } from './metricFormat';
+import {
+  formatAmount,
+  formatCompact,
+  formatCount,
+  formatDay,
+  formatElapsed,
+  formatRate,
+  formatRatio,
+} from './metricFormat';
 
 describe('metricFormat', () => {
   it('formats counts from numbers and strings', () => {
@@ -55,5 +63,12 @@ describe('metricFormat', () => {
     const arabic = formatDay('2026-09-30', 'ar');
     expect(arabic).toContain('30');
     expect(arabic).toContain('سبتمبر');
+  });
+
+  it('formats compact axis values', () => {
+    expect(formatCompact(2800, 'en')).toBe('2.8K');
+    const arabic = formatCompact(2800, 'ar');
+    expect(arabic).toContain('2.8');
+    expect(arabic).not.toMatch(/[٠-٩]/u);
   });
 });

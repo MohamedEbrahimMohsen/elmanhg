@@ -41,8 +41,8 @@ export function GradeResultPanel({ result }: GradeResultPanelProps) {
         <p className="text-ui font-semibold text-text">{t(verdict.key)}</p>
         <p className="text-caption text-text">
           {t('preview.score', {
-            score: formatNumber(Number(result.score), lng, 'latin'),
-            maxScore: formatNumber(Number(result.maxScore), lng, 'latin'),
+            score: formatNumber(Number(result.score), lng),
+            maxScore: formatNumber(Number(result.maxScore), lng),
           })}
         </p>
         {result.feedback ? <p className="text-caption text-text-muted">{result.feedback}</p> : null}

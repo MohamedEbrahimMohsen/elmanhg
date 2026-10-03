@@ -5,7 +5,9 @@ import {
   useGetDashboardValidation,
 } from '@/shared/api/generated/dashboard/dashboard';
 import type { GetDashboardPaymentsParams, GetDashboardSolveRateParams } from '@/shared/api/generated/model';
-import { formatAmount, formatCount } from '../api/metricFormat';
+import { minorUnitsPerMajor } from '@/shared/lib/money';
+import { fillDailySeries } from '../api/dailySeries';
+import { formatAmount, formatCompact, formatCount } from '../api/metricFormat';
 import { DailyBarChart } from './DailyBarChart';
 import { MetricCard } from './MetricCard';
 
@@ -22,6 +24,7 @@ export function DashboardCharts({ subjectRangeParams, rangeParams, subjectSelect
   const payments = useGetDashboardPayments(rangeParams);
   const validation = useGetDashboardValidation(subjectRangeParams);
   const count = (value: number) => formatCount(value, lng);
+  const compact = (value: number) => formatCompact(value, lng);
 
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -29,8 +32,13 @@ export function DashboardCharts({ subjectRangeParams, rangeParams, subjectSelect
         {(data) => (
           <DailyBarChart
             label={t('charts.attempts')}
-            points={data.daily.map((day) => ({ date: day.date, value: Number(day.attempts) }))}
+            points={fillDailySeries(
+              data.from,
+              data.to,
+              data.daily.map((day) => ({ date: day.date, value: Number(day.attempts) })),
+            )}
             formatValue={count}
+            formatTick={compact}
             emptyText={t('charts.emptyAttempts')}
           />
         )}
@@ -39,8 +47,13 @@ export function DashboardCharts({ subjectRangeParams, rangeParams, subjectSelect
         {(data) => (
           <DailyBarChart
             label={t('charts.revenue')}
-            points={data.revenueByDay.map((day) => ({ date: day.date, value: Number(day.value) }))}
+            points={fillDailySeries(
+              data.from,
+              data.to,
+              data.revenueByDay.map((day) => ({ date: day.date, value: Number(day.value) })),
+            )}
             formatValue={(value) => formatAmount({ amountMinor: value, currency: data.revenue.currency }, lng)}
+            formatTick={(value) => formatCompact(value / minorUnitsPerMajor, lng)}
             emptyText={t('charts.emptyRevenue')}
             note={subjectSelected ? t('card.noSubject') : undefined}
           />
@@ -50,8 +63,13 @@ export function DashboardCharts({ subjectRangeParams, rangeParams, subjectSelect
         {(data) => (
           <DailyBarChart
             label={t('charts.decisions')}
-            points={data.dailyDecisions.map((day) => ({ date: day.date, value: Number(day.value) }))}
+            points={fillDailySeries(
+              data.from,
+              data.to,
+              data.dailyDecisions.map((day) => ({ date: day.date, value: Number(day.value) })),
+            )}
             formatValue={count}
+            formatTick={compact}
             emptyText={t('charts.emptyDecisions')}
           />
         )}
