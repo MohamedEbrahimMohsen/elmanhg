@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { ContentErrorState, ContentListSkeleton } from '@/features/content';
 import { useGetStudentSessionHistory } from '@/shared/api/generated/students/students';
 import { Pagination } from '@/shared/components/Pagination';
-import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/button';
+import { pillTabClassName } from '@/shared/ui/pillTab';
 import { useStudentHistorySearch } from '../hooks/useStudentHistorySearch';
 import { StudentHistoryTable } from './StudentHistoryTable';
 
@@ -15,9 +15,6 @@ const kinds = [
   { value: 'Quiz', key: 'history.quizzes' },
   { value: 'Exam', key: 'history.exams' },
 ] as const;
-
-const pillClassName =
-  'inline-flex min-h-11 items-center rounded-pill border px-4 text-ui font-semibold focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden';
 
 export interface StudentHistorySectionProps {
   studentId: string;
@@ -86,12 +83,7 @@ export function StudentHistorySection({ studentId }: StudentHistorySectionProps)
             onClick={() => {
               setKind(kind.value);
             }}
-            className={cn(
-              pillClassName,
-              search.kind === kind.value
-                ? 'border-text bg-text text-surface'
-                : 'border-border-strong bg-surface text-text hover:bg-soft',
-            )}
+            className={pillTabClassName}
           >
             {t(kind.key)}
           </button>

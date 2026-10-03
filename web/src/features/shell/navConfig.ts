@@ -34,6 +34,7 @@ export interface NavItem {
 export interface RoleNav {
   items: readonly NavItem[];
   tabBarKeys: readonly string[];
+  topBarKeys: readonly string[];
   morePath: NavPath | null;
 }
 
@@ -74,6 +75,7 @@ export const navByRole: Record<Role, RoleNav> = {
       },
     ],
     tabBarKeys: ['home', 'progress', 'ask'],
+    topBarKeys: ['home', 'progress', 'multiExam', 'ask', 'subscription'],
     morePath: '/student/more',
   },
   teacher: {
@@ -102,6 +104,7 @@ export const navByRole: Record<Role, RoleNav> = {
       },
     ],
     tabBarKeys: ['queue', 'gradeReviews', 'inbox'],
+    topBarKeys: ['queue', 'gradeReviews', 'inbox', 'stats'],
     morePath: '/teacher/more',
   },
   admin: {
@@ -166,6 +169,7 @@ export const navByRole: Record<Role, RoleNav> = {
       },
     ],
     tabBarKeys: ['dashboard', 'content', 'questions'],
+    topBarKeys: ['dashboard', 'content', 'questions', 'users'],
     morePath: '/admin/more',
   },
 };
@@ -180,4 +184,12 @@ export function tabBarItems(role: Role, nav: RoleNav): readonly NavItem[] {
 
 export function overflowItems(role: Role, nav: RoleNav): readonly NavItem[] {
   return visibleNavItems(role, nav).filter((item) => !nav.tabBarKeys.includes(item.key));
+}
+
+export function topBarItems(role: Role, nav: RoleNav): readonly NavItem[] {
+  return visibleNavItems(role, nav).filter((item) => nav.topBarKeys.includes(item.key));
+}
+
+export function topBarOverflowItems(role: Role, nav: RoleNav): readonly NavItem[] {
+  return visibleNavItems(role, nav).filter((item) => !nav.topBarKeys.includes(item.key));
 }

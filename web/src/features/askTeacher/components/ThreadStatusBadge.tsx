@@ -11,9 +11,9 @@ export interface ThreadStatusBadgeProps {
 
 const badgeClasses: Record<ThreadBadge, string> = {
   closed: 'bg-soft text-text-muted',
-  overdue: 'bg-danger text-surface',
+  overdue: 'bg-danger-soft text-danger',
   awaiting: 'bg-soft text-text-muted',
-  answered: 'bg-success text-surface',
+  answered: 'bg-success-soft text-success-text',
 };
 
 export function ThreadStatusBadge({ thread }: ThreadStatusBadgeProps) {

@@ -6,8 +6,8 @@ export interface OutcomeBadgeProps {
 }
 
 const outcomeClasses: Partial<Record<string, string>> = {
-  Success: 'bg-success text-surface',
-  Failure: 'bg-danger text-surface',
+  Success: 'bg-success-soft text-success-text',
+  Failure: 'bg-danger-soft text-danger',
 };
 
 export function OutcomeBadge({ outcome }: OutcomeBadgeProps) {

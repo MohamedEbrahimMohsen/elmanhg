@@ -57,7 +57,7 @@ export function QuestionPreviewPanel({ lessonId }: QuestionPreviewPanelProps) {
             onChange={(event) => {
               setShowKey(event.target.checked);
             }}
-            className="size-4.5 accent-text"
+            className="size-4.5 accent-accent"
           />
           {t('questionsDiagram:preview.showKey')}
         </label>

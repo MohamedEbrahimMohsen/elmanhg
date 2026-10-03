@@ -8,7 +8,7 @@ export interface LessonNavigationProps {
 }
 
 const linkClassName =
-  'inline-flex items-center gap-1 rounded-sm text-ui text-accent wrap-anywhere focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden';
+  'inline-flex min-h-11 items-center gap-1 rounded-sm text-ui text-accent wrap-anywhere focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden';
 
 export function LessonNavigation({ lesson }: LessonNavigationProps) {
   const { t } = useTranslation('browse');

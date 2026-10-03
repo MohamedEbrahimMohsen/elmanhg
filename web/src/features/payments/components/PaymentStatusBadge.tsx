@@ -7,8 +7,8 @@ export interface PaymentStatusBadgeProps {
 }
 
 const statusClasses: Record<PaymentStatus, string> = {
-  Succeeded: 'bg-success text-surface',
-  Failed: 'bg-danger text-surface',
+  Succeeded: 'bg-success-soft text-success-text',
+  Failed: 'bg-danger-soft text-danger',
   Pending: 'bg-soft text-text-muted',
   Refunded: 'bg-soft text-text-muted',
 };

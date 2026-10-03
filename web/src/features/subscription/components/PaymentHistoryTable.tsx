@@ -12,8 +12,8 @@ const headerKeys = ['date', 'plan', 'amount', 'status'] as const;
 const cellClassName = 'px-2.5 py-2.25 text-caption';
 
 const statusClasses: Record<PaymentStatus, string> = {
-  Succeeded: 'bg-success text-surface',
-  Failed: 'bg-danger text-surface',
+  Succeeded: 'bg-success-soft text-success-text',
+  Failed: 'bg-danger-soft text-danger',
   Refunded: 'bg-soft text-text-muted',
   Pending: 'bg-soft text-text-muted',
 };

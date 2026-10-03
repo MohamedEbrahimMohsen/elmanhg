@@ -21,7 +21,7 @@ interface ChoiceItem {
 }
 
 const stateClasses = {
-  none: 'border-border-strong bg-surface hover:bg-soft has-checked:border-text has-checked:bg-soft',
+  none: 'border-border-strong bg-surface hover:bg-soft has-checked:border-accent has-checked:bg-accent-soft',
   correct: 'border-success bg-success-soft',
   wrong: 'border-danger bg-danger-soft',
 } as const;
@@ -81,12 +81,12 @@ export function ChoiceAnswerInputs({ question, answer, onAnswerChange, disabled,
               onChange={(event) => {
                 item.onSelect(event.target.checked);
               }}
-              className="size-4.5 accent-text"
+              className="size-4.5 accent-accent"
             />
             {item.label}
             {state === 'correct' ? (
               <>
-                <CircleCheck aria-hidden className="ms-auto size-5 text-success" />
+                <CircleCheck aria-hidden className="ms-auto size-5 text-success-text" />
                 <span className="sr-only">{t('view.correctOption')}</span>
               </>
             ) : null}

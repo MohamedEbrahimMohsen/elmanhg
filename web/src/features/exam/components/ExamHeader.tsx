@@ -26,7 +26,7 @@ export function ExamHeader({ title, remainingMilliseconds, status, lastSavedAt }
           : t('exam.autoSaved');
 
   return (
-    <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-surface p-4 shadow-1">
+    <div className="sticky top-16 z-10 flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-surface p-4 shadow-1">
       <h1 className="font-display text-h1 font-bold lg:text-h1-desktop">{title}</h1>
       {countdown ? (
         <p role="timer" aria-live="off" className={cn('font-display text-h3 font-bold', urgent && 'text-danger')}>

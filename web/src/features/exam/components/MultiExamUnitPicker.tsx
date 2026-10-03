@@ -23,7 +23,7 @@ export function MultiExamUnitPicker({ units, selected, onToggle }: MultiExamUnit
               <input
                 type="checkbox"
                 aria-describedby={captionId}
-                className="size-5 accent-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:opacity-45"
+                className="size-5 accent-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:opacity-45"
                 checked={selected.includes(unit.unitId)}
                 disabled={!unit.hasBlueprint}
                 onChange={(event) => {

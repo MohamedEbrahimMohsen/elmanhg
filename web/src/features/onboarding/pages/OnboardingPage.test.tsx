@@ -173,4 +173,12 @@ describe('OnboardingPage', () => {
 
     expect((await axe(container)).violations).toEqual([]);
   });
+
+  it('shows the app bar with the logo linking home', async () => {
+    openOnboarding();
+
+    const banner = await screen.findByRole('banner');
+
+    expect(within(banner).getByRole('link', { name: 'Elmanhg' })).toHaveAttribute('href', '/');
+  });
 });

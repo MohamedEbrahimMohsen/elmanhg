@@ -55,7 +55,7 @@ export function ChoiceSettingForm({ setting, mutations }: ChoiceSettingFormProps
           ))}
         </select>
       </div>
-      <Button type="submit" size="sm" disabled={mutations.isPending || form.formState.isSubmitting}>
+      <Button type="submit" disabled={mutations.isPending || form.formState.isSubmitting}>
         {t('row.save')}
       </Button>
       {error ? (

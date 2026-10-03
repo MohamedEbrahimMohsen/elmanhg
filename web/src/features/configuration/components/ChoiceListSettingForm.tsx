@@ -42,12 +42,12 @@ export function ChoiceListSettingForm({ setting, mutations }: ChoiceListSettingF
         <legend className="mb-1 text-caption text-text-muted">{t('row.newValue')}</legend>
         {setting.allowedValues.map((option) => (
           <label key={option} className="flex items-center gap-2 text-ui text-text">
-            <input type="checkbox" value={option} className="size-6 accent-text" {...form.register('value')} />
+            <input type="checkbox" value={option} className="size-6 accent-accent" {...form.register('value')} />
             {t([`choices.${option}`, option])}
           </label>
         ))}
       </fieldset>
-      <Button type="submit" size="sm" disabled={mutations.isPending || form.formState.isSubmitting}>
+      <Button type="submit" disabled={mutations.isPending || form.formState.isSubmitting}>
         {t('row.save')}
       </Button>
       {error ? (

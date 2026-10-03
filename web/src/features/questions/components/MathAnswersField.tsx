@@ -32,8 +32,8 @@ export function MathAnswersField() {
               </div>
               <Button
                 variant="ghost"
-                size="sm"
-                className="mt-6"
+                size="icon"
+                className="mt-6.5"
                 aria-label={t('editor.math.removeAnswer', { number })}
                 disabled={fields.length <= 1}
                 onClick={() => {

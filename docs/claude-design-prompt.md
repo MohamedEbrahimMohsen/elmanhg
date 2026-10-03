@@ -33,24 +33,26 @@ A single self-contained web app that runs from a static folder with no build ste
 Define these as CSS variables on `:root` and use nothing else.
 
 ```css
---bg: #F5F5F7;            /* page ground. Never pure white for the page */
---surface: #FFFFFF;       /* cards, sheets, inputs, app bar */
---soft: #EDEDF0;          /* selected option fill, muted chips, progress track */
---text: #1D1D1F;          /* primary text, primary buttons */
---text-2: #6E6E73;        /* secondary text, labels, captions */
---border: rgba(0,0,0,.06);        /* hairline on cards */
---border-strong: rgba(0,0,0,.14); /* inputs, option outlines */
---accent: #0071E3;  --accent-soft: #E8F1FC;   /* links, focus ring, progress fill, Ask a Teacher, active tab */
---ok: #34A853;      --ok-soft: #E9F6EC;       /* correct, mastered, approved */
---bad: #E5484D;     --bad-soft: #FDECEC;      /* wrong, rejected, overdue, destructive */
---warn: #B7791F;    --warn-soft: #FFF6E5;     /* partial credit, pending review */
+--bg: #F4F5FB;            /* page ground. Never pure white for the page */
+--surface: #FFFFFF;       /* cards, sheets, inputs, app bar, tab bar */
+--soft: #E5E7FB;          /* muted chips, pending badge, progress track, secondary hover */
+--text: #1E1B4B;          /* primary text. Never a button, tab or badge fill */
+--text-2: #5F5D7A;        /* secondary text, labels, captions, inactive nav */
+--border: rgba(30,27,75,.08);        /* hairline on cards, app bar, tab bar */
+--border-strong: rgba(30,27,75,.18); /* inputs, option outlines, secondary buttons */
+--accent: #4F46E5;  --accent-soft: #EEF0FF;   /* primary buttons, links, focus ring, progress fill, active nav/tab, selected option */
+--accent-hover: #4338CA;  --accent-pressed: #3730A3; /* hover and pressed on accent fills */
+--ok: #16A34A;      --ok-soft: #DFF3E5;       /* non-text only: borders, icons, pass fill */
+--ok-text: #166534;                           /* success text, ok badge text, verdict icon */
+--bad: #C8233A;     --bad-soft: #FDECEE;      /* wrong, rejected, overdue, destructive */
+--warn: #B45309;    --warn-soft: #FEF3E2;     /* partial credit, pending review */
 --v2: #6A3FB5;                                /* "v2" badge only */
---aurora: linear-gradient(135deg, #7C5CFF 0%, #C86DD7 50%, #FFB07A 100%); /* landing hero and subscribe header ONLY */
+--aurora: linear-gradient(135deg, #4338CA 0%, #6D28D9 55%, #A21CAF 100%); /* landing hero and subscribe header ONLY */
 ```
 
 Colour rules:
-- Blue = action or link. Green = correct. Red = wrong. Nothing else is coloured.
-- Green and red are used as **text on their soft background** for body sizes. As **fills with white text** only for badges 12 px bold or larger.
+- Indigo = action, link or current place. Green = correct. Red = wrong. Amber = partial/pending. Nothing else is coloured. Near-black (`--text`) is never a fill.
+- Status text uses `--ok-text`, `--bad` or `--warn` on white or its soft background. `--ok` itself is never text. Badges are soft fills; no white text on green.
 - The gradient appears in exactly two places: the landing page hero and the subscribe screen header. Never on lesson, quiz, exam, teacher or admin screens.
 - Lesson content areas are pure white with no tint.
 
@@ -76,30 +78,30 @@ Arabic body text never below 15 px. Arabic-Indic digits (٠١٢٣) in student-fa
 - Card padding 16 px mobile, 20 px desktop. Gap between stacked cards 12 px. Gap between cards in a grid 12 px.
 - Section spacing: 24 px between an H2 and the previous block, 12 px between H2 and its content.
 - Radius: `--r-sm` 10 px inputs and chips; `--r-md` 14 px options and list items; `--r-lg` 18 px cards, sheets, dialogs; `--r-pill` 999 px buttons and badges.
-- Shadows: `--shadow-1: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06)` on cards; `--shadow-2: 0 4px 12px rgba(0,0,0,.08), 0 24px 48px rgba(0,0,0,.10)` on sheets, dialogs and the floating assistant button.
+- Shadows: `--shadow-1: 0 1px 2px rgba(30,27,75,.05), 0 8px 24px rgba(79,70,229,.08)` on cards; `--shadow-2: 0 4px 12px rgba(30,27,75,.08), 0 24px 48px rgba(79,70,229,.14)` on sheets, dialogs, the nav menu and the floating assistant button.
 - Cards: white, hairline border, shadow-1. No coloured left or right borders ever.
 
 ### 2.4 Components and their states
 
-**Buttons.** Pill shape, 44 px min height (36 px for the `sm` size in dense admin tables), 15 px weight 600, horizontal padding 18 px (12 px for sm). Disabled 45 percent opacity. Focus ring 2 px `--accent` offset 2 px. Hover: background shifts to `--soft` for secondary, to `#000` for primary. Transition 150 ms.
+**Buttons.** Pill shape, 44 px min height (36 px for the `sm` size in dense admin tables), 15 px weight 600, horizontal padding 18 px (12 px for sm). Disabled 45 percent opacity. Focus ring 2 px `--accent` offset 2 px. Hover: secondary shifts to `--soft`; primary to `--accent-hover`, pressed `--accent-pressed`. Transition 150 ms.
 
 | Variant | Fill | Text | Border | Where |
 |---|---|---|---|---|
-| Primary | `--text` | white | none | One per screen: start quiz, check answer, submit exam, save |
-| Accent | `--accent` | white | none | Subscribe, Ask a Teacher, pay |
+| Primary | `--accent` | white | none | One per screen: start quiz, check answer, submit exam, save |
+| Accent | same as Primary | white | none | Subscribe, Ask a Teacher, pay |
 | Secondary | `--surface` | `--text` | `--border-strong` + 1px shadow | Everything else |
 | Danger | `--surface` | `--bad` | `--bad` | Reject, delete, cancel subscription, fail payment |
 | Ghost | none | `--accent` | none | Inline actions in tables |
 
-**Quiz option.** Full-width `<label>` containing the input, 48 px min height, `--r-md`, 15 px, 12 px vertical and 14 px horizontal padding, 10 px gap between control and text, 8 px gap between options. States: default white with `--border-strong`; hover `--soft`; selected `--soft` fill with `--text` border; after check, correct `--ok-soft` with `--ok` border and wrong `--bad-soft` with `--bad` border. Radio and checkbox controls 18 px with `accent-color: var(--text)`.
+**Quiz option.** Full-width `<label>` containing the input, 48 px min height, `--r-md`, 15 px, 12 px vertical and 14 px horizontal padding, 10 px gap between control and text, 8 px gap between options. States: default white with `--border-strong`; hover `--soft`; selected `--accent-soft` fill with `--accent` border; after check, correct `--ok-soft` with `--ok` border and wrong `--bad-soft` with `--bad` border. Radio and checkbox controls 18 px with `accent-color: var(--accent)`.
 
 **Feedback panel** (under the question after checking): `--r-md`, 12 px by 14 px padding, soft background and strong border in the verdict colour, a 26 px filled circle icon (check or x) at the start, bold verdict, explanation in `--text-2`.
 
-**Badges.** Pill, 12 px 600, 2 px by 10 px padding. `ok` green fill white text; `bad` red fill; `pending` `--soft` fill `--text-2` text; `role` `--text` fill white text; `v2` transparent with `--v2` outline and text.
+**Badges.** Pill, 12 px 600, 2 px by 10 px padding. `ok` `--ok-soft` fill with `--ok-text` text; `bad` `--bad-soft` fill with `--bad` text; `pending` `--soft` fill `--text-2` text; `role` `--soft` fill `--text` text; `v2` transparent with `--v2` outline and text.
 
 **Progress.** Track `--soft`, fill `--accent` for mastery and `--ok` for a passed exam. 6 px tall, fully rounded. The headline counter is a white card, number in Display size, meta line in caption.
 
-**Navigation.** Mobile: bottom tab bar, white, hairline top border, at most 4 items, Lucide stroke icons 22 px at 1.8 px stroke, label 12 px (micro), active `--text` 600, inactive `--text-2`. A role with more than 3 destinations shows its 3 primary destinations plus a fourth item "المزيد" that opens a list of the rest. Desktop (≥ 900 px): top bar with every destination as text tabs, active has a 2 px `--accent` underline. Sub-tabs are pills: 7 px by 14 px, active white with `--border-strong`.
+**Navigation.** App bar: one row, 56 px tall, sticky, white with a hairline bottom border, inside the same 1040 px container as the page: logo (`--accent`, links home) · nav · role badge · display name · sign-out. Mobile: bottom tab bar, white, hairline top border, at most 4 items, Lucide stroke icons 22 px at 1.8 px stroke, label 12 px (micro), active `--accent` 600 with the icon on an `--accent-soft` pill, inactive `--text-2`, bottom padding for the device safe area. A role with more than 3 destinations shows its 3 primary destinations plus a fourth item "المزيد" that opens a list of the rest. Desktop (≥ 900 px): the nav sits inline in the app bar as 36 px pills, inactive `--text-2`, active `--accent-soft` fill with `--accent` 600 text; the display name and the sign-out label show from 1200 px (below that sign-out is icon only). The admin shows dashboard, content, questions and users inline and the rest in an «المزيد» menu at the end of the nav (white, hairline border, shadow-2, items 44 px, closes on Esc or outside click). Login, sign-up, accept-invite, onboarding and the landing page show the same app bar with the logo only. Sub-tabs and filters are pills: 44 px, inactive white with `--border-strong`, active `--accent-soft` fill with `--accent` border and text.
 
 **Inputs.** White, `--r-sm`, `--border-strong`, 44 px height, 9 px by 12 px padding, 15 px. Labels 13 px `--text-2` above the field with 6 px gap. Selects in filter rows may be 36 px.
 
@@ -107,9 +109,9 @@ Arabic body text never below 15 px. Arabic-Indic digits (٠١٢٣) in student-fa
 
 **Cards in a grid.** Subject cards, plan cards, dashboard KPI cards: grid with `minmax(280px, 1fr)` on 700 px and up, single column below.
 
-**Assistant panel** (AI Avatar). Floating pill button bottom-start, `--text` fill, white text, shadow-2, 48 px. Opens a slide-in sheet from the start edge, max 380 px, full height, white, shadow-2, rounded outer corners `--r-lg`. Student bubbles `--soft` with no border; assistant bubbles white with hairline border; a 14 px sparkle icon in `--accent` marks the assistant. 220 ms slide.
+**Assistant panel** (AI Avatar). Floating pill button bottom-start, `--accent` fill, white text, shadow-2, 48 px. Opens a slide-in sheet from the start edge, max 380 px, full height, white, shadow-2, rounded outer corners `--r-lg`. Student bubbles `--soft` with no border; assistant bubbles white with hairline border; a 14 px sparkle icon in `--accent` marks the assistant. 220 ms slide.
 
-**Dialogs.** Centred, max 420 px, `--r-lg`, 20 px padding, shadow-2, overlay `rgba(29,29,31,.35)`.
+**Dialogs.** Centred, max 420 px, `--r-lg`, 20 px padding, shadow-2, overlay `rgba(30,27,75,.40)` above the app bar and tab bar.
 
 **Sticky exam header.** White card, `--r-md`, shadow-1, sticks under the app bar, holds the countdown in Readex Pro 700 18 px, turning `--bad` in the last two minutes.
 

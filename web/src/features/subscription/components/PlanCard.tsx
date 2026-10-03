@@ -23,7 +23,7 @@ export function PlanCard({ title, priceLines, features, isActive, actions }: Pla
           {title}
         </h3>
         {isActive ? (
-          <span className="rounded-pill bg-success px-2.5 py-0.5 text-micro font-semibold text-surface">
+          <span className="rounded-pill bg-success-soft px-2.5 py-0.5 text-micro font-semibold text-success-text">
             {t('badge.active')}
           </span>
         ) : null}

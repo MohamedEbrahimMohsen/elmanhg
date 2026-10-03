@@ -13,7 +13,7 @@ export interface ExamResultSummaryProps {
   session: ExamSessionResult;
 }
 
-const badgeClassName = 'self-start rounded-full px-2.5 py-0.5 text-micro font-semibold text-surface';
+const badgeClassName = 'self-start rounded-full px-2.5 py-0.5 text-micro font-semibold';
 
 export function ExamResultSummary({ session }: ExamResultSummaryProps) {
   const { t } = useTranslation('exam');
@@ -28,13 +28,13 @@ export function ExamResultSummary({ session }: ExamResultSummaryProps) {
         {t('result.score', { score: Math.round(Number(session.scorePercent ?? 0)) })}
       </p>
       {session.isPassed ? (
-        <span className={`${badgeClassName} bg-success`}>{t('result.passed')}</span>
+        <span className={`${badgeClassName} bg-success-soft text-success-text`}>{t('result.passed')}</span>
       ) : inReview ? (
         <span className="self-start rounded-full border border-warning bg-warning-soft px-2.5 py-0.5 text-micro font-semibold text-text">
           {t('result.provisional')}
         </span>
       ) : (
-        <span className={`${badgeClassName} bg-danger`}>
+        <span className={`${badgeClassName} bg-danger-soft text-danger`}>
           {t('result.failed', { passMark: Number(session.passMark) })}
         </span>
       )}

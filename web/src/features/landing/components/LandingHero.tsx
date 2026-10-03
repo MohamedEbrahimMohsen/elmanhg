@@ -21,8 +21,8 @@ export function LandingHero({ servableCount }: LandingHeroProps) {
       <h1 id={headingId} className="font-display text-display font-bold lg:text-display-desktop">
         {servableCount === undefined ? t('hero.title') : t('hero.titleWithCount', { count: servableCount })}
       </h1>
-      <p className="text-ui text-surface/80">{t('hero.goal', { goal: marketedQuestionGoal })}</p>
-      <Button asChild variant="primary">
+      <p className="text-ui text-surface">{t('hero.goal', { goal: marketedQuestionGoal })}</p>
+      <Button asChild variant="secondary">
         <Link to="/signup">{t('hero.start')}</Link>
       </Button>
     </section>

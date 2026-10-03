@@ -52,7 +52,7 @@ export function MultiExamSubjectSection({ subjectId }: MultiExamSubjectSectionPr
           <Link
             to="/student/exam/$sessionId"
             params={{ sessionId: inProgress.sessionId }}
-            className="rounded-sm text-ui text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+            className="inline-flex min-h-11 items-center rounded-sm text-ui text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
           >
             {t('start.openOther')}
           </Link>

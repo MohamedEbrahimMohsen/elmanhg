@@ -12,7 +12,7 @@ const verdicts = {
   Correct: {
     icon: CircleCheck,
     panel: 'border-success bg-success-soft',
-    color: 'text-success',
+    color: 'text-success-text',
     key: 'preview.correct',
   },
   Partial: {

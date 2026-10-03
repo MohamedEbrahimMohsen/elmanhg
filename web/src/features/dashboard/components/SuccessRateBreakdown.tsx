@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { SuccessRateMetricsResult } from '@/shared/api/generated/model';
 import { cn } from '@/shared/lib/utils';
+import { pillTabClassName } from '@/shared/ui/pillTab';
 import { formatCount, formatRate } from '../api/metricFormat';
 
 export interface SuccessRateBreakdownProps {
@@ -39,12 +40,7 @@ export function SuccessRateBreakdown({ data, subjectSelected }: SuccessRateBreak
             onClick={() => {
               setLevel(option);
             }}
-            className={cn(
-              'min-h-9 rounded-full px-3.5 text-ui focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden',
-              level === option
-                ? 'border border-border-strong bg-surface font-semibold text-text'
-                : 'text-text-muted hover:bg-soft',
-            )}
+            className={cn(pillTabClassName, 'min-h-9 px-3.5')}
           >
             {t(`breakdown.levels.${option}`)}
           </button>
