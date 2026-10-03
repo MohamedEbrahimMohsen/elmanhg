@@ -144,7 +144,7 @@ describe('AppShell', () => {
     const banner = await screen.findByRole('banner');
     const row = within(banner).getByRole('link', { name: 'Elmanhg' }).parentElement;
 
-    // layout guard #276: the desktop header is a single row
+    // layout guard (story 276): the desktop header is a single row
     expect(banner.children).toHaveLength(1);
     expect(row).toBe(banner.firstElementChild);
     expect(row).toContainElement(within(banner).getByRole('navigation', { name: 'Main navigation' }));
