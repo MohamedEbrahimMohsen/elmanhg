@@ -1,5 +1,4 @@
 import ar from './i18n/ar.json';
-import en from './i18n/en.json';
 
 export { roles, createSessionStore, type Role, type Session, type SessionStore } from './sessionStore';
 export { SessionContext } from './SessionContext';
@@ -14,4 +13,4 @@ export { LoginPage } from './pages/LoginPage';
 export { SignUpPage } from './pages/SignUpPage';
 export { AcceptInvitePage } from './pages/AcceptInvitePage';
 
-export const sessionLocales = { ar, en };
+export const sessionLocales = { ar, en: () => import('./i18n/en.json') };

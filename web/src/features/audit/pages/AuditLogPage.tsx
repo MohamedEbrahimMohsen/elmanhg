@@ -9,6 +9,9 @@ import { AuditLogTable } from '../components/AuditLogTable';
 import { AuditLogTableSkeleton } from '../components/AuditLogTableSkeleton';
 import { useAuditLogs } from '../hooks/useAuditLogs';
 import { useAuditLogSearch } from '../hooks/useAuditLogSearch';
+import { registerAuditLocales } from '../locales';
+
+registerAuditLocales();
 
 export function AuditLogPage() {
   const { t } = useTranslation('audit');

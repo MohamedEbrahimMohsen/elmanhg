@@ -17,6 +17,9 @@ import { usePaymentLog } from '../hooks/usePaymentLog';
 import { usePaymentLogSearch } from '../hooks/usePaymentLogSearch';
 import { usePaymentReviewCount } from '../hooks/usePaymentReviewCount';
 import { useResolvePaymentReview } from '../hooks/useResolvePaymentReview';
+import { registerPaymentsLocales } from '../locales';
+
+registerPaymentsLocales();
 
 export function PaymentLogPage() {
   const { t } = useTranslation('payments');

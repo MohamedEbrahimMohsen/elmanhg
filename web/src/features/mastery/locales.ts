@@ -1,4 +1,3 @@
 import ar from './i18n/ar.json';
-import en from './i18n/en.json';
 
-export const masteryLocales = { ar, en };
+export const masteryLocales = { ar, en: () => import('./i18n/en.json') };

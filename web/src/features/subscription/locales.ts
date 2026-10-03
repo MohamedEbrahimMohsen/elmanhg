@@ -1,4 +1,3 @@
 import ar from './i18n/ar.json';
-import en from './i18n/en.json';
 
-export const subscriptionLocales = { ar, en };
+export const subscriptionLocales = { ar, en: () => import('./i18n/en.json') };

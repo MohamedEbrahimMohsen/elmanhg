@@ -7,6 +7,9 @@ import { AvatarConversationSkeleton } from '../components/AvatarConversationSkel
 import { AvatarConversationSummary } from '../components/AvatarConversationSummary';
 import { AvatarLoggedMessage } from '../components/AvatarLoggedMessage';
 import { useAvatarConversation } from '../hooks/useAvatarConversation';
+import { registerAvatarConversationsLocales } from '../locales';
+
+registerAvatarConversationsLocales();
 
 export interface AvatarConversationPageProps {
   conversationId: string;

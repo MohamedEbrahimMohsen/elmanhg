@@ -9,6 +9,9 @@ import { AvatarConversationSkeleton } from '../components/AvatarConversationSkel
 import { AvatarConversationTable } from '../components/AvatarConversationTable';
 import { useAvatarConversations } from '../hooks/useAvatarConversations';
 import { useAvatarConversationSearch } from '../hooks/useAvatarConversationSearch';
+import { registerAvatarConversationsLocales } from '../locales';
+
+registerAvatarConversationsLocales();
 
 export function AvatarConversationsPage() {
   const { t } = useTranslation('avatarConversations');

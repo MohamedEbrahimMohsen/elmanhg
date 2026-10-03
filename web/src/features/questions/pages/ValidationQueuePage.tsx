@@ -14,6 +14,9 @@ import { useBulkApprove } from '../hooks/useBulkApprove';
 import { useReviewSession } from '../hooks/useReviewSession';
 import { useValidationQueue } from '../hooks/useValidationQueue';
 import { useValidationQueueSearch } from '../hooks/useValidationQueueSearch';
+import { registerQuestionsAdminLocales } from '../questionsAdminLocales';
+
+registerQuestionsAdminLocales();
 
 export function ValidationQueuePage() {
   const { t, i18n } = useTranslation('questions');

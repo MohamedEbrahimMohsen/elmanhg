@@ -5,6 +5,9 @@ import { BlueprintsEmptyState } from '../components/BlueprintsEmptyState';
 import { SubjectBlueprints } from '../components/SubjectBlueprints';
 import { SubjectPicker } from '../components/SubjectPicker';
 import { useBlueprintsSearch } from '../hooks/useBlueprintsSearch';
+import { registerBlueprintsLocales } from '../locales';
+
+registerBlueprintsLocales();
 
 export function ExamBlueprintsPage() {
   const { t } = useTranslation('blueprints');
