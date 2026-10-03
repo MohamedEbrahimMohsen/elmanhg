@@ -17,7 +17,7 @@ export function useBulkApprove() {
     mutation: {
       onSuccess: async (result) => {
         const count = Number(result.approvedCount);
-        const formattedCount = formatNumber(count, i18n.resolvedLanguage ?? i18n.language, 'latin');
+        const formattedCount = formatNumber(count, i18n.resolvedLanguage ?? i18n.language);
         toast(t('validation.queue.bulkApproved', { count, formattedCount }));
         await queryClient.invalidateQueries({ queryKey: getGetValidationQueueQueryKey() });
       },

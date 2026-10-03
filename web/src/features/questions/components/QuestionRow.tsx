@@ -25,7 +25,7 @@ export function QuestionRow({ item }: QuestionRowProps) {
         <QuestionStatusBadge status={item.validationStatus} />
       </td>
       <td className={cellClassName}>
-        {t('list.table.versionValue', { version: formatNumber(Number(item.version), lng, 'latin') })}
+        {t('list.table.versionValue', { version: formatNumber(Number(item.version), lng) })}
       </td>
       <td className={cellClassName}>{item.teacherName ?? t('list.table.noTeacher')}</td>
       <td className={cellClassName}>{item.rejectionReason ?? ''}</td>

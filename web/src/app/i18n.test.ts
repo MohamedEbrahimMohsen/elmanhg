@@ -16,10 +16,10 @@ describe('i18n', () => {
     expect(document.documentElement).toHaveAttribute('dir', 'ltr');
   });
 
-  it('formats ICU numbers with Arabic-Indic digits in Arabic', () => {
+  it('formats ICU numbers with Latin digits in Arabic', () => {
     i18n.addResource('ar', 'common', 'test.count', '{count, plural, few {# أسئلة} other {# سؤال}}');
 
-    expect(i18n.t('test.count', { lng: 'ar', count: 3 })).toBe('٣ أسئلة');
+    expect(i18n.t('test.count', { lng: 'ar', count: 3 })).toBe('3 أسئلة');
   });
 
   it('falls back to Arabic and rtl for an unsupported language', async () => {

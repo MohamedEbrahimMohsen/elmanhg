@@ -22,7 +22,7 @@ export function GradeReviewForm({ detail, onSubmit, isPending }: GradeReviewForm
   const { t, i18n } = useTranslation('gradeReview');
   const lng = i18n.resolvedLanguage ?? i18n.language;
   const maxScoreNumber = Number(detail.maxScore);
-  const maxScore = formatNumber(maxScoreNumber, lng, 'latin');
+  const maxScore = formatNumber(maxScoreNumber, lng);
   const form = useForm<GradeReviewFormValues>({
     resolver: zodResolver(gradeReviewFormSchema(maxScoreNumber)),
     defaultValues: { decision: detail.aiScore === null ? 'Overridden' : 'Accepted', score: '', comment: '' },
@@ -34,7 +34,7 @@ export function GradeReviewForm({ detail, onSubmit, isPending }: GradeReviewForm
   const scoreErrorId = `${id}-score-error`;
   const commentHintId = `${id}-comment-hint`;
   const commentErrorId = `${id}-comment-error`;
-  const aiScoreLabel = detail.aiScore === null ? null : formatNumber(Number(detail.aiScore), lng, 'latin');
+  const aiScoreLabel = detail.aiScore === null ? null : formatNumber(Number(detail.aiScore), lng);
 
   return (
     <FormProvider {...form}>
@@ -83,7 +83,7 @@ export function GradeReviewForm({ detail, onSubmit, isPending }: GradeReviewForm
             {...form.register('comment')}
           />
           <p id={commentHintId} className="text-caption text-text-muted">
-            {t('form.commentHint', { max: formatNumber(gradeReviewCommentMaxLength, lng, 'latin') })}
+            {t('form.commentHint', { max: formatNumber(gradeReviewCommentMaxLength, lng) })}
           </p>
           {errors.comment?.message ? (
             <p id={commentErrorId} className="text-caption text-danger">

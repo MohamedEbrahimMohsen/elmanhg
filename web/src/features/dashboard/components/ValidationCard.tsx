@@ -2,8 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { useGetDashboardValidation } from '@/shared/api/generated/dashboard/dashboard';
 import type { GetDashboardValidationParams } from '@/shared/api/generated/model';
 import { formatCount, formatElapsed } from '../api/metricFormat';
-import { KpiFigure } from './KpiFigure';
 import { MetricCard } from './MetricCard';
+import { MetricList } from './MetricList';
 
 export interface ValidationCardProps {
   params: GetDashboardValidationParams;
@@ -15,22 +15,36 @@ export function ValidationCard({ params }: ValidationCardProps) {
   const query = useGetDashboardValidation(params);
 
   return (
-    <MetricCard title={t('validation.title')} query={query}>
+    <MetricCard title={t('validation.title')} query={query} variant="panel">
       {(data) => (
-        <KpiFigure value={formatCount(data.pendingBacklog, lng)} caption={t('validation.caption')}>
-          <li>{t('validation.approved', { count: formatCount(data.approved, lng) })}</li>
-          <li>{t('validation.rejected', { count: formatCount(data.rejected, lng) })}</li>
-          <li>{t('validation.median', { duration: formatElapsed(data.medianSecondsToDecision, lng) })}</li>
-          {data.byTeacher.map((teacher) => (
-            <li key={teacher.teacherId}>
-              {t('validation.teacher', {
-                name: teacher.displayName,
-                approved: formatCount(teacher.approved, lng),
-                rejected: formatCount(teacher.rejected, lng),
-              })}
-            </li>
-          ))}
-        </KpiFigure>
+        <>
+          <MetricList
+            rows={[
+              { key: 'approved', label: t('validation.approved'), value: formatCount(data.approved, lng) },
+              { key: 'rejected', label: t('validation.rejected'), value: formatCount(data.rejected, lng) },
+              {
+                key: 'median',
+                label: t('validation.median'),
+                value: formatElapsed(data.medianSecondsToDecision, lng),
+              },
+            ]}
+          />
+          {data.byTeacher.length > 0 ? (
+            <>
+              <h3 className="text-caption font-semibold text-text-muted">{t('validation.byTeacher')}</h3>
+              <MetricList
+                rows={data.byTeacher.map((teacher) => ({
+                  key: teacher.teacherId,
+                  label: teacher.displayName,
+                  value: t('validation.teacherValue', {
+                    approved: formatCount(teacher.approved, lng),
+                    rejected: formatCount(teacher.rejected, lng),
+                  }),
+                }))}
+              />
+            </>
+          ) : null}
+        </>
       )}
     </MetricCard>
   );

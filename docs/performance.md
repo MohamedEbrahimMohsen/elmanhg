@@ -47,11 +47,11 @@ Also: `http_req_failed` < 1 % and `checks` > 99 %. The answer check is the only 
 | `landing` | + `routes/index` | 213 | 220 |
 | `lesson` | + `student/route`, `student/lesson.$lessonId`, `lesson.$lessonId.index` | 234 | 240 |
 | `quiz` | + `student/route`, `student/quiz.$sessionId` | 248 | 255 |
-| `admin-dashboard` | + `admin/route`, `admin/index` | 222 | 230 |
+| `admin-dashboard` | + `admin/route`, `admin/index` | 233 | 233 |
 | `admin-users` | + `admin/route`, `admin/users` | 254 | 270 |
 | `teacher-home` | + `teacher/route`, `teacher/index` | 250 | 265 |
 
-Budget = measured × 1.05, rounded up to the next 5 KB. They are regression guards; the 2 s browser gate is the real target. When a change legitimately grows a page, raise its budget in the same pull request and say why.
+Budget = measured × 1.05, rounded up to the next 5 KB. They are regression guards; the 2 s browser gate is the real target. When a change legitimately grows a page, raise its budget in the same pull request and say why. #280 dataviz redesign (KPI tiles, panels, chart axes) grew the admin chunk.
 
 ## 4. What keeps it fast
 

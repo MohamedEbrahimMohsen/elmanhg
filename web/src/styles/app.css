@@ -129,6 +129,16 @@
     text-align: start;
   }
 
+  button:enabled,
+  select:enabled,
+  [role='button'] {
+    cursor: pointer;
+  }
+
+  :disabled {
+    cursor: not-allowed;
+  }
+
   body {
     background-color: var(--ds-color-bg);
     color: var(--ds-color-text);

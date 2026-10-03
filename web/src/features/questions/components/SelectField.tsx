@@ -2,6 +2,7 @@ import { useId } from 'react';
 import { useController, type FieldValues, type Path } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Label } from '@/shared/ui/label';
+import { Select } from '@/shared/ui/select';
 
 export interface SelectFieldProps<TValues extends FieldValues> {
   name: Path<TValues>;
@@ -36,7 +37,7 @@ export function SelectField<TValues extends FieldValues>({
   return (
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={id}>{label}</Label>
-      <select
+      <Select
         id={id}
         ref={ref}
         name={fieldName}
@@ -46,7 +47,6 @@ export function SelectField<TValues extends FieldValues>({
         disabled={disabled}
         aria-invalid={fieldState.invalid}
         aria-describedby={describedByIds.length > 0 ? describedByIds.join(' ') : undefined}
-        className="h-11 w-full rounded-sm border border-border-strong bg-surface px-3 text-ui text-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:opacity-45 aria-invalid:border-danger"
       >
         {placeholder === undefined ? null : <option value="">{placeholder}</option>}
         {options.map((option) => (
@@ -54,7 +54,7 @@ export function SelectField<TValues extends FieldValues>({
             {option.label}
           </option>
         ))}
-      </select>
+      </Select>
       {description ? (
         <p id={descriptionId} className="text-caption text-text-muted">
           {description}

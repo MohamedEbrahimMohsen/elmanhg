@@ -1,8 +1,8 @@
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import type { ValidationQueueItemResult } from '@/shared/api/generated/model';
+import { formatRelativeTime } from '@/shared/lib/dateTime';
 import { formatNumber } from '@/shared/lib/format';
-import { formatPendingAge } from '../api/pendingAge';
 import { stemExcerpt } from '../api/stemExcerpt';
 
 export interface ValidationQueueItemProps {
@@ -20,8 +20,8 @@ export function ValidationQueueItem({ item, selected, onToggle, now }: Validatio
     t([`types.${item.type}`, item.type]),
     `${item.unitName} › ${item.lessonName}`,
     t([`difficulties.${item.difficulty}`, item.difficulty]),
-    t('list.table.versionValue', { version: formatNumber(Number(item.version), lng, 'latin') }),
-    t('validation.queue.age', { age: formatPendingAge(item.submittedAt, now, lng) }),
+    t('list.table.versionValue', { version: formatNumber(Number(item.version), lng) }),
+    t('validation.queue.age', { age: formatRelativeTime(item.submittedAt, now, lng) }),
   ];
 
   return (

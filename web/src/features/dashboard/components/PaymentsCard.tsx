@@ -2,8 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { useGetDashboardPayments } from '@/shared/api/generated/dashboard/dashboard';
 import type { GetDashboardPaymentsParams } from '@/shared/api/generated/model';
 import { formatAmount, formatCount } from '../api/metricFormat';
-import { KpiFigure } from './KpiFigure';
 import { MetricCard } from './MetricCard';
+import { MetricList } from './MetricList';
 
 export interface PaymentsCardProps {
   params: GetDashboardPaymentsParams;
@@ -16,23 +16,26 @@ export function PaymentsCard({ params, subjectSelected }: PaymentsCardProps) {
   const query = useGetDashboardPayments(params);
 
   return (
-    <MetricCard title={t('payments.title')} query={query}>
+    <MetricCard title={t('payments.title')} query={query} variant="panel">
       {(data) => (
-        <KpiFigure
-          value={formatAmount(data.revenue, lng)}
-          caption={t('payments.caption')}
-          note={subjectSelected ? t('card.noSubject') : undefined}
-        >
-          <li>{t('payments.succeeded', { count: formatCount(data.succeeded, lng) })}</li>
-          <li>{t('payments.failed', { count: formatCount(data.failed, lng) })}</li>
-          <li>
-            {t('payments.refunds', {
-              count: formatCount(data.refunds, lng),
-              amount: formatAmount(data.refunded, lng),
-            })}
-          </li>
-          <li>{t('payments.net', { amount: formatAmount(data.netRevenue, lng) })}</li>
-        </KpiFigure>
+        <>
+          {subjectSelected ? <p className="text-caption text-text-muted">{t('card.noSubject')}</p> : null}
+          <MetricList
+            rows={[
+              { key: 'succeeded', label: t('payments.succeeded'), value: formatCount(data.succeeded, lng) },
+              { key: 'failed', label: t('payments.failed'), value: formatCount(data.failed, lng) },
+              {
+                key: 'refunds',
+                label: t('payments.refunds'),
+                value: t('payments.refundsValue', {
+                  count: formatCount(data.refunds, lng),
+                  amount: formatAmount(data.refunded, lng),
+                }),
+              },
+              { key: 'net', label: t('payments.net'), value: formatAmount(data.netRevenue, lng) },
+            ]}
+          />
+        </>
       )}
     </MetricCard>
   );

@@ -167,7 +167,7 @@
     "SESSION_ALREADY_SUBMITTED": "انتهت هذه الجلسة بالفعل.",
     "SESSION_QUESTION_ALREADY_ANSWERED": "لقد اجبت عن هذا السؤال بالفعل.",
     "SESSION_MODIFIED_CONCURRENTLY": "تم تعديل هذه الجلسة بواسطة طلب آخر. حاول مرة أخرى.",
-    "SESSION_HISTORY_PAGE_NUMBER_INVALID": "رقم الصفحة يجب أن يكون ١ أو أكثر.",
+    "SESSION_HISTORY_PAGE_NUMBER_INVALID": "رقم الصفحة يجب أن يكون 1 أو أكثر.",
     "SESSION_HISTORY_PAGE_SIZE_INVALID": "حجم الصفحة خارج النطاق المسموح.",
     "SESSION_HISTORY_KIND_INVALID": "نوع الجلسة غير صالح.",
     "EXAM_BLUEPRINT_SHORTFALL": "لم يتم الحفظ — عدد الأسئلة المتاحة غير كاف لبعض الأنواع.",

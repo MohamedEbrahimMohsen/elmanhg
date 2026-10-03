@@ -12,7 +12,7 @@ const cardClassName = 'flex flex-col gap-3 rounded-lg border border-border bg-su
 export function AiGradeCard({ detail }: AiGradeCardProps) {
   const { t, i18n } = useTranslation('gradeReview');
   const lng = i18n.resolvedLanguage ?? i18n.language;
-  const maxScore = formatNumber(Number(detail.maxScore), lng, 'latin');
+  const maxScore = formatNumber(Number(detail.maxScore), lng);
 
   return (
     <section aria-label={t('detail.ai')} className={cardClassName}>
@@ -27,12 +27,12 @@ export function AiGradeCard({ detail }: AiGradeCardProps) {
       ) : (
         <>
           <p className="text-ui font-semibold text-text">
-            {t('detail.aiScore', { score: formatNumber(Number(detail.aiScore), lng, 'latin'), maxScore })}
+            {t('detail.aiScore', { score: formatNumber(Number(detail.aiScore), lng), maxScore })}
           </p>
           {detail.confidence === null ? null : (
             <p className="text-caption text-text-muted">
               {t('detail.confidence', {
-                percent: formatNumber(Math.round(Number(detail.confidence) * 100), lng, 'latin'),
+                percent: formatNumber(Math.round(Number(detail.confidence) * 100), lng),
               })}
             </p>
           )}

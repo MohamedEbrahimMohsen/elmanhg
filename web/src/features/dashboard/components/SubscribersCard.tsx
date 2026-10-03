@@ -2,8 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { useGetDashboardSubscribers } from '@/shared/api/generated/dashboard/dashboard';
 import type { GetDashboardSubscribersParams } from '@/shared/api/generated/model';
 import { formatAmount, formatCount } from '../api/metricFormat';
-import { KpiFigure } from './KpiFigure';
 import { MetricCard } from './MetricCard';
+import { MetricList } from './MetricList';
 
 export interface SubscribersCardProps {
   params: GetDashboardSubscribersParams;
@@ -16,25 +16,31 @@ export function SubscribersCard({ params, subjectSelected }: SubscribersCardProp
   const query = useGetDashboardSubscribers(params);
 
   return (
-    <MetricCard title={t('subscribers.title')} query={query}>
+    <MetricCard title={t('subscribers.title')} query={query} variant="panel">
       {(data) => (
-        <KpiFigure
-          value={formatCount(data.activeSubscriptions, lng)}
-          caption={t('subscribers.caption')}
-          note={subjectSelected ? t('card.noSubject') : undefined}
-        >
-          {data.activeByPlan.map((entry) => (
-            <li key={entry.plan}>
-              {t('subscribers.plan', {
-                plan: t(`subscribers.plans.${entry.plan}`),
-                count: formatCount(entry.count, lng),
-              })}
-            </li>
-          ))}
-          <li>{t('subscribers.churnedInRange', { count: formatCount(data.churnedInRange, lng) })}</li>
-          <li>{t('subscribers.churnedThisMonth', { count: formatCount(data.churnedThisMonth, lng) })}</li>
-          <li>{t('subscribers.mrr', { amount: formatAmount(data.monthlyRecurringRevenue, lng) })}</li>
-        </KpiFigure>
+        <>
+          {subjectSelected ? <p className="text-caption text-text-muted">{t('card.noSubject')}</p> : null}
+          <MetricList
+            rows={[
+              ...data.activeByPlan.map((entry) => ({
+                key: entry.plan,
+                label: t(`subscribers.plans.${entry.plan}`),
+                value: formatCount(entry.count, lng),
+              })),
+              {
+                key: 'churnedInRange',
+                label: t('subscribers.churnedInRange'),
+                value: formatCount(data.churnedInRange, lng),
+              },
+              {
+                key: 'churnedThisMonth',
+                label: t('subscribers.churnedThisMonth'),
+                value: formatCount(data.churnedThisMonth, lng),
+              },
+              { key: 'mrr', label: t('subscribers.mrr'), value: formatAmount(data.monthlyRecurringRevenue, lng) },
+            ]}
+          />
+        </>
       )}
     </MetricCard>
   );

@@ -6,7 +6,7 @@ import { cn } from '@/shared/lib/utils';
 const accentFillClassName = 'bg-accent text-surface hover:bg-accent-hover active:bg-accent-pressed';
 
 export const buttonVariants = cva(
-  'inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-sans text-ui font-semibold whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-45',
+  'inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-sans text-ui font-semibold whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:opacity-45',
   {
     variants: {
       variant: {
@@ -14,7 +14,7 @@ export const buttonVariants = cva(
         accent: accentFillClassName,
         secondary:
           'border border-border-strong bg-surface text-text hover:bg-soft active:bg-soft aria-pressed:border-accent aria-pressed:bg-accent-soft aria-pressed:text-accent',
-        danger: 'border border-danger bg-surface text-danger hover:bg-danger-soft',
+        danger: 'border border-border-strong bg-surface text-danger hover:bg-danger-soft',
         ghost: 'bg-transparent text-accent hover:bg-accent-soft',
       },
       size: {

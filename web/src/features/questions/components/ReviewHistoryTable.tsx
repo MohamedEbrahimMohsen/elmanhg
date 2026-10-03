@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { QuestionDecisionResult, QuestionRevisionEntryResult } from '@/shared/api/generated/model';
-import { formatDate, formatNumber } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
+import { formatNumber } from '@/shared/lib/format';
 import { buildReviewHistory, type ReviewHistoryEntry } from '../api/reviewHistory';
 
 export interface ReviewHistoryTableProps {
@@ -56,12 +57,10 @@ export function ReviewHistoryTable({ revisions, decisions }: ReviewHistoryTableP
         <tbody>
           {entries.map((entry) => (
             <tr key={entry.key} className="border-t border-border hover:bg-soft">
-              <td className={cellClassName}>
-                {formatDate(new Date(entry.at), lng, 'latin', { dateStyle: 'medium', timeStyle: 'short' })}
-              </td>
+              <td className={cellClassName}>{formatDateTime(entry.at, lng)}</td>
               <td className={cellClassName}>{entry.actorName ?? t('validation.history.noActor')}</td>
               <td className={cellClassName}>
-                {`${t(`validation.history.kind.${entry.kind}`)} · ${t('validation.history.versionValue', { version: formatNumber(entry.version, lng, 'latin') })}`}
+                {`${t(`validation.history.kind.${entry.kind}`)} · ${t('validation.history.versionValue', { version: formatNumber(entry.version, lng) })}`}
               </td>
               <td className={cellClassName}>{details(entry)}</td>
             </tr>

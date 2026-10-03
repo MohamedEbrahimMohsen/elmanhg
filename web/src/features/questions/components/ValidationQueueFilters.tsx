@@ -73,7 +73,7 @@ export function ValidationQueueFilters({ search, filters, onApply, onClear }: Va
           placeholder={all}
           options={validationAgeFilters.map((days) => ({
             value: String(days),
-            label: t('validation.filters.ageOption', { count: days, formattedCount: formatNumber(days, lng, 'latin') }),
+            label: t('validation.filters.ageOption', { count: days, formattedCount: formatNumber(days, lng) }),
           }))}
         />
       </div>

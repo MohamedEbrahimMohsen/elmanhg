@@ -7,6 +7,7 @@ import { SubmitButton } from '@/shared/form/SubmitButton';
 import { TextField } from '@/shared/form/TextField';
 import { Button } from '@/shared/ui/button';
 import { Label } from '@/shared/ui/label';
+import { Select } from '@/shared/ui/select';
 import { userFiltersSchema, type UserFiltersValues } from '../schemas/userFiltersSchema';
 import type { UsersSearch } from '../schemas/usersSearchSchema';
 
@@ -26,19 +27,11 @@ function StatusSelect() {
   return (
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={id}>{t('filters.status')}</Label>
-      <select
-        id={id}
-        ref={ref}
-        name={name}
-        value={value}
-        onChange={onChange}
-        onBlur={onBlur}
-        className="h-11 w-full rounded-sm border border-border-strong bg-surface px-3 text-ui text-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
-      >
+      <Select id={id} ref={ref} name={name} value={value} onChange={onChange} onBlur={onBlur}>
         <option value="">{t('filters.all')}</option>
         <option value="Active">{t('status.Active')}</option>
         <option value="Suspended">{t('status.SuspendedStudent')}</option>
-      </select>
+      </Select>
     </div>
   );
 }

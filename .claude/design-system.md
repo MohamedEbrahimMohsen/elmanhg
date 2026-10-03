@@ -1,8 +1,8 @@
-# Design system — Elmanhg (المنهج) · "Glass" — palette Indigo calm (v2.0)
+# Design system — Elmanhg (المنهج) · "Glass" — palette Indigo calm (v2.1)
 
 Owner: product (Mohamed). Engineers do not edit values here; they reference tokens. Human-readable rationale lives in `docs/design-system.md`; this file is the token contract the pipeline reads. Both must agree (docs-sync rule).
 
-Source of truth: `docs/design-system.md` v2.0 (2026-10-03). No Figma. Screen content, flow and states come from `prototype/`; the look comes only from this file.
+Source of truth: `docs/design-system.md` v2.1 (2026-10-03). No Figma. Screen content, flow and states come from `prototype/`; the look comes only from this file.
 Mode: **light only**. There is no dark theme and no `.dark` override block.
 
 ## Tokens
@@ -83,24 +83,27 @@ Arabic body text never below 15 px. Fonts: Google Fonts `Readex Pro:wght@500;600
 ## Components
 | Component | Variants | States | Notes |
 |-----------|----------|--------|-------|
-| Button | primary (accent fill, white label; hover accent.hover, pressed accent.pressed), accent (same as primary since 2.0), secondary (surface + border.strong; aria-pressed → accent.soft + accent border/text), danger (surface, danger text + border), ghost (accent text) | default, hover, focus, pressed, disabled (45% opacity), loading | pill, min height 44 (36 for `sm` in dense admin tables), padding-inline 18 (12 sm), type.ui 600; size `icon` 44×44 for icon-only buttons beside fields (offset `mt-6.5` under a label). One primary per screen. |
+| Button | primary (accent fill, white label; hover accent.hover, pressed accent.pressed), accent (same as primary since 2.0), secondary (surface + border.strong; aria-pressed → accent.soft + accent border/text), danger (surface + border.strong, danger text; hover danger.soft), ghost (accent text) | default, hover, focus, pressed, disabled (45% opacity), loading | pill, min height 44 (36 for `sm` table row actions, a documented exception to the 44 rule), padding-inline 18 (12 sm), type.ui 600; size `icon` 44×44 for icon-only buttons beside fields (offset `mt-6.5` under a label). One primary per screen. Cursor pointer on enabled buttons/selects/[role=button], not-allowed on disabled (global base rule). Row actions in every table are `sm` (36): secondary, destructive `danger`; row links use `Button asChild`. |
 | Card | default | default, hover (border.strong) for clickable cards | surface, border, shadow.1, radius.lg. No coloured side borders ever. |
 | QuizOption | radio, checkbox | default, hover (soft), selected (accent.soft fill + accent border), correct (success.soft + success), wrong (danger.soft + danger), disabled | full-width label, min height 48, radius.md, padding 12×14, gap 10, control 18px with accent-color accent |
 | FeedbackPanel | correct, wrong, partial | enter (fade, motion.base) | soft bg + strong border of the verdict colour, 26px filled circle icon, bold verdict, explanation in text.muted |
 | Badge | ok, bad, pending, role, v2, neutral | — | pill, type.micro, padding 2×10. ok = success.soft + success.text; bad = danger.soft + danger; pending/neutral = soft + text.muted; role = soft + text; v2 = outline |
 | Progress | mastery (accent), pass (success) | — | height 6, track soft, radius.pill, fill animates motion.slow |
-| Input / Select / Textarea | default | default, focus (2px accent ring, offset 2), error (danger border + caption), disabled | surface, border.strong, radius.sm, height 44, padding 9×12, label type.caption above with gap 6 |
+| Input / Select / Textarea | default | default, focus (2px accent ring, offset 2), error (danger border + caption), disabled | surface, border.strong, radius.sm, height 44, padding 9×12, label type.caption above with gap 6. Select: appearance none, Lucide ChevronDown 16 px text.muted in a 40 px inline-end box, padding-inline-end 40, not mirrored (`shared/ui/select.tsx`) |
 | TabBar (mobile) | — | active (accent text 600 on an accent.soft icon pill), inactive (text.muted) | at most 4 items; a role with more destinations shows 3 + "المزيد" (list of the rest); Lucide icons 22px stroke 1.8, label type.micro, surface + top hairline; bottom padding env(safe-area-inset-bottom) |
 | AppBar | — | — | single row, height layout.bar, sticky, surface + bottom hairline, same container as main: logo (accent) · nav · role badge · name (≥ xl) · sign-out (label ≥ xl; min height 44 below lg, 36 `sm` from lg) |
 | TopNav (desktop) | — | inactive (text.muted), hover (bg + text), active (accent.soft + accent 600) | pills min-h 36; destinations beyond the role's top-bar list sit in an «المزيد» disclosure menu: surface, border, shadow.2, radius.md, items ≥ 44 px, Esc/outside click/focus leaving closes |
 | BrandBar | — | — | app bar with logo only (+ end slot) on landing, login, sign-up, accept-invite, onboarding |
 | PillTab | — | inactive (surface + border.strong), hover (soft), active (accent.soft + accent border + accent text) | filters, sub-tabs, segmented toggles; pill, min height 44 |
-| Table | — | row hover (soft) | inside a Card, no vertical rules, row hairline, header type.caption 600 text.muted, cell 13.5px, padding 9×10, sticky header on desktop, horizontal scroll inside the card on mobile |
+| Table | — | row hover (soft) | inside a Card, no vertical rules, row hairline, header type.caption 600 text.muted, cell 13.5px, padding 9×10, sticky header on desktop, horizontal scroll inside the card on mobile; row actions `sm`; activity dates relative under 24 h with the full date in `title` |
 | AssistantSheet | — | open, closed | slides from inline-start, max 380, shadow.2, outer corners radius.lg; user bubble soft; assistant bubble surface + border; sparkle icon in accent |
 | AssistantFab | — | default, hover | pill, accent fill (hover, pressed as primary), white label, shadow.2, min height 48, fixed bottom inline-start |
 | Dialog | default, confirm, destructive | open | centred, max 420, radius.lg, padding 20, shadow.2, backdrop color.overlay |
 | ExamTimer | normal, urgent (last 2 min → danger) | — | sticky Card under app bar, radius.md, type.stat 18px |
-| KpiCard | — | — | Card with type.caption label, type.stat value, type.caption sub-line |
+| KpiTile | — | loading, error | Card, type.caption label, type.stat value, one type.caption detail (period delta when the API has one, never coloured), optional note; grid 2 columns, 4 from md |
+| MetricList | — | — | caption rows, label text.muted at inline-start, value 600 text at inline-end, hairline between rows; overdue value danger |
+| BarList | — | — | label and value over a 6 px Progress (accent on soft), scaled to the total or first step |
+| DailyBarChart | — | empty | accent bars, border gridlines at 0/½/max with compact labels, a baseline tick for every day of the period, ≤ 4 date labels anchored on the latest day, total/peak line, LTR in both languages, sr-only data table, empty message in a 160 px box |
 | EmptyState | no-data, no-results | — | icon, one line, primary CTA; no-results offers "مسح الفلاتر" |
 | Skeleton | — | loading | soft blocks with radius of the element they replace |
 | MathInput | step, final | default, focus, disabled, keypad open (inputmode none) | textarea like Input but type.mono family at type.body size (16 px, avoids iOS zoom), dir="ltr"; preview box surface + border, radius.sm, min height 44; keypad 6×6 keys (surface, border.strong, radius.sm, ≥44px) on soft panel radius.md, dir="ltr", under the active field; step row surface + border radius.md with move up/down (ghost) and remove (danger) icon buttons ≥44px |
@@ -157,13 +160,14 @@ Computed with the WCAG 2.x formula; `web/scripts/tokens/contrast.test.ts` re-ver
 | success #16A34A | success.soft | 2.84 | — | **never** text or the sole indicator |
 | border.strong | surface | ≈1.44 | — | decorative field boundary, not a text pair |
 
-Touch targets ≥44px; the only exception is the desktop top nav and app-bar sign-out (36 px, shown only ≥ lg, the pointer layout; below lg the tab bar and a 44 px sign-out take over). Focus visible on every interactive element (2px accent ring, offset 2). Real `<button>`, `<a href>`, `<label>` + `<input>`; never click handlers on divs. Icon-only buttons carry `aria-label`.
+Touch targets ≥44px; the only exceptions are (1) the desktop top nav and app-bar sign-out (36 px, shown only ≥ lg, the pointer layout; below lg the tab bar and a 44 px sign-out take over) and (2) table row actions in every table, student and admin (36 px `sm`, because rows are dense; adjacent actions keep adequate spacing per WCAG 2.5.8 Target Size (Minimum)). Focus visible on every interactive element (2px accent ring, offset 2). Real `<button>`, `<a href>`, `<label>` + `<input>`; never click handlers on divs. Icon-only buttons carry `aria-label`.
 
 ## RTL rules (Arabic)
 - `<html lang="ar" dir="rtl">`. Logical properties only (`margin-inline-start`, `padding-inline`, `inset-inline-start`); `left`/`right` are findings.
 - Direction-implying icons (back, next, chevrons) mirror in RTL.
 - LaTeX, code, URLs, phone numbers, emails: `dir="ltr"` + `unicode-bidi: isolate`.
-- Digits: Arabic-Indic (`ar-EG`) in student-facing UI; Latin (`ar-EG-u-nu-latn`) in admin tables, exports and anything copied into formulas. Never mixed within one string.
+- Digits: Latin (0123) everywhere, in both languages: numbers, dates, times, percentages, money, counters (`ar-EG-u-nu-latn`, `numberLocale` in `shared/lib/format.ts`). Arabic-Indic digits are accepted in input and normalised, never displayed.
+- Dates (`formatDateTime` in `shared/lib/dateTime.ts`, `<DateTime>` component): `date` «3 أكتوبر 2026» / Oct 3, 2026; `dateTime` (default) «3 أكتوبر 2026، 2:37 م» / Oct 3, 2026, 2:37 PM; `time` «2:37 م»; `day` «30 سبتمبر» / Sep 30; `fullDateTime` «السبت، 3 أكتوبر 2026، 2:37 م». Date and time are joined with «، » (ar) or «, » (en); a `YYYY-MM-DD` value is a UTC calendar date. Activity tables (session history, student history, AI conversations, audit log) show relative time («قبل ساعتين») under 24 h with the full date in `title`; deadlines and record dates stay absolute.
 
 ## Token → code mapping
 - `src/styles/tokens.css` is generated from the tables above by `npm --prefix web run gen:tokens`: every token becomes `--ds-<group>-<name>` on `:root` (dots → dashes). Composite values split: typography → `-size`, `-line`, `-size-desktop`, `-line-desktop`, `-weight`, `-tracking`; motion → `-duration`, `-easing`; `N mobile · M desktop` → base + `-desktop`. `bp.*` → `--breakpoint-*` inside `@theme`. No `.dark` block.
@@ -199,3 +203,4 @@ Touch targets ≥44px; the only exception is the desktop top nav and app-bar sig
 |---------|------|--------|
 | 1.0 | 2026-09-26 | Glass adopted (light only, aurora on landing + subscribe) |
 | 2.0 | 2026-10-03 | Indigo calm palette (#276): indigo primary and active states, ink-tinted borders and shadows, AA-tuned status colours (success.text added), aurora retuned; single-row app bar with More menu, BrandBar on auth and onboarding, layout.bar, layout.auth.max, bp.xl |
+| 2.1 | 2026-10-03 | #280: Latin digits app-wide, shared date formats, Select chevron, global pointer cursor, row-action style and neutral-border danger, dashboard KPI tile / metric list / bar list / daily chart |

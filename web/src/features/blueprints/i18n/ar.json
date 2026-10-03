@@ -41,11 +41,11 @@
     "errors": {
       "countInvalid": "عدد غير صالح",
       "empty": "يجب تحديد سؤال واحد على الأقل",
-      "tooLarge": "عدد الأسئلة أكبر من ١٠٠",
+      "tooLarge": "عدد الأسئلة أكبر من 100",
       "timeLimitInvalid": "زمن غير صالح",
-      "passMarkInvalid": "درجة النجاح بين ١ و١٠٠",
+      "passMarkInvalid": "درجة النجاح بين 1 و100",
       "percentInvalid": "نسبة غير صالحة",
-      "mixSum": "مجموع النسب يجب أن يكون ١٠٠"
+      "mixSum": "مجموع النسب يجب أن يكون 100"
     }
   },
   "toasts": {

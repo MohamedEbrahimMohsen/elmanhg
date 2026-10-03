@@ -28,7 +28,7 @@ export function GradeReviewSubjectPicker({ subjects, selectedId, onSelect }: Gra
             }}
             className={pillTabClassName}
           >
-            {t('queue.subjectPill', { name: subject.name, count: formatNumber(count, lng, 'latin') })}
+            {t('queue.subjectPill', { name: subject.name, count: formatNumber(count, lng) })}
           </button>
         );
       })}

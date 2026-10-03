@@ -13,7 +13,7 @@ export interface BulkApproveBarProps {
 export function BulkApproveBar({ count, isPending, onConfirm }: BulkApproveBarProps) {
   const { t, i18n } = useTranslation('questions');
   const [open, setOpen] = useState(false);
-  const formattedCount = formatNumber(count, i18n.resolvedLanguage ?? i18n.language, 'latin');
+  const formattedCount = formatNumber(count, i18n.resolvedLanguage ?? i18n.language);
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface p-4 shadow-1">

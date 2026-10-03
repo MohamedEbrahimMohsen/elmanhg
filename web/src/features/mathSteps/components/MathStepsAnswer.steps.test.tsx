@@ -131,7 +131,7 @@ describe('MathStepsAnswer steps', () => {
   it('keeps LaTeX left to right in Arabic', () => {
     renderWithProviders(<MathStepsAnswer owner={owner} />, { lng: 'ar' });
 
-    expect(screen.getByRole('textbox', { name: 'الخطوة ١' })).toHaveAttribute('dir', 'ltr');
+    expect(screen.getByRole('textbox', { name: 'الخطوة 1' })).toHaveAttribute('dir', 'ltr');
     expect(screen.getByRole('textbox', { name: 'الإجابة النهائية' })).toBeInTheDocument();
   });
 

@@ -37,8 +37,8 @@ export function CorrectAnswer({ view }: CorrectAnswerProps) {
         </ul>
       );
     case 'numeric': {
-      const value = formatNumber(view.value, lng, 'arabic-indic', { maximumFractionDigits: 6 });
-      const tolerance = formatNumber(view.tolerance, lng, 'arabic-indic', { maximumFractionDigits: 6 });
+      const value = formatNumber(view.value, lng, { maximumFractionDigits: 6 });
+      const tolerance = formatNumber(view.tolerance, lng, { maximumFractionDigits: 6 });
       const text =
         view.tolerance > 0
           ? t(view.toleranceMode === 'percent' ? 'feedback.tolerancePercent' : 'feedback.tolerance', {

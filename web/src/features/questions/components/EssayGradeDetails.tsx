@@ -22,7 +22,7 @@ export function EssayGradeDetails({ essay }: EssayGradeDetailsProps) {
       </div>
       <p className="text-caption text-text-muted">
         {t('preview.essay.confidence', {
-          confidence: formatNumber(Math.round(Number(essay.confidence) * percent), lng, 'latin'),
+          confidence: formatNumber(Math.round(Number(essay.confidence) * percent), lng),
         })}
       </p>
       <p dir="ltr" className="text-caption text-text-muted">

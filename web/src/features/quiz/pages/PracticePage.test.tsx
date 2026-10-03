@@ -97,7 +97,7 @@ describe('PracticePage', () => {
   it('renders right to left in Arabic', async () => {
     openPractice('ar');
 
-    expect(await screen.findByRole('button', { name: '٥ أسئلة' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: '5 أسئلة' })).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('dir', 'rtl');
   });
 

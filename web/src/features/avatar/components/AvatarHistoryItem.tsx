@@ -1,7 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { StudentAvatarConversationResult } from '@/shared/api/generated/model';
-import { formatDate } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
 import { Button } from '@/shared/ui/button';
 import { conversationTitle } from '../api/avatarHistory';
 
@@ -16,10 +16,7 @@ export interface AvatarHistoryItemProps {
 export function AvatarHistoryItem({ conversation, canDelete, isOpening, onOpen, onDelete }: AvatarHistoryItemProps) {
   const { t, i18n } = useTranslation('avatar');
   const title = conversationTitle(conversation) ?? t('history.general');
-  const date = formatDate(new Date(conversation.lastMessageAt), i18n.language, 'arabic-indic', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
+  const date = formatDateTime(conversation.lastMessageAt, i18n.language);
 
   return (
     <li className="flex items-start gap-2 rounded-md border border-border bg-surface p-3">

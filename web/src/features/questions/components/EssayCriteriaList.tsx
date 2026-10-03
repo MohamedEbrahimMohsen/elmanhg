@@ -18,8 +18,8 @@ export function EssayCriteriaList({ criteria }: EssayCriteriaListProps) {
             <p className="text-ui font-semibold text-text">{c.title}</p>
             <span dir="ltr" className="text-caption text-text">
               {t('essayGrade.criterionPoints', {
-                points: formatNumber(Number(c.points), lng, 'latin'),
-                maxPoints: formatNumber(Number(c.maxPoints), lng, 'latin'),
+                points: formatNumber(Number(c.points), lng),
+                maxPoints: formatNumber(Number(c.maxPoints), lng),
               })}
             </span>
           </div>

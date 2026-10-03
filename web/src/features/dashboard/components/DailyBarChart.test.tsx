@@ -10,12 +10,18 @@ const attempts = [
   { date: '2026-09-30', value: 2800 },
 ];
 
+const fortnight = Array.from({ length: 14 }, (_, index) => ({
+  date: `2026-09-${String(17 + index)}`,
+  value: index >= 12 ? 2600 + (index - 12) * 200 : 0,
+}));
+
 function renderChart(props: Partial<DailyBarChartProps> = {}, lng: 'en' | 'ar' = 'en') {
   return renderWithProviders(
     <DailyBarChart
       label="Attempts per day"
       points={attempts}
       formatValue={(value) => value.toLocaleString('en-US')}
+      formatTick={(value) => value.toLocaleString('en-US')}
       emptyText="No attempts in this period."
       {...props}
     />,
@@ -34,12 +40,19 @@ describe('DailyBarChart', () => {
     expect(within(table).getByRole('row', { name: 'Sep 30 2,800' })).toBeInTheDocument();
   });
 
-  it('labels the first day, the last day and the peak', () => {
+  it('labels the axis from the latest day back', () => {
+    renderChart({ points: fortnight });
+
+    expect(screen.getAllByText('Sep 30')).toHaveLength(2);
+    expect(screen.getAllByText('Sep 29')).toHaveLength(1);
+  });
+
+  it('shows the total, the peak and the scale', () => {
     renderChart();
 
-    expect(screen.getAllByText('Sep 29')).toHaveLength(2);
-    expect(screen.getAllByText('Sep 30')).toHaveLength(2);
-    expect(screen.getByText('Peak: 2,800')).toBeInTheDocument();
+    expect(screen.getByText('Total 5,400 · Peak 2,800')).toBeInTheDocument();
+    expect(screen.getByText('3,000')).toBeInTheDocument();
+    expect(screen.getByText('1,500')).toBeInTheDocument();
   });
 
   it('shows the empty text when every value is zero', () => {
@@ -55,12 +68,11 @@ describe('DailyBarChart', () => {
     expect(screen.getByText('Not filtered by subject')).toBeInTheDocument();
   });
 
-  it('formats days in Arabic', () => {
+  it('formats days in Arabic with Latin digits', () => {
     renderChart({}, 'ar');
 
     const table = screen.getByRole('table', { name: 'Attempts per day' });
     expect(within(table).getByText('29 سبتمبر')).toBeInTheDocument();
-    expect(screen.getAllByText('29 سبتمبر')).toHaveLength(2);
     expect(screen.getAllByText('30 سبتمبر')).toHaveLength(2);
   });
 

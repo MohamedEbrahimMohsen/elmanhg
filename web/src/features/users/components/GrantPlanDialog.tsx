@@ -10,6 +10,7 @@ import { FormRootError } from '@/shared/form/FormRootError';
 import { SubmitButton } from '@/shared/form/SubmitButton';
 import { Dialog, DialogContent } from '@/shared/ui/dialog';
 import { Label } from '@/shared/ui/label';
+import { Select } from '@/shared/ui/select';
 import { useGrantPlan } from '../hooks/useGrantPlan';
 import { grantPlanSchema, type GrantPlanValues } from '../schemas/grantPlanSchema';
 
@@ -41,7 +42,7 @@ function PeriodSelect({ prices }: { prices: PlanPriceResult[] }) {
   return (
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={id}>{t('grant.period')}</Label>
-      <select
+      <Select
         id={id}
         ref={ref}
         name={name}
@@ -49,14 +50,13 @@ function PeriodSelect({ prices }: { prices: PlanPriceResult[] }) {
         onChange={onChange}
         onBlur={onBlur}
         aria-invalid={fieldState.invalid}
-        className="h-11 w-full rounded-sm border border-border-strong bg-surface px-3 text-ui text-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
       >
         {prices.map((price) => (
           <option key={price.period} value={price.period}>
             {t(`grant.${price.period}`, { months: Number(price.months) })}
           </option>
         ))}
-      </select>
+      </Select>
       {fieldState.error ? (
         <p className="text-caption text-danger">
           {tCommon([fieldState.error.message ?? '', 'errors.UNHANDLED_EXCEPTION'])}

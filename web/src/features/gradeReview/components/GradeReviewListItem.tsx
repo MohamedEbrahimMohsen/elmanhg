@@ -1,7 +1,8 @@
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { formatPendingAge, stemExcerpt } from '@/features/questions';
+import { stemExcerpt } from '@/features/questions';
 import type { GradeReviewItemResult } from '@/shared/api/generated/model';
+import { formatRelativeTime } from '@/shared/lib/dateTime';
 import { formatNumber } from '@/shared/lib/format';
 import { kindSegments, toKind } from '../api/gradeReviewOptions';
 
@@ -19,14 +20,14 @@ export function GradeReviewListItem({ item, subjectId, now }: GradeReviewListIte
   const meta = [
     `${item.unitName} › ${item.lessonName}`,
     t(`reasons.${item.reviewReason}`, { defaultValue: item.reviewReason }),
-    t('queue.age', { age: formatPendingAge(item.requestedAt, now, lng) }),
+    t('queue.age', { age: formatRelativeTime(item.requestedAt, now, lng) }),
   ];
   const score =
     item.aiScore === null
       ? t('queue.noAiScore')
       : t('queue.aiScore', {
-          score: formatNumber(Number(item.aiScore), lng, 'latin'),
-          maxScore: formatNumber(Number(item.maxScore), lng, 'latin'),
+          score: formatNumber(Number(item.aiScore), lng),
+          maxScore: formatNumber(Number(item.maxScore), lng),
         });
 
   return (
@@ -46,7 +47,7 @@ export function GradeReviewListItem({ item, subjectId, now }: GradeReviewListIte
         {item.confidence === null ? null : (
           <span className="text-caption text-text-muted">
             {t('queue.confidence', {
-              percent: formatNumber(Math.round(Number(item.confidence) * 100), lng, 'latin'),
+              percent: formatNumber(Math.round(Number(item.confidence) * 100), lng),
             })}
           </span>
         )}

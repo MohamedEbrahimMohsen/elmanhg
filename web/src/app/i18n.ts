@@ -95,7 +95,7 @@ export function initI18n(lng: Language = defaultLanguage): void {
   }
 
   void i18n
-    .use(new ICU({ parseLngForICU: (code) => numberLocale(code, 'arabic-indic') }))
+    .use(new ICU({ parseLngForICU: numberLocale }))
     .use(initReactI18next)
     .init({
       lng,

@@ -35,7 +35,7 @@ export function QuestionImportReport({ preview, onConfirm, isConfirming }: Quest
       <h3 className="font-display text-h3 font-semibold">{t('import.report.types')}</h3>
       <ul className="flex flex-col gap-1 text-caption text-text">
         {preview.types.map(({ type, count }) => (
-          <li key={type}>{`${t(`types.${type}`)}: ${formatNumber(Number(count), lng, 'latin')}`}</li>
+          <li key={type}>{`${t(`types.${type}`)}: ${formatNumber(Number(count), lng)}`}</li>
         ))}
       </ul>
       {preview.errors.length > 0 ? (

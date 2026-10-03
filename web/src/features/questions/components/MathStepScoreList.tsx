@@ -26,8 +26,8 @@ export function MathStepScoreList({ steps }: MathStepScoreListProps) {
                 <p className="text-ui font-semibold text-text">{t('mathStepGrade.step', { number })}</p>
                 <span dir="ltr" className="text-caption text-text">
                   {t('mathStepGrade.stepPoints', {
-                    points: formatNumber(Number(step.points), lng, 'latin'),
-                    maxPoints: formatNumber(Number(step.maxPoints), lng, 'latin'),
+                    points: formatNumber(Number(step.points), lng),
+                    maxPoints: formatNumber(Number(step.maxPoints), lng),
                   })}
                 </span>
               </div>

@@ -29,7 +29,7 @@ export function MathStepGradeDetails({ mathSteps }: MathStepGradeDetailsProps) {
       </div>
       <p className="text-caption text-text-muted">
         {t('preview.essay.confidence', {
-          confidence: formatNumber(Math.round(Number(mathSteps.confidence) * percent), lng, 'latin'),
+          confidence: formatNumber(Math.round(Number(mathSteps.confidence) * percent), lng),
         })}
       </p>
       <p dir="ltr" className="text-caption text-text-muted">

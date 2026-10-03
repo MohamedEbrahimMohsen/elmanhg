@@ -1,7 +1,7 @@
 import { Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { AdminAvatarMessageResult } from '@/shared/api/generated/model';
-import { formatDate } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
 import { formatCostUsd, formatCount } from '../api/avatarConversationFormat';
 import { AvatarLoggedContext } from './AvatarLoggedContext';
 
@@ -14,7 +14,7 @@ const technicalClassName = 'font-mono text-mono';
 export function AvatarLoggedMessage({ message }: AvatarLoggedMessageProps) {
   const { t, i18n } = useTranslation('avatarConversations');
   const lng = i18n.resolvedLanguage ?? i18n.language;
-  const time = formatDate(new Date(message.createdAt), lng, 'latin', { timeStyle: 'short' });
+  const time = formatDateTime(message.createdAt, lng, 'time');
 
   if (message.role === 'Student') {
     return (

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { RuntimeSettingResult } from '@/shared/api/generated/model';
-import { formatDate } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
 import { Button } from '@/shared/ui/button';
 import { formatSettingValue, readSettingValue, settingDescription, settingLabel } from '../api/runtimeSettingValue';
 import { useRuntimeSettingMutations } from '../hooks/useRuntimeSettingMutations';
@@ -51,7 +51,7 @@ export function RuntimeSettingRow({ setting }: RuntimeSettingRowProps) {
       <p className="text-caption text-text-muted">{t('row.default', { value: defaultValue })}</p>
       {setting.updatedAt ? (
         <p className="text-caption text-text-muted">
-          {t('row.updatedAt', { date: formatDate(new Date(setting.updatedAt), lng, 'latin', { dateStyle: 'medium' }) })}
+          {t('row.updatedAt', { date: formatDateTime(setting.updatedAt, lng, 'date') })}
         </p>
       ) : null}
       {renderForm()}
