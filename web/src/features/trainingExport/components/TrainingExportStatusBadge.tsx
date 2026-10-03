@@ -8,8 +8,8 @@ export interface TrainingExportStatusBadgeProps {
 
 const statusClasses: Record<TrainingExportStatus, string> = {
   Pending: 'bg-soft text-text-muted',
-  Completed: 'bg-success text-surface',
-  Failed: 'bg-danger text-surface',
+  Completed: 'bg-success-soft text-success-text',
+  Failed: 'bg-danger-soft text-danger',
   Expired: 'bg-warning-soft text-text',
 };
 

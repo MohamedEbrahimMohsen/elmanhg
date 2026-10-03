@@ -39,8 +39,8 @@ export function RubricLevelsField({ criterionIndex }: RubricLevelsFieldProps) {
             </div>
             <Button
               variant="ghost"
-              size="sm"
-              className="mt-6"
+              size="icon"
+              className="mt-6.5"
               aria-label={t('editor.essay.removeLevel', { number, level })}
               disabled={fields.length <= rubricLevelsMin}
               onClick={() => {

@@ -31,8 +31,8 @@ export function FillBlanksField() {
           </div>
           <Button
             variant="ghost"
-            size="sm"
-            className="mt-6"
+            size="icon"
+            className="mt-6.5"
             aria-label={t('editor.blanks.remove', { number: index + 1 })}
             disabled={fields.length <= 1}
             onClick={() => {

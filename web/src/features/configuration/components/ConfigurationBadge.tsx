@@ -9,7 +9,7 @@ export interface ConfigurationBadgeProps {
 }
 
 const toneClasses: Record<ConfigurationBadgeTone, string> = {
-  ok: 'bg-success text-surface',
+  ok: 'bg-success-soft text-success-text',
   accent: 'bg-accent-soft text-accent',
   warning: 'bg-warning-soft text-warning',
   neutral: 'bg-soft text-text-muted',

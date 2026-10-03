@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/shared/ui/button';
+import { pillTabClassName } from '@/shared/ui/pillTab';
 
 export type SignInMethod = 'phone' | 'email';
 
@@ -21,17 +21,17 @@ export function MethodSwitch({ value, onChange }: MethodSwitchProps) {
       {methods.map(({ method, labelKey }) => {
         const active = method === value;
         return (
-          <Button
+          <button
             key={method}
             type="button"
-            variant={active ? 'primary' : 'secondary'}
             aria-pressed={active}
+            className={pillTabClassName}
             onClick={() => {
               onChange(method);
             }}
           >
             {t(labelKey)}
-          </Button>
+          </button>
         );
       })}
     </div>

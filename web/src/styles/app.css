@@ -1,6 +1,9 @@
 @import 'tailwindcss';
 @import './tokens.css';
 
+@source not '../../scripts';
+@source not '../**/*.test.{ts,tsx}';
+
 @theme {
   --color-*: initial;
   --shadow-*: initial;
@@ -19,8 +22,11 @@
   --color-border-strong: var(--ds-color-border-strong);
   --color-accent: var(--ds-color-accent);
   --color-accent-soft: var(--ds-color-accent-soft);
+  --color-accent-hover: var(--ds-color-accent-hover);
+  --color-accent-pressed: var(--ds-color-accent-pressed);
   --color-success: var(--ds-color-success);
   --color-success-soft: var(--ds-color-success-soft);
+  --color-success-text: var(--ds-color-success-text);
   --color-danger: var(--ds-color-danger);
   --color-danger-soft: var(--ds-color-danger-soft);
   --color-warning: var(--ds-color-warning);
@@ -52,6 +58,7 @@
 
   --spacing: var(--ds-space-1);
   --container-layout: var(--ds-layout-max);
+  --container-auth: var(--ds-layout-auth-max);
 
   --text-display: var(--ds-type-display-size);
   --text-display--line-height: var(--ds-type-display-line);
@@ -90,7 +97,7 @@
   --radius: var(--ds-radius-md);
   --background: var(--ds-color-bg);
   --foreground: var(--ds-color-text);
-  --primary: var(--ds-color-text);
+  --primary: var(--ds-color-accent);
   --primary-foreground: var(--ds-color-surface);
   --ring: var(--ds-color-accent);
   --destructive: var(--ds-color-danger);
@@ -105,9 +112,21 @@
   background-image: var(--ds-gradient-aurora);
 }
 
+@utility pb-safe-area {
+  padding-block-end: env(safe-area-inset-bottom);
+}
+
+@utility bottom-above-tab-bar {
+  inset-block-end: calc(var(--ds-layout-bar) + var(--ds-space-2) + env(safe-area-inset-bottom));
+}
+
 @layer base {
   html {
-    scroll-padding-top: calc(var(--ds-space-12) * 2);
+    scroll-padding-top: calc(var(--ds-layout-bar) + var(--ds-space-2));
+  }
+
+  th {
+    text-align: start;
   }
 
   body {

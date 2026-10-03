@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
+import { pillTabClassName } from '@/shared/ui/pillTab';
 import { lessonTabs } from '../api/lessonTabs';
 
 export interface LessonTabsProps {
@@ -14,14 +15,7 @@ export function LessonTabs({ lessonId }: LessonTabsProps) {
       <ul className="flex flex-wrap gap-2">
         {lessonTabs.map((tab) => (
           <li key={tab.key}>
-            <Link
-              to={tab.to}
-              params={{ lessonId }}
-              activeOptions={{ exact: true }}
-              activeProps={{ className: 'border-text bg-text text-surface' }}
-              inactiveProps={{ className: 'border-border-strong bg-surface text-text hover:bg-soft' }}
-              className="inline-flex min-h-11 items-center rounded-pill border px-3.5 text-micro font-semibold focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
-            >
+            <Link to={tab.to} params={{ lessonId }} activeOptions={{ exact: true }} className={pillTabClassName}>
               {t(`lesson.tabs.${tab.key}`)}
             </Link>
           </li>

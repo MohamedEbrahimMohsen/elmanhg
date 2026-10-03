@@ -28,7 +28,7 @@ export function ChoiceOptionRow({ index, multiple, groupName, canRemove, onRemov
         <input
           type="checkbox"
           aria-label={t('editor.options.correct', { number: position })}
-          className="mt-3 size-4.5 accent-text"
+          className="mt-2.5 size-6 accent-accent"
           {...register(correctName)}
         />
       ) : (
@@ -44,7 +44,7 @@ export function ChoiceOptionRow({ index, multiple, groupName, canRemove, onRemov
               });
             });
           }}
-          className="mt-3 size-4.5 accent-text"
+          className="mt-2.5 size-6 accent-accent"
         />
       )}
       <div className="min-w-0 flex-1">

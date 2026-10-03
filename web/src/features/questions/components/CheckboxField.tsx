@@ -21,7 +21,7 @@ export function CheckboxField<TValues extends FieldValues>({ name, label }: Chec
           onChange(event.target.checked);
         }}
         onBlur={onBlur}
-        className="size-4.5 accent-text"
+        className="size-4.5 accent-accent"
       />
       {label}
     </label>

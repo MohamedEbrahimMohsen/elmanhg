@@ -29,8 +29,8 @@ export function ModelAnswersField() {
             </div>
             <Button
               variant="ghost"
-              size="sm"
-              className="mt-6"
+              size="icon"
+              className="mt-6.5"
               aria-label={t('editor.essay.removeModelAnswer', { number })}
               disabled={fields.length <= 1}
               onClick={() => {

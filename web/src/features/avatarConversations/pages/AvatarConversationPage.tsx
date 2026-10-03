@@ -61,7 +61,7 @@ export function AvatarConversationPage({ conversationId }: AvatarConversationPag
     <section className="flex flex-col gap-4">
       <Link
         to="/admin/avatar-conversations"
-        className="flex w-fit items-center gap-1 rounded-sm text-caption text-accent underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+        className="flex min-h-11 w-fit items-center gap-1 rounded-sm text-caption text-accent underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
       >
         <ChevronLeft aria-hidden className="size-4 rtl:rotate-180" />
         {t('detail.back')}

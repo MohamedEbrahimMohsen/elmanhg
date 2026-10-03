@@ -20,7 +20,7 @@ export function MultiExamSizePicker({ sizes, value, onChange }: MultiExamSizePic
             <input
               type="radio"
               name={name}
-              className="size-5 accent-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+              className="size-5 accent-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
               checked={size === value}
               onChange={() => {
                 onChange(size);

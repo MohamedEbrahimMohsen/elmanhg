@@ -41,7 +41,7 @@ export function BooleanSettingForm({ setting, mutations }: BooleanSettingFormPro
         <input
           id={id}
           type="checkbox"
-          className="size-6 accent-text"
+          className="size-6 accent-accent"
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
           {...form.register('value')}
@@ -50,7 +50,7 @@ export function BooleanSettingForm({ setting, mutations }: BooleanSettingFormPro
           {t('row.enabled')}
         </label>
       </div>
-      <Button type="submit" size="sm" disabled={mutations.isPending || form.formState.isSubmitting}>
+      <Button type="submit" disabled={mutations.isPending || form.formState.isSubmitting}>
         {t('row.save')}
       </Button>
       {error ? (

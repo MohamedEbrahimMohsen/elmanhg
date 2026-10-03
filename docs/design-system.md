@@ -2,16 +2,16 @@
 
 | | |
 |---|---|
-| Version | 1.0 |
-| Date | 2026-09-26 |
-| Decision | Glass direction for the whole app. Aurora gradient allowed only on the landing hero and the subscribe screen. |
+| Version | 2.0 |
+| Date | 2026-10-03 |
+| Decision | Glass direction for the whole app. Aurora gradient allowed only on the landing hero and the subscribe screen. Indigo calm palette (#276). |
 | Mode | Light only. No dark theme. |
 | Reference canvas | https://claude.ai/artifact/VHfyt2bTbtQJnA9Fg6Snpp (board 4, Glass) |
 
 ## 1. Principles
 
 1. **Low glare.** The page ground is light grey, never pure white. White is reserved for cards, so contrast lands where reading happens.
-2. **One colour per job.** Blue means "action or link". Green means "correct or mastered". Red means "wrong or overdue". Nothing else is coloured.
+2. **One colour per job.** Indigo means action, link or where you are. Green means "correct or mastered". Red means "wrong or overdue". Amber means partial or pending. Nothing else is coloured. Near-black is text, never a fill.
 3. **Content is the hero.** Lesson text, equations and diagrams sit on white with no tint. Chrome stays grey.
 4. **Calm surfaces.** Depth comes from soft shadows and hairline borders, not from colour blocks.
 5. **Touch first.** Every control is at least 44 px tall. Phone width (375 px) is the primary layout.
@@ -22,49 +22,66 @@
 
 | Token | Value | Use |
 |---|---|---|
-| `--bg` | `#F5F5F7` | Page background |
-| `--surface` | `#FFFFFF` | Cards, sheets, inputs, app bar |
-| `--soft` | `#EDEDF0` | Selected option fill, muted chips, progress track |
-| `--text` | `#1D1D1F` | Primary text, primary buttons |
-| `--text-2` | `#6E6E73` | Secondary text, labels, captions |
-| `--border` | `rgba(0,0,0,.06)` | Hairline borders on cards |
-| `--border-strong` | `rgba(0,0,0,.14)` | Inputs, selected option outline |
+| `--bg` | `#F4F5FB` | Page background |
+| `--surface` | `#FFFFFF` | Cards, sheets, inputs, app bar, tab bar |
+| `--soft` | `#E5E7FB` | Muted chips, pending badge, progress track, skeletons, secondary hover, user bubbles |
+| `--text` | `#1E1B4B` | Primary text. Never a button, tab or badge fill |
+| `--text-2` | `#5F5D7A` | Secondary text, labels, captions, inactive nav |
+| `--border` | `rgba(30,27,75,.08)` | Hairline borders on cards, app bar, tab bar, table rows |
+| `--border-strong` | `rgba(30,27,75,.18)` | Inputs, option outlines, secondary buttons, inactive pill tabs |
 
 ### 2.2 Semantic
 
 | Token | Value | Use |
 |---|---|---|
-| `--accent` | `#0071E3` | Links, focus ring, progress fill, "Ask a teacher", tab active |
-| `--accent-soft` | `#E8F1FC` | Accent chip background |
-| `--ok` | `#34A853` | Correct, mastered, approved, SLA met |
-| `--ok-soft` | `#E9F6EC` | Correct feedback background |
-| `--bad` | `#E5484D` | Wrong, rejected, SLA breached, destructive |
-| `--bad-soft` | `#FDECEC` | Wrong feedback background |
-| `--warn` | `#B7791F` | Partial credit, pending review |
-| `--warn-soft` | `#FFF6E5` | Partial feedback background |
+| `--accent` | `#4F46E5` | Primary button fill, links, focus ring, progress fill, active nav/tab text, selected option border, checkbox colour, logo |
+| `--accent-hover` | `#4338CA` | Hover on accent fills |
+| `--accent-pressed` | `#3730A3` | Pressed on accent fills |
+| `--accent-soft` | `#EEF0FF` | Active nav item and pill tab fill, selected option fill, accent chips, toggled secondary button |
+| `--ok` | `#16A34A` | Non-text only: borders, icons on white, pass progress fill, diagram key stroke |
+| `--ok-text` | `#166534` | Success text, ok badge text, verdict icon on `--ok-soft` |
+| `--ok-soft` | `#DFF3E5` | Correct feedback background, ok badge fill |
+| `--bad` | `#C8233A` | Wrong, rejected, SLA breached, destructive: text, border, fill |
+| `--bad-soft` | `#FDECEE` | Wrong feedback background, bad badge fill |
+| `--warn` | `#B45309` | Partial credit, pending review |
+| `--warn-soft` | `#FEF3E2` | Partial feedback background |
 | `--v2` | `#6A3FB5` | "v2" badge only (internal) |
 
 ### 2.3 Landing gradient (marketing surfaces only)
 
 | Token | Value |
 |---|---|
-| `--aurora` | `linear-gradient(135deg, #7C5CFF 0%, #C86DD7 50%, #FFB07A 100%)` |
+| `--aurora` | `linear-gradient(135deg, #4338CA 0%, #6D28D9 55%, #A21CAF 100%)` |
 
-Allowed on: landing page hero background, subscribe screen header, marketing emails. Never inside lesson, quiz, exam, teacher or admin screens.
+Allowed on: landing page hero background, subscribe screen header, marketing emails. Never inside lesson, quiz, exam, teacher or admin screens. Text on the aurora is plain white (at least 6.32:1 on every stop); the hero button is the white Secondary pill.
 
 ### 2.4 Contrast (verified)
 
-| Pair | Ratio | Passes |
-|---|---|---|
-| `--text` on `--surface` | 16.1:1 | AAA |
-| `--text` on `--bg` | 14.6:1 | AAA |
-| `--text-2` on `--surface` | 5.2:1 | AA |
-| `--text-2` on `--bg` | 4.7:1 | AA |
-| White on `--accent` | 4.6:1 | AA |
-| White on `--ok` | 3.3:1 | AA large only. Use `--ok` as text on `--ok-soft` for small text (5.1:1). |
-| White on `--bad` | 3.9:1 | AA large only. Same rule as `--ok`. |
+Computed with the WCAG 2.x formula. `web/scripts/tokens/contrast.test.ts` re-checks these over the generated tokens.
 
-Rule: green and red are used as text on their soft backgrounds for body sizes, and as fills only for badges 12 px bold or larger.
+| Foreground | Background | Ratio | Need | Use |
+|---|---|---|---|---|
+| `--text` | `--surface` | 15.99 | 4.5 | Body |
+| `--text` | `--bg` | 14.69 | 4.5 | Page text |
+| `--text` | `--soft` | 13.06 | 4.5 | Pending badge, bubbles |
+| `--text` | `--accent-soft` | 14.12 | 4.5 | — |
+| `--text` | `--ok-soft` / `--bad-soft` / `--warn-soft` | 13.77 / 14.01 / 14.57 | 4.5 | Feedback panels |
+| `--text-2` | `--surface` / `--bg` / `--soft` | 6.30 / 5.79 / 5.15 | 4.5 | Captions, inactive nav |
+| `--text-2` | `--accent-soft` / `--ok-soft` / `--bad-soft` / `--warn-soft` | 5.56 / 5.43 / 5.52 / 5.74 | 4.5 | Captions in panels |
+| White | `--accent` / `--accent-hover` / `--accent-pressed` | 6.29 / 7.90 / 9.93 | 4.5 | Primary button states |
+| White | `--bad` | 5.59 | 4.5 | — |
+| `--accent` | `--surface` / `--bg` / `--soft` / `--accent-soft` | 6.29 / 5.78 / 5.14 / 5.55 | 4.5 | Links, active nav pill, chips, ghost |
+| `--ok-text` | `--surface` / `--ok-soft` | 7.13 / 6.14 | 4.5 | Ok text, ok badge, verdict icon |
+| `--bad` | `--surface` / `--bg` / `--bad-soft` | 5.59 / 5.14 / 4.90 | 4.5 | Error text, bad badge |
+| `--warn` | `--surface` / `--bg` / `--warn-soft` | 5.02 / 4.62 / 4.58 | 4.5 | Partial, pending |
+| `--v2` | `--surface` | 7.02 | 4.5 | v2 badge |
+| White | aurora stops `#4338CA` / `#6D28D9` / `#A21CAF` | 7.90 / 7.10 / 6.32 | 4.5 | Hero and subscribe header |
+| `--accent` (focus ring, active pill border) | `--surface` / `--bg` | 6.29 / 5.78 | 3 | UI |
+| `--ok` (non-text) | `--surface` / `--bg` | 3.30 / 3.03 | 3 | Borders, icons, pass fill |
+| `--ok` | `--ok-soft` | 2.84 | — | **Never** text or the sole indicator |
+| `--border-strong` | `--surface` | ≈1.44 | — | Decorative field boundary, not a text pair |
+
+Rule: status text uses `--ok-text`, `--bad` or `--warn` on white or its soft background. `--ok` itself is never text. Badges are soft fills; no white text on green.
 
 ## 3. Typography
 
@@ -105,12 +122,14 @@ Arabic-Indic digits (٠١٢٣) in student-facing UI. ASCII digits in admin table
 | Page gutter | 16 px mobile, 24 px desktop |
 | Card padding | 16 px mobile, 20 px desktop |
 | Content max width | 1040 px |
+| App bar / tab bar height | 56 px |
+| Auth column max | 440 px |
 | `--r-sm` | 10 px (inputs, chips) |
 | `--r-md` | 14 px (options, list items) |
 | `--r-lg` | 18 px (cards) |
 | `--r-pill` | 999 px (buttons, badges) |
-| `--shadow-1` | `0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06)` cards |
-| `--shadow-2` | `0 4px 12px rgba(0,0,0,.08), 0 24px 48px rgba(0,0,0,.10)` sheets, dialogs |
+| `--shadow-1` | `0 1px 2px rgba(30,27,75,.05), 0 8px 24px rgba(79,70,229,.08)` cards |
+| `--shadow-2` | `0 4px 12px rgba(30,27,75,.08), 0 24px 48px rgba(79,70,229,.14)` sheets, dialogs, nav menu |
 
 ## 5. Components
 
@@ -118,13 +137,13 @@ Arabic-Indic digits (٠١٢٣) in student-facing UI. ASCII digits in admin table
 
 | Variant | Fill | Text | Border | Use |
 |---|---|---|---|---|
-| Primary | `--text` | white | none | One per screen: start quiz, submit, check |
-| Accent | `--accent` | white | none | Subscribe, Ask a teacher |
-| Secondary | `--surface` | `--text` | `--border-strong` | Everything else |
+| Primary | `--accent` (hover `--accent-hover`, pressed `--accent-pressed`) | white | none | One per screen: start quiz, submit, check |
+| Accent | same as Primary since 2.0 | white | none | Subscribe, Ask a teacher |
+| Secondary | `--surface` (hover and pressed `--soft`; toggled on `--accent-soft`) | `--text` (toggled `--accent`) | `--border-strong` (toggled `--accent`) | Everything else |
 | Danger | `--surface` | `--bad` | `--bad` | Reject, delete, cancel subscription |
 | Ghost | none | `--accent` | none | Inline actions in tables |
 
-All pill-shaped, 44 px min height (36 px for `sm` in dense admin tables), 15 px 600 weight. Disabled: 45 percent opacity. Focus: 2 px `--accent` ring offset 2 px.
+All pill-shaped, 44 px min height (36 px for `sm` in dense admin tables), 15 px 600 weight. Size `icon` is 44 × 44 for icon-only buttons beside fields (offset under the field label so it centres on the field). Disabled: 45 percent opacity. Focus: 2 px `--accent` ring offset 2 px.
 
 ### 5.2 Cards
 
@@ -132,22 +151,22 @@ White, `--r-lg`, hairline border, `--shadow-1`. No coloured left borders. A card
 
 ### 5.3 Quiz option
 
-Full-width label, `--r-md`, 48 px min height, 15 px text.
+Full-width label, `--r-md`, 48 px min height, 15 px text. The radio or checkbox uses `accent-color: var(--accent)`.
 
 | State | Fill | Border |
 |---|---|---|
 | Default | `--surface` | `--border-strong` |
-| Selected | `--soft` | `--text` |
+| Selected | `--accent-soft` | `--accent` |
 | Correct (after check) | `--ok-soft` | `--ok` |
 | Wrong (after check) | `--bad-soft` | `--bad` |
 
 ### 5.4 Feedback panel
 
-Appears under the question after checking. Icon circle 26 px filled with `--ok` or `--bad`, bold verdict, explanation in `--text-2`. Background uses the matching soft colour, border the matching strong colour.
+Appears under the question after checking. Icon circle 26 px in `--ok-text` or `--bad`, bold verdict, explanation in `--text-2`. Background uses the matching soft colour, border the matching strong colour.
 
 ### 5.5 Badges
 
-Pill, 12 px 600. `ok` = `--ok` fill white text. `bad` = `--bad` fill. `pending` = `--soft` fill `--text-2` text. `role` = `--text` fill. `v2` = `--v2` outline.
+Pill, 12 px 600. `ok` = `--ok-soft` fill, `--ok-text` text. `bad` = `--bad-soft` fill, `--bad` text. `pending`/neutral = `--soft` fill, `--text-2` text. `role` = `--soft` fill, `--text` text. `v2` = `--v2` outline.
 
 ### 5.6 Progress
 
@@ -155,7 +174,15 @@ Track `--soft`, fill `--accent` (mastery) or `--ok` (exam pass). Height 6 px, fu
 
 ### 5.7 Navigation
 
-Mobile: bottom tab bar, at most 4 items, icons 22 px stroke 1.8, active in `--text` 600, inactive `--text-2`. A role with more than 3 destinations shows its 3 primary destinations plus a fourth item "المزيد" that opens a list of the rest. Desktop (≥ 900 px): top bar with every destination as text tabs, active underlined 2 px `--accent`.
+App bar: one row, 56 px tall, sticky, white with a bottom hairline, inside the same 1040 px container as the page, so the logo lines up with the page title. Order: logo (`--accent`, links home) · nav · role badge · display name · sign-out. Below 900 px the nav moves to the tab bar. From 900 px the nav sits inline; between 900 and 1199 px the display name is hidden and sign-out shows its icon only (it keeps its accessible name); from 1200 px both show. Below 900 px sign-out is 44 px tall like every touch control; from 900 px it is the 36 px `sm` size.
+
+Top nav (desktop ≥ 900 px): pills 36 px tall (with the 36 px sign-out, the only exception to principle 5: both exist at this size only in the pointer layout, and below 900 px navigation is the tab bar, whose items are taller than 44 px); inactive `--text-2`, hover `--bg` fill with `--text`, active `--accent-soft` fill with `--accent` 600. Each role has a fixed top-bar list: student all 5, teacher all 4, admin dashboard, content, questions and users. The admin's other destinations sit in an «المزيد» disclosure menu at the end of the nav: white, hairline border, `--shadow-2`, `--r-md`, items at least 44 px, closes on Esc, outside click, keyboard focus leaving the menu, or choosing an item.
+
+Mobile tab bar: at most 4 items, icons 22 px stroke 1.8, active `--accent` 600 with the icon on an `--accent-soft` pill, inactive `--text-2`. A role with more than 3 destinations shows its 3 primary destinations plus a fourth item "المزيد" that opens a list of the rest. Bottom padding follows the device safe area (iOS home indicator).
+
+Brand bar: the same app bar with only the logo (and an optional end slot, such as the landing page's sign-in button) on the landing page, login, sign-up, accept-invite and onboarding. The auth forms sit in a centred column at most 440 px wide under it.
+
+Pill tabs (filters, sub-tabs, segmented toggles): inactive white with `--border-strong`, hover `--soft`, active `--accent-soft` fill with `--accent` border and text.
 
 ### 5.8 Inputs
 
@@ -167,11 +194,11 @@ White card, no vertical rules, row separator hairline, header `caption` weight 6
 
 ### 5.10 Avatar panel
 
-Slide-in sheet from the start edge, `--surface`, `--shadow-2`, `--r-lg` on the outer corners. Student bubbles `--soft`; assistant bubbles white with hairline border. A small sparkle icon in `--accent` marks the assistant.
+Slide-in sheet from the start edge, `--surface`, `--shadow-2`, `--r-lg` on the outer corners. Student bubbles `--soft`; assistant bubbles white with hairline border. A small sparkle icon in `--accent` marks the assistant. The floating assistant button is an `--accent` pill with a white label.
 
 ### 5.11 Dialogs
 
-Centered, max 420 px, `--r-lg`, `--shadow-2`, overlay `rgba(29,29,31,.35)`.
+Centered, max 420 px, `--r-lg`, `--shadow-2`, overlay `rgba(30,27,75,.40)`. The overlay and dialog stack above the app bar and tab bar.
 
 ### 5.12 Math input
 
@@ -181,14 +208,14 @@ The math-with-steps answer ([math-input.md](math-input.md)). Each LaTeX field is
 
 The drag-and-drop diagram ([question-schemas.md](question-schemas.md)). The image scales to the card width with its aspect ratio reserved. Zones are rectangles with a 2 px non-scaling stroke, and each zone has a number badge (white circle, text colour) at its top-left. Edit mode uses an Accent stroke with a 15 % Accent fill; student mode uses a muted dashed stroke on a 60 % white fill; answer-key mode uses a Success stroke with a 20 % Success fill. A zone being drawn is dashed Accent. The canvas is never mirrored in RTL: image coordinates are physical. Items are pill chips: white, `--border-strong`.
 
-Student answer mode: zones are buttons. An empty zone has a muted dashed stroke on a 60 % white fill; a zone holding items has a solid text-colour stroke; the drop target (dragged over, or focused while an item is chosen) has an Accent stroke with a 15 % Accent fill. Each zone shows its number badge and, when it holds items, a `count/capacity` pill. A zone list under the image (white cards, `--r-md`, hairline border) holds each zone's chips, with ghost icon buttons of at least 44 px (earlier, later, return to the bank) and «ضعه هنا» (secondary, small) while an item is chosen. Chips are pills of at least 44 px, white with `--border-strong`; a chosen chip has the soft fill and a text-colour border; the chip being dragged follows the pointer with `--shadow-2`. After checking, a correct item has the Success soft fill, a Success border and a check icon; a wrong or unplaced item has the Danger soft fill, a Danger border and an x icon, each with its text for screen readers. The correct placements reuse answer-key mode.
+Student answer mode: zones are buttons. An empty zone has a muted dashed stroke on a 60 % white fill; a zone holding items has a solid text-colour stroke; the drop target (dragged over, or focused while an item is chosen) has an Accent stroke with a 15 % Accent fill. Each zone shows its number badge and, when it holds items, a `count/capacity` pill (`--accent` fill). A zone list under the image (white cards, `--r-md`, hairline border) holds each zone's chips, with ghost icon buttons of at least 44 px (earlier, later, return to the bank) and «ضعه هنا» (secondary, small) while an item is chosen. Chips are pills of at least 44 px, white with `--border-strong`; a chosen chip has the `--accent-soft` fill and an `--accent` border; the chip being dragged follows the pointer with `--shadow-2`. After checking, a correct item has the Success soft fill, a Success border and a check icon; a wrong or unplaced item has the Danger soft fill, a Danger border and an x icon, each with its text for screen readers. The correct placements reuse answer-key mode.
 
 ## 6. Layout and RTL
 
 - `dir="rtl"` on `html`. Logical properties only (`margin-inline-start`, `padding-inline`), never left/right.
 - Icons that imply direction (back, next) are mirrored in RTL.
 - LaTeX, code, URLs and phone numbers are wrapped in `direction: ltr; unicode-bidi: isolate`.
-- Breakpoints: 700 px (tablet grid), 900 px (admin two-column editor).
+- Breakpoints: 700 px (tablet grid), 900 px (admin two-column editor, nav moves into the app bar), 1200 px (app bar shows the display name and sign-out label).
 
 ## 7. Motion
 
@@ -212,5 +239,5 @@ Stroke icons, 1.8 px, round caps, 22 px in navigation and 16 px inline. Lucide s
 ## 10. Implementation notes
 
 - Tailwind CSS v4, CSS-first: `web/src/styles/tokens.css` is generated from `.claude/design-system.md` by `npm run gen:tokens` (never hand-edited) and mapped to utilities with `@theme inline` in `web/src/styles/app.css`. There is no `tailwind.config.*`.
-- shadcn/ui: override `--radius` to 14 px and the primary/accent CSS variables. Replace default Inter with the two fonts.
+- shadcn/ui: override `--radius` to 14 px; `--primary` maps to the accent (`--accent`). Replace default Inter with the two fonts.
 - The prototype in `prototype/` remains the reference for screen content and flow.

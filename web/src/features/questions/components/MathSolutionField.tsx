@@ -32,8 +32,8 @@ export function MathSolutionField() {
               </div>
               <Button
                 variant="ghost"
-                size="sm"
-                className="mt-6"
+                size="icon"
+                className="mt-6.5"
                 aria-label={t('editor.math.removeSolutionStep', { number })}
                 onClick={() => {
                   remove(index);

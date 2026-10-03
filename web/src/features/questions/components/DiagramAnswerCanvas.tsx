@@ -73,7 +73,7 @@ export function DiagramAnswerCanvas({
               {index + 1}
             </span>
             {count > 0 ? (
-              <span className="absolute end-1 bottom-1 rounded-full bg-text px-1.5 text-micro font-semibold text-surface">
+              <span className="absolute end-1 bottom-1 rounded-full bg-accent px-1.5 text-micro font-semibold text-surface">
                 {t('zoneFill', { count, capacity: zone.capacity })}
               </span>
             ) : null}

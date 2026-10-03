@@ -137,4 +137,34 @@ describe('AppShell', () => {
     await screen.findByRole('navigation', { name: 'Main navigation' });
     expect(screen.queryByRole('button', { name: 'Assistant' })).not.toBeInTheDocument();
   });
+
+  it('places the logo, main navigation and sign-out in one header row', async () => {
+    renderApp('/student', { session: testSessions.student });
+
+    const banner = await screen.findByRole('banner');
+    const row = within(banner).getByRole('link', { name: 'Elmanhg' }).parentElement;
+
+    // layout guard (story 276): the desktop header is a single row
+    expect(banner.children).toHaveLength(1);
+    expect(row).toBe(banner.firstElementChild);
+    expect(row).toContainElement(within(banner).getByRole('navigation', { name: 'Main navigation' }));
+    expect(row).toContainElement(within(banner).getByRole('button', { name: 'Sign out' }));
+  });
+
+  it('shows four admin destinations and a More menu in the top bar', async () => {
+    renderApp('/admin', { session: testSessions.admin });
+
+    const nav = await screen.findByRole('navigation', { name: 'Main navigation' });
+
+    expect(linkNames(nav)).toEqual(['Dashboard', 'Content', 'Questions', 'Users']);
+    expect(await within(nav).findByRole('button', { name: 'More' })).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('does not show a More menu to students', async () => {
+    renderApp('/student', { session: testSessions.student });
+
+    const nav = await screen.findByRole('navigation', { name: 'Main navigation' });
+
+    expect(within(nav).queryByRole('button', { name: 'More' })).toBeNull();
+  });
 });

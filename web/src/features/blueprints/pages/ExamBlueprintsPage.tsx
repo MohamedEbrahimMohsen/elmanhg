@@ -39,7 +39,7 @@ export function ExamBlueprintsPage() {
   };
 
   return (
-    <section className="flex flex-col gap-3">
+    <section className="flex flex-col gap-4">
       <h1 className="font-display text-h1 font-bold lg:text-h1-desktop">{t('page.title')}</h1>
       <p className="text-caption text-text-muted">{t('page.intro')}</p>
       {renderBody()}

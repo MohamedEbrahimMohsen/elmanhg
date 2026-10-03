@@ -12,7 +12,7 @@ export function MorePage({ role }: MorePageProps) {
   const { t } = useTranslation('shell');
 
   return (
-    <section className="flex flex-col gap-3">
+    <section className="flex flex-col gap-4">
       <h1 className="font-display text-h1 font-bold lg:text-h1-desktop">{t('more.title')}</h1>
       <ul className="flex flex-col gap-2">
         {overflowItems(role, navByRole[role]).map(({ key, to, labelKey, icon: Icon }) => (

@@ -1,14 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import { cn } from '@/shared/lib/utils';
+import { pillTabClassName } from '@/shared/ui/pillTab';
 import { userListTabs, type UserListTab } from '../schemas/usersSearchSchema';
 
 export interface UserRoleTabsProps {
   value: UserListTab;
   onChange: (tab: UserListTab) => void;
 }
-
-const tabClassName =
-  'inline-flex min-h-11 items-center rounded-pill border px-4 text-ui font-semibold focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden';
 
 export function UserRoleTabs({ value, onChange }: UserRoleTabsProps) {
   const { t } = useTranslation('users');
@@ -24,12 +21,7 @@ export function UserRoleTabs({ value, onChange }: UserRoleTabsProps) {
           onClick={() => {
             onChange(tab);
           }}
-          className={cn(
-            tabClassName,
-            value === tab
-              ? 'border-text bg-text text-surface'
-              : 'border-border-strong bg-surface text-text hover:bg-soft',
-          )}
+          className={pillTabClassName}
         >
           {t(`tabs.${tab}`)}
         </button>

@@ -29,7 +29,7 @@ export function TeacherSubjectsCell({ teacherId, teacherName, subjectIds }: Teac
             onChange={(event) => {
               toggle(teacherId, subject.id, event.target.checked);
             }}
-            className="size-4 accent-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+            className="size-4 accent-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
           />
           {subject.name}
         </label>

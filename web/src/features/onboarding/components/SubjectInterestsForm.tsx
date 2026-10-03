@@ -36,13 +36,13 @@ export function SubjectInterestsForm({ interests }: SubjectInterestsFormProps) {
           {interests.subjects.map((subject) => (
             <label
               key={subject.subjectId}
-              className="flex min-h-12 items-center gap-3 rounded-md border border-border-strong bg-surface px-3.5 py-3 text-ui has-checked:border-text has-checked:bg-soft"
+              className="flex min-h-12 items-center gap-3 rounded-md border border-border-strong bg-surface px-3.5 py-3 text-ui has-checked:border-accent has-checked:bg-accent-soft"
             >
               <input
                 type="checkbox"
                 value={subject.subjectId}
                 {...form.register('subjectIds')}
-                className="size-5 accent-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+                className="size-5 accent-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
               />
               {subject.name}
             </label>

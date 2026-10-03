@@ -52,8 +52,8 @@ export function DiagramItemRow({ index, itemId, zones, onAssign, onRemove, canRe
       </div>
       <Button
         variant="ghost"
-        size="sm"
-        className="mt-6"
+        size="icon"
+        className="mt-6.5"
         aria-label={t('editor.dragDrop.removeItem', { number })}
         disabled={!canRemove}
         onClick={onRemove}

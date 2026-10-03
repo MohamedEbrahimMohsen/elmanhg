@@ -1,7 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { ContentErrorState, ContentListSkeleton } from '@/features/content';
 import { useGetSubjectInterests } from '@/shared/api/generated/students/students';
+import { BrandBar } from '@/shared/components/BrandBar';
+import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/button';
+import { layoutContainerClassName } from '@/shared/ui/layout';
 import { SubjectInterestsForm } from '../components/SubjectInterestsForm';
 import { useSubjectInterestsSave } from '../hooks/useSubjectInterestsSave';
 
@@ -38,10 +41,13 @@ export function OnboardingPage() {
   };
 
   return (
-    <main id="main" className="mx-auto flex min-h-dvh max-w-layout flex-col gap-4 px-4 py-6 lg:px-6">
-      <h1 className="font-display text-h1 font-bold lg:text-h1-desktop">{t('page.title')}</h1>
-      <p className="text-ui text-text-muted">{t('page.intro')}</p>
-      {content()}
-    </main>
+    <>
+      <BrandBar />
+      <main id="main" className={cn(layoutContainerClassName, 'flex flex-col gap-4 py-6')}>
+        <h1 className="font-display text-h1 font-bold lg:text-h1-desktop">{t('page.title')}</h1>
+        <p className="text-ui text-text-muted">{t('page.intro')}</p>
+        {content()}
+      </main>
+    </>
   );
 }

@@ -19,7 +19,7 @@ export function TabBar({ role }: TabBarProps) {
   return (
     <nav
       aria-label={t('nav.tabBar')}
-      className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-surface lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-surface pb-safe-area lg:hidden"
     >
       <ul className="flex">
         {items.map(({ key, to, labelKey, icon: Icon }) => (
@@ -27,10 +27,15 @@ export function TabBar({ role }: TabBarProps) {
             <Link
               to={to}
               activeOptions={{ exact: to === roleHome[role] }}
-              className="flex min-h-14 flex-col items-center justify-center gap-1 text-micro text-text-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden data-[status=active]:font-semibold data-[status=active]:text-text"
+              className="group flex min-h-14 flex-col items-center justify-center gap-0.5 text-micro text-text-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden data-[status=active]:font-semibold data-[status=active]:text-accent"
             >
-              <Icon aria-hidden className="size-5.5" strokeWidth={navIconStrokeWidth} />
-              <span>{t(labelKey)}</span>
+              <span
+                aria-hidden
+                className="inline-flex h-7 w-14 items-center justify-center rounded-pill group-data-[status=active]:bg-accent-soft"
+              >
+                <Icon aria-hidden className="size-5.5" strokeWidth={navIconStrokeWidth} />
+              </span>
+              <span className="leading-none">{t(labelKey)}</span>
             </Link>
           </li>
         ))}

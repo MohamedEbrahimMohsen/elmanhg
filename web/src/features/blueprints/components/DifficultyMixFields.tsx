@@ -16,7 +16,7 @@ export function DifficultyMixFields() {
   return (
     <div className="flex flex-col gap-2">
       <label className="flex min-h-11 items-center gap-2.5 text-ui">
-        <input type="checkbox" className="size-4.5 accent-text" {...register('difficultyMix.enabled')} />
+        <input type="checkbox" className="size-4.5 accent-accent" {...register('difficultyMix.enabled')} />
         {t('editor.mixToggle')}
       </label>
       {enabled ? (
