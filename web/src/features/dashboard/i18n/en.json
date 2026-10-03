@@ -8,7 +8,11 @@
     "subject": "Subject",
     "allSubjects": "All subjects",
     "period": "Period",
-    "periods": { "7": "Last 7 days", "14": "Last 14 days", "30": "Last 30 days" },
+    "periods": {
+      "7": "Last 7 days",
+      "14": "Last 14 days",
+      "30": "Last 30 days"
+    },
     "range": "From {from} to {to}"
   },
   "card": {
@@ -17,74 +21,87 @@
     "noSubject": "Not filtered by subject",
     "snapshot": "Current snapshot, not filtered by period"
   },
+  "tiles": {
+    "students": "Students",
+    "studentsDetail": "+{count} new in period",
+    "subscribers": "Active subscriptions",
+    "subscribersDetail": "−{count} churned in period",
+    "revenue": "Revenue",
+    "revenueDetail": "Net {amount}",
+    "content": "Servable questions",
+    "successRate": "Success rate",
+    "successRateDetail": "{correct} correct of {attempts}",
+    "solveRate": "Solve rate",
+    "solveRateDetail": "{attempts} attempts · {studentDays} student-days",
+    "validation": "Pending review",
+    "validationDetail": "{approved} approved · {rejected} rejected in period",
+    "askTeacher": "Open teacher questions",
+    "askTeacherDetail": "{count} overdue now"
+  },
   "students": {
-    "title": "Students",
-    "caption": "Total students",
-    "newInRange": "New in period: {count}",
-    "newThisWeek": "New this week: {count}",
-    "activeToday": "Active today (DAU): {count}",
-    "activeThisMonth": "Active this month (MAU): {count}"
+    "title": "Student activity",
+    "newInRange": "New in period",
+    "newThisWeek": "New this week",
+    "activeToday": "Active today (DAU)",
+    "activeThisMonth": "Active this month (MAU)"
   },
   "subscribers": {
-    "title": "Subscribers",
-    "caption": "Active subscriptions",
-    "plan": "{plan}: {count}",
-    "plans": { "Base": "Base", "AskTeacher": "Ask a Teacher" },
-    "churnedInRange": "Churned in period: {count}",
-    "churnedThisMonth": "Churned this month: {count}",
-    "mrr": "MRR: {amount}"
-  },
-  "content": {
-    "title": "Content",
-    "caption": "Servable questions (the marketed number)",
-    "structure": "Subjects: {subjects} · Units: {units}",
-    "lessons": "Lessons: published {published} · draft {draft} · archived {archived}",
-    "questions": "Questions: pending {pending} · approved {approved} · rejected {rejected} · retired {retired}",
-    "byType": "Questions by type",
-    "typeCount": "{type}: {count}"
-  },
-  "solveRate": {
-    "title": "Solve rate",
-    "caption": "Attempts per active student per day",
-    "attempts": "Attempts: {count}",
-    "studentDays": "Active student-days: {count}"
-  },
-  "successRate": {
-    "title": "Success rate",
-    "caption": "Correct attempts out of all attempts",
-    "correct": "Correct: {correct} of {attempts}"
-  },
-  "validation": {
-    "title": "Validation",
-    "caption": "Questions pending review",
-    "approved": "Approved in period: {count}",
-    "rejected": "Rejected in period: {count}",
-    "median": "Median time to decision: {duration}",
-    "teacher": "{name}: {approved} approved · {rejected} rejected"
-  },
-  "askTeacher": {
-    "title": "Ask a Teacher",
-    "caption": "Open threads",
-    "awaiting": "Awaiting a reply: {count}",
-    "overdue": "Overdue now: {count}",
-    "breaches": "SLA breaches in period: {count}",
-    "replies": "Replies in period: {count} ({within} within SLA)",
-    "compliance": "SLA compliance: {rate}",
-    "median": "Median reply time: {duration}"
+    "title": "Subscriptions",
+    "plans": {
+      "Base": "Base",
+      "AskTeacher": "Ask a Teacher"
+    },
+    "churnedInRange": "Churned in period",
+    "churnedThisMonth": "Churned this month",
+    "mrr": "MRR"
   },
   "payments": {
     "title": "Payments",
-    "caption": "Revenue in period",
-    "succeeded": "Successful: {count}",
-    "failed": "Failed: {count}",
-    "refunds": "Refunds: {count} ({amount})",
-    "net": "Net revenue: {amount}"
+    "succeeded": "Successful",
+    "failed": "Failed",
+    "refunds": "Refunds",
+    "refundsValue": "{count} ({amount})",
+    "net": "Net revenue"
+  },
+  "askTeacher": {
+    "title": "Ask a Teacher",
+    "awaiting": "Awaiting a reply",
+    "overdue": "Overdue now",
+    "breaches": "SLA breaches in period",
+    "replies": "Replies in period",
+    "repliesValue": "{count} ({within} within SLA)",
+    "compliance": "SLA compliance",
+    "median": "Median reply time"
+  },
+  "validation": {
+    "title": "Validation",
+    "approved": "Approved in period",
+    "rejected": "Rejected in period",
+    "median": "Median time to decision",
+    "byTeacher": "By teacher",
+    "teacherValue": "{approved} approved · {rejected} rejected"
+  },
+  "content": {
+    "title": "Content",
+    "subjects": "Subjects",
+    "units": "Units",
+    "lessonsPublished": "Published lessons",
+    "lessonsDraft": "Draft lessons",
+    "lessonsArchived": "Archived lessons",
+    "questionsPending": "Questions pending review",
+    "questionsApproved": "Approved questions",
+    "questionsRejected": "Rejected questions",
+    "questionsRetired": "Retired questions"
+  },
+  "questionTypes": {
+    "title": "Questions by type",
+    "share": "{count} ({share})",
+    "empty": "No questions yet."
   },
   "funnel": {
     "title": "Sign-up funnel",
-    "caption": "Visitors who reached a first answer",
-    "step": "{step}: {visitors}",
-    "stepConversion": "{step}: {visitors} ({rate})",
+    "completed": "{count} reached a first answer",
+    "stepValue": "{visitors} ({rate})",
     "steps": {
       "LandingViewed": "Landing viewed",
       "SignUpStarted": "Sign-up started",
@@ -92,18 +109,24 @@
       "OnboardingCompleted": "Onboarding done",
       "FirstQuizAnswered": "First quiz answer"
     },
-    "median": "Median landing to first answer: {duration}"
+    "median": "Median landing to first answer",
+    "empty": "No visitors in this period."
   },
   "breakdown": {
     "title": "Success rate by curriculum",
     "levelLabel": "Group by",
-    "levels": { "subject": "Subjects", "unit": "Units", "lesson": "Lessons" },
+    "levels": {
+      "subject": "Subjects",
+      "unit": "Units",
+      "lesson": "Lessons"
+    },
     "name": "Name",
     "attempts": "Attempts",
     "correct": "Correct",
     "rate": "Success rate",
     "empty": "No attempts in this period.",
-    "chooseSubject": "Choose a subject to see lessons."
+    "chooseSubject": "Choose a subject to see lessons.",
+    "rateBar": "Success rate for {name}"
   },
   "charts": {
     "attempts": "Attempts per day",
@@ -111,7 +134,8 @@
     "decisions": "Validation decisions per day",
     "date": "Date",
     "value": "Value",
-    "peak": "Peak: {value}",
+    "summary": "Total {total} · Peak {peak}",
+    "point": "{date}: {value}",
     "emptyAttempts": "No attempts in this period.",
     "emptyRevenue": "No revenue in this period.",
     "emptyDecisions": "No decisions in this period."

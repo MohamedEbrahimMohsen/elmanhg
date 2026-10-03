@@ -1,7 +1,8 @@
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { GradeReviewDetailResult, GradeReviewNoteResult } from '@/shared/api/generated/model';
-import { formatDate, formatNumber } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
+import { formatNumber } from '@/shared/lib/format';
 
 export interface ReviewedCardProps {
   detail: GradeReviewDetailResult;
@@ -27,8 +28,8 @@ export function ReviewedCard({ detail, review }: ReviewedCardProps) {
       </p>
       <p className="text-ui text-text">
         {t('detail.finalScore', {
-          score: formatNumber(Number(detail.finalScore), lng, 'latin'),
-          maxScore: formatNumber(Number(detail.maxScore), lng, 'latin'),
+          score: formatNumber(Number(detail.finalScore), lng),
+          maxScore: formatNumber(Number(detail.maxScore), lng),
         })}
       </p>
       {review.comment ? (
@@ -38,7 +39,7 @@ export function ReviewedCard({ detail, review }: ReviewedCardProps) {
       ) : null}
       <p className="text-caption text-text-muted">
         {t('detail.reviewedAt', {
-          date: formatDate(new Date(review.reviewedAt), lng, 'latin', { dateStyle: 'medium', timeStyle: 'short' }),
+          date: formatDateTime(review.reviewedAt, lng),
         })}
       </p>
     </section>

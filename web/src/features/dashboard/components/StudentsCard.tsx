@@ -2,13 +2,15 @@ import { useTranslation } from 'react-i18next';
 import { useGetDashboardStudents } from '@/shared/api/generated/dashboard/dashboard';
 import type { GetDashboardStudentsParams } from '@/shared/api/generated/model';
 import { formatCount } from '../api/metricFormat';
-import { KpiFigure } from './KpiFigure';
 import { MetricCard } from './MetricCard';
+import { MetricList } from './MetricList';
 
 export interface StudentsCardProps {
   params: GetDashboardStudentsParams;
   subjectSelected: boolean;
 }
+
+const rowKeys = ['newInRange', 'newThisWeek', 'activeToday', 'activeThisMonth'] as const;
 
 export function StudentsCard({ params, subjectSelected }: StudentsCardProps) {
   const { t, i18n } = useTranslation('dashboard');
@@ -16,18 +18,18 @@ export function StudentsCard({ params, subjectSelected }: StudentsCardProps) {
   const query = useGetDashboardStudents(params);
 
   return (
-    <MetricCard title={t('students.title')} query={query}>
+    <MetricCard title={t('students.title')} query={query} variant="panel">
       {(data) => (
-        <KpiFigure
-          value={formatCount(data.total, lng)}
-          caption={t('students.caption')}
-          note={subjectSelected ? t('card.noSubject') : undefined}
-        >
-          <li>{t('students.newInRange', { count: formatCount(data.newInRange, lng) })}</li>
-          <li>{t('students.newThisWeek', { count: formatCount(data.newThisWeek, lng) })}</li>
-          <li>{t('students.activeToday', { count: formatCount(data.activeToday, lng) })}</li>
-          <li>{t('students.activeThisMonth', { count: formatCount(data.activeThisMonth, lng) })}</li>
-        </KpiFigure>
+        <>
+          {subjectSelected ? <p className="text-caption text-text-muted">{t('card.noSubject')}</p> : null}
+          <MetricList
+            rows={rowKeys.map((key) => ({
+              key,
+              label: t(`students.${key}`),
+              value: formatCount(data[key], lng),
+            }))}
+          />
+        </>
       )}
     </MetricCard>
   );

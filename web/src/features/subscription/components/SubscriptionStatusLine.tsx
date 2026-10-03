@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { SubscriptionResult } from '@/shared/api/generated/model';
-import { formatDate } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
 import { Button } from '@/shared/ui/button';
 
 export interface SubscriptionStatusLineProps {
@@ -17,14 +17,7 @@ export function SubscriptionStatusLine({ subscription, onCancelClick }: Subscrip
   }
 
   const inGrace = status === 'Active' && subscription.inGracePeriod;
-  const date = formatDate(
-    new Date(inGrace || status !== 'Active' ? entitledUntil : currentPeriodEnd),
-    i18n.language,
-    'arabic-indic',
-    {
-      dateStyle: 'medium',
-    },
-  );
+  const date = formatDateTime(inGrace || status !== 'Active' ? entitledUntil : currentPeriodEnd, i18n.language, 'date');
   const planLabel = t(`plan.${plan}`);
 
   return (

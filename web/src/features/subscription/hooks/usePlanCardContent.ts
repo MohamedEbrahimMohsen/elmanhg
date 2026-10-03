@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { PlanCatalogueResult, PlanPriceResult } from '@/shared/api/generated/model';
-import { formatMoney } from '@/shared/lib/format';
+import { formatMoney } from '@/shared/lib/money';
 
 export interface PlanCardContent {
   title: string;

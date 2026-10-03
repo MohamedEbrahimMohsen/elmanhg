@@ -34,14 +34,14 @@ describe('DashboardPage', () => {
     await openDashboard();
 
     expect(await (await region('Students')).findByText('1,250')).toBeInTheDocument();
-    expect(await (await region('Subscribers')).findByText('420')).toBeInTheDocument();
-    expect(await (await region('Content')).findByText('870')).toBeInTheDocument();
+    expect(await (await region('Active subscriptions')).findByText('420')).toBeInTheDocument();
+    expect(await (await region('Servable questions')).findByText('870')).toBeInTheDocument();
     expect(await (await region('Solve rate')).findByText('3.25')).toBeInTheDocument();
     expect(await (await region('Success rate')).findByText('75%')).toBeInTheDocument();
-    expect(await (await region('Validation')).findByText('55')).toBeInTheDocument();
-    expect(await (await region('Ask a Teacher')).findByText('14')).toBeInTheDocument();
-    expect(await (await region('Payments')).findByText(/^EGP\s8,955$/u)).toBeInTheDocument();
-    expect(await (await region('Sign-up funnel')).findByText('150')).toBeInTheDocument();
+    expect(await (await region('Pending review')).findByText('55')).toBeInTheDocument();
+    expect(await (await region('Open teacher questions')).findByText('14')).toBeInTheDocument();
+    expect(await (await region('Revenue')).findByText(/^EGP\s8,955$/u)).toBeInTheDocument();
+    expect(await (await region('Sign-up funnel')).findByText('150 reached a first answer')).toBeInTheDocument();
   });
 
   it('shows a dash when a rate has no denominator', async () => {
@@ -71,7 +71,7 @@ describe('DashboardPage', () => {
 
     await user.click(within(alert).getByRole('button', { name: 'Retry' }));
 
-    expect(await payments.findByText(/^EGP\s8,955$/u)).toBeInTheDocument();
+    expect(await payments.findByRole('definition', { name: 'Net revenue' })).toHaveTextContent(/^EGP\s8,756$/u);
   });
 
   it('shows the three daily charts', async () => {
@@ -83,6 +83,13 @@ describe('DashboardPage', () => {
     expect(within(revenue).getByRole('row', { name: /^Sep 30 EGP\s4,955$/u })).toBeInTheDocument();
     const decisions = await screen.findByRole('table', { name: 'Validation decisions per day' });
     expect(within(decisions).getByRole('row', { name: 'Sep 30 69' })).toBeInTheDocument();
+  });
+
+  it('shows every day of the period on the chart', async () => {
+    await openDashboard();
+
+    const attempts = await screen.findByRole('table', { name: 'Attempts per day' });
+    expect(within(attempts).getAllByRole('row')).toHaveLength(15);
   });
 
   it('shows an empty message when a period has no attempts', async () => {

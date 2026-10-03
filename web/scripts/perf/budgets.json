@@ -28,7 +28,7 @@
         "src/routes/admin/route.tsx?tsr-split=component",
         "src/routes/admin/index.tsx?tsr-split=component"
       ],
-      "maxKb": 230
+      "maxKb": 233
     },
     {
       "name": "admin-users",

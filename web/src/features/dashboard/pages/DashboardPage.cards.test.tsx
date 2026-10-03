@@ -1,5 +1,11 @@
 import { screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
+import {
+  getGetDashboardContentMockHandler,
+  getGetDashboardFunnelMockHandler,
+} from '@/shared/api/generated/dashboard/dashboard.msw';
+import { contentMetrics, funnelMetrics } from '@/test/dashboardFixtures';
+import { server } from '@/test/msw/server';
 import { renderApp } from '@/test/renderWithProviders';
 import { testSessions } from '@/test/sessions';
 
@@ -13,54 +19,81 @@ async function region(name: string) {
   return within(await screen.findByRole('region', { name }));
 }
 
+async function value(card: string, name: string) {
+  return (await region(card)).findByRole('definition', { name });
+}
+
 describe('DashboardPage cards', () => {
-  it('shows the student and subscriber details', async () => {
+  it('shows the student activity and subscription rows', async () => {
     await openDashboard();
 
-    const students = await region('Students');
-    expect(await students.findByText('New this week: 21')).toBeInTheDocument();
-    expect(students.getByText('Active today (DAU): 310')).toBeInTheDocument();
-    expect(students.getByText('Active this month (MAU): 940')).toBeInTheDocument();
-    const subscribers = await region('Subscribers');
-    expect(await subscribers.findByText('Base: 400')).toBeInTheDocument();
-    expect(subscribers.getByText('Ask a Teacher: 20')).toBeInTheDocument();
-    expect(subscribers.getByText('Churned this month: 15')).toBeInTheDocument();
-    expect(subscribers.getByText(/^MRR: EGP\s83,580$/u)).toBeInTheDocument();
+    expect(await value('Student activity', 'New in period')).toHaveTextContent(/^80$/u);
+    expect(await value('Student activity', 'New this week')).toHaveTextContent(/^21$/u);
+    expect(await value('Student activity', 'Active today (DAU)')).toHaveTextContent(/^310$/u);
+    expect(await value('Student activity', 'Active this month (MAU)')).toHaveTextContent(/^940$/u);
+    expect(await value('Subscriptions', 'Base')).toHaveTextContent(/^400$/u);
+    expect(await value('Subscriptions', 'Ask a Teacher')).toHaveTextContent(/^20$/u);
+    expect(await value('Subscriptions', 'Churned this month')).toHaveTextContent(/^15$/u);
+    expect(await value('Subscriptions', 'MRR')).toHaveTextContent(/^EGP\s83,580$/u);
   });
 
-  it('shows the content details', async () => {
+  it('shows the content rows and the question types as bars', async () => {
     await openDashboard();
 
-    const content = await region('Content');
-    expect(await content.findByText('Lessons: published 40 · draft 4 · archived 1')).toBeInTheDocument();
-    expect(content.getByText('Questions: pending 55 · approved 900 · rejected 7 · retired 3')).toBeInTheDocument();
-    expect(content.getByText('Multiple choice: 600')).toBeInTheDocument();
-    expect(content.getByText('Current snapshot, not filtered by period')).toBeInTheDocument();
+    expect(await value('Content', 'Published lessons')).toHaveTextContent(/^40$/u);
+    expect(await value('Content', 'Questions pending review')).toHaveTextContent(/^55$/u);
+    expect(await value('Content', 'Retired questions')).toHaveTextContent(/^3$/u);
+    expect((await region('Content')).getByText('Current snapshot, not filtered by period')).toBeInTheDocument();
+    const types = await region('Questions by type');
+    expect(await types.findByRole('progressbar', { name: 'Multiple choice 600 (62.2%)' })).toBeInTheDocument();
   });
 
-  it('shows the validation and ask-a-teacher details', async () => {
+  it('shows the validation and ask-a-teacher rows', async () => {
     await openDashboard();
 
-    const validation = await region('Validation');
-    expect(await validation.findByText('Median time to decision: 1.5 hours')).toBeInTheDocument();
-    expect(validation.getByText('Mohamed Ali: 100 approved · 6 rejected')).toBeInTheDocument();
-    const askTeacher = await region('Ask a Teacher');
-    expect(await askTeacher.findByText('Overdue now: 2')).toBeInTheDocument();
-    expect(askTeacher.getByText('Replies in period: 40 (37 within SLA)')).toBeInTheDocument();
-    expect(askTeacher.getByText('SLA compliance: 92.5%')).toBeInTheDocument();
-    expect(askTeacher.getByText('Median reply time: 3 minutes')).toBeInTheDocument();
+    expect(await value('Validation', 'Median time to decision')).toHaveTextContent(/^1\.5 hours$/u);
+    expect(await value('Validation', 'Mohamed Ali')).toHaveTextContent(/^100 approved · 6 rejected$/u);
+    expect(await value('Ask a Teacher', 'Overdue now')).toHaveTextContent(/^2$/u);
+    expect(await value('Ask a Teacher', 'Replies in period')).toHaveTextContent(/^40 \(37 within SLA\)$/u);
+    expect(await value('Ask a Teacher', 'SLA compliance')).toHaveTextContent(/^92\.5%$/u);
+    expect(await value('Ask a Teacher', 'Median reply time')).toHaveTextContent(/^3 minutes$/u);
   });
 
-  it('shows the payment and funnel details', async () => {
+  it('shows the payment rows and the funnel bars', async () => {
     await openDashboard();
 
-    const payments = await region('Payments');
-    expect(await payments.findByText('Failed: 3')).toBeInTheDocument();
-    expect(payments.getByText(/^Refunds: 1 \(EGP\s199\)$/u)).toBeInTheDocument();
-    expect(payments.getByText(/^Net revenue: EGP\s8,756$/u)).toBeInTheDocument();
+    expect(await value('Payments', 'Failed')).toHaveTextContent(/^3$/u);
+    expect(await value('Payments', 'Refunds')).toHaveTextContent(/^1 \(EGP\s199\)$/u);
+    expect(await value('Payments', 'Net revenue')).toHaveTextContent(/^EGP\s8,756$/u);
     const funnel = await region('Sign-up funnel');
-    expect(await funnel.findByText('Landing viewed: 1,000')).toBeInTheDocument();
-    expect(funnel.getByText('Account created: 200 (66.7%)')).toBeInTheDocument();
-    expect(funnel.getByText('Median landing to first answer: 1.5 days')).toBeInTheDocument();
+    expect(await funnel.findByRole('progressbar', { name: 'Landing viewed 1,000' })).toBeInTheDocument();
+    expect(funnel.getByRole('progressbar', { name: 'Account created 200 (66.7%)' })).toBeInTheDocument();
+    expect(await value('Sign-up funnel', 'Median landing to first answer')).toHaveTextContent(/^1\.5 days$/u);
+  });
+
+  it('shows the tile details', async () => {
+    await openDashboard();
+
+    expect(await (await region('Students')).findByText('+80 new in period')).toBeInTheDocument();
+    expect(await (await region('Active subscriptions')).findByText('−12 churned in period')).toBeInTheDocument();
+    expect(await (await region('Revenue')).findByText(/^Net EGP\s8,756$/u)).toBeInTheDocument();
+    expect(await (await region('Success rate')).findByText('4,050 correct of 5,400')).toBeInTheDocument();
+    expect(await (await region('Solve rate')).findByText('5,400 attempts · 1,800 student-days')).toBeInTheDocument();
+    expect(
+      await (await region('Pending review')).findByText('120 approved · 9 rejected in period'),
+    ).toBeInTheDocument();
+    expect(await (await region('Open teacher questions')).findByText('2 overdue now')).toBeInTheDocument();
+  });
+
+  it('shows empty messages for a funnel and question types without data', async () => {
+    const steps = funnelMetrics().steps.map((step) => ({ ...step, visitors: 0 }));
+    server.use(
+      getGetDashboardFunnelMockHandler(funnelMetrics({ steps })),
+      getGetDashboardContentMockHandler(contentMetrics({ questionsByType: [] })),
+    );
+    await openDashboard();
+
+    expect(await (await region('Sign-up funnel')).findByText('No visitors in this period.')).toBeInTheDocument();
+    expect(await (await region('Questions by type')).findByText('No questions yet.')).toBeInTheDocument();
   });
 });

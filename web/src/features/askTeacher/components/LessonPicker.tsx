@@ -4,10 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { ContentErrorState, ContentListSkeleton } from '@/features/content';
 import { useGetMasteryOverview, useGetSubjectMastery } from '@/shared/api/generated/mastery/mastery';
 import { Label } from '@/shared/ui/label';
+import { Select } from '@/shared/ui/select';
 import type { AskTeacherFormValues } from '../schemas/askTeacherFormSchema';
-
-const selectClassName =
-  'h-11 w-full rounded-sm border border-border-strong bg-surface px-3 text-ui text-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden aria-invalid:border-danger';
 
 export function LessonPicker() {
   const { t } = useTranslation('askTeacher');
@@ -43,14 +41,13 @@ export function LessonPicker() {
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={subjectFieldId}>{t('picker.subject')}</Label>
-        <select
+        <Select
           id={subjectFieldId}
           value={subjectId}
           onChange={(event) => {
             setSubjectId(event.target.value);
             onChange('');
           }}
-          className={selectClassName}
         >
           <option value="">{t('picker.chooseSubject')}</option>
           {overview.data.subjects.map((item) => (
@@ -58,11 +55,11 @@ export function LessonPicker() {
               {item.name}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={lessonFieldId}>{t('picker.lesson')}</Label>
-        <select
+        <Select
           id={lessonFieldId}
           ref={ref}
           name={name}
@@ -72,7 +69,6 @@ export function LessonPicker() {
           disabled={subjectId === '' || subject.isPending}
           aria-invalid={fieldState.invalid}
           aria-describedby={fieldState.error ? errorId : undefined}
-          className={selectClassName}
         >
           <option value="">{t('picker.chooseLesson')}</option>
           {subject.data?.units.map((unit) => (
@@ -84,7 +80,7 @@ export function LessonPicker() {
               ))}
             </optgroup>
           ))}
-        </select>
+        </Select>
         {fieldState.error ? (
           <p id={errorId} className="text-caption text-danger">
             {tCommon([fieldState.error.message ?? '', 'errors.UNHANDLED_EXCEPTION'])}

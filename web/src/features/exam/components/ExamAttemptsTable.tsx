@@ -1,7 +1,8 @@
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import type { ExamAttemptsResult } from '@/shared/api/generated/model';
-import { formatDate } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
+import { Button } from '@/shared/ui/button';
 
 export interface ExamAttemptsTableProps {
   attempts: ExamAttemptsResult;
@@ -42,12 +43,7 @@ export function ExamAttemptsTable({ attempts, currentSessionId }: ExamAttemptsTa
           <tbody>
             {attempts.attempts.map((attempt) => (
               <tr key={attempt.sessionId} className="border-t border-border">
-                <td className={cellClassName}>
-                  {formatDate(new Date(attempt.submittedAt), i18n.language, 'arabic-indic', {
-                    dateStyle: 'medium',
-                    timeStyle: 'short',
-                  })}
-                </td>
+                <td className={cellClassName}>{formatDateTime(attempt.submittedAt, i18n.language)}</td>
                 <td className={cellClassName}>
                   {t('attempts.scoreValue', { score: Math.round(Number(attempt.scorePercent)) })}
                   {attempt.isBest ? (
@@ -60,13 +56,11 @@ export function ExamAttemptsTable({ attempts, currentSessionId }: ExamAttemptsTa
                   {attempt.sessionId === currentSessionId ? (
                     <span className="text-text-muted">{t('attempts.current')}</span>
                   ) : (
-                    <Link
-                      to="/student/exam-result/$sessionId"
-                      params={{ sessionId: attempt.sessionId }}
-                      className="rounded-sm text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
-                    >
-                      {t('attempts.view')}
-                    </Link>
+                    <Button asChild variant="secondary" size="sm">
+                      <Link to="/student/exam-result/$sessionId" params={{ sessionId: attempt.sessionId }}>
+                        {t('attempts.view')}
+                      </Link>
+                    </Button>
                   )}
                 </td>
               </tr>

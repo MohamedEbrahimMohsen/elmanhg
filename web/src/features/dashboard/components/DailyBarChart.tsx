@@ -1,80 +1,67 @@
 import { useTranslation } from 'react-i18next';
+import { axisTickIndices, niceCeiling, type DailyPoint } from '../api/dailySeries';
 import { formatDay } from '../api/metricFormat';
-
-export interface DailyPoint {
-  date: string;
-  value: number;
-}
+import { DailyBarPlot } from './DailyBarPlot';
 
 export interface DailyBarChartProps {
   label: string;
   points: readonly DailyPoint[];
   formatValue: (value: number) => string;
+  formatTick: (value: number) => string;
   emptyText: string;
   note?: string | undefined;
 }
 
-// viewBox units, not CSS px
-const slotWidth = 10;
-const barWidth = 8;
-const chartHeight = 100;
-
-export function DailyBarChart({ label, points, formatValue, emptyText, note }: DailyBarChartProps) {
+export function DailyBarChart({ label, points, formatValue, formatTick, emptyText, note }: DailyBarChartProps) {
   const { t, i18n } = useTranslation('dashboard');
   const lng = i18n.resolvedLanguage ?? i18n.language;
   const peak = Math.max(0, ...points.map((point) => point.value));
-  const first = points.at(0);
-  const last = points.at(-1);
   const noteLine = note ? <p className="text-caption text-text-muted">{note}</p> : null;
 
-  if (peak === 0 || !first || !last) {
+  if (peak === 0) {
     return (
       <>
         {noteLine}
-        <p className="text-caption text-text-muted">{emptyText}</p>
+        <p className="flex h-40 items-center justify-center text-caption text-text-muted">{emptyText}</p>
       </>
     );
   }
 
-  const width = points.length * slotWidth;
+  const max = niceCeiling(peak);
+  const sum = points.reduce((total, point) => total + point.value, 0);
+  const ticks = new Set(axisTickIndices(points.length));
 
   return (
     <div className="flex flex-col gap-2">
       {noteLine}
-      <svg
-        aria-hidden="true"
-        viewBox={`0 0 ${String(width)} ${String(chartHeight)}`}
-        preserveAspectRatio="none"
-        className="h-32 w-full"
-      >
-        {points.map((point, index) => {
-          const height = (point.value / peak) * chartHeight;
-          return (
-            <rect
-              key={point.date}
-              x={index * slotWidth + 1}
-              y={chartHeight - height}
-              width={barWidth}
-              height={height}
-              className="fill-text-muted"
-            >
-              <title>{`${formatDay(point.date, lng)}: ${formatValue(point.value)}`}</title>
-            </rect>
-          );
-        })}
-        <line
-          x1={0}
-          y1={chartHeight}
-          x2={width}
-          y2={chartHeight}
-          className="stroke-border-strong"
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
-      <div dir="ltr" className="flex justify-between text-micro text-text-muted">
-        <span dir="auto">{formatDay(first.date, lng)}</span>
-        <span dir="auto">{t('charts.peak', { value: formatValue(peak) })}</span>
-        <span dir="auto">{formatDay(last.date, lng)}</span>
+      <p className="text-caption text-text-muted">
+        {t('charts.summary', { total: formatValue(sum), peak: formatValue(peak) })}
+      </p>
+      <div dir="ltr" aria-hidden="true" className="flex gap-2">
+        <div className="flex h-32 flex-col items-end justify-between text-micro text-text-muted">
+          <span>{formatTick(max)}</span>
+          <span>{formatTick(max / 2)}</span>
+          <span>{formatTick(0)}</span>
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <DailyBarPlot
+            points={points}
+            max={max}
+            describe={(point) =>
+              t('charts.point', { date: formatDay(point.date, lng), value: formatValue(point.value) })
+            }
+          />
+          <div className="flex">
+            {points.map((point, index) => (
+              <span
+                key={point.date}
+                className="flex min-w-0 flex-1 justify-center text-micro whitespace-nowrap text-text-muted"
+              >
+                {ticks.has(index) ? formatDay(point.date, lng) : null}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
       <table className="sr-only">
         <caption>{label}</caption>

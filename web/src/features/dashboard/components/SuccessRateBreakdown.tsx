@@ -4,6 +4,7 @@ import type { SuccessRateMetricsResult } from '@/shared/api/generated/model';
 import { cn } from '@/shared/lib/utils';
 import { pillTabClassName } from '@/shared/ui/pillTab';
 import { formatCount, formatRate } from '../api/metricFormat';
+import { ShareBar } from './ShareBar';
 
 export interface SuccessRateBreakdownProps {
   data: SuccessRateMetricsResult;
@@ -68,11 +69,21 @@ export function SuccessRateBreakdown({ data, subjectSelected }: SuccessRateBreak
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.id} className="border-t border-border">
+                <tr key={row.id} className="border-t border-border hover:bg-soft">
                   <td className={bodyCell}>{row.name}</td>
                   <td className={bodyCell}>{formatCount(row.attempts, lng)}</td>
                   <td className={bodyCell}>{formatCount(row.correct, lng)}</td>
-                  <td className={bodyCell}>{formatRate(row.rate, lng)}</td>
+                  <td className={bodyCell}>
+                    <div className="flex flex-col gap-1">
+                      {formatRate(row.rate, lng)}
+                      {row.rate === null ? null : (
+                        <ShareBar
+                          percent={Number(row.rate) * 100}
+                          aria-label={t('breakdown.rateBar', { name: row.name })}
+                        />
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>

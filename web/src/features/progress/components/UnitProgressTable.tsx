@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import type { UnitProgressResult } from '@/shared/api/generated/model';
+import { Button } from '@/shared/ui/button';
 
 export interface UnitProgressTableProps {
   units: UnitProgressResult[];
@@ -34,13 +35,11 @@ export function UnitProgressTable({ units, subjectName }: UnitProgressTableProps
           {units.map((unit) => (
             <tr key={unit.unitId} className="border-t border-border">
               <td className={cellClassName}>
-                <Link
-                  to="/student/unit/$unitId"
-                  params={{ unitId: unit.unitId }}
-                  className="rounded-sm text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
-                >
-                  {unit.name}
-                </Link>
+                <Button asChild variant="secondary" size="sm">
+                  <Link to="/student/unit/$unitId" params={{ unitId: unit.unitId }}>
+                    {unit.name}
+                  </Link>
+                </Button>
               </td>
               <td className={cellClassName}>
                 {t('subjects.unitMasteryValue', { percent: Number(unit.masteryPercent) })}
@@ -51,13 +50,11 @@ export function UnitProgressTable({ units, subjectName }: UnitProgressTableProps
                   : t('subjects.bestExamValue', { score: Math.round(Number(unit.bestExamScorePercent)) })}
               </td>
               <td className={cellClassName}>
-                <Link
-                  to="/student/exam-start/$unitId"
-                  params={{ unitId: unit.unitId }}
-                  className="rounded-sm text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
-                >
-                  {t('subjects.startExam')}
-                </Link>
+                <Button asChild variant="secondary" size="sm">
+                  <Link to="/student/exam-start/$unitId" params={{ unitId: unit.unitId }}>
+                    {t('subjects.startExam')}
+                  </Link>
+                </Button>
               </td>
             </tr>
           ))}

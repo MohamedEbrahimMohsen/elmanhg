@@ -2,8 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { useGetDashboardAskTeacher } from '@/shared/api/generated/dashboard/dashboard';
 import type { GetDashboardAskTeacherParams } from '@/shared/api/generated/model';
 import { formatCount, formatElapsed, formatRate } from '../api/metricFormat';
-import { KpiFigure } from './KpiFigure';
 import { MetricCard } from './MetricCard';
+import { MetricList } from './MetricList';
 
 export interface AskTeacherCardProps {
   params: GetDashboardAskTeacherParams;
@@ -15,23 +15,30 @@ export function AskTeacherCard({ params }: AskTeacherCardProps) {
   const query = useGetDashboardAskTeacher(params);
 
   return (
-    <MetricCard title={t('askTeacher.title')} query={query}>
+    <MetricCard title={t('askTeacher.title')} query={query} variant="panel">
       {(data) => (
-        <KpiFigure value={formatCount(data.openThreads, lng)} caption={t('askTeacher.caption')}>
-          <li>{t('askTeacher.awaiting', { count: formatCount(data.awaitingReply, lng) })}</li>
-          <li className={Number(data.overdueNow) > 0 ? 'font-semibold text-danger' : undefined}>
-            {t('askTeacher.overdue', { count: formatCount(data.overdueNow, lng) })}
-          </li>
-          <li>{t('askTeacher.breaches', { count: formatCount(data.slaBreaches, lng) })}</li>
-          <li>
-            {t('askTeacher.replies', {
-              count: formatCount(data.replies, lng),
-              within: formatCount(data.repliedWithinSla, lng),
-            })}
-          </li>
-          <li>{t('askTeacher.compliance', { rate: formatRate(data.slaComplianceRate, lng) })}</li>
-          <li>{t('askTeacher.median', { duration: formatElapsed(data.medianReplySeconds, lng) })}</li>
-        </KpiFigure>
+        <MetricList
+          rows={[
+            { key: 'awaiting', label: t('askTeacher.awaiting'), value: formatCount(data.awaitingReply, lng) },
+            {
+              key: 'overdue',
+              label: t('askTeacher.overdue'),
+              value: formatCount(data.overdueNow, lng),
+              tone: Number(data.overdueNow) > 0 ? 'danger' : undefined,
+            },
+            { key: 'breaches', label: t('askTeacher.breaches'), value: formatCount(data.slaBreaches, lng) },
+            {
+              key: 'replies',
+              label: t('askTeacher.replies'),
+              value: t('askTeacher.repliesValue', {
+                count: formatCount(data.replies, lng),
+                within: formatCount(data.repliedWithinSla, lng),
+              }),
+            },
+            { key: 'compliance', label: t('askTeacher.compliance'), value: formatRate(data.slaComplianceRate, lng) },
+            { key: 'median', label: t('askTeacher.median'), value: formatElapsed(data.medianReplySeconds, lng) },
+          ]}
+        />
       )}
     </MetricCard>
   );

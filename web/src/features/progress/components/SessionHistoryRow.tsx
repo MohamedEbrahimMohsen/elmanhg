@@ -1,8 +1,9 @@
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import type { SessionHistoryItemResult } from '@/shared/api/generated/model';
-import { formatDate } from '@/shared/lib/format';
+import { DateTime } from '@/shared/components/DateTime';
 import { cn } from '@/shared/lib/utils';
+import { Button } from '@/shared/ui/button';
 import { sessionKindLabelKey, sessionLink } from '../api/sessionHistory';
 
 export interface SessionHistoryRowProps {
@@ -12,16 +13,13 @@ export interface SessionHistoryRowProps {
 const cellClassName = 'px-2.5 py-2.25 text-caption';
 
 export function SessionHistoryRow({ item }: SessionHistoryRowProps) {
-  const { t, i18n } = useTranslation('progress');
+  const { t } = useTranslation('progress');
   const link = sessionLink(item);
 
   return (
     <tr className="border-t border-border hover:bg-soft">
       <td className={cn(cellClassName, 'whitespace-nowrap')}>
-        {formatDate(new Date(item.startedAt), i18n.language, 'arabic-indic', {
-          dateStyle: 'medium',
-          timeStyle: 'short',
-        })}
+        <DateTime value={item.startedAt} relative />
       </td>
       <td className={cellClassName}>{t(sessionKindLabelKey(item.kind))}</td>
       <td className={cellClassName}>{item.scopeName ?? t('history.unknownScope')}</td>
@@ -43,13 +41,11 @@ export function SessionHistoryRow({ item }: SessionHistoryRowProps) {
       </td>
       <td className={cellClassName}>
         {link ? (
-          <Link
-            to={link.to}
-            params={{ sessionId: item.id }}
-            className="rounded-sm text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
-          >
-            {t(link.labelKey)}
-          </Link>
+          <Button asChild variant="secondary" size="sm">
+            <Link to={link.to} params={{ sessionId: item.id }}>
+              {t(link.labelKey)}
+            </Link>
+          </Button>
         ) : null}
       </td>
     </tr>

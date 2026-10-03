@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Version | 2.0 |
+| Version | 2.1 |
 | Date | 2026-10-03 |
-| Decision | Glass direction for the whole app. Aurora gradient allowed only on the landing hero and the subscribe screen. Indigo calm palette (#276). |
+| Decision | Glass direction for the whole app. Aurora gradient allowed only on the landing hero and the subscribe screen. Indigo calm palette (#276). #280 polish: Latin digits, shared date formats, Select chevron, pointer cursor, row actions, dashboard. |
 | Mode | Light only. No dark theme. |
 | Reference canvas | https://claude.ai/artifact/VHfyt2bTbtQJnA9Fg6Snpp (board 4, Glass) |
 
@@ -14,7 +14,7 @@
 2. **One colour per job.** Indigo means action, link or where you are. Green means "correct or mastered". Red means "wrong or overdue". Amber means partial or pending. Nothing else is coloured. Near-black is text, never a fill.
 3. **Content is the hero.** Lesson text, equations and diagrams sit on white with no tint. Chrome stays grey.
 4. **Calm surfaces.** Depth comes from soft shadows and hairline borders, not from colour blocks.
-5. **Touch first.** Every control is at least 44 px tall. Phone width (375 px) is the primary layout.
+5. **Touch first.** Every control is at least 44 px tall, except 36 px `sm` row actions inside tables. Phone width (375 px) is the primary layout.
 
 ## 2. Colour tokens
 
@@ -111,7 +111,21 @@ Arabic body text never goes below 15 px. Lesson explanation uses `body` at 1.8 l
 
 ### 3.2 Numerals
 
-Arabic-Indic digits (٠١٢٣) in student-facing UI. ASCII digits in admin tables, exports and anything copied into formulas. Never mix within one string.
+Latin digits (0123) everywhere, in both languages: numbers, dates, times, percentages, money and counters. Arabic formats with the `ar-EG-u-nu-latn` locale (`numberLocale` in `shared/lib/format.ts` is the single place this policy lives). Arabic-Indic digits typed by a user are accepted and normalised, never displayed.
+
+#### Dates
+
+One shared formatter (`formatDateTime` in `shared/lib/dateTime.ts`, the `<DateTime>` component) with five styles. Date and time are joined with «، » in Arabic and «, » in English. A `YYYY-MM-DD` value is a calendar date and is formatted in UTC; everything else in local time.
+
+| Style | Arabic | English | Use |
+|---|---|---|---|
+| `date` | 3 أكتوبر 2026 | Oct 3, 2026 | Record dates, periods, renewals |
+| `dateTime` (default) | 3 أكتوبر 2026، 2:37 م | Oct 3, 2026, 2:37 PM | Activity, messages, logs |
+| `time` | 2:37 م | 2:37 PM | Chat messages, autosave |
+| `day` | 30 سبتمبر | Sep 30 | Chart axes, dashboard range |
+| `fullDateTime` | السبت، 3 أكتوبر 2026، 2:37 م | Saturday, October 3, 2026, 2:37 PM | Reply deadlines |
+
+Activity tables (session history, admin student history, AI conversations, audit log) show relative time («قبل ساعتين») when the item is under 24 hours old, with the full date in the `title`. Deadlines and record dates stay absolute.
 
 ## 4. Spacing, radius, elevation
 
@@ -140,10 +154,10 @@ Arabic-Indic digits (٠١٢٣) in student-facing UI. ASCII digits in admin table
 | Primary | `--accent` (hover `--accent-hover`, pressed `--accent-pressed`) | white | none | One per screen: start quiz, submit, check |
 | Accent | same as Primary since 2.0 | white | none | Subscribe, Ask a teacher |
 | Secondary | `--surface` (hover and pressed `--soft`; toggled on `--accent-soft`) | `--text` (toggled `--accent`) | `--border-strong` (toggled `--accent`) | Everything else |
-| Danger | `--surface` | `--bad` | `--bad` | Reject, delete, cancel subscription |
-| Ghost | none | `--accent` | none | Inline actions in tables |
+| Danger | `--surface` (hover `--bad-soft`) | `--bad` | `--border-strong` | Reject, delete, cancel subscription |
+| Ghost | none | `--accent` | none | Inline text actions outside table rows (table row actions are secondary or danger `sm`) |
 
-All pill-shaped, 44 px min height (36 px for `sm` in dense admin tables), 15 px 600 weight. Size `icon` is 44 × 44 for icon-only buttons beside fields (offset under the field label so it centres on the field). Disabled: 45 percent opacity. Focus: 2 px `--accent` ring offset 2 px.
+All pill-shaped, 44 px min height (36 px for `sm` table row actions in every table, student and admin: a documented exception to the 44 px rule, because rows are dense; adjacent actions keep adequate spacing per WCAG 2.5.8 Target Size (Minimum)), 15 px 600 weight. Size `icon` is 44 × 44 for icon-only buttons beside fields (offset under the field label so it centres on the field). Disabled: 45 percent opacity. Focus: 2 px `--accent` ring offset 2 px. Cursor: pointer on enabled buttons, selects and `[role=button]`, not-allowed on disabled controls (a global base rule). Row actions in every table are `sm` (36 px): secondary for neutral actions, danger for destructive ones (same outline, only the text is red); a row link is a secondary `sm` button (`Button asChild`).
 
 ### 5.2 Cards
 
@@ -170,13 +184,13 @@ Pill, 12 px 600. `ok` = `--ok-soft` fill, `--ok-text` text. `bad` = `--bad-soft`
 
 ### 5.6 Progress
 
-Track `--soft`, fill `--accent` (mastery) or `--ok` (exam pass). Height 6 px, fully rounded. Headline counter card is a white card with the number in `display` size.
+Track `--soft`, fill `--accent` (mastery) or `--ok` (exam pass). Height 6 px, fully rounded. Headline counter card is a white card with the number in `display` size. The admin dashboard uses the same 6 px bar in its bar lists (share of a total, funnel steps, success-rate rows).
 
 ### 5.7 Navigation
 
 App bar: one row, 56 px tall, sticky, white with a bottom hairline, inside the same 1040 px container as the page, so the logo lines up with the page title. Order: logo (`--accent`, links home) · nav · role badge · display name · sign-out. Below 900 px the nav moves to the tab bar. From 900 px the nav sits inline; between 900 and 1199 px the display name is hidden and sign-out shows its icon only (it keeps its accessible name); from 1200 px both show. Below 900 px sign-out is 44 px tall like every touch control; from 900 px it is the 36 px `sm` size.
 
-Top nav (desktop ≥ 900 px): pills 36 px tall (with the 36 px sign-out, the only exception to principle 5: both exist at this size only in the pointer layout, and below 900 px navigation is the tab bar, whose items are taller than 44 px); inactive `--text-2`, hover `--bg` fill with `--text`, active `--accent-soft` fill with `--accent` 600. Each role has a fixed top-bar list: student all 5, teacher all 4, admin dashboard, content, questions and users. The admin's other destinations sit in an «المزيد» disclosure menu at the end of the nav: white, hairline border, `--shadow-2`, `--r-md`, items at least 44 px, closes on Esc, outside click, keyboard focus leaving the menu, or choosing an item.
+Top nav (desktop ≥ 900 px): pills 36 px tall (with the 36 px sign-out, one of the two exceptions to principle 5, the other being 36 px `sm` table row actions: both nav controls exist at this size only in the pointer layout, and below 900 px navigation is the tab bar, whose items are taller than 44 px); inactive `--text-2`, hover `--bg` fill with `--text`, active `--accent-soft` fill with `--accent` 600. Each role has a fixed top-bar list: student all 5, teacher all 4, admin dashboard, content, questions and users. The admin's other destinations sit in an «المزيد» disclosure menu at the end of the nav: white, hairline border, `--shadow-2`, `--r-md`, items at least 44 px, closes on Esc, outside click, keyboard focus leaving the menu, or choosing an item.
 
 Mobile tab bar: at most 4 items, icons 22 px stroke 1.8, active `--accent` 600 with the icon on an `--accent-soft` pill, inactive `--text-2`. A role with more than 3 destinations shows its 3 primary destinations plus a fourth item "المزيد" that opens a list of the rest. Bottom padding follows the device safe area (iOS home indicator).
 
@@ -186,11 +200,11 @@ Pill tabs (filters, sub-tabs, segmented toggles): inactive white with `--border-
 
 ### 5.8 Inputs
 
-White, `--r-sm`, `--border-strong`, 44 px height, 15 px. Focus ring as buttons. Labels 13 px `--text-2` above the field.
+White, `--r-sm`, `--border-strong`, 44 px height, 15 px. Focus ring as buttons. Labels 13 px `--text-2` above the field. Select: native appearance removed, a 16 px Lucide chevron-down in `--text-2` sits in a 40 px box at inline-end, padding-inline-end 40 px, not mirrored (`shared/ui/select.tsx`).
 
 ### 5.9 Tables (admin, teacher)
 
-White card, no vertical rules, row separator hairline, header `caption` weight 600 `--text-2`, 13.5 px cells. Sticky header on desktop, horizontal scroll inside the card on mobile.
+White card, no vertical rules, row separator hairline, header `caption` weight 600 `--text-2`, 13.5 px cells. Sticky header on desktop, horizontal scroll inside the card on mobile. Row actions are `sm` buttons (see 5.1). Activity dates are relative under 24 hours with the full date on hover.
 
 ### 5.10 Avatar panel
 
@@ -209,6 +223,10 @@ The math-with-steps answer ([math-input.md](math-input.md)). Each LaTeX field is
 The drag-and-drop diagram ([question-schemas.md](question-schemas.md)). The image scales to the card width with its aspect ratio reserved. Zones are rectangles with a 2 px non-scaling stroke, and each zone has a number badge (white circle, text colour) at its top-left. Edit mode uses an Accent stroke with a 15 % Accent fill; student mode uses a muted dashed stroke on a 60 % white fill; answer-key mode uses a Success stroke with a 20 % Success fill. A zone being drawn is dashed Accent. The canvas is never mirrored in RTL: image coordinates are physical. Items are pill chips: white, `--border-strong`.
 
 Student answer mode: zones are buttons. An empty zone has a muted dashed stroke on a 60 % white fill; a zone holding items has a solid text-colour stroke; the drop target (dragged over, or focused while an item is chosen) has an Accent stroke with a 15 % Accent fill. Each zone shows its number badge and, when it holds items, a `count/capacity` pill (`--accent` fill). A zone list under the image (white cards, `--r-md`, hairline border) holds each zone's chips, with ghost icon buttons of at least 44 px (earlier, later, return to the bank) and «ضعه هنا» (secondary, small) while an item is chosen. Chips are pills of at least 44 px, white with `--border-strong`; a chosen chip has the `--accent-soft` fill and an `--accent` border; the chip being dragged follows the pointer with `--shadow-2`. After checking, a correct item has the Success soft fill, a Success border and a check icon; a wrong or unplaced item has the Danger soft fill, a Danger border and an x icon, each with its text for screen readers. The correct placements reuse answer-key mode.
+
+### 5.14 Dashboard
+
+Admin dashboard (`/admin`): a row of eight KPI tiles (2 columns, 4 from 700 px): a caption label, one `stat` number, one caption detail (the in-period delta when the API has one, never coloured) and an optional note. Below, eight panels (1 / 2 / 3 columns) of metric rows (caption label in `--text-2` at inline-start, 600-weight value at inline-end, hairline between rows; an overdue value is `--bad`) and bar lists (label and value over a 6 px progress bar, scaled to the total or the first funnel step). Daily charts: `--accent` bars, `--border` gridlines at 0, ½ and the rounded maximum with compact labels, a baseline tick for every day of the period, at most 4 date labels anchored on the latest day, a total and peak line, left-to-right in both languages, an sr-only data table, and the empty message centred in a 160 px box.
 
 ## 6. Layout and RTL
 

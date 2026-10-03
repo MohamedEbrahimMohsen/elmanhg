@@ -1,8 +1,9 @@
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import type { AdminAvatarConversationResult } from '@/shared/api/generated/model';
-import { formatDate } from '@/shared/lib/format';
+import { DateTime } from '@/shared/components/DateTime';
 import { cn } from '@/shared/lib/utils';
+import { Button } from '@/shared/ui/button';
 import { formatCount } from '../api/avatarConversationFormat';
 
 export interface AvatarConversationRowProps {
@@ -19,7 +20,7 @@ export function AvatarConversationRow({ item }: AvatarConversationRowProps) {
   return (
     <tr className="border-t border-border hover:bg-soft">
       <td className={cn(cellClassName, 'whitespace-nowrap')}>
-        {formatDate(new Date(item.lastMessageAt), lng, 'latin', { dateStyle: 'medium', timeStyle: 'short' })}
+        <DateTime value={item.lastMessageAt} relative />
       </td>
       <td className={cellClassName}>{item.studentName}</td>
       <td className={cellClassName}>
@@ -31,14 +32,15 @@ export function AvatarConversationRow({ item }: AvatarConversationRowProps) {
       </td>
       <td className={cellClassName}>{formatCount(Number(item.messageCount), lng)}</td>
       <td className={cellClassName}>
-        <Link
-          to="/admin/avatar-conversation/$conversationId"
-          params={{ conversationId: item.id }}
-          aria-label={t('table.openLabel', { student: item.studentName })}
-          className="rounded-sm text-accent underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
-        >
-          {t('table.open')}
-        </Link>
+        <Button asChild variant="secondary" size="sm">
+          <Link
+            to="/admin/avatar-conversation/$conversationId"
+            params={{ conversationId: item.id }}
+            aria-label={t('table.openLabel', { student: item.studentName })}
+          >
+            {t('table.open')}
+          </Link>
+        </Button>
       </td>
     </tr>
   );

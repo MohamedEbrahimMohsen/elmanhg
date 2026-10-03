@@ -1,7 +1,7 @@
 import { formatNumber } from '@/shared/lib/format';
 
 export function formatCostUsd(value: number, lng: string): string {
-  return formatNumber(value, lng, 'latin', {
+  return formatNumber(value, lng, {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2,
@@ -10,5 +10,5 @@ export function formatCostUsd(value: number, lng: string): string {
 }
 
 export function formatCount(value: number, lng: string): string {
-  return formatNumber(value, lng, 'latin');
+  return formatNumber(value, lng);
 }

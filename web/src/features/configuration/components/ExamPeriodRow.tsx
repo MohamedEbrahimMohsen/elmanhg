@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { ExamPeriodResult } from '@/shared/api/generated/model';
-import { formatDate } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
 import { Button } from '@/shared/ui/button';
 
 export interface ExamPeriodRowProps {
@@ -12,7 +12,7 @@ export interface ExamPeriodRowProps {
 export function ExamPeriodRow({ examPeriod, onEdit, onDelete }: ExamPeriodRowProps) {
   const { t, i18n } = useTranslation('configuration');
   const lng = i18n.resolvedLanguage ?? i18n.language;
-  const format = (date: string) => formatDate(new Date(`${date}T00:00:00`), lng, 'latin', { dateStyle: 'medium' });
+  const format = (date: string) => formatDateTime(date, lng, 'date');
   const name = examPeriod.name;
 
   return (

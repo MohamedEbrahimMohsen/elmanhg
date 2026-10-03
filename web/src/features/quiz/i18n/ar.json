@@ -55,7 +55,7 @@
     "title": "نتيجة التدريب",
     "loading": "جارٍ تحميل النتيجة…",
     "errorTitle": "تعذّر تحميل النتيجة.",
-    "score": "{score, number} / ١٠٠",
+    "score": "{score, number} / 100",
     "answered": "أجبت عن {answered, number} من {total, number}",
     "time": "الوقت: {minutes, number} د {seconds, number} ث",
     "review": "مراجعة الأسئلة",

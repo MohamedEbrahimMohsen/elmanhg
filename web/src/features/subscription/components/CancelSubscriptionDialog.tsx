@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { SubscriptionResult } from '@/shared/api/generated/model';
-import { formatDate } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
 import { Button } from '@/shared/ui/button';
 import { Dialog, DialogContent } from '@/shared/ui/dialog';
 
@@ -19,9 +19,7 @@ export function CancelSubscriptionDialog({
 }: CancelSubscriptionDialogProps) {
   const { t, i18n } = useTranslation('subscription');
   const plan = subscription ? t(`plan.${subscription.plan}`) : '';
-  const date = subscription
-    ? formatDate(new Date(subscription.currentPeriodEnd), i18n.language, 'arabic-indic', { dateStyle: 'medium' })
-    : '';
+  const date = subscription ? formatDateTime(subscription.currentPeriodEnd, i18n.language, 'date') : '';
 
   return (
     <Dialog open={subscription !== null} onOpenChange={onOpenChange}>

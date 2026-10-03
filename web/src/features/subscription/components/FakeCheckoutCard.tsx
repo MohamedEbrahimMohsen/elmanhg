@@ -2,7 +2,7 @@ import { useId } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import type { PaymentResult } from '@/shared/api/generated/model';
-import { formatMoney } from '@/shared/lib/format';
+import { formatMoney } from '@/shared/lib/money';
 import { Button } from '@/shared/ui/button';
 
 export interface FakeCheckoutCardProps {

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { AdminPaymentResult } from '@/shared/api/generated/model';
-import { formatDate, formatMoney } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
+import { formatMoney } from '@/shared/lib/money';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/button';
 import { PaymentStatusBadge } from './PaymentStatusBadge';
@@ -20,8 +21,7 @@ const captionClassName = 'block text-caption text-text-muted';
 export function PaymentLogRow({ item, refundsEnabled, onRefund, onKeep, onStudent }: PaymentLogRowProps) {
   const { t, i18n } = useTranslation('payments');
   const lng = i18n.resolvedLanguage ?? i18n.language;
-  const date = (value: string) =>
-    formatDate(new Date(value), lng, 'latin', { dateStyle: 'medium', timeStyle: 'short' });
+  const date = (value: string) => formatDateTime(value, lng);
 
   return (
     <tr className="border-t border-border hover:bg-soft">
@@ -48,7 +48,7 @@ export function PaymentLogRow({ item, refundsEnabled, onRefund, onKeep, onStuden
         <span className={captionClassName}>{t(`period.${item.period}`)}</span>
       </td>
       <td className={cn(cellClassName, 'whitespace-nowrap')}>
-        {formatMoney(Number(item.amount.amountMinor), item.amount.currency, lng, 'latin')}
+        {formatMoney(Number(item.amount.amountMinor), item.amount.currency, lng)}
       </td>
       <td className={cellClassName}>
         <div className="flex flex-col items-start gap-1.5">

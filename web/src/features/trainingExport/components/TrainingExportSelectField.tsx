@@ -2,6 +2,7 @@ import { useId } from 'react';
 import { useController } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Label } from '@/shared/ui/label';
+import { Select } from '@/shared/ui/select';
 import type { TrainingExportRequestValues } from '../schemas/trainingExportRequestSchema';
 
 export interface TrainingExportSelectFieldProps {
@@ -23,7 +24,7 @@ export function TrainingExportSelectField({ name, label, allLabel, options }: Tr
   return (
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={id}>{label}</Label>
-      <select
+      <Select
         id={id}
         ref={ref}
         name={fieldName}
@@ -32,7 +33,6 @@ export function TrainingExportSelectField({ name, label, allLabel, options }: Tr
         onBlur={onBlur}
         aria-invalid={fieldState.invalid}
         aria-describedby={fieldState.error ? errorId : undefined}
-        className="h-11 w-full rounded-sm border border-border-strong bg-surface px-3 text-ui text-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
       >
         {allLabel ? <option value="">{allLabel}</option> : null}
         {options.map((option) => (
@@ -40,7 +40,7 @@ export function TrainingExportSelectField({ name, label, allLabel, options }: Tr
             {option.label}
           </option>
         ))}
-      </select>
+      </Select>
       {fieldState.error ? (
         <p id={errorId} className="text-caption text-danger">
           {t([fieldState.error.message ?? '', 'errors.UNHANDLED_EXCEPTION'])}

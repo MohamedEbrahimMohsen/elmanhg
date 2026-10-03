@@ -82,7 +82,7 @@ describe('StudentHomePage', () => {
   it('renders right-to-left with the Arabic counter in Arabic', async () => {
     openHome(undefined, 'ar');
 
-    expect(await screen.findByText('متبقّي لك ٤٠ سؤال من ٦٠')).toBeInTheDocument();
+    expect(await screen.findByText('متبقّي لك 40 سؤال من 60')).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('dir', 'rtl');
     expect(screen.getByRole('link', { name: 'درّب الآن' })).toBeInTheDocument();
   });

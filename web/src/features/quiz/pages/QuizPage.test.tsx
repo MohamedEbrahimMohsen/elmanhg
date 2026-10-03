@@ -283,7 +283,7 @@ describe('QuizPage', () => {
   it('renders right to left in Arabic', async () => {
     openQuiz('ar');
 
-    expect(await screen.findByRole('heading', { name: 'السؤال ١ من ٣' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'السؤال 1 من 3' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'تحقّق' })).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('dir', 'rtl');
   });

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { TextField } from '@/shared/form/TextField';
 import { Button } from '@/shared/ui/button';
 import { Label } from '@/shared/ui/label';
+import { Select } from '@/shared/ui/select';
 import { zoneOfItem, type DiagramZoneValues } from '../api/dragDropValues';
 import type { QuestionValues } from '../schemas/questionEditorSchema';
 
@@ -15,9 +16,6 @@ export interface DiagramItemRowProps {
   onRemove: () => void;
   canRemove: boolean;
 }
-
-const selectClassName =
-  'h-11 w-full rounded-sm border border-border-strong bg-surface px-3 text-ui text-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden';
 
 export function DiagramItemRow({ index, itemId, zones, onAssign, onRemove, canRemove }: DiagramItemRowProps) {
   const { t } = useTranslation('questionsDiagram');
@@ -33,13 +31,12 @@ export function DiagramItemRow({ index, itemId, zones, onAssign, onRemove, canRe
         />
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={id}>{t('editor.dragDrop.itemZone', { number })}</Label>
-          <select
+          <Select
             id={id}
             value={zoneOfItem(zones, itemId)}
             onChange={(event) => {
               onAssign(event.target.value);
             }}
-            className={selectClassName}
           >
             <option value="">{t('editor.dragDrop.noZone')}</option>
             {zones.map((zone, position) => (
@@ -47,7 +44,7 @@ export function DiagramItemRow({ index, itemId, zones, onAssign, onRemove, canRe
                 {t('editor.dragDrop.zone', { number: position + 1 })}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
       <Button

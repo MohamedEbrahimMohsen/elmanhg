@@ -63,7 +63,7 @@ describe('DashboardPage filters', () => {
     );
     await openDashboard();
 
-    expect(await (await region('Solve rate')).findByText('Attempts: 111')).toBeInTheDocument();
+    expect(await (await region('Solve rate')).findByText('111 attempts · 1,800 student-days')).toBeInTheDocument();
     expect(screen.getByText('From Sep 17 to Sep 30')).toBeInTheDocument();
     expect(screen.getByLabelText('Period')).toHaveDisplayValue('Last 14 days');
   });
@@ -79,7 +79,7 @@ describe('DashboardPage filters', () => {
 
     await user.selectOptions(await screen.findByLabelText('Period'), 'Last 7 days');
 
-    expect(await (await region('Solve rate')).findByText('Attempts: 222')).toBeInTheDocument();
+    expect(await (await region('Solve rate')).findByText('222 attempts · 1,800 student-days')).toBeInTheDocument();
     expect(screen.getByText('From Sep 24 to Sep 30')).toBeInTheDocument();
     expect(router.state.location.search).toEqual({ days: 7 });
   });
@@ -96,7 +96,7 @@ describe('DashboardPage filters', () => {
     expect(await screen.findByText('From Sep 17 to Sep 30')).toBeInTheDocument();
     await vi.advanceTimersByTimeAsync(60_000);
 
-    expect(await (await region('Solve rate')).findByText('Attempts: 333')).toBeInTheDocument();
+    expect(await (await region('Solve rate')).findByText('333 attempts · 1,800 student-days')).toBeInTheDocument();
     expect(screen.getByText('From Sep 18 to Oct 1')).toBeInTheDocument();
   });
 
@@ -108,7 +108,7 @@ describe('DashboardPage filters', () => {
     await screen.findByRole('option', { name: 'Physics' });
     await user.selectOptions(screen.getByLabelText('Subject'), 'Physics');
 
-    expect(await (await region('Content')).findByText('300')).toBeInTheDocument();
+    expect(await (await region('Servable questions')).findByText('300')).toBeInTheDocument();
     const students = await region('Students');
     expect(await students.findByText('Not filtered by subject')).toBeInTheDocument();
     expect(students.getByText('1,250')).toBeInTheDocument();
@@ -120,10 +120,10 @@ describe('DashboardPage filters', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     const { router } = await openDashboard(`/admin?subjectId=${dashboardPhysicsId}`);
 
-    expect(await (await region('Content')).findByText('300')).toBeInTheDocument();
+    expect(await (await region('Servable questions')).findByText('300')).toBeInTheDocument();
     await user.selectOptions(screen.getByLabelText('Subject'), 'All subjects');
 
-    expect(await (await region('Content')).findByText('870')).toBeInTheDocument();
+    expect(await (await region('Servable questions')).findByText('870')).toBeInTheDocument();
     expect((await region('Students')).queryByText('Not filtered by subject')).not.toBeInTheDocument();
     expect(router.state.location.search).toEqual({});
   });

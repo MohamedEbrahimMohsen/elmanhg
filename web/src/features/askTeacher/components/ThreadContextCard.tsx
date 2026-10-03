@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RichTextViewer } from '@/features/content';
 import type { TeacherThreadResult } from '@/shared/api/generated/model';
-import { formatDate } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
 import { ThreadStatusBadge } from './ThreadStatusBadge';
 
 export interface ThreadContextCardProps {
@@ -14,7 +14,7 @@ export function ThreadContextCard({ thread, children }: ThreadContextCardProps) 
   const { t, i18n } = useTranslation('askTeacher');
   const lng = i18n.resolvedLanguage ?? i18n.language;
   const { context } = thread;
-  const due = formatDate(new Date(thread.slaDueAt), lng, 'arabic-indic', { dateStyle: 'medium', timeStyle: 'short' });
+  const due = formatDateTime(thread.slaDueAt, lng);
 
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-1">

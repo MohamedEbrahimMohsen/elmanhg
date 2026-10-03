@@ -35,7 +35,7 @@ export function QuestionImportErrorTable({ errors }: QuestionImportErrorTablePro
           {errors.map(({ sheet, row, column, code }) => (
             <tr key={`${sheet}-${String(row)}-${column ?? ''}-${code}`} className="border-t border-border">
               <td className={cellClassName}>{sheet}</td>
-              <td className={cellClassName}>{formatNumber(Number(row), lng, 'latin')}</td>
+              <td className={cellClassName}>{formatNumber(Number(row), lng)}</td>
               <td className={cellClassName}>{column ?? t('import.report.noColumn')}</td>
               <td className={cellClassName}>
                 {t([`common:errors.${code}`, 'common:errors.UNHANDLED_EXCEPTION'], { column: column ?? '' })}

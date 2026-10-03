@@ -40,7 +40,7 @@ export function QuestionEditorHeader({ lesson, question }: QuestionEditorHeaderP
           <>
             <QuestionStatusBadge status={question.validationStatus} />
             <span className="rounded-full bg-soft px-2.5 py-0.5 text-micro font-semibold text-text-muted">
-              {t('editor.versionBadge', { version: formatNumber(Number(question.version), lng, 'latin') })}
+              {t('editor.versionBadge', { version: formatNumber(Number(question.version), lng) })}
             </span>
           </>
         ) : null}

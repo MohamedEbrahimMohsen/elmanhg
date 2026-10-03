@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { PaymentResult, PaymentStatus } from '@/shared/api/generated/model';
-import { formatDate, formatMoney } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
+import { formatMoney } from '@/shared/lib/money';
 import { cn } from '@/shared/lib/utils';
 
 export interface PaymentHistoryTableProps {
@@ -43,7 +44,7 @@ export function PaymentHistoryTable({ items }: PaymentHistoryTableProps) {
           {items.map((item) => (
             <tr key={item.id} className="border-t border-border">
               <td className={cn(cellClassName, 'whitespace-nowrap')}>
-                {formatDate(new Date(item.completedAt ?? item.createdAt), lng, 'arabic-indic', { dateStyle: 'medium' })}
+                {formatDateTime(item.completedAt ?? item.createdAt, lng, 'date')}
               </td>
               <td className={cellClassName}>{t(`plan.${item.plan}`)}</td>
               <td className={cn(cellClassName, 'whitespace-nowrap')}>

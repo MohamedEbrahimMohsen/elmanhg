@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { TrainingExportResult } from '@/shared/api/generated/model';
-import { formatDate, formatNumber } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
+import { formatNumber } from '@/shared/lib/format';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/button';
 import { TrainingExportStatusBadge } from './TrainingExportStatusBadge';
@@ -18,7 +19,7 @@ const kilobyte = 1024;
 export function TrainingExportRow({ item, subjectName, downloading, onDownload }: TrainingExportRowProps) {
   const { t, i18n } = useTranslation('trainingExport');
   const lng = i18n.resolvedLanguage ?? i18n.language;
-  const date = (value: string) => formatDate(new Date(value), lng, 'latin', { dateStyle: 'medium' });
+  const date = (value: string) => formatDateTime(value, lng, 'date');
   const lastDay = new Date(new Date(item.to).getTime() - 1).toISOString();
 
   const renderAction = () => {
@@ -67,19 +68,15 @@ export function TrainingExportRow({ item, subjectName, downloading, onDownload }
       <td className={cellClassName}>
         <TrainingExportStatusBadge status={item.status} />
       </td>
-      <td className={cellClassName}>
-        {item.rowCount === null ? '—' : formatNumber(Number(item.rowCount), lng, 'latin')}
-      </td>
+      <td className={cellClassName}>{item.rowCount === null ? '—' : formatNumber(Number(item.rowCount), lng)}</td>
       <td className={cellClassName}>
         {item.fileSizeBytes === null
           ? '—'
           : t('list.sizeKb', {
-              size: formatNumber(Number(item.fileSizeBytes) / kilobyte, lng, 'latin', { maximumFractionDigits: 1 }),
+              size: formatNumber(Number(item.fileSizeBytes) / kilobyte, lng, { maximumFractionDigits: 1 }),
             })}
       </td>
-      <td className={cn(cellClassName, 'whitespace-nowrap')}>
-        {formatDate(new Date(item.requestedAt), lng, 'latin', { dateStyle: 'medium', timeStyle: 'short' })}
-      </td>
+      <td className={cn(cellClassName, 'whitespace-nowrap')}>{formatDateTime(item.requestedAt, lng)}</td>
       <td className={cellClassName}>{renderAction()}</td>
     </tr>
   );

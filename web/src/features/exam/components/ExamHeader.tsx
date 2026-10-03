@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { formatDate, formatNumber } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
+import { formatNumber } from '@/shared/lib/format';
 import { cn } from '@/shared/lib/utils';
 import { isCountdownUrgent, splitCountdown } from '../api/examSession';
 import type { ExamSaveStatus } from '../hooks/useExamAnswers';
@@ -20,7 +21,7 @@ export function ExamHeader({ title, remainingMilliseconds, status, lastSavedAt }
     status === 'saving'
       ? t('exam.saving')
       : status === 'saved' && lastSavedAt
-        ? t('exam.savedAt', { time: formatDate(lastSavedAt, lng, 'arabic-indic', { timeStyle: 'short' }) })
+        ? t('exam.savedAt', { time: formatDateTime(lastSavedAt, lng, 'time') })
         : status === 'error'
           ? t('exam.saveFailed')
           : t('exam.autoSaved');
@@ -32,7 +33,7 @@ export function ExamHeader({ title, remainingMilliseconds, status, lastSavedAt }
         <p role="timer" aria-live="off" className={cn('font-display text-h3 font-bold', urgent && 'text-danger')}>
           {t('exam.timeLeft', {
             minutes: formatNumber(countdown.minutes, lng),
-            seconds: formatNumber(countdown.seconds, lng, 'arabic-indic', { minimumIntegerDigits: 2 }),
+            seconds: formatNumber(countdown.seconds, lng, { minimumIntegerDigits: 2 }),
           })}
         </p>
       ) : null}

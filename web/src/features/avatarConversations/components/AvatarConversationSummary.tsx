@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { AdminAvatarConversationDetailResult } from '@/shared/api/generated/model';
-import { formatDate } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
 import { formatCostUsd, formatCount } from '../api/avatarConversationFormat';
 
 export interface AvatarConversationSummaryProps {
@@ -10,8 +10,7 @@ export interface AvatarConversationSummaryProps {
 export function AvatarConversationSummary({ conversation }: AvatarConversationSummaryProps) {
   const { t, i18n } = useTranslation('avatarConversations');
   const lng = i18n.resolvedLanguage ?? i18n.language;
-  const date = (value: string) =>
-    formatDate(new Date(value), lng, 'latin', { dateStyle: 'medium', timeStyle: 'short' });
+  const date = (value: string) => formatDateTime(value, lng);
   const scope = [conversation.subjectName, conversation.unitName, conversation.lessonName]
     .filter((name) => name !== null)
     .join(' › ');

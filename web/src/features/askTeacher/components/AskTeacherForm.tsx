@@ -6,7 +6,8 @@ import { Form } from '@/shared/form/Form';
 import { FormRootError } from '@/shared/form/FormRootError';
 import { SubmitButton } from '@/shared/form/SubmitButton';
 import { TextAreaField } from '@/shared/form/TextAreaField';
-import { formatDate, formatNumber } from '@/shared/lib/format';
+import { formatDateTime } from '@/shared/lib/dateTime';
+import { formatNumber } from '@/shared/lib/format';
 import { useCreateThread } from '../hooks/useCreateThread';
 import { askTeacherFormSchema, type AskTeacherFormValues } from '../schemas/askTeacherFormSchema';
 import type { AskTeacherNewSearch } from '../schemas/askTeacherNewSearchSchema';
@@ -49,10 +50,7 @@ export function AskTeacherForm({ search, replyDeadline }: AskTeacherFormProps) {
         <p className="text-caption text-text-muted">
           {t('form.slaNote', {
             hours: formatNumber(Number(replyDeadline.replySlaHours), lng),
-            date: formatDate(new Date(replyDeadline.slaDueAt), lng, 'arabic-indic', {
-              dateStyle: 'full',
-              timeStyle: 'short',
-            }),
+            date: formatDateTime(replyDeadline.slaDueAt, lng, 'fullDateTime'),
           })}
         </p>
       )}
