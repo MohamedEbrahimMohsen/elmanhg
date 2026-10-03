@@ -8,6 +8,9 @@ import { ValidationQuestionContent } from '../components/ValidationQuestionConte
 import { ValidationQuestionHeader } from '../components/ValidationQuestionHeader';
 import { useRecordOpening } from '../hooks/useRecordOpening';
 import { useReviewSession } from '../hooks/useReviewSession';
+import { registerQuestionsAdminLocales } from '../questionsAdminLocales';
+
+registerQuestionsAdminLocales();
 
 export interface ValidationQuestionPageProps {
   questionId: string;

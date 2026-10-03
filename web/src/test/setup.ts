@@ -2,11 +2,12 @@ import './nodeFormData';
 import '@testing-library/jest-dom/vitest';
 import { cleanup, configure } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll } from 'vitest';
-import { i18n, initI18n } from '@/app/i18n';
+import { i18n, initI18n, loadLanguage } from '@/app/i18n';
 import { registerAuthHandlers, setAccessToken } from '@/shared/lib/authToken';
 import { server } from './msw/server';
 
 initI18n('en');
+await loadLanguage('en');
 configure({ asyncUtilTimeout: 3000 });
 
 Object.defineProperty(window, 'scrollTo', { value: () => undefined, writable: true });

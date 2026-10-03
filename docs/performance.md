@@ -43,15 +43,17 @@ Also: `http_req_failed` < 1 % and `checks` > 99 %. The answer check is the only 
 
 | Page | Entries | Measured (KB br) | Budget (KB br) |
 |---|---|---|---|
-| `entry` | `index.html` | 204 | 210 |
-| `landing` | + `routes/index` | 213 | 220 |
-| `lesson` | + `student/route`, `student/lesson.$lessonId`, `lesson.$lessonId.index` | 234 | 240 |
-| `quiz` | + `student/route`, `student/quiz.$sessionId` | 248 | 255 |
-| `admin-dashboard` | + `admin/route`, `admin/index` | 233 | 233 |
-| `admin-users` | + `admin/route`, `admin/users` | 254 | 270 |
-| `teacher-home` | + `teacher/route`, `teacher/index` | 250 | 265 |
+| `entry` | `index.html` | 190 | 210 |
+| `landing` | + `routes/index` | 199 | 220 |
+| `lesson` | + `student/route`, `student/lesson.$lessonId`, `lesson.$lessonId.index` | 221 | 240 |
+| `quiz` | + `student/route`, `student/quiz.$sessionId` | 236 | 255 |
+| `admin-dashboard` | + `admin/route`, `admin/index` | 213 | 233 |
+| `admin-users` | + `admin/route`, `admin/users` | 245 | 270 |
+| `teacher-home` | + `teacher/route`, `teacher/index` | 246 | 265 |
 
-Budget = measured × 1.05, rounded up to the next 5 KB. They are regression guards; the 2 s browser gate is the real target. When a change legitimately grows a page, raise its budget in the same pull request and say why. #280 dataviz redesign (KPI tiles, panels, chart axes) grew the admin chunk.
+Budget = measured × 1.05, rounded up to the next 5 KB. They are regression guards; the 2 s browser gate is the real target. When a change legitimately grows a page, raise its budget in the same pull request and say why. #280 dataviz redesign (KPI tiles, panels, chart axes) grew the admin chunk. The measured column is after the #283 cleanup (§8); the budgets were set before it and were not lowered.
+
+**Diagnosing a failure.** When a page is over, `perf:budget` prints that page's chunks after the report, largest first: brotli bytes, share of the page, file, and the manifest source (the manifest key that emits the file, or `<key> (css)` for a stylesheet). `npm run perf:budget -- --breakdown=quiz` (or `--breakdown=quiz,lesson`) prints them on demand, and a bare `--breakdown` prints every page; an unknown page name fails. Shared `_name` chunks and `index.html` (the entry) count on every page, so a growth there moves every row of the table.
 
 ## 4. What keeps it fast
 
@@ -60,7 +62,8 @@ Budget = measured × 1.05, rounded up to the next 5 KB. They are regression guar
 - **Lazy quiz extras.** The quiz page loads the MathSteps input (`MathStepsAnswerInput`) only for a MathSteps question, the essay card (`QuizEssayCard`) only for an essay question, the paywall dialog (`LazyPaywallDialog`, with the radix dialog) only when a free-tier limit is reached, the drag-and-drop canvas (`DragDropAnswerInput`, with the `diagramStudent` strings) only for a drag-and-drop question, and the correct placements (`DragDropCorrectAnswer`, through `LazyDragDropCorrectAnswer`) only after checking one.
 - **Realtime client on connect.** The SignalR client (`@microsoft/signalr`, about 11 KB brotli) loads as its own chunk when the realtime connection starts, so it stays out of the entry bundle.
 - **Dashboard charts without a library.** The admin dashboard's three daily charts are plain SVG (`DailyBarChart`), so no chart library ships; the page is the auto-split `/admin/` chunk and has its own budget.
-- **Admin-only strings on demand.** The `dashboard` i18n namespace is not in `app/i18n.ts`. `DashboardPage` registers it with `addResourceBundle` when its `/admin/` chunk loads, before the first render, so student pages do not download admin copy. The `users` namespace is registered the same way by `UsersPage` and `StudentDetailPage` (#106). The diagram editor does the same: `registerDiagramLocales` (`features/questions/diagramLocales.ts`) adds the `questionsDiagram` namespace and deep-merges the `QUESTION_DIAGRAM_*` codes into `common:errors` (never overwriting) when `DragDropFields`, `DragDropPreview`, `DiagramKeyLegend` or `QuestionPreviewPanel` loads. Until then, those codes fall back to `common:errors.UNHANDLED_EXCEPTION`. The DragDrop zod schemas live in `schemas/dragDropContentSchemas.ts`, which only the admin `dragDropValues` imports, so they stay out of the quiz chunk. Student pages never load `questionsDiagram`: the canvas registers its own small `diagramStudent` namespace (`registerDiagramStudentLocales`) when its lazy chunk loads, and the quiz chunk carries only the student diagram schema (`schemas/studentDiagramSchema.ts`) and the placement helpers. The `admin-users` page also carries react-hook-form, the radix dialog and both `users` locale files, which is why it sits above `admin-dashboard`. Likewise the `teacherStats` namespace is registered by `TeacherStatsCard` when a teacher route chunk loads.
+- **Admin-only strings on demand.** The `dashboard` i18n namespace is not in `app/i18n.ts`. `DashboardPage` registers it with `addResourceBundle` when its `/admin/` chunk loads, before the first render, so student pages do not download admin copy. The `users` namespace is registered the same way by `UsersPage` and `StudentDetailPage` (#106). The diagram editor does the same: `registerDiagramLocales` (`features/questions/diagramLocales.ts`) adds the `questionsDiagram` namespace and deep-merges the `QUESTION_DIAGRAM_*` codes into `common:errors` (never overwriting) when `DragDropFields`, `DragDropPreview`, `DiagramKeyLegend` or `QuestionPreviewPanel` loads. Until then, those codes fall back to `common:errors.UNHANDLED_EXCEPTION`. The DragDrop zod schemas live in `schemas/dragDropContentSchemas.ts`, which only the admin `dragDropValues` imports, so they stay out of the quiz chunk. Student pages never load `questionsDiagram`: the canvas registers its own small `diagramStudent` namespace (`registerDiagramStudentLocales`) when its lazy chunk loads, and the quiz chunk carries only the student diagram schema (`schemas/studentDiagramSchema.ts`) and the placement helpers. The `admin-users` page also carries react-hook-form, the radix dialog and both `users` locale files, which is why it sits above `admin-dashboard`. Likewise the `teacherStats` namespace is registered by `TeacherStatsCard` when a teacher route chunk loads. Since #283 the `audit`, `blueprints`, `payments`, `trainingExport` and `avatarConversations` namespaces follow the same pattern, each registered by its page (`AuditLogPage`, `ExamBlueprintsPage`, `PaymentLogPage`, `TrainingExportPage`, `AvatarConversationsPage` and `AvatarConversationPage`). The `questions` namespace is split: the student groups (`types`, `preview`, `essayGrade`, `view`, `mathStepGrade`) stay in the entry, and the admin and teacher groups (`list`, `editor`, `import`, `validation`, `statuses`, `difficulties`) live in `questions/i18n/admin.{ar,en}.json`, deep-merged into the same namespace by `registerQuestionsAdminLocales` from the six question pages and `GradingKeyView`.
+- **Arabic at boot, English on demand.** The UI is Arabic (PRD §14), so only the Arabic resources are in the entry chunk. Each feature's locale export is `{ ar, en }` with `en` a loader (`() => import('./i18n/en.json')`), and `app/i18n.ts` keeps the `common` loader. `loadLanguage('en')` loads every English bundle in parallel and adds them only when all have arrived; if one fails, none is added and Arabic (the `fallbackLng`) keeps showing. A switch must load before it changes language, because react-i18next re-renders on `languageChanged`, not on added resources: `initI18n(lng)` on a running instance does `loadLanguage(lng)` then `changeLanguage(lng)`. Tests run in English: `src/test/setup.ts` awaits `loadLanguage('en')` after `initI18n('en')`.
 - **Lesson data on intent.** Hovering or focusing a lesson link preloads the route and prefetches `GET /api/browse/lessons/{id}` through the route loader, so the click renders from the cache.
 - **Images.** Rich-text images get `decoding="async"`, and every image after the first gets `loading="lazy"`. The editor downscales uploads to WebP with a 1600 px edge ([docs/rich-text.md](rich-text.md)).
 - **Precompression.** `npm run build` writes `.br` (quality 11) and `.gz` (level 9) next to every `.js .css .html .svg .json .txt` file of at least 1 KB, when smaller. Caddy serves them with `file_server { precompressed br gzip }` (it cannot brotli on the fly) and keeps `encode zstd gzip` for API responses. The smoke test asserts `Content-Encoding: br` on an asset.
@@ -195,11 +198,53 @@ Levers for the follow-up, in expected order of effect: split the entry bundle (r
 
 **Bundle sizes after this change** (brotli, the `perf:budget` report): entry 201 KB, landing 209 KB, lesson 230 KB, quiz 248 KB. KaTeX (78 KB gzip) and the avatar panel, with react-hook-form and the radix dialog, are no longer on the lesson critical path.
 
+### Bundle cleanup (#283), 2026-10-03
+
+The quiz page had 53 B to spare, so any student-facing change failed `perf:budget`. Three cuts, all inside the entry chunk (`index-*.js`), so every page drops by about the same amount: English strings on demand (−14.6 KB on quiz), the five admin namespaces registered by their pages (−2.3 KB), and the admin half of `questions` split out (−3.0 KB). The #282 disabled-button hover fix costs +19 B of CSS. No budget changed.
+
+Bytes brotli, `npm run build && npm run perf:budget` on `75f44a8a` (before) and on this change (after); budget = maxKb × 1024.
+
+| Page | Budget | Before | Spare before | After | Spare after | Δ |
+|---|---|---|---|---|---|---|
+| entry | 215040 | 213830 | 1210 | 194202 | 20838 | −19628 |
+| landing | 225280 | 223058 | 2222 | 203452 | 21828 | −19606 |
+| lesson | 245760 | 245462 | 298 | 225853 | 19907 | −19609 |
+| quiz | 261120 | 261067 | 53 | 241437 | 19683 | −19630 |
+| admin-dashboard | 238592 | 237687 | 905 | 218105 | 20487 | −19582 |
+| admin-users | 276480 | 270172 | 6308 | 250585 | 25895 | −19587 |
+| teacher-home | 271360 | 264063 | 7297 | 250982 | 20378 | −13081 |
+
+`teacher-home` gains less because the validation queue chunk on its path now carries the `questions` admin strings.
+
+Quiz after the cleanup (`npm run perf:budget -- --breakdown=quiz`, 241437 B):
+
+| Bytes br | Share | Chunk | Main contents |
+|---|---|---|---|
+| 131732 | 54.6 % | `index-*.js` (entry) | react-dom, Arabic i18n resources, router-core, i18next, sonner, @formatjs |
+| 24563 | 10.2 % | `http-*.js` | zod v4, query-core, `http.ts` |
+| 10531 | 4.4 % | `RichTextViewer-*.js` | dompurify |
+| 8516 | 3.5 % | `index-*.css` | utilities, theme, `@font-face` |
+| 7858 | 3.3 % | `utils-*.js` | tailwind-merge |
+| 5018 | 2.1 % | `compiler-runtime-*.js` | react, react-i18next |
+| 4968 | 2.1 % | `quiz._sessionId-*.js` | QuizQuestionCard, QuizRunner, hooks |
+| 4742 | 2.0 % | `useQuery-*.js` | query-core |
+| 4739 | 2.0 % | `QuestionView-*.js` | answer inputs |
+| 4400 | 1.8 % | `MathStepGradeStatus-*.js` | FeedbackPanel, MathStepGrade*, CorrectAnswer |
+| 4227 | 1.8 % | `link-*.js` | router |
+| 2651 · 2354 · 1983 | 2.9 % | AppShell · student route · navConfig | |
+| 23155 | 9.6 % | 45 chunks under 1.7 KB each | mathStepsValue, lucide icons, sessions, subscriptions, quizItem… |
+
+Investigated and left alone: the quiz extras, the avatar panel, KaTeX and the paywall are already lazy and off the quiz closure; excluding generated files from the Tailwind scan saves 0 B; unused exports are tree-shaken (0 B); a vendor split changes caching, not page totals.
+
 ## 9. Levers not yet used
 
 | Lever | Why not yet |
 |---|---|
-| Drop English locales from the production bundle (about 16 KB gzip) | every feature's `locales.ts` exports `{ ar, en }` in one object, so it touches about 17 feature modules |
+| Sonner on demand (about 8.2 KB brotli on every page) | the first toast would wait for a chunk |
+| FeedbackPanel and MathStepGrade on the first check (about 4.4 KB on quiz) | adds a chunk download to the first check's latency |
+| Prune fontsource subsets (up to 1.7 KB of CSS) | changes rendering of rare Latin-ext and Vietnamese glyphs |
+| Split `common:errors` by role (about 5 KB) | resolving an error code would depend on the route |
+| Split react-dom, the router and i18next out of the entry for cross-deploy caching | no budget gain (page totals grow a little) |
 | A projection for `GetStudentLesson` (it loads the full lesson rows of the subject) | only if `browse_lesson` comes near its budget in a full run |
 | `ExamSessionResultLoader` loads each selected unit by id | at most one primary-key lookup per unit |
 | A CDN in front of Caddy for `/assets/*` and `/api/media/*` | needs the live domain and hosting (#205) |

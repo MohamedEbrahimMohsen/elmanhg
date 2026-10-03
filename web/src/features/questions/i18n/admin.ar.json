@@ -1,0 +1,345 @@
+{
+  "statuses": {
+    "Pending": "قيد المراجعة",
+    "Approved": "معتمد",
+    "Rejected": "مرفوض"
+  },
+  "difficulties": {
+    "Easy": "سهل",
+    "Medium": "متوسط",
+    "Hard": "صعب"
+  },
+  "list": {
+    "title": "بنك الأسئلة",
+    "count": "{count, plural, zero {لا أسئلة} one {سؤال واحد} two {سؤالان} few {# أسئلة} many {# سؤالًا} other {# سؤال}}",
+    "loading": "جارٍ تحميل الأسئلة",
+    "errorTitle": "تعذر تحميل الأسئلة",
+    "hint": "لإضافة سؤال افتح الدرس من شجرة المحتوى.",
+    "lessonFilter": "تعرض أسئلة درس واحد.",
+    "newInLesson": "سؤال جديد في هذا الدرس",
+    "importInLesson": "استيراد أسئلة إلى هذا الدرس",
+    "empty": {
+      "noData": "لا توجد أسئلة بعد.",
+      "noResults": "لا توجد أسئلة تطابق هذه الفلاتر."
+    },
+    "table": {
+      "caption": "الأسئلة",
+      "question": "السؤال",
+      "lesson": "الدرس",
+      "type": "النوع",
+      "status": "الحالة",
+      "version": "الإصدار",
+      "teacher": "المعلّم",
+      "rejectionReason": "سبب الرفض",
+      "actions": "الإجراءات",
+      "versionValue": "v{version}",
+      "noTeacher": "—",
+      "edit": "تعديل",
+      "editAndResubmit": "تعديل وإعادة إرسال"
+    },
+    "filters": {
+      "status": "الحالة",
+      "type": "النوع",
+      "subject": "المادة",
+      "teacher": "المعلّم",
+      "minVersion": "الإصدار على الأقل",
+      "rejectionReason": "سبب الرفض يحتوي على",
+      "all": "الكل",
+      "apply": "تطبيق الفلاتر",
+      "clear": "مسح الفلاتر",
+      "errors": {
+        "minVersion": "اكتب رقمًا صحيحًا 1 أو أكثر.",
+        "rejectionReasonTooLong": "نص البحث طويل جدًا."
+      }
+    }
+  },
+  "editor": {
+    "newTitle": "سؤال جديد",
+    "editTitle": "تحرير سؤال",
+    "breadcrumb": "مسار التنقل",
+    "questionsLink": "الأسئلة",
+    "loading": "جارٍ تحميل السؤال",
+    "errorTitle": "تعذر تحميل السؤال",
+    "lessonErrorTitle": "تعذر تحميل الدرس",
+    "approvedWarning": "تعديل نص السؤال أو الخيارات أو الإجابة أو الشرح أو الدرجة يعيده إلى \"قيد المراجعة\" ويزيد الإصدار. تعديل الصعوبة أو الهدف أو الوسوم فقط لا يغيّر الحالة.",
+    "rejectionReason": "سبب الرفض: {reason}",
+    "versionBadge": "v{version}",
+    "save": "حفظ",
+    "create": "إنشاء السؤال",
+    "resubmit": "حفظ وإعادة الإرسال للمراجعة",
+    "created": "تم إنشاء السؤال.",
+    "saved": "تم حفظ السؤال.",
+    "resubmitted": "أعيد إرسال السؤال للمراجعة.",
+    "fields": {
+      "type": "النوع",
+      "typeLocked": "لا يمكن تغيير نوع السؤال.",
+      "stem": "نص السؤال",
+      "stemFillHint": "اكتب [[1]] مكان الفراغ الأول و[[2]] مكان الثاني وهكذا.",
+      "explanation": "الشرح (يظهر بعد الإجابة)",
+      "difficulty": "الصعوبة",
+      "objective": "الهدف",
+      "noObjective": "بدون هدف",
+      "maxScore": "الدرجة",
+      "tags": "الوسوم",
+      "tagsHint": "افصل الوسوم بفواصل.",
+      "typeV2": "{type} (v2)"
+    },
+    "options": {
+      "legend": "الخيارات",
+      "option": "الخيار {number}",
+      "correct": "الخيار {number} صحيح",
+      "add": "إضافة خيار",
+      "remove": "حذف الخيار {number}",
+      "partialCredit": "احتساب درجة جزئية"
+    },
+    "trueFalse": {
+      "answer": "الإجابة الصحيحة",
+      "choose": "اختر",
+      "true": "صح",
+      "false": "خطأ"
+    },
+    "blanks": {
+      "legend": "الفراغات",
+      "accepted": "الإجابات المقبولة للفراغ {number} (إجابة في كل سطر)",
+      "add": "إضافة فراغ",
+      "remove": "حذف الفراغ {number}"
+    },
+    "normalization": {
+      "legend": "تطبيع الإجابة",
+      "hint": "تُطبَّق على إجابة الطالب وعلى كل إجابة مقبولة قبل المقارنة.",
+      "stripTashkeel": "تجاهل التشكيل",
+      "stripTatweel": "تجاهل التطويل (ـ)",
+      "unifyAlef": "اعتبار أ إ آ ٱ مثل ا",
+      "unifyTaaMarbuta": "اعتبار ة مثل ه",
+      "unifyAlefMaqsura": "اعتبار ى مثل ي",
+      "convertDigits": "اعتبار الأرقام العربية (٠–٩) مثل 0–9",
+      "collapseWhitespace": "تجاهل المسافات الزائدة",
+      "foldCase": "تجاهل حالة الأحرف اللاتينية"
+    },
+    "short": {
+      "answerKind": "نوع الإجابة",
+      "numeric": "رقمية",
+      "text": "نصية",
+      "value": "القيمة الصحيحة",
+      "tolerance": "السماحية",
+      "toleranceMode": "نوع السماحية",
+      "absolute": "± مطلق",
+      "percent": "± نسبة مئوية",
+      "accepted": "الإجابات المقبولة (إجابة في كل سطر)"
+    },
+    "errors": {
+      "maxScore": "اكتب درجة صحيحة من 1 إلى 100.",
+      "optionsCount": "أضف خيارين على الأقل.",
+      "correctOption": "حدد إجابة صحيحة واحدة فقط.",
+      "correctOptions": "حدد إجابة صحيحة واحدة على الأقل.",
+      "trueFalseAnswer": "اختر الإجابة الصحيحة.",
+      "blanksCount": "أضف فراغًا واحدًا على الأقل.",
+      "acceptedAnswers": "أضف إجابة مقبولة واحدة على الأقل.",
+      "blankPlaceholder": "ضع [[id]] لكل فراغ مرة واحدة فقط في نص السؤال.",
+      "number": "اكتب رقمًا.",
+      "tolerance": "اكتب سماحية 0 أو أكثر.",
+      "maxWords": "اكتب حدًا للكلمات من 1 إلى 2000 أو اتركه فارغًا.",
+      "criteriaCount": "أضف معيارًا واحدًا على الأقل.",
+      "rubricPoints": "اكتب نقاطًا صحيحة من 1 إلى 100.",
+      "levelsCount": "أضف مستويين على الأقل.",
+      "levelPoints": "اكتب نقاطًا صحيحة من 0 إلى نقاط المعيار.",
+      "levelScale": "يجب أن تختلف نقاط المستويات وأن تشمل 0 ونقاط المعيار كاملة.",
+      "modelAnswersCount": "أضف إجابة نموذجية واحدة على الأقل.",
+      "mathAnswersCount": "أضف إجابة مقبولة واحدة على الأقل.",
+      "mathAnswerLength": "يجب ألا تزيد الإجابة على 200 حرف.",
+      "mathToleranceForm": "هامش الخطأ يعمل مع «أي صورة مكافئة» فقط.",
+      "mathStepsWeight": "وزن الخطوات عدد صحيح من 0 إلى 100.",
+      "mathSolutionCount": "الحد الأقصى 20 خطوة.",
+      "mathSolutionStepLength": "الخطوة أطول من 500 حرف.",
+      "mathSolutionRequired": "أضف خطوة واحدة على الأقل للحل النموذجي."
+    },
+    "essay": {
+      "maxWords": "الحد الأقصى للكلمات (اختياري)",
+      "maxWordsHint": "يظهر للطالب أسفل مربع الإجابة.",
+      "rubricLegend": "معايير التصحيح",
+      "rubricHint": "مجموع النقاط: {total}. الدرجة = النقاط المحققة ÷ {total} × درجة السؤال.",
+      "criterion": "المعيار {number}",
+      "criterionTitle": "عنوان المعيار {number}",
+      "criterionDescription": "ما يقيسه المعيار {number} (اختياري)",
+      "criterionPoints": "نقاط المعيار {number}",
+      "addCriterion": "إضافة معيار",
+      "removeCriterion": "حذف المعيار {number}",
+      "levelsLegend": "مستويات المعيار {number}",
+      "levelPoints": "نقاط المستوى {level} في المعيار {number}",
+      "levelDescription": "وصف المستوى {level} في المعيار {number}",
+      "addLevel": "إضافة مستوى للمعيار {number}",
+      "removeLevel": "حذف المستوى {level} من المعيار {number}",
+      "modelAnswersLegend": "الإجابات النموذجية",
+      "modelAnswersHint": "يستخدمها مصحح الذكاء الاصطناعي ولا تظهر للطالب.",
+      "modelAnswer": "الإجابة النموذجية {number}",
+      "addModelAnswer": "إضافة إجابة نموذجية",
+      "removeModelAnswer": "حذف الإجابة النموذجية {number}"
+    },
+    "math": {
+      "answersLegend": "الإجابات النهائية المقبولة",
+      "answersHint": "اكتب كل إجابة بصيغة LaTeX، مثل x = 2 أو \\sqrt 2. تُقبل أي إجابة مكافئة رياضيًا.",
+      "answer": "الإجابة المقبولة {number}",
+      "answerPreview": "معاينة الإجابة المقبولة {number}",
+      "addAnswer": "أضف إجابة",
+      "removeAnswer": "احذف الإجابة المقبولة {number}",
+      "form": "الصورة المطلوبة",
+      "forms": {
+        "equivalent": "أي صورة مكافئة",
+        "simplified": "أبسط صورة",
+        "factored": "محللة إلى عوامل",
+        "expanded": "مفكوكة",
+        "exact": "قيمة مضبوطة بدون كسور عشرية"
+      },
+      "tolerance": "هامش الخطأ العددي (اختياري)",
+      "toleranceHint": "يقبل إجابة عددية قريبة بهذا القدر. يعمل مع «أي صورة مكافئة» فقط.",
+      "toleranceMode": "نوع الهامش",
+      "stepsNote": "عندما يكون وزن الخطوات أكبر من صفر، يصحّح مصحح الذكاء الاصطناعي خطوات الطالب مقارنةً بالحل النموذجي.",
+      "solutionLegend": "الحل النموذجي",
+      "solutionHint": "اكتب خطوات الحل بالترتيب بصيغة LaTeX. يقارن مصحح الذكاء الاصطناعي خطوات الطالب بها.",
+      "solutionStep": "الخطوة {number}",
+      "solutionStepPreview": "معاينة الخطوة {number}",
+      "addSolutionStep": "أضف خطوة",
+      "removeSolutionStep": "احذف الخطوة {number}",
+      "stepsWeight": "وزن الخطوات (٪)",
+      "stepsWeightHint": "0 يصحّح الإجابة النهائية فقط. أي قيمة أكبر تمنح هذه النسبة من الدرجة لخطوات الحل."
+    }
+  },
+  "import": {
+    "title": "استيراد أسئلة",
+    "breadcrumb": "مسار التنقل",
+    "loading": "جارٍ تحميل الدرس",
+    "lessonErrorTitle": "تعذّر تحميل الدرس",
+    "intro": "أضف أسئلة كثيرة إلى هذا الدرس مرة واحدة من جدول بيانات. كل سؤال مستورد يبدأ قيد المراجعة.",
+    "template": {
+      "title": "1. نزّل القالب",
+      "description": "يحتوي القالب على ورقة لكل نوع سؤال وورقة تعليمات تشرح كل عمود.",
+      "download": "تنزيل القالب"
+    },
+    "form": {
+      "title": "2. افحص ملفك",
+      "file": "ملف جدول البيانات (.xlsx)",
+      "hint": "لن يُحفظ شيء حتى تؤكد الاستيراد.",
+      "check": "افحص الملف"
+    },
+    "report": {
+      "title": "نتيجة الفحص",
+      "summary": "{total, plural, zero {لا صفوف} one {صف واحد} two {صفان} few {# صفوف} many {# صفًا} other {# صف}} · {valid, plural, zero {لا شيء جاهز} one {سؤال جاهز} two {سؤالان جاهزان} few {# أسئلة جاهزة} many {# سؤالًا جاهزًا} other {# سؤال جاهز}} · {errors, plural, zero {لا مشكلات} one {مشكلة واحدة} two {مشكلتان} few {# مشكلات} many {# مشكلة} other {# مشكلة}}",
+      "types": "الجاهز حسب النوع",
+      "errorsCaption": "مشكلات يجب تصحيحها",
+      "sheet": "الورقة",
+      "row": "الصف",
+      "column": "العمود",
+      "problem": "المشكلة",
+      "noColumn": "—",
+      "fixAndRetry": "صحّح هذه المشكلات في ملفك ثم افحصه مرة أخرى. لم يُستورد أي شيء.",
+      "pendingNote": "تبقى الأسئلة المستوردة قيد المراجعة حتى يعتمدها معلّم.",
+      "confirm": "{count, plural, one {استيراد سؤال واحد} two {استيراد سؤالين} few {استيراد # أسئلة} many {استيراد # سؤالًا} other {استيراد # سؤال}}"
+    },
+    "success": {
+      "title": "{count, plural, one {تم استيراد سؤال واحد} two {تم استيراد سؤالين} few {تم استيراد # أسئلة} many {تم استيراد # سؤالًا} other {تم استيراد # سؤال}} قيد المراجعة.",
+      "viewQuestions": "عرض أسئلة الدرس",
+      "another": "استيراد ملف آخر"
+    },
+    "toast": {
+      "imported": "تم استيراد الأسئلة."
+    }
+  },
+  "validation": {
+    "queue": {
+      "title": "قائمة المراجعة",
+      "subjects": "موادك: {subjects}",
+      "loading": "جارٍ تحميل قائمة المراجعة",
+      "errorTitle": "تعذر تحميل قائمة المراجعة",
+      "listLabel": "أسئلة بانتظار المراجعة",
+      "select": "تحديد: {stem}",
+      "openToSelect": "افتح السؤال أولاً لتحديده",
+      "opened": "مفتوح",
+      "age": "ينتظر {age}",
+      "selectedCount": "{count, plural, =0 {لم يتم تحديد أسئلة} one {تم تحديد سؤال واحد} two {تم تحديد سؤالين} few {تم تحديد {formattedCount} أسئلة} many {تم تحديد {formattedCount} سؤالًا} other {تم تحديد {formattedCount} سؤال}}",
+      "bulkApprove": "اعتماد المحدد",
+      "confirmTitle": "اعتماد الأسئلة المحددة؟",
+      "confirmBody": "{count, plural, one {سيتم اعتماد سؤال واحد} two {سيتم اعتماد سؤالين} few {سيتم اعتماد {formattedCount} أسئلة} many {سيتم اعتماد {formattedCount} سؤالًا} other {سيتم اعتماد {formattedCount} سؤال}} ويمكن عرضها على الطلاب بعد نشر دروسها.",
+      "confirm": "اعتماد",
+      "cancel": "إلغاء",
+      "bulkApproved": "{count, plural, one {تم اعتماد سؤال واحد.} two {تم اعتماد سؤالين.} few {تم اعتماد {formattedCount} أسئلة.} many {تم اعتماد {formattedCount} سؤالًا.} other {تم اعتماد {formattedCount} سؤال.}}",
+      "empty": {
+        "noData": "لا توجد أسئلة بانتظار المراجعة.",
+        "noResults": "لا توجد أسئلة تطابق هذه الفلاتر."
+      }
+    },
+    "filters": {
+      "unit": "الوحدة",
+      "lesson": "الدرس",
+      "type": "النوع",
+      "difficulty": "الصعوبة",
+      "age": "ينتظر منذ",
+      "ageOption": "{count, plural, one {يوم واحد} two {يومين} few {{formattedCount} أيام} many {{formattedCount} يومًا} other {{formattedCount} يوم}}",
+      "all": "الكل",
+      "apply": "تطبيق الفلاتر",
+      "clear": "مسح الفلاتر"
+    },
+    "detail": {
+      "title": "مراجعة السؤال",
+      "breadcrumb": "مسار التنقل",
+      "queueLink": "قائمة المراجعة",
+      "loading": "جارٍ تحميل السؤال",
+      "errorTitle": "تعذر تحميل السؤال",
+      "lessonState": "حالة الدرس: {state}",
+      "lessonStates": {
+        "Draft": "مسودة",
+        "Published": "منشور",
+        "Archived": "مؤرشف"
+      },
+      "objective": "الهدف: {objective}",
+      "noObjective": "بدون هدف",
+      "difficulty": "الصعوبة: {difficulty}",
+      "maxScore": "الدرجة: {score}",
+      "tags": "الوسوم: {tags}",
+      "retired": "متقاعد",
+      "previousRejection": "سبب الرفض السابق: {reason}",
+      "preview": "معاينة كما يراها الطالب",
+      "explanation": "الشرح",
+      "gradingSpec": "مواصفات التصحيح (JSON)",
+      "rubric": "معايير التصحيح",
+      "rubricTotal": "مجموع النقاط: {total}",
+      "criterionPoints": "({points} نقاط)",
+      "level": "{points} نقاط: {description}",
+      "modelAnswers": "الإجابات النموذجية",
+      "modelAnswer": "الإجابة النموذجية {number}",
+      "mathRules": "تصحيح الإجابة النهائية",
+      "mathAccepted": "الإجابات المقبولة",
+      "mathForm": "الصورة المطلوبة: {form}",
+      "mathTolerance": "هامش الخطأ: ±{tolerance}",
+      "mathTolerancePercent": "هامش الخطأ: ±{tolerance}%",
+      "mathSolution": "الحل النموذجي",
+      "mathStepsWeight": "وزن الخطوات: {weight}٪",
+      "mathFinalOnly": "تُصحَّح الإجابة النهائية فقط."
+    },
+    "decision": {
+      "title": "القرار",
+      "difficulty": "الصعوبة",
+      "approve": "اعتماد",
+      "reason": "سبب الرفض",
+      "reject": "رفض",
+      "noEditNote": "لا يمكن للمعلّم تعديل نص السؤال أو الخيارات أو الإجابة. إذا كان هناك خطأ ارفض مع ذكر السبب.",
+      "approved": "تم اعتماد السؤال.",
+      "rejected": "تم رفض السؤال."
+    },
+    "history": {
+      "title": "سجل الإصدارات والقرارات",
+      "caption": "سجل الإصدارات والقرارات",
+      "date": "التاريخ",
+      "by": "بواسطة",
+      "action": "الإجراء",
+      "details": "التفاصيل",
+      "kind": {
+        "revision": "حفظ إصدار",
+        "approved": "اعتماد",
+        "rejected": "رفض"
+      },
+      "versionValue": "v{version}",
+      "noActor": "—",
+      "difficultyChanged": "تغيّرت الصعوبة من {from} إلى {to}"
+    }
+  }
+}

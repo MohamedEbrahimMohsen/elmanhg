@@ -4,6 +4,9 @@ import { useGetLesson } from '@/shared/api/generated/lessons/lessons';
 import { useGetQuestion } from '@/shared/api/generated/questions/questions';
 import { QuestionEditorForm } from '../components/QuestionEditorForm';
 import { QuestionEditorHeader } from '../components/QuestionEditorHeader';
+import { registerQuestionsAdminLocales } from '../questionsAdminLocales';
+
+registerQuestionsAdminLocales();
 
 export interface QuestionEditorPageProps {
   questionId: string;
