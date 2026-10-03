@@ -12,7 +12,7 @@ export function LessonStateBadge({ state }: LessonStateBadgeProps) {
     <span
       className={cn(
         'rounded-full px-2.5 py-0.5 text-micro font-semibold',
-        state === 'Published' ? 'bg-success text-surface' : 'bg-soft text-text-muted',
+        state === 'Published' ? 'bg-success-soft text-success-text' : 'bg-soft text-text-muted',
       )}
     >
       {t([`lessons.state.${state}`, 'lessons.state.Draft'])}

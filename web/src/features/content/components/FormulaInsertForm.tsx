@@ -23,7 +23,7 @@ export function FormulaInsertForm({ onInsert, onCancel }: FormulaInsertFormProps
     <Form form={form} onSubmit={onInsert}>
       <TextField<FormulaValues> name="latex" label={t('lessonEditor.formula.latex')} dir="ltr" />
       <label className="flex items-center gap-2 text-ui">
-        <input type="checkbox" {...form.register('block')} className="size-5 accent-text" />
+        <input type="checkbox" {...form.register('block')} className="size-5 accent-accent" />
         {t('lessonEditor.formula.block')}
       </label>
       <div className="flex flex-wrap gap-2">

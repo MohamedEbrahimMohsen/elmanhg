@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@/shared/lib/format';
-import { cn } from '@/shared/lib/utils';
+import { pillTabClassName } from '@/shared/ui/pillTab';
 import type { PaymentLogView } from '../schemas/paymentLogSearchSchema';
 
 export interface PaymentLogTabsProps {
@@ -8,9 +8,6 @@ export interface PaymentLogTabsProps {
   reviewCount: number;
   onChange: (view: PaymentLogView) => void;
 }
-
-const tabClassName =
-  'inline-flex min-h-11 items-center gap-2 rounded-pill border px-4 text-ui font-semibold focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden';
 
 export function PaymentLogTabs({ view, reviewCount, onChange }: PaymentLogTabsProps) {
   const { t, i18n } = useTranslation('payments');
@@ -27,12 +24,7 @@ export function PaymentLogTabs({ view, reviewCount, onChange }: PaymentLogTabsPr
           onClick={() => {
             onChange(tab);
           }}
-          className={cn(
-            tabClassName,
-            view === tab
-              ? 'border-text bg-text text-surface'
-              : 'border-border-strong bg-surface text-text hover:bg-soft',
-          )}
+          className={pillTabClassName}
         >
           {t(`tabs.${tab}`)}
           {tab === 'review' && reviewCount > 0 ? (

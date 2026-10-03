@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
@@ -266,5 +266,13 @@ describe('LoginPage', () => {
     await screen.findByRole('heading', { name: 'Sign in' });
 
     expect((await axe(container)).violations).toEqual([]);
+  });
+
+  it('shows the app bar with the logo linking home', async () => {
+    renderApp('/login');
+
+    const banner = await screen.findByRole('banner');
+
+    expect(within(banner).getByRole('link', { name: 'Elmanhg' })).toHaveAttribute('href', '/');
   });
 });

@@ -6,8 +6,8 @@ export interface QuestionStatusBadgeProps {
 }
 
 const statusClasses: Partial<Record<string, string>> = {
-  Approved: 'bg-success text-surface',
-  Rejected: 'bg-danger text-surface',
+  Approved: 'bg-success-soft text-success-text',
+  Rejected: 'bg-danger-soft text-danger',
 };
 
 export function QuestionStatusBadge({ status }: QuestionStatusBadgeProps) {

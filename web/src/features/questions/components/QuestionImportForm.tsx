@@ -62,7 +62,7 @@ export function QuestionImportForm({ onCheck, onFileChange }: QuestionImportForm
             }}
             onBlur={onBlur}
             ref={ref}
-            className="text-ui"
+            className="min-h-11 text-ui"
           />
           <p id={hintId} className="text-caption text-text-muted">
             {t('import.form.hint')}

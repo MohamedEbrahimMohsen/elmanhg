@@ -34,7 +34,7 @@ export function ValidationQueueItem({ item, selected, onToggle, now }: Validatio
         onChange={() => {
           onToggle(item.id);
         }}
-        className="mt-0.5 size-6 shrink-0 accent-text disabled:opacity-45"
+        className="mt-0.5 size-6 shrink-0 accent-accent disabled:opacity-45"
       />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <Link

@@ -8,7 +8,7 @@ export interface GradeReviewDecisionFieldProps {
   maxScore: string;
 }
 
-const radioClassName = 'size-5 shrink-0 accent-text';
+const radioClassName = 'size-5 shrink-0 accent-accent';
 
 export function GradeReviewDecisionField({ aiScoreLabel, maxScore }: GradeReviewDecisionFieldProps) {
   const { t } = useTranslation('gradeReview');

@@ -1,16 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import type { GradeReviewSubjectResult } from '@/shared/api/generated/model';
 import { formatNumber } from '@/shared/lib/format';
-import { cn } from '@/shared/lib/utils';
+import { pillTabClassName } from '@/shared/ui/pillTab';
 
 export interface GradeReviewSubjectPickerProps {
   subjects: GradeReviewSubjectResult[];
   selectedId: string;
   onSelect: (subjectId: string) => void;
 }
-
-const pillClassName =
-  'inline-flex min-h-11 items-center rounded-pill border px-4 text-ui font-semibold focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden';
 
 export function GradeReviewSubjectPicker({ subjects, selectedId, onSelect }: GradeReviewSubjectPickerProps) {
   const { t, i18n } = useTranslation('gradeReview');
@@ -29,10 +26,7 @@ export function GradeReviewSubjectPicker({ subjects, selectedId, onSelect }: Gra
             onClick={() => {
               onSelect(subject.subjectId);
             }}
-            className={cn(
-              pillClassName,
-              selected ? 'border-text bg-text text-surface' : 'border-border-strong bg-surface text-text hover:bg-soft',
-            )}
+            className={pillTabClassName}
           >
             {t('queue.subjectPill', { name: subject.name, count: formatNumber(count, lng, 'latin') })}
           </button>

@@ -44,7 +44,7 @@ export function DiagramItemChip({
         className={cn(
           chipClassName,
           'touch-none select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden',
-          selected ? 'border-text bg-soft' : 'border-border-strong bg-surface',
+          selected ? 'border-accent bg-accent-soft' : 'border-border-strong bg-surface',
         )}
         {...handlers}
       >
@@ -57,7 +57,7 @@ export function DiagramItemChip({
   return (
     <span className={cn(chipClassName, mark ? markClassNames[mark] : 'border-border-strong bg-surface')}>
       {mark ? (
-        <Icon aria-hidden className={cn('size-4 shrink-0', mark === 'correct' ? 'text-success' : 'text-danger')} />
+        <Icon aria-hidden className={cn('size-4 shrink-0', mark === 'correct' ? 'text-success-text' : 'text-danger')} />
       ) : null}
       <bdi>{item.text}</bdi>
       {mark ? <span className="sr-only"> {t(`mark.${mark}`)}</span> : null}

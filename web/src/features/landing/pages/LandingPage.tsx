@@ -5,6 +5,8 @@ import { ContentErrorState, ContentListSkeleton } from '@/features/content';
 import { PublicPlanCards } from '@/features/subscription';
 import { useGetPlanCatalogue } from '@/shared/api/generated/plans/plans';
 import { useGetServableQuestionCount } from '@/shared/api/generated/questions/questions';
+import { cn } from '@/shared/lib/utils';
+import { layoutContainerClassName } from '@/shared/ui/layout';
 import { LandingHero } from '../components/LandingHero';
 import { LandingTopBar } from '../components/LandingTopBar';
 import { ValueProps } from '../components/ValueProps';
@@ -36,7 +38,7 @@ export function LandingPage() {
   return (
     <>
       <LandingTopBar />
-      <main id="main" className="mx-auto flex max-w-layout flex-col gap-6 px-4 pb-10 lg:px-6">
+      <main id="main" className={cn(layoutContainerClassName, 'flex flex-col gap-6 pt-6 pb-10')}>
         <LandingHero servableCount={count.data ? Number(count.data.count) : undefined} />
         <ValueProps replySlaHours={catalogue.data ? Number(catalogue.data.askTeacher.replySlaHours) : undefined} />
         <section aria-labelledby={plansHeadingId} className="flex flex-col gap-3">

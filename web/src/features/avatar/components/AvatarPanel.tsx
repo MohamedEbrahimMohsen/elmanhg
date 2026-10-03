@@ -22,10 +22,10 @@ export function AvatarPanel() {
       }}
     >
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-overlay" />
+        <Dialog.Overlay className="fixed inset-0 z-40 bg-overlay" />
         <Dialog.Content
           aria-describedby={undefined}
-          className="fixed inset-y-0 start-0 flex h-dvh w-full max-w-95 flex-col gap-3 rounded-e-lg bg-surface p-4 shadow-2 focus-visible:outline-hidden motion-safe:transition-transform motion-safe:duration-(--ds-motion-base-duration) motion-safe:ease-(--ds-motion-base-easing) motion-safe:starting:ltr:-translate-x-full motion-safe:starting:rtl:translate-x-full"
+          className="fixed inset-y-0 start-0 z-50 flex h-dvh w-full max-w-95 flex-col gap-3 rounded-e-lg bg-surface p-4 shadow-2 focus-visible:outline-hidden motion-safe:transition-transform motion-safe:duration-(--ds-motion-base-duration) motion-safe:ease-(--ds-motion-base-easing) motion-safe:starting:ltr:-translate-x-full motion-safe:starting:rtl:translate-x-full"
         >
           <AvatarPanelHeader view={view} status={status.isSuccess ? status.data : undefined} />
           {view === 'chat' ? (
