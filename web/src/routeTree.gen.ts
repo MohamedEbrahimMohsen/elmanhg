@@ -31,6 +31,7 @@ import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as StudentIndexRouteImport } from './routes/student/index'
 import { Route as StudentAskRouteImport } from './routes/student/ask'
 import { Route as StudentAskNewRouteImport } from './routes/student/ask-new'
+import { Route as StudentAssistantRouteImport } from './routes/student/assistant'
 import { Route as StudentMoreRouteImport } from './routes/student/more'
 import { Route as StudentMultiExamRouteImport } from './routes/student/multi-exam'
 import { Route as StudentProgressRouteImport } from './routes/student/progress'
@@ -44,6 +45,7 @@ import { Route as AdminAvatarConversationConversationIdRouteImport } from './rou
 import { Route as AdminLessonLessonIdRouteImport } from './routes/admin/lesson.$lessonId'
 import { Route as AdminQuestionQuestionIdRouteImport } from './routes/admin/question.$questionId'
 import { Route as AdminStudentStudentIdRouteImport } from './routes/admin/student.$studentId'
+import { Route as StudentAssistantConversationIdRouteImport } from './routes/student/assistant.$conversationId'
 import { Route as StudentCheckoutResultPaymentIdRouteImport } from './routes/student/checkout-result.$paymentId'
 import { Route as StudentExamResultSessionIdRouteImport } from './routes/student/exam-result.$sessionId'
 import { Route as StudentExamStartUnitIdRouteImport } from './routes/student/exam-start.$unitId'
@@ -176,6 +178,11 @@ const StudentAskNewRoute = StudentAskNewRouteImport.update({
   path: '/ask-new',
   getParentRoute: () => StudentRouteRoute,
 } as any)
+const StudentAssistantRoute = StudentAssistantRouteImport.update({
+  id: '/assistant',
+  path: '/assistant',
+  getParentRoute: () => StudentRouteRoute,
+} as any)
 const StudentMoreRoute = StudentMoreRouteImport.update({
   id: '/more',
   path: '/more',
@@ -242,6 +249,12 @@ const AdminStudentStudentIdRoute = AdminStudentStudentIdRouteImport.update({
   path: '/student/$studentId',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const StudentAssistantConversationIdRoute =
+  StudentAssistantConversationIdRouteImport.update({
+    id: '/$conversationId',
+    path: '/$conversationId',
+    getParentRoute: () => StudentAssistantRoute,
+  } as any)
 const StudentCheckoutResultPaymentIdRoute =
   StudentCheckoutResultPaymentIdRouteImport.update({
     id: '/checkout-result/$paymentId',
@@ -375,6 +388,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/student/ask': typeof StudentAskRoute
   '/student/ask-new': typeof StudentAskNewRoute
+  '/student/assistant': typeof StudentAssistantRouteWithChildren
   '/student/more': typeof StudentMoreRoute
   '/student/multi-exam': typeof StudentMultiExamRoute
   '/student/progress': typeof StudentProgressRoute
@@ -390,6 +404,7 @@ export interface FileRoutesByFullPath {
   '/admin/lesson/$lessonId': typeof AdminLessonLessonIdRoute
   '/admin/question/$questionId': typeof AdminQuestionQuestionIdRoute
   '/admin/student/$studentId': typeof AdminStudentStudentIdRoute
+  '/student/assistant/$conversationId': typeof StudentAssistantConversationIdRoute
   '/student/checkout-result/$paymentId': typeof StudentCheckoutResultPaymentIdRoute
   '/student/exam-result/$sessionId': typeof StudentExamResultSessionIdRoute
   '/student/exam-start/$unitId': typeof StudentExamStartUnitIdRoute
@@ -429,6 +444,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/student/ask': typeof StudentAskRoute
   '/student/ask-new': typeof StudentAskNewRoute
+  '/student/assistant': typeof StudentAssistantRouteWithChildren
   '/student/more': typeof StudentMoreRoute
   '/student/multi-exam': typeof StudentMultiExamRoute
   '/student/progress': typeof StudentProgressRoute
@@ -444,6 +460,7 @@ export interface FileRoutesByTo {
   '/admin/lesson/$lessonId': typeof AdminLessonLessonIdRoute
   '/admin/question/$questionId': typeof AdminQuestionQuestionIdRoute
   '/admin/student/$studentId': typeof AdminStudentStudentIdRoute
+  '/student/assistant/$conversationId': typeof StudentAssistantConversationIdRoute
   '/student/checkout-result/$paymentId': typeof StudentCheckoutResultPaymentIdRoute
   '/student/exam-result/$sessionId': typeof StudentExamResultSessionIdRoute
   '/student/exam-start/$unitId': typeof StudentExamStartUnitIdRoute
@@ -486,6 +503,7 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/student/ask': typeof StudentAskRoute
   '/student/ask-new': typeof StudentAskNewRoute
+  '/student/assistant': typeof StudentAssistantRouteWithChildren
   '/student/more': typeof StudentMoreRoute
   '/student/multi-exam': typeof StudentMultiExamRoute
   '/student/progress': typeof StudentProgressRoute
@@ -501,6 +519,7 @@ export interface FileRoutesById {
   '/admin/lesson/$lessonId': typeof AdminLessonLessonIdRoute
   '/admin/question/$questionId': typeof AdminQuestionQuestionIdRoute
   '/admin/student/$studentId': typeof AdminStudentStudentIdRoute
+  '/student/assistant/$conversationId': typeof StudentAssistantConversationIdRoute
   '/student/checkout-result/$paymentId': typeof StudentCheckoutResultPaymentIdRoute
   '/student/exam-result/$sessionId': typeof StudentExamResultSessionIdRoute
   '/student/exam-start/$unitId': typeof StudentExamStartUnitIdRoute
@@ -545,6 +564,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/student/ask'
     | '/student/ask-new'
+    | '/student/assistant'
     | '/student/more'
     | '/student/multi-exam'
     | '/student/progress'
@@ -560,6 +580,7 @@ export interface FileRouteTypes {
     | '/admin/lesson/$lessonId'
     | '/admin/question/$questionId'
     | '/admin/student/$studentId'
+    | '/student/assistant/$conversationId'
     | '/student/checkout-result/$paymentId'
     | '/student/exam-result/$sessionId'
     | '/student/exam-start/$unitId'
@@ -599,6 +620,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/student/ask'
     | '/student/ask-new'
+    | '/student/assistant'
     | '/student/more'
     | '/student/multi-exam'
     | '/student/progress'
@@ -614,6 +636,7 @@ export interface FileRouteTypes {
     | '/admin/lesson/$lessonId'
     | '/admin/question/$questionId'
     | '/admin/student/$studentId'
+    | '/student/assistant/$conversationId'
     | '/student/checkout-result/$paymentId'
     | '/student/exam-result/$sessionId'
     | '/student/exam-start/$unitId'
@@ -655,6 +678,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/student/ask'
     | '/student/ask-new'
+    | '/student/assistant'
     | '/student/more'
     | '/student/multi-exam'
     | '/student/progress'
@@ -670,6 +694,7 @@ export interface FileRouteTypes {
     | '/admin/lesson/$lessonId'
     | '/admin/question/$questionId'
     | '/admin/student/$studentId'
+    | '/student/assistant/$conversationId'
     | '/student/checkout-result/$paymentId'
     | '/student/exam-result/$sessionId'
     | '/student/exam-start/$unitId'
@@ -859,6 +884,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentAskNewRouteImport
       parentRoute: typeof StudentRouteRoute
     }
+    '/student/assistant': {
+      id: '/student/assistant'
+      path: '/assistant'
+      fullPath: '/student/assistant'
+      preLoaderRoute: typeof StudentAssistantRouteImport
+      parentRoute: typeof StudentRouteRoute
+    }
     '/student/more': {
       id: '/student/more'
       path: '/more'
@@ -949,6 +981,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/student/$studentId'
       preLoaderRoute: typeof AdminStudentStudentIdRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/student/assistant/$conversationId': {
+      id: '/student/assistant/$conversationId'
+      path: '/$conversationId'
+      fullPath: '/student/assistant/$conversationId'
+      preLoaderRoute: typeof StudentAssistantConversationIdRouteImport
+      parentRoute: typeof StudentAssistantRoute
     }
     '/student/checkout-result/$paymentId': {
       id: '/student/checkout-result/$paymentId'
@@ -1138,6 +1177,17 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
   AdminRouteRouteChildren,
 )
 
+interface StudentAssistantRouteChildren {
+  StudentAssistantConversationIdRoute: typeof StudentAssistantConversationIdRoute
+}
+
+const StudentAssistantRouteChildren: StudentAssistantRouteChildren = {
+  StudentAssistantConversationIdRoute: StudentAssistantConversationIdRoute,
+}
+
+const StudentAssistantRouteWithChildren =
+  StudentAssistantRoute._addFileChildren(StudentAssistantRouteChildren)
+
 interface StudentLessonLessonIdRouteChildren {
   StudentLessonLessonIdObjectivesRoute: typeof StudentLessonLessonIdObjectivesRoute
   StudentLessonLessonIdPracticeRoute: typeof StudentLessonLessonIdPracticeRoute
@@ -1160,6 +1210,7 @@ const StudentLessonLessonIdRouteWithChildren =
 interface StudentRouteRouteChildren {
   StudentAskRoute: typeof StudentAskRoute
   StudentAskNewRoute: typeof StudentAskNewRoute
+  StudentAssistantRoute: typeof StudentAssistantRouteWithChildren
   StudentMoreRoute: typeof StudentMoreRoute
   StudentMultiExamRoute: typeof StudentMultiExamRoute
   StudentProgressRoute: typeof StudentProgressRoute
@@ -1181,6 +1232,7 @@ interface StudentRouteRouteChildren {
 const StudentRouteRouteChildren: StudentRouteRouteChildren = {
   StudentAskRoute: StudentAskRoute,
   StudentAskNewRoute: StudentAskNewRoute,
+  StudentAssistantRoute: StudentAssistantRouteWithChildren,
   StudentMoreRoute: StudentMoreRoute,
   StudentMultiExamRoute: StudentMultiExamRoute,
   StudentProgressRoute: StudentProgressRoute,

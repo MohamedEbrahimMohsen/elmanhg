@@ -120,6 +120,14 @@
   inset-block-end: calc(var(--ds-layout-bar) + var(--ds-space-2) + env(safe-area-inset-bottom));
 }
 
+@utility h-assistant {
+  height: calc(100dvh - var(--ds-layout-bar) - var(--ds-space-1) * 30);
+}
+
+@utility h-assistant-desktop {
+  height: calc(100dvh - var(--ds-layout-bar) - var(--ds-space-1) * 14);
+}
+
 @layer base {
   html {
     scroll-padding-top: calc(var(--ds-layout-bar) + var(--ds-space-2));

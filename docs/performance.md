@@ -50,6 +50,7 @@ Also: `http_req_failed` < 1 % and `checks` > 99 %. The answer check is the only 
 | `admin-dashboard` | + `admin/route`, `admin/index` | 213 | 233 |
 | `admin-users` | + `admin/route`, `admin/users` | 245 | 270 |
 | `teacher-home` | + `teacher/route`, `teacher/index` | 246 | 265 |
+| `assistant` | + `student/route`, `student/assistant` | 245 | 260 |
 
 Budget = measured × 1.05, rounded up to the next 5 KB. They are regression guards; the 2 s browser gate is the real target. When a change legitimately grows a page, raise its budget in the same pull request and say why. #280 dataviz redesign (KPI tiles, panels, chart axes) grew the admin chunk. The measured column is after the #283 cleanup (§8); the budgets were set before it and were not lowered.
 
@@ -58,7 +59,7 @@ Budget = measured × 1.05, rounded up to the next 5 KB. They are regression guar
 ## 4. What keeps it fast
 
 - **KaTeX on demand.** `RichTextViewer` renders HTML without math synchronously. HTML with math shows its text at once, while KaTeX and its CSS load as one lazy chunk (`renderMath`), then re-renders with formulas. Once loaded, later views render at once. KaTeX is no longer on the lesson or quiz critical path; the editor (admin) still bundles it.
-- **Lazy avatar panel.** `AvatarDock` loads `AvatarPanel` (with react-hook-form and the radix dialog) the first time the student opens the assistant, and keeps it mounted afterwards.
+- **Lazy avatar panel.** `AvatarDock` loads `AvatarPanel` (with react-hook-form and the radix dialog) the first time the student opens the assistant, and keeps it mounted afterwards. The full assistant page is its own route chunk, and registers its `assistant` strings when the chunk loads, so no other page carries them.
 - **Lazy quiz extras.** The quiz page loads the MathSteps input (`MathStepsAnswerInput`) only for a MathSteps question, the essay card (`QuizEssayCard`) only for an essay question, the paywall dialog (`LazyPaywallDialog`, with the radix dialog) only when a free-tier limit is reached, the drag-and-drop canvas (`DragDropAnswerInput`, with the `diagramStudent` strings) only for a drag-and-drop question, and the correct placements (`DragDropCorrectAnswer`, through `LazyDragDropCorrectAnswer`) only after checking one.
 - **Realtime client on connect.** The SignalR client (`@microsoft/signalr`, about 11 KB brotli) loads as its own chunk when the realtime connection starts, so it stays out of the entry bundle.
 - **Dashboard charts without a library.** The admin dashboard's three daily charts are plain SVG (`DailyBarChart`), so no chart library ships; the page is the auto-split `/admin/` chunk and has its own budget.

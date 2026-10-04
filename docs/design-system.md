@@ -190,7 +190,7 @@ Track `--soft`, fill `--accent` (mastery) or `--ok` (exam pass). Height 6 px, fu
 
 App bar: one row, 56 px tall, sticky, white with a bottom hairline, inside the same 1040 px container as the page, so the logo lines up with the page title. Order: logo (`--accent`, links home) · nav · role badge · display name · sign-out. Below 900 px the nav moves to the tab bar. From 900 px the nav sits inline; between 900 and 1199 px the display name is hidden and sign-out shows its icon only (it keeps its accessible name); from 1200 px both show. Below 900 px sign-out is 44 px tall like every touch control; from 900 px it is the 36 px `sm` size.
 
-Top nav (desktop ≥ 900 px): pills 36 px tall (with the 36 px sign-out, one of the two exceptions to principle 5, the other being 36 px `sm` table row actions: both nav controls exist at this size only in the pointer layout, and below 900 px navigation is the tab bar, whose items are taller than 44 px); inactive `--text-2`, hover `--bg` fill with `--text`, active `--accent-soft` fill with `--accent` 600. Each role has a fixed top-bar list: student all 5, teacher all 4, admin dashboard, content, questions and users. The admin's other destinations sit in an «المزيد» disclosure menu at the end of the nav: white, hairline border, `--shadow-2`, `--r-md`, items at least 44 px, closes on Esc, outside click, keyboard focus leaving the menu, or choosing an item.
+Top nav (desktop ≥ 900 px): pills 36 px tall (with the 36 px sign-out, one of the two exceptions to principle 5, the other being 36 px `sm` table row actions: both nav controls exist at this size only in the pointer layout, and below 900 px navigation is the tab bar, whose items are taller than 44 px); inactive `--text-2`, hover `--bg` fill with `--text`, active `--accent-soft` fill with `--accent` 600. Each role has a fixed top-bar list: student all 6, teacher all 4, admin dashboard, content, questions and users. The admin's other destinations sit in an «المزيد» disclosure menu at the end of the nav: white, hairline border, `--shadow-2`, `--r-md`, items at least 44 px, closes on Esc, outside click, keyboard focus leaving the menu, or choosing an item.
 
 Mobile tab bar: at most 4 items, icons 22 px stroke 1.8, active `--accent` 600 with the icon on an `--accent-soft` pill, inactive `--text-2`. A role with more than 3 destinations shows its 3 primary destinations plus a fourth item "المزيد" that opens a list of the rest. Bottom padding follows the device safe area (iOS home indicator).
 
@@ -208,7 +208,7 @@ White card, no vertical rules, row separator hairline, header `caption` weight 6
 
 ### 5.10 Avatar panel
 
-Slide-in sheet from the start edge, `--surface`, `--shadow-2`, `--r-lg` on the outer corners. Student bubbles `--soft`; assistant bubbles white with hairline border. A small sparkle icon in `--accent` marks the assistant. The floating assistant button is an `--accent` pill with a white label.
+Slide-in sheet from the start edge, `--surface`, `--shadow-2`, `--r-lg` on the outer corners. Student bubbles `--soft`; assistant bubbles white with hairline border. A small sparkle icon in `--accent` marks the assistant. The floating assistant button is an `--accent` pill with a white label. Full page (`/student/assistant`): the list and the chat are white cards (`--r-lg`, `--shadow-1`) in a 1 : 2 grid from 900 px; the current chat item is `--accent-soft` with an `--accent` border; the bubbles are the panel's.
 
 ### 5.11 Dialogs
 

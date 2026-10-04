@@ -18,7 +18,8 @@
     "typing": "The assistant is typing…",
     "messages": "Conversation",
     "history": "Past chats",
-    "backToChat": "Back to the chat"
+    "backToChat": "Back to the chat",
+    "openFullPage": "Open full page"
   },
   "greeting": {
     "lesson": "Hi! I am your assistant for \"{title}\". Ask me about any part of the explanation or the objectives.",

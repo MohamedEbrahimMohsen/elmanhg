@@ -312,7 +312,9 @@ An in-app assistant for students, scoped to the platform's content.
 | Lesson page | Subject, unit, lesson explanation/objectives/summary |
 | After answering a quiz question | Above + question, student's answer, correct answer, explanation |
 | Exam review | Above, per question |
-| Global | Subject list; asks the student to pick a lesson |
+| Global | Subject list; asks the student to pick a lesson (the full page offers an optional picker) |
+
+Beside the floating panel, students have a full page «المساعد» (`/student/assistant`, `/student/assistant/{id}`) with their past chats beside the conversation, «محادثة جديدة», and an optional subject and lesson picker for a new chat (no lesson: Global; a lesson: Lesson). It uses the same endpoints, daily limits, exam refusal and deletion setting as the panel, and the panel header links to it.
 
 ### 9.2 Behaviour
 
@@ -329,7 +331,7 @@ An in-app assistant for students, scoped to the platform's content.
 
 ### 9.4 History and deletion
 
-- A student sees their own past assistant chats inside the assistant panel («محادثاتي السابقة»), newest first, each with its lesson or subject, date and first question. They can reopen a chat and keep chatting in it.
+- A student sees their own past assistant chats inside the assistant panel («محادثاتي السابقة») and on the full assistant page, newest first, each with its lesson or subject, date and first question. They can reopen a chat and keep chatting in it.
 - A student can delete a chat after a confirmation. Deleting erases its messages and their training copies (§13), hides it from every view (the student's history, the admin view), and is audit-logged without any message text. Deleting never gives back today's messages: the daily limit is unchanged.
 - During an exam in progress the history is refused, like the assistant itself (§9.2).
 - Admins can turn deletion off (`features.studentsCanDeleteAvatarChats`, on by default, §10.6); students then still see and continue their chats.

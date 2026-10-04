@@ -24,7 +24,14 @@ describe('AppShell', () => {
 
     const nav = await screen.findByRole('navigation', { name: 'Main navigation' });
 
-    expect(linkNames(nav)).toEqual(['Home', 'My progress', 'Multi-unit exam', 'Ask a teacher', 'Subscription']);
+    expect(linkNames(nav)).toEqual([
+      'Home',
+      'My progress',
+      'Multi-unit exam',
+      'Assistant',
+      'Ask a teacher',
+      'Subscription',
+    ]);
   });
 
   it('shows three student tabs and More in the bottom tab bar', async () => {

@@ -1,0 +1,18 @@
+{
+  "newChat": "New chat",
+  "picker": {
+    "subject": "Subject",
+    "lesson": "Lesson",
+    "general": "General",
+    "noLesson": "No specific lesson",
+    "locked": "{name} (subscribers only)",
+    "hint": "Choosing a subject and lesson is optional. Without them the assistant answers in general.",
+    "loading": "Loading subjects and lessons…",
+    "error": "Subjects and lessons could not load."
+  },
+  "open": {
+    "loading": "Opening the chat…",
+    "notFound": "This chat does not exist or was deleted.",
+    "error": "The chat could not open."
+  }
+}

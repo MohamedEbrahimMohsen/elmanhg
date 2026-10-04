@@ -814,6 +814,24 @@
           ]
         }
       ]
+    },
+    {
+      "key": "E20",
+      "title": "Assistant full page",
+      "labels": ["v1", "student", "frontend"],
+      "description": "Dev request 2026-10-04: a full-page AI assistant chat beside the floating panel, which stays as it is. Epic #287.",
+      "stories": [
+        {
+          "title": "Full-page AI assistant chat",
+          "description": "As a student I want a full-page AI assistant that feels like a normal chat app, alongside the existing floating assistant panel. Issue #288.",
+          "tasks": [
+            "Route, layout, conversation list and chat view, reusing the existing avatar API and hooks",
+            "Nav entries and the panel's \"open full page\" link",
+            "Exam block, plan limits, deletion flag and context picker",
+            "Tests, budget entry, docs (`docs/avatar.md`, PRD avatar section, `docs/claude-design-prompt.md` §4–6)"
+          ]
+        }
+      ]
     }
   ]
 }
