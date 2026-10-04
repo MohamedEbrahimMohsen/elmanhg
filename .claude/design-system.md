@@ -98,6 +98,7 @@ Arabic body text never below 15 px. Fonts: Google Fonts `Readex Pro:wght@500;600
 | Table | — | row hover (soft) | inside a Card, no vertical rules, row hairline, header type.caption 600 text.muted, cell 13.5px, padding 9×10, sticky header on desktop, horizontal scroll inside the card on mobile; row actions `sm`; activity dates relative under 24 h with the full date in `title` |
 | AssistantSheet | — | open, closed | slides from inline-start, max 380, shadow.2, outer corners radius.lg; user bubble soft; assistant bubble surface + border; sparkle icon in accent |
 | AssistantFab | — | default, hover | pill, accent fill (hover, pressed as primary), white label, shadow.2, min height 48, fixed bottom inline-start |
+| AssistantPage | — | default, list (mobile) | two Cards 1:2 from lg, height = viewport − app bar − main padding (`h-assistant`), log scrolls inside the chat card, current item accent.soft + accent border; under lg one column with a «محادثاتي السابقة» toggle |
 | Dialog | default, confirm, destructive | open | centred, max 420, radius.lg, padding 20, shadow.2, backdrop color.overlay |
 | ExamTimer | normal, urgent (last 2 min → danger) | — | sticky Card under app bar, radius.md, type.stat 18px |
 | KpiTile | — | loading, error | Card, type.caption label, type.stat value, one type.caption detail (period delta when the API has one, never coloured), optional note; grid 2 columns, 4 from md |

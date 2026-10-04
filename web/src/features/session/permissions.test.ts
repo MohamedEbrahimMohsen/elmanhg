@@ -30,6 +30,12 @@ describe('can', () => {
     expect(can('student', 'configurationManage')).toBe(false);
   });
 
+  it('grants a student the assistant chat and denies other roles', () => {
+    expect(can('student', 'avatarChat')).toBe(true);
+    expect(can('teacher', 'avatarChat')).toBe(false);
+    expect(can('admin', 'avatarChat')).toBe(false);
+  });
+
   it('denies an admin question validation', () => {
     expect(can('admin', 'questionsValidate')).toBe(false);
   });

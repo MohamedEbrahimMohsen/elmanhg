@@ -16,6 +16,7 @@ import {
   MessagesSquare,
   ScrollText,
   Settings,
+  Sparkles,
   Users,
   type LucideIcon,
 } from 'lucide-react';
@@ -60,6 +61,13 @@ export const navByRole: Record<Role, RoleNav> = {
         capability: 'assessmentsTake',
       },
       {
+        key: 'assistant',
+        to: '/student/assistant',
+        labelKey: 'nav.student.assistant',
+        icon: Sparkles,
+        capability: 'avatarChat',
+      },
+      {
         key: 'ask',
         to: '/student/ask',
         labelKey: 'nav.student.ask',
@@ -75,7 +83,7 @@ export const navByRole: Record<Role, RoleNav> = {
       },
     ],
     tabBarKeys: ['home', 'progress', 'ask'],
-    topBarKeys: ['home', 'progress', 'multiExam', 'ask', 'subscription'],
+    topBarKeys: ['home', 'progress', 'multiExam', 'assistant', 'ask', 'subscription'],
     morePath: '/student/more',
   },
   teacher: {
