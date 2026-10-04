@@ -19,7 +19,7 @@ export function ChoiceOptionsField() {
 
   return (
     <fieldset className="flex flex-col gap-3">
-      <legend className="mb-2 text-caption text-text-muted">{t('editor.options.legend')}</legend>
+      <legend className="text-caption text-text-muted">{t('editor.options.legend')}</legend>
       {fields.map((field, index) => (
         <ChoiceOptionRow
           key={field.id}

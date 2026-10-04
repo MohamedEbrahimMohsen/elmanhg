@@ -17,7 +17,7 @@ export function GradeReviewDecisionField({ aiScoreLabel, maxScore }: GradeReview
 
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="mb-1 text-ui font-semibold text-text">{t('form.decision')}</legend>
+      <legend className="text-ui font-semibold text-text">{t('form.decision')}</legend>
       <label className="flex min-h-11 items-center gap-3 text-ui text-text">
         <input
           type="radio"

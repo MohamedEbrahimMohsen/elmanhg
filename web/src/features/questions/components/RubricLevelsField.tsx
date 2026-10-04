@@ -21,7 +21,7 @@ export function RubricLevelsField({ criterionIndex }: RubricLevelsFieldProps) {
 
   return (
     <fieldset className="flex flex-col gap-3">
-      <legend className="mb-2 text-caption text-text-muted">{t('editor.essay.levelsLegend', { number })}</legend>
+      <legend className="text-caption text-text-muted">{t('editor.essay.levelsLegend', { number })}</legend>
       {fields.map((field, index) => {
         const level = index + 1;
         return (

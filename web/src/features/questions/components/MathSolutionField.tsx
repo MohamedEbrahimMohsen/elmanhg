@@ -16,7 +16,7 @@ export function MathSolutionField() {
 
   return (
     <fieldset className="flex flex-col gap-3">
-      <legend className="mb-2 text-caption text-text-muted">{t('editor.math.solutionLegend')}</legend>
+      <legend className="text-caption text-text-muted">{t('editor.math.solutionLegend')}</legend>
       <p className="text-caption text-text-muted">{t('editor.math.solutionHint')}</p>
       {fields.map((field, index) => {
         const number = index + 1;

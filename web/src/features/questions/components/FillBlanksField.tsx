@@ -17,7 +17,7 @@ export function FillBlanksField() {
 
   return (
     <fieldset className="flex flex-col gap-3">
-      <legend className="mb-2 text-caption text-text-muted">{t('editor.blanks.legend')}</legend>
+      <legend className="text-caption text-text-muted">{t('editor.blanks.legend')}</legend>
       {fields.map((field, index) => (
         <div key={field.id} className="flex items-start gap-2.5">
           <code dir="ltr" className="mt-8 font-mono text-mono">
