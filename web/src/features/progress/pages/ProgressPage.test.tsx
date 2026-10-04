@@ -56,7 +56,17 @@ describe('ProgressPage', () => {
 
     expect(await screen.findByRole('status', { name: 'Loading your summary…' })).toBeInTheDocument();
     expect(await screen.findByText('40 of 60 questions left for you')).toBeInTheDocument();
-    expect(screen.getByText('Seen 30 · Mastered 20 · Streak: 3 days')).toBeInTheDocument();
+    const counter = screen.getByRole('region', { name: 'Your question counter' });
+    expect(
+      within(counter)
+        .getAllByRole('term')
+        .map((term) => term.textContent),
+    ).toEqual(['Seen', 'Mastered', 'Streak']);
+    expect(
+      within(counter)
+        .getAllByRole('definition')
+        .map((value) => value.textContent),
+    ).toEqual(['30', '20', '3 days']);
     expect(screen.getByRole('heading', { level: 1, name: 'My progress' })).toBeInTheDocument();
   });
 
@@ -148,6 +158,20 @@ describe('ProgressPage', () => {
     const physics = await screen.findByRole('article', { name: 'Physics' });
     const mechanics = within(physics).getByRole('row', { name: /Mechanics/ });
     expect(within(mechanics).getByText('50٪')).toBeInTheDocument();
+  });
+
+  it('shows the headline stats with Latin digits in Arabic', async () => {
+    openProgress(undefined, 'ar');
+
+    const counter = await screen.findByRole('region', { name: 'عدّاد أسئلتك' });
+    expect(counter).toHaveTextContent('متبقّي لك 40 سؤال من 60');
+    expect(
+      within(counter)
+        .getAllByRole('definition')
+        .map((value) => value.textContent),
+    ).toEqual(['30', '20', '3 أيام']);
+    const lesson = await listItemWith("Ohm's law");
+    expect(within(lesson).getByText('إتقان 20٪')).toBeInTheDocument();
   });
 
   it('has no axe violations', async () => {

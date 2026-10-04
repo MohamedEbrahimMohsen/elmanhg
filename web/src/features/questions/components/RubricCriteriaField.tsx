@@ -16,7 +16,7 @@ export function RubricCriteriaField() {
 
   return (
     <fieldset className="flex flex-col gap-3">
-      <legend className="mb-2 text-caption text-text-muted">{t('editor.essay.rubricLegend')}</legend>
+      <legend className="text-caption text-text-muted">{t('editor.essay.rubricLegend')}</legend>
       <p className="text-caption text-text-muted">
         {t('editor.essay.rubricHint', { total: rubricTotalPoints(criteria) })}
       </p>

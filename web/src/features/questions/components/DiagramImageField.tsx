@@ -51,7 +51,7 @@ export function DiagramImageField({ lessonId }: DiagramImageFieldProps) {
 
   return (
     <fieldset className="flex flex-col gap-3">
-      <legend className="mb-2 text-caption text-text-muted">{t('editor.dragDrop.imageLegend')}</legend>
+      <legend className="text-caption text-text-muted">{t('editor.dragDrop.imageLegend')}</legend>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={id}>{t('editor.dragDrop.imageFile')}</Label>
         <input

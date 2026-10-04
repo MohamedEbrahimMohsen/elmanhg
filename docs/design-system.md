@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Version | 2.1 |
-| Date | 2026-10-03 |
-| Decision | Glass direction for the whole app. Aurora gradient allowed only on the landing hero and the subscribe screen. Indigo calm palette (#276). #280 polish: Latin digits, shared date formats, Select chevron, pointer cursor, row actions, dashboard. |
+| Version | 2.2 |
+| Date | 2026-10-04 |
+| Decision | Glass direction for the whole app. Aurora gradient allowed only on the landing hero and the subscribe screen. Indigo calm palette (#276). #280 polish: Latin digits, shared date formats, Select chevron, pointer cursor, row actions, dashboard. #286: legends inside their group, option cards for choice groups, headline stat chips, compact ranked lists. |
 | Mode | Light only. No dark theme. |
 | Reference canvas | https://claude.ai/artifact/VHfyt2bTbtQJnA9Fg6Snpp (board 4, Glass) |
 
@@ -98,7 +98,7 @@ Both fonts are on Google Fonts and cover Arabic and Latin. Load with `display=sw
 
 | Token | Size | Line height | Use |
 |---|---|---|---|
-| `display` | 36 / 44 px | 1.05 | Headline counter, landing hero |
+| `display` | 36 / 44 px | 1.05 | Headline counter (from 900 px; `h1` below), landing hero |
 | `h1` | 26 / 30 px | 1.2 | Page title |
 | `h2` | 20 / 22 px | 1.3 | Section, card title |
 | `h3` | 16 px | 1.4 | Sub-section |
@@ -174,6 +174,8 @@ Full-width label, `--r-md`, 48 px min height, 15 px text. The radio or checkbox 
 | Correct (after check) | `--ok-soft` | `--ok` |
 | Wrong (after check) | `--bad-soft` | `--bad` |
 
+The same option card is used for choice groups outside the quiz (multi-unit exam units and sizes); a disabled option has 45 percent opacity and no hover fill, and a caption line may sit under the label.
+
 ### 5.4 Feedback panel
 
 Appears under the question after checking. Icon circle 26 px in `--ok-text` or `--bad`, bold verdict, explanation in `--text-2`. Background uses the matching soft colour, border the matching strong colour.
@@ -184,7 +186,7 @@ Pill, 12 px 600. `ok` = `--ok-soft` fill, `--ok-text` text. `bad` = `--bad-soft`
 
 ### 5.6 Progress
 
-Track `--soft`, fill `--accent` (mastery) or `--ok` (exam pass). Height 6 px, fully rounded. Headline counter card is a white card with the number in `display` size. The admin dashboard uses the same 6 px bar in its bar lists (share of a total, funnel steps, success-rate rows).
+Track `--soft`, fill `--accent` (mastery) or `--ok` (exam pass). Height 6 px, fully rounded. The headline counter is a white card with 12 px between rows: the counter sentence in H1 size below 900 px and Display from 900 px, a 6 px mastered-share bar, then three stat chips (seen, mastered, day streak): `--soft` pills with a caption label in `--text-2` and a 600 value. The admin dashboard uses the same 6 px bar in its bar lists (share of a total, funnel steps, success-rate rows).
 
 ### 5.7 Navigation
 
@@ -200,7 +202,7 @@ Pill tabs (filters, sub-tabs, segmented toggles): inactive white with `--border-
 
 ### 5.8 Inputs
 
-White, `--r-sm`, `--border-strong`, 44 px height, 15 px. Focus ring as buttons. Labels 13 px `--text-2` above the field. Select: native appearance removed, a 16 px Lucide chevron-down in `--text-2` sits in a 40 px box at inline-end, padding-inline-end 40 px, not mirrored (`shared/ui/select.tsx`).
+White, `--r-sm`, `--border-strong`, 44 px height, 15 px. Focus ring as buttons. Labels 13 px `--text-2` above the field. Select: native appearance removed, a 16 px Lucide chevron-down in `--text-2` sits in a 40 px box at inline-end, padding-inline-end 40 px, not mirrored (`shared/ui/select.tsx`). A group of choices is a fieldset whose legend is an ordinary label inside the group (15 px 600 in a card, 13 px `--text-2` in a form), never drawn on the group's border.
 
 ### 5.9 Tables (admin, teacher)
 
@@ -227,6 +229,10 @@ Student answer mode: zones are buttons. An empty zone has a muted dashed stroke 
 ### 5.14 Dashboard
 
 Admin dashboard (`/admin`): a row of eight KPI tiles (2 columns, 4 from 700 px): a caption label, one `stat` number, one caption detail (the in-period delta when the API has one, never coloured) and an optional note. Below, eight panels (1 / 2 / 3 columns) of metric rows (caption label in `--text-2` at inline-start, 600-weight value at inline-end, hairline between rows; an overdue value is `--bad`) and bar lists (label and value over a 6 px progress bar, scaled to the total or the first funnel step). Daily charts: `--accent` bars, `--border` gridlines at 0, ½ and the rounded maximum with compact labels, a baseline tick for every day of the period, at most 4 date labels anchored on the latest day, a total and peak line, left-to-right in both languages, an sr-only data table, and the empty message centred in a 160 px box.
+
+### 5.15 Compact list
+
+One white card, hairline between rows, 12 px vertical row padding. Each row: title (`ui` 600) and caption meta at inline-start; a caption value over a 6 px bar (112 px wide from 700 px, full remaining width below); a 36 px `sm` secondary action at inline-end. Below 700 px the value, bar and action form a second line. The first 3 rows show, then a ghost «عرض الكل (N)» / «عرض أقل» with `aria-expanded`.
 
 ## 6. Layout and RTL
 

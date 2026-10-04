@@ -60,7 +60,7 @@ describe('MultiExamBuilderPage', () => {
     expect(await screen.findByRole('status', { name: 'Loading units…' })).toBeInTheDocument();
     await rendered;
     expect(await screen.findByRole('checkbox', { name: 'Mechanics' })).toBeInTheDocument();
-    expect(screen.getByText('(12 questions available)')).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Mechanics' })).toHaveAccessibleDescription('12 questions available');
   });
 
   it('asks for two units when fewer are selected', async () => {
@@ -116,7 +116,7 @@ describe('MultiExamBuilderPage', () => {
     });
   });
 
-  it('shows the shortfall and hides Start when questions are short', async () => {
+  it('shows the shortfall as the reason Start is disabled', async () => {
     server.use(
       getGetSubjectsMockHandler(subjects),
       getGetMultiUnitExamOverviewMockHandler(multiOverview()),
@@ -127,10 +127,11 @@ describe('MultiExamBuilderPage', () => {
 
     await tickBoth(user);
 
-    expect(
-      await screen.findByText('The exam cannot be created: not enough questions are available.'),
-    ).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Start exam' })).toBeNull();
+    const start = screen.getByRole('button', { name: 'Start exam' });
+    await waitFor(() => {
+      expect(start).toBeDisabled();
+    });
+    expect(start).toHaveAccessibleDescription('The exam cannot be created: not enough questions are available.');
   });
 
   it('disables a unit without an exam blueprint', async () => {
@@ -213,7 +214,9 @@ describe('MultiExamBuilderPage', () => {
       'href',
       `/student/exam/${examSessionId}`,
     );
-    expect(screen.queryByRole('button', { name: 'Start exam' })).toBeNull();
+    const start = screen.getByRole('button', { name: 'Start exam' });
+    expect(start).toBeDisabled();
+    expect(start).toHaveAccessibleDescription('Finish the exam in progress first.');
   });
 
   it('clears the selection when the subject changes', async () => {
@@ -274,6 +277,63 @@ describe('MultiExamBuilderPage', () => {
     await openBuilder();
 
     expect(await screen.findByText('This subject has no units yet.')).toBeInTheDocument();
+  });
+
+  it('keeps Start visible and disabled with its reason until two units are chosen', async () => {
+    server.use(
+      getGetSubjectsMockHandler(subjects),
+      getGetMultiUnitExamOverviewMockHandler(multiOverview()),
+      getPreviewMultiUnitExamMockHandler(multiPreview()),
+    );
+    const user = userEvent.setup();
+    await openBuilder();
+
+    await screen.findByRole('checkbox', { name: 'Mechanics' });
+    const start = screen.getByRole('button', { name: 'Start exam' });
+    expect(start).toBeDisabled();
+    expect(start).toHaveAccessibleDescription('Choose at least two units.');
+    expect(screen.getByText('No units chosen · 20 questions')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('checkbox', { name: 'Mechanics' }));
+    expect(await screen.findByText('1 unit · 20 questions')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Start exam' })).toBeDisabled();
+
+    await user.click(screen.getByRole('checkbox', { name: 'Waves' }));
+    expect(await screen.findByText('2 units · 20 questions')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Start exam' })).toBeEnabled();
+    });
+    expect(screen.getByRole('button', { name: 'Start exam' })).not.toHaveAccessibleDescription();
+  });
+
+  it('checks the chosen size card and updates the summary', async () => {
+    server.use(
+      getGetSubjectsMockHandler(subjects),
+      getGetMultiUnitExamOverviewMockHandler(multiOverview()),
+      previewForSize,
+    );
+    const user = userEvent.setup();
+    await openBuilder();
+
+    expect(await screen.findByRole('radio', { name: '20 questions' })).toBeChecked();
+
+    await user.click(screen.getByRole('radio', { name: '60 questions' }));
+
+    expect(await screen.findByText('No units chosen · 60 questions')).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: '60 questions' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: '20 questions' })).not.toBeChecked();
+  });
+
+  it('shows the Arabic summary and reason with Latin digits', async () => {
+    server.use(getGetSubjectsMockHandler(subjects), getGetMultiUnitExamOverviewMockHandler(multiOverview()));
+    await openBuilder('', 'ar');
+
+    const mechanics = await screen.findByRole('checkbox', { name: 'Mechanics' });
+    const start = screen.getByRole('button', { name: 'ابدأ الامتحان' });
+    expect(start).toBeDisabled();
+    expect(start).toHaveAccessibleDescription('اختر وحدتين على الأقل.');
+    expect(screen.getByText('لم تختر وحدات بعد · 20 سؤال')).toBeInTheDocument();
+    expect(mechanics).toHaveAccessibleDescription('12 سؤال متاح');
   });
 
   it('renders right-to-left in Arabic without axe violations', async () => {

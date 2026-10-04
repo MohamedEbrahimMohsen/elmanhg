@@ -1,8 +1,8 @@
-# Design system — Elmanhg (المنهج) · "Glass" — palette Indigo calm (v2.1)
+# Design system — Elmanhg (المنهج) · "Glass" — palette Indigo calm (v2.2)
 
 Owner: product (Mohamed). Engineers do not edit values here; they reference tokens. Human-readable rationale lives in `docs/design-system.md`; this file is the token contract the pipeline reads. Both must agree (docs-sync rule).
 
-Source of truth: `docs/design-system.md` v2.1 (2026-10-03). No Figma. Screen content, flow and states come from `prototype/`; the look comes only from this file.
+Source of truth: `docs/design-system.md` v2.2 (2026-10-04). No Figma. Screen content, flow and states come from `prototype/`; the look comes only from this file.
 Mode: **light only**. There is no dark theme and no `.dark` override block.
 
 ## Tokens
@@ -35,7 +35,7 @@ Mode: **light only**. There is no dark theme and no `.dark` override block.
 ### Typography
 | Token | Family | Size / line (mobile · desktop) | Weight | Use |
 |-------|--------|-------------------------------|--------|-----|
-| type.display | Readex Pro | 36/38 · 44/46, tracking -0.02em | 700 | headline counter, landing hero |
+| type.display | Readex Pro | 36/38 · 44/46, tracking -0.02em | 700 | headline counter (from lg; type.h1 below lg), landing hero |
 | type.h1 | Readex Pro | 26/31 · 30/36 | 700 | page title |
 | type.h2 | Readex Pro | 20/26 · 22/29 | 700 | section, card title |
 | type.h3 | Readex Pro | 16/22 | 600 | sub-section |
@@ -85,11 +85,11 @@ Arabic body text never below 15 px. Fonts: Google Fonts `Readex Pro:wght@500;600
 |-----------|----------|--------|-------|
 | Button | primary (accent fill, white label; hover accent.hover, pressed accent.pressed), accent (same as primary since 2.0), secondary (surface + border.strong; aria-pressed → accent.soft + accent border/text), danger (surface + border.strong, danger text; hover danger.soft), ghost (accent text) | default, hover, focus, pressed, disabled (45% opacity, no hover fill), loading | pill, min height 44 (36 for `sm` table row actions, a documented exception to the 44 rule), padding-inline 18 (12 sm), type.ui 600; size `icon` 44×44 for icon-only buttons beside fields (offset `mt-6.5` under a label). One primary per screen. Cursor pointer on enabled buttons/selects/[role=button], not-allowed on disabled (global base rule). Row actions in every table are `sm` (36): secondary, destructive `danger`; row links use `Button asChild`. |
 | Card | default | default, hover (border.strong) for clickable cards | surface, border, shadow.1, radius.lg. No coloured side borders ever. |
-| QuizOption | radio, checkbox | default, hover (soft), selected (accent.soft fill + accent border), correct (success.soft + success), wrong (danger.soft + danger), disabled | full-width label, min height 48, radius.md, padding 12×14, gap 10, control 18px with accent-color accent |
+| QuizOption | radio, checkbox | default, hover (soft), selected (accent.soft fill + accent border), correct (success.soft + success), wrong (danger.soft + danger), disabled | full-width label, min height 48, radius.md, padding 12×14, gap 10, control 18px with accent-color accent; also the option card for choice groups (multi-exam units and sizes), disabled 45% opacity no hover, `shared/ui/optionCard.ts` |
 | FeedbackPanel | correct, wrong, partial | enter (fade, motion.base) | soft bg + strong border of the verdict colour, 26px filled circle icon, bold verdict, explanation in text.muted |
 | Badge | ok, bad, pending, role, v2, neutral | — | pill, type.micro, padding 2×10. ok = success.soft + success.text; bad = danger.soft + danger; pending/neutral = soft + text.muted; role = soft + text; v2 = outline |
-| Progress | mastery (accent), pass (success) | — | height 6, track soft, radius.pill, fill animates motion.slow |
-| Input / Select / Textarea | default | default, focus (2px accent ring, offset 2), error (danger border + caption), disabled | surface, border.strong, radius.sm, height 44, padding 9×12, label type.caption above with gap 6. Select: appearance none, Lucide ChevronDown 16 px text.muted in a 40 px inline-end box, padding-inline-end 40, not mirrored (`shared/ui/select.tsx`) |
+| Progress | mastery (accent), pass (success) | — | height 6, track soft, radius.pill, fill animates motion.slow; headline counter card: sentence h1 below lg / display from lg with balanced wrap, mastered-share bar, 3 stat chips (soft pill, caption label text.muted, 600 value), rows gap 12 |
+| Input / Select / Textarea | default | default, focus (2px accent ring, offset 2), error (danger border + caption), disabled | surface, border.strong, radius.sm, height 44, padding 9×12, label type.caption above with gap 6. Select: appearance none, Lucide ChevronDown 16 px text.muted in a 40 px inline-end box, padding-inline-end 40, not mirrored (`shared/ui/select.tsx`); fieldset legend is a block label inside the group (global base rule floats it), never on the border |
 | TabBar (mobile) | — | active (accent text 600 on an accent.soft icon pill), inactive (text.muted) | at most 4 items; a role with more destinations shows 3 + "المزيد" (list of the rest); Lucide icons 22px stroke 1.8, label type.micro, surface + top hairline; bottom padding env(safe-area-inset-bottom) |
 | AppBar | — | — | single row, height layout.bar, sticky, surface + bottom hairline, same container as main: logo (accent) · nav · role badge · name (≥ xl) · sign-out (label ≥ xl; min height 44 below lg, 36 `sm` from lg) |
 | TopNav (desktop) | — | inactive (text.muted), hover (bg + text), active (accent.soft + accent 600) | pills min-h 36; destinations beyond the role's top-bar list sit in an «المزيد» disclosure menu: surface, border, shadow.2, radius.md, items ≥ 44 px, Esc/outside click/focus leaving closes |
@@ -103,6 +103,7 @@ Arabic body text never below 15 px. Fonts: Google Fonts `Readex Pro:wght@500;600
 | KpiTile | — | loading, error | Card, type.caption label, type.stat value, one type.caption detail (period delta when the API has one, never coloured), optional note; grid 2 columns, 4 from md |
 | MetricList | — | — | caption rows, label text.muted at inline-start, value 600 text at inline-end, hairline between rows; overdue value danger |
 | BarList | — | — | label and value over a 6 px Progress (accent on soft), scaled to the total or first step |
+| CompactList | — | — | one Card, hairline rows (py 12), title ui 600 + caption meta at inline-start, caption value over a 6 px Progress (w 112 from md) and an `sm` secondary action at inline-end; second line below md; first 3 rows then ghost «عرض الكل (N)» / «عرض أقل» (aria-expanded) |
 | DailyBarChart | — | empty | accent bars, border gridlines at 0/½/max with compact labels, a baseline tick for every day of the period, ≤ 4 date labels anchored on the latest day, total/peak line, LTR in both languages, sr-only data table, empty message in a 160 px box |
 | EmptyState | no-data, no-results | — | icon, one line, primary CTA; no-results offers "مسح الفلاتر" |
 | Skeleton | — | loading | soft blocks with radius of the element they replace |
@@ -204,3 +205,4 @@ Touch targets ≥44px; the only exceptions are (1) the desktop top nav and app-b
 | 1.0 | 2026-09-26 | Glass adopted (light only, aurora on landing + subscribe) |
 | 2.0 | 2026-10-03 | Indigo calm palette (#276): indigo primary and active states, ink-tinted borders and shadows, AA-tuned status colours (success.text added), aurora retuned; single-row app bar with More menu, BrandBar on auth and onboarding, layout.bar, layout.auth.max, bp.xl |
 | 2.1 | 2026-10-03 | #280: Latin digits app-wide, shared date formats, Select chevron, global pointer cursor, row-action style and neutral-border danger, dashboard KPI tile / metric list / bar list / daily chart |
+| 2.2 | 2026-10-04 | #286: legend-in-group rule, option cards for choice groups, headline counter chips and bar, CompactList |

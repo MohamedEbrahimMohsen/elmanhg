@@ -15,7 +15,7 @@ export function MultiExamSubjectSelect({ subjects, value, onChange }: MultiExamS
   const id = useId();
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-1.5 md:max-w-xs">
       <Label htmlFor={id}>{t('multi.subject')}</Label>
       <Select
         id={id}

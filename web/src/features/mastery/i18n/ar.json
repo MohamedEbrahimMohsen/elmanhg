@@ -7,7 +7,12 @@
   "headline": {
     "label": "عدّاد أسئلتك",
     "remaining": "متبقّي لك {remaining, number} سؤال من {total, number}",
-    "meta": "شاهدت {seen, number} سؤالًا · أتقنت {mastered, number} · سلسلة الأيام: {streak, number} يوم"
+    "barLabel": "الأسئلة التي أتقنتها",
+    "seen": "شاهدت",
+    "mastered": "أتقنت",
+    "streak": "سلسلة الأيام",
+    "count": "{value, number}",
+    "streakValue": "{streak, plural, zero {# يوم} one {يوم واحد} two {يومان} few {# أيام} many {# يومًا} other {# يوم}}"
   },
   "nextLesson": {
     "label": "الدرس التالي المقترح",

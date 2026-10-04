@@ -84,7 +84,7 @@
     "noSubjects": "لا توجد مواد بعد.",
     "noUnits": "لا توجد وحدات في هذه المادة بعد.",
     "units": "اختر وحدتين أو أكثر:",
-    "available": "({count, number} سؤال متاح)",
+    "available": "{count, number} سؤال متاح",
     "noBlueprint": "لا يوجد امتحان لهذه الوحدة",
     "size": "عدد الأسئلة",
     "sizeOption": "{size, number} سؤال",
@@ -92,7 +92,9 @@
     "previewTitle": "النموذج المدمج (تناسبيًا)",
     "previewLoading": "جارٍ حساب الامتحان…",
     "unitShares": "الأسئلة من كل وحدة",
-    "unitShare": "{unit}: {count, number} سؤال"
+    "unitShare": "{unit}: {count, number} سؤال",
+    "summary": "{units, plural, zero {لم تختر وحدات بعد} one {وحدة واحدة} two {وحدتان} few {# وحدات} many {# وحدة} other {# وحدة}} · {size, number} سؤال",
+    "reasonInProgress": "أنهِ الامتحان الجاري أولًا."
   },
   "attempts": {
     "title": "محاولاتك السابقة",

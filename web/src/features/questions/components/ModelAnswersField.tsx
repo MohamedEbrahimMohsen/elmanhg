@@ -14,7 +14,7 @@ export function ModelAnswersField() {
 
   return (
     <fieldset className="flex flex-col gap-3">
-      <legend className="mb-2 text-caption text-text-muted">{t('editor.essay.modelAnswersLegend')}</legend>
+      <legend className="text-caption text-text-muted">{t('editor.essay.modelAnswersLegend')}</legend>
       <p className="text-caption text-text-muted">{t('editor.essay.modelAnswersHint')}</p>
       {fields.map((field, index) => {
         const number = index + 1;
