@@ -16,7 +16,7 @@ export function AiGradeCard({ detail }: AiGradeCardProps) {
 
   return (
     <section aria-label={t('detail.ai')} className={cardClassName}>
-      <h2 className="font-display text-h3 font-semibold">{t('detail.ai')}</h2>
+      <h2 className="font-display text-h3 font-bold">{t('detail.ai')}</h2>
       {detail.aiScore === null ? (
         <>
           <p className="text-ui text-text">{t('detail.noAiScore')}</p>
@@ -26,7 +26,7 @@ export function AiGradeCard({ detail }: AiGradeCardProps) {
         </>
       ) : (
         <>
-          <p className="text-ui font-semibold text-text">
+          <p className="text-ui font-bold text-text">
             {t('detail.aiScore', { score: formatNumber(Number(detail.aiScore), lng), maxScore })}
           </p>
           {detail.confidence === null ? null : (

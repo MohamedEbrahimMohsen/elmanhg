@@ -16,7 +16,7 @@ export function MultiExamUnitPicker({ units, selected, onToggle }: MultiExamUnit
 
   return (
     <fieldset className="flex min-w-0 flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5">
-      <legend className="text-ui font-semibold text-text">{t('multi.units')}</legend>
+      <legend className="text-ui font-bold text-text">{t('multi.units')}</legend>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
         {units.map((unit) => {
           const nameId = `${baseId}-${unit.unitId}-name`;
@@ -41,7 +41,7 @@ export function MultiExamUnitPicker({ units, selected, onToggle }: MultiExamUnit
                 }}
               />
               <span className="flex min-w-0 flex-col">
-                <span id={nameId} className="font-semibold text-text">
+                <span id={nameId} className="font-bold text-text">
                   {unit.name}
                 </span>
                 <span id={captionId} className="text-caption text-text-muted">

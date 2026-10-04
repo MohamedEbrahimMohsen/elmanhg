@@ -4,7 +4,7 @@ import { toSafeVideoUrl } from '../api/lessonValues';
 import type { LessonValues } from '../schemas/lessonSchema';
 import { RichTextViewer } from './RichTextViewer';
 
-const sectionHeading = 'font-display text-h3 font-semibold';
+const sectionHeading = 'font-display text-h3 font-bold';
 
 export function LessonPreview() {
   const { t } = useTranslation('content');
@@ -34,7 +34,7 @@ export function LessonPreview() {
           target="_blank"
           rel="noopener noreferrer"
           dir="ltr"
-          className="text-ui text-accent underline"
+          className="text-ui text-accent-text underline"
         >
           {t('lessonEditor.preview.video')}
         </a>

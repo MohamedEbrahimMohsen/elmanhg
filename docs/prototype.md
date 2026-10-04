@@ -9,7 +9,7 @@ Double-click `index.html` (or open `file:///D:/Personal/elmanhg/prototype/index.
 Files:
 - `index.html` — shell (Arabic, RTL)
 - `styles.css` — grey/white wireframe styling, mobile-first
-  - The prototype keeps this grey wireframe look and its two-row top bar with the persona switchers. The product's look (Indigo calm palette, single-row app bar) comes from `docs/design-system.md`.
+  - The prototype keeps this grey wireframe look and its two-row top bar with the persona switchers. The product's look (the Mist design from DESIGN.md: mint primary button, Signal Blue accents, hero gradient banners, circle tiles, single-row app bar) comes from `docs/design-system.md`.
 - `data.js` — seed data (`window.SEED`)
 - `app.js` — all logic and rendering (vanilla JS)
 

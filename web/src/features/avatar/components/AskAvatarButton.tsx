@@ -21,7 +21,7 @@ export function AskAvatarButton({ context, label = 'default' }: AskAvatarButtonP
         open(context);
       }}
     >
-      <Sparkles aria-hidden strokeWidth={1.8} className="size-4 text-accent" />
+      <Sparkles aria-hidden strokeWidth={1.8} className="size-4 text-accent-text" />
       {t(label === 'lesson' ? 'ask.lesson' : 'ask.default')}
     </Button>
   );

@@ -17,7 +17,7 @@ export function PaymentStatusBadge({ status }: PaymentStatusBadgeProps) {
   const { t } = useTranslation('payments');
 
   return (
-    <span className={cn('inline-flex rounded-pill px-2.5 py-0.5 text-micro font-semibold', statusClasses[status])}>
+    <span className={cn('inline-flex rounded-pill px-2.5 py-0.5 text-micro font-bold', statusClasses[status])}>
       {t(`status.${status}`)}
     </span>
   );

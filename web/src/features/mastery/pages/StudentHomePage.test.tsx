@@ -128,6 +128,16 @@ describe('StudentHomePage', () => {
     );
   });
 
+  it("shows each subject's initial in a circle beside its name", async () => {
+    openHome();
+
+    const physics = await screen.findByRole('article', { name: 'Physics' });
+    const chemistry = screen.getByRole('article', { name: 'Chemistry' });
+
+    expect(within(physics).getByText('P')).toBeInTheDocument();
+    expect(within(chemistry).getByText('C')).toBeInTheDocument();
+  });
+
   it('lists chosen subjects under Your subjects and the rest under Other subjects', async () => {
     const base = masteryOverview();
     openHome({

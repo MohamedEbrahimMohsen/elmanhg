@@ -33,7 +33,7 @@ export function PaymentLogRow({ item, refundsEnabled, onRefund, onKeep, onStuden
           onClick={() => {
             onStudent(item.studentId);
           }}
-          className="text-start font-semibold text-accent hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+          className="text-start font-bold text-accent-text hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
         >
           {item.studentName}
         </button>
@@ -55,7 +55,7 @@ export function PaymentLogRow({ item, refundsEnabled, onRefund, onKeep, onStuden
           <PaymentStatusBadge status={item.status} />
           {item.needsReview && item.reviewReason ? (
             <>
-              <span className="inline-flex rounded-pill bg-danger-soft px-2.5 py-0.5 text-micro font-semibold text-danger">
+              <span className="inline-flex rounded-pill bg-danger-soft px-2.5 py-0.5 text-micro font-bold text-danger">
                 {t('review.badge')}
               </span>
               <span className={captionClassName}>{t(`review.${item.reviewReason}`)}</span>

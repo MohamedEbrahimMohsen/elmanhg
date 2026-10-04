@@ -25,7 +25,7 @@ export function UnitItem({ subjectId, unit, isFirst, isLast, position }: UnitIte
 
   return (
     <li className="flex flex-col gap-2 rounded-md border border-border bg-bg p-3">
-      <span className="text-ui font-semibold text-text">{unit.name}</span>
+      <span className="text-ui font-bold text-text">{unit.name}</span>
       <p className="text-caption text-text-muted">{t('units.lessonCount', { count: unit.lessonCount })}</p>
       <ItemActions
         name={unit.name}

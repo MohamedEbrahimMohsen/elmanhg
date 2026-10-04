@@ -57,7 +57,7 @@ export function AssistantConversationList(props: AssistantConversationListProps)
           id={headingId}
           ref={headingRef}
           tabIndex={-1}
-          className="font-display text-h3 font-semibold focus-visible:outline-hidden"
+          className="font-display text-h3 font-bold focus-visible:outline-hidden"
         >
           {t('history.title')}
         </h2>

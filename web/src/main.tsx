@@ -1,9 +1,9 @@
-import '@fontsource/readex-pro/500.css';
-import '@fontsource/readex-pro/600.css';
-import '@fontsource/readex-pro/700.css';
-import '@fontsource/noto-sans-arabic/400.css';
-import '@fontsource/noto-sans-arabic/500.css';
-import '@fontsource/noto-sans-arabic/600.css';
+import '@fontsource/poppins/latin-400.css';
+import '@fontsource/poppins/latin-700.css';
+import '@fontsource/poppins/latin-800.css';
+import '@fontsource/almarai/arabic-400.css';
+import '@fontsource/almarai/arabic-700.css';
+import '@fontsource/almarai/arabic-800.css';
 import './styles/app.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';

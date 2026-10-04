@@ -34,7 +34,7 @@ export function FakeCheckoutCard({ payment, isPending, onComplete }: FakeCheckou
       <p className="text-caption text-text-muted">{t('fakeCheckout.note')}</p>
       <div className="flex flex-wrap gap-2">
         <Button
-          variant="accent"
+          variant="primary"
           disabled={isPending}
           onClick={() => {
             onComplete(true);

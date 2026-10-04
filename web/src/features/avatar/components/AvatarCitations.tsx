@@ -8,7 +8,7 @@ export interface AvatarCitationsProps {
   citations: AvatarCitationResult[];
 }
 
-const chip = 'inline-flex rounded-pill bg-accent-soft px-2.5 py-0.5 text-micro text-accent';
+const chip = 'inline-flex rounded-pill bg-accent-soft px-2.5 py-0.5 text-micro text-accent-text';
 
 export function AvatarCitations({ citations }: AvatarCitationsProps) {
   const { t } = useTranslation('avatar');
@@ -16,7 +16,7 @@ export function AvatarCitations({ citations }: AvatarCitationsProps) {
 
   return (
     <div className="flex flex-col gap-1">
-      <p className="text-caption font-semibold text-text-muted">{t('citations.label')}</p>
+      <p className="text-caption font-bold text-text-muted">{t('citations.label')}</p>
       <ul className="flex flex-wrap gap-1.5">
         {citations.map((citation) => {
           const section = t(`citations.section.${citation.section}`);

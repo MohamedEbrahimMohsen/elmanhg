@@ -17,7 +17,7 @@ export function WeakSpotRow({ title, meta, percent, barLabel, lessonId }: WeakSp
   return (
     <li className="flex flex-col gap-2 py-3 md:flex-row md:items-center md:gap-4">
       <div className="flex min-w-0 flex-1 flex-col">
-        <p className="text-ui font-semibold text-text">{title}</p>
+        <p className="text-ui font-bold text-text">{title}</p>
         <p className="text-caption text-text-muted">{meta}</p>
       </div>
       <div className="flex items-center gap-3">

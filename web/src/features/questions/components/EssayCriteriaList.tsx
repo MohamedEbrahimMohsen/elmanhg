@@ -15,7 +15,7 @@ export function EssayCriteriaList({ criteria }: EssayCriteriaListProps) {
       {criteria.map((c) => (
         <li key={c.criterionId} className="flex flex-col gap-1 rounded-md border border-border p-3">
           <div className="flex items-baseline justify-between gap-3">
-            <p className="text-ui font-semibold text-text">{c.title}</p>
+            <p className="text-ui font-bold text-text">{c.title}</p>
             <span dir="ltr" className="text-caption text-text">
               {t('essayGrade.criterionPoints', {
                 points: formatNumber(Number(c.points), lng),

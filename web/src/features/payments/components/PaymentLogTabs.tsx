@@ -28,7 +28,7 @@ export function PaymentLogTabs({ view, reviewCount, onChange }: PaymentLogTabsPr
         >
           {t(`tabs.${tab}`)}
           {tab === 'review' && reviewCount > 0 ? (
-            <span className="rounded-pill bg-soft px-2 py-0.5 text-micro font-semibold text-text-muted">
+            <span className="rounded-pill bg-soft px-2 py-0.5 text-micro font-bold text-text-muted">
               {formatNumber(reviewCount, lng)}
             </span>
           ) : null}

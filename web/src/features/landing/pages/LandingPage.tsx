@@ -38,7 +38,7 @@ export function LandingPage() {
   return (
     <>
       <LandingTopBar />
-      <main id="main" className={cn(layoutContainerClassName, 'flex flex-col gap-6 pt-6 pb-10')}>
+      <main id="main" className={cn(layoutContainerClassName, 'flex flex-col gap-10 pt-6 pb-10 lg:gap-16')}>
         <LandingHero servableCount={count.data ? Number(count.data.count) : undefined} />
         <ValueProps replySlaHours={catalogue.data ? Number(catalogue.data.askTeacher.replySlaHours) : undefined} />
         <section aria-labelledby={plansHeadingId} className="flex flex-col gap-3">

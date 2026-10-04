@@ -13,7 +13,7 @@ export interface ExamResultSummaryProps {
   session: ExamSessionResult;
 }
 
-const badgeClassName = 'self-start rounded-full px-2.5 py-0.5 text-micro font-semibold';
+const badgeClassName = 'self-start rounded-full px-2.5 py-0.5 text-micro font-bold';
 
 export function ExamResultSummary({ session }: ExamResultSummaryProps) {
   const { t } = useTranslation('exam');
@@ -24,13 +24,13 @@ export function ExamResultSummary({ session }: ExamResultSummaryProps) {
 
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5">
-      <p className="font-display text-display font-bold lg:text-display-desktop">
+      <p className="font-display text-display font-extrabold lg:text-display-desktop">
         {t('result.score', { score: Math.round(Number(session.scorePercent ?? 0)) })}
       </p>
       {session.isPassed ? (
         <span className={`${badgeClassName} bg-success-soft text-success-text`}>{t('result.passed')}</span>
       ) : inReview ? (
-        <span className="self-start rounded-full border border-warning bg-warning-soft px-2.5 py-0.5 text-micro font-semibold text-text">
+        <span className="self-start rounded-full border border-warning bg-warning-soft px-2.5 py-0.5 text-micro font-bold text-text">
           {t('result.provisional')}
         </span>
       ) : (

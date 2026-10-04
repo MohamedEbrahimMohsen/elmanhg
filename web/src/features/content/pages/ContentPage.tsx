@@ -56,6 +56,7 @@ export function ContentPage() {
           submitLabel={t('subjects.add')}
           serverErrorFields={subjectNameErrorFields}
           onSubmit={create}
+          submitVariant="primary"
         />
       </div>
       {renderSubjects()}

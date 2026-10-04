@@ -6,6 +6,7 @@ import type { PageDataOfUserSummaryResult } from '@/shared/api/generated/model';
 import { getGetSubjectsMockHandler } from '@/shared/api/generated/subjects/subjects.msw';
 import { getGetUsersMockHandler } from '@/shared/api/generated/users/users.msw';
 import { axe } from '@/test/axe';
+import { mintButtons } from '@/test/mintButtons';
 import { server } from '@/test/msw/server';
 import { renderApp } from '@/test/renderWithProviders';
 import { testSessions } from '@/test/sessions';
@@ -47,6 +48,7 @@ describe('UsersPage', () => {
     const { router } = await openUsers('/admin/users?q=Nobody');
 
     expect(await screen.findByText('No users match the search.')).toBeInTheDocument();
+    expect(mintButtons()).toHaveLength(0);
     const clear = screen.getAllByRole('button', { name: 'Clear filters' }).at(-1);
     if (!clear) {
       throw new Error('The empty state does not offer Clear filters.');
@@ -55,6 +57,14 @@ describe('UsersPage', () => {
 
     expect(await screen.findByRole('row', { name: /Mona Ali/ })).toBeInTheDocument();
     expect(router.state.location.search).not.toHaveProperty('q');
+  });
+
+  it('keeps Invite as the only mint button on a filtered empty Teachers tab', async () => {
+    respondWith(() => usersPage([]));
+    await openUsers('/admin/users?tab=teachers&q=Nobody');
+
+    expect(await screen.findByText('No users match the search.')).toBeInTheDocument();
+    expect(mintButtons().map((button) => button.textContent)).toEqual(['Invite teacher']);
   });
 
   it('shows retry on error and recovers', async () => {

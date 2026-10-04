@@ -21,7 +21,7 @@ export function StudentWeakSpots({ weakSpots }: StudentWeakSpotsProps) {
       ) : (
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-1">
-            <h3 className="font-display text-h3 font-semibold">{t('weakSpots.lessons')}</h3>
+            <h3 className="font-display text-h3 font-bold">{t('weakSpots.lessons')}</h3>
             <ul className="flex flex-col gap-2">
               {weakSpots.lessons.map((lesson) => (
                 <li key={lesson.lessonId} className="flex flex-col">
@@ -34,7 +34,7 @@ export function StudentWeakSpots({ weakSpots }: StudentWeakSpotsProps) {
             </ul>
           </div>
           <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-1">
-            <h3 className="font-display text-h3 font-semibold">{t('weakSpots.objectives')}</h3>
+            <h3 className="font-display text-h3 font-bold">{t('weakSpots.objectives')}</h3>
             <ul className="flex flex-col gap-2">
               {weakSpots.objectives.map((objective) => (
                 <li key={objective.objectiveId} className="flex flex-col">

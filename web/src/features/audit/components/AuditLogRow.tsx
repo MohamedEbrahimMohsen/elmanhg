@@ -49,7 +49,7 @@ export function AuditLogRow({ item }: AuditLogRowProps) {
           ) : null}
           {item.diff ? (
             <details>
-              <summary className="cursor-pointer text-accent">{t('table.changes')}</summary>
+              <summary className="cursor-pointer text-accent-text">{t('table.changes')}</summary>
               <pre dir="ltr" className="font-mono text-mono whitespace-pre-wrap">
                 {formatDiff(item.diff)}
               </pre>

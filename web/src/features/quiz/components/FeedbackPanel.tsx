@@ -64,7 +64,7 @@ export function FeedbackPanel({ item, attempt, question, ask, children }: Feedba
       <div role="status" className="flex items-center gap-3">
         <Icon aria-hidden className={cn('size-6.5 shrink-0', verdict.color)} />
         <div>
-          <p className="text-ui font-semibold text-text">{t(verdict.key)}</p>
+          <p className="text-ui font-bold text-text">{t(verdict.key)}</p>
           <p className="text-caption text-text">
             {inReview
               ? t('feedback.inReviewHint')
@@ -78,13 +78,13 @@ export function FeedbackPanel({ item, attempt, question, ask, children }: Feedba
       {attempt.feedback ? <p className="text-caption text-text-muted">{attempt.feedback}</p> : null}
       {view ? (
         <div className="flex flex-col gap-1">
-          <p className="text-caption font-semibold text-text">{t('feedback.correctAnswer')}</p>
+          <p className="text-caption font-bold text-text">{t('feedback.correctAnswer')}</p>
           <CorrectAnswer view={view} />
         </div>
       ) : null}
       {explanation ? (
         <div className="flex flex-col gap-1">
-          <p className="text-caption font-semibold text-text">{t('feedback.explanation')}</p>
+          <p className="text-caption font-bold text-text">{t('feedback.explanation')}</p>
           <div className="text-ui text-text-muted">
             <RichTextViewer html={explanation} />
           </div>

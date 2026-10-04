@@ -15,7 +15,7 @@ export function NextLessonCard({ lesson }: NextLessonCardProps) {
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5">
       <p className="text-caption text-text-muted">{t('nextLesson.label')}</p>
-      <p className="text-ui font-semibold">{lesson.lessonName}</p>
+      <p className="text-ui font-bold">{lesson.lessonName}</p>
       <p className="text-caption text-text-muted">{lesson.subjectName}</p>
       <p className="text-caption text-text-muted">{t('nextLesson.mastery', { percent })}</p>
       <MasteryBar percent={percent} label={t('nextLesson.barLabel', { name: lesson.lessonName })} />

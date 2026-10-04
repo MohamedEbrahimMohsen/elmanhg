@@ -26,7 +26,7 @@ export function InfrastructureSection() {
           role="alert"
           className="flex flex-col items-start gap-3 rounded-lg border border-danger bg-danger-soft p-4"
         >
-          <p className="text-ui font-semibold text-danger">{t('infrastructure.errorTitle')}</p>
+          <p className="text-ui font-bold text-danger">{t('infrastructure.errorTitle')}</p>
           <p className="text-caption text-text">{t([`common:errors.${code}`, 'common:errors.UNHANDLED_EXCEPTION'])}</p>
           <Button variant="secondary" onClick={() => void refetch()}>
             {t('common:actions.retry')}
@@ -38,7 +38,7 @@ export function InfrastructureSection() {
       <>
         <dl className="flex gap-2">
           <dt className="text-caption text-text-muted">{t('infrastructure.environment')}</dt>
-          <dd dir="ltr" className="text-ui font-semibold">
+          <dd dir="ltr" className="text-ui font-bold">
             {data.environment}
           </dd>
         </dl>

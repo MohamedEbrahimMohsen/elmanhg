@@ -27,7 +27,7 @@ export function MultiExamStartBar({ subjectId, unitIds, size, inProgress }: Mult
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-1 md:flex-row md:items-center md:justify-between lg:p-5">
       <div className="flex min-w-0 flex-col gap-1">
-        <p className="text-ui font-semibold text-text">{t('multi.summary', { units: unitIds.length, size })}</p>
+        <p className="text-ui font-bold text-text">{t('multi.summary', { units: unitIds.length, size })}</p>
         <p id={reasonId} aria-live="polite" className="text-caption text-text-muted">
           {reason ? t(reasonKeys[reason]) : null}
         </p>

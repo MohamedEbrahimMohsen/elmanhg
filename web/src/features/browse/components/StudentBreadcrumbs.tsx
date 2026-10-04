@@ -9,7 +9,7 @@ export interface StudentBreadcrumbsProps {
 
 const itemClassName = "min-w-0 break-words before:me-2 before:content-['/']";
 const linkClassName =
-  'rounded-sm text-accent underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden';
+  'rounded-sm text-accent-text underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden';
 
 export function StudentBreadcrumbs({ subject, unit, current }: StudentBreadcrumbsProps) {
   const { t } = useTranslation('browse');

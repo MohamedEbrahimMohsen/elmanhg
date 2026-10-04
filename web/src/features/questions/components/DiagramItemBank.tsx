@@ -16,7 +16,7 @@ export function DiagramItemBank({ items, interactive, marks, chipProps }: Diagra
 
   return (
     <section aria-label={t('bank')} data-diagram-bank className="flex flex-col gap-2">
-      <h3 className="text-h3 font-semibold">{t('bank')}</h3>
+      <h3 className="text-h3 font-bold">{t('bank')}</h3>
       {items.length === 0 ? (
         <p className="text-caption text-text-muted">{t('bankEmpty')}</p>
       ) : (

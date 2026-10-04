@@ -27,7 +27,7 @@ export function AvatarNotice({ kind }: AvatarNoticeProps) {
         <Link
           to="/student/subscription"
           onClick={close}
-          className="font-semibold text-accent underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+          className="font-bold text-accent-text underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
         >
           {t('notice.subscribe')}
         </Link>

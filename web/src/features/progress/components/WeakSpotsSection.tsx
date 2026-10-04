@@ -5,7 +5,7 @@ import { useGetWeakSpots } from '@/shared/api/generated/progress/progress';
 import { WeakLessonList } from './WeakLessonList';
 import { WeakObjectiveList } from './WeakObjectiveList';
 
-const subHeading = 'font-display text-h3 font-semibold';
+const subHeading = 'font-display text-h3 font-bold';
 
 export function WeakSpotsSection() {
   const { t } = useTranslation('progress');

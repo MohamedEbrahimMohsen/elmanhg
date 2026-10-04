@@ -50,7 +50,7 @@ export function StudentProfileCard({ profile, onSuspend, onReactivate, onGrant }
         <Entry label={t('student.plan')}>
           {t(`plan.${profile.tier}`)}
           {profile.hasAskTeacher ? (
-            <span className="ms-2 rounded-pill bg-accent-soft px-2.5 py-0.5 text-micro font-semibold text-accent">
+            <span className="ms-2 rounded-pill bg-accent-soft px-2.5 py-0.5 text-micro font-bold text-accent-text">
               {t('plan.askTeacher')}
             </span>
           ) : null}

@@ -50,7 +50,7 @@ export function BooleanSettingForm({ setting, mutations }: BooleanSettingFormPro
           {t('row.enabled')}
         </label>
       </div>
-      <Button type="submit" disabled={mutations.isPending || form.formState.isSubmitting}>
+      <Button type="submit" variant="secondary" disabled={mutations.isPending || form.formState.isSubmitting}>
         {t('row.save')}
       </Button>
       {error ? (

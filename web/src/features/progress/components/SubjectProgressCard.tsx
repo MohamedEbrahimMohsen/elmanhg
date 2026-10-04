@@ -19,11 +19,11 @@ export function SubjectProgressCard({ subject }: SubjectProgressCardProps) {
       aria-labelledby={id}
       className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5"
     >
-      <h3 id={id} className="font-display text-h3 font-semibold">
+      <h3 id={id} className="font-display text-h3 font-bold">
         <Link
           to="/student/subject/$subjectId"
           params={{ subjectId: subject.subjectId }}
-          className="rounded-sm text-text hover:text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+          className="rounded-sm text-text hover:text-accent-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
         >
           {subject.name}
         </Link>

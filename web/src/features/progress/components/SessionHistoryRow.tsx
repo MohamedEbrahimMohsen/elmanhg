@@ -28,13 +28,13 @@ export function SessionHistoryRow({ item }: SessionHistoryRowProps) {
           <>
             {t('history.scoreValue', { score: Math.round(Number(item.scorePercent ?? 0)) })}
             {item.isBestScore ? (
-              <span className="ms-2 rounded-full bg-accent-soft px-2.5 py-0.5 text-micro font-semibold text-accent">
+              <span className="ms-2 rounded-full bg-accent-soft px-2.5 py-0.5 text-micro font-bold text-accent-text">
                 {t('history.best')}
               </span>
             ) : null}
           </>
         ) : (
-          <span className="rounded-full bg-soft px-2.5 py-0.5 text-micro font-semibold text-text-muted">
+          <span className="rounded-full bg-soft px-2.5 py-0.5 text-micro font-bold text-text-muted">
             {t('history.inProgress')}
           </span>
         )}

@@ -25,7 +25,7 @@ export function AssistantToolbar({ listId, listOpen, newChatDisabled, onShowList
         <History aria-hidden className="size-4" />
         {t('avatar:panel.history')}
       </Button>
-      <Button variant="primary" disabled={newChatDisabled} onClick={onNewChat}>
+      <Button variant="secondary" disabled={newChatDisabled} onClick={onNewChat}>
         <Plus aria-hidden className="size-4" />
         {t('assistant:newChat')}
       </Button>

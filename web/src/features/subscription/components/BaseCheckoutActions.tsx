@@ -15,7 +15,7 @@ export function BaseCheckoutActions({ mode, prices, disabled, onCheckout }: Base
   return prices.map((price) => (
     <Button
       key={price.period}
-      variant="accent"
+      variant="secondary"
       className="w-full"
       disabled={disabled}
       onClick={() => {

@@ -17,8 +17,8 @@ export function LessonListItem({ lesson }: LessonListItemProps) {
     <li className="flex flex-col gap-2 rounded-md border border-border bg-surface px-3.5 py-3 shadow-1">
       {lesson.isLocked ? (
         <>
-          <span className="text-ui font-semibold break-words text-text-muted">{lesson.name}</span>
-          <span className="inline-flex items-center gap-1 self-start rounded-full bg-soft px-2.5 py-0.5 text-micro font-semibold text-text-muted">
+          <span className="text-ui font-bold break-words text-text-muted">{lesson.name}</span>
+          <span className="inline-flex items-center gap-1 self-start rounded-full bg-soft px-2.5 py-0.5 text-micro font-bold text-text-muted">
             <Lock aria-hidden className="size-4" />
             {t('unit.locked')}
           </span>
@@ -27,7 +27,7 @@ export function LessonListItem({ lesson }: LessonListItemProps) {
         <Link
           to="/student/lesson/$lessonId"
           params={{ lessonId: lesson.id }}
-          className="rounded-sm text-ui font-semibold break-words text-text hover:text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+          className="rounded-sm text-ui font-bold break-words text-text hover:text-accent-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
         >
           {lesson.name}
         </Link>

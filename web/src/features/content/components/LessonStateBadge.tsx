@@ -11,7 +11,7 @@ export function LessonStateBadge({ state }: LessonStateBadgeProps) {
   return (
     <span
       className={cn(
-        'rounded-full px-2.5 py-0.5 text-micro font-semibold',
+        'rounded-full px-2.5 py-0.5 text-micro font-bold',
         state === 'Published' ? 'bg-success-soft text-success-text' : 'bg-soft text-text-muted',
       )}
     >

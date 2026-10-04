@@ -51,7 +51,7 @@ export function MathStepGradeOutcome({ grade, showOutcome }: MathStepGradeOutcom
         <div role="status" className="flex items-center gap-3">
           <Icon aria-hidden className={cn('size-6.5 shrink-0', verdict.color)} />
           <div>
-            <p className="text-ui font-semibold text-text">{t(verdict.key)}</p>
+            <p className="text-ui font-bold text-text">{t(verdict.key)}</p>
             <p className="text-caption text-text">
               {t('feedback.score', {
                 score: formatNumber(Number(grade.score), lng),
@@ -63,14 +63,14 @@ export function MathStepGradeOutcome({ grade, showOutcome }: MathStepGradeOutcom
       ) : null}
       {grade.finalAnswerVerdict !== null ? (
         <p className="text-ui text-text">
-          <span className="font-semibold">{t('mathStepGrade.finalAnswer')}</span>{' '}
+          <span className="font-bold">{t('mathStepGrade.finalAnswer')}</span>{' '}
           {t(`mathStepGrade.verdicts.${grade.finalAnswerVerdict}`, { defaultValue: grade.finalAnswerVerdict })}
         </p>
       ) : null}
       {grade.steps.length > 0 ? <MathStepScoreList steps={grade.steps} /> : null}
       {grade.justification ? (
         <div className="flex flex-col gap-1">
-          <h3 className="text-caption font-semibold text-text">{t('mathStepGrade.justification')}</h3>
+          <h3 className="text-caption font-bold text-text">{t('mathStepGrade.justification')}</h3>
           <p className="text-ui text-text-muted">{grade.justification}</p>
         </div>
       ) : null}

@@ -15,14 +15,14 @@ export function EssayRubricView({ criteria, modelAnswers }: EssayRubricViewProps
 
   return (
     <section aria-label={t('validation.detail.rubric')} className={cardClassName}>
-      <h2 className="font-display text-h3 font-semibold">{t('validation.detail.rubric')}</h2>
+      <h2 className="font-display text-h3 font-bold">{t('validation.detail.rubric')}</h2>
       <p className="text-caption text-text-muted">
         {t('validation.detail.rubricTotal', { total: rubricTotalPoints(criteria) })}
       </p>
       <ol className="flex flex-col gap-3">
         {criteria.map((criterion) => (
           <li key={criterion.id} className="flex flex-col gap-1.5">
-            <h3 className="text-ui font-semibold text-text">
+            <h3 className="text-ui font-bold text-text">
               {criterion.title} {t('validation.detail.criterionPoints', { points: criterion.points })}
             </h3>
             {criterion.description === '' ? null : (
@@ -38,7 +38,7 @@ export function EssayRubricView({ criteria, modelAnswers }: EssayRubricViewProps
           </li>
         ))}
       </ol>
-      <h3 className="text-ui font-semibold text-text">{t('validation.detail.modelAnswers')}</h3>
+      <h3 className="text-ui font-bold text-text">{t('validation.detail.modelAnswers')}</h3>
       {modelAnswers.map((answer, index) => {
         const number = index + 1;
         return (

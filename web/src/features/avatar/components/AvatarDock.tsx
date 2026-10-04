@@ -7,7 +7,7 @@ import { useAvatar } from '../hooks/useAvatar';
 const AvatarPanel = lazy(() => import('./AvatarPanel').then((module) => ({ default: module.AvatarPanel })));
 
 const dockClassName =
-  'fixed start-4 bottom-24 z-10 inline-flex h-12 items-center gap-2 rounded-pill bg-accent px-5 text-ui font-semibold text-surface shadow-2 hover:bg-accent-hover active:bg-accent-pressed focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden lg:bottom-6';
+  'fixed start-4 bottom-24 z-10 inline-flex h-12 items-center gap-2 rounded-pill border-2 border-accent bg-surface px-5 text-label font-bold text-accent-text shadow-1 hover:bg-accent-soft focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden lg:bottom-6';
 
 export function AvatarDock() {
   const { t } = useTranslation('avatar');

@@ -16,7 +16,7 @@ export function QuestionStatusBadge({ status }: QuestionStatusBadgeProps) {
   return (
     <span
       className={cn(
-        'rounded-full px-2.5 py-0.5 text-micro font-semibold',
+        'rounded-full px-2.5 py-0.5 text-micro font-bold',
         statusClasses[status] ?? 'bg-soft text-text-muted',
       )}
     >

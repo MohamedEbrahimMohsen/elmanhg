@@ -21,7 +21,7 @@ export function ExamAttemptsTable({ attempts, currentSessionId }: ExamAttemptsTa
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5">
       <h2 className="font-display text-h2 font-bold lg:text-h2-desktop">{t('attempts.title')}</h2>
-      <p className="text-ui font-semibold">
+      <p className="text-ui font-bold">
         {t('attempts.best', { score: Math.round(Number(attempts.bestScorePercent)) })}
       </p>
       <div className="overflow-x-auto">
@@ -30,11 +30,7 @@ export function ExamAttemptsTable({ attempts, currentSessionId }: ExamAttemptsTa
           <thead>
             <tr>
               {headerKeys.map((key) => (
-                <th
-                  key={key}
-                  scope="col"
-                  className="px-2.5 py-2.25 text-start text-caption font-semibold text-text-muted"
-                >
+                <th key={key} scope="col" className="px-2.5 py-2.25 text-start text-caption font-bold text-text-muted">
                   {t(`attempts.${key}`)}
                 </th>
               ))}
@@ -47,7 +43,7 @@ export function ExamAttemptsTable({ attempts, currentSessionId }: ExamAttemptsTa
                 <td className={cellClassName}>
                   {t('attempts.scoreValue', { score: Math.round(Number(attempt.scorePercent)) })}
                   {attempt.isBest ? (
-                    <span className="ms-2 rounded-full bg-accent-soft px-2.5 py-0.5 text-micro font-semibold text-accent">
+                    <span className="ms-2 rounded-full bg-accent-soft px-2.5 py-0.5 text-micro font-bold text-accent-text">
                       {t('attempts.bestBadge')}
                     </span>
                   ) : null}

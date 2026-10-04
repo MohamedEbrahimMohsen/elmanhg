@@ -59,7 +59,7 @@ export function BlueprintEditor({
     <section aria-label={title} className="rounded-lg border border-border bg-surface p-4 shadow-1">
       <Form form={form} serverErrorFields={serverErrorFields} onSubmit={submit}>
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-h3 font-semibold">{title}</h2>
+          <h2 className="font-display text-h3 font-bold">{title}</h2>
           {caption ? <p className="text-caption text-text-muted">{caption}</p> : null}
         </div>
         <TypeCountsTable available={available} />
@@ -82,7 +82,7 @@ export function BlueprintEditor({
               {t('editor.cancel')}
             </Button>
           ) : null}
-          <SubmitButton>{t('editor.save')}</SubmitButton>
+          <SubmitButton variant="secondary">{t('editor.save')}</SubmitButton>
         </div>
       </Form>
     </section>

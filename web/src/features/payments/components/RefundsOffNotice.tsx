@@ -39,7 +39,7 @@ export function RefundsOffNotice() {
       aria-labelledby={`${refundsOffNoticeId}-title`}
       className="flex flex-col gap-1 rounded-lg border border-border bg-warning-soft p-4"
     >
-      <p id={`${refundsOffNoticeId}-title`} className="text-ui font-semibold text-text">
+      <p id={`${refundsOffNoticeId}-title`} className="text-ui font-bold text-text">
         {t('refundsOff.title')}
       </p>
       <p className="text-caption text-text">{t('refundsOff.body')}</p>

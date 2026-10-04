@@ -45,7 +45,7 @@ export function AssistantConversationItem({
         }}
         className="flex min-h-11 flex-1 flex-col items-start gap-1 rounded-sm text-start focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
       >
-        <span className="text-ui font-semibold">{title}</span>
+        <span className="text-ui font-bold">{title}</span>
         <span className="text-caption text-text-muted">
           {t('history.meta', { entryPoint: t(`history.entryPoint.${conversation.entryPoint}`), date })}
         </span>

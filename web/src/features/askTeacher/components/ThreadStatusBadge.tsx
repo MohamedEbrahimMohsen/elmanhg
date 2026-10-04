@@ -22,7 +22,7 @@ export function ThreadStatusBadge({ thread }: ThreadStatusBadgeProps) {
   const badge = threadBadge(thread);
 
   return (
-    <span className={cn('inline-flex rounded-pill px-2.5 py-0.5 text-micro font-semibold', badgeClasses[badge])}>
+    <span className={cn('inline-flex rounded-pill px-2.5 py-0.5 text-micro font-bold', badgeClasses[badge])}>
       {t(`badge.${badge}`, { hours: remainingHours(thread.slaDueAt, now) })}
     </span>
   );
