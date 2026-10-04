@@ -21,7 +21,7 @@ export function DiagramZonesField({ fields, onAdd, onRemove, onReplace }: Diagra
 
   return (
     <fieldset className="flex flex-col gap-3">
-      <legend className="mb-2 text-caption text-text-muted">{t('editor.dragDrop.zonesLegend')}</legend>
+      <legend className="text-caption text-text-muted">{t('editor.dragDrop.zonesLegend')}</legend>
       {fields.map((field, index) => (
         <DiagramZoneCard
           key={field.id}

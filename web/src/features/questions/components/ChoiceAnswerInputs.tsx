@@ -3,6 +3,7 @@ import { CircleCheck, CircleX } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { RichTextViewer } from '@/features/content';
 import { cn } from '@/shared/lib/utils';
+import { optionCardClassName, optionCardIdleClassName } from '@/shared/ui/optionCard';
 import type { ChoiceReview, QuestionAnswer, StudentQuestion } from '../api/studentQuestion';
 
 export interface ChoiceAnswerInputsProps {
@@ -21,7 +22,7 @@ interface ChoiceItem {
 }
 
 const stateClasses = {
-  none: 'border-border-strong bg-surface hover:bg-soft has-checked:border-accent has-checked:bg-accent-soft',
+  none: optionCardIdleClassName,
   correct: 'border-success bg-success-soft',
   wrong: 'border-danger bg-danger-soft',
 } as const;
@@ -67,13 +68,7 @@ export function ChoiceAnswerInputs({ question, answer, onAnswerChange, disabled,
                 ? 'wrong'
                 : 'none';
         return (
-          <label
-            key={item.key}
-            className={cn(
-              'flex min-h-12 cursor-pointer items-center gap-2.5 rounded-md border px-3.5 py-3 text-ui',
-              stateClasses[state],
-            )}
-          >
+          <label key={item.key} className={cn(optionCardClassName, stateClasses[state])}>
             <input
               type={multiple ? 'checkbox' : 'radio'}
               name={name}

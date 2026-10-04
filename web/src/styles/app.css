@@ -139,6 +139,19 @@
     cursor: not-allowed;
   }
 
+  fieldset {
+    min-inline-size: 0;
+  }
+
+  legend {
+    float: inline-start;
+    inline-size: 100%;
+  }
+
+  legend + * {
+    clear: both;
+  }
+
   body {
     background-color: var(--ds-color-bg);
     color: var(--ds-color-text);

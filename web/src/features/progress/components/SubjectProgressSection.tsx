@@ -28,7 +28,7 @@ export function SubjectProgressSection() {
       return <p className="text-ui text-text-muted">{t('subjects.empty')}</p>;
     }
     return (
-      <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+      <ul className="flex flex-col gap-3">
         {data.map((subject) => (
           <li key={subject.subjectId}>
             <SubjectProgressCard subject={subject} />

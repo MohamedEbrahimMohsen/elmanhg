@@ -33,7 +33,9 @@
     "mastery": "إتقان {percent, number}٪",
     "barLabel": "إتقان {name}",
     "objectiveLesson": "{lesson} · {subject}",
-    "train": "درّب الآن"
+    "train": "درّب الآن",
+    "showAll": "عرض الكل ({count, number})",
+    "showLess": "عرض أقل"
   },
   "history": {
     "title": "سجل الجلسات",

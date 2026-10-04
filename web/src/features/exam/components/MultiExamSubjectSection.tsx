@@ -2,17 +2,16 @@ import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ContentErrorState, ContentListSkeleton } from '@/features/content';
 import { useGetMultiUnitExamOverview } from '@/shared/api/generated/exams/exams';
+import { minimumUnits } from '../hooks/useMultiExamBlockReason';
 import { useMultiExamSearch } from '../hooks/useMultiExamSearch';
 import { MultiExamPreview } from './MultiExamPreview';
 import { MultiExamSizePicker } from './MultiExamSizePicker';
+import { MultiExamStartBar } from './MultiExamStartBar';
 import { MultiExamUnitPicker } from './MultiExamUnitPicker';
 
 export interface MultiExamSubjectSectionProps {
   subjectId: string;
 }
-
-// PRD §7.5: a multi-unit exam covers two or more units.
-const minimumUnits = 2;
 
 export function MultiExamSubjectSection({ subjectId }: MultiExamSubjectSectionProps) {
   const { t } = useTranslation('exam');
@@ -60,11 +59,10 @@ export function MultiExamSubjectSection({ subjectId }: MultiExamSubjectSectionPr
       ) : null}
       <MultiExamUnitPicker units={data.units} selected={selectedIds} onToggle={search.toggleUnit} />
       <MultiExamSizePicker sizes={sizes} value={size} onChange={search.selectSize} />
-      {selectedIds.length < minimumUnits ? (
-        <p className="text-ui text-text-muted">{t('multi.chooseTwo')}</p>
-      ) : (
-        <MultiExamPreview subjectId={subjectId} unitIds={selectedIds} size={size} canStart={!inProgress} />
-      )}
+      {selectedIds.length >= minimumUnits ? (
+        <MultiExamPreview subjectId={subjectId} unitIds={selectedIds} size={size} />
+      ) : null}
+      <MultiExamStartBar subjectId={subjectId} unitIds={selectedIds} size={size} inProgress={inProgress != null} />
     </div>
   );
 }
