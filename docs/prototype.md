@@ -41,6 +41,7 @@ All state is saved in `localStorage` under the key `elmanhg.v1`. Click **إعا�
     - Dashboard cards are computed live and can be filtered by subject and period.
     - Content tree supports CRUD, reordering with ▲▼, and publish/unpublish/archive. Publish "التكامل المحدد" and watch the servable total rise.
     - Question editor has a live preview and a **جرّب الإجابة** box that runs the real grader. Editing the stem, options or answer of an approved question sends it back to *pending* with version +1. Changing only the difficulty keeps it approved. Rejected questions get **تعديل وإعادة إرسال**. Fill-in and text short answers have per-rule answer-normalisation checkboxes, all on by default.
+    - Questions list: the prototype says to open the lesson from the content tree to add a question. The product also has an always-visible «إضافة سؤال» button that opens a subject → unit → lesson picker with «سؤال جديد» and «استيراد من ملف» (or goes straight to the editor when the list is filtered by a lesson).
     - Blueprint editor refuses to save when there is a shortfall.
     - Users page: suspend students, grant plans, assign subjects to teachers. The last active admin cannot be deactivated. The product also has search, invitations (link plus email code), reactivation, and no self-deactivation; the prototype does not simulate them.
     - The product also has a payments page (log, needs-review queue, refunds); the prototype does not simulate it.

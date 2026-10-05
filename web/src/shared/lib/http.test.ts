@@ -74,6 +74,54 @@ describe('http', () => {
     expect(result.size).toBe(bytes.length);
   });
 
+  it('parses application/json with a charset', async () => {
+    server.use(
+      mswHttp.get(
+        '*/api/probe',
+        () => new HttpResponse('{"value":3}', { headers: { 'Content-Type': 'application/json; charset=utf-8' } }),
+      ),
+    );
+
+    await expect(http('/api/probe')).resolves.toEqual({ value: 3 });
+  });
+
+  it('parses an application/problem+json success body', async () => {
+    server.use(
+      mswHttp.get(
+        '*/api/probe',
+        () => new HttpResponse('{"value":4}', { headers: { 'Content-Type': 'application/problem+json' } }),
+      ),
+    );
+
+    await expect(http('/api/probe')).resolves.toEqual({ value: 4 });
+  });
+
+  it('returns a Blob with the lines for a non-empty application/x-ndjson body', async () => {
+    const lines = '{"a":1}\n{"a":2}\n';
+    server.use(
+      mswHttp.get(
+        '*/api/probe',
+        () => new HttpResponse(lines, { headers: { 'Content-Type': 'application/x-ndjson' } }),
+      ),
+    );
+
+    const result = await http<Blob>('/api/probe');
+
+    expect(result).toBeInstanceOf(Blob);
+    await expect(result.text()).resolves.toBe(lines);
+  });
+
+  it('returns an empty Blob for an empty application/x-ndjson body', async () => {
+    server.use(
+      mswHttp.get('*/api/probe', () => new HttpResponse('', { headers: { 'Content-Type': 'application/x-ndjson' } })),
+    );
+
+    const result = await http<Blob>('/api/probe');
+
+    expect(result).toBeInstanceOf(Blob);
+    expect(result.size).toBe(0);
+  });
+
   it('rethrows an abort without wrapping it', async () => {
     server.use(mswHttp.get('*/api/probe', () => HttpResponse.json({ value: 1 })));
     const controller = new AbortController();
