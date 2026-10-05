@@ -83,7 +83,7 @@ export function UnitBlueprintSection({ unit, defaultBlueprint, onSave, onDelete 
 
   return (
     <section aria-label={title} className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-1">
-      <h2 className="font-display text-h3 font-semibold">{title}</h2>
+      <h2 className="font-display text-h3 font-bold">{title}</h2>
       <p className="text-ui text-text">{t(defaultBlueprint ? 'editor.usesDefault' : 'editor.noDefaultForUnit')}</p>
       {defaultBlueprint ? (
         <ShortfallNotice

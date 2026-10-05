@@ -29,7 +29,7 @@ export function AvatarHistory({ status }: AvatarHistoryProps) {
 
   return (
     <section aria-labelledby={headingId} className="flex flex-1 flex-col gap-3 overflow-hidden">
-      <h3 id={headingId} className="font-display text-h3 font-semibold">
+      <h3 id={headingId} className="font-display text-h3 font-bold">
         {t('history.title')}
       </h3>
       {list.isPending ? (

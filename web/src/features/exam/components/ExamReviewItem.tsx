@@ -69,7 +69,7 @@ export function ExamReviewItem({ item, sessionId }: ExamReviewItemProps) {
       aria-labelledby={headingId}
       className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4.5 shadow-1"
     >
-      <h3 id={headingId} className="font-display text-h3 font-semibold">
+      <h3 id={headingId} className="font-display text-h3 font-bold">
         {t('result.reviewItem', { position: Number(item.position) })}
       </h3>
       <QuestionView
@@ -79,10 +79,10 @@ export function ExamReviewItem({ item, sessionId }: ExamReviewItemProps) {
         disabled
         review={choiceReview(question, item.correctAnswer)}
       />
-      <p className="text-ui font-semibold text-text-muted">{t('result.unanswered')}</p>
+      <p className="text-ui font-bold text-text-muted">{t('result.unanswered')}</p>
       {correct ? (
         <div className="flex flex-col gap-1">
-          <p className="text-caption font-semibold text-text-muted">{t('result.correctAnswer')}</p>
+          <p className="text-caption font-bold text-text-muted">{t('result.correctAnswer')}</p>
           <CorrectAnswer view={correct} />
         </div>
       ) : null}

@@ -25,7 +25,7 @@ export function LessonItem({ lesson, isFirst, isLast, position }: LessonItemProp
         <Link
           to="/admin/lesson/$lessonId"
           params={{ lessonId: lesson.id }}
-          className="text-ui font-semibold text-accent underline"
+          className="text-ui font-bold text-accent-text underline"
         >
           {lesson.name}
         </Link>

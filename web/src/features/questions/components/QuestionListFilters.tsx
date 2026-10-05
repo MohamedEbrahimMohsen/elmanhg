@@ -66,7 +66,7 @@ export function QuestionListFilters({ search, onApply, onClear }: QuestionListFi
         <TextField<QuestionListFiltersValues> name="rejectionReason" label={t('list.filters.rejectionReason')} />
       </div>
       <div className="flex flex-wrap gap-3">
-        <SubmitButton>{t('list.filters.apply')}</SubmitButton>
+        <SubmitButton variant="secondary">{t('list.filters.apply')}</SubmitButton>
         <Button variant="ghost" onClick={onClear}>
           {t('list.filters.clear')}
         </Button>

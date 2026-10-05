@@ -17,7 +17,7 @@ export function UserStatusBadge({ status, role }: UserStatusBadgeProps) {
   return (
     <span
       className={cn(
-        'inline-flex rounded-pill px-2.5 py-0.5 text-micro font-semibold',
+        'inline-flex rounded-pill px-2.5 py-0.5 text-micro font-bold',
         active ? 'bg-success-soft text-success-text' : 'bg-danger-soft text-danger',
       )}
     >

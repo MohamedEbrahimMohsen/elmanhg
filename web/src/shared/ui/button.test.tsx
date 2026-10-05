@@ -6,7 +6,7 @@ import { Button, buttonVariants, type ButtonProps } from './button';
 
 type Variant = NonNullable<ButtonProps['variant']>;
 
-const variants: Variant[] = ['primary', 'accent', 'secondary', 'danger', 'ghost'];
+const variants: Variant[] = ['primary', 'secondary', 'danger', 'ghost'];
 
 let rules: Awaited<ReturnType<typeof compileBackgroundRules>>;
 
@@ -35,11 +35,11 @@ describe('Button', () => {
   });
 
   it.each<[string, ButtonProps, PointerState, string]>([
-    ['primary at rest', { variant: 'primary' }, {}, fill('accent')],
-    ['primary hovered', { variant: 'primary' }, { hover: true }, fill('accent-hover')],
-    ['primary pressed', { variant: 'primary' }, { hover: true, active: true }, fill('accent-pressed')],
-    ['accent pressed', { variant: 'accent' }, { hover: true, active: true }, fill('accent-pressed')],
-    ['disabled primary hovered', { variant: 'primary', disabled: true }, { hover: true }, fill('accent')],
+    ['primary at rest', { variant: 'primary' }, {}, fill('action')],
+    ['primary hovered', { variant: 'primary' }, { hover: true }, fill('action-hover')],
+    ['primary pressed', { variant: 'primary' }, { hover: true, active: true }, fill('action-pressed')],
+    ['disabled primary hovered', { variant: 'primary', disabled: true }, { hover: true }, fill('action')],
+    ['secondary at rest', { variant: 'secondary' }, {}, 'transparent'],
     ['secondary hovered', { variant: 'secondary' }, { hover: true }, fill('soft')],
     ['toggled secondary hovered', { variant: 'secondary', 'aria-pressed': true }, { hover: true }, fill('accent-soft')],
     [
@@ -48,15 +48,17 @@ describe('Button', () => {
       { hover: true, active: true },
       fill('accent-soft'),
     ],
-    ['disabled secondary hovered', { variant: 'secondary', disabled: true }, { hover: true }, fill('surface')],
+    ['disabled secondary hovered', { variant: 'secondary', disabled: true }, { hover: true }, 'transparent'],
     [
       'disabled toggled secondary',
       { variant: 'secondary', disabled: true, 'aria-pressed': true },
       { hover: true },
       fill('accent-soft'),
     ],
+    ['danger at rest', { variant: 'danger' }, {}, 'transparent'],
     ['danger hovered', { variant: 'danger' }, { hover: true }, fill('danger-soft')],
-    ['disabled danger hovered', { variant: 'danger', disabled: true }, { hover: true }, fill('surface')],
+    ['disabled danger hovered', { variant: 'danger', disabled: true }, { hover: true }, 'transparent'],
+    ['ghost hovered', { variant: 'ghost' }, { hover: true }, fill('soft')],
     ['disabled ghost hovered', { variant: 'ghost', disabled: true }, { hover: true }, 'transparent'],
   ])('resolves the %s fill from the compiled CSS', (_, props, state, expected) => {
     renderWithProviders(<Button {...props}>Go</Button>);
@@ -72,7 +74,7 @@ describe('Button', () => {
     );
 
     expect(winningBackground(screen.getByRole('link', { name: 'Go' }), rules, { hover: true })).toBe(
-      fill('accent-hover'),
+      fill('action-hover'),
     );
   });
 

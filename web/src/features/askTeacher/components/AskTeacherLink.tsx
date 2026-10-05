@@ -12,7 +12,7 @@ export function AskTeacherLink({ lessonId, attemptId }: AskTeacherLinkProps) {
   const { t } = useTranslation('askTeacher');
 
   return (
-    <Button asChild variant="accent">
+    <Button asChild variant="secondary">
       <Link to="/student/ask-new" search={{ lessonId, attemptId }}>
         <MessageCircleQuestion aria-hidden strokeWidth={1.8} className="size-4" />
         {t('link')}

@@ -21,11 +21,7 @@ export function TrainingExportTable({ items, subjects }: TrainingExportTableProp
         <thead>
           <tr>
             {headerKeys.map((key) => (
-              <th
-                key={key}
-                scope="col"
-                className="px-2.5 py-2.25 text-start text-caption font-semibold text-text-muted"
-              >
+              <th key={key} scope="col" className="px-2.5 py-2.25 text-start text-caption font-bold text-text-muted">
                 {t(`list.columns.${key}`)}
               </th>
             ))}

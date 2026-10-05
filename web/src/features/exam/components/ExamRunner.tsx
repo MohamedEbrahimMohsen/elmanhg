@@ -44,7 +44,7 @@ export function ExamRunner({ session, receivedAt }: ExamRunnerProps) {
         lastSavedAt={answers.lastSavedAt}
       />
       {remaining === 0 ? (
-        <p role="status" className="text-ui font-semibold text-text">
+        <p role="status" className="text-ui font-bold text-text">
           {t('exam.timeUp')}
         </p>
       ) : null}

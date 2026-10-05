@@ -8,6 +8,7 @@ import {
 } from '@/shared/api/generated/avatar-conversations/avatar-conversations.msw';
 import { conversationDetail, conversationItem, conversationPage } from '@/test/avatarConversationFixtures';
 import { axe } from '@/test/axe';
+import { mintButtons } from '@/test/mintButtons';
 import { server } from '@/test/msw/server';
 import { renderApp } from '@/test/renderWithProviders';
 import { testSessions } from '@/test/sessions';
@@ -50,6 +51,7 @@ describe('AvatarConversationsPage', () => {
     const { router } = await openList('/admin/avatar-conversations?search=zzz');
 
     expect(await screen.findByText('No conversations match these filters.')).toBeInTheDocument();
+    expect(mintButtons()).toHaveLength(1);
     const [, emptyStateClear] = screen.getAllByRole('button', { name: 'Clear filters' });
     if (!emptyStateClear) {
       throw new Error('The empty state does not offer Clear filters.');

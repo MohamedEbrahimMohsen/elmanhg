@@ -12,7 +12,7 @@ export function NotFound() {
         <h1 className="font-display text-h2 font-bold">{t('notFound.body')}</h1>
         <Link
           to="/"
-          className="text-ui font-semibold text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+          className="text-ui font-bold text-accent-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
         >
           {t('notFound.back')}
         </Link>

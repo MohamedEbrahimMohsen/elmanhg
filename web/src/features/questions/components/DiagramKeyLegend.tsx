@@ -18,7 +18,7 @@ export function DiagramKeyLegend({ diagram }: DiagramKeyLegendProps) {
 
   return (
     <section aria-label={t('view.diagramKeyTitle')} className="flex flex-col gap-2">
-      <h3 className="text-h3 font-semibold">{t('view.diagramKeyTitle')}</h3>
+      <h3 className="text-h3 font-bold">{t('view.diagramKeyTitle')}</h3>
       <ol className="flex flex-col gap-1 text-ui">
         {diagram.zones.map((zone, index) => {
           const number = index + 1;

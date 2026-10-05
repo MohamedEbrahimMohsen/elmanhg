@@ -15,7 +15,7 @@ export function UserListEmptyState({ variant, onClear }: UserListEmptyStateProps
       <Users aria-hidden className="size-8 text-text-muted" />
       <p className="text-ui text-text">{t(variant === 'no-data' ? 'empty.noData' : 'empty.noResults')}</p>
       {variant === 'no-results' ? (
-        <Button variant="primary" onClick={onClear}>
+        <Button variant="secondary" onClick={onClear}>
           {t('filters.clear')}
         </Button>
       ) : null}

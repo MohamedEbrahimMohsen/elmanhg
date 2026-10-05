@@ -15,12 +15,12 @@ export function DialogContent({ title, children, className, ...props }: DialogCo
       <DialogPrimitive.Content
         aria-describedby={undefined}
         className={cn(
-          'fixed inset-0 z-50 m-auto flex h-fit w-full max-w-105 flex-col gap-4 rounded-lg bg-surface p-5 shadow-2 focus-visible:outline-hidden',
+          'fixed inset-0 z-50 m-auto flex h-fit w-full max-w-105 flex-col gap-4 rounded-lg bg-surface p-5 shadow-1 focus-visible:outline-hidden',
           className,
         )}
         {...props}
       >
-        <DialogPrimitive.Title className="font-display text-h3 font-semibold">{title}</DialogPrimitive.Title>
+        <DialogPrimitive.Title className="font-display text-h3 font-bold">{title}</DialogPrimitive.Title>
         {children}
       </DialogPrimitive.Content>
     </DialogPrimitive.Portal>

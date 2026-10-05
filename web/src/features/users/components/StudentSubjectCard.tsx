@@ -20,7 +20,7 @@ export function StudentSubjectCard({ subject }: StudentSubjectCardProps) {
       aria-labelledby={id}
       className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5"
     >
-      <h3 id={id} className="font-display text-h3 font-semibold">
+      <h3 id={id} className="font-display text-h3 font-bold">
         {subject.name}
       </h3>
       <MasteryBar percent={percent} label={t('progress.barLabel', { name: subject.name })} />
@@ -38,11 +38,7 @@ export function StudentSubjectCard({ subject }: StudentSubjectCardProps) {
           <thead>
             <tr>
               {headerKeys.map((key) => (
-                <th
-                  key={key}
-                  scope="col"
-                  className="px-2.5 py-2.25 text-start text-caption font-semibold text-text-muted"
-                >
+                <th key={key} scope="col" className="px-2.5 py-2.25 text-start text-caption font-bold text-text-muted">
                   {t(`progress.${key}`)}
                 </th>
               ))}

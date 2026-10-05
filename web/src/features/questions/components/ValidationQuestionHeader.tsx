@@ -8,7 +8,7 @@ export interface ValidationQuestionHeaderProps {
   question: ValidationQuestionDetailResult;
 }
 
-const badgeClassName = 'rounded-full bg-soft px-2.5 py-0.5 text-micro font-semibold text-text-muted';
+const badgeClassName = 'rounded-full bg-soft px-2.5 py-0.5 text-micro font-bold text-text-muted';
 
 export function ValidationQuestionHeader({ question }: ValidationQuestionHeaderProps) {
   const { t, i18n } = useTranslation('questions');
@@ -30,7 +30,7 @@ export function ValidationQuestionHeader({ question }: ValidationQuestionHeaderP
       <nav aria-label={t('validation.detail.breadcrumb')}>
         <ol className="flex flex-wrap gap-2 text-caption text-text-muted">
           <li>
-            <Link to="/teacher" className="text-accent underline">
+            <Link to="/teacher" className="text-accent-text underline">
               {t('validation.detail.queueLink')}
             </Link>
           </li>

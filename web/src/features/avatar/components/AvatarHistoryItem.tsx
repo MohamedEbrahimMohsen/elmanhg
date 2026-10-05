@@ -28,7 +28,7 @@ export function AvatarHistoryItem({ conversation, canDelete, isOpening, onOpen, 
           onOpen(conversation.id);
         }}
       >
-        <span className="text-ui font-semibold">{title}</span>
+        <span className="text-ui font-bold">{title}</span>
         <span className="text-caption text-text-muted">
           {t('history.meta', { entryPoint: t(`history.entryPoint.${conversation.entryPoint}`), date })}
         </span>

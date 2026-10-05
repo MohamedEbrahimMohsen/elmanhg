@@ -12,12 +12,12 @@ export function ContextSummary({ context }: ContextSummaryProps) {
   return (
     <div className="flex flex-col gap-2 rounded-md border border-border bg-soft px-3.5 py-3">
       <p className="text-caption text-text-muted">{t('context.label')}</p>
-      <p className="text-ui font-semibold text-text">
+      <p className="text-ui font-bold text-text">
         {t('context.path', { subject: context.subjectName, unit: context.unitName, lesson: context.lessonName })}
       </p>
       {context.questionStem ? (
         <div className="flex flex-col gap-1">
-          <p className="text-caption font-semibold text-text">{t('context.question')}</p>
+          <p className="text-caption font-bold text-text">{t('context.question')}</p>
           <div className="text-ui text-text">
             <RichTextViewer html={context.questionStem} />
           </div>

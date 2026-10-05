@@ -20,7 +20,7 @@ export function SignUpPage() {
           {t('signUp.haveAccount')}{' '}
           <Link
             to="/login"
-            className="font-semibold text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+            className="font-bold text-accent-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
           >
             {t('signUp.signIn')}
           </Link>

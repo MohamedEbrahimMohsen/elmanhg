@@ -26,7 +26,7 @@ export function InboxListItem({ thread }: InboxListItemProps) {
         className="flex items-start justify-between gap-3 rounded-md border border-border bg-surface px-3.5 py-3 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
       >
         <span className="flex min-w-0 flex-col gap-1">
-          <span className="line-clamp-2 text-ui font-semibold text-text">{thread.questionText}</span>
+          <span className="line-clamp-2 text-ui font-bold text-text">{thread.questionText}</span>
           <span className="text-caption text-text-muted">
             {t('inbox.meta', {
               subject: thread.subjectName,

@@ -70,7 +70,7 @@ export function DiagramSvg({ image, zones, tone, label, draft, interactive, ...h
               textAnchor="middle"
               dominantBaseline="central"
               fontSize={r * 1.2}
-              className="fill-text font-semibold"
+              className="fill-text font-bold"
             >
               {String(index + 1)}
             </text>

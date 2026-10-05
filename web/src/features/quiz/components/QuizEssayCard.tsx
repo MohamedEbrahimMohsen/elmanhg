@@ -44,7 +44,7 @@ export function QuizEssayCard({
         focusOnMount={focusOnMount}
       />
       {submitted ? (
-        <div className="text-body font-semibold">
+        <div className="text-body font-bold">
           <RichTextViewer html={item.stem} />
         </div>
       ) : (
@@ -73,7 +73,7 @@ export function QuizEssayCard({
           <EssayGradeStatus sessionId={sessionId} questionId={item.questionId} onGraded={essay.refreshSession} />
           {item.explanation ? (
             <div className="flex flex-col gap-1">
-              <p className="text-caption font-semibold text-text">{t('feedback.explanation')}</p>
+              <p className="text-caption font-bold text-text">{t('feedback.explanation')}</p>
               <div className="text-ui text-text-muted">
                 <RichTextViewer html={item.explanation} />
               </div>

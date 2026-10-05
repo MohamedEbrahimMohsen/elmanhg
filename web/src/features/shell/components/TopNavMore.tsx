@@ -54,7 +54,7 @@ export function TopNavMore({ items }: TopNavMoreProps) {
         type="button"
         aria-expanded={open}
         aria-controls={panelId}
-        className={`${topNavItemClassName} group-has-[[data-status=active]]:bg-accent-soft group-has-[[data-status=active]]:font-semibold group-has-[[data-status=active]]:text-accent`}
+        className={`${topNavItemClassName} group-has-[[data-status=active]]:bg-accent-soft group-has-[[data-status=active]]:font-bold group-has-[[data-status=active]]:text-accent-text`}
         onClick={() => {
           setOpen(!open);
         }}
@@ -65,7 +65,7 @@ export function TopNavMore({ items }: TopNavMoreProps) {
       <ul
         id={panelId}
         hidden={!open}
-        className="absolute end-0 top-full z-30 mt-2 flex min-w-56 flex-col gap-0.5 rounded-md border border-border bg-surface p-1.5 shadow-2"
+        className="absolute end-0 top-full z-30 mt-2 flex min-w-56 flex-col gap-0.5 rounded-md border border-border bg-surface p-1.5 shadow-1"
       >
         {items.map(({ key, to, labelKey, icon: Icon }) => (
           <li key={key}>
@@ -74,7 +74,7 @@ export function TopNavMore({ items }: TopNavMoreProps) {
               onClick={() => {
                 setOpen(false);
               }}
-              className="flex min-h-11 items-center gap-3 rounded-sm px-3 text-ui text-text hover:bg-bg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden data-[status=active]:bg-accent-soft data-[status=active]:font-semibold data-[status=active]:text-accent"
+              className="flex min-h-11 items-center gap-3 rounded-sm px-3 text-ui text-text hover:bg-bg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden data-[status=active]:bg-accent-soft data-[status=active]:font-bold data-[status=active]:text-accent-text"
             >
               <Icon aria-hidden className="size-5 shrink-0" strokeWidth={navIconStrokeWidth} />
               <span>{t(labelKey)}</span>

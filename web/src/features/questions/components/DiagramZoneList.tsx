@@ -31,7 +31,7 @@ export function DiagramZoneList({
 
   return (
     <section aria-labelledby={headingId} className="flex flex-col gap-2">
-      <h3 id={headingId} className="text-h3 font-semibold">
+      <h3 id={headingId} className="text-h3 font-bold">
         {t('zonesTitle')}
       </h3>
       <ol className="flex flex-col gap-2">

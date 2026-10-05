@@ -13,7 +13,7 @@ export function MathStepScoreList({ steps }: MathStepScoreListProps) {
 
   return (
     <section aria-label={t('mathStepGrade.steps')} className="flex flex-col gap-2">
-      <h3 className="text-caption font-semibold text-text">{t('mathStepGrade.steps')}</h3>
+      <h3 className="text-caption font-bold text-text">{t('mathStepGrade.steps')}</h3>
       <ol className="flex flex-col gap-2">
         {steps.map((step) => {
           const number = Number(step.stepIndex) + 1;
@@ -23,7 +23,7 @@ export function MathStepScoreList({ steps }: MathStepScoreListProps) {
               className="flex flex-col gap-1 rounded-md border border-border p-3"
             >
               <div className="flex items-baseline justify-between gap-3">
-                <p className="text-ui font-semibold text-text">{t('mathStepGrade.step', { number })}</p>
+                <p className="text-ui font-bold text-text">{t('mathStepGrade.step', { number })}</p>
                 <span dir="ltr" className="text-caption text-text">
                   {t('mathStepGrade.stepPoints', {
                     points: formatNumber(Number(step.points), lng),

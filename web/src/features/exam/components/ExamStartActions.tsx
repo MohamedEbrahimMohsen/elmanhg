@@ -32,7 +32,7 @@ export function ExamStartActions({ overview }: ExamStartActionsProps) {
         <Link
           to="/student/exam/$sessionId"
           params={{ sessionId: inProgress.sessionId }}
-          className="inline-flex min-h-11 items-center rounded-sm text-ui text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+          className="inline-flex min-h-11 items-center rounded-sm text-ui text-accent-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
         >
           {t('start.openOther')}
         </Link>
@@ -48,7 +48,7 @@ export function ExamStartActions({ overview }: ExamStartActionsProps) {
         <Link
           to="/student/unit/$unitId"
           params={{ unitId: overview.unitId }}
-          className="inline-flex min-h-11 items-center rounded-sm text-ui text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+          className="inline-flex min-h-11 items-center rounded-sm text-ui text-accent-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
         >
           {t('start.toUnit')}
         </Link>
@@ -58,7 +58,7 @@ export function ExamStartActions({ overview }: ExamStartActionsProps) {
   if (overview.blueprint && !overview.isAvailable) {
     return (
       <div className={warningClassName}>
-        <p className="text-ui font-semibold text-text">{t('start.shortfall')}</p>
+        <p className="text-ui font-bold text-text">{t('start.shortfall')}</p>
       </div>
     );
   }

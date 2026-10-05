@@ -21,11 +21,7 @@ export function UnitProgressTable({ units, subjectName }: UnitProgressTableProps
         <thead>
           <tr>
             {headerKeys.map((key) => (
-              <th
-                key={key}
-                scope="col"
-                className="px-2.5 py-2.25 text-start text-caption font-semibold text-text-muted"
-              >
+              <th key={key} scope="col" className="px-2.5 py-2.25 text-start text-caption font-bold text-text-muted">
                 {t(`subjects.${key}`)}
               </th>
             ))}
@@ -38,7 +34,7 @@ export function UnitProgressTable({ units, subjectName }: UnitProgressTableProps
                 <Link
                   to="/student/unit/$unitId"
                   params={{ unitId: unit.unitId }}
-                  className="rounded-sm font-semibold text-accent hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+                  className="rounded-sm font-bold text-accent-text hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
                 >
                   {unit.name}
                 </Link>

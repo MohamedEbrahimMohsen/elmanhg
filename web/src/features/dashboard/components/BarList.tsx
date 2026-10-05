@@ -19,7 +19,7 @@ export function BarList({ items, max }: { items: readonly BarListItem[]; max: nu
             <span id={`${id}-${key}-l`} className="text-text">
               {label}
             </span>
-            <span id={`${id}-${key}-v`} className="font-semibold text-text">
+            <span id={`${id}-${key}-v`} className="font-bold text-text">
               {display}
             </span>
           </div>

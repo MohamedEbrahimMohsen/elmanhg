@@ -23,7 +23,7 @@ export function ValidationQuestionContent({ question, values }: ValidationQuesti
   return (
     <>
       <section aria-label={t('validation.detail.preview')} className={cardClassName}>
-        <h2 className="font-display text-h3 font-semibold">{t('validation.detail.preview')}</h2>
+        <h2 className="font-display text-h3 font-bold">{t('validation.detail.preview')}</h2>
         {values.type === 'DragDrop' ? (
           <DragDropPreview stem={values.stem} diagram={toDiagramModel(values)} />
         ) : (
@@ -49,10 +49,12 @@ export function ValidationQuestionContent({ question, values }: ValidationQuesti
         />
       ) : null}
       <section aria-label={t('validation.detail.explanation')} className={cardClassName}>
-        <h2 className="font-display text-h3 font-semibold">{t('validation.detail.explanation')}</h2>
+        <h2 className="font-display text-h3 font-bold">{t('validation.detail.explanation')}</h2>
         <RichTextViewer html={question.explanation} />
         <details>
-          <summary className="cursor-pointer text-caption text-accent">{t('validation.detail.gradingSpec')}</summary>
+          <summary className="cursor-pointer text-caption text-accent-text">
+            {t('validation.detail.gradingSpec')}
+          </summary>
           <pre dir="ltr" className="mt-2 overflow-x-auto rounded-sm bg-soft p-3 font-mono text-mono">
             {JSON.stringify({ body: question.body, gradingSpec: question.gradingSpec }, null, 2)}
           </pre>

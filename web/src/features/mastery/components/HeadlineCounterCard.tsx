@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { MasteryHeadlineResult } from '@/shared/api/generated/model';
+import { heroClassName, heroHaloClassName } from '@/shared/ui/hero';
 import { MasteryBar } from './MasteryBar';
 
 export interface HeadlineCounterCardProps {
@@ -19,19 +20,17 @@ export function HeadlineCounterCard({ headline, streakDays }: HeadlineCounterCar
   ];
 
   return (
-    <section
-      aria-label={t('headline.label')}
-      className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5"
-    >
-      <p className="font-display text-h1 font-bold text-balance lg:text-display-desktop">
+    <section aria-label={t('headline.label')} className={heroClassName}>
+      <span aria-hidden="true" className={heroHaloClassName} />
+      <p className="font-display text-h1 font-extrabold text-balance lg:text-display-desktop">
         {t('headline.remaining', { remaining: Number(headline.remainingCount), total })}
       </p>
-      <MasteryBar percent={masteredPercent} label={t('headline.barLabel')} />
+      <MasteryBar tone="onHero" percent={masteredPercent} label={t('headline.barLabel')} />
       <dl className="flex flex-wrap gap-2">
         {stats.map((stat) => (
-          <div key={stat.key} className="flex items-baseline gap-1.5 rounded-pill bg-soft px-3 py-1">
+          <div key={stat.key} className="flex items-baseline gap-1.5 rounded-pill bg-surface px-3 py-1">
             <dt className="text-caption text-text-muted">{stat.label}</dt>
-            <dd className="text-caption font-semibold text-text">{stat.value}</dd>
+            <dd className="text-caption font-bold text-text">{stat.value}</dd>
           </div>
         ))}
       </dl>

@@ -14,7 +14,7 @@ export function QuizResultSummary({ session }: QuizResultSummaryProps) {
 
   return (
     <div className="flex flex-col gap-1 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5">
-      <p className="font-display text-display font-bold lg:text-display-desktop">
+      <p className="font-display text-display font-extrabold lg:text-display-desktop">
         {t('result.score', { score: Math.round(Number(session.scorePercent ?? 0)) })}
       </p>
       <p className="text-caption text-text-muted">{t('result.answered', { answered, total: session.items.length })}</p>

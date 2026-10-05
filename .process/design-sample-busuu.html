@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>المنهج — DESIGN.md sample</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --color-deep-indigo: #3b1e90;
+  --color-signal-blue: #116eee;
+  --color-spring-mint: #11ee92;
+  --color-hero-sky-blue: #3a6ef0;
+  --gradient-hero-sky-blue: linear-gradient(90deg, #3b1e90 0%, #5a3cc4 30%, #3a6ef0 100%);
+  --color-charcoal: #252b2f;
+  --color-pure-black: #000000;
+  --color-canvas-mist: #f2f7fd;
+  --color-paper-white: #ffffff;
+  --color-steel-border: #d6dee6;
+  --color-slate-caption: #666e7e;
+  --color-shadow-gray: #b3b3b3;
+  --color-trustpilot-star: #ffcf00;
+
+  --font-nista: 'Nista', 'Poppins', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --text-caption: 10px; --leading-caption: 1.2;
+  --text-body: 14px; --leading-body: 1.5;
+  --text-body-lg: 16px; --leading-body-lg: 1.5;
+  --text-subheading: 18px; --leading-subheading: 1.5;
+  --text-heading-sm: 24px; --leading-heading-sm: 1.3;
+  --text-heading: 36px; --leading-heading: 1.14;
+  --text-display: 40px; --leading-display: 1.14;
+
+  --page-max-width: 1200px;
+  --section-gap: 64px;
+  --card-padding: 20px;
+
+  --radius-cards: 16px;
+  --radius-inputs: 5px;
+  --radius-buttons: 45px;
+  --radius-circles: 9999px;
+
+  --shadow-subtle: rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--color-canvas-mist);
+  color: var(--color-charcoal);
+  font-family: var(--font-nista);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+}
+a { color: var(--color-signal-blue); text-decoration: none; }
+.container { max-width: var(--page-max-width); margin: 0 auto; padding: 0 20px; }
+
+/* Top Navigation Bar */
+.nav { position: sticky; top: 0; z-index: 10; background: var(--color-paper-white); box-shadow: var(--shadow-subtle); }
+.nav .container { height: 64px; display: flex; align-items: center; gap: 20px; }
+.logo { display: flex; align-items: center; gap: 8px; }
+.logo-mark { width: 32px; height: 32px; border-radius: 8px; background: var(--color-signal-blue); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: var(--text-subheading); }
+.logo-word { font-size: var(--text-subheading); font-weight: 700; color: var(--color-signal-blue); line-height: 1.2; }
+.logo-sub { display: block; font-size: var(--text-caption); line-height: var(--leading-caption); color: var(--color-slate-caption); font-weight: 400; }
+.nav-links { display: flex; gap: 4px; margin-inline-start: 12px; }
+.nav-links a { padding: 8px 14px; color: var(--color-charcoal); font-weight: 700; font-size: var(--text-body); border-radius: var(--radius-buttons); }
+.nav-links a.active { color: var(--color-signal-blue); }
+.nav-actions { margin-inline-start: auto; display: flex; gap: 8px; align-items: center; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: var(--radius-buttons); font-family: inherit; font-weight: 700; font-size: var(--text-body); line-height: 1.2; padding: 12px 20px; cursor: pointer; border: 0; background: transparent; }
+.btn-primary { background: var(--color-spring-mint); color: var(--color-charcoal); }
+.btn-primary.lg { font-size: var(--text-body-lg); }
+.btn-outline { border: 1.5px solid var(--color-signal-blue); color: var(--color-signal-blue); }
+.btn-ghost { color: var(--color-charcoal); }
+
+/* Hero Gradient Banner */
+.hero { background: var(--gradient-hero-sky-blue); color: #fff; }
+.hero .container { display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; align-items: center; padding-top: 64px; padding-bottom: 64px; }
+.hero h1 { font-size: var(--text-display); line-height: var(--leading-display); font-weight: 800; margin: 0; }
+.hero p { font-size: var(--text-body-lg); line-height: var(--leading-body-lg); font-weight: 400; color: rgba(255,255,255,.9); max-width: 480px; margin: 20px 0; }
+.hero-meta { display: flex; gap: 8px; align-items: center; margin-top: 16px; font-size: 12px; }
+.hero-meta .muted { color: rgba(255,255,255,.75); }
+.art { position: relative; height: 300px; }
+.halo { position: absolute; border-radius: var(--radius-circles); }
+.halo.a { width: 240px; height: 240px; inset-inline-start: 60px; top: 30px; background: rgba(255,255,255,.14); }
+.halo.b { width: 120px; height: 120px; inset-inline-start: 10px; top: 170px; background: rgba(17,238,146,.35); }
+.character { position: absolute; inset-inline-start: 110px; top: 70px; width: 140px; height: 180px; }
+.bubble { position: absolute; background: #fff; color: var(--color-charcoal); font-weight: 700; font-size: var(--text-body); padding: 8px 14px; border-radius: 18px; box-shadow: var(--shadow-subtle); }
+.bubble.b1 { top: 20px; inset-inline-start: 0; }
+.bubble.b2 { top: 60px; inset-inline-end: 10px; }
+.bubble.b3 { bottom: 20px; inset-inline-end: 40px; }
+
+/* Sections */
+section.block { margin-top: var(--section-gap); }
+.section-heading { font-size: var(--text-heading-sm); line-height: var(--leading-heading-sm); font-weight: 700; color: var(--color-charcoal); text-align: center; margin: 0 0 40px; }
+
+/* Subject tiles (Language Flag Tile pattern) */
+.tile-row { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.tiles { display: flex; gap: 28px; overflow-x: auto; padding: 4px; }
+.tile { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 96px; }
+.tile-circle { width: 80px; height: 80px; border-radius: var(--radius-circles); background: var(--color-paper-white); box-shadow: var(--shadow-subtle); display: grid; place-items: center; }
+.tile-inner { width: 56px; height: 56px; border-radius: var(--radius-circles); display: grid; place-items: center; font-weight: 800; font-size: var(--text-subheading); color: #fff; }
+.tile-name { font-size: var(--text-body); color: var(--color-charcoal); }
+.arrow { width: 40px; height: 40px; border-radius: var(--radius-circles); display: grid; place-items: center; background: transparent; border: 0; color: var(--color-steel-border); cursor: pointer; }
+.arrow svg { width: 22px; height: 22px; }
+
+/* Cards */
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.card { background: var(--color-paper-white); border-radius: var(--radius-cards); padding: var(--card-padding); box-shadow: var(--shadow-subtle); }
+.icon-circle { width: 60px; height: 60px; border-radius: var(--radius-circles); background: var(--color-canvas-mist); display: grid; place-items: center; color: var(--color-signal-blue); }
+.icon-circle svg { width: 28px; height: 28px; }
+.card h3 { font-size: var(--text-subheading); line-height: var(--leading-subheading); font-weight: 700; margin: 16px 0 4px; }
+.card p { font-size: var(--text-body); color: var(--color-slate-caption); margin: 0; }
+.stat { font-size: var(--text-heading); line-height: var(--leading-heading); font-weight: 800; margin-top: 16px; }
+
+/* Lesson list */
+.lesson { display: flex; align-items: center; gap: 16px; }
+.lesson + .lesson { border-top: 1px solid var(--color-steel-border); margin-top: 16px; padding-top: 16px; }
+.lesson .num { width: 44px; height: 44px; border-radius: var(--radius-circles); background: var(--color-canvas-mist); display: grid; place-items: center; font-weight: 700; color: var(--color-signal-blue); flex: none; }
+.lesson .body { flex: 1; }
+.lesson .title { font-weight: 700; font-size: var(--text-body-lg); }
+.lesson .meta { color: var(--color-slate-caption); font-size: 12px; }
+.lesson .go { font-weight: 700; }
+
+/* Quiz question card */
+.question { max-width: 720px; margin: 0 auto; }
+.q-meta { display: flex; justify-content: space-between; color: var(--color-slate-caption); font-size: 12px; margin-bottom: 12px; }
+.q-stem { font-size: var(--text-subheading); line-height: var(--leading-subheading); font-weight: 700; margin: 0 0 20px; }
+.options { display: grid; gap: 12px; }
+.option { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--color-steel-border); border-radius: var(--radius-cards); background: var(--color-paper-white); cursor: pointer; font-size: var(--text-body-lg); }
+.option .dot { width: 28px; height: 28px; border-radius: var(--radius-circles); border: 1px solid var(--color-steel-border); display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--color-slate-caption); flex: none; }
+.option.selected { border-color: var(--color-signal-blue); }
+.option.selected .dot { border-color: var(--color-signal-blue); color: var(--color-signal-blue); }
+.q-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+
+/* Footer Band */
+footer { background: var(--color-canvas-mist); padding: 60px 20px 40px; margin-top: var(--section-gap); }
+footer .container { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
+footer label { display: block; font-weight: 700; font-size: var(--text-body); margin-bottom: 10px; }
+footer select { border: 1px solid var(--color-steel-border); border-radius: var(--radius-inputs); padding: 8px 12px; font-family: inherit; font-size: var(--text-body); color: var(--color-charcoal); background: var(--color-paper-white); }
+footer .links { display: flex; gap: 20px; }
+footer .copy { color: var(--color-slate-caption); font-size: 12px; }
+
+@media (max-width: 860px) {
+  .hero .container { grid-template-columns: 1fr; }
+  .art { display: none; }
+  .grid3 { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Top Navigation Bar -->
+<header class="nav">
+  <div class="container">
+    <div class="logo">
+      <div class="logo-mark">م</div>
+      <div class="logo-word">المنهج<span class="logo-sub">منصة تعلم ذكية</span></div>
+    </div>
+    <nav class="nav-links" aria-label="التنقل الرئيسي">
+      <a href="#" class="active">الرئيسية</a>
+      <a href="#">تقدّمي</a>
+      <a href="#">امتحان متعدد الوحدات</a>
+      <a href="#">اسأل معلّم</a>
+      <a href="#">المساعد</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-outline" href="#">الاشتراك</a>
+      <button class="btn btn-ghost" type="button">تسجيل الخروج</button>
+    </div>
+  </div>
+</header>
+
+<!-- Hero Gradient Banner -->
+<section class="hero">
+  <div class="container">
+    <div>
+      <h1>أهلًا طالب اختبار 1،<br>متبقّي لك 416 سؤال من 450</h1>
+      <p>شاهدت 34 سؤالًا وأتقنت 0 حتى الآن. خطوة صغيرة كل يوم تقرّبك من إتقان المنهج كله.</p>
+      <a class="btn btn-primary lg" href="#">ابدأ التدريب</a>
+      <div class="hero-meta">
+        <strong>سلسلة الأيام: 1 يوم</strong>
+        <span class="muted">· باقتك: الأساسية</span>
+      </div>
+    </div>
+    <div class="art" aria-hidden="true">
+      <div class="halo a"></div>
+      <div class="halo b"></div>
+      <svg class="character" viewBox="0 0 140 180" fill="none">
+        <circle cx="70" cy="52" r="34" fill="#f5c7a1" stroke="#000" stroke-width="2"/>
+        <path d="M36 50c2-26 22-38 40-36 18 2 30 16 28 38-8-10-22-16-36-16S44 42 36 50Z" fill="#252b2f" stroke="#000" stroke-width="2"/>
+        <circle cx="58" cy="56" r="3" fill="#000"/><circle cx="82" cy="56" r="3" fill="#000"/>
+        <path d="M60 70c6 5 14 5 20 0" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+        <path d="M22 178c0-36 20-62 48-62s48 26 48 62Z" fill="#11ee92" stroke="#000" stroke-width="2"/>
+        <rect x="50" y="128" width="40" height="30" rx="4" fill="#fff" stroke="#000" stroke-width="2"/>
+        <path d="M70 128v30" stroke="#000" stroke-width="2"/>
+      </svg>
+      <div class="bubble b1">أهلًا!</div>
+      <div class="bubble b2">Hello!</div>
+      <div class="bubble b3">2 + 2 = 4</div>
+    </div>
+  </div>
+</section>
+
+<main class="container">
+
+  <!-- Subjects (circular tile row) -->
+  <section class="block">
+    <h2 class="section-heading">أريد أن أذاكر</h2>
+    <div class="tile-row">
+      <button class="arrow" type="button" aria-label="السابق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button>
+      <div class="tiles">
+        <div class="tile"><div class="tile-circle"><div class="tile-inner" style="background:#116eee">ر</div></div><span class="tile-name">الرياضيات</span></div>
+        <div class="tile"><div class="tile-circle"><div class="tile-inner" style="background:#5a3cc4">ف</div></div><span class="tile-name">الفيزياء</span></div>
+        <div class="tile"><div class="tile-circle"><div class="tile-inner" style="background:#3a6ef0">ك</div></div><span class="tile-name">الكيمياء</span></div>
+        <div class="tile"><div class="tile-circle"><div class="tile-inner" style="background:#3b1e90">ع</div></div><span class="tile-name">اللغة العربية</span></div>
+        <div class="tile"><div class="tile-circle"><div class="tile-inner" style="background:#252b2f">E</div></div><span class="tile-name">الإنجليزية</span></div>
+        <div class="tile"><div class="tile-circle"><div class="tile-inner" style="background:#666e7e">أ</div></div><span class="tile-name">الأحياء</span></div>
+      </div>
+      <button class="arrow" type="button" aria-label="التالي"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></button>
+    </div>
+  </section>
+
+  <!-- Progress cards -->
+  <section class="block">
+    <h2 class="section-heading">تقدّمك هذا الأسبوع</h2>
+    <div class="grid3">
+      <div class="card">
+        <div class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19h16M7 16V9m5 7V5m5 11v-4"/></svg></div>
+        <div class="stat">34</div>
+        <h3>سؤال شاهدته</h3>
+        <p>من أصل 450 سؤالًا راجعها معلّمون حقيقيون.</p>
+      </div>
+      <div class="card">
+        <div class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l4 4 10-10"/></svg></div>
+        <div class="stat">0%</div>
+        <h3>نسبة الإتقان</h3>
+        <p>أجب صحيحًا مرتين متتاليتين لتتقن السؤال.</p>
+      </div>
+      <div class="card">
+        <div class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3c2 3 5 5 5 9a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3 1-5 1-8Z"/></svg></div>
+        <div class="stat">1</div>
+        <h3>يوم متتالٍ</h3>
+        <p>ذاكر اليوم لتحافظ على سلسلتك.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Next lessons -->
+  <section class="block">
+    <h2 class="section-heading">الدروس التالية المقترحة</h2>
+    <div class="card">
+      <div class="lesson">
+        <div class="num">1.1</div>
+        <div class="body"><div class="title">الدرس 1.1: المعادلات الخطية</div><div class="meta">Load test demo · الوحدة 1 · إتقان 0%</div></div>
+        <a class="go" href="#">درّب الآن</a>
+      </div>
+      <div class="lesson">
+        <div class="num">1.2</div>
+        <div class="body"><div class="title">الدرس 1.2: المتباينات</div><div class="meta">Load test demo · الوحدة 1 · إتقان 0%</div></div>
+        <a class="go" href="#">درّب الآن</a>
+      </div>
+      <div class="lesson">
+        <div class="num">2.1</div>
+        <div class="body"><div class="title">الدرس 2.1: الدوال</div><div class="meta">Load test demo · الوحدة 2 · إتقان 0%</div></div>
+        <a class="go" href="#">درّب الآن</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quiz question -->
+  <section class="block">
+    <h2 class="section-heading">جرّب سؤالًا الآن</h2>
+    <div class="card question">
+      <div class="q-meta"><span>الدرس 1.1 · سؤال 3 من 10</span><span>اختيار من متعدد</span></div>
+      <p class="q-stem">ما قيمة س في المعادلة 2س + 4 = 10؟</p>
+      <div class="options" role="radiogroup" aria-label="الاختيارات">
+        <div class="option" role="radio" aria-checked="false"><span class="dot">أ</span>س = 2</div>
+        <div class="option selected" role="radio" aria-checked="true"><span class="dot">ب</span>س = 3</div>
+        <div class="option" role="radio" aria-checked="false"><span class="dot">ج</span>س = 5</div>
+        <div class="option" role="radio" aria-checked="false"><span class="dot">د</span>س = 7</div>
+      </div>
+      <div class="q-actions">
+        <a href="#">اسأل المساعد</a>
+        <button class="btn btn-primary" type="button">تحقّق من الإجابة</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer Band -->
+<footer>
+  <div class="container">
+    <div>
+      <label for="lang">لغة العرض:</label>
+      <select id="lang"><option>العربية</option><option>English</option></select>
+    </div>
+    <div class="links"><a href="#">عن المنهج</a><a href="#">الخصوصية</a><a href="#">تواصل معنا</a></div>
+    <div class="copy">© 2026 المنهج</div>
+  </div>
+</footer>
+
+</body>
+</html>

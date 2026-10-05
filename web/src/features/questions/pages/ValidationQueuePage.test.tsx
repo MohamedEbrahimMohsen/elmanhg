@@ -14,6 +14,7 @@ import {
   getStartReviewSessionMockHandler,
 } from '@/shared/api/generated/validation-queue/validation-queue.msw';
 import { axe } from '@/test/axe';
+import { mintButtons } from '@/test/mintButtons';
 import { server } from '@/test/msw/server';
 import { renderApp } from '@/test/renderWithProviders';
 import { testSessions } from '@/test/sessions';
@@ -103,6 +104,7 @@ describe('ValidationQueuePage', () => {
     openQueue('/teacher?difficulty=Hard');
 
     expect(await screen.findByText('No questions match these filters.')).toBeInTheDocument();
+    expect(mintButtons()).toHaveLength(1);
     const clearButtons = screen.getAllByRole('button', { name: 'Clear filters' });
     const emptyStateClear = clearButtons.at(-1);
     if (!emptyStateClear) {

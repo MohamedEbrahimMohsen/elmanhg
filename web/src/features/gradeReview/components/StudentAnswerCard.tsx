@@ -17,7 +17,7 @@ export function StudentAnswerCard({ detail }: StudentAnswerCardProps) {
 
   return (
     <section aria-label={t('detail.answer')} className={cardClassName}>
-      <h2 className="font-display text-h3 font-semibold">{t('detail.answer')}</h2>
+      <h2 className="font-display text-h3 font-bold">{t('detail.answer')}</h2>
       {detail.kind === 'MathSteps' ? <MathAnswer detail={detail} /> : <EssayAnswer detail={detail} />}
     </section>
   );

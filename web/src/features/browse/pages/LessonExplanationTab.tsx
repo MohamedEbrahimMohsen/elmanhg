@@ -24,7 +24,7 @@ export function LessonExplanationTab({ lessonId }: LessonExplanationTabProps) {
           target="_blank"
           rel="noopener noreferrer"
           dir="ltr"
-          className="self-start rounded-sm text-ui text-accent underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+          className="self-start rounded-sm text-ui text-accent-text underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
         >
           {t('lesson.video')}
         </a>

@@ -73,7 +73,7 @@ export function TypeCountsTable({ available }: TypeCountsTableProps) {
             })}
           </tbody>
           <tfoot>
-            <tr className="font-semibold">
+            <tr className="font-bold">
               <th scope="row" className={cellClass}>
                 {t('editor.total')}
               </th>

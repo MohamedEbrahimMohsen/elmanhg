@@ -8,7 +8,7 @@ export function AskTeacherUpsell() {
   return (
     <div className="flex flex-col items-start gap-3 rounded-lg border border-border bg-warning-soft p-4">
       <p className="text-ui text-text">{t('upsell.body')}</p>
-      <Button asChild size="sm" variant="accent">
+      <Button asChild size="sm" variant="secondary">
         <Link to="/student/subscription">{t('upsell.cta')}</Link>
       </Button>
     </div>

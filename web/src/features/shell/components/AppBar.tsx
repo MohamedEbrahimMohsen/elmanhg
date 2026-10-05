@@ -23,13 +23,13 @@ export function AppBar({ role }: AppBarProps) {
           {t('common:app.name')}
         </Link>
         <TopTabs role={role} />
-        <span className="ms-auto shrink-0 rounded-pill bg-soft px-2.5 py-0.5 text-micro font-semibold text-text lg:ms-0">
+        <span className="ms-auto shrink-0 rounded-pill bg-soft px-2.5 py-0.5 text-micro font-bold text-text lg:ms-0">
           {t(`role.${role}`)}
         </span>
         <span className="max-w-28 min-w-0 truncate text-caption text-text-muted lg:max-xl:hidden xl:max-w-36">
           {session?.displayName}
         </span>
-        <Button variant="secondary" size="sm" onClick={signOut} className="shrink-0 max-lg:min-h-11">
+        <Button variant="ghost" size="sm" onClick={signOut} className="shrink-0 max-lg:min-h-11">
           <LogOut aria-hidden className="size-4" strokeWidth={navIconStrokeWidth} />
           <span className="lg:max-xl:sr-only">{t('signOut')}</span>
         </Button>

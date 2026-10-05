@@ -9,7 +9,7 @@ export interface ReviewHistoryTableProps {
   decisions: QuestionDecisionResult[];
 }
 
-const headerClassName = 'px-2.5 py-2.25 text-start text-caption font-semibold text-text-muted';
+const headerClassName = 'px-2.5 py-2.25 text-start text-caption font-bold text-text-muted';
 const cellClassName = 'px-2.5 py-2.25 align-top text-caption';
 
 export function ReviewHistoryTable({ revisions, decisions }: ReviewHistoryTableProps) {

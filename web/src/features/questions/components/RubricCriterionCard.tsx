@@ -20,7 +20,7 @@ export function RubricCriterionCard({ index, canRemove, onRemove }: RubricCriter
   return (
     <div className="flex flex-col gap-3 rounded-md border border-border p-3">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-ui font-semibold text-text">{t('editor.essay.criterion', { number })}</span>
+        <span className="text-ui font-bold text-text">{t('editor.essay.criterion', { number })}</span>
         <Button
           variant="ghost"
           size="sm"

@@ -69,11 +69,11 @@ export function DiagramAnswerCanvas({
               height: `${String(zone.height)}%`,
             }}
           >
-            <span className="absolute start-1 top-1 flex size-6 items-center justify-center rounded-full border border-border-strong bg-surface text-micro font-semibold text-text">
+            <span className="absolute start-1 top-1 flex size-6 items-center justify-center rounded-full border border-border-strong bg-surface text-micro font-bold text-text">
               {index + 1}
             </span>
             {count > 0 ? (
-              <span className="absolute end-1 bottom-1 rounded-full bg-accent px-1.5 text-micro font-semibold text-surface">
+              <span className="absolute end-1 bottom-1 rounded-full bg-accent px-1.5 text-micro font-bold text-surface">
                 {t('zoneFill', { count, capacity: zone.capacity })}
               </span>
             ) : null}

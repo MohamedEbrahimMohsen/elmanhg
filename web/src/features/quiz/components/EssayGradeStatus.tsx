@@ -28,7 +28,7 @@ export function EssayGradeStatus({ sessionId, questionId, onGraded }: EssayGrade
         role="alert"
         className="flex flex-col items-start gap-2 rounded-md border border-danger bg-danger-soft px-3.5 py-3"
       >
-        <p className="text-ui font-semibold text-danger">{t('essayGrade.error')}</p>
+        <p className="text-ui font-bold text-danger">{t('essayGrade.error')}</p>
         <Button variant="secondary" onClick={() => void refetch()}>
           {t('essayGrade.retry')}
         </Button>
@@ -45,7 +45,7 @@ export function EssayGradeStatus({ sessionId, questionId, onGraded }: EssayGrade
       >
         <Loader2 aria-hidden className="size-5 shrink-0 text-text-muted motion-safe:animate-spin" />
         <div>
-          <p className="text-ui font-semibold text-text">{t('essayGrade.pending')}</p>
+          <p className="text-ui font-bold text-text">{t('essayGrade.pending')}</p>
           <p className="text-caption text-text-muted">{t('essayGrade.pendingHint')}</p>
         </div>
       </div>
@@ -61,7 +61,7 @@ export function EssayGradeStatus({ sessionId, questionId, onGraded }: EssayGrade
       >
         <Clock aria-hidden className="size-5 shrink-0 text-warning" />
         <div>
-          <p className="text-ui font-semibold text-text">{t('essayGrade.inReview')}</p>
+          <p className="text-ui font-bold text-text">{t('essayGrade.inReview')}</p>
           <p className="text-caption text-text-muted">{t('essayGrade.inReviewHint')}</p>
         </div>
       </div>

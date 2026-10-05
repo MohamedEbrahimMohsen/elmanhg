@@ -26,10 +26,10 @@ export function ExamQuestionCard({ sessionId, item, total, answer, onChange, dis
       className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4.5 shadow-1"
     >
       <div className="flex flex-wrap items-center gap-2">
-        <h2 id={headingId} className="font-display text-h3 font-semibold">
+        <h2 id={headingId} className="font-display text-h3 font-bold">
           {t('exam.counter', { position: Number(item.position), total })}
         </h2>
-        <span className="rounded-full bg-soft px-2.5 py-0.5 text-micro font-semibold text-text-muted">
+        <span className="rounded-full bg-soft px-2.5 py-0.5 text-micro font-bold text-text-muted">
           {t(`questions:types.${question.type}`)}
         </span>
         <span className="text-caption text-text-muted">{t('exam.marks', { count: Number(item.maxScore) })}</span>

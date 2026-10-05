@@ -31,7 +31,7 @@ export function DiagramZoneCard({ index, onRemove, onReplace }: DiagramZoneCardP
   return (
     <div className="flex flex-col gap-3 rounded-md border border-border p-3">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-ui font-semibold">{t('editor.dragDrop.zone', { number })}</p>
+        <p className="text-ui font-bold">{t('editor.dragDrop.zone', { number })}</p>
         <Button variant="ghost" size="sm" aria-label={t('editor.dragDrop.removeZone', { number })} onClick={onRemove}>
           <Trash2 aria-hidden className="size-4" />
         </Button>

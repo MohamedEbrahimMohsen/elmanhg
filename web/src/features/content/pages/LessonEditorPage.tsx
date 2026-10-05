@@ -40,7 +40,7 @@ export function LessonEditorPage({ lessonId }: LessonEditorPageProps) {
       <nav aria-label={t('lessonEditor.breadcrumb')}>
         <ol className="flex gap-2 text-caption text-text-muted">
           <li>
-            <Link to="/admin/content" className="text-accent underline">
+            <Link to="/admin/content" className="text-accent-text underline">
               {t('lessonEditor.contentLink')}
             </Link>
           </li>

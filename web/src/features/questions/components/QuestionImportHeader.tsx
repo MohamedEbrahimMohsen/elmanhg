@@ -14,12 +14,12 @@ export function QuestionImportHeader({ lesson }: QuestionImportHeaderProps) {
       <nav aria-label={t('import.breadcrumb')}>
         <ol className="flex flex-wrap gap-2 text-caption text-text-muted">
           <li>
-            <Link to="/admin/questions" className="text-accent underline">
+            <Link to="/admin/questions" className="text-accent-text underline">
               {t('editor.questionsLink')}
             </Link>
           </li>
           <li>
-            <Link to="/admin/lesson/$lessonId" params={{ lessonId: lesson.id }} className="text-accent underline">
+            <Link to="/admin/lesson/$lessonId" params={{ lessonId: lesson.id }} className="text-accent-text underline">
               {lesson.name}
             </Link>
           </li>

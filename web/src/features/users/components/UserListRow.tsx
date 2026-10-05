@@ -36,12 +36,12 @@ export function UserListRow({
 
   return (
     <tr className="border-t border-border hover:bg-soft">
-      <td className={cn(cellClassName, 'font-semibold')}>
+      <td className={cn(cellClassName, 'font-bold')}>
         {tab === 'students' ? (
           <Link
             to="/admin/student/$studentId"
             params={{ studentId: item.id }}
-            className="rounded-sm text-accent hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+            className="rounded-sm text-accent-text hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
           >
             {item.displayName}
           </Link>
@@ -60,7 +60,7 @@ export function UserListRow({
         <td className={cellClassName}>
           {t(`plan.${item.tier ?? 'Free'}`)}
           {item.hasAskTeacher ? (
-            <span className="ms-2 rounded-pill bg-accent-soft px-2.5 py-0.5 text-micro font-semibold text-accent">
+            <span className="ms-2 rounded-pill bg-accent-soft px-2.5 py-0.5 text-micro font-bold text-accent-text">
               {t('plan.askTeacher')}
             </span>
           ) : null}
@@ -75,7 +75,7 @@ export function UserListRow({
         <div className="flex flex-col items-start gap-1.5">
           <UserStatusBadge status={item.status} role={item.role} />
           {item.invitationPending ? (
-            <span className="inline-flex rounded-pill bg-warning-soft px-2.5 py-0.5 text-micro font-semibold text-warning">
+            <span className="inline-flex rounded-pill bg-warning-soft px-2.5 py-0.5 text-micro font-bold text-warning">
               {t('status.pendingInvite')}
             </span>
           ) : null}

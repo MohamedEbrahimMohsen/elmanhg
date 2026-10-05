@@ -47,7 +47,7 @@ export function ChoiceListSettingForm({ setting, mutations }: ChoiceListSettingF
           </label>
         ))}
       </fieldset>
-      <Button type="submit" disabled={mutations.isPending || form.formState.isSubmitting}>
+      <Button type="submit" variant="secondary" disabled={mutations.isPending || form.formState.isSubmitting}>
         {t('row.save')}
       </Button>
       {error ? (

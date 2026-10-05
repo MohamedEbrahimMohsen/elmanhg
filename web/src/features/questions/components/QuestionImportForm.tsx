@@ -75,7 +75,7 @@ export function QuestionImportForm({ onCheck, onFileChange }: QuestionImportForm
         </div>
         <FormRootError />
         <div>
-          <SubmitButton>{t('import.form.check')}</SubmitButton>
+          <SubmitButton variant="secondary">{t('import.form.check')}</SubmitButton>
         </div>
       </Form>
     </section>

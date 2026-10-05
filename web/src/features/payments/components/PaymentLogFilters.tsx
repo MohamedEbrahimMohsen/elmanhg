@@ -57,7 +57,7 @@ export function PaymentLogFilters({ search, onApply, onClear }: PaymentLogFilter
       </div>
       {search.studentId ? <p className="text-caption text-text-muted">{t('filters.studentActive')}</p> : null}
       <div className="flex flex-wrap gap-3">
-        <SubmitButton>{t('filters.apply')}</SubmitButton>
+        <SubmitButton variant="secondary">{t('filters.apply')}</SubmitButton>
         <Button variant="ghost" onClick={onClear}>
           {t('filters.clear')}
         </Button>

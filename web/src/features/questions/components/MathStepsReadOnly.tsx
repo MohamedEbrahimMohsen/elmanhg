@@ -18,14 +18,14 @@ export function MathStepsReadOnly({ solution }: MathStepsReadOnlyProps) {
             const number = index + 1;
             return (
               <li key={`step-${String(index)}`} className="flex flex-col gap-1">
-                <p className="text-caption font-semibold text-text-muted">{t('view.mathStep', { number })}</p>
+                <p className="text-caption font-bold text-text-muted">{t('view.mathStep', { number })}</p>
                 <MathPreview latex={step} label={t('view.mathStep', { number })} />
               </li>
             );
           })}
         </ol>
       )}
-      <p className="text-caption font-semibold text-text-muted">{t('view.mathFinal')}</p>
+      <p className="text-caption font-bold text-text-muted">{t('view.mathFinal')}</p>
       <MathPreview latex={solution.finalAnswer} label={t('view.mathFinal')} />
     </div>
   );

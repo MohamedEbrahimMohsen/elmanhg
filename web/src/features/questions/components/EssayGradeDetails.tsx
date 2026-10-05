@@ -17,7 +17,7 @@ export function EssayGradeDetails({ essay }: EssayGradeDetailsProps) {
     <section aria-label={t('preview.essay.title')} className="flex flex-col gap-3">
       <EssayCriteriaList criteria={essay.criteria} />
       <div className="flex flex-col gap-1">
-        <h3 className="text-ui font-semibold text-text">{t('preview.essay.justification')}</h3>
+        <h3 className="text-ui font-bold text-text">{t('preview.essay.justification')}</h3>
         <p className="text-body">{essay.justification}</p>
       </div>
       <p className="text-caption text-text-muted">

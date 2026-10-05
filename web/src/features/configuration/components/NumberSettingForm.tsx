@@ -56,7 +56,7 @@ export function NumberSettingForm({ setting, mutations }: NumberSettingFormProps
           {...form.register('value')}
         />
       </div>
-      <Button type="submit" disabled={mutations.isPending || form.formState.isSubmitting}>
+      <Button type="submit" variant="secondary" disabled={mutations.isPending || form.formState.isSubmitting}>
         {t('row.save')}
       </Button>
       {error ? (

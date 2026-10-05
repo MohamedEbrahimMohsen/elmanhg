@@ -19,7 +19,7 @@ export function DragDropPreview({ stem, diagram }: DragDropPreviewProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="text-body font-semibold">
+      <div className="text-body font-bold">
         <RichTextViewer html={stem} />
       </div>
       {hasImage ? (

@@ -40,7 +40,7 @@ export function MathStepsInput({ value, onChange, disabled = false }: MathStepsI
         </Button>
       </div>
       <fieldset className="flex flex-col gap-3">
-        <legend className="font-display text-h3 font-semibold text-text">{t('steps.title')}</legend>
+        <legend className="font-display text-h3 font-bold text-text">{t('steps.title')}</legend>
         <ol className="flex flex-col gap-3">
           {value.steps.map((step, index) => (
             <MathStepRow

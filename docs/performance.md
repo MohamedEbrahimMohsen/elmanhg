@@ -43,16 +43,16 @@ Also: `http_req_failed` < 1 % and `checks` > 99 %. The answer check is the only 
 
 | Page | Entries | Measured (KB br) | Budget (KB br) |
 |---|---|---|---|
-| `entry` | `index.html` | 190 | 210 |
+| `entry` | `index.html` | 189 | 210 |
 | `landing` | + `routes/index` | 199 | 220 |
 | `lesson` | + `student/route`, `student/lesson.$lessonId`, `lesson.$lessonId.index` | 221 | 240 |
 | `quiz` | + `student/route`, `student/quiz.$sessionId` | 236 | 255 |
 | `admin-dashboard` | + `admin/route`, `admin/index` | 213 | 233 |
 | `admin-users` | + `admin/route`, `admin/users` | 245 | 270 |
-| `teacher-home` | + `teacher/route`, `teacher/index` | 246 | 265 |
-| `assistant` | + `student/route`, `student/assistant` | 245 | 260 |
+| `teacher-home` | + `teacher/route`, `teacher/index` | 245 | 265 |
+| `assistant` | + `student/route`, `student/assistant` | 244 | 260 |
 
-Budget = measured × 1.05, rounded up to the next 5 KB. They are regression guards; the 2 s browser gate is the real target. When a change legitimately grows a page, raise its budget in the same pull request and say why. #280 dataviz redesign (KPI tiles, panels, chart axes) grew the admin chunk. The measured column is after the #283 cleanup (§8); the budgets were set before it and were not lowered.
+Budget = measured × 1.05, rounded up to the next 5 KB. They are regression guards; the 2 s browser gate is the real target. When a change legitimately grows a page, raise its budget in the same pull request and say why. #280 dataviz redesign (KPI tiles, panels, chart axes) grew the admin chunk. The measured column is after the #283 cleanup (§8) and the #289 theme; the budgets were set before it and were not lowered. #289 (theme) did not raise any budget.
 
 **Diagnosing a failure.** When a page is over, `perf:budget` prints that page's chunks after the report, largest first: brotli bytes, share of the page, file, and the manifest source (the manifest key that emits the file, or `<key> (css)` for a stylesheet). `npm run perf:budget -- --breakdown=quiz` (or `--breakdown=quiz,lesson`) prints them on demand, and a bare `--breakdown` prints every page; an unknown page name fails. Shared `_name` chunks and `index.html` (the entry) count on every page, so a growth there moves every row of the table.
 
@@ -70,6 +70,7 @@ Budget = measured × 1.05, rounded up to the next 5 KB. They are regression guar
 - **Precompression.** `npm run build` writes `.br` (quality 11) and `.gz` (level 9) next to every `.js .css .html .svg .json .txt` file of at least 1 KB, when smaller. Caddy serves them with `file_server { precompressed br gzip }` (it cannot brotli on the fly) and keeps `encode zstd gzip` for API responses. The smoke test asserts `Content-Encoding: br` on an asset.
 - **HTTP caching.** Hashed `/assets/*` are `immutable` for a year; the SPA shell is `no-cache`. Public media (`/api/media/**`) is `public, max-age=31536000, immutable`, because keys are write-once GUIDs; private teacher-thread images are unchanged. `GET /api/questions/servable-count` is `public, max-age=<Content:ServableCountCacheSeconds>` (60 s, the same window as the server cache).
 - **Quiz transitions without a request.** The start response carries every item, «التالي» makes no request, and next-item images are preloaded (#76).
+- **Two font families, few faces.** Poppins (latin subset) and Almarai (arabic subset) at 400/700/800: ≤ 119 KB of woff2 per page (old fonts about 226 KB), `font-display: swap`, not preloaded. The woff2 files are assets, so `perf:budget` does not count them; their `@font-face` rules (6) are in the entry CSS.
 - **Database.** `IX_Attempts_StudentId_CreatedAt` bounds the daily free-tier count and the progress streak by student and time (§6). A multi-unit exam draw reads its candidates in one query and its lessons once (#181).
 
 ## 5. Load-test harness
@@ -192,7 +193,7 @@ With so few samples, the `quiz_start` and `multi_exam_start` p95s are their slow
 **The lesson budget is missed**, and it is kept at 2 s (a PRD rule; relaxing it is a product decision). [#220](https://github.com/MohamedEbrahimMohsen/elmanhg/issues/220) tracks it. Where the time goes, from the build and the web vitals:
 
 - First paint alone takes about 2.1 s. The entry bundle (`index-*.js`) is 146 KB brotli, but over plain HTTP Chromium does not offer brotli, so the local run downloads the 175 KB gzip copy: about 0.9 s at 200 KB/s, after the HTML round trip.
-- The Arabic web fonts (Noto Sans Arabic 400/500/600 and Readex Pro 500/600/700, about 200 KB of woff2) compete for the same 1.6 Mbps.
+- The Arabic web fonts (Noto Sans Arabic 400/500/600 and Readex Pro 500/600/700, about 200 KB of woff2) compete for the same 1.6 Mbps (replaced by Poppins and Almarai in #289, see §4).
 - Content then waits for the session restore (the refresh round trip) and the lesson request, each at least one 150 ms round trip, plus the lesson route chunks.
 
 Levers for the follow-up, in expected order of effect: split the entry bundle (react-dom, router, query, i18n and every locale are in one 584 KB chunk); load fewer font weights, with `font-display: optional` for the rest; start the lesson request during the session restore on a cold load (§9); and measure over HTTPS with HTTP/2 and brotli, as production serves.

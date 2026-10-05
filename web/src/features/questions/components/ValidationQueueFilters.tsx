@@ -78,7 +78,7 @@ export function ValidationQueueFilters({ search, filters, onApply, onClear }: Va
         />
       </div>
       <div className="flex flex-wrap gap-3">
-        <SubmitButton>{t('validation.filters.apply')}</SubmitButton>
+        <SubmitButton variant="secondary">{t('validation.filters.apply')}</SubmitButton>
         <Button variant="ghost" onClick={onClear}>
           {t('validation.filters.clear')}
         </Button>

@@ -39,7 +39,7 @@ export function InboxThreadPage({ threadId }: InboxThreadPageProps) {
           <li>
             <Link
               to="/teacher/inbox"
-              className="rounded-sm text-accent underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+              className="rounded-sm text-accent-text underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
             >
               {t('inbox.title')}
             </Link>

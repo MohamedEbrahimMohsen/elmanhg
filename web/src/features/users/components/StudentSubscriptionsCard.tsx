@@ -34,7 +34,7 @@ export function StudentSubscriptionsCard({ subscriptions, studentName }: Student
                   <th
                     key={key}
                     scope="col"
-                    className="px-2.5 py-2.25 text-start text-caption font-semibold text-text-muted"
+                    className="px-2.5 py-2.25 text-start text-caption font-bold text-text-muted"
                   >
                     {t(`subscriptions.${key}`)}
                   </th>
@@ -47,7 +47,7 @@ export function StudentSubscriptionsCard({ subscriptions, studentName }: Student
                   <td className={cellClassName}>
                     {t(`plan.${subscription.plan}`)}
                     {subscription.isComplimentary ? (
-                      <span className="ms-2 rounded-pill bg-soft px-2.5 py-0.5 text-micro font-semibold text-text-muted">
+                      <span className="ms-2 rounded-pill bg-soft px-2.5 py-0.5 text-micro font-bold text-text-muted">
                         {t('subscriptions.complimentary')}
                       </span>
                     ) : null}

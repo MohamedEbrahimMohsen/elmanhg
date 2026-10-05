@@ -18,8 +18,8 @@ export function AvatarPanelHeader({ view, status }: AvatarPanelHeaderProps) {
 
   return (
     <div className="flex items-center justify-between gap-2">
-      <Dialog.Title className="inline-flex items-center gap-2 font-display text-h3 font-semibold">
-        <Sparkles aria-hidden strokeWidth={1.8} className="size-5 text-accent" />
+      <Dialog.Title className="inline-flex items-center gap-2 font-display text-h3 font-bold">
+        <Sparkles aria-hidden strokeWidth={1.8} className="size-5 text-accent-text" />
         {t('panel.title')}
       </Dialog.Title>
       <div className="flex items-center gap-1">

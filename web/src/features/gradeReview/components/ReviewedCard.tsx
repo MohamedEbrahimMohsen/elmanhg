@@ -20,10 +20,10 @@ export function ReviewedCard({ detail, review }: ReviewedCardProps) {
       aria-labelledby={headingId}
       className="flex flex-col gap-2 rounded-lg border border-border bg-soft p-4 lg:p-5"
     >
-      <h2 id={headingId} className="font-display text-h3 font-semibold">
+      <h2 id={headingId} className="font-display text-h3 font-bold">
         {t('detail.reviewed')}
       </h2>
-      <p className="text-ui font-semibold text-text">
+      <p className="text-ui font-bold text-text">
         {t(`decisions.${review.decision}`, { defaultValue: review.decision })}
       </p>
       <p className="text-ui text-text">

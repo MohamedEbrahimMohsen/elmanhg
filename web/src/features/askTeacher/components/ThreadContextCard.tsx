@@ -18,12 +18,12 @@ export function ThreadContextCard({ thread, children }: ThreadContextCardProps) 
 
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-1">
-      <p className="text-ui font-semibold text-text">
+      <p className="text-ui font-bold text-text">
         {t('thread.path', { subject: context.subjectName, lesson: context.lessonName })}
       </p>
       {context.questionStem ? (
         <div className="flex flex-col gap-1">
-          <p className="text-caption font-semibold text-text">{t('context.question')}</p>
+          <p className="text-caption font-bold text-text">{t('context.question')}</p>
           <div className="text-ui text-text">
             <RichTextViewer html={context.questionStem} />
           </div>

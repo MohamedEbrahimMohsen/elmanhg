@@ -28,7 +28,7 @@ export function HomeSubjects({ subjects }: HomeSubjectsProps) {
         <h2 className="font-display text-h2 font-bold lg:text-h2-desktop">{t('subjects.title')}</h2>
         <Link
           to="/onboarding"
-          className="inline-flex min-h-11 items-center rounded-sm text-ui font-semibold text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+          className="inline-flex min-h-11 items-center rounded-sm text-ui font-bold text-accent-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
         >
           {t('subjects.edit')}
         </Link>

@@ -12,7 +12,7 @@ export interface GradeReviewListItemProps {
   now: Date;
 }
 
-const chipClassName = 'shrink-0 rounded-full bg-accent-soft px-2.5 py-0.5 text-micro font-semibold text-accent';
+const chipClassName = 'shrink-0 rounded-full bg-accent-soft px-2.5 py-0.5 text-micro font-bold text-accent-text';
 
 export function GradeReviewListItem({ item, subjectId, now }: GradeReviewListItemProps) {
   const { t, i18n } = useTranslation('gradeReview');
@@ -36,7 +36,7 @@ export function GradeReviewListItem({ item, subjectId, now }: GradeReviewListIte
         <Link
           to="/teacher/grade/$subjectId/$kind/$gradeId"
           params={{ subjectId, kind: kindSegments[toKind(item.kind)], gradeId: item.id }}
-          className="text-ui font-semibold text-text hover:text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+          className="text-ui font-bold text-text hover:text-accent-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
         >
           {stemExcerpt(item.stem)}
         </Link>
