@@ -40,7 +40,8 @@ export const VerifyOtpResponse = zod.looseObject({
 
 export const RegisterWithPhoneBody = zod.object({
   "verificationId": zod.uuid(),
-  "displayName": zod.string()
+  "displayName": zod.string(),
+  "termsVersion": zod.string()
 })
 
 export const RegisterWithPhoneResponse = zod.object({
@@ -58,7 +59,8 @@ export const RegisterWithPhoneResponse = zod.object({
 export const RegisterWithEmailBody = zod.object({
   "displayName": zod.string(),
   "email": zod.string(),
-  "password": zod.string()
+  "password": zod.string(),
+  "termsVersion": zod.string()
 })
 
 export const RegisterWithEmailResponse = zod.object({

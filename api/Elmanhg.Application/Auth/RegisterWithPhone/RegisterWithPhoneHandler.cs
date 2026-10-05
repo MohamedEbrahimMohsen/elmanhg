@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Elmanhg.Application.Auth.RegisterWithPhone;
 
-public sealed class RegisterWithPhoneHandler(UserManager<User> userManager, IOtpRepository otpRepository, ITokenService tokenService, IRefreshTokenService<User, Guid> refreshTokenService) : IRequestHandler<RegisterWithPhoneCommand, AuthResult>
+public sealed class RegisterWithPhoneHandler(UserManager<User> userManager, IOtpRepository otpRepository, ITokenService tokenService, IRefreshTokenService<User, Guid> refreshTokenService, TimeProvider timeProvider) : IRequestHandler<RegisterWithPhoneCommand, AuthResult>
 {
     public async Task<AuthResult> Handle(RegisterWithPhoneCommand request, CancellationToken cancellationToken)
     {
@@ -29,6 +29,7 @@ public sealed class RegisterWithPhoneHandler(UserManager<User> userManager, IOtp
         }
 
         var user = User.CreateStudentWithPhone(request.DisplayName, otp.Recipient);
+        user.AcceptTerms(request.TermsVersion, timeProvider.GetUtcNow());
         var result = await userManager.CreateAsync(user).ConfigureAwait(false);
         if (!result.Succeeded)
         {

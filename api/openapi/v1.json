@@ -13415,7 +13415,8 @@
         "required": [
           "displayName",
           "email",
-          "password"
+          "password",
+          "termsVersion"
         ],
         "type": "object",
         "properties": {
@@ -13427,13 +13428,17 @@
           },
           "password": {
             "type": "string"
+          },
+          "termsVersion": {
+            "type": "string"
           }
         }
       },
       "RegisterWithPhoneCommand": {
         "required": [
           "verificationId",
-          "displayName"
+          "displayName",
+          "termsVersion"
         ],
         "type": "object",
         "properties": {
@@ -13442,6 +13447,9 @@
             "format": "uuid"
           },
           "displayName": {
+            "type": "string"
+          },
+          "termsVersion": {
             "type": "string"
           }
         }

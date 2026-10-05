@@ -105,6 +105,15 @@ describe('LandingPage', () => {
     expect(document.documentElement).toHaveAttribute('dir', 'rtl');
   });
 
+  it('links to the terms and privacy page from the footer', async () => {
+    const user = userEvent.setup();
+    renderApp('/');
+
+    await user.click(within(await screen.findByRole('contentinfo')).getByRole('link', { name: 'Terms and privacy' }));
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Terms and privacy' })).toBeInTheDocument();
+  });
+
   it('has no axe violations', async () => {
     const { container } = renderApp('/');
 

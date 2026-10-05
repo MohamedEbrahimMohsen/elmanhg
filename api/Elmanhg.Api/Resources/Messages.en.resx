@@ -92,6 +92,8 @@
   <data name="REFRESH_TOKEN_REVOKED" xml:space="preserve"><value>Your session was ended for your security. Sign in again.</value></data>
   <data name="DISPLAY_NAME_REQUIRED" xml:space="preserve"><value>Enter your name.</value></data>
   <data name="DISPLAY_NAME_TOO_LONG" xml:space="preserve"><value>Name is too long.</value></data>
+  <data name="TERMS_VERSION_REQUIRED" xml:space="preserve"><value>The terms version is required. Reload the page and try again.</value></data>
+  <data name="TERMS_VERSION_UNKNOWN" xml:space="preserve"><value>These terms are out of date. Reload the page and try again.</value></data>
   <data name="EMAIL_REQUIRED" xml:space="preserve"><value>Enter your email.</value></data>
   <data name="EMAIL_INVALID" xml:space="preserve"><value>Enter a valid email address.</value></data>
   <data name="EMAIL_TOO_LONG" xml:space="preserve"><value>Email is too long.</value></data>

@@ -26,7 +26,12 @@ describe('MorePage', () => {
 
     expect(await screen.findByRole('heading', { name: 'More' })).toBeInTheDocument();
     const links = within(screen.getByRole('main')).getAllByRole('link');
-    expect(links.map((link) => link.textContent)).toEqual(['Multi-unit exam', 'Assistant', 'Subscription']);
+    expect(links.map((link) => link.textContent)).toEqual([
+      'Multi-unit exam',
+      'Assistant',
+      'Subscription',
+      'Terms and privacy',
+    ]);
   });
 
   it('opens a destination from the list', async () => {
@@ -37,5 +42,15 @@ describe('MorePage', () => {
     await user.click(within(screen.getByRole('main')).getByRole('link', { name: 'Users' }));
 
     expect(await screen.findByRole('heading', { name: 'Users' })).toBeInTheDocument();
+  });
+
+  it('opens the terms and privacy page from the student More page', async () => {
+    const user = userEvent.setup();
+    renderApp('/student/more', { session: testSessions.student });
+
+    await screen.findByRole('heading', { name: 'More' });
+    await user.click(within(screen.getByRole('main')).getByRole('link', { name: 'Terms and privacy' }));
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Terms and privacy' })).toBeInTheDocument();
   });
 });

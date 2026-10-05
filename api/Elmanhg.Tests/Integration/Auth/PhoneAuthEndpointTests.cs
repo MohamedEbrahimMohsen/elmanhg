@@ -24,7 +24,7 @@ public sealed class PhoneAuthEndpointTests(ApiFactory factory)
         var phone = AuthTestClient.NewPhoneNumber();
         var verificationId = await AuthTestClient.SendAndVerifyOtpAsync(client, factory, phone, TestContext.Current.CancellationToken);
 
-        using var response = await client.PostAsJsonAsync(RegisterRoute, new { verificationId, displayName = "Ahmed" }, TestContext.Current.CancellationToken);
+        using var response = await client.PostAsJsonAsync(RegisterRoute, new { verificationId, displayName = "Ahmed", termsVersion = TermsVersions.Current }, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var body = await response.Content.ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken);
@@ -59,7 +59,7 @@ public sealed class PhoneAuthEndpointTests(ApiFactory factory)
         var phone = AuthTestClient.NewPhoneNumber();
         var verificationId = await AuthTestClient.SendOtpAsync(client, phone, TestContext.Current.CancellationToken);
 
-        using var response = await client.PostAsJsonAsync(RegisterRoute, new { verificationId, displayName = "Ahmed" }, TestContext.Current.CancellationToken);
+        using var response = await client.PostAsJsonAsync(RegisterRoute, new { verificationId, displayName = "Ahmed", termsVersion = TermsVersions.Current }, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         (await ReadCodeAsync(response)).Should().Be("OTP_NOT_VERIFIED");
@@ -74,7 +74,7 @@ public sealed class PhoneAuthEndpointTests(ApiFactory factory)
         var email = AuthTestClient.NewEmail();
         var verificationId = await AuthTestClient.SendAndVerifyEmailOtpAsync(client, factory, email, TestContext.Current.CancellationToken);
 
-        using var response = await client.PostAsJsonAsync(RegisterRoute, new { verificationId, displayName = "Ahmed" }, TestContext.Current.CancellationToken);
+        using var response = await client.PostAsJsonAsync(RegisterRoute, new { verificationId, displayName = "Ahmed", termsVersion = TermsVersions.Current }, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         (await ReadCodeAsync(response)).Should().Be("OTP_INVALID");
@@ -90,10 +90,40 @@ public sealed class PhoneAuthEndpointTests(ApiFactory factory)
         await AuthTestClient.SeedUserAsync(factory, User.CreateStudentWithPhone("Existing", phone), null, false, TestContext.Current.CancellationToken);
         var verificationId = await AuthTestClient.SendAndVerifyOtpAsync(client, factory, phone, TestContext.Current.CancellationToken);
 
-        using var response = await client.PostAsJsonAsync(RegisterRoute, new { verificationId, displayName = "Ahmed" }, TestContext.Current.CancellationToken);
+        using var response = await client.PostAsJsonAsync(RegisterRoute, new { verificationId, displayName = "Ahmed", termsVersion = TermsVersions.Current }, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
         (await ReadCodeAsync(response)).Should().Be("PHONE_NUMBER_ALREADY_REGISTERED");
+    }
+
+    [Fact]
+    public async Task RegisterWithPhone_CurrentTermsVersion_PersistsTermsAcceptance()
+    {
+        using var client = AuthTestClient.Create(factory);
+        var phone = AuthTestClient.NewPhoneNumber();
+        var verificationId = await AuthTestClient.SendAndVerifyOtpAsync(client, factory, phone, TestContext.Current.CancellationToken);
+
+        using var response = await client.PostAsJsonAsync(RegisterRoute, new { verificationId, displayName = "Ahmed", termsVersion = TermsVersions.Current }, TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        using var scope = factory.Services.CreateScope();
+        var user = await scope.ServiceProvider.GetRequiredService<AppDbContext>().Users.AsNoTracking().SingleAsync(x => x.UserName == phone, TestContext.Current.CancellationToken);
+        user.TermsVersion.Should().Be(TermsVersions.Current);
+        user.TermsAcceptedAt.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task RegisterWithPhone_UnknownTermsVersion_Returns422AndOtpStaysUsable()
+    {
+        using var client = AuthTestClient.Create(factory);
+        var verificationId = await AuthTestClient.SendAndVerifyOtpAsync(client, factory, AuthTestClient.NewPhoneNumber(), TestContext.Current.CancellationToken);
+
+        using var response = await client.PostAsJsonAsync(RegisterRoute, new { verificationId, displayName = "Ahmed", termsVersion = "2020-01-01" }, TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await ReadCodeAsync(response)).Should().Contain("TERMS_VERSION_UNKNOWN");
+        using var retry = await client.PostAsJsonAsync(RegisterRoute, new { verificationId, displayName = "Ahmed", termsVersion = TermsVersions.Current }, TestContext.Current.CancellationToken);
+        retry.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]
@@ -123,7 +153,7 @@ public sealed class PhoneAuthEndpointTests(ApiFactory factory)
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         (await ReadCodeAsync(response)).Should().Be("PHONE_NUMBER_NOT_REGISTERED");
-        using var register = await client.PostAsJsonAsync(RegisterRoute, new { verificationId, displayName = "Ahmed" }, TestContext.Current.CancellationToken);
+        using var register = await client.PostAsJsonAsync(RegisterRoute, new { verificationId, displayName = "Ahmed", termsVersion = TermsVersions.Current }, TestContext.Current.CancellationToken);
         register.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 

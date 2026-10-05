@@ -3,4 +3,4 @@ using MediatR;
 
 namespace Elmanhg.Application.Auth.RegisterWithPhone;
 
-public sealed record RegisterWithPhoneCommand(Guid VerificationId, string DisplayName) : IRequest<AuthResult>;
+public sealed record RegisterWithPhoneCommand(Guid VerificationId, string DisplayName, string TermsVersion) : IRequest<AuthResult>;

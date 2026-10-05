@@ -8,4 +8,5 @@
 export interface RegisterWithPhoneCommand {
   verificationId: string;
   displayName: string;
+  termsVersion: string;
 }

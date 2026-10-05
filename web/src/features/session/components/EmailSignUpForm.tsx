@@ -8,6 +8,7 @@ import { Form } from '@/shared/form/Form';
 import { FormRootError } from '@/shared/form/FormRootError';
 import { SubmitButton } from '@/shared/form/SubmitButton';
 import { TextField } from '@/shared/form/TextField';
+import { termsVersion } from '@/shared/lib/terms';
 import { useStartSession } from '../hooks/useStartSession';
 import { emailSignUpSchema, type EmailSignUpValues } from '../schemas/emailSignUpSchema';
 
@@ -34,7 +35,7 @@ export function EmailSignUpForm() {
       form={form}
       serverErrorFields={serverErrorFields}
       onSubmit={async (values) => {
-        const result = await registerWithEmail.mutateAsync({ data: values });
+        const result = await registerWithEmail.mutateAsync({ data: { ...values, termsVersion } });
         trackFunnelEvent('SignUpCompleted');
         startSession(result);
       }}

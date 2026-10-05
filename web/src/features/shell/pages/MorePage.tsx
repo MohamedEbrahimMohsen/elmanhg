@@ -28,6 +28,14 @@ export function MorePage({ role }: MorePageProps) {
           </li>
         ))}
       </ul>
+      {role === 'student' ? (
+        <Link
+          to="/privacy"
+          className="inline-flex min-h-11 items-center self-start text-caption font-bold text-accent-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+        >
+          {t('more.privacy')}
+        </Link>
+      ) : null}
     </section>
   );
 }

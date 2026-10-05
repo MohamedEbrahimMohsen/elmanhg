@@ -8,6 +8,7 @@ public static class ErrorCodes
     public const string UserCannotSuspendSelf = "USER_CANNOT_SUSPEND_SELF";
     public const string LastActiveAdmin = "LAST_ACTIVE_ADMIN";
     public const string UserNotSuspended = "USER_NOT_SUSPENDED";
+    public const string TermsVersionUnknown = "TERMS_VERSION_UNKNOWN";
 
     // TEACHERS
     public const string UserNotTeacher = "USER_NOT_TEACHER";

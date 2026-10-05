@@ -23,6 +23,8 @@
     "PASSWORD_TOO_SHORT": "كلمة المرور قصيرة جدًا.",
     "PASSWORD_MUST_CONTAIN_DIGIT": "يجب أن تحتوي كلمة المرور على رقم.",
     "DISPLAY_NAME_TOO_LONG": "الاسم طويل جدًا.",
+    "TERMS_VERSION_REQUIRED": "هذه الصفحة قديمة. حدّث الصفحة وحاول مرة أخرى.",
+    "TERMS_VERSION_UNKNOWN": "هذه الصفحة قديمة. حدّث الصفحة وحاول مرة أخرى.",
     "OTP_INVALID": "طلب التحقق غير صالح. اطلب رمزًا جديدًا.",
     "OTP_INVALID_FORMAT": "أدخل الرمز المكوّن من 6 أرقام.",
     "OTP_EXPIRED": "انتهت صلاحية الرمز. اطلب رمزًا جديدًا.",
