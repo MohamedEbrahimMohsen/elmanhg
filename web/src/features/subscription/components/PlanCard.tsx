@@ -23,13 +23,13 @@ export function PlanCard({ title, priceLines, features, isActive, actions }: Pla
           {title}
         </h3>
         {isActive ? (
-          <span className="rounded-pill bg-success-soft px-2.5 py-0.5 text-micro font-semibold text-success-text">
+          <span className="rounded-pill bg-success-soft px-2.5 py-0.5 text-micro font-bold text-success-text">
             {t('badge.active')}
           </span>
         ) : null}
       </div>
       {priceLines.map((line) => (
-        <p key={line} className="font-display text-h3 font-semibold">
+        <p key={line} className="font-display text-h3 font-bold">
           {line}
         </p>
       ))}

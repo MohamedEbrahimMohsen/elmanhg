@@ -20,7 +20,7 @@ const routeApi = getRouteApi('/teacher/grade/$subjectId/$kind/$gradeId');
 
 const cardClassName = 'flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5';
 const linkClassName =
-  'inline-flex items-center gap-1 self-start text-ui font-semibold text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden';
+  'inline-flex items-center gap-1 self-start text-ui font-bold text-accent-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden';
 
 export function GradeReviewDetailPage() {
   const { t } = useTranslation('gradeReview');
@@ -74,14 +74,14 @@ export function GradeReviewDetailPage() {
       <div className="flex flex-col gap-1">
         <h1 className="font-display text-h1 font-bold lg:text-h1-desktop">{t('detail.title')}</h1>
         <p className="text-caption text-text-muted">
-          <span className="rounded-full bg-accent-soft px-2.5 py-0.5 text-micro font-semibold text-accent">
+          <span className="rounded-full bg-accent-soft px-2.5 py-0.5 text-micro font-bold text-accent-text">
             {t(`reasons.${detail.reviewReason}`, { defaultValue: detail.reviewReason })}
           </span>{' '}
           {`${detail.unitName} › ${detail.lessonName}`}
         </p>
       </div>
       <section aria-label={t('detail.question')} className={cardClassName}>
-        <h2 className="font-display text-h3 font-semibold">{t('detail.question')}</h2>
+        <h2 className="font-display text-h3 font-bold">{t('detail.question')}</h2>
         <RichTextViewer html={detail.stem} />
       </section>
       <GradingKeyView

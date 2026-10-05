@@ -38,7 +38,7 @@ export function GradeResultPanel({ result }: GradeResultPanelProps) {
     <div role="status" className={cn('flex items-center gap-3 rounded-md border px-3.5 py-3', verdict.panel)}>
       <Icon aria-hidden className={cn('size-6.5 shrink-0', verdict.color)} />
       <div className="flex flex-col">
-        <p className="text-ui font-semibold text-text">{t(verdict.key)}</p>
+        <p className="text-ui font-bold text-text">{t(verdict.key)}</p>
         <p className="text-caption text-text">
           {t('preview.score', {
             score: formatNumber(Number(result.score), lng),

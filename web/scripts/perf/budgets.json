@@ -47,6 +47,15 @@
         "src/routes/teacher/index.tsx?tsr-split=component"
       ],
       "maxKb": 265
+    },
+    {
+      "name": "assistant",
+      "entries": [
+        "index.html",
+        "src/routes/student/route.tsx?tsr-split=component",
+        "src/routes/student/assistant.tsx?tsr-split=component"
+      ],
+      "maxKb": 260
     }
   ]
 }

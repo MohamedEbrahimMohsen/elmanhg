@@ -18,7 +18,7 @@ export function ExamPeriodRow({ examPeriod, onEdit, onDelete }: ExamPeriodRowPro
   return (
     <li className="flex flex-wrap items-center justify-between gap-3 py-3">
       <div className="flex flex-col gap-1">
-        <p className="text-ui font-semibold text-text">{name}</p>
+        <p className="text-ui font-bold text-text">{name}</p>
         <p className="text-caption text-text-muted">
           {t('examPeriods.range', { start: format(examPeriod.startDate), end: format(examPeriod.endDate) })}
         </p>

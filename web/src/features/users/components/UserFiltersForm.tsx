@@ -52,7 +52,7 @@ export function UserFiltersForm({ search, onApply, onClear }: UserFiltersFormPro
         <StatusSelect />
       </div>
       <div className="flex flex-wrap gap-3">
-        <SubmitButton>{t('filters.apply')}</SubmitButton>
+        <SubmitButton variant="secondary">{t('filters.apply')}</SubmitButton>
         <Button variant="ghost" onClick={onClear}>
           {t('filters.clear')}
         </Button>

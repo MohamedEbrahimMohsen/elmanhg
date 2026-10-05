@@ -9,6 +9,9 @@ import { QuestionListFilters } from '../components/QuestionListFilters';
 import { QuestionTable } from '../components/QuestionTable';
 import { useQuestionList } from '../hooks/useQuestionList';
 import { useQuestionListSearch } from '../hooks/useQuestionListSearch';
+import { registerQuestionsAdminLocales } from '../questionsAdminLocales';
+
+registerQuestionsAdminLocales();
 
 export function QuestionListPage() {
   const { t } = useTranslation('questions');

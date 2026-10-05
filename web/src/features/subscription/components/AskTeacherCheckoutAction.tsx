@@ -16,7 +16,7 @@ export function AskTeacherCheckoutAction({ mode, hasBase, disabled, onCheckout }
   return (
     <>
       <Button
-        variant="accent"
+        variant="secondary"
         className="w-full"
         disabled={disabled || !hasBase}
         aria-describedby={hasBase ? undefined : hintId}

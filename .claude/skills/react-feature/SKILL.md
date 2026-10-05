@@ -7,7 +7,7 @@ description: Style guide for every frontend change in this repo's React app. The
 
 Stack: **React 18 · TypeScript strict · Vite · TanStack Query · React Hook Form + Zod · Tailwind + shadcn/ui · i18next (AR/EN, RTL)**
   → 2026-09 update: Stack is **React 19.2 + React Compiler 1.0 · TypeScript strict (typecheck with TS 6.0; TS 7 native `tsc` allowed for CI speed only, typescript-eslint not yet on TS 7) · Vite 8 (Rolldown, Node ≥ 22.12) · TanStack Query v5 (+ TanStack Router v1 for new apps) · React Hook Form + Zod 4 (`@hookform/resolvers` v5) · Tailwind CSS v4 (CSS-first `@theme`, no `tailwind.config.*`) + shadcn CLI v4 · Orval 8 · i18next (AR/EN, RTL)**. React 18 idioms are findings (§23).
-Design: every visual value comes from `.claude/design-system.md` (the Glass system, mirrored from `docs/design-system.md`). There is no Figma. Every screen's content, flow and states come from the working prototype in `prototype/` (open the matching route in `prototype/app.js`) and `docs/claude-design-prompt.md` §4–§6; the look comes only from the design system.
+Design: every visual value comes from `.claude/design-system.md` (the Mist system, mirrored from `docs/design-system.md`). There is no Figma. Every screen's content, flow and states come from the working prototype in `prototype/` (open the matching route in `prototype/app.js`) and `docs/claude-design-prompt.md` §4–§6; the look comes only from the design system.
 
 ## 1. Layout
 

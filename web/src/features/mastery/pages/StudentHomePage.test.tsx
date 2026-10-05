@@ -21,8 +21,30 @@ describe('StudentHomePage', () => {
 
     expect(await screen.findByRole('status', { name: 'Loading your progress…' })).toBeInTheDocument();
     expect(await screen.findByText('40 of 60 questions left for you')).toBeInTheDocument();
-    expect(screen.getByText('Seen 30 · Mastered 20 · Streak: 3 days')).toBeInTheDocument();
+    const counter = screen.getByRole('region', { name: 'Your question counter' });
+    expect(
+      within(counter)
+        .getAllByRole('term')
+        .map((term) => term.textContent),
+    ).toEqual(['Seen', 'Mastered', 'Streak']);
+    expect(
+      within(counter)
+        .getAllByRole('definition')
+        .map((value) => value.textContent),
+    ).toEqual(['30', '20', '3 days']);
     expect(screen.getByRole('heading', { name: 'Hello, أحمد' })).toBeInTheDocument();
+  });
+
+  it('shows the share of mastered questions as a bar', async () => {
+    openHome();
+
+    expect(await screen.findByRole('progressbar', { name: 'Questions mastered' })).toHaveAttribute('value', '33');
+  });
+
+  it('shows an empty mastered bar when no question is servable yet', async () => {
+    openHome({ headline: { servableTotal: 0, masteredCount: 0, remainingCount: 0, seenCount: 0 } });
+
+    expect(await screen.findByRole('progressbar', { name: 'Questions mastered' })).toHaveAttribute('value', '0');
   });
 
   it('links the suggested lesson to its practice page', async () => {
@@ -104,6 +126,16 @@ describe('StudentHomePage', () => {
       'href',
       `/student/subject/${physicsId}`,
     );
+  });
+
+  it("shows each subject's initial in a circle beside its name", async () => {
+    openHome();
+
+    const physics = await screen.findByRole('article', { name: 'Physics' });
+    const chemistry = screen.getByRole('article', { name: 'Chemistry' });
+
+    expect(within(physics).getByText('P')).toBeInTheDocument();
+    expect(within(chemistry).getByText('C')).toBeInTheDocument();
   });
 
   it('lists chosen subjects under Your subjects and the rest under Other subjects', async () => {

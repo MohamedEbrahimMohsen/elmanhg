@@ -31,7 +31,7 @@ export function MathKeypad({ onKey }: MathKeypadProps) {
             onClick={() => {
               onKey(key.id);
             }}
-            className="flex min-h-11 items-center justify-center rounded-sm border border-border-strong bg-surface font-sans text-ui font-semibold text-text hover:bg-soft focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+            className="flex min-h-11 items-center justify-center rounded-sm border border-border-strong bg-surface font-sans text-ui font-bold text-text hover:bg-soft focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
           >
             {Icon ? <Icon aria-hidden className="size-5" /> : (key.glyph ?? t('keypad.textGlyph'))}
           </button>

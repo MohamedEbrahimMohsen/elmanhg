@@ -15,7 +15,7 @@ export function MathStepGradeDetails({ mathSteps }: MathStepGradeDetailsProps) {
 
   return (
     <section aria-label={t('preview.essay.title')} className="flex flex-col gap-3">
-      <p className="text-ui font-semibold text-text">
+      <p className="text-ui font-bold text-text">
         {t('preview.mathSteps.verdict', {
           verdict: t(`preview.mathSteps.verdicts.${mathSteps.finalAnswerVerdict}`, {
             defaultValue: mathSteps.finalAnswerVerdict,
@@ -24,7 +24,7 @@ export function MathStepGradeDetails({ mathSteps }: MathStepGradeDetailsProps) {
       </p>
       <MathStepScoreList steps={mathSteps.steps} />
       <div className="flex flex-col gap-1">
-        <h3 className="text-ui font-semibold text-text">{t('preview.essay.justification')}</h3>
+        <h3 className="text-ui font-bold text-text">{t('preview.essay.justification')}</h3>
         <p className="text-body">{mathSteps.justification}</p>
       </div>
       <p className="text-caption text-text-muted">

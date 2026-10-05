@@ -17,6 +17,9 @@ import { usePaymentLog } from '../hooks/usePaymentLog';
 import { usePaymentLogSearch } from '../hooks/usePaymentLogSearch';
 import { usePaymentReviewCount } from '../hooks/usePaymentReviewCount';
 import { useResolvePaymentReview } from '../hooks/useResolvePaymentReview';
+import { registerPaymentsLocales } from '../locales';
+
+registerPaymentsLocales();
 
 export function PaymentLogPage() {
   const { t } = useTranslation('payments');
@@ -39,7 +42,7 @@ export function PaymentLogPage() {
           role="alert"
           className="flex flex-col items-start gap-3 rounded-lg border border-danger bg-danger-soft p-4"
         >
-          <p className="text-ui font-semibold text-danger">{t('error.title')}</p>
+          <p className="text-ui font-bold text-danger">{t('error.title')}</p>
           <p className="text-caption text-text">
             {t([`common:errors.${errorCode}`, 'common:errors.UNHANDLED_EXCEPTION'])}
           </p>

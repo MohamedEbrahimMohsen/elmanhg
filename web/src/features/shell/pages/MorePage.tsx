@@ -19,7 +19,7 @@ export function MorePage({ role }: MorePageProps) {
           <li key={key}>
             <Link
               to={to}
-              className="flex min-h-11 items-center gap-3 rounded-md border border-border bg-surface px-3.5 py-3 text-ui font-semibold text-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+              className="flex min-h-11 items-center gap-3 rounded-md border border-border bg-surface px-3.5 py-3 text-ui font-bold text-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
             >
               <Icon aria-hidden className="size-5.5" strokeWidth={navIconStrokeWidth} />
               <span className="flex-1">{t(labelKey)}</span>

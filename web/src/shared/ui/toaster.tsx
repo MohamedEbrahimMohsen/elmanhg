@@ -9,7 +9,7 @@ export function Toaster() {
       dir={i18n.dir(i18n.resolvedLanguage)}
       position="top-center"
       toastOptions={{
-        classNames: { toast: 'rounded-lg border border-border bg-surface font-sans text-ui text-text shadow-2' },
+        classNames: { toast: 'rounded-lg border border-border bg-surface font-sans text-ui text-text shadow-1' },
       }}
     />
   );

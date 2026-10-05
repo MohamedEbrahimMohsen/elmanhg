@@ -9,6 +9,7 @@ export const capabilities = [
   'questionsChangeDifficulty',
   'blueprintsManage',
   'askTeacherSubmit',
+  'avatarChat',
   'askTeacherReply',
   'aiGradesOverride',
   'progressViewOwn',
@@ -27,7 +28,14 @@ export const capabilities = [
 export type Capability = (typeof capabilities)[number];
 
 export const roleCapabilities: Record<Role, readonly Capability[]> = {
-  student: ['contentBrowse', 'assessmentsTake', 'askTeacherSubmit', 'progressViewOwn', 'subscriptionManage'],
+  student: [
+    'contentBrowse',
+    'assessmentsTake',
+    'askTeacherSubmit',
+    'avatarChat',
+    'progressViewOwn',
+    'subscriptionManage',
+  ],
   teacher: [
     'contentBrowse',
     'questionsValidate',

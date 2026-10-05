@@ -1,6 +1,8 @@
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MultiUnitExamUnitOptionResult } from '@/shared/api/generated/model';
+import { cn } from '@/shared/lib/utils';
+import { optionCardClassName, optionCardDisabledClassName, optionCardIdleClassName } from '@/shared/ui/optionCard';
 
 export interface MultiExamUnitPickerProps {
   units: MultiUnitExamUnitOptionResult[];
@@ -13,31 +15,45 @@ export function MultiExamUnitPicker({ units, selected, onToggle }: MultiExamUnit
   const baseId = useId();
 
   return (
-    <fieldset className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5">
-      <legend className="px-1 text-ui font-semibold text-text">{t('multi.units')}</legend>
-      {units.map((unit) => {
-        const captionId = `${baseId}-${unit.unitId}`;
-        return (
-          <div key={unit.unitId} className="flex flex-col">
-            <label className="flex min-h-11 items-center gap-3 text-ui text-text">
+    <fieldset className="flex min-w-0 flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5">
+      <legend className="text-ui font-bold text-text">{t('multi.units')}</legend>
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+        {units.map((unit) => {
+          const nameId = `${baseId}-${unit.unitId}-name`;
+          const captionId = `${baseId}-${unit.unitId}-caption`;
+          return (
+            <label
+              key={unit.unitId}
+              className={cn(
+                optionCardClassName,
+                unit.hasBlueprint ? optionCardIdleClassName : optionCardDisabledClassName,
+              )}
+            >
               <input
                 type="checkbox"
+                aria-labelledby={nameId}
                 aria-describedby={captionId}
-                className="size-5 accent-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:opacity-45"
+                className="size-4.5 shrink-0 accent-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
                 checked={selected.includes(unit.unitId)}
                 disabled={!unit.hasBlueprint}
                 onChange={(event) => {
                   onToggle(unit.unitId, event.target.checked);
                 }}
               />
-              {unit.name}
+              <span className="flex min-w-0 flex-col">
+                <span id={nameId} className="font-bold text-text">
+                  {unit.name}
+                </span>
+                <span id={captionId} className="text-caption text-text-muted">
+                  {unit.hasBlueprint
+                    ? t('multi.available', { count: Number(unit.servableCount) })
+                    : t('multi.noBlueprint')}
+                </span>
+              </span>
             </label>
-            <p id={captionId} className="ps-8 text-caption text-text-muted">
-              {unit.hasBlueprint ? t('multi.available', { count: Number(unit.servableCount) }) : t('multi.noBlueprint')}
-            </p>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </fieldset>
   );
 }

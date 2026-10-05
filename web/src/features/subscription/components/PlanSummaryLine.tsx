@@ -22,7 +22,7 @@ export function PlanSummaryLine() {
               limit: Number(data.dailyQuizQuestionLimit),
             })}
           </span>
-          <Button asChild size="sm" variant="primary">
+          <Button asChild size="sm" variant="secondary">
             <Link to="/student/subscription">{t('usage.subscribe')}</Link>
           </Button>
         </>

@@ -10,14 +10,14 @@ export interface ConfigurationBadgeProps {
 
 const toneClasses: Record<ConfigurationBadgeTone, string> = {
   ok: 'bg-success-soft text-success-text',
-  accent: 'bg-accent-soft text-accent',
+  accent: 'bg-accent-soft text-accent-text',
   warning: 'bg-warning-soft text-warning',
   neutral: 'bg-soft text-text-muted',
 };
 
 export function ConfigurationBadge({ tone, children }: ConfigurationBadgeProps) {
   return (
-    <span className={cn('inline-flex rounded-pill px-2.5 py-0.5 text-micro font-semibold', toneClasses[tone])}>
+    <span className={cn('inline-flex rounded-pill px-2.5 py-0.5 text-micro font-bold', toneClasses[tone])}>
       {children}
     </span>
   );

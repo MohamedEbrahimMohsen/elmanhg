@@ -20,7 +20,7 @@ export function MetricCard<T>({ title, query, variant = 'kpi', ns = 'dashboard',
       aria-labelledby={id}
       className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5"
     >
-      <h2 id={id} className={variant === 'kpi' ? 'text-caption text-text-muted' : 'text-ui font-semibold text-text'}>
+      <h2 id={id} className={variant === 'kpi' ? 'text-caption text-text-muted' : 'text-ui font-bold text-text'}>
         {title}
       </h2>
       {query.isPending ? (

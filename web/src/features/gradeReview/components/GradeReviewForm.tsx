@@ -49,7 +49,7 @@ export function GradeReviewForm({ detail, onSubmit, isPending }: GradeReviewForm
         <GradeReviewDecisionField aiScoreLabel={aiScoreLabel} maxScore={maxScore} />
         {decision === 'Overridden' ? (
           <div className="flex flex-col gap-1.5">
-            <label htmlFor={`${id}-score`} className="text-ui font-semibold text-text">
+            <label htmlFor={`${id}-score`} className="text-ui font-bold text-text">
               {t('form.score', { maxScore })}
             </label>
             <input
@@ -70,7 +70,7 @@ export function GradeReviewForm({ detail, onSubmit, isPending }: GradeReviewForm
           </div>
         ) : null}
         <div className="flex flex-col gap-1.5">
-          <label htmlFor={`${id}-comment`} className="text-ui font-semibold text-text">
+          <label htmlFor={`${id}-comment`} className="text-ui font-bold text-text">
             {t(decision === 'Overridden' ? 'form.commentRequiredLabel' : 'form.commentOptionalLabel')}
           </label>
           <textarea

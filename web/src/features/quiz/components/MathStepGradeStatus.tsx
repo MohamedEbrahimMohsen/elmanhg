@@ -35,7 +35,7 @@ export function MathStepGradeStatus({ sessionId, questionId, onGraded, showOutco
         role="alert"
         className="flex flex-col items-start gap-2 rounded-md border border-danger bg-danger-soft px-3.5 py-3"
       >
-        <p className="text-ui font-semibold text-danger">{t('mathStepGrade.error')}</p>
+        <p className="text-ui font-bold text-danger">{t('mathStepGrade.error')}</p>
         <Button variant="secondary" onClick={() => void refetch()}>
           {t('mathStepGrade.retry')}
         </Button>
@@ -52,7 +52,7 @@ export function MathStepGradeStatus({ sessionId, questionId, onGraded, showOutco
       >
         <Loader2 aria-hidden className="size-5 shrink-0 text-text-muted motion-safe:animate-spin" />
         <div>
-          <p className="text-ui font-semibold text-text">{t('mathStepGrade.pending')}</p>
+          <p className="text-ui font-bold text-text">{t('mathStepGrade.pending')}</p>
           <p className="text-caption text-text-muted">{t('mathStepGrade.pendingHint')}</p>
         </div>
       </div>
@@ -68,7 +68,7 @@ export function MathStepGradeStatus({ sessionId, questionId, onGraded, showOutco
       >
         <Clock aria-hidden className="size-5 shrink-0 text-warning" />
         <div>
-          <p className="text-ui font-semibold text-text">{t('mathStepGrade.inReview')}</p>
+          <p className="text-ui font-bold text-text">{t('mathStepGrade.inReview')}</p>
           <p className="text-caption text-text-muted">{t('mathStepGrade.inReviewHint')}</p>
         </div>
       </div>

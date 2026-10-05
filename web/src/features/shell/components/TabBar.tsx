@@ -27,7 +27,7 @@ export function TabBar({ role }: TabBarProps) {
             <Link
               to={to}
               activeOptions={{ exact: to === roleHome[role] }}
-              className="group flex min-h-14 flex-col items-center justify-center gap-0.5 text-micro text-text-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden data-[status=active]:font-semibold data-[status=active]:text-accent"
+              className="group flex min-h-14 flex-col items-center justify-center gap-0.5 text-micro text-text-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden data-[status=active]:font-bold data-[status=active]:text-accent-text"
             >
               <span
                 aria-hidden

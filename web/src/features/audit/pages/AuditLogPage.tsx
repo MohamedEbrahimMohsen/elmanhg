@@ -9,6 +9,9 @@ import { AuditLogTable } from '../components/AuditLogTable';
 import { AuditLogTableSkeleton } from '../components/AuditLogTableSkeleton';
 import { useAuditLogs } from '../hooks/useAuditLogs';
 import { useAuditLogSearch } from '../hooks/useAuditLogSearch';
+import { registerAuditLocales } from '../locales';
+
+registerAuditLocales();
 
 export function AuditLogPage() {
   const { t } = useTranslation('audit');
@@ -26,7 +29,7 @@ export function AuditLogPage() {
           role="alert"
           className="flex flex-col items-start gap-3 rounded-lg border border-danger bg-danger-soft p-4"
         >
-          <p className="text-ui font-semibold text-danger">{t('error.title')}</p>
+          <p className="text-ui font-bold text-danger">{t('error.title')}</p>
           <p className="text-caption text-text">
             {t([`common:errors.${errorCode}`, 'common:errors.UNHANDLED_EXCEPTION'])}
           </p>

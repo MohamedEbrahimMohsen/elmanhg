@@ -40,7 +40,7 @@ export function AvatarLoggedMessage({ message }: AvatarLoggedMessageProps) {
   return (
     <article className="flex flex-col gap-3 rounded-md border border-border bg-surface p-3">
       <p className="flex items-center gap-2 text-caption text-text-muted">
-        <Sparkles aria-hidden strokeWidth={1.8} className="size-3.5 shrink-0 text-accent" />
+        <Sparkles aria-hidden strokeWidth={1.8} className="size-3.5 shrink-0 text-accent-text" />
         {t('message.assistant')} · {time}
       </p>
       <p className="text-ui whitespace-pre-wrap text-text">{message.text}</p>

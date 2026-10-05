@@ -40,14 +40,14 @@ export function ValidationQueueItem({ item, selected, onToggle, now }: Validatio
         <Link
           to="/teacher/q/$questionId"
           params={{ questionId: item.id }}
-          className="text-ui font-semibold text-text hover:text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+          className="text-ui font-bold text-text hover:text-accent-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
         >
           {stem}
         </Link>
         <p className="text-caption text-text-muted">{meta.join(' · ')}</p>
       </div>
       {item.openedInSession ? (
-        <span className="shrink-0 rounded-full bg-accent-soft px-2.5 py-0.5 text-micro font-semibold text-accent">
+        <span className="shrink-0 rounded-full bg-accent-soft px-2.5 py-0.5 text-micro font-bold text-accent-text">
           {t('validation.queue.opened')}
         </span>
       ) : (

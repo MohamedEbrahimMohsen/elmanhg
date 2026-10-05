@@ -3,6 +3,9 @@ import { ContentErrorState, ContentListSkeleton } from '@/features/content';
 import { useGetLesson } from '@/shared/api/generated/lessons/lessons';
 import { QuestionEditorForm } from '../components/QuestionEditorForm';
 import { QuestionEditorHeader } from '../components/QuestionEditorHeader';
+import { registerQuestionsAdminLocales } from '../questionsAdminLocales';
+
+registerQuestionsAdminLocales();
 
 export interface NewQuestionPageProps {
   lessonId: string;

@@ -10,7 +10,7 @@ export function MultiExamUnitShares({ units }: MultiExamUnitSharesProps) {
 
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5">
-      <h3 className="text-ui font-semibold text-text">{t('multi.unitShares')}</h3>
+      <h3 className="text-ui font-bold text-text">{t('multi.unitShares')}</h3>
       <ul className="flex flex-col gap-1">
         {units.map((unit) => (
           <li key={unit.unitId} className="text-ui text-text">

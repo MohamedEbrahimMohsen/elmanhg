@@ -65,7 +65,7 @@ export function DiagramZoneRow({
       className={cn('flex flex-col gap-2 rounded-md border border-border bg-surface p-3', over && 'border-accent')}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p id={headingId} className="text-ui font-semibold">
+        <p id={headingId} className="text-ui font-bold">
           {t('zone', { number })}
         </p>
         <span className="text-caption text-text-muted">

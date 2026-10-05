@@ -21,6 +21,14 @@ describe('MorePage', () => {
     ]);
   });
 
+  it('lists the student destinations that are not in the tab bar', async () => {
+    renderApp('/student/more', { session: testSessions.student });
+
+    expect(await screen.findByRole('heading', { name: 'More' })).toBeInTheDocument();
+    const links = within(screen.getByRole('main')).getAllByRole('link');
+    expect(links.map((link) => link.textContent)).toEqual(['Multi-unit exam', 'Assistant', 'Subscription']);
+  });
+
   it('opens a destination from the list', async () => {
     const user = userEvent.setup();
     renderApp('/admin/more', { session: testSessions.admin });

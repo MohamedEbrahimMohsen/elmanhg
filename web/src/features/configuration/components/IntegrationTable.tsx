@@ -20,7 +20,7 @@ export function IntegrationTable({ integrations }: IntegrationTableProps) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-ui">
-        <caption className="pb-2 text-start font-semibold">{t('infrastructure.integrationsTitle')}</caption>
+        <caption className="pb-2 text-start font-bold">{t('infrastructure.integrationsTitle')}</caption>
         <thead>
           <tr className="border-b border-border text-caption text-text-muted">
             <th scope="col" className={cellClassName}>

@@ -15,7 +15,7 @@ type Level = 'subject' | 'unit' | 'lesson';
 
 const levels: readonly Level[] = ['subject', 'unit', 'lesson'];
 
-const headerCell = 'px-2.5 py-2 text-start text-caption font-semibold text-text-muted';
+const headerCell = 'px-2.5 py-2 text-start text-caption font-bold text-text-muted';
 const bodyCell = 'px-2.5 py-2 text-caption text-text';
 
 export function SuccessRateBreakdown({ data, subjectSelected }: SuccessRateBreakdownProps) {

@@ -24,11 +24,11 @@ export function QuizQuestionHeading({ id, position, total, type, focusOnMount }:
               }
             : undefined
         }
-        className="font-display text-h3 font-semibold focus-visible:outline-hidden"
+        className="font-display text-h3 font-bold focus-visible:outline-hidden"
       >
         {t('session.counter', { position, total })}
       </h2>
-      <span className="rounded-full bg-soft px-2.5 py-0.5 text-micro font-semibold text-text-muted">
+      <span className="rounded-full bg-soft px-2.5 py-0.5 text-micro font-bold text-text-muted">
         {t(`questions:types.${type}`)}
       </span>
     </div>

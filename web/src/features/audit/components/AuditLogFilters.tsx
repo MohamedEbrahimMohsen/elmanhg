@@ -40,7 +40,7 @@ export function AuditLogFilters({ search, onApply, onClear }: AuditLogFiltersPro
         <TextField<AuditLogFiltersValues> name="to" label={t('filters.to')} type="date" />
       </div>
       <div className="flex flex-wrap gap-3">
-        <SubmitButton>{t('filters.apply')}</SubmitButton>
+        <SubmitButton variant="secondary">{t('filters.apply')}</SubmitButton>
         <Button variant="ghost" onClick={onClear}>
           {t('filters.clear')}
         </Button>

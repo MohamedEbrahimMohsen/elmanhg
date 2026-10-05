@@ -16,7 +16,7 @@ const titleClassName = 'font-display text-h2 font-bold lg:text-h2-desktop';
 
 export function CheckoutStatusCard({ payment, timedOut, isFetching, onCheckAgain }: CheckoutStatusCardProps) {
   const { t } = useTranslation('subscription');
-  const backLink = (variant: 'accent' | 'secondary' | 'ghost', label: string): ReactNode => (
+  const backLink = (variant: 'primary' | 'secondary' | 'ghost', label: string): ReactNode => (
     <Button variant={variant} asChild>
       <Link to="/student/subscription">{label}</Link>
     </Button>
@@ -27,7 +27,7 @@ export function CheckoutStatusCard({ payment, timedOut, isFetching, onCheckAgain
       <section className={cardClassName}>
         <h1 className={titleClassName}>{t('checkoutResult.succeededTitle')}</h1>
         <p className="text-ui">{t('checkoutResult.succeededBody', { plan: t(`plan.${payment.plan}`) })}</p>
-        <div className="flex flex-wrap gap-2">{backLink('accent', t('checkoutResult.done'))}</div>
+        <div className="flex flex-wrap gap-2">{backLink('primary', t('checkoutResult.done'))}</div>
       </section>
     );
   }

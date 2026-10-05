@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Form } from '@/shared/form/Form';
 import { FormRootError } from '@/shared/form/FormRootError';
-import { SubmitButton } from '@/shared/form/SubmitButton';
+import { SubmitButton, type SubmitButtonProps } from '@/shared/form/SubmitButton';
 import { TextField } from '@/shared/form/TextField';
 import type { ServerErrorFields } from '@/shared/form/applyServerErrors';
 import { Button } from '@/shared/ui/button';
@@ -16,9 +16,18 @@ export interface NameFormProps {
   serverErrorFields: ServerErrorFields<NameValues>;
   onSubmit: (name: string) => Promise<void>;
   onCancel?: () => void;
+  submitVariant?: SubmitButtonProps['variant'];
 }
 
-export function NameForm({ label, submitLabel, defaultName, serverErrorFields, onSubmit, onCancel }: NameFormProps) {
+export function NameForm({
+  label,
+  submitLabel,
+  defaultName,
+  serverErrorFields,
+  onSubmit,
+  onCancel,
+  submitVariant = 'secondary',
+}: NameFormProps) {
   const { t } = useTranslation('content');
   const form = useForm<NameValues>({ resolver: zodResolver(nameSchema), defaultValues: { name: defaultName ?? '' } });
 
@@ -36,7 +45,7 @@ export function NameForm({ label, submitLabel, defaultName, serverErrorFields, o
       <FormRootError />
       <TextField<NameValues> name="name" label={label} />
       <div className="flex flex-wrap gap-2">
-        <SubmitButton>{submitLabel}</SubmitButton>
+        <SubmitButton variant={submitVariant}>{submitLabel}</SubmitButton>
         {onCancel ? (
           <Button variant="secondary" onClick={onCancel}>
             {t('actions.cancel')}

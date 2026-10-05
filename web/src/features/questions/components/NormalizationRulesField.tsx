@@ -8,7 +8,7 @@ export function NormalizationRulesField() {
 
   return (
     <fieldset className="flex flex-col gap-1">
-      <legend className="mb-2 text-caption text-text-muted">{t('editor.normalization.legend')}</legend>
+      <legend className="mb-1 text-caption text-text-muted">{t('editor.normalization.legend')}</legend>
       <p className="text-caption text-text-muted">{t('editor.normalization.hint')}</p>
       <div className="grid md:grid-cols-2 md:gap-x-4">
         {normalizationRules.map((rule) => (

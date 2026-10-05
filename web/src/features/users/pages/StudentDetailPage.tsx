@@ -69,7 +69,7 @@ export function StudentDetailPage() {
     <section className="flex flex-col gap-4">
       <Link
         to="/admin/users"
-        className="inline-flex min-h-11 items-center gap-1 self-start rounded-sm text-caption font-semibold text-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+        className="inline-flex min-h-11 items-center gap-1 self-start rounded-sm text-caption font-bold text-accent-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
       >
         <ChevronLeft aria-hidden className="size-4 rtl:rotate-180" />
         {t('student.back')}

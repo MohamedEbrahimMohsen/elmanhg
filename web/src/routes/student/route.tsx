@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { StudentRealtimeListener } from '@/features/askTeacher';
-import { AvatarDock, AvatarProvider } from '@/features/avatar';
+import { AvatarProvider, StudentAvatarDock } from '@/features/avatar';
 import { requireOnboarded, requireRole } from '@/features/session';
 import { AppShell } from '@/features/shell';
 
@@ -12,7 +12,7 @@ export const Route = createFileRoute('/student')({
   component: () => (
     <AvatarProvider>
       <StudentRealtimeListener />
-      <AppShell role="student" assistant={<AvatarDock />} />
+      <AppShell role="student" assistant={<StudentAvatarDock />} />
     </AvatarProvider>
   ),
 });

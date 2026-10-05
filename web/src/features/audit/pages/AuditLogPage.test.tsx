@@ -8,6 +8,7 @@ import {
 } from '@/shared/api/generated/audit-logs/audit-logs.msw';
 import type { AuditLogResult, PageDataOfAuditLogResult } from '@/shared/api/generated/model';
 import { axe } from '@/test/axe';
+import { mintButtons } from '@/test/mintButtons';
 import { server } from '@/test/msw/server';
 import { renderApp } from '@/test/renderWithProviders';
 import { testSessions } from '@/test/sessions';
@@ -71,6 +72,7 @@ describe('AuditLogPage', () => {
     const { router } = openAuditLog('/admin/audit?actor=nobody');
 
     expect(await screen.findByText('No entries match these filters.')).toBeInTheDocument();
+    expect(mintButtons()).toHaveLength(1);
     const [, emptyStateClear] = screen.getAllByRole('button', { name: 'Clear filters' });
     if (!emptyStateClear) {
       throw new Error('The empty state does not offer Clear filters.');

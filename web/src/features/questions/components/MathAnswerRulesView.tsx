@@ -26,8 +26,8 @@ export function MathAnswerRulesView({
 
   return (
     <section aria-label={t('validation.detail.mathRules')} className={cardClassName}>
-      <h2 className="font-display text-h3 font-semibold">{t('validation.detail.mathRules')}</h2>
-      <h3 className="text-body font-semibold">{t('validation.detail.mathAccepted')}</h3>
+      <h2 className="font-display text-h3 font-bold">{t('validation.detail.mathRules')}</h2>
+      <h3 className="text-body font-bold">{t('validation.detail.mathAccepted')}</h3>
       <ol className="flex flex-col gap-2">
         {answers.map((answer, index) => {
           const number = index + 1;
@@ -56,7 +56,7 @@ export function MathAnswerRulesView({
       </p>
       {solution.length > 0 ? (
         <>
-          <h3 className="text-body font-semibold">{t('validation.detail.mathSolution')}</h3>
+          <h3 className="text-body font-bold">{t('validation.detail.mathSolution')}</h3>
           <ol className="flex flex-col gap-2">
             {solution.map((step, index) => {
               const number = index + 1;

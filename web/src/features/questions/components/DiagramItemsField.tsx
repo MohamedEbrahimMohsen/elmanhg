@@ -21,7 +21,7 @@ export function DiagramItemsField({ onReplaceZones }: DiagramItemsFieldProps) {
 
   return (
     <fieldset className="flex flex-col gap-3">
-      <legend className="mb-2 text-caption text-text-muted">{t('editor.dragDrop.itemsLegend')}</legend>
+      <legend className="text-caption text-text-muted">{t('editor.dragDrop.itemsLegend')}</legend>
       <p className="text-caption text-text-muted">{t('editor.dragDrop.itemsHint')}</p>
       {items.fields.map((field, index) => {
         const itemId = values[index]?.id ?? '';

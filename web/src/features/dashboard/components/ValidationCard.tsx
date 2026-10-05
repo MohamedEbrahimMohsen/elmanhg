@@ -31,7 +31,7 @@ export function ValidationCard({ params }: ValidationCardProps) {
           />
           {data.byTeacher.length > 0 ? (
             <>
-              <h3 className="text-caption font-semibold text-text-muted">{t('validation.byTeacher')}</h3>
+              <h3 className="text-caption font-bold text-text-muted">{t('validation.byTeacher')}</h3>
               <MetricList
                 rows={data.byTeacher.map((teacher) => ({
                   key: teacher.teacherId,

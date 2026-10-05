@@ -16,7 +16,7 @@ export function OutcomeBadge({ outcome }: OutcomeBadgeProps) {
   return (
     <span
       className={cn(
-        'inline-flex rounded-pill px-2.5 py-0.5 text-micro font-semibold',
+        'inline-flex rounded-pill px-2.5 py-0.5 text-micro font-bold',
         outcomeClasses[outcome] ?? 'bg-soft text-text-muted',
       )}
     >

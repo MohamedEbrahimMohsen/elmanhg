@@ -19,7 +19,7 @@ export function MetricList({ rows }: { rows: readonly MetricListRow[] }) {
           </dt>
           <dd
             aria-labelledby={`${id}-${key}`}
-            className={tone === 'danger' ? 'font-semibold text-danger' : 'font-semibold text-text'}
+            className={tone === 'danger' ? 'font-bold text-danger' : 'font-bold text-text'}
           >
             {value}
           </dd>

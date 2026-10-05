@@ -38,10 +38,10 @@ export function RuntimeSettingRow({ setting }: RuntimeSettingRowProps) {
 
   return (
     <li className="flex flex-col gap-2 py-3">
-      <p className="text-ui font-semibold">{settingLabel(setting, lng)}</p>
+      <p className="text-ui font-bold">{settingLabel(setting, lng)}</p>
       <p className="text-caption text-text-muted">{settingDescription(setting, lng)}</p>
       <div className="flex flex-wrap items-center gap-2">
-        <span dir="ltr" className="text-ui font-semibold">
+        <span dir="ltr" className="text-ui font-bold">
           {value}
         </span>
         <ConfigurationBadge tone={setting.isOverridden ? 'accent' : 'neutral'}>

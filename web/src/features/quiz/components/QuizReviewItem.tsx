@@ -24,10 +24,10 @@ export function QuizReviewItem({ item, attempt, ask }: QuizReviewItemProps) {
       className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4.5 shadow-1"
     >
       <div className="flex flex-wrap items-center gap-2">
-        <h3 id={headingId} className="font-display text-h3 font-semibold">
+        <h3 id={headingId} className="font-display text-h3 font-bold">
           {t('result.reviewItem', { position: Number(item.position) })}
         </h3>
-        <span className="rounded-full bg-soft px-2.5 py-0.5 text-micro font-semibold text-text-muted">
+        <span className="rounded-full bg-soft px-2.5 py-0.5 text-micro font-bold text-text-muted">
           {t(`questions:types.${question.type}`)}
         </span>
       </div>

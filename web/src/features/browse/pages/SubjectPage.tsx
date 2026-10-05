@@ -44,8 +44,8 @@ export function SubjectPage({ subjectId }: SubjectPageProps) {
         <p className="text-ui text-text-muted">{t('subject.empty')}</p>
       ) : (
         <ul className="flex flex-col gap-2">
-          {data.units.map((unit) => (
-            <UnitListItem key={unit.id} unit={unit} />
+          {data.units.map((unit, index) => (
+            <UnitListItem key={unit.id} unit={unit} ordinal={index + 1} />
           ))}
         </ul>
       )}

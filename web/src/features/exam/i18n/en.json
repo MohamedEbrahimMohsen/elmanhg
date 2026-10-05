@@ -84,7 +84,7 @@
     "noSubjects": "No subjects yet.",
     "noUnits": "This subject has no units yet.",
     "units": "Choose two or more units:",
-    "available": "({count, number} questions available)",
+    "available": "{count, plural, one {# question available} other {# questions available}}",
     "noBlueprint": "This unit has no exam",
     "size": "Number of questions",
     "sizeOption": "{size, number} questions",
@@ -92,7 +92,9 @@
     "previewTitle": "Merged blueprint (proportional)",
     "previewLoading": "Working out the exam…",
     "unitShares": "Questions from each unit",
-    "unitShare": "{unit}: {count, number} questions"
+    "unitShare": "{unit}: {count, number} questions",
+    "summary": "{units, plural, =0 {No units chosen} one {# unit} other {# units}} · {size, number} questions",
+    "reasonInProgress": "Finish the exam in progress first."
   },
   "attempts": {
     "title": "Your previous attempts",

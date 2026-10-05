@@ -6,6 +6,7 @@ import type { PageDataOfQuestionListItemResult, QuestionListItemResult } from '@
 import { getGetQuestionsMockHandler } from '@/shared/api/generated/questions/questions.msw';
 import { getGetSubjectsMockHandler } from '@/shared/api/generated/subjects/subjects.msw';
 import { getGetTeachersMockHandler } from '@/shared/api/generated/teachers/teachers.msw';
+import { mintButtons } from '@/test/mintButtons';
 import { server } from '@/test/msw/server';
 import { renderApp } from '@/test/renderWithProviders';
 import { testSessions } from '@/test/sessions';
@@ -117,6 +118,7 @@ describe('QuestionListPage', () => {
     openList('/admin/questions?status=Approved');
 
     expect(await screen.findByText('No questions match these filters.')).toBeInTheDocument();
+    expect(mintButtons()).toHaveLength(1);
     const clearButtons = screen.getAllByRole('button', { name: 'Clear filters' });
     const emptyStateClear = clearButtons[clearButtons.length - 1];
     if (!emptyStateClear) {

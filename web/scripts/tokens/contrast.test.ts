@@ -14,12 +14,12 @@ const textPairs: [string, string][] = [
   ...['surface', 'bg', 'soft', 'accent-soft', 'success-soft', 'danger-soft', 'warning-soft'].map(
     (background): [string, string] => ['text-muted', background],
   ),
-  ...['accent', 'accent-hover', 'accent-pressed', 'danger'].map((background): [string, string] => [
-    'surface',
-    background,
-  ]),
-  ...['surface', 'bg', 'soft', 'accent-soft'].map((background): [string, string] => ['accent', background]),
+  ...['action', 'action-hover', 'action-pressed'].map((background): [string, string] => ['text', background]),
+  ...['surface', 'bg', 'soft', 'accent-soft'].map((background): [string, string] => ['accent-text', background]),
+  ['surface', 'accent'],
+  ['surface', 'danger'],
   ['success-text', 'surface'],
+  ['success-text', 'bg'],
   ['success-text', 'success-soft'],
   ['danger', 'surface'],
   ['danger', 'bg'],
@@ -35,7 +35,13 @@ const uiPairs: [string, string][] = [
   ['success', 'bg'],
   ['accent', 'surface'],
   ['accent', 'bg'],
+  ['accent', 'soft'],
+  ['accent', 'accent-soft'],
+  ['danger', 'surface'],
+  ['danger', 'bg'],
 ];
+
+const heroStops = ['#3B1E90', '#5A3CC4', '#3A6EF0'];
 
 describe('contrast', () => {
   it('returns 21 for black on white', () => {
@@ -68,12 +74,25 @@ describe('design tokens', () => {
     expect(contrastRatio(colour(foreground), colour(background))).toBeGreaterThanOrEqual(3);
   });
 
-  it('keeps white text readable on every aurora stop', () => {
-    const stops = gradientStops(readToken(css, 'gradient-aurora'));
+  it('keeps white text readable on the hero gradient stops', () => {
+    const stops = gradientStops(readToken(css, 'gradient-hero'));
 
-    expect(stops).toHaveLength(3);
-    for (const stop of stops) {
-      expect(contrastRatio(stop, '#FFFFFF')).toBeGreaterThanOrEqual(4.5);
-    }
+    expect(stops).toEqual(heroStops);
+    expect(contrastRatio(stops[0] ?? '', '#FFFFFF')).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(stops[1] ?? '', '#FFFFFF')).toBeGreaterThanOrEqual(4.5);
+    // Large text only reaches the end stop (D10), so 3:1 applies there.
+    expect(contrastRatio(stops[2] ?? '', '#FFFFFF')).toBeGreaterThanOrEqual(3);
+  });
+
+  it('mirrors the hero gradient for right-to-left on the same stops', () => {
+    const rtl = readToken(css, 'gradient-hero-rtl');
+
+    expect(rtl.startsWith('linear-gradient(270deg')).toBe(true);
+    expect(gradientStops(rtl)).toEqual(heroStops);
+  });
+
+  it('keeps Signal Blue itself below 4.5 on the canvas so text uses accent-text', () => {
+    expect(contrastRatio(colour('accent'), colour('bg'))).toBeLessThan(4.5);
+    expect(contrastRatio(colour('accent-text'), colour('bg'))).toBeGreaterThanOrEqual(4.5);
   });
 });

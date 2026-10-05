@@ -22,12 +22,12 @@ export function QuestionEditorHeader({ lesson, question }: QuestionEditorHeaderP
       <nav aria-label={t('editor.breadcrumb')}>
         <ol className="flex flex-wrap gap-2 text-caption text-text-muted">
           <li>
-            <Link to="/admin/questions" className="text-accent underline">
+            <Link to="/admin/questions" className="text-accent-text underline">
               {t('editor.questionsLink')}
             </Link>
           </li>
           <li>
-            <Link to="/admin/lesson/$lessonId" params={{ lessonId: lesson.id }} className="text-accent underline">
+            <Link to="/admin/lesson/$lessonId" params={{ lessonId: lesson.id }} className="text-accent-text underline">
               {lesson.name}
             </Link>
           </li>
@@ -39,7 +39,7 @@ export function QuestionEditorHeader({ lesson, question }: QuestionEditorHeaderP
         {question ? (
           <>
             <QuestionStatusBadge status={question.validationStatus} />
-            <span className="rounded-full bg-soft px-2.5 py-0.5 text-micro font-semibold text-text-muted">
+            <span className="rounded-full bg-soft px-2.5 py-0.5 text-micro font-bold text-text-muted">
               {t('editor.versionBadge', { version: formatNumber(Number(question.version), lng) })}
             </span>
           </>

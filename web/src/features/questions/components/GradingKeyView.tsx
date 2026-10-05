@@ -2,6 +2,9 @@ import type { JsonElement } from '@/shared/api/generated/model';
 import { toQuestionValues } from '../api/questionValues';
 import { EssayRubricView } from './EssayRubricView';
 import { MathAnswerRulesView } from './MathAnswerRulesView';
+import { registerQuestionsAdminLocales } from '../questionsAdminLocales';
+
+registerQuestionsAdminLocales();
 
 export interface GradingKeyViewProps {
   type: string;

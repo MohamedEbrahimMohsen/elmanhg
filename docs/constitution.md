@@ -151,7 +151,7 @@ public sealed class ProvisioningOptions
 
 ## 5. Frontend (web/) and AI service (ai/)
 
-- `web/`: governed by `.claude/skills/react-feature/SKILL.md` (React 19 + TypeScript strict + Vite 8 + Tailwind v4 + shadcn + TanStack Query + i18next RTL). Every visual value is a token from `.claude/design-system.md` (Glass, light only). Screen content and flow come from `prototype/`.
+- `web/`: governed by `.claude/skills/react-feature/SKILL.md` (React 19 + TypeScript strict + Vite 8 + Tailwind v4 + shadcn + TanStack Query + i18next RTL). Every visual value is a token from `.claude/design-system.md` (Mist, light only). Screen content and flow come from `prototype/`.
 - No magic values: API base URL and tunables come from Vite env (`import.meta.env.VITE_*`) with `.env.example` committed, real `.env.local` gitignored.
 - `ai/`: Python 3.13 FastAPI service (uv, committed `uv.lock`, pydantic v2, structlog, ruff, mypy strict, pytest), governed by `.claude/skills/python-feature/SKILL.md`. It is called only by the .NET API over HTTP with a shared service token (`Authorization: Bearer`; contract in `docs/ai-service.md`). Every model/provider call sits behind `clients/model.py` with a fake for tests and offline runs; the OpenAI-compatible LLM adapter (`clients/openai_compatible_model.py`: OpenAI by default, Gemini or DeepSeek by base URL) is switched on by config. The Anthropic API is not used (dev decision 2026-10-01). Prompt text built from student input is treated as untrusted.
 

@@ -77,7 +77,7 @@ export function QuestionPreviewPanel({ lessonId }: QuestionPreviewPanelProps) {
       </div>
       {errorCode ? (
         <div role="alert" className="flex flex-col gap-1 rounded-md border border-danger bg-danger-soft px-3.5 py-3">
-          <p className="text-ui font-semibold text-danger">{t('preview.gradeFailed')}</p>
+          <p className="text-ui font-bold text-danger">{t('preview.gradeFailed')}</p>
           <p className="text-caption text-text">
             {t([`common:errors.${errorCode}`, 'common:errors.UNHANDLED_EXCEPTION'])}
           </p>

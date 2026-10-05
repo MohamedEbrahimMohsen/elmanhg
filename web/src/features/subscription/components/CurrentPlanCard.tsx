@@ -21,10 +21,10 @@ export function CurrentPlanCard({ entitlement, onCancel, isCancelPending }: Curr
       aria-labelledby={headingId}
       className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5"
     >
-      <h3 id={headingId} className="text-caption font-semibold text-text-muted">
+      <h3 id={headingId} className="text-caption font-bold text-text-muted">
         {t('current.label')}
       </h3>
-      <p className="font-semibold">{t(`current.${planLabelKey(entitlement)}`)}</p>
+      <p className="font-bold">{t(`current.${planLabelKey(entitlement)}`)}</p>
       <ul className="flex flex-col gap-1">
         {entitlement.subscriptions.map((subscription) => (
           <SubscriptionStatusLine key={subscription.id} subscription={subscription} onCancelClick={setCancelling} />

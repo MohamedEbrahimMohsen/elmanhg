@@ -33,7 +33,7 @@ export function ValidationDecisionPanel({ question }: ValidationDecisionPanelPro
       aria-label={t('validation.decision.title')}
       className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4 shadow-1 lg:p-5"
     >
-      <h2 className="font-display text-h3 font-semibold">{t('validation.decision.title')}</h2>
+      <h2 className="font-display text-h3 font-bold">{t('validation.decision.title')}</h2>
       <Form form={approveForm} onSubmit={(values) => approve({ ...target, difficulty: values.difficulty })}>
         <SelectField<ApproveQuestionValues>
           name="difficulty"

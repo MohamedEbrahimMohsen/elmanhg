@@ -21,11 +21,7 @@ export function UnitProgressTable({ units, subjectName }: UnitProgressTableProps
         <thead>
           <tr>
             {headerKeys.map((key) => (
-              <th
-                key={key}
-                scope="col"
-                className="px-2.5 py-2.25 text-start text-caption font-semibold text-text-muted"
-              >
+              <th key={key} scope="col" className="px-2.5 py-2.25 text-start text-caption font-bold text-text-muted">
                 {t(`subjects.${key}`)}
               </th>
             ))}
@@ -33,13 +29,15 @@ export function UnitProgressTable({ units, subjectName }: UnitProgressTableProps
         </thead>
         <tbody>
           {units.map((unit) => (
-            <tr key={unit.unitId} className="border-t border-border">
+            <tr key={unit.unitId} className="border-t border-border hover:bg-soft">
               <td className={cellClassName}>
-                <Button asChild variant="secondary" size="sm">
-                  <Link to="/student/unit/$unitId" params={{ unitId: unit.unitId }}>
-                    {unit.name}
-                  </Link>
-                </Button>
+                <Link
+                  to="/student/unit/$unitId"
+                  params={{ unitId: unit.unitId }}
+                  className="rounded-sm font-bold text-accent-text hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+                >
+                  {unit.name}
+                </Link>
               </td>
               <td className={cellClassName}>
                 {t('subjects.unitMasteryValue', { percent: Number(unit.masteryPercent) })}

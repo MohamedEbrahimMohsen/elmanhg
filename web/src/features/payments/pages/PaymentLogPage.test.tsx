@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import type { PageDataOfAdminPaymentResult } from '@/shared/api/generated/model';
 import { getGetPaymentLogMockHandler } from '@/shared/api/generated/payments/payments.msw';
 import { axe } from '@/test/axe';
+import { mintButtons } from '@/test/mintButtons';
 import { server } from '@/test/msw/server';
 import { adminPayment, adminPaymentStudentId, paymentLogPage } from '@/test/paymentFixtures';
 import { renderApp } from '@/test/renderWithProviders';
@@ -54,6 +55,7 @@ describe('PaymentLogPage', () => {
     const { router } = await openPayments('/admin/payments?status=Failed');
 
     expect(await screen.findByText('No payments match these filters.')).toBeInTheDocument();
+    expect(mintButtons()).toHaveLength(1);
     const emptyStateClear = screen.getAllByRole('button', { name: 'Clear filters' }).at(-1);
     if (!emptyStateClear) {
       throw new Error('The empty state does not offer Clear filters.');

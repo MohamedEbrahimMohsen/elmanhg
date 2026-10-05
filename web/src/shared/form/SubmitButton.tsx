@@ -4,7 +4,7 @@ import { Button } from '@/shared/ui/button';
 
 export interface SubmitButtonProps {
   children: ReactNode;
-  variant?: 'primary' | 'accent';
+  variant?: 'primary' | 'secondary';
   disabled?: boolean;
 }
 

@@ -39,7 +39,7 @@ export function ChoiceListSettingForm({ setting, mutations }: ChoiceListSettingF
       onSubmit={(event) => void form.handleSubmit(submit)(event)}
     >
       <fieldset className="flex flex-wrap gap-3" aria-describedby={error ? errorId : undefined}>
-        <legend className="mb-1 text-caption text-text-muted">{t('row.newValue')}</legend>
+        <legend className="text-caption text-text-muted">{t('row.newValue')}</legend>
         {setting.allowedValues.map((option) => (
           <label key={option} className="flex items-center gap-2 text-ui text-text">
             <input type="checkbox" value={option} className="size-6 accent-accent" {...form.register('value')} />
@@ -47,7 +47,7 @@ export function ChoiceListSettingForm({ setting, mutations }: ChoiceListSettingF
           </label>
         ))}
       </fieldset>
-      <Button type="submit" disabled={mutations.isPending || form.formState.isSubmitting}>
+      <Button type="submit" variant="secondary" disabled={mutations.isPending || form.formState.isSubmitting}>
         {t('row.save')}
       </Button>
       {error ? (

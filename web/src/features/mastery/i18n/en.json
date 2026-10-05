@@ -7,7 +7,12 @@
   "headline": {
     "label": "Your question counter",
     "remaining": "{remaining, number} of {total, number} questions left for you",
-    "meta": "Seen {seen, number} · Mastered {mastered, number} · Streak: {streak, plural, one {# day} other {# days}}"
+    "barLabel": "Questions mastered",
+    "seen": "Seen",
+    "mastered": "Mastered",
+    "streak": "Streak",
+    "count": "{value, number}",
+    "streakValue": "{streak, plural, one {# day} other {# days}}"
   },
   "nextLesson": {
     "label": "Suggested next lesson",

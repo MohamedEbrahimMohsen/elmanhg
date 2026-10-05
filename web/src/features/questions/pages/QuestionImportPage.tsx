@@ -8,6 +8,9 @@ import { QuestionImportReport } from '../components/QuestionImportReport';
 import { QuestionImportSuccess } from '../components/QuestionImportSuccess';
 import { QuestionImportTemplateCard } from '../components/QuestionImportTemplateCard';
 import { useQuestionImport } from '../hooks/useQuestionImport';
+import { registerQuestionsAdminLocales } from '../questionsAdminLocales';
+
+registerQuestionsAdminLocales();
 
 export interface QuestionImportPageProps {
   lessonId: string;

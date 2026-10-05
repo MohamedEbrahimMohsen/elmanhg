@@ -18,7 +18,7 @@ export function ShortfallNotice({ title, shortfalls }: ShortfallNoticeProps) {
       aria-live="polite"
       className="rounded-md border border-warning bg-warning-soft px-3.5 py-3 text-caption text-text"
     >
-      <p className="font-semibold">{title}</p>
+      <p className="font-bold">{title}</p>
       {shortfalls.map(({ type, required, available, missing }) => (
         <p key={type}>
           {t('editor.shortfallLine', { type: t(`questions:types.${type}`), required, available, missing })}

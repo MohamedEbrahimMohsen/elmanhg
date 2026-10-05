@@ -17,7 +17,7 @@ export function TrainingExportStatusBadge({ status }: TrainingExportStatusBadgeP
   const { t } = useTranslation('trainingExport');
 
   return (
-    <span className={cn('inline-flex rounded-pill px-2.5 py-0.5 text-micro font-semibold', statusClasses[status])}>
+    <span className={cn('inline-flex rounded-pill px-2.5 py-0.5 text-micro font-bold', statusClasses[status])}>
       {t(`status.${status}`)}
     </span>
   );

@@ -7,6 +7,9 @@ import { AvatarConversationSkeleton } from '../components/AvatarConversationSkel
 import { AvatarConversationSummary } from '../components/AvatarConversationSummary';
 import { AvatarLoggedMessage } from '../components/AvatarLoggedMessage';
 import { useAvatarConversation } from '../hooks/useAvatarConversation';
+import { registerAvatarConversationsLocales } from '../locales';
+
+registerAvatarConversationsLocales();
 
 export interface AvatarConversationPageProps {
   conversationId: string;
@@ -27,7 +30,7 @@ export function AvatarConversationPage({ conversationId }: AvatarConversationPag
           role="alert"
           className="flex flex-col items-start gap-3 rounded-lg border border-danger bg-danger-soft p-4"
         >
-          <p className="text-ui font-semibold text-danger">{t('detail.error')}</p>
+          <p className="text-ui font-bold text-danger">{t('detail.error')}</p>
           <p className="text-caption text-text">
             {t([`common:errors.${errorCode}`, 'common:errors.UNHANDLED_EXCEPTION'])}
           </p>
@@ -61,7 +64,7 @@ export function AvatarConversationPage({ conversationId }: AvatarConversationPag
     <section className="flex flex-col gap-4">
       <Link
         to="/admin/avatar-conversations"
-        className="flex min-h-11 w-fit items-center gap-1 rounded-sm text-caption text-accent underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
+        className="flex min-h-11 w-fit items-center gap-1 rounded-sm text-caption text-accent-text underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden"
       >
         <ChevronLeft aria-hidden className="size-4 rtl:rotate-180" />
         {t('detail.back')}

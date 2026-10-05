@@ -26,6 +26,15 @@ describe('SubjectPage', () => {
     ]);
   });
 
+  it('numbers the units in order', async () => {
+    server.use(getGetStudentSubjectMockHandler(studentSubject()));
+    openSubject();
+
+    await screen.findByRole('heading', { level: 1, name: 'Physics' });
+
+    expect(screen.getAllByText(/^[12]$/).map((el) => el.textContent)).toEqual(['1', '2']);
+  });
+
   it('links each unit to its unit page and its exam start', async () => {
     server.use(getGetStudentSubjectMockHandler(studentSubject()));
     openSubject();

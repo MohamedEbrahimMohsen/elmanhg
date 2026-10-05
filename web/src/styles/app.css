@@ -10,6 +10,10 @@
   --font-*: initial;
   --text-*: initial;
   --radius-*: initial;
+  --font-weight-*: initial;
+  --font-weight-normal: 400;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
 }
 
 @theme inline {
@@ -21,9 +25,11 @@
   --color-border: var(--ds-color-border);
   --color-border-strong: var(--ds-color-border-strong);
   --color-accent: var(--ds-color-accent);
+  --color-accent-text: var(--ds-color-accent-text);
   --color-accent-soft: var(--ds-color-accent-soft);
-  --color-accent-hover: var(--ds-color-accent-hover);
-  --color-accent-pressed: var(--ds-color-accent-pressed);
+  --color-action: var(--ds-color-action);
+  --color-action-hover: var(--ds-color-action-hover);
+  --color-action-pressed: var(--ds-color-action-pressed);
   --color-success: var(--ds-color-success);
   --color-success-soft: var(--ds-color-success-soft);
   --color-success-text: var(--ds-color-success-text);
@@ -44,8 +50,8 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-input: var(--input);
 
-  --font-display: 'Readex Pro', Tahoma, sans-serif;
-  --font-sans: 'Noto Sans Arabic', Tahoma, sans-serif;
+  --font-display: 'Poppins', 'Almarai', Tahoma, sans-serif;
+  --font-sans: 'Poppins', 'Almarai', Tahoma, sans-serif;
   --font-mono: ui-monospace, monospace;
 
   --radius-sm: var(--ds-radius-sm);
@@ -54,7 +60,6 @@
   --radius-pill: var(--ds-radius-pill);
 
   --shadow-1: var(--ds-shadow-1);
-  --shadow-2: var(--ds-shadow-2);
 
   --spacing: var(--ds-space-1);
   --container-layout: var(--ds-layout-max);
@@ -62,7 +67,6 @@
 
   --text-display: var(--ds-type-display-size);
   --text-display--line-height: var(--ds-type-display-line);
-  --text-display--letter-spacing: var(--ds-type-display-tracking);
   --text-display-desktop: var(--ds-type-display-size-desktop);
   --text-display-desktop--line-height: var(--ds-type-display-line-desktop);
   --text-h1: var(--ds-type-h1-size);
@@ -79,13 +83,14 @@
   --text-body--line-height: var(--ds-type-body-line);
   --text-ui: var(--ds-type-ui-size);
   --text-ui--line-height: var(--ds-type-ui-line);
+  --text-label: var(--ds-type-label-size);
+  --text-label--line-height: var(--ds-type-label-line);
   --text-caption: var(--ds-type-caption-size);
   --text-caption--line-height: var(--ds-type-caption-line);
   --text-micro: var(--ds-type-micro-size);
   --text-micro--line-height: var(--ds-type-micro-line);
   --text-stat: var(--ds-type-stat-size);
   --text-stat--line-height: var(--ds-type-stat-line);
-  --text-stat--letter-spacing: var(--ds-type-stat-tracking);
   --text-mono: var(--ds-type-mono-size);
   --text-mono--line-height: var(--ds-type-mono-line);
 
@@ -97,8 +102,8 @@
   --radius: var(--ds-radius-md);
   --background: var(--ds-color-bg);
   --foreground: var(--ds-color-text);
-  --primary: var(--ds-color-accent);
-  --primary-foreground: var(--ds-color-surface);
+  --primary: var(--ds-color-action);
+  --primary-foreground: var(--ds-color-text);
   --ring: var(--ds-color-accent);
   --destructive: var(--ds-color-danger);
   --card: var(--ds-color-surface);
@@ -108,8 +113,12 @@
   --input: var(--ds-color-border-strong);
 }
 
-@utility bg-aurora {
-  background-image: var(--ds-gradient-aurora);
+@utility bg-hero {
+  background-image: var(--ds-gradient-hero);
+
+  &:where([dir='rtl'], [dir='rtl'] *) {
+    background-image: var(--ds-gradient-hero-rtl);
+  }
 }
 
 @utility pb-safe-area {
@@ -118,6 +127,14 @@
 
 @utility bottom-above-tab-bar {
   inset-block-end: calc(var(--ds-layout-bar) + var(--ds-space-2) + env(safe-area-inset-bottom));
+}
+
+@utility h-assistant {
+  height: calc(100dvh - var(--ds-layout-bar) - var(--ds-space-1) * 30);
+}
+
+@utility h-assistant-desktop {
+  height: calc(100dvh - var(--ds-layout-bar) - var(--ds-space-1) * 14);
 }
 
 @layer base {
@@ -137,6 +154,19 @@
 
   :disabled {
     cursor: not-allowed;
+  }
+
+  fieldset {
+    min-inline-size: 0;
+  }
+
+  legend {
+    float: inline-start;
+    inline-size: 100%;
+  }
+
+  legend + * {
+    clear: both;
   }
 
   body {
@@ -200,7 +230,7 @@
   }
 
   .rich-text a {
-    color: var(--ds-color-accent);
+    color: var(--ds-color-accent-text);
     text-decoration: underline;
   }
 
