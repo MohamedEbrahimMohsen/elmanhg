@@ -14,10 +14,29 @@
     "count": "{count, plural, one {# question} other {# questions}}",
     "loading": "Loading questions",
     "errorTitle": "Could not load the questions",
-    "hint": "To add a question, open its lesson from the content tree.",
+    "hint": "Use Add question to choose a lesson, or open the lesson from the content tree.",
     "lessonFilter": "Showing one lesson's questions.",
     "newInLesson": "New question in this lesson",
     "importInLesson": "Import questions into this lesson",
+    "add": {
+      "button": "Add question",
+      "title": "Add question",
+      "intro": "Choose the lesson the question belongs to.",
+      "subject": "Subject",
+      "unit": "Unit",
+      "lesson": "Lesson",
+      "choose": {
+        "subject": "Choose a subject",
+        "unit": "Choose a unit",
+        "lesson": "Choose a lesson"
+      },
+      "loading": "Loading lessons",
+      "errorTitle": "Could not load the lessons",
+      "noLessons": "This unit has no lessons yet.",
+      "new": "New question",
+      "import": "Import from file",
+      "cancel": "Cancel"
+    },
     "empty": {
       "noData": "No questions yet.",
       "noResults": "No questions match these filters."

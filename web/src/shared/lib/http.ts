@@ -48,12 +48,16 @@ async function send(url: string, init: RequestInit): Promise<Response> {
   }
 }
 
+function isJsonContentType(contentType: string): boolean {
+  const mediaType = (contentType.split(';')[0] ?? '').trim().toLowerCase();
+  return mediaType === '' || mediaType === 'application/json' || mediaType.endsWith('+json');
+}
+
 async function parse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     throw await toApiError(response);
   }
-  const contentType = response.headers.get('Content-Type') ?? '';
-  if (contentType !== '' && !contentType.includes('json')) {
+  if (!isJsonContentType(response.headers.get('Content-Type') ?? '')) {
     return (await response.blob()) as T;
   }
   const body = await response.text();

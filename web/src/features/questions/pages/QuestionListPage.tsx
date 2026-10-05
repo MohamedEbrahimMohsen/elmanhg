@@ -4,6 +4,7 @@ import { ContentErrorState, ContentListSkeleton } from '@/features/content';
 import { Pagination } from '@/shared/components/Pagination';
 import { Button } from '@/shared/ui/button';
 import { hasActiveFilters } from '../api/questionListParams';
+import { AddQuestionButton } from '../components/AddQuestionButton';
 import { QuestionListEmptyState } from '../components/QuestionListEmptyState';
 import { QuestionListFilters } from '../components/QuestionListFilters';
 import { QuestionTable } from '../components/QuestionTable';
@@ -50,10 +51,13 @@ export function QuestionListPage() {
 
   return (
     <section className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <h1 className="font-display text-h1 font-bold lg:text-h1-desktop">{t('list.title')}</h1>
-        {data ? <p className="text-caption text-text-muted">{t('list.count', { count: data.totalItems })}</p> : null}
-        <p className="text-caption text-text-muted">{t('list.hint')}</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <h1 className="font-display text-h1 font-bold lg:text-h1-desktop">{t('list.title')}</h1>
+          {data ? <p className="text-caption text-text-muted">{t('list.count', { count: data.totalItems })}</p> : null}
+          <p className="text-caption text-text-muted">{t('list.hint')}</p>
+        </div>
+        <AddQuestionButton lessonId={search.lessonId} />
       </div>
       {search.lessonId ? (
         <div className="flex flex-wrap items-center gap-3">
