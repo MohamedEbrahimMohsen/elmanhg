@@ -7,8 +7,14 @@ import {
   getSendOtpMockHandler,
   getVerifyOtpMockHandler,
 } from '@/shared/api/generated/auth/auth.msw';
-import type { AuthResult, RecordFunnelEventRequest } from '@/shared/api/generated/model';
+import type {
+  AuthResult,
+  RecordFunnelEventRequest,
+  RegisterWithEmailCommand,
+  RegisterWithPhoneCommand,
+} from '@/shared/api/generated/model';
 import { getGetSubjectInterestsMockHandler } from '@/shared/api/generated/students/students.msw';
+import { termsVersion } from '@/shared/lib/terms';
 import { axe } from '@/test/axe';
 import { server } from '@/test/msw/server';
 import { subjectInterests } from '@/test/onboardingFixtures';
@@ -149,5 +155,81 @@ describe('SignUpPage', () => {
     const banner = await screen.findByRole('banner');
 
     expect(within(banner).getByRole('link', { name: 'Elmanhg' })).toHaveAttribute('href', '/');
+  });
+
+  it('shows the terms line with a link to the privacy page', async () => {
+    renderApp('/signup');
+
+    expect(await screen.findByText(/By signing up, you agree to the terms and privacy policy/u)).toBeInTheDocument();
+    const link = screen.getByRole('link', { name: /Read the terms and privacy policy/u });
+    expect(link).toHaveAttribute('href', '/privacy');
+    expect(link).toHaveAttribute('target', '_blank');
+  });
+
+  it('keeps the terms line under the code step of a mobile sign-up', async () => {
+    server.use(getSendOtpMockHandler());
+    const user = userEvent.setup();
+    renderApp('/signup');
+
+    await user.type(await screen.findByLabelText('Your name'), 'Ahmed');
+    await user.type(screen.getByLabelText('Mobile number'), '01012345678');
+    await user.click(screen.getByRole('button', { name: 'Send code' }));
+
+    expect(await screen.findByLabelText('Verification code')).toBeInTheDocument();
+    expect(screen.getByText(/By signing up, you agree to the terms and privacy policy/u)).toBeInTheDocument();
+  });
+
+  it('shows the terms line in Arabic', async () => {
+    renderApp('/signup', { lng: 'ar' });
+
+    expect(await screen.findByText(/لو سنك أقل من 18 سنة، لازم ولي أمرك يكون موافق\./u)).toBeInTheDocument();
+  });
+
+  it('sends the displayed terms version with an email sign-up', async () => {
+    let body: RegisterWithEmailCommand | undefined;
+    server.use(
+      http.post('*/api/auth/register/email', async ({ request }) => {
+        body = (await request.json()) as RegisterWithEmailCommand;
+        return HttpResponse.json(studentResult);
+      }),
+      getGetSubjectInterestsMockHandler(subjectInterests()),
+    );
+    const user = userEvent.setup();
+    renderApp('/signup');
+
+    await fillEmailSignUp(user);
+
+    expect(await screen.findByRole('heading', { name: 'Choose your subjects' })).toBeInTheDocument();
+    expect(body?.termsVersion).toBe(termsVersion);
+  });
+
+  it('sends the displayed terms version with a mobile sign-up', async () => {
+    let body: RegisterWithPhoneCommand | undefined;
+    server.use(
+      getSendOtpMockHandler(),
+      getVerifyOtpMockHandler({}),
+      http.post('*/api/auth/register/phone', async ({ request }) => {
+        body = (await request.json()) as RegisterWithPhoneCommand;
+        return HttpResponse.json(studentResult);
+      }),
+      getGetSubjectInterestsMockHandler(subjectInterests()),
+    );
+    const user = userEvent.setup();
+    renderApp('/signup');
+
+    await signUpWithPhone(user);
+
+    expect(await screen.findByRole('heading', { name: 'Choose your subjects' })).toBeInTheDocument();
+    expect(body?.termsVersion).toBe(termsVersion);
+  });
+
+  it('asks to reload when the terms version is out of date', async () => {
+    server.use(http.post('*/api/auth/register/email', () => apiError(422, 'TERMS_VERSION_UNKNOWN')));
+    const user = userEvent.setup();
+    renderApp('/signup');
+
+    await fillEmailSignUp(user);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('This page is out of date. Reload it and try again.');
   });
 });

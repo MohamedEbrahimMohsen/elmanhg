@@ -29,5 +29,8 @@
     "title": "Plans",
     "loading": "Loading plans…",
     "errorTitle": "Could not load the plans."
+  },
+  "footer": {
+    "privacy": "Terms and privacy"
   }
 }

@@ -1,0 +1,31 @@
+{
+  "privacy": {
+    "title": "Terms and privacy",
+    "version": "Version: {version}",
+    "intro": "This page explains how Elmanhg uses your data. By signing up, you agree to it.",
+    "collect": {
+      "title": "What we collect",
+      "body": "Your name, your mobile number or email, the subjects you chose, your answers and grades, your chats with the AI assistant, your Ask a Teacher questions and the replies from teachers, and your subscription and payment records."
+    },
+    "use": {
+      "title": "How we use it",
+      "body": "To run your account, pick the right questions for you and track your mastery, send your question to a subject teacher, and turn on your subscription. Teachers see only your name, never your number or email."
+    },
+    "training": {
+      "title": "Improving the AI assistant and grading",
+      "body": "We may use your chats with the assistant, your Ask a Teacher questions, and your answers and grades to improve the AI assistant and grading. Before we use them, we remove your name, mobile number and email and replace your account with a code. A name you type inside a message may stay, so do not write personal details in chats."
+    },
+    "deleteChats": {
+      "title": "Deleting your chats",
+      "body": "You can delete any assistant chat from Past chats. The chat is deleted together with the copy we use for improvement. Ask a Teacher questions, answers and grades are kept without your name."
+    },
+    "minors": {
+      "title": "If you are under 18",
+      "body": "A parent or guardian must agree to these terms before you sign up."
+    },
+    "contact": {
+      "title": "Contact us",
+      "body": "Questions about your data? Write to us at"
+    }
+  }
+}

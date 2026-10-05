@@ -92,6 +92,8 @@
   <data name="REFRESH_TOKEN_REVOKED" xml:space="preserve"><value>انتهت جلستك لأسباب أمنية. سجل الدخول مرة اخرى.</value></data>
   <data name="DISPLAY_NAME_REQUIRED" xml:space="preserve"><value>ادخل اسمك.</value></data>
   <data name="DISPLAY_NAME_TOO_LONG" xml:space="preserve"><value>الاسم طويل جدا.</value></data>
+  <data name="TERMS_VERSION_REQUIRED" xml:space="preserve"><value>اصدار الشروط مطلوب. حدث الصفحة وحاول مرة اخرى.</value></data>
+  <data name="TERMS_VERSION_UNKNOWN" xml:space="preserve"><value>اصدار الشروط غير معروف. حدث الصفحة وحاول مرة اخرى.</value></data>
   <data name="EMAIL_REQUIRED" xml:space="preserve"><value>ادخل بريدك الالكتروني.</value></data>
   <data name="EMAIL_INVALID" xml:space="preserve"><value>ادخل بريدا الكترونيا صحيحا.</value></data>
   <data name="EMAIL_TOO_LONG" xml:space="preserve"><value>البريد الالكتروني طويل جدا.</value></data>

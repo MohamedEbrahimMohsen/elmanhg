@@ -23,6 +23,8 @@
     "PASSWORD_TOO_SHORT": "Password is too short.",
     "PASSWORD_MUST_CONTAIN_DIGIT": "Password must include a number.",
     "DISPLAY_NAME_TOO_LONG": "Name is too long.",
+    "TERMS_VERSION_REQUIRED": "This page is out of date. Reload it and try again.",
+    "TERMS_VERSION_UNKNOWN": "This page is out of date. Reload it and try again.",
     "OTP_INVALID": "This verification request is not valid. Request a new code.",
     "OTP_INVALID_FORMAT": "Enter the 6-digit code.",
     "OTP_EXPIRED": "This code has expired. Request a new one.",

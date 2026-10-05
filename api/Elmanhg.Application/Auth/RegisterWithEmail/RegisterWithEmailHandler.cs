@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Elmanhg.Application.Auth.RegisterWithEmail;
 
-public sealed class RegisterWithEmailHandler(UserManager<User> userManager, ITokenService tokenService, IRefreshTokenService<User, Guid> refreshTokenService) : IRequestHandler<RegisterWithEmailCommand, AuthResult>
+public sealed class RegisterWithEmailHandler(UserManager<User> userManager, ITokenService tokenService, IRefreshTokenService<User, Guid> refreshTokenService, TimeProvider timeProvider) : IRequestHandler<RegisterWithEmailCommand, AuthResult>
 {
     public async Task<AuthResult> Handle(RegisterWithEmailCommand request, CancellationToken cancellationToken)
     {
@@ -19,6 +19,7 @@ public sealed class RegisterWithEmailHandler(UserManager<User> userManager, ITok
         }
 
         var user = User.CreateStudentWithEmail(request.DisplayName, request.Email);
+        user.AcceptTerms(request.TermsVersion, timeProvider.GetUtcNow());
         var result = await userManager.CreateAsync(user, request.Password).ConfigureAwait(false);
         if (!result.Succeeded)
         {

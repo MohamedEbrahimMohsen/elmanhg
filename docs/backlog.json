@@ -812,6 +812,15 @@
             "Runtime setting and Configuration page entry",
             "Docs: docs/avatar.md (retention, privacy, history view), docs/training-data.md (erasure), PRD avatar section, docs/configuration.md; close #215"
           ]
+        },
+        {
+          "title": "Terms and privacy notice with training-use line at sign-up",
+          "description": "As a student (or parent) I am told, in the terms I accept at sign-up, that my chats with the platform may be used, without personal data, to improve the AI assistant. Dev decision on #273 (2026-10-05): a terms line, no pop-up and no opt-in checkbox. Issue #301.",
+          "tasks": [
+            "API: TermsVersion / TermsAcceptedAt on sign-up, migration, validation, tests",
+            "Web: privacy & terms page, sign-up line, footer/settings links, ar/en, tests",
+            "Docs: PRD privacy row and §13, docs/training-data.md checklist, docs/claude-design-prompt.md §4–§6, docs/prototype.md"
+          ]
         }
       ]
     },

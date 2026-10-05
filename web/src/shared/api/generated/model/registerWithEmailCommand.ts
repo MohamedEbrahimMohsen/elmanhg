@@ -9,4 +9,5 @@ export interface RegisterWithEmailCommand {
   displayName: string;
   email: string;
   password: string;
+  termsVersion: string;
 }

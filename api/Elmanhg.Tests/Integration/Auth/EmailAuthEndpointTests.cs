@@ -24,7 +24,7 @@ public sealed class EmailAuthEndpointTests(ApiFactory factory)
         using var client = AuthTestClient.Create(factory);
         var email = AuthTestClient.NewEmail();
 
-        using var response = await client.PostAsJsonAsync(RegisterRoute, new { displayName = "Mona", email, password = Password }, TestContext.Current.CancellationToken);
+        using var response = await client.PostAsJsonAsync(RegisterRoute, new { displayName = "Mona", email, password = Password, termsVersion = TermsVersions.Current }, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         AuthTestClient.ReadRefreshCookie(response).Should().StartWith("elmanhg_refresh=");
@@ -38,9 +38,9 @@ public sealed class EmailAuthEndpointTests(ApiFactory factory)
     {
         using var client = AuthTestClient.Create(factory);
         var email = AuthTestClient.NewEmail();
-        using var first = await client.PostAsJsonAsync(RegisterRoute, new { displayName = "Mona", email, password = Password }, TestContext.Current.CancellationToken);
+        using var first = await client.PostAsJsonAsync(RegisterRoute, new { displayName = "Mona", email, password = Password, termsVersion = TermsVersions.Current }, TestContext.Current.CancellationToken);
 
-        using var response = await client.PostAsJsonAsync(RegisterRoute, new { displayName = "Mona", email, password = Password }, TestContext.Current.CancellationToken);
+        using var response = await client.PostAsJsonAsync(RegisterRoute, new { displayName = "Mona", email, password = Password, termsVersion = TermsVersions.Current }, TestContext.Current.CancellationToken);
 
         first.StatusCode.Should().Be(HttpStatusCode.OK);
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
@@ -52,10 +52,41 @@ public sealed class EmailAuthEndpointTests(ApiFactory factory)
     {
         using var client = AuthTestClient.Create(factory);
 
-        using var response = await client.PostAsJsonAsync(RegisterRoute, new { displayName = "Mona", email = AuthTestClient.NewEmail(), password = "Pass1" }, TestContext.Current.CancellationToken);
+        using var response = await client.PostAsJsonAsync(RegisterRoute, new { displayName = "Mona", email = AuthTestClient.NewEmail(), password = "Pass1", termsVersion = TermsVersions.Current }, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
         (await ReadCodeAsync(response)).Should().Contain("PASSWORD_TOO_SHORT");
+    }
+
+    [Fact]
+    public async Task RegisterWithEmail_CurrentTermsVersion_PersistsTermsAcceptance()
+    {
+        using var client = AuthTestClient.Create(factory);
+        var email = AuthTestClient.NewEmail();
+        var before = DateTimeOffset.UtcNow;
+
+        using var response = await client.PostAsJsonAsync(RegisterRoute, new { displayName = "Mona", email, password = Password, termsVersion = TermsVersions.Current }, TestContext.Current.CancellationToken);
+
+        var after = DateTimeOffset.UtcNow;
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        using var scope = factory.Services.CreateScope();
+        var user = await scope.ServiceProvider.GetRequiredService<AppDbContext>().Users.AsNoTracking().SingleAsync(x => x.Email == email, TestContext.Current.CancellationToken);
+        user.TermsVersion.Should().Be(TermsVersions.Current);
+        user.TermsAcceptedAt.Should().BeOnOrAfter(before).And.BeOnOrBefore(after);
+    }
+
+    [Fact]
+    public async Task RegisterWithEmail_UnknownTermsVersion_Returns422AndCreatesNoUser()
+    {
+        using var client = AuthTestClient.Create(factory);
+        var email = AuthTestClient.NewEmail();
+
+        using var response = await client.PostAsJsonAsync(RegisterRoute, new { displayName = "Mona", email, password = Password, termsVersion = "2020-01-01" }, TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await ReadCodeAsync(response)).Should().Contain("TERMS_VERSION_UNKNOWN");
+        using var scope = factory.Services.CreateScope();
+        (await scope.ServiceProvider.GetRequiredService<AppDbContext>().Users.AnyAsync(x => x.Email == email, TestContext.Current.CancellationToken)).Should().BeFalse();
     }
 
     [Fact]

@@ -1038,6 +1038,13 @@ namespace Elmanhg.Infrastructure.Migrations
                         .HasColumnType("uuid[]")
                         .HasDefaultValueSql("'{}'");
 
+                    b.Property<DateTimeOffset?>("TermsAcceptedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TermsVersion")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
 

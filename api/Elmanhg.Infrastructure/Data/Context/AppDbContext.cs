@@ -47,6 +47,8 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
     private const int TranscriptionModelMaxLength = 100;
     // Model ids, prompt versions and stop reasons are short identifiers set by the AI service; a schema invariant.
     private const int AiIdentifierMaxLength = 100;
+    // Terms versions are yyyy-MM-dd strings known to the domain (TermsVersions); a schema invariant.
+    private const int TermsVersionMaxLength = 20;
 
     public const string InProgressSessionIndex = "IX_Sessions_InProgressScope";
     public const string AttemptPerQuestionIndex = "IX_Attempts_SessionId_QuestionId";
@@ -235,6 +237,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.Property(x => x.Role).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.SubjectInterestIds).IsRequired().HasDefaultValueSql("'{}'");
+            builder.Property(x => x.TermsVersion).HasMaxLength(TermsVersionMaxLength);
             builder.HasIndex(x => new { x.Role, x.CreationDate });
         });
     }
