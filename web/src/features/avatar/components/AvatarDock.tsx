@@ -1,7 +1,7 @@
-import { useMatch } from '@tanstack/react-router';
 import { Sparkles } from 'lucide-react';
 import { lazy, Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAssistantDockShown } from '../hooks/useAssistantDockShown';
 import { useAvatar } from '../hooks/useAvatar';
 
 const AvatarPanel = lazy(() => import('./AvatarPanel').then((module) => ({ default: module.AvatarPanel })));
@@ -12,7 +12,7 @@ const dockClassName =
 export function AvatarDock() {
   const { t } = useTranslation('avatar');
   const { state, open } = useAvatar();
-  const takingExam = useMatch({ from: '/student/exam/$sessionId', shouldThrow: false }) !== undefined;
+  const dockShown = useAssistantDockShown();
   const [mounted, setMounted] = useState(state.isOpen);
   if (state.isOpen && !mounted) {
     setMounted(true);
@@ -20,7 +20,7 @@ export function AvatarDock() {
 
   return (
     <>
-      {state.isOpen || takingExam ? null : (
+      {state.isOpen || !dockShown ? null : (
         <button
           type="button"
           onClick={() => {

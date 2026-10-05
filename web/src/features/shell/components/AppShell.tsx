@@ -10,9 +10,10 @@ import { TabBar } from './TabBar';
 export interface AppShellProps {
   role: Role;
   assistant?: ReactNode;
+  reserveAssistantSpace?: boolean;
 }
 
-export function AppShell({ role, assistant }: AppShellProps) {
+export function AppShell({ role, assistant, reserveAssistantSpace = false }: AppShellProps) {
   const { t } = useTranslation('shell');
 
   return (
@@ -24,7 +25,15 @@ export function AppShell({ role, assistant }: AppShellProps) {
         {t('skipToContent')}
       </a>
       <AppBar role={role} />
-      <main id="main" tabIndex={-1} className={cn(layoutContainerClassName, 'pt-6 pb-24 lg:pb-8')}>
+      <main
+        id="main"
+        tabIndex={-1}
+        className={cn(
+          layoutContainerClassName,
+          'pt-6',
+          reserveAssistantSpace ? 'pb-assistant-dock lg:pb-assistant-dock-desktop' : 'pb-24 lg:pb-8',
+        )}
+      >
         <Outlet />
       </main>
       <TabBar role={role} />
