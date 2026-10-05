@@ -125,6 +125,14 @@
   padding-block-end: env(safe-area-inset-bottom);
 }
 
+@utility pb-assistant-dock {
+  padding-block-end: calc(var(--ds-space-1) * 40 + env(safe-area-inset-bottom));
+}
+
+@utility pb-assistant-dock-desktop {
+  padding-block-end: calc(var(--ds-space-1) * 22 + env(safe-area-inset-bottom));
+}
+
 @utility bottom-above-tab-bar {
   inset-block-end: calc(var(--ds-layout-bar) + var(--ds-space-2) + env(safe-area-inset-bottom));
 }
