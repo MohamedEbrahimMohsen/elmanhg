@@ -6,6 +6,7 @@ import { AuthLayout } from '../components/AuthLayout';
 import { EmailSignUpForm } from '../components/EmailSignUpForm';
 import { MethodSwitch, type SignInMethod } from '../components/MethodSwitch';
 import { PhoneSignUp } from '../components/PhoneSignUp';
+import { TermsNotice } from '../components/TermsNotice';
 
 export function SignUpPage() {
   const { t } = useTranslation('session');
@@ -29,6 +30,7 @@ export function SignUpPage() {
     >
       <MethodSwitch value={method} onChange={setMethod} />
       {method === 'phone' ? <PhoneSignUp /> : <EmailSignUpForm />}
+      <TermsNotice />
     </AuthLayout>
   );
 }

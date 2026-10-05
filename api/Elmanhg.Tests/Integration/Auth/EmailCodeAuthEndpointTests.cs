@@ -17,7 +17,7 @@ public sealed class EmailCodeAuthEndpointTests(ApiFactory factory)
     {
         using var client = AuthTestClient.Create(factory);
         var email = AuthTestClient.NewEmail();
-        using var registration = await client.PostAsJsonAsync("/api/auth/register/email", new { displayName = "Mona", email, password = Password }, TestContext.Current.CancellationToken);
+        using var registration = await client.PostAsJsonAsync("/api/auth/register/email", new { displayName = "Mona", email, password = Password, termsVersion = TermsVersions.Current }, TestContext.Current.CancellationToken);
         registration.StatusCode.Should().Be(HttpStatusCode.OK);
         var verificationId = await AuthTestClient.SendAndVerifyEmailOtpAsync(client, factory, email, TestContext.Current.CancellationToken);
 

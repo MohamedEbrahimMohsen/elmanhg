@@ -10,7 +10,12 @@
   "signUp": {
     "title": "Create account",
     "haveAccount": "Already have an account?",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "terms": {
+      "notice": "By signing up, you agree to the terms and privacy policy, including the use of chats without your personal data to improve the AI assistant. If you are under 18, a parent or guardian must agree.",
+      "link": "Read the terms and privacy policy",
+      "newTab": "(opens in a new tab)"
+    }
   },
   "fields": {
     "displayName": "Your name",

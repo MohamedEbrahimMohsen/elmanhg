@@ -14,6 +14,7 @@ import { Route as AcceptInviteRouteImport } from './routes/accept-invite'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as StudentRouteRouteImport } from './routes/student/route'
 import { Route as TeacherRouteRouteImport } from './routes/teacher/route'
@@ -90,6 +91,11 @@ const LoginRoute = LoginRouteImport.update({
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -375,6 +381,7 @@ export interface FileRoutesByFullPath {
   '/accept-invite': typeof AcceptInviteRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/avatar-conversations': typeof AdminAvatarConversationsRoute
@@ -431,6 +438,7 @@ export interface FileRoutesByTo {
   '/accept-invite': typeof AcceptInviteRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/avatar-conversations': typeof AdminAvatarConversationsRoute
@@ -490,6 +498,7 @@ export interface FileRoutesById {
   '/accept-invite': typeof AcceptInviteRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/avatar-conversations': typeof AdminAvatarConversationsRoute
@@ -551,6 +560,7 @@ export interface FileRouteTypes {
     | '/accept-invite'
     | '/login'
     | '/onboarding'
+    | '/privacy'
     | '/signup'
     | '/admin/audit'
     | '/admin/avatar-conversations'
@@ -607,6 +617,7 @@ export interface FileRouteTypes {
     | '/accept-invite'
     | '/login'
     | '/onboarding'
+    | '/privacy'
     | '/signup'
     | '/admin/audit'
     | '/admin/avatar-conversations'
@@ -665,6 +676,7 @@ export interface FileRouteTypes {
     | '/accept-invite'
     | '/login'
     | '/onboarding'
+    | '/privacy'
     | '/signup'
     | '/admin/audit'
     | '/admin/avatar-conversations'
@@ -725,6 +737,7 @@ export interface RootRouteChildren {
   AcceptInviteRoute: typeof AcceptInviteRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
+  PrivacyRoute: typeof PrivacyRoute
   SignupRoute: typeof SignupRoute
 }
 
@@ -763,6 +776,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -1289,6 +1309,7 @@ const rootRouteChildren: RootRouteChildren = {
   AcceptInviteRoute: AcceptInviteRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
+  PrivacyRoute: PrivacyRoute,
   SignupRoute: SignupRoute,
 }
 export const routeTree = rootRouteImport

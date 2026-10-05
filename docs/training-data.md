@@ -141,7 +141,7 @@ The student id, names, phone, email, the teacher id, audio and image URLs, the s
 - [x] Export files are private, downloaded only by an admin through the audited API, and deleted after `TrainingExports:RetentionDays` (default 7).
 - [x] **Retention period**: decided on #215 (2026-10-02): avatar chats are kept until the student deletes them; there is no purge job.
 - [x] **Student erasure path** for avatar conversations (#271): deleting a chat erases its messages and training rows through `erase_avatar_conversation(uuid)`. Other sources (attempts, teacher threads, essay grades) and whole-account erasure are not offered. Anyone holding the key can re-link hashes to ids.
-- [ ] **Notice or consent** that interactions are used for training: dev or legal decision (#215).
+- [x] **Notice or consent** that interactions are used for training: decided on #273 (2026-10-05): a terms line under the sign-up form links to the public `/privacy` page (no pop-up, no opt-in checkbox); sign-up stores the accepted `TermsVersion` and `TermsAcceptedAt` on the user (#301). Existing users are not re-prompted. Legal review of the text before go-live is the dev's.
 - [x] Only the Admin export job reads these tables (PRD §16 "Export training data"); no other API reads them.
 
 ## Consumers

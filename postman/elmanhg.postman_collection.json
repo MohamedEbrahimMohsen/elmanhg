@@ -165,7 +165,7 @@
             "auth": { "type": "noauth" },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"verificationId\": \"{{verificationId}}\",\n  \"displayName\": \"Ahmed\"\n}",
+              "raw": "{\n  \"verificationId\": \"{{verificationId}}\",\n  \"displayName\": \"Ahmed\",\n  \"termsVersion\": \"2026-10-05\"\n}",
               "options": { "raw": { "language": "json" } }
             }
           },
@@ -196,7 +196,7 @@
             "auth": { "type": "noauth" },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"displayName\": \"Mona\",\n  \"email\": \"mona@elmanhg.local\",\n  \"password\": \"Password1\"\n}",
+              "raw": "{\n  \"displayName\": \"Mona\",\n  \"email\": \"mona@elmanhg.local\",\n  \"password\": \"Password1\",\n  \"termsVersion\": \"2026-10-05\"\n}",
               "options": { "raw": { "language": "json" } }
             }
           },

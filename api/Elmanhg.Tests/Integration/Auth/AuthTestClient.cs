@@ -65,7 +65,7 @@ public static class AuthTestClient
     public static async Task<HttpResponseMessage> RegisterByPhoneAsync(HttpClient client, ApiFactory factory, string phone, CancellationToken cancellationToken)
     {
         var verificationId = await SendAndVerifyOtpAsync(client, factory, phone, cancellationToken).ConfigureAwait(false);
-        return await client.PostAsJsonAsync("/api/auth/register/phone", new { verificationId, displayName = "Student" }, cancellationToken).ConfigureAwait(false);
+        return await client.PostAsJsonAsync("/api/auth/register/phone", new { verificationId, displayName = "Student", termsVersion = TermsVersions.Current }, cancellationToken).ConfigureAwait(false);
     }
 
     public static string ReadRefreshCookie(HttpResponseMessage response)

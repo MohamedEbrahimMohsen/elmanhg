@@ -196,7 +196,7 @@ Numeric answers ignore the per-question rules and must be a plain decimal (`docs
 
 ### 7.1 Navigation
 
-1. Landing (live servable counter, value props, plans) → sign up (phone + one-time code, or email + password) → choose subjects of interest (skippable; editable later from Home). Students with an email account can also sign in with a one-time code sent to that email; teachers and admins always sign in with email and password. An invited teacher or admin sets their first password at `/accept-invite` after proving the email with a one-time code.
+1. Landing (live servable counter, value props, plans) → sign up (phone + one-time code, or email + password; the form shows a terms line linking to `/privacy`, and the accepted terms version is stored) → choose subjects of interest (skippable; editable later from Home). Students with an email account can also sign in with a one-time code sent to that email; teachers and admins always sign in with email and password. An invited teacher or admin sets their first password at `/accept-invite` after proving the email with a one-time code.
 2. Home: subjects with per-subject mastery and "next recommended lesson".
 3. Subject → Units (ordered, with mastery %) → Lessons (ordered, with mastery %).
 4. Lesson page tabs: Explanation · Objectives · Summary · Practice.
@@ -479,6 +479,8 @@ The anonymised id is an HMAC-SHA256 of the student id under a server secret. Adm
 
 Exports (admin only): JSONL per source, date-ranged, optionally per subject, with PII stripped (contact data masked in texts, raw source ids never exported). An export is prepared in the background, downloaded only by an admin through the audited API, and its file is deleted after a configurable retention (7 days by default).
 
+**Notice.** Students are told at sign-up, in a terms line under the form (no pop-up, no opt-in checkbox; dev decision on #273), that their chats, Ask a Teacher threads, answers and grades may be used without names, phone numbers or emails to improve the AI assistant and grading, and that under-18s need a parent's or guardian's agreement. The full text is the public `/privacy` page. Sign-up stores the terms version shown (`TermsVersion`, `TermsAcceptedAt`); an unknown version is rejected; existing users stay null and are not re-prompted (#301).
+
 ---
 
 ## 14. Non-functional requirements
@@ -490,7 +492,7 @@ Exports (admin only): JSONL per source, date-ranged, optionally per subject, wit
 | Performance | Lesson page < 2s on 3G-class connections; quiz question transition < 300ms (prefetch next). Budgets and how they are measured: docs/performance.md. |
 | Availability | 99.5% monthly, measured and alerted as in docs/observability.md. Exam sessions auto-save every answer; a refresh resumes the session. |
 | Security | Role-based authorisation on every endpoint; teacher subject scoping enforced server-side; Paymob webhooks HMAC-verified; rate limits on auth, Avatar, Ask a Teacher, analytics and every other anonymous endpoint; a replayed refresh token ends its whole sign-in; security headers and CSP at the edge; dependency, container-image and secret scanning in CI (docs/security.md). |
-| Privacy | Students identified to teachers by display name only. Training exports strip PII. |
+| Privacy | Students identified to teachers by display name only. Training exports strip PII. Sign-up shows the terms and privacy line with its training-use clause and stores the accepted terms version (§13, `/privacy`). |
 | Auditability | All content changes and validation decisions logged with actor and timestamp. |
 | Accessibility | Readable font sizes, sufficient contrast, keyboard-navigable quizzes. |
 
@@ -499,7 +501,7 @@ Exports (admin only): JSONL per source, date-ranged, optionally per subject, wit
 ## 15. Data model (entities and key fields)
 
 ```
-User(id, role[Student|Teacher|Admin], phone, email, display_name, status, onboarded_at?, subject_interest_ids[])
+User(id, role[Student|Teacher|Admin], phone, email, display_name, status, onboarded_at?, subject_interest_ids[], terms_version?, terms_accepted_at?)
 TeacherSubject(teacher_id, subject_id)
 
 Subject(id, name, order)

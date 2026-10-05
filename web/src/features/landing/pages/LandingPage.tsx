@@ -7,6 +7,7 @@ import { useGetPlanCatalogue } from '@/shared/api/generated/plans/plans';
 import { useGetServableQuestionCount } from '@/shared/api/generated/questions/questions';
 import { cn } from '@/shared/lib/utils';
 import { layoutContainerClassName } from '@/shared/ui/layout';
+import { LandingFooter } from '../components/LandingFooter';
 import { LandingHero } from '../components/LandingHero';
 import { LandingTopBar } from '../components/LandingTopBar';
 import { ValueProps } from '../components/ValueProps';
@@ -48,6 +49,7 @@ export function LandingPage() {
           {plans()}
         </section>
       </main>
+      <LandingFooter />
     </>
   );
 }

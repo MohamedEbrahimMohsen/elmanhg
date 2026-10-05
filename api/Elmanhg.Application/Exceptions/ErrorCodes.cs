@@ -42,6 +42,7 @@ public static class ErrorCodes
     public const string PasswordIsRequired = "PASSWORD_IS_REQUIRED";
     public const string PasswordTooShort = "PASSWORD_TOO_SHORT";
     public const string PasswordMustContainDigit = "PASSWORD_MUST_CONTAIN_DIGIT";
+    public const string TermsVersionRequired = "TERMS_VERSION_REQUIRED";
 
     // SUBJECTS & TEACHERS
     public const string SubjectOutOfScope = "SUBJECT_OUT_OF_SCOPE";

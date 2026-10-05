@@ -38,7 +38,8 @@
   },
   "signOut": "Sign out",
   "more": {
-    "title": "More"
+    "title": "More",
+    "privacy": "Terms and privacy"
   },
   "placeholder": {
     "body": "This screen is under construction."

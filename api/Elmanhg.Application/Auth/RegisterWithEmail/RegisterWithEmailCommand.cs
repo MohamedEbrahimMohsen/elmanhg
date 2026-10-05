@@ -3,4 +3,4 @@ using MediatR;
 
 namespace Elmanhg.Application.Auth.RegisterWithEmail;
 
-public sealed record RegisterWithEmailCommand(string DisplayName, string Email, string Password) : IRequest<AuthResult>;
+public sealed record RegisterWithEmailCommand(string DisplayName, string Email, string Password, string TermsVersion) : IRequest<AuthResult>;
