@@ -145,6 +145,15 @@ describe('AddQuestionButton', () => {
     expect(document.documentElement).toHaveAttribute('dir', 'rtl');
   });
 
+  it('returns focus to the add question button when the dialog closes', async () => {
+    const { user } = await openDialog('إضافة سؤال');
+
+    await user.keyboard('{Escape}');
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'إضافة سؤال' })).toHaveFocus();
+  });
+
   it('has no axe violations with the dialog open', async () => {
     const { dialog } = await openDialog();
 

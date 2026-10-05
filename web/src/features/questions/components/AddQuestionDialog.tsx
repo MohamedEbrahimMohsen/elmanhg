@@ -1,3 +1,4 @@
+import type { ComponentProps } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui/button';
@@ -8,16 +9,17 @@ import { QuestionLessonPicker } from './QuestionLessonPicker';
 export interface AddQuestionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCloseAutoFocus?: ComponentProps<typeof DialogContent>['onCloseAutoFocus'];
 }
 
-export function AddQuestionDialog({ open, onOpenChange }: AddQuestionDialogProps) {
+export function AddQuestionDialog({ open, onOpenChange, onCloseAutoFocus }: AddQuestionDialogProps) {
   const { t } = useTranslation('questions');
   const picker = useQuestionLessonPicker();
   const { lessonId } = picker;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent title={t('list.add.title')}>
+      <DialogContent title={t('list.add.title')} onCloseAutoFocus={onCloseAutoFocus}>
         <p className="text-ui text-text">{t('list.add.intro')}</p>
         <QuestionLessonPicker picker={picker} />
         <div className="flex flex-wrap justify-end gap-3">

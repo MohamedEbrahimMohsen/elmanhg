@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +12,7 @@ export interface AddQuestionButtonProps {
 export function AddQuestionButton({ lessonId }: AddQuestionButtonProps) {
   const { t } = useTranslation('questions');
   const [open, setOpen] = useState(false);
+  const openerRef = useRef<HTMLButtonElement>(null);
 
   if (lessonId) {
     return (
@@ -27,6 +28,7 @@ export function AddQuestionButton({ lessonId }: AddQuestionButtonProps) {
   return (
     <>
       <Button
+        ref={openerRef}
         aria-haspopup="dialog"
         onClick={() => {
           setOpen(true);
@@ -35,7 +37,14 @@ export function AddQuestionButton({ lessonId }: AddQuestionButtonProps) {
         <Plus aria-hidden className="size-4" />
         {t('list.add.button')}
       </Button>
-      <AddQuestionDialog open={open} onOpenChange={setOpen} />
+      <AddQuestionDialog
+        open={open}
+        onOpenChange={setOpen}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          openerRef.current?.focus();
+        }}
+      />
     </>
   );
 }
