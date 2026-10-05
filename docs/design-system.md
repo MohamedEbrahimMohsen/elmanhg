@@ -235,7 +235,7 @@ White card, no vertical rules, row separator hairline, header `caption` weight 7
 
 ### 5.10 Avatar panel
 
-Slide-in sheet from the start edge, `--surface`, `--shadow-1`, `--r-lg` on the outer corners. Student bubbles `--soft`; assistant bubbles white with hairline border. A small sparkle icon in `--accent-text` marks the assistant. The floating assistant button is a white pill with a 2 px `--accent` outline, an `--accent-text` 700 label and `--shadow-1` (hover `--accent-soft`): a mint button there would be a second mint action on every student screen. Full page (`/student/assistant`): the list and the chat are white cards (`--r-lg`, `--shadow-1`) in a 1 : 2 grid from 900 px; the current chat item is `--accent-soft` with an `--accent` border; the bubbles are the panel's.
+Slide-in sheet from the start edge, `--surface`, `--shadow-1`, `--r-lg` on the outer corners. Student bubbles `--soft`; assistant bubbles white with hairline border. A small sparkle icon in `--accent-text` marks the assistant. The floating assistant button is a white pill with a 2 px `--accent` outline, an `--accent-text` 700 label and `--shadow-1` (hover `--accent-soft`): a mint button there would be a second mint action on every student screen. Student pages where the button shows keep room below their content for it (its offset, its height and a gap, plus the safe-area inset), so the last control scrolls clear of the button; the full-page assistant and the exam page, which hide it, keep no such room. Full page (`/student/assistant`): the list and the chat are white cards (`--r-lg`, `--shadow-1`) in a 1 : 2 grid from 900 px; the current chat item is `--accent-soft` with an `--accent` border; the bubbles are the panel's.
 
 ### 5.11 Dialogs
 
