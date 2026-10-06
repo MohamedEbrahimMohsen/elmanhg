@@ -7,9 +7,11 @@
     <Project Path="core-libraries/Core.EntityFrameworkCore/Core.EntityFrameworkCore.csproj" />
     <Project Path="core-libraries/Core.Errors/Core.Errors.csproj" />
     <Project Path="core-libraries/Core.Exceptions/Core.Exceptions.csproj" />
+    <Project Path="core-libraries/Core.Http/Core.Http.csproj" />
     <Project Path="core-libraries/Core.Identity/Core.Identity.csproj" />
     <Project Path="core-libraries/Core.Localization/Core.Localization.csproj" />
     <Project Path="core-libraries/Core.Logging/Core.Logging.csproj" />
+    <Project Path="core-libraries/Core.Messaging/Core.Messaging.csproj" />
     <Project Path="core-libraries/Core.Notifications/Core.Notifications.csproj" />
     <Project Path="core-libraries/Core.OTP/Core.OTP.csproj" />
     <Project Path="core-libraries/Core.Queues/Core.Queues.csproj" />

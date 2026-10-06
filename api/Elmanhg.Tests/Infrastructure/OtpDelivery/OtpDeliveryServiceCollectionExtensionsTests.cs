@@ -1,11 +1,11 @@
 using Core.OTP;
 using Core.OTP.Delivery;
+using Core.OTP.Delivery.Email;
+using Core.OTP.Delivery.Sms;
+using Core.OTP.Delivery.WhatsApp;
 using Core.OTP.Entities;
 using Elmanhg.Application.Shared.Observability;
 using Elmanhg.Infrastructure.OtpDelivery;
-using Elmanhg.Infrastructure.OtpDelivery.Email;
-using Elmanhg.Infrastructure.OtpDelivery.Sms;
-using Elmanhg.Infrastructure.OtpDelivery.WhatsApp;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -73,6 +73,16 @@ public sealed class OtpDeliveryServiceCollectionExtensionsTests
 
         channel.Should().Be(OtpChannel.Email);
         scope.ServiceProvider.GetServices<IOtpChannel>().Single(x => x.Channel == OtpChannel.WhatsApp).Should().BeOfType<FakeOtpChannel>();
+    }
+
+    [Fact]
+    public void AddOtpDelivery_Registered_ExposesElmanhgMetricsAsObserver()
+    {
+        using var provider = BuildProvider(OtpDeliveryTestSettings.Fake());
+
+        var observers = provider.GetServices<IOtpDeliveryObserver>().ToList();
+
+        observers.Should().ContainSingle().Which.Should().BeSameAs(provider.GetRequiredService<ElmanhgMetrics>());
     }
 
     private static IOtpChannel ChannelFor(OtpDeliveryOptions options, OtpChannel channel)

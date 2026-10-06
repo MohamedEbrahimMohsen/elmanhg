@@ -1,3 +1,4 @@
+using Core.Http;
 using Core.Storage;
 using Elmanhg.Application.Configuration.Shared;
 using Elmanhg.Application.Shared.RichText;
@@ -59,8 +60,12 @@ namespace Elmanhg.Infrastructure;
 
 public static class DependencyInjection
 {
+    // Product token sent on every outbound provider call unless CoreHttp:UserAgent overrides it.
+    private const string DefaultUserAgent = "Elmanhg/1.0";
+
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
+        services.AddCoreHttp(DefaultUserAgent);
         services.AddOtpDelivery();
         services.AddInvitationEmail();
         services.AddMessaging();

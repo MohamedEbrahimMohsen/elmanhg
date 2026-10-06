@@ -1,4 +1,5 @@
 using Core.Errors;
+using Core.Http;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Payments;
 using Microsoft.Extensions.Options;
@@ -18,7 +19,7 @@ public sealed class FakePaymentGateway(IOptions<PaymentsOptions> paymentsOptions
             throw new ServiceUnavailableCoreException(ErrorCodes.PaymentGatewayUnavailable);
         }
 
-        return Task.FromResult(new PaymentCheckout($"{paymentsOptions.Value.FakeCheckoutPath.TrimEnd('/')}/{request.PaymentId}"));
+        return Task.FromResult(new PaymentCheckout(HttpBaseAddress.Combine(paymentsOptions.Value.FakeCheckoutPath, request.PaymentId.ToString())));
     }
 
     public Task<PaymentRefund> RefundAsync(PaymentRefundRequest request, CancellationToken cancellationToken)

@@ -1,3 +1,4 @@
+using Core.OTP.Delivery;
 using System.Globalization;
 using System.Net;
 
@@ -11,6 +12,8 @@ public static class OtpEmailTemplate
 
     private static readonly Lazy<string> Html = new(() => Read("OtpEmail.html"));
     private static readonly Lazy<string> Text = new(() => Read("OtpEmail.txt"));
+
+    public static OtpEmailContent Render(string code, int expirationMinutes) => new(RenderHtml(code, expirationMinutes), RenderText(code, expirationMinutes));
 
     public static string RenderHtml(string code, int expirationMinutes) => Html.Value
         .Replace(CodePlaceholder, WebUtility.HtmlEncode(code), StringComparison.Ordinal)

@@ -1,17 +1,16 @@
 using Core.Errors;
+using Core.Http;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Payments;
-using Elmanhg.Infrastructure.OtpDelivery;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Polly;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace Elmanhg.Infrastructure.Payments.Paymob;
 
-public sealed partial class PaymobPaymentGateway(HttpClient httpClient, IOptions<PaymentsOptions> paymentsOptions, ILogger<PaymobPaymentGateway> logger) : IPaymentGateway
+public sealed partial class PaymobPaymentGateway(HttpClient httpClient, IOptions<PaymentsOptions> paymentsOptions, IOptions<CoreHttpOptions> coreHttpOptions, ILogger<PaymobPaymentGateway> logger) : IPaymentGateway
 {
     private const string IntentionPath = "v1/intention/";
     private const string TokenScheme = "Token";
@@ -26,13 +25,13 @@ public sealed partial class PaymobPaymentGateway(HttpClient httpClient, IOptions
             Content = JsonContent.Create(PaymobIntentionRequest.Create(request, paymob)),
         };
         message.Headers.Authorization = new AuthenticationHeaderValue(TokenScheme, paymob.SecretKey);
-        message.Headers.UserAgent.ParseAdd(OtpProviderHttpExtensions.UserAgent);
+        message.WithUserAgent(coreHttpOptions.Value.UserAgent);
         HttpResponseMessage response;
         try
         {
             response = await httpClient.SendAsync(message, cancellationToken).ConfigureAwait(false);
         }
-        catch (Exception exception) when (exception is HttpRequestException or ExecutionRejectedException || (exception is OperationCanceledException && !cancellationToken.IsCancellationRequested))
+        catch (Exception exception) when (exception.IsTransientFailure(cancellationToken))
         {
             logger.LogError(exception, "Paymob intention for payment {PaymentId} failed before a response arrived.", request.PaymentId);
             throw new ServiceUnavailableCoreException(ErrorCodes.PaymentGatewayUnavailable, innerException: exception);

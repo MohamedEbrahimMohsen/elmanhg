@@ -1,3 +1,4 @@
+using Core.Http;
 using Elmanhg.Application.Shared.Payments;
 using System.Text.Json.Serialization;
 
@@ -18,7 +19,7 @@ public sealed record PaymobIntentionRequest([property: JsonPropertyName("amount"
             BillingData: PaymobBillingData.From(request.Customer, options.BillingCountry),
             SpecialReference: request.PaymentId.ToString(),
             NotificationUrl: string.IsNullOrWhiteSpace(options.NotificationUrl) ? null : options.NotificationUrl,
-            RedirectionUrl: $"{options.RedirectionUrl.TrimEnd('/')}/{request.PaymentId}");
+            RedirectionUrl: HttpBaseAddress.Combine(options.RedirectionUrl, request.PaymentId.ToString()));
     }
 }
 
