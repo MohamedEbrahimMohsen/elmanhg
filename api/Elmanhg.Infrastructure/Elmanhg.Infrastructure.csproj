@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="ClosedXML" />
     <PackageReference Include="HtmlSanitizer" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
@@ -15,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\core-libraries\Core.EntityFrameworkCore\Core.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\core-libraries\Core.Spreadsheets\Core.Spreadsheets.csproj" />
     <ProjectReference Include="..\core-libraries\Core.Storage\Core.Storage.csproj" />
     <ProjectReference Include="..\Elmanhg.Application\Elmanhg.Application.csproj" />
     <ProjectReference Include="..\Elmanhg.Domain\Elmanhg.Domain.csproj" />

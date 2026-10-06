@@ -53,7 +53,7 @@ public sealed class ClientErrorsEndpointTests(ApiFactory factory)
 
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
         (await ReadCodeAsync(response)).Should().Contain("CLIENT_ERROR_MESSAGE_REQUIRED");
-        requests.GetMeasurementSnapshot().Should().Contain(x => Equals(x.Tags[ElmanhgMetrics.RequestTag], "ReportClientErrorCommand") && Equals(x.Tags[ElmanhgMetrics.OutcomeTag], "VALIDATION_FAILED"));
+        requests.GetMeasurementSnapshot().Should().Contain(x => Equals(x.Tags["elmanhg.request"], "ReportClientErrorCommand") && Equals(x.Tags[ElmanhgMetrics.OutcomeTag], "VALIDATION_FAILED"));
     }
 
     [Fact]
