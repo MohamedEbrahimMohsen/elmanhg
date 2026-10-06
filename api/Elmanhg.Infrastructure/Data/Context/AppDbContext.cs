@@ -1,4 +1,5 @@
 using Core.Auditing;
+using Core.DDD.Models;
 using Core.EntityFrameworkCore.Auditing;
 using Core.EntityFrameworkCore.Context;
 using Core.Errors;
@@ -503,7 +504,14 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.HasOne<TeacherThread>().WithMany().HasForeignKey(x => x.ThreadId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.TeacherId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.ThreadId, x.TeacherId });
-            builder.HasIndex(x => x.NextAttemptAt).HasFilter("\"Status\" = 'Pending'");
+            builder.OwnsOne(x => x.Retry, retry =>
+            {
+                retry.Property(x => x.Attempts).HasColumnName(nameof(RetrySchedule.Attempts));
+                retry.Property(x => x.NextAttemptAt).HasColumnName(nameof(RetrySchedule.NextAttemptAt));
+                retry.Ignore(x => x.LastErrorCode);
+                retry.HasIndex(x => x.NextAttemptAt).HasFilter("\"Status\" = 'Pending'").HasDatabaseName("IX_TeacherVoiceDrafts_NextAttemptAt");
+            });
+            builder.Navigation(x => x.Retry).IsRequired();
         });
     }
 
@@ -628,7 +636,14 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.Property(x => x.Confidence).HasPrecision(5, 4);
             builder.Property(x => x.Model).HasMaxLength(AiIdentifierMaxLength);
             builder.Property(x => x.PromptVersion).HasMaxLength(AiIdentifierMaxLength);
-            builder.Property(x => x.LastErrorCode).HasMaxLength(AiIdentifierMaxLength);
+            builder.OwnsOne(x => x.Retry, retry =>
+            {
+                retry.Property(x => x.Attempts).HasColumnName(nameof(RetrySchedule.Attempts));
+                retry.Property(x => x.NextAttemptAt).HasColumnName(nameof(RetrySchedule.NextAttemptAt));
+                retry.Property(x => x.LastErrorCode).HasColumnName(nameof(RetrySchedule.LastErrorCode)).HasMaxLength(AiIdentifierMaxLength);
+                retry.HasIndex(x => x.NextAttemptAt).HasFilter("\"Status\" = 'Pending'").HasDatabaseName("IX_EssayGrades_NextAttemptAt");
+            });
+            builder.Navigation(x => x.Retry).IsRequired();
             builder.Property(x => x.CostUsd).HasPrecision(12, 6);
             builder.Property(x => x.ReviewDecision).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.ReviewedScore).HasPrecision(9, 2);
@@ -639,7 +654,6 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.HasOne<Question>().WithMany().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.SessionId, x.QuestionId }).IsUnique().HasDatabaseName(EssayGradePerQuestionIndex);
-            builder.HasIndex(x => x.NextAttemptAt).HasFilter("\"Status\" = 'Pending'");
             builder.HasIndex(x => x.GradedAt).HasFilter("\"Status\" = 'Graded' AND \"AppliedAt\" IS NULL");
             builder.HasIndex(x => new { x.SubjectId, x.Status });
         });

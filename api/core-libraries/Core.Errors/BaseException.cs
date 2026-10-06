@@ -8,4 +8,6 @@ public class BaseException(string? errorCode = null, string? message = null, Dic
 {
     public string? ErrorCode { get; private set; } = errorCode;
     public Dictionary<string, object>? Context { get; private set; } = context;
+
+    public static string ErrorCodeOf(Exception exception) => exception is BaseException { ErrorCode: { Length: > 0 } code } ? code : exception.GetType().Name;
 }

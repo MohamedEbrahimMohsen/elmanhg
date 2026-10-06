@@ -1,21 +1,21 @@
 using Core.DDD.Entities;
+using Core.DDD.Models;
+using Elmanhg.Domain.SharedKernel;
 using System.Globalization;
 
 namespace Elmanhg.Domain.TrainingExports;
 
-public partial class TrainingExport : AuditEntity, IAuditedEntity
+public partial class TrainingExport : AuditEntity, IAuditedEntity, IRetriedWork
 {
-    // Matches the LastErrorCode column width.
-    private const int ErrorCodeMaxLength = 100;
-
     public TrainingExportSource Source { get; private set; }
     public DateTimeOffset From { get; private set; }
     public DateTimeOffset To { get; private set; }
     public Guid? SubjectId { get; private set; }
     public TrainingExportStatus Status { get; private set; }
-    public int Attempts { get; private set; }
-    public DateTimeOffset? NextAttemptAt { get; private set; }
-    public string? LastErrorCode { get; private set; }
+    public RetrySchedule Retry { get; private set; } = default!;
+    public int Attempts => Retry.Attempts;
+    public DateTimeOffset? NextAttemptAt => Retry.NextAttemptAt;
+    public string? LastErrorCode => Retry.LastErrorCode;
     public DateTimeOffset RequestedAt { get; private set; }
     public DateTimeOffset? CompletedAt { get; private set; }
     public DateTimeOffset? ExpiresAt { get; private set; }
@@ -44,13 +44,14 @@ public partial class TrainingExport : AuditEntity, IAuditedEntity
             To = ToMicroseconds(to),
             SubjectId = subjectId,
             Status = TrainingExportStatus.Pending,
-            Attempts = 0,
-            NextAttemptAt = at,
+            Retry = RetrySchedule.DueAt(at),
             RequestedAt = at,
         };
     }
 
-    public bool IsDueAt(DateTimeOffset now) => Status == TrainingExportStatus.Pending && NextAttemptAt <= now;
+    public bool IsDueAt(DateTimeOffset now) => Status == TrainingExportStatus.Pending && Retry.IsDueAt(now);
+
+    public bool IsPending => Status == TrainingExportStatus.Pending;
 
     public bool IsExpiredAt(DateTimeOffset now) => Status == TrainingExportStatus.Completed && ExpiresAt <= now;
 

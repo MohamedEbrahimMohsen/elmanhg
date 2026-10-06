@@ -73,7 +73,7 @@ public sealed class EssayGradingWorkerTests
     [Fact]
     public async Task Sweep_Disabled_NeverQueries()
     {
-        using var worker = new EssayGradingWorker(ScopeFactory(), Options.Create(new EssayGradingOptions { SweepEnabled = false }), _time, _logger, new BackgroundJobMetrics(_meterFactory, _time));
+        using var worker = new EssayGradingWorker(ScopeFactory(), Options.Create(new EssayGradingOptions { SweepEnabled = false }), _time, _logger, ElmanhgJobMetrics.Create(_meterFactory, _time));
 
         await worker.StartAsync(TestContext.Current.CancellationToken);
         await worker.ExecuteTask!.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
@@ -112,7 +112,7 @@ public sealed class EssayGradingWorkerTests
         using var worker = await RunAsync();
         await runs.WaitForMeasurementsAsync(1, WaitLimit);
 
-        runs.LastMeasurement!.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "essay-grading").And.Contain(BackgroundJobMetrics.OutcomeTag, "Failed");
+        runs.LastMeasurement!.Tags.Should().Contain(ElmanhgJobMetrics.JobTag, "essay-grading").And.Contain(ElmanhgJobMetrics.OutcomeTag, "Failed");
     }
 
     [Fact]
@@ -158,7 +158,7 @@ public sealed class EssayGradingWorkerTests
 
     private async Task<EssayGradingWorker> RunAsync()
     {
-        var worker = new EssayGradingWorker(ScopeFactory(), Options.Create(new EssayGradingOptions()), _time, _logger, new BackgroundJobMetrics(_meterFactory, _time));
+        var worker = new EssayGradingWorker(ScopeFactory(), Options.Create(new EssayGradingOptions()), _time, _logger, ElmanhgJobMetrics.Create(_meterFactory, _time));
         await worker.StartAsync(TestContext.Current.CancellationToken);
         await _time.TimerCreated.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
         _time.Tick();

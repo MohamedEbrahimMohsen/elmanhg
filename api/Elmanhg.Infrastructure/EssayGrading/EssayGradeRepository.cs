@@ -13,9 +13,9 @@ public class EssayGradeRepository(AppDbContext context) : Repository<EssayGrade>
     {
         return await _dbSet
             .AsNoTracking()
-            .Where(x => (x.Status == EssayGradeStatus.Pending && x.NextAttemptAt <= now) || (x.Status == EssayGradeStatus.Graded && x.AppliedAt == null))
+            .Where(x => (x.Status == EssayGradeStatus.Pending && x.Retry.NextAttemptAt <= now) || (x.Status == EssayGradeStatus.Graded && x.AppliedAt == null))
             .OrderBy(x => x.Status == EssayGradeStatus.Pending)
-            .ThenBy(x => x.NextAttemptAt)
+            .ThenBy(x => x.Retry.NextAttemptAt)
             .ThenBy(x => x.Id)
             .Select(x => x.Id)
             .Take(limit)

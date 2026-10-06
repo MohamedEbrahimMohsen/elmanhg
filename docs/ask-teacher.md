@@ -58,7 +58,7 @@ The transcription job for one recording. It is created when the teacher uploads 
 | `AudioDurationSeconds` | Reported by the browser, 1..`VoiceMaxDurationSeconds`. |
 | `Status` | `Pending` → `Ready` or `Failed` → `Sent`, stored as a string. |
 | `Transcript`, `TranscriptionModel` | Set when the transcription succeeds (`varchar(100)` model id). |
-| `Attempts`, `NextAttemptAt` | Retry bookkeeping; `NextAttemptAt` is null once the draft leaves `Pending`. |
+| `Attempts`, `NextAttemptAt` | Retry bookkeeping (`RetrySchedule`, Core.DDD; the error code is not stored); `NextAttemptAt` is null once the draft leaves `Pending`. |
 | `RecordedAt`, `TranscribedAt`, `SentMessageId` | Microsecond-truncated times; the id of the voice message once sent. |
 
 Indexes: `(ThreadId, TeacherId)` and `NextAttemptAt` filtered on `Status = 'Pending'` for the worker. The table is in the global soft-delete filter.

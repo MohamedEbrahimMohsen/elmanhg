@@ -20,7 +20,7 @@ Essays (question type `Essay`, v2) are graded by the LLM (OpenAI-compatible, [ai
 | `Answer` | jsonb | `{"text": "…"}`, trimmed |
 | `Status` | text | `Pending`, `InReview` or `Graded` |
 | `ReviewReason` | text, null | `LowConfidence` or `GradingFailed` when `InReview` |
-| `Attempts`, `NextAttemptAt`, `LastErrorCode` | | the retry schedule; `LastErrorCode` holds at most 100 characters |
+| `Attempts`, `NextAttemptAt`, `LastErrorCode` | | the retry schedule (`RetrySchedule`, Core.DDD, mapped onto these columns); `LastErrorCode` holds at most 100 characters |
 | `RequestedAt`, `GradedAt` | timestamptz | truncated to microseconds |
 | `Score` (9,2), `NormalisedScore` (5,4) | numeric, null | from `QuestionGrader.GradeEssay` |
 | `Criteria` | jsonb, null | `[{criterionId, title, points, maxPoints, justification}]` in rubric order |

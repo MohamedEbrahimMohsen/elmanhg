@@ -13,9 +13,9 @@ public class MathStepGradeRepository(AppDbContext context) : Repository<MathStep
     {
         return await _dbSet
             .AsNoTracking()
-            .Where(x => (x.Status == MathStepGradeStatus.Pending && x.NextAttemptAt <= now) || (x.Status == MathStepGradeStatus.Graded && x.AppliedAt == null))
+            .Where(x => (x.Status == MathStepGradeStatus.Pending && x.Retry.NextAttemptAt <= now) || (x.Status == MathStepGradeStatus.Graded && x.AppliedAt == null))
             .OrderBy(x => x.Status == MathStepGradeStatus.Pending)
-            .ThenBy(x => x.NextAttemptAt)
+            .ThenBy(x => x.Retry.NextAttemptAt)
             .ThenBy(x => x.Id)
             .Select(x => x.Id)
             .Take(limit)
