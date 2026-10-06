@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Elmanhg.Infrastructure.Storage;
+namespace Core.Storage;
 
 public sealed class FileStorageOptions
 {
@@ -26,4 +26,8 @@ public sealed class FileStorageOptions
     public string S3SecretAccessKey { get; set; } = string.Empty;
 
     public bool S3ForcePathStyle { get; set; } = true;
+
+    public string GetPublicUrl(string key) => $"{PublicBaseUrl.TrimEnd('/')}/{key}";
+
+    public string ResolveLocalRoot(string contentRootPath) => Path.GetFullPath(LocalRootPath, contentRootPath);
 }

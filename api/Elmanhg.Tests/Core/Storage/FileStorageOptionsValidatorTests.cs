@@ -1,7 +1,7 @@
-using Elmanhg.Infrastructure.Storage;
+using Core.Storage;
 using FluentAssertions;
 
-namespace Elmanhg.Tests.Infrastructure.Storage;
+namespace Elmanhg.Tests.Core.Storage;
 
 public sealed class FileStorageOptionsValidatorTests
 {
@@ -59,7 +59,7 @@ public sealed class FileStorageOptionsValidatorTests
         S3ServiceUrl = "https://account.r2.cloudflarestorage.com",
         S3Region = "auto",
         S3BucketName = "elmanhg-media",
-        S3AccessKeyId = "placeholder-access-key",
-        S3SecretAccessKey = "placeholder-secret",
+        S3AccessKeyId = "not-a-secret-access-key",
+        S3SecretAccessKey = "not-a-secret-secret-key",
     };
 }

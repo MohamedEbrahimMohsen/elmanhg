@@ -1,3 +1,4 @@
+using Core.Storage;
 using Elmanhg.Application.Configuration.Shared;
 using Elmanhg.Application.Shared.RichText;
 using Elmanhg.Application.Shared.Spreadsheets;
@@ -44,7 +45,6 @@ using Elmanhg.Infrastructure.RuntimeSettings;
 using Elmanhg.Infrastructure.Sessions;
 using Elmanhg.Infrastructure.SlaCalendars;
 using Elmanhg.Infrastructure.Spreadsheets;
-using Elmanhg.Infrastructure.Storage;
 using Elmanhg.Infrastructure.Subjects;
 using Elmanhg.Infrastructure.Subscriptions;
 using Elmanhg.Infrastructure.TeacherThreads;
@@ -66,7 +66,7 @@ public static class DependencyInjection
         services.AddMessaging();
         services.AddPayments();
         services.AddAiService();
-        services.AddFileStorage();
+        services.AddCoreFileStorage();
         services.AddTrainingData();
         services.AddOptions<ReverseProxyOptions>().BindConfiguration(ReverseProxyOptions.SectionName).ValidateOnStart();
         services.AddSingleton<IValidateOptions<ReverseProxyOptions>, ReverseProxyOptionsValidator>();

@@ -13,6 +13,7 @@
     <Project Path="core-libraries/Core.Notifications/Core.Notifications.csproj" />
     <Project Path="core-libraries/Core.OTP/Core.OTP.csproj" />
     <Project Path="core-libraries/Core.Queues/Core.Queues.csproj" />
+    <Project Path="core-libraries/Core.Storage/Core.Storage.csproj" />
     <Project Path="core-libraries/Core.Utilities/Core.Utilities.csproj" />
     <Project Path="core-libraries/Core.Validation/Core.Validation.csproj" />
   </Folder>
