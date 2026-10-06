@@ -1,5 +1,4 @@
 using Core.DDD.Models;
-using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.TeacherInbox.Shared;
@@ -16,12 +15,7 @@ public sealed class GetTeacherInboxHandler(ITeacherThreadRepository teacherThrea
 {
     public async Task<PageData<TeacherInboxItemResult>> Handle(GetTeacherInboxQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var isAdmin = currentUserService.GetClaim(ClaimTypes.Role) == nameof(UserRole.Admin);
         List<Guid>? subjectIds = null;
         if (!isAdmin)
@@ -36,15 +30,6 @@ public sealed class GetTeacherInboxHandler(ITeacherThreadRepository teacherThrea
         var names = await TeacherInboxNames.LoadAsync(userRepository, page.Items, cancellationToken).ConfigureAwait(false);
         var now = timeProvider.GetUtcNow();
 
-        return new PageData<TeacherInboxItemResult>
-        {
-            Items = page.Items
-                .Select(x => TeacherInboxResultGenerator.GenerateItem(x, names, userId, now))
-                .ToList(),
-            PageNumber = page.PageNumber,
-            PageSize = page.PageSize,
-            TotalItems = page.TotalItems,
-            TotalPages = page.TotalPages,
-        };
+        return page.Map(x => TeacherInboxResultGenerator.GenerateItem(x, names, userId, now));
     }
 }

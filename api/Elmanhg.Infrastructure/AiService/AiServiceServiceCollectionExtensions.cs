@@ -1,4 +1,5 @@
 using Core.Http;
+using Core.Utilities;
 using Elmanhg.Application.Shared.AiService;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -9,8 +10,7 @@ public static class AiServiceServiceCollectionExtensions
 {
     public static IServiceCollection AddAiService(this IServiceCollection services)
     {
-        services.AddOptions<AiServiceOptions>().BindConfiguration(AiServiceOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
-        services.AddSingleton<IValidateOptions<AiServiceOptions>, AiServiceOptionsValidator>();
+        services.AddValidatedOptions<AiServiceOptions, AiServiceOptionsValidator>(AiServiceOptions.SectionName);
         AddAiHttpClient<HttpAiServiceClient>(services, x => x.AttemptTimeoutSeconds, x => x.TotalTimeoutSeconds, infiniteClientTimeout: false);
         AddAiHttpClient<HttpAiTranscriptionClient>(services, x => x.TranscriptionTimeoutSeconds, x => x.TranscriptionTimeoutSeconds, infiniteClientTimeout: true);
         AddAiHttpClient<HttpAiEssayGradingClient>(services, x => x.EssayGradingTimeoutSeconds, x => x.EssayGradingTimeoutSeconds, infiniteClientTimeout: true);

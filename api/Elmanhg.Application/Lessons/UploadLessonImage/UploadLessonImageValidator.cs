@@ -20,8 +20,7 @@ public sealed class UploadLessonImageValidator : AbstractValidator<UploadLessonI
             .ValidateRequired(ErrorCodes.LessonImageRequired)
             .ValidateAllowedExtensions(LessonImageFormats.Extensions, ErrorCodes.LessonImageTypeInvalid)
             .ValidateMaxFileSize(options.LessonImageMaxSizeInMb, ErrorCodes.LessonImageTooLarge)
-            .Must(file => file is not null && LessonImageFormats.HasMatchingSignature(file))
-            .WithErrorCode(ErrorCodes.LessonImageTypeInvalid);
+            .ValidateFileSignature(LessonImageFormats.Signatures, ErrorCodes.LessonImageTypeInvalid);
         RuleFor(x => x.File)
             .Must(file => file is null || LessonImageFormats.ContentTypes.Contains(file.ContentType))
             .WithErrorCode(ErrorCodes.LessonImageTypeInvalid);

@@ -60,4 +60,12 @@ public sealed class RefundPaymentValidatorTests
 
         result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.PaymentRefundIdempotencyKeyRequired);
     }
+
+    [Fact]
+    public void Validate_EmptyIdempotencyKey_ReportsKeyRequiredOnce()
+    {
+        var result = _validator.Validate(new RefundPaymentCommand(Guid.NewGuid(), "Duplicate charge", Guid.Empty));
+
+        result.Errors.Select(x => x.ErrorCode).Where(x => x == ErrorCodes.PaymentRefundIdempotencyKeyRequired).Should().ContainSingle();
+    }
 }

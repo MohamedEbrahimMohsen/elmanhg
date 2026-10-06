@@ -1,3 +1,4 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Core.Storage;
 using Elmanhg.Application.Exceptions;
@@ -10,7 +11,7 @@ public sealed class DownloadTrainingExportHandler(ITrainingExportRepository trai
 {
     public async Task<TrainingExportFileResult> Handle(DownloadTrainingExportQuery request, CancellationToken cancellationToken)
     {
-        var export = await trainingExportRepository.FirstOrDefaultAsync(x => x.Id == request.ExportId, cancellationToken, asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.TrainingExportNotFound);
+        var export = await trainingExportRepository.GetRequiredAsync(x => x.Id == request.ExportId, ErrorCodes.TrainingExportNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
         export.EnsureDownloadableAt(timeProvider.GetUtcNow());
 
         var key = export.FileKey ?? throw new NotFoundCoreException(ErrorCodes.TrainingExportNotFound);

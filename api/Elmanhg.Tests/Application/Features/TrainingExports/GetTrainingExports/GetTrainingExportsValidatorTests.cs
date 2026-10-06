@@ -33,4 +33,12 @@ public sealed class GetTrainingExportsValidatorTests
 
         result.Errors.Select(x => x.ErrorCode).Should().Equal(ErrorCodes.TrainingExportPageSizeInvalid);
     }
+
+    [Fact]
+    public void Validate_PageOffsetPastIntRange_FailsPageNumberInvalid()
+    {
+        var result = _validator.Validate(new GetTrainingExportsQuery(int.MaxValue, 20));
+
+        result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.TrainingExportPageNumberInvalid);
+    }
 }

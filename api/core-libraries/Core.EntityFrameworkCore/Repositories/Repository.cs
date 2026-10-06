@@ -212,29 +212,12 @@ public class Repository<T>(DbContext context, ICurrentUserService? currentUserSe
             query = include(query);
         }
 
-        var totalItems = await query.LongCountAsync(cancellationToken)
-                                    .ConfigureAwait(false);
-
-        var offset = PageCalculator.Offset(pageNumber, pageSize);
-
         if (orderBy != null)
         {
             query = orderBy(query);
         }
 
-        List<T> items = PageCalculator.IsPastEnd(offset, totalItems) ? [] : await query.Skip((int)offset)
-                                                                                     .Take(pageSize)
-                                                                                     .ToListAsync(cancellationToken)
-                                                                                     .ConfigureAwait(false);
-
-        return new PageData<T>()
-        {
-            Items = items,
-            TotalItems = totalItems,
-            TotalPages = PageCalculator.TotalPages(totalItems, pageSize),
-            PageNumber = pageNumber,
-            PageSize = pageSize
-        };
+        return await query.ToPageDataAsync(pageNumber, pageSize, cancellationToken).ConfigureAwait(false);
     }
     #endregion
 

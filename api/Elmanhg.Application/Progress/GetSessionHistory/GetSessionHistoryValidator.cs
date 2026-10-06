@@ -12,8 +12,7 @@ public sealed class GetSessionHistoryValidator : AbstractValidator<GetSessionHis
     {
         var options = progressOptions.Value;
 
-        RuleFor(x => x.PageNumber).ValidateMin(1, ErrorCodes.SessionHistoryPageNumberInvalid);
-        RuleFor(x => x.PageSize).ValidateRange(1, options.HistoryMaxPageSize, ErrorCodes.SessionHistoryPageSizeInvalid);
+        RuleFor(x => x).ValidatePaging(x => x.PageNumber, x => x.PageSize, options.HistoryMaxPageSize, ErrorCodes.SessionHistoryPageNumberInvalid, ErrorCodes.SessionHistoryPageSizeInvalid);
         RuleFor(x => x.Kind)
             .IsInEnum()
             .WithErrorCode(ErrorCodes.SessionHistoryKindInvalid);

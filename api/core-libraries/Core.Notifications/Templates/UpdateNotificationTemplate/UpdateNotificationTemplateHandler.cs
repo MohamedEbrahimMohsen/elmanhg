@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Notifications.Exceptions;
 using Core.Notifications.Repositories;
 using MediatR;
@@ -9,12 +9,7 @@ public sealed class UpdateNotificationTemplateHandler(INotificationTemplateRepos
 {
     public async Task Handle(UpdateNotificationTemplateCommand request, CancellationToken cancellationToken)
     {
-        var notificationTemplate = await notificationTemplateRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
-
-        if (notificationTemplate == null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.NotificationTemplateNotFound);
-        }
+        var notificationTemplate = await notificationTemplateRepository.GetRequiredAsync(request.Id, ErrorCodes.NotificationTemplateNotFound, cancellationToken).ConfigureAwait(false);
 
         notificationTemplate.Update(request.Title, request.Content, request.DeepLink, request.ImageUrl);
         await notificationTemplateRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

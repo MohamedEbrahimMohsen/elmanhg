@@ -1,4 +1,5 @@
 using Core.Http;
+using Core.Utilities;
 using Elmanhg.Application.Shared.Payments;
 using Elmanhg.Infrastructure.Payments.Paymob;
 using Microsoft.Extensions.Configuration;
@@ -12,8 +13,7 @@ public static class PaymentsServiceCollectionExtensions
 {
     public static IServiceCollection AddPayments(this IServiceCollection services)
     {
-        services.AddOptions<PaymentsOptions>().BindConfiguration(PaymentsOptions.SectionName).PostConfigure<IConfiguration, IHostEnvironment>(ApplyAllowFakePaymentsDefault).ValidateDataAnnotations().ValidateOnStart();
-        services.AddSingleton<IValidateOptions<PaymentsOptions>, PaymentsOptionsValidator>();
+        services.AddValidatedOptions<PaymentsOptions, PaymentsOptionsValidator>(PaymentsOptions.SectionName).PostConfigure<IConfiguration, IHostEnvironment>(ApplyAllowFakePaymentsDefault);
         services.AddHttpClient<PaymobPaymentGateway>((serviceProvider, client) => client.BaseAddress = HttpBaseAddress.From(Options(serviceProvider).Paymob.BaseUrl)).AddTimeoutResilience(serviceProvider => TimeSpan.FromSeconds(Options(serviceProvider).AttemptTimeoutSeconds), serviceProvider => TimeSpan.FromSeconds(Options(serviceProvider).TotalTimeoutSeconds), retryUnsafeMethods: false);
         services.AddScoped<FakePaymentGateway>();
         services.AddSingleton<IPaymentNotificationReader, PaymobNotificationReader>();

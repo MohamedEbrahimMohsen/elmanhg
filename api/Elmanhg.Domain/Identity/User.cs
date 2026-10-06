@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Elmanhg.Domain.Identity;
 
-public partial class User : IdentityUser<Guid>, IAuditEntity
+public partial class User : IdentityUser<Guid>, IAuditEntity, ISoftDeletable
 {
     public Guid? CreatedBy { get; set; }
     public DateTimeOffset CreationDate { get; set; } = DateTimeOffset.UtcNow;

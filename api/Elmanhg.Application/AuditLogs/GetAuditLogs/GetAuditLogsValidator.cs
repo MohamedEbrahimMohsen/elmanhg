@@ -12,10 +12,9 @@ public sealed class GetAuditLogsValidator : AbstractValidator<GetAuditLogsQuery>
     {
         var options = auditLogsOptions.Value;
 
-        RuleFor(x => x.PageNumber).ValidateMin(1, ErrorCodes.AuditLogPageNumberInvalid);
-        RuleFor(x => x.PageSize).ValidateRange(1, options.MaxPageSize, ErrorCodes.AuditLogPageSizeInvalid);
+        RuleFor(x => x).ValidatePaging(x => x.PageNumber, x => x.PageSize, options.MaxPageSize, ErrorCodes.AuditLogPageNumberInvalid, ErrorCodes.AuditLogPageSizeInvalid);
         RuleFor(x => x.Actor).ValidateMaxLength(options.FilterMaxLength, ErrorCodes.AuditLogFilterTooLong);
         RuleFor(x => x.ResourceType).ValidateMaxLength(options.FilterMaxLength, ErrorCodes.AuditLogFilterTooLong);
-        RuleFor(x => x).Must(x => x.From is null || x.To is null || x.From < x.To).WithErrorCode(ErrorCodes.AuditLogDateRangeInvalid);
+        RuleFor(x => x).ValidateDateRange(x => x.From, x => x.To, ErrorCodes.AuditLogDateRangeInvalid);
     }
 }

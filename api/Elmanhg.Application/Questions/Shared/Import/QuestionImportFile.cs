@@ -1,3 +1,4 @@
+using Core.Validation.Files;
 using Microsoft.AspNetCore.Http;
 using System.Security.Cryptography;
 
@@ -10,9 +11,7 @@ public static class QuestionImportFile
     public static readonly IReadOnlyList<string> Extensions = [".xlsx"];
 
     // An .xlsx workbook is a zip archive: every one starts with a local file header.
-    private const int ZipSignatureLength = 4;
-
-    private static ReadOnlySpan<byte> ZipSignature => [0x50, 0x4B, 0x03, 0x04];
+    public static readonly IReadOnlyList<FileSignature> Signatures = [FileSignature.Zip.ForExtensions(".xlsx")];
 
     public static async Task<byte[]> ReadAsync(IFormFile file, CancellationToken cancellationToken)
     {
@@ -21,13 +20,7 @@ public static class QuestionImportFile
         return stream.ToArray();
     }
 
-    public static bool HasZipSignature(IFormFile file)
-    {
-        Span<byte> buffer = stackalloc byte[ZipSignatureLength];
-        using var stream = file.OpenReadStream();
-        var header = buffer[..stream.ReadAtLeast(buffer, ZipSignatureLength, throwOnEndOfStream: false)];
-        return header.SequenceEqual(ZipSignature);
-    }
+    public static bool HasZipSignature(IFormFile file) => FileSignature.Matches(file, Signatures);
 
     public static string Hash(byte[] content) => Convert.ToHexStringLower(SHA256.HashData(content));
 }

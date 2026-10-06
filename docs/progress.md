@@ -57,7 +57,7 @@ Both lists use the product's single mastery definition (`docs/mastery.md`), not 
 |---|---|---|
 | `USER_NOT_AUTHENTICATED` | 401 | No signed-in user. |
 | — | 403 | The caller is not a Student. |
-| `SESSION_HISTORY_PAGE_NUMBER_INVALID` | 422 | `pageNumber` below 1. |
+| `SESSION_HISTORY_PAGE_NUMBER_INVALID` | 422 | `pageNumber` below 1, or so large that the row offset passes 2,147,483,647. |
 | `SESSION_HISTORY_PAGE_SIZE_INVALID` | 422 | `pageSize` outside `[1, Progress:HistoryMaxPageSize]`. |
 | `SESSION_HISTORY_KIND_INVALID` | 422 | `kind` outside the enum. Over HTTP the model binder rejects an unknown name or an out-of-range number first, with a framework 400 (`errors.kind`); the validator code covers in-process callers. |
 

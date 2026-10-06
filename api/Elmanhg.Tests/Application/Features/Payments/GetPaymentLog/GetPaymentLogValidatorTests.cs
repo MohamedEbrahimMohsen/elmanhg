@@ -70,5 +70,13 @@ public sealed class GetPaymentLogValidatorTests
         result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.PaymentLogDateRangeInvalid);
     }
 
+    [Fact]
+    public void Validate_PageOffsetPastIntRange_FailsPageNumberInvalid()
+    {
+        var result = _validator.Validate(Query() with { PageNumber = int.MaxValue, PageSize = 20 });
+
+        result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.PaymentLogPageNumberInvalid);
+    }
+
     private static GetPaymentLogQuery Query() => new(null, null, false, null, null, null, null);
 }

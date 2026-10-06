@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.GradeReviews.Shared;
@@ -21,13 +21,8 @@ public sealed class ReviewMathStepGradeHandler(IMathStepGradeRepository mathStep
 {
     public async Task<GradeReviewDetailResult> Handle(ReviewMathStepGradeCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
-        var grade = await mathStepGradeRepository.FirstOrDefaultAsync(x => x.Id == request.MathStepGradeId && x.SubjectId == request.SubjectId, cancellationToken).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.GradeReviewNotFound);
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
+        var grade = await mathStepGradeRepository.GetRequiredAsync(x => x.Id == request.MathStepGradeId && x.SubjectId == request.SubjectId, ErrorCodes.GradeReviewNotFound, cancellationToken).ConfigureAwait(false);
         await GradeReviewSessionGuard.EnsureNotTestModeAsync(grade.SessionId, sessionRepository, cancellationToken).ConfigureAwait(false);
         var now = timeProvider.GetUtcNow();
         if (request.Decision == GradeReviewDecision.Accepted)

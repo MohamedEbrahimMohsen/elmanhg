@@ -11,10 +11,7 @@ public sealed class DeleteUnitHandler(ICurriculumUnitRepository unitRepository, 
 {
     public async Task Handle(DeleteUnitCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         var unit = await unitRepository.GetByIdAsync(request.UnitId, cancellationToken).ConfigureAwait(false);
         if (unit is null || unit.SubjectId != request.SubjectId)
@@ -23,7 +20,7 @@ public sealed class DeleteUnitHandler(ICurriculumUnitRepository unitRepository, 
         }
 
         var hasLessons = await lessonRepository.AnyInUnitAsync(unit.Id, cancellationToken).ConfigureAwait(false);
-        unit.Delete(hasLessons, currentUserService.UserId.Value);
+        unit.Delete(hasLessons, userId);
 
         await unitRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }

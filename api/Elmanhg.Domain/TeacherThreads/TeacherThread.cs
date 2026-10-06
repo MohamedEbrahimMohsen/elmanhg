@@ -1,4 +1,5 @@
 using Core.DDD.Entities;
+using Core.Utilities.Time;
 
 namespace Elmanhg.Domain.TeacherThreads;
 
@@ -25,7 +26,7 @@ public partial class TeacherThread : AuditEntity
 
     public static TeacherThread Submit(Guid studentId, TeacherThreadContext context, string text, string? imageUrl, DateTimeOffset submittedAt, TeacherThreadSlaPolicy slaPolicy)
     {
-        var at = ToMicroseconds(submittedAt);
+        var at = submittedAt.TruncateToMicroseconds();
         var thread = new TeacherThread(Guid.NewGuid(), studentId)
         {
             StudentId = studentId,
@@ -48,5 +49,5 @@ public partial class TeacherThread : AuditEntity
     public bool HasUnreadReply() => Messages.Any(x => x.SenderId != StudentId && x.StudentReadAt == null);
 
     // PostgreSQL timestamptz keeps microseconds; truncating keeps the returned result equal to what is stored.
-    internal static DateTimeOffset ToMicroseconds(DateTimeOffset value) => value.AddTicks(-(value.Ticks % TimeSpan.TicksPerMicrosecond));
+    internal static DateTimeOffset ToMicroseconds(DateTimeOffset value) => value.TruncateToMicroseconds();
 }

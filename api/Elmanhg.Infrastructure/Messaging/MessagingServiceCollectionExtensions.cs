@@ -3,6 +3,7 @@ using Core.Messaging.Email;
 using Core.Messaging.WhatsApp;
 using Core.OTP.Delivery;
 using Core.OTP.Delivery.WhatsApp;
+using Core.Utilities;
 using Elmanhg.Application.Shared.Messaging;
 using Elmanhg.Infrastructure.Invitations;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,8 +17,7 @@ public static class MessagingServiceCollectionExtensions
 {
     public static IServiceCollection AddMessaging(this IServiceCollection services)
     {
-        services.AddOptions<OutOfAppReminderOptions>().BindConfiguration(OutOfAppReminderOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
-        services.AddSingleton<IValidateOptions<OutOfAppReminderOptions>, OutOfAppReminderOptionsValidator>();
+        services.AddValidatedOptions<OutOfAppReminderOptions, OutOfAppReminderOptionsValidator>(OutOfAppReminderOptions.SectionName);
         services.AddScopedHttpConsumer<MetaWhatsAppMessageChannel, MetaWhatsAppClient>((serviceProvider, client) => client.BaseAddress = HttpBaseAddress.From(OtpDelivery(serviceProvider).WhatsApp.BaseUrl)).AddOtpProviderResilience(retryUnsafeMethods: false);
         services.AddScopedHttpConsumer<ResendEmailMessageChannel, ResendEmailClient>((serviceProvider, client) => client.BaseAddress = HttpBaseAddress.From(OtpDelivery(serviceProvider).Email.BaseUrl)).AddOtpProviderResilience(retryUnsafeMethods: true);
         services.AddProviderSwitch<IMessageChannel, MetaWhatsAppMessageChannel>(serviceProvider => UsesMeta(OtpDelivery(serviceProvider).WhatsApp, ReminderOptions(serviceProvider)), serviceProvider => Fake(serviceProvider, MessageChannel.WhatsApp));

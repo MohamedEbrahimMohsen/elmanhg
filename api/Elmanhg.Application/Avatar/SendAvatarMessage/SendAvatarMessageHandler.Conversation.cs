@@ -1,3 +1,4 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Elmanhg.Application.Avatar.Shared;
 using Elmanhg.Application.Exceptions;
@@ -16,7 +17,7 @@ public sealed partial class SendAvatarMessageHandler
             return null;
         }
 
-        var conversation = await avatarConversationRepository.FirstOrDefaultAsync(x => x.Id == conversationId && x.StudentId == studentId, cancellationToken, include: query => query.Include(x => x.Messages)).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.AvatarConversationNotFound);
+        var conversation = await avatarConversationRepository.GetRequiredAsync(x => x.Id == conversationId && x.StudentId == studentId, ErrorCodes.AvatarConversationNotFound, cancellationToken, include: query => query.Include(x => x.Messages)).ConfigureAwait(false);
         if (!conversation.IsFor(request.EntryPoint, request.LessonId, request.SessionId, request.QuestionId))
         {
             throw new BadRequestCoreException(ErrorCodes.AvatarConversationContextMismatch);

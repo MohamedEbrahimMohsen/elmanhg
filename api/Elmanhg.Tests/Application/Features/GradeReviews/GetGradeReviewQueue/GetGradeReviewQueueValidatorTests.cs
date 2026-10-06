@@ -42,6 +42,12 @@ public sealed class GetGradeReviewQueueValidatorTests
         Codes(new GetGradeReviewQueueQuery(Guid.NewGuid(), (GradeReviewKind)9)).Should().Equal(ErrorCodes.GradeReviewKindInvalid);
     }
 
+    [Fact]
+    public void Validate_PageOffsetPastIntRange_FailsPageNumberInvalid()
+    {
+        Codes(new GetGradeReviewQueueQuery(Guid.NewGuid(), GradeReviewKind.Essay, int.MaxValue, 20)).Should().Contain(ErrorCodes.GradeReviewPageNumberInvalid);
+    }
+
     private List<string> Codes(GetGradeReviewQueueQuery query)
     {
         return _validator.Validate(query).Errors

@@ -226,7 +226,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         ConfigureIssuedRefreshTokens(modelBuilder);
         ConfigureRuntimeSettings(modelBuilder);
         ConfigureSlaCalendars(modelBuilder);
-        ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
+        modelBuilder.ApplySoftDeleteQueryFilters();
     }
 
     private static void ConfigureUsers(ModelBuilder modelBuilder)
@@ -643,51 +643,5 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.HasIndex(x => x.GradedAt).HasFilter("\"Status\" = 'Graded' AND \"AppliedAt\" IS NULL");
             builder.HasIndex(x => new { x.SubjectId, x.Status });
         });
-    }
-
-    private static void ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<User>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<Subject>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<TeacherSubject>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<CurriculumUnit>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<Lesson>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<LessonObjective>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<LessonOpening>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<Question>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<QuestionRevision>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<QuestionImportBatch>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<QuestionDecision>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<ReviewSession>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<ReviewSessionOpening>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<Session>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<SessionItem>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<Attempt>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<QuestionMastery>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<ExamBlueprint>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<Subscription>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<Payment>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<TeacherThread>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<TeacherMessage>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<TeacherVoiceDraft>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<TeacherThreadSlaEvent>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<TeacherThreadOutOfAppReminder>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<FunnelEvent>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<UserActivityDay>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<LessonContentChunk>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<LessonContentIndex>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<AvatarMessageUsage>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<AvatarConversation>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<AvatarMessage>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<AttemptTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<AvatarTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<TeacherThreadTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<EssayGrade>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<MathStepGrade>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<EssayGradeTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<TrainingExport>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<IssuedRefreshToken>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<RuntimeSettingOverride>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<ExamPeriod>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

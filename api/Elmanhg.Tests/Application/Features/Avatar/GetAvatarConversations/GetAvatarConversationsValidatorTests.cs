@@ -69,6 +69,14 @@ public sealed class GetAvatarConversationsValidatorTests
         Codes(result).Should().Contain(ErrorCodes.AvatarConversationsDateRangeInvalid);
     }
 
+    [Fact]
+    public void Validate_PageOffsetPastIntRange_FailsPageNumberInvalid()
+    {
+        var result = _validator.Validate(Query() with { PageNumber = int.MaxValue, PageSize = 20 });
+
+        Codes(result).Should().Contain(ErrorCodes.AvatarConversationsPageNumberInvalid);
+    }
+
     private static GetAvatarConversationsQuery Query() => new(null, null, null, null);
 
     private static IEnumerable<string> Codes(ValidationResult result) => result.Errors.Select(x => x.ErrorCode);

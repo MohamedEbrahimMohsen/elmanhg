@@ -1,3 +1,4 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
@@ -16,18 +17,14 @@ public sealed class RefundPaymentHandler(IPaymentRepository paymentRepository, I
 {
     public async Task<AdminPaymentResult> Handle(RefundPaymentCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         if (!await runtimeSettings.GetAsync(FeatureFlagRuntimeSettings.RefundsEnabled, cancellationToken).ConfigureAwait(false))
         {
             throw new BusinessRuleViolationCoreException(ErrorCodes.PaymentRefundsDisabled);
         }
 
-        var userId = currentUserService.UserId.Value;
-        var payment = await paymentRepository.FirstOrDefaultAsync(x => x.Id == request.PaymentId, cancellationToken).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.PaymentNotFound);
+        var payment = await paymentRepository.GetRequiredAsync(x => x.Id == request.PaymentId, ErrorCodes.PaymentNotFound, cancellationToken).ConfigureAwait(false);
         if (payment.IsRefundReplay(request.IdempotencyKey))
         {
             return await GenerateAsync(payment, cancellationToken).ConfigureAwait(false);

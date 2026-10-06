@@ -1,3 +1,4 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Lessons;
@@ -24,8 +25,8 @@ public static partial class TeacherThreadContextResolver
             throw new NotFoundCoreException(ErrorCodes.LessonNotFound);
         }
 
-        var unit = await sources.Units.GetByIdAsync(lesson.UnitId, cancellationToken, asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.LessonNotFound);
-        var subject = await sources.Subjects.GetByIdAsync(unit.SubjectId, cancellationToken, asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.LessonNotFound);
+        var unit = await sources.Units.GetRequiredAsync(lesson.UnitId, ErrorCodes.LessonNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
+        var subject = await sources.Subjects.GetRequiredAsync(unit.SubjectId, ErrorCodes.LessonNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
         return new TeacherThreadContext(subject.Id, subject.Name, unit.Id, unit.Name, lesson.Id, lesson.Name, part?.Question.Id, part?.Version, part?.Stem, part?.AttemptId);
     }
 }

@@ -15,13 +15,7 @@ public sealed class LoginWithPhoneHandler(UserManager<User> userManager, IOtpRep
 {
     public async Task<AuthResult> Handle(LoginWithPhoneCommand request, CancellationToken cancellationToken)
     {
-        var otp = await otpRepository.FindByVerificationId(request.VerificationId, cancellationToken).ConfigureAwait(false);
-        if (otp is null || otp.RecipientType != OtpRecipientType.Phone)
-        {
-            throw new BadRequestCoreException(ErrorCodes.OtpInvalid);
-        }
-
-        otp.MarkUsed();
+        var otp = await otpRepository.ConsumeAsync(request.VerificationId, OtpRecipientType.Phone, ErrorCodes.OtpInvalid, cancellationToken).ConfigureAwait(false);
 
         var user = await userManager.FindByNameAsync(otp.Recipient).ConfigureAwait(false);
         if (user is null)

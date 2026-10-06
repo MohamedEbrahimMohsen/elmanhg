@@ -1,4 +1,5 @@
 using Core.Errors;
+using Core.Utilities.Time;
 using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Questions.Schemas;
 using Elmanhg.Domain.SharedKernel.Exceptions;
@@ -31,7 +32,7 @@ public partial class Session
         }
 
         EnsureNotSubmitted();
-        var now = UtcNowToMicroseconds();
+        var now = DateTimeOffset.UtcNow.TruncateToMicroseconds();
         var timeTaken = MeasureTimeTaken(LastActivityAt, now, reportedTimeTakenMilliseconds);
         item.SaveAnswer(answer, now);
         Touch(now);
@@ -48,7 +49,7 @@ public partial class Session
             return null;
         }
 
-        var attempt = Attempt.Create(this, item, answer, grade, timeTakenMilliseconds, ToMicroseconds(answeredAt), gradedBy);
+        var attempt = Attempt.Create(this, item, answer, grade, timeTakenMilliseconds, answeredAt.TruncateToMicroseconds(), gradedBy);
         Attempts.Add(attempt);
         if (IsSubmitted)
         {
@@ -56,7 +57,7 @@ public partial class Session
         }
 
         // Stamping the row makes the xmin token serialise this against a concurrent answer or finish.
-        UpdationDate = ToMicroseconds(now);
+        UpdationDate = now.TruncateToMicroseconds();
         RaiseDomainEvent(new AttemptsRecorded(this, [attempt]));
         return attempt;
     }

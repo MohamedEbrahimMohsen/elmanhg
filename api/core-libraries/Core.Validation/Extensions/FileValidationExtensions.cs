@@ -1,3 +1,4 @@
+using Core.Validation.Files;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 
@@ -27,6 +28,12 @@ public static class FileValidationExtensions
             .WithMessage($"The file size must not exceed {maxFileSizeInMb} MB.")
             .WithErrorCode(errorCode ?? ValidationErrors.ValidationFileSize);
     }
+
+    public static IRuleBuilderOptions<T, IFormFile?> ValidateFileSignature<T>(this IRuleBuilder<T, IFormFile?> ruleBuilder, IReadOnlyCollection<FileSignature> signatures, string? errorCode = null)
+        => ruleBuilder
+            .Must(file => file is null || FileSignature.Matches(file, signatures))
+            .WithMessage("The file content does not match its type.")
+            .WithErrorCode(errorCode ?? ValidationErrors.ValidationFileSignature);
 
     public static IRuleBuilderOptions<T, IFormFile?> ValidateFileNameLength<T>(this IRuleBuilder<T, IFormFile?> ruleBuilder, int minLength, int maxLength, string? errorCode = null)
         => ruleBuilder

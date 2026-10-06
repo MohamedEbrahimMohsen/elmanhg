@@ -15,13 +15,7 @@ public sealed class LoginWithEmailCodeHandler(UserManager<User> userManager, IOt
 {
     public async Task<AuthResult> Handle(LoginWithEmailCodeCommand request, CancellationToken cancellationToken)
     {
-        var otp = await otpRepository.FindByVerificationId(request.VerificationId, cancellationToken).ConfigureAwait(false);
-        if (otp is null || otp.RecipientType != OtpRecipientType.Email)
-        {
-            throw new BadRequestCoreException(ErrorCodes.OtpInvalid);
-        }
-
-        otp.MarkUsed();
+        var otp = await otpRepository.ConsumeAsync(request.VerificationId, OtpRecipientType.Email, ErrorCodes.OtpInvalid, cancellationToken).ConfigureAwait(false);
 
         var user = await userManager.FindByEmailAsync(otp.Recipient).ConfigureAwait(false);
         if (user is null)

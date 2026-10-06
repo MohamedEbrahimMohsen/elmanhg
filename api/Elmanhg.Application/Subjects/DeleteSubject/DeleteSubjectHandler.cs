@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Subjects;
@@ -11,19 +11,12 @@ public sealed class DeleteSubjectHandler(ISubjectRepository subjectRepository, I
 {
     public async Task Handle(DeleteSubjectCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
-        var subject = await subjectRepository.GetByIdAsync(request.SubjectId, cancellationToken).ConfigureAwait(false);
-        if (subject is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.SubjectNotFound);
-        }
+        var subject = await subjectRepository.GetRequiredAsync(request.SubjectId, ErrorCodes.SubjectNotFound, cancellationToken).ConfigureAwait(false);
 
         var hasUnits = await unitRepository.AnyInSubjectAsync(subject.Id, cancellationToken).ConfigureAwait(false);
-        subject.Delete(hasUnits, currentUserService.UserId.Value);
+        subject.Delete(hasUnits, userId);
 
         await subjectRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }

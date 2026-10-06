@@ -1,5 +1,4 @@
 using Core.DDD.Models;
-using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Avatar.Shared;
 using Elmanhg.Application.Exceptions;
@@ -18,12 +17,7 @@ public sealed class GetMyAvatarConversationsHandler(IAvatarConversationRepositor
 {
     public async Task<PageData<StudentAvatarConversationResult>> Handle(GetMyAvatarConversationsQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         await AvatarGate.EnsureNoExamInProgressAsync(userId, sessionRepository, examsOptions.Value, timeProvider.GetUtcNow(), cancellationToken).ConfigureAwait(false);
 
         var page = await avatarConversationRepository.FindPaginatedAsync(request.PageNumber, request.PageSize, cancellationToken, filter: x => x.StudentId == userId, include: query => query.Include(x => x.Messages.Where(m => m.Position == 0)), orderBy: query => query.OrderByDescending(x => x.LastMessageAt).ThenByDescending(x => x.Id), asNoTracking: true).ConfigureAwait(false);
@@ -41,15 +35,6 @@ public sealed class GetMyAvatarConversationsHandler(IAvatarConversationRepositor
         var subjects = (await subjectRepository.FindAsync(x => subjectIds.Contains(x.Id), cancellationToken, asNoTracking: true).ConfigureAwait(false)).ToDictionary(x => x.Id);
         var lessons = (await lessonRepository.FindAsync(x => lessonIds.Contains(x.Id), cancellationToken, asNoTracking: true).ConfigureAwait(false)).ToDictionary(x => x.Id);
 
-        return new PageData<StudentAvatarConversationResult>
-        {
-            Items = page.Items
-                .Select(x => StudentAvatarConversationResultGenerator.Generate(x, x.SubjectId is { } subjectId ? subjects.GetValueOrDefault(subjectId)?.Name : null, x.LessonId is { } lessonId ? lessons.GetValueOrDefault(lessonId)?.Name : null))
-                .ToList(),
-            PageNumber = page.PageNumber,
-            PageSize = page.PageSize,
-            TotalItems = page.TotalItems,
-            TotalPages = page.TotalPages,
-        };
+        return page.Map(x => StudentAvatarConversationResultGenerator.Generate(x, x.SubjectId is { } subjectId ? subjects.GetValueOrDefault(subjectId)?.Name : null, x.LessonId is { } lessonId ? lessons.GetValueOrDefault(lessonId)?.Name : null));
     }
 }

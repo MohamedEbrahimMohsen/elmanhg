@@ -10,12 +10,7 @@ public sealed class RecordLessonOpeningHandler(ILessonRepository lessonRepositor
 {
     public async Task Handle(RecordLessonOpeningCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var lesson = await lessonRepository.GetByIdAsync(request.LessonId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
         if (lesson is null || lesson.State != LessonState.Published)
         {

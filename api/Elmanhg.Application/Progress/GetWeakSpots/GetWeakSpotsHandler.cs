@@ -1,4 +1,3 @@
-using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Progress.Shared;
@@ -15,11 +14,8 @@ public sealed class GetWeakSpotsHandler(IQuestionMasteryRepository questionMaste
 {
     public async Task<WeakSpotsResult> Handle(GetWeakSpotsQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
-        return await WeakSpotsLoader.LoadAsync(questionMasteryRepository, lessonRepository, subjectRepository, progressOptions.Value, currentUserService.UserId.Value, cancellationToken).ConfigureAwait(false);
+        return await WeakSpotsLoader.LoadAsync(questionMasteryRepository, lessonRepository, subjectRepository, progressOptions.Value, userId, cancellationToken).ConfigureAwait(false);
     }
 }

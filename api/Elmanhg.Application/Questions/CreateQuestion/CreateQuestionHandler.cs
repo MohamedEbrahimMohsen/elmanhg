@@ -1,3 +1,4 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
@@ -14,10 +15,7 @@ public sealed class CreateQuestionHandler(ILessonRepository lessonRepository, IC
 {
     public async Task<CreateQuestionResult> Handle(CreateQuestionCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         var lesson = await lessonRepository.GetWithObjectivesAsync(request.LessonId, asNoTracking: true, cancellationToken).ConfigureAwait(false);
         if (lesson is null)
@@ -25,16 +23,12 @@ public sealed class CreateQuestionHandler(ILessonRepository lessonRepository, IC
             throw new NotFoundCoreException(ErrorCodes.LessonNotFound);
         }
 
-        var unit = await unitRepository.GetByIdAsync(lesson.UnitId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        if (unit is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.UnitNotFound);
-        }
+        var unit = await unitRepository.GetRequiredAsync(lesson.UnitId, ErrorCodes.UnitNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
 
         QuestionBodyMedia.EnsureLessonMedia(request.Question, lesson.Id);
         var content = QuestionContentFactory.CreateContent(request.Question, richTextSanitizer);
         var metadata = QuestionContentFactory.CreateMetadata(request.Question);
-        var question = Question.Create(lesson, unit, request.Question.Type.GetValueOrDefault(), content, metadata, currentUserService.UserId.Value);
+        var question = Question.Create(lesson, unit, request.Question.Type.GetValueOrDefault(), content, metadata, userId);
 
         await questionRepository.AddAsync(question, cancellationToken).ConfigureAwait(false);
         await questionRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

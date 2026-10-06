@@ -31,12 +31,7 @@ public sealed class StartMultiUnitExamHandler(ISessionRepository sessionReposito
 {
     public async Task<ExamSessionResult> Handle(StartMultiUnitExamCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var now = timeProvider.GetUtcNow();
         var threshold = masteryOptions.Value.CorrectThreshold;
         var input = request.Selection;

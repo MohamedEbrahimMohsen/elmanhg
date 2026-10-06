@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.ExamBlueprints;
@@ -10,18 +10,11 @@ public sealed class DeleteExamBlueprintHandler(IExamBlueprintRepository examBlue
 {
     public async Task Handle(DeleteExamBlueprintCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
-        var blueprint = await examBlueprintRepository.GetByIdAsync(request.ExamBlueprintId, cancellationToken).ConfigureAwait(false);
-        if (blueprint is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.ExamBlueprintNotFound);
-        }
+        var blueprint = await examBlueprintRepository.GetRequiredAsync(request.ExamBlueprintId, ErrorCodes.ExamBlueprintNotFound, cancellationToken).ConfigureAwait(false);
 
-        blueprint.Delete(currentUserService.UserId.Value);
+        blueprint.Delete(userId);
 
         await examBlueprintRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }

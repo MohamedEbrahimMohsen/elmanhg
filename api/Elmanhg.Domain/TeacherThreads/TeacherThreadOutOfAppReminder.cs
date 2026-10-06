@@ -1,4 +1,5 @@
 using Core.DDD.Entities;
+using Core.Utilities.Time;
 
 namespace Elmanhg.Domain.TeacherThreads;
 
@@ -23,7 +24,7 @@ public class TeacherThreadOutOfAppReminder : Entity
             ThreadId = threadId,
             Stage = stage,
             SlaDueAt = slaDueAt,
-            OccurredAt = TeacherThread.ToMicroseconds(occurredAt),
+            OccurredAt = occurredAt.TruncateToMicroseconds(),
         };
     }
 }

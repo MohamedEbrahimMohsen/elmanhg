@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Elmanhg.Application.Avatar.Shared;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Avatar;
@@ -15,7 +15,7 @@ public sealed class GetAvatarConversationHandler(IAvatarConversationRepository a
 {
     public async Task<AdminAvatarConversationDetailResult> Handle(GetAvatarConversationQuery request, CancellationToken cancellationToken)
     {
-        var conversation = await avatarConversationRepository.FirstOrDefaultAsync(x => x.Id == request.ConversationId, cancellationToken, include: query => query.Include(x => x.Messages), asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.AvatarConversationNotFound);
+        var conversation = await avatarConversationRepository.GetRequiredAsync(x => x.Id == request.ConversationId, ErrorCodes.AvatarConversationNotFound, cancellationToken, include: query => query.Include(x => x.Messages), asNoTracking: true).ConfigureAwait(false);
         var student = await userRepository.GetByIdAsync(conversation.StudentId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
         var subject = conversation.SubjectId is { } subjectId ? await subjectRepository.GetByIdAsync(subjectId, cancellationToken, asNoTracking: true).ConfigureAwait(false) : null;
         var unit = conversation.UnitId is { } unitId ? await unitRepository.GetByIdAsync(unitId, cancellationToken, asNoTracking: true).ConfigureAwait(false) : null;

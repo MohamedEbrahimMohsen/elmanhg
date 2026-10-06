@@ -1,5 +1,6 @@
 using Core.Hosting;
 using Core.Hosting.RateLimiting;
+using Core.Utilities;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
 using Microsoft.AspNetCore.RateLimiting;
@@ -12,7 +13,7 @@ public static class AppRateLimiting
 {
     public static IServiceCollection AddAppRateLimiting(this IServiceCollection services)
     {
-        services.AddOptions<RateLimitingOptions>().BindConfiguration(RateLimitingOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddValidatedOptions<RateLimitingOptions>(RateLimitingOptions.SectionName);
 
         services.AddCoreRateLimiting(ErrorCodes.TooManyRequests);
 

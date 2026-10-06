@@ -10,10 +10,7 @@ public sealed class ReorderUnitHandler(ICurriculumUnitRepository unitRepository,
 {
     public async Task Handle(ReorderUnitCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         var siblings = await unitRepository.FindAsync(x => x.SubjectId == request.SubjectId, cancellationToken, orderBy: query => query.OrderBy(x => x.Order).ThenBy(x => x.CreationDate)).ConfigureAwait(false);
         var unit = siblings.FirstOrDefault(x => x.Id == request.UnitId);
@@ -26,7 +23,7 @@ public sealed class ReorderUnitHandler(ICurriculumUnitRepository unitRepository,
         siblings.Insert(Math.Min(request.Position, siblings.Count + 1) - 1, unit);
         for (var index = 0; index < siblings.Count; index++)
         {
-            siblings[index].MoveTo(index + 1, currentUserService.UserId.Value);
+            siblings[index].MoveTo(index + 1, userId);
         }
 
         await unitRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

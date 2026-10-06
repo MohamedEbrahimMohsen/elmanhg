@@ -12,8 +12,7 @@ public sealed class GetPaymentLogValidator : AbstractValidator<GetPaymentLogQuer
     {
         var options = subscriptionsOptions.Value;
 
-        RuleFor(x => x.PageNumber).ValidateMin(1, ErrorCodes.PaymentLogPageNumberInvalid);
-        RuleFor(x => x.PageSize).ValidateRange(1, options.AdminPaymentLogMaxPageSize, ErrorCodes.PaymentLogPageSizeInvalid);
+        RuleFor(x => x).ValidatePaging(x => x.PageNumber, x => x.PageSize, options.AdminPaymentLogMaxPageSize, ErrorCodes.PaymentLogPageNumberInvalid, ErrorCodes.PaymentLogPageSizeInvalid);
         RuleFor(x => x.Status)
             .IsInEnum()
             .WithErrorCode(ErrorCodes.PaymentLogStatusInvalid);
@@ -21,6 +20,6 @@ public sealed class GetPaymentLogValidator : AbstractValidator<GetPaymentLogQuer
             .IsInEnum()
             .WithErrorCode(ErrorCodes.PaymentLogPlanInvalid);
         RuleFor(x => x.Reference).ValidateMaxLength(options.PaymentLogReferenceMaxLength, ErrorCodes.PaymentLogReferenceTooLong);
-        RuleFor(x => x).Must(x => x.From is null || x.To is null || x.From < x.To).WithErrorCode(ErrorCodes.PaymentLogDateRangeInvalid);
+        RuleFor(x => x).ValidateDateRange(x => x.From, x => x.To, ErrorCodes.PaymentLogDateRangeInvalid);
     }
 }
