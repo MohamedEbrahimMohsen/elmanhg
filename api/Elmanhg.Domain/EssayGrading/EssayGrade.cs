@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace Elmanhg.Domain.EssayGrading;
 
-public partial class EssayGrade : AuditEntity, IRetriedWork
+public partial class EssayGrade : AuditEntity, IRetriedWork, IVersioned
 {
     public Guid StudentId { get; private set; }
     public Guid SessionId { get; private set; }

@@ -7,7 +7,7 @@ using System.Text.Json;
 
 namespace Elmanhg.Domain.MathStepGrading;
 
-public partial class MathStepGrade : AuditEntity, IRetriedWork
+public partial class MathStepGrade : AuditEntity, IRetriedWork, IVersioned
 {
     public Guid StudentId { get; private set; }
     public Guid SessionId { get; private set; }

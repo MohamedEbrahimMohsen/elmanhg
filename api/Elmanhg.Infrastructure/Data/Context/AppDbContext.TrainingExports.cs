@@ -29,7 +29,6 @@ public partial class AppDbContext
             builder.Property(x => x.FileKey).HasMaxLength(MediaUrlMaxLength);
             builder.Property(x => x.Sha256).HasMaxLength(Sha256HexLength);
             builder.Ignore(x => x.DownloadFileName);
-            builder.Property(x => x.Version).IsRowVersion();
             builder.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => x.ExpiresAt).HasFilter("\"Status\" = 'Completed'");
             builder.HasIndex(x => x.RequestedAt);

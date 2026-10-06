@@ -2,7 +2,7 @@ using Core.DDD.Entities;
 
 namespace Elmanhg.Domain.Mastery;
 
-public class QuestionMastery : AuditEntity
+public class QuestionMastery : AuditEntity, IVersioned
 {
     public Guid StudentId { get; private set; }
     public Guid QuestionId { get; private set; }

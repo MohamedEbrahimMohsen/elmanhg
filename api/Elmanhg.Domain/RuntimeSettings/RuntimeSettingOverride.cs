@@ -2,7 +2,7 @@ using Core.DDD.Entities;
 
 namespace Elmanhg.Domain.RuntimeSettings;
 
-public class RuntimeSettingOverride : AuditEntity, IAuditedEntity
+public class RuntimeSettingOverride : AuditEntity, IAuditedEntity, IVersioned
 {
     public string Key { get; private set; } = default!;
     public string? Value { get; private set; }

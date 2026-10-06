@@ -5,7 +5,7 @@ using Elmanhg.Domain.SharedKernel.Exceptions;
 
 namespace Elmanhg.Domain.Subscriptions;
 
-public partial class Payment : AuditEntity, IAuditedEntity
+public partial class Payment : AuditEntity, IAuditedEntity, IVersioned
 {
     public Guid StudentId { get; private set; }
     public Guid? SubscriptionId { get; private set; }

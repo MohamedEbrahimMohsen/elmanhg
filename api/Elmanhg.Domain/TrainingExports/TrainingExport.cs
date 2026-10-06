@@ -5,7 +5,7 @@ using System.Globalization;
 
 namespace Elmanhg.Domain.TrainingExports;
 
-public partial class TrainingExport : AuditEntity, IAuditedEntity, IRetriedWork
+public partial class TrainingExport : AuditEntity, IAuditedEntity, IRetriedWork, IVersioned
 {
     public TrainingExportSource Source { get; private set; }
     public DateTimeOffset From { get; private set; }
