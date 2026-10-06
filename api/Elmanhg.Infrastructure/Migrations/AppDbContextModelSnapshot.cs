@@ -299,6 +299,9 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<int>("ReissueCount")
                         .HasColumnType("integer");
 
+                    b.Property<DateTimeOffset>("ReissueWindowStartedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("RequestIP")
                         .HasColumnType("text");
 

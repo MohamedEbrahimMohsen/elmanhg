@@ -21,11 +21,13 @@ public sealed class GenerateOTPHandlerTests
 {
     private const string PhoneNumber = "01012345678";
     private const string GeneratedCode = "123456";
+    private static readonly DateTimeOffset Now = new(2026, 1, 1, 8, 0, 0, TimeSpan.Zero);
 
     private readonly IOtpRepository _otpRepository = Substitute.For<IOtpRepository>();
     private readonly IGenerator _generator = Substitute.For<IGenerator>();
     private readonly IOtpHasher _otpHasher = Substitute.For<IOtpHasher>();
     private readonly IOtpSender _otpSender = Substitute.For<IOtpSender>();
+    private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
     private readonly GenerateOTPHandler _handler;
 
     public GenerateOTPHandlerTests()
@@ -33,7 +35,8 @@ public sealed class GenerateOTPHandlerTests
         _generator.Generate(Arg.Any<int>(), Arg.Any<string>()).Returns(GeneratedCode);
         _otpHasher.Hash(GeneratedCode).Returns(OtpBuilder.CodeHash);
         _otpSender.SendAsync(Arg.Any<OtpRecipientType>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(OtpChannel.Sms);
-        _handler = new GenerateOTPHandler(_otpRepository, _generator, _otpHasher, Options.Create(new OtpOptions()), _otpSender);
+        _timeProvider.GetUtcNow().Returns(Now);
+        _handler = new GenerateOTPHandler(_otpRepository, _generator, _otpHasher, Options.Create(new OtpOptions()), _otpSender, _timeProvider);
     }
 
     [Fact]
@@ -61,13 +64,36 @@ public sealed class GenerateOTPHandlerTests
     [Fact]
     public async Task Handle_ExistingOtpInCooldown_ThrowsRateLimitAndSendsNothing()
     {
-        _otpRepository.FindAsync(PhoneNumber, Arg.Any<string?>(), Arg.Any<CancellationToken>()).Returns(new OtpBuilder().ForPhone(PhoneNumber).Build());
+        _otpRepository.FindByRecipientAsync(PhoneNumber, Arg.Any<CancellationToken>()).Returns(new OtpBuilder().ForPhone(PhoneNumber).IssuedAt(Now).Build());
 
         var act = () => _handler.Handle(new GenerateOTPCommand(PhoneNumber), TestContext.Current.CancellationToken);
 
         (await act.Should().ThrowAsync<RateLimitExceededCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.OTPReissueCooldown);
         await _otpRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
         await _otpSender.DidNotReceive().SendAsync(Arg.Any<OtpRecipientType>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_NewPhone_StampsTimesFromTimeProvider()
+    {
+        var result = await _handler.Handle(new GenerateOTPCommand(PhoneNumber), TestContext.Current.CancellationToken);
+
+        result.ExpiresAt.Should().Be(Now.AddMinutes(5));
+        result.NextAllowedReissueAt.Should().Be(Now.AddSeconds(60));
+        await _otpRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_ExistingOtpPastCooldown_ReissuesWithoutAdding()
+    {
+        _otpRepository.FindByRecipientAsync(PhoneNumber, Arg.Any<CancellationToken>()).Returns(new OtpBuilder().ForPhone(PhoneNumber).IssuedAt(Now.AddMinutes(-2)).Build());
+
+        var result = await _handler.Handle(new GenerateOTPCommand(PhoneNumber), TestContext.Current.CancellationToken);
+
+        result.ReissueCount.Should().Be(1);
+        await _otpRepository.DidNotReceive().AddAsync(Arg.Any<OtpEntity>(), Arg.Any<CancellationToken>());
+        await _otpRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        await _otpSender.Received(1).SendAsync(OtpRecipientType.Phone, PhoneNumber, GeneratedCode, Arg.Any<CancellationToken>());
     }
 
     [Fact]

@@ -65,9 +65,10 @@ public class ExamBlueprint : AuditEntity, IAuditedEntity
             throw new BusinessRuleViolationCoreException(ErrorCodes.ExamBlueprintDefaultNotDeletable);
         }
 
-        SoftDelete();
+        var now = DateTimeOffset.UtcNow;
+        SoftDelete(now);
         UpdatedBy = deletedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
+        UpdationDate = now;
     }
 
     private void Apply(ExamBlueprintShape shape)

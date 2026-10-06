@@ -66,8 +66,7 @@ public class AvatarConversation : AuditEntity, IAuditedEntity
     public void Delete(DateTimeOffset deletedAt)
     {
         var at = ToMicroseconds(deletedAt);
-        SoftDelete();
-        DeletedAt = at;
+        SoftDelete(at);
         MessageCount = 0;
         UpdatedBy = StudentId;
         UpdationDate = at;

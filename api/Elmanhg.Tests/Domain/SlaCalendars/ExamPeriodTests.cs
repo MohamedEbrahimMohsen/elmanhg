@@ -69,4 +69,15 @@ public sealed class ExamPeriodTests
 
         (range.Start, range.End, range.Contains(Start), range.Contains(End), range.Contains(End.AddDays(1)), range.Contains(Start.AddDays(-1))).Should().Be((Start, End, true, true, false, false));
     }
+
+    [Fact]
+    public void Delete_StampsDeletedAtWithUpdationDate()
+    {
+        var period = ExamPeriod.Create("Final exams", Start, End, Guid.NewGuid());
+        period.UpdationDate = LongAgo;
+
+        period.Delete(_adminId);
+
+        period.DeletedAt.Should().NotBeNull().And.Be(period.UpdationDate);
+    }
 }

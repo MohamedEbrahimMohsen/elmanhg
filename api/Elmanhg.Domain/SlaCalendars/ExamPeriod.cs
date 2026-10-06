@@ -29,9 +29,10 @@ public class ExamPeriod : AuditEntity, IAuditedEntity
 
     public void Delete(Guid deletedBy)
     {
-        SoftDelete();
+        var now = DateTimeOffset.UtcNow;
+        SoftDelete(now);
         UpdatedBy = deletedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
+        UpdationDate = now;
     }
 
     public SlaDateRange ToDateRange() => new(StartDate, EndDate);

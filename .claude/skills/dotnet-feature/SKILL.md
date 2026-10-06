@@ -193,12 +193,12 @@ api/
 
 | Class | Inherits | Adds |
 |-------|----------|------|
-| `Entity(Guid id)` | — | `Id`, `IsDeleted`, `SoftDelete()`, domain events |
+| `Entity(Guid id)` | — | `Id`, `IsDeleted`, `DeletedAt`, `SoftDelete(DateTimeOffset deletedAt)`, domain events |
 | `AuditEntity(Guid id, Guid? createdBy)` | `Entity` | `CreatedBy`, `CreationDate`, `UpdatedBy`, `UpdationDate` |
 | `AggregateRoot(Guid id, Guid? createdBy)` | `AuditEntity` | aggregate boundary marker |
 
 Use `AggregateRoot` for top-level aggregates. `AuditEntity` for child entities needing audit. `Entity` for simple children.
-All entities implement `ISoftDeletable` — call `.SoftDelete()`, never set `IsDeleted` directly.
+All entities implement `ISoftDeletable` — call `.SoftDelete(now)` with the same `now` you stamp on `UpdationDate`; never set `IsDeleted`/`DeletedAt` directly.
 
 ### 4.2 Aggregate Root
 
@@ -315,6 +315,8 @@ NameEnglish = entity.Name.English,
 ```
 
 Never call `.Localized()` in an admin result. Never return raw `LocalizedText` in a client result.
+
+Default language for an unsupported request culture: the single key `CoreLocalization:DefaultLanguage` (first two letters; anything shorter falls back to `en`). `.Localized()` reads the thread default culture on every call.
 
 ### 4.6 Enums + Extensions (same file)
 
@@ -606,6 +608,8 @@ public class TenantSubscriptionRepository(AppDbContext context) : Repository<Ten
 
 **`AddAsync`/`Update`/`Delete` do NOT call `SaveChangesAsync`. Call it once in the handler.**
 
+`FindPaginatedAsync` counts with `LongCountAsync`; a page whose offset is past the last row (or past `int` range) returns empty `Items` with correct totals. A hand-written paged query uses `Core.DDD.Models.PageCalculator` (`Offset`, `TotalPages`, `IsPastEnd`), never `(pageNumber - 1) * pageSize` in `int`.
+
 ### 6.2 AppDbContext — Single Shared Context
 
 ONE `AppDbContext` for the whole solution. Per-area DbContext subclasses are PROHIBITED. Actual signature (mirror it):
@@ -826,7 +830,9 @@ Controller rules:
 
 ### 7.4 Program.cs
 
-`Elmanhg.Api/Program.cs` already composes the full `Core.*` pipeline (environment variables + `.env` locally, Core.Identity, Core.CQRS, Core.Exceptions middleware, Core.Localization, Core.Logging, Scalar OpenAPI). Mirror the existing composition when adding registrations — **middleware order is fixed; do not change it**. New policies go into the existing `AddAuthorization` block.
+`Elmanhg.Api/Program.cs` already composes the full `Core.*` pipeline (environment variables + `.env` locally, Core.Identity, Core.CQRS, Core.Exceptions middleware, Core.Localization, Core.Logging, Scalar OpenAPI). Mirror the existing composition when adding registrations — **middleware order is fixed**: forwarded headers → `UseCoreLocalization` → `CoreRequestLoggingMiddleware` → `CoreExceptionMiddleware` → HTTPS redirection → media storage → `UseAuthorization` → rate limiter → endpoints. The exception middleware sits inside request logging (which reads its error code) and before authorization, so a failure in an authorization handler still returns the standard error body; do not reorder. New policies go into the existing `AddAuthorization` block.
+
+Core endpoint modules take the policy name from the app (`MapCoreNotificationTemplateEndpoints(adminPolicyName)`, `MapCoreFirebaseNotificationEndpoints(adminPolicyName)`); the user and device groups require an authenticated user.
 
 ### 7.5 Localization Resources
 
@@ -912,11 +918,11 @@ do
 ```csharp
 // ❌ DON'T
 public enum EngineerStatus { Draft, Published, Removed }
-public void Remove() { Status = EngineerStatus.Removed; SoftDelete(); }
+public void Remove(DateTimeOffset now) { Status = EngineerStatus.Removed; SoftDelete(now); }
 
 // ✅ DO — the enum value pairs with ISoftDeletable semantics
 public enum EngineerStatus { Draft, Published, Deleted }
-public void Delete() { Status = EngineerStatus.Deleted; SoftDelete(); UpdationDate = DateTimeOffset.UtcNow; }
+public void Delete() { var now = DateTimeOffset.UtcNow; Status = EngineerStatus.Deleted; SoftDelete(now); UpdationDate = now; }
 ```
 
 ### 8.5 Soft-delete filtering has exactly one home

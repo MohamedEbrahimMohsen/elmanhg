@@ -14,9 +14,10 @@ namespace Core.Notifications.Endpoints;
 
 public static class CoreNotificationTemplateEndpoints
 {
-    public static RouteGroupBuilder MapCoreNotificationTemplateEndpoints(this IEndpointRouteBuilder endpoints)
+    public static RouteGroupBuilder MapCoreNotificationTemplateEndpoints(this IEndpointRouteBuilder endpoints, string adminPolicyName)
     {
-        var group = endpoints.MapGroup("/c/notification-templates");
+        ArgumentException.ThrowIfNullOrWhiteSpace(adminPolicyName);
+        var group = endpoints.MapGroup("/c/notification-templates").RequireAuthorization(adminPolicyName);
 
         group.MapGet("/{code}", async ([FromRoute] string code, IMediator mediator, CancellationToken cancellationToken) =>
         {

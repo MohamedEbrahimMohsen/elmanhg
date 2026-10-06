@@ -32,14 +32,15 @@ public class EssayGradeRepository(AppDbContext context) : Repository<EssayGrade>
         var total = await query
             .LongCountAsync(cancellationToken)
             .ConfigureAwait(false);
-        var items = await query
+        var offset = PageCalculator.Offset(pageNumber, pageSize);
+        List<EssayGrade> items = PageCalculator.IsPastEnd(offset, total) ? [] : await query
             .OrderBy(x => x.RequestedAt)
             .ThenBy(x => x.Id)
-            .Skip((pageNumber - 1) * pageSize)
+            .Skip((int)offset)
             .Take(pageSize)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-        return new PageData<EssayGrade> { Items = items, PageNumber = pageNumber, PageSize = pageSize, TotalItems = total, TotalPages = (total + pageSize - 1) / pageSize };
+        return new PageData<EssayGrade> { Items = items, PageNumber = pageNumber, PageSize = pageSize, TotalItems = total, TotalPages = PageCalculator.TotalPages(total, pageSize) };
     }
 
     public async Task<Dictionary<Guid, int>> CountInReviewBySubjectAsync(IReadOnlyCollection<Guid>? subjectIds, CancellationToken cancellationToken)

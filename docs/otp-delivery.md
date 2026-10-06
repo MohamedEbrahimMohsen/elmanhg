@@ -15,6 +15,8 @@ Email codes sign in existing **student** email accounts through `POST /api/auth/
 
 The code is delivered **before** the OTP row is saved. If delivery fails, nothing is stored and the 60 s resend cooldown does not start. Any provider failure (a non-2xx response, a transport error, a timeout or an open circuit) returns 503 `OTP_DELIVERY_FAILED`. There is no fallback from WhatsApp to SMS on a runtime failure: the fallback applies only when WhatsApp is disabled. Logs name the channel and the HTTP status only, never the recipient, the code or the provider's response body.
 
+**Resend limits** (`CoreOtp`). One OTP row per recipient is reused for every resend and is found by recipient only; the `RequestIP` and `UserAgent` columns are not filled, so a new network does not reset the limits. A resend waits `ReissueCooldownSeconds` (60) after the previous code (429 `OTP_REISSUE_COOLDOWN`). A recipient gets at most `MaxReissueCount` (5) resends per 24-hour window; the window starts with the first code and later resends do not move it. The resend that uses up the quota also pushes the next one out by `ReissueBlockCooldownInHours` (24), and a resend over the quota returns 429 `OTP_REACHED_MAX_REISSUE_COUNT`. Codes are compared in constant time.
+
 ## 2. Configuration reference
 
 All keys live under `OtpDelivery` (environment variables use `__`, for example `OtpDelivery__WhatsApp__Provider`). The committed defaults are in `api/Elmanhg.Api/appsettings.example.json`. **Secrets** go in environment variables only, never in a committed file.

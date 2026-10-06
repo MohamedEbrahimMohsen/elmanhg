@@ -12,6 +12,8 @@ public sealed class OtpBuilder
     private int _reissueCooldownSeconds = 60;
     private int _maxReissueCount = 5;
     private int _maxVerificationAttempts = 3;
+    private int _reissueBlockCooldownInHours = 24;
+    private DateTimeOffset _issuedAt = DateTimeOffset.UtcNow;
 
     public OtpBuilder ForPhone(string phoneNumber)
     {
@@ -51,9 +53,21 @@ public sealed class OtpBuilder
         return this;
     }
 
+    public OtpBuilder WithReissueBlockCooldownInHours(int reissueBlockCooldownInHours)
+    {
+        _reissueBlockCooldownInHours = reissueBlockCooldownInHours;
+        return this;
+    }
+
+    public OtpBuilder IssuedAt(DateTimeOffset issuedAt)
+    {
+        _issuedAt = issuedAt;
+        return this;
+    }
+
     public Otp Build()
     {
-        var otp = Otp.Create(_recipientType, _recipient, CodeHash, 5, _maxVerificationAttempts, _reissueCooldownSeconds, _maxReissueCount, 24);
+        var otp = Otp.Create(_recipientType, _recipient, CodeHash, 5, _maxVerificationAttempts, _reissueCooldownSeconds, _maxReissueCount, _reissueBlockCooldownInHours, _issuedAt);
         if (_verified)
         {
             otp.Verify(CodeHash);

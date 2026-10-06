@@ -134,4 +134,15 @@ public sealed class ExamBlueprintTests
 
         blueprint.GetTypeCounts().Should().Equal(new ExamTypeCount(QuestionType.Multi, 3), new ExamTypeCount(QuestionType.Short, 1));
     }
+
+    [Fact]
+    public void Delete_UnitBlueprint_StampsDeletedAtWithUpdationDate()
+    {
+        var blueprint = _builder.BuildForUnit();
+        var deletedBy = Guid.NewGuid();
+
+        blueprint.Delete(deletedBy);
+
+        blueprint.DeletedAt.Should().NotBeNull().And.Be(blueprint.UpdationDate);
+    }
 }

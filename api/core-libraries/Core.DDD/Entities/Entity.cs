@@ -18,10 +18,10 @@ public abstract class Entity(Guid id) : IEntity, ISoftDeletable
     public List<DomainEvent> GetDomainEvents() => _domainEvents;
     public void ClearDomainEvents() => _domainEvents.Clear();
     
-    public void SoftDelete()
+    public void SoftDelete(DateTimeOffset deletedAt)
     {
         IsDeleted = true;
-        DeletedAt = null;
+        DeletedAt = deletedAt;
     }
 }
 

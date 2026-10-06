@@ -4,6 +4,7 @@ using Core.OTP.VerifyOTP;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Reflection;
 
 namespace Core.OTP;
@@ -15,6 +16,7 @@ public static class DependencyInjection
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
         services.Configure<OtpOptions>(configuration.GetSection(OtpOptions.SectionName));
         services.AddScoped<IOtpHasher, HmacOtpHasher>();
+        services.TryAddSingleton(TimeProvider.System);
         services.AddValidatorsFromAssemblyContaining<VerifyOTPValidator>();
         services.AddValidatorsFromAssemblyContaining<GenerateOTPValidator>();
 

@@ -48,8 +48,9 @@ public class LessonObjective : AuditEntity, IAuditedEntity
 
     public void Delete(Guid deletedBy)
     {
-        SoftDelete();
+        var now = DateTimeOffset.UtcNow;
+        SoftDelete(now);
         UpdatedBy = deletedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
+        UpdationDate = now;
     }
 }

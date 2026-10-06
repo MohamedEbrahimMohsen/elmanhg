@@ -59,8 +59,9 @@ public class CurriculumUnit : AuditEntity, IAuditedEntity
             throw new BusinessRuleViolationCoreException(ErrorCodes.UnitHasLessons);
         }
 
-        SoftDelete();
+        var now = DateTimeOffset.UtcNow;
+        SoftDelete(now);
         UpdatedBy = deletedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
+        UpdationDate = now;
     }
 }
