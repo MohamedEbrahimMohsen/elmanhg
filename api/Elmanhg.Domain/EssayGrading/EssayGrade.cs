@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace Elmanhg.Domain.EssayGrading;
 
-public partial class EssayGrade : AuditEntity
+public partial class EssayGrade : AuditEntity, IVersioned
 {
     // Matches the LastErrorCode column width.
     private const int ErrorCodeMaxLength = 100;

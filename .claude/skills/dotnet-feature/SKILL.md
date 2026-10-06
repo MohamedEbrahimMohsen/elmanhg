@@ -11,7 +11,7 @@ Companion documents: `docs/constitution.md` (wins on conflict) · `docs/PRD.md` 
 
 ## Elmanhg deltas — read before anything below
 
-1. **Database is PostgreSQL**, via `Npgsql.EntityFrameworkCore.PostgreSQL`. `UseNpgsql(...)` with `EnableRetryOnFailure()`. Never `UseSqlServer`, never SQL Server-only features (`rowversion`, `NEWSEQUENTIALID`, `datetime2`). Concurrency tokens use PostgreSQL `xmin` (`.IsRowVersion()` on a `uint Version` property mapped to `xmin`). Timestamps are `timestamptz` (`DateTimeOffset`, UTC).
+1. **Database is PostgreSQL**, via `Npgsql.EntityFrameworkCore.PostgreSQL`. `UseNpgsql(...)` with `EnableRetryOnFailure()`. Never `UseSqlServer`, never SQL Server-only features (`rowversion`, `NEWSEQUENTIALID`, `datetime2`). Concurrency tokens use PostgreSQL `xmin`: the entity implements `IVersioned` (`Core.DDD`, `public uint Version { get; private set; }`) and `AppDbContext.OnModelCreating` calls `modelBuilder.ApplyRowVersionConvention()` (`Core.EntityFrameworkCore`), which maps every `IVersioned` root entity's `Version` to `xmin`. Never write `.IsRowVersion()` per entity. Timestamps are `timestamptz` (`DateTimeOffset`, UTC).
 2. **JSON columns** (question body, grading spec, blueprint counts, context bundles) are `jsonb`: `.HasColumnType("jsonb")` on a typed owned model or a `JsonDocument`/`string` with a documented shape. Never serialise to `nvarchar`/`text` by hand.
 3. **Vector search** (AI Avatar retrieval) uses `pgvector` via `Pgvector.EntityFrameworkCore`, only in the stories that need it.
 4. **Integration tests** hit a real PostgreSQL through `Testcontainers.PostgreSql`. No in-memory provider, no SQLite stand-in.
@@ -670,7 +670,7 @@ private static void ConfigureTenants(ModelBuilder modelBuilder)
 | `HasIndex(...).IsUnique()` | unique business keys |
 | `ValueGeneratedNever()` | child entities with manually assigned IDs |
 | `HasPrecision(18, 2)` (or the currency's scale) | every money `decimal` — `double`/`float` for money PROHIBITED |
-| `IsRowVersion()` on `byte[] RowVersion` | aggregates edited concurrently by humans (§6.8) |
+| implement `IVersioned` (`uint Version`), no per-entity config | aggregates written concurrently (§6.8) |
 
 ### 6.4 Soft-Delete Global Filters — MANDATORY for every entity
 
@@ -738,13 +738,8 @@ dotnet ef migrations script --idempotent -p api/Elmanhg.Infrastructure -s api/El
 ### 6.8 Transactions, Concurrency & Side Effects
 
 - One `SaveChangesAsync` per command is atomic — that IS the transaction. Explicit `BeginTransactionAsync` only across multiple saves or raw SQL, wrapped in `CreateExecutionStrategy().ExecuteAsync(...)` when retry-on-failure is on (PostgreSQL).
-- Concurrency token on human-edited aggregates:
-```csharp
-public byte[] RowVersion { get; private set; } = [];
-
-builder.Property(x => x.RowVersion).IsRowVersion();
-```
-- `DbUpdateConcurrencyException` → 409 is mapped in `CoreExceptionMiddleware`, never a handler `try`/`catch` — verify the existing mapping before adding an error code.
+- Concurrency token on concurrently written aggregates: `public sealed class Order : AuditEntity, IVersioned` with `public uint Version { get; private set; }`; `ApplyRowVersionConvention()` maps it to `xmin`.
+- Conflicts → 409 are declared once in `AppDbContext.Conflicts` (`AppDbContext.Conflicts.cs`), a `Core.EntityFrameworkCore.Conflicts.ConflictMap`: `.MapConcurrency<Order>(ErrorCodes.OrderModifiedConcurrently)` for a stale row version, `.MapUniqueConstraint(OrderNumberIndex, ErrorCodes.OrderNumberTaken)` (or `.MapUniqueTable(...)`) for a unique index race. `SaveChangesAsync` has a single `catch (DbUpdateException) when (Conflicts.TryTranslate(...))`. Registration order is precedence. Never a handler `try`/`catch`, never a new catch block; verify the existing mapping before adding an error code.
 - Side effects that must follow a commit (emails, notifications, webhooks) → outbox row written in the same `SaveChangesAsync`, dispatched by a worker. Check `Core.Queues` / `Core.Notifications` first.
 
 ---

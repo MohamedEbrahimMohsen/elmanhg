@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace Elmanhg.Domain.MathStepGrading;
 
-public partial class MathStepGrade : AuditEntity
+public partial class MathStepGrade : AuditEntity, IVersioned
 {
     // Matches the LastErrorCode column width.
     private const int ErrorCodeMaxLength = 100;
