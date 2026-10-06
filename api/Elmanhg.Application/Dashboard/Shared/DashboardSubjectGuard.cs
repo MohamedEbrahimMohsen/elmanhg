@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Subjects;
 
@@ -13,10 +13,6 @@ public static class DashboardSubjectGuard
             return;
         }
 
-        var subject = await subjectRepository.GetByIdAsync(id, cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        if (subject is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.SubjectNotFound);
-        }
+        var subject = await subjectRepository.GetRequiredAsync(id, ErrorCodes.SubjectNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
     }
 }

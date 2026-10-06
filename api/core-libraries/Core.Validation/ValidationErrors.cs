@@ -27,6 +27,15 @@ public static class ValidationErrors
 
     public const string ValidationFileSize = "VALIDATION_FILE_SIZE";
     public const string ValidationAllowedExtensions = "VALIDATION_ALLOWED_EXTENSIONS";
+    public const string ValidationFileSignature = "VALIDATION_FILE_SIGNATURE";
+
+    public const string ValidationPageNumber = "VALIDATION_PAGE_NUMBER";
+    public const string ValidationPageSize = "VALIDATION_PAGE_SIZE";
+
+    public const string ValidationDateRange = "VALIDATION_DATE_RANGE";
+    public const string ValidationDateRangeTooLong = "VALIDATION_DATE_RANGE_TOO_LONG";
+
+    public const string ValidationDistinct = "VALIDATION_DISTINCT";
 
     public const string ValidationPhoneNumberIsRequired = "VALIDATION_PHONE_NUMBER_IS_REQUIRED";
     public const string ValidationPhoneNumberMustBeOnlyDigits = "VALIDATION_PHONE_NUMBER_MUST_BE_ONLY_DIGITS";

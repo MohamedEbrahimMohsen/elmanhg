@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.ExamBlueprints.Shared;
 using Elmanhg.Application.Exceptions;
@@ -13,17 +13,8 @@ public sealed class SaveUnitExamBlueprintHandler(ICurriculumUnitRepository unitR
 {
     public async Task<ExamBlueprintResult> Handle(SaveUnitExamBlueprintCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
-        var unit = await unitRepository.GetByIdAsync(request.UnitId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        if (unit is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.UnitNotFound);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
+        var unit = await unitRepository.GetRequiredAsync(request.UnitId, ErrorCodes.UnitNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
 
         var servable = ServableTypeCounts.ForUnit(await questionRepository.CountServableByUnitAndTypeAsync(unit.SubjectId, cancellationToken).ConfigureAwait(false), unit.Id);
         var shape = ExamBlueprintShapeGenerator.Generate(request.Blueprint);

@@ -13,12 +13,7 @@ public sealed class SuspendUserHandler(UserManager<User> userManager, IUserRepos
 {
     public async Task Handle(SuspendUserCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var actorId = currentUserService.UserId.Value;
+        var actorId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         await userRepository.ExecuteInAdminRosterLockAsync(async token =>
         {
             var user = await userManager.FindByIdAsync(request.UserId.ToString()).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.UserNotFound);

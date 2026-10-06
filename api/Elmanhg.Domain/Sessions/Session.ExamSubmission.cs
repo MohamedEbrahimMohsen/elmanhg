@@ -1,3 +1,4 @@
+using Core.Utilities.Time;
 using Elmanhg.Domain.Questions.Grading;
 
 namespace Elmanhg.Domain.Sessions;
@@ -30,7 +31,7 @@ public partial class Session
             throw new InvalidOperationException("A saved exam answer has no grade.");
         }
 
-        var at = ToMicroseconds(now);
+        var at = now.TruncateToMicroseconds();
         var attempts = answered
             .Select(x => Attempt.Create(this, x, x.SavedAnswer ?? string.Empty, grades[x.QuestionId], ExamAttemptTimeTakenMilliseconds, at, AttemptGrader.Auto))
             .ToList();

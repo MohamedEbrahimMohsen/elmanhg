@@ -13,13 +13,10 @@ public sealed class ReactivateUserHandler(UserManager<User> userManager, ICurren
 {
     public async Task Handle(ReactivateUserCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         var user = await userManager.FindByIdAsync(request.UserId.ToString()).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.UserNotFound);
-        user.Reactivate(currentUserService.UserId.Value);
+        user.Reactivate(userId);
         var result = await userManager.UpdateAsync(user).ConfigureAwait(false);
         if (!result.Succeeded)
         {

@@ -17,8 +17,7 @@ public sealed class BulkApproveQuestionsValidator : AbstractValidator<BulkApprov
             .ValidateNotEmptyList(ErrorCodes.QuestionIdsRequired)
             .ValidateListMaxItems(options.BulkApproveMaxCount, ErrorCodes.QuestionIdsTooMany);
         RuleFor(x => x.QuestionIds)
-            .Must(ids => ids == null || ids.Distinct().Count() == ids.Count)
-            .WithErrorCode(ErrorCodes.QuestionIdsDuplicate);
+            .ValidateDistinct(ErrorCodes.QuestionIdsDuplicate);
         RuleForEach(x => x.QuestionIds).ValidateRequired(ErrorCodes.QuestionIdRequired);
     }
 }

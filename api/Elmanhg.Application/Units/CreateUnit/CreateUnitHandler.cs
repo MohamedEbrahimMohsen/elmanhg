@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Subjects;
@@ -11,19 +11,12 @@ public sealed class CreateUnitHandler(ISubjectRepository subjectRepository, ICur
 {
     public async Task<CreateUnitResult> Handle(CreateUnitCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
-        var subject = await subjectRepository.GetByIdAsync(request.SubjectId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        if (subject is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.SubjectNotFound);
-        }
+        var subject = await subjectRepository.GetRequiredAsync(request.SubjectId, ErrorCodes.SubjectNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
 
         var last = await unitRepository.FirstOrDefaultAsync(x => x.SubjectId == subject.Id, cancellationToken, orderBy: query => query.OrderByDescending(x => x.Order), asNoTracking: true).ConfigureAwait(false);
-        var unit = CurriculumUnit.Create(subject, request.Name, (last?.Order ?? 0) + 1, currentUserService.UserId.Value);
+        var unit = CurriculumUnit.Create(subject, request.Name, (last?.Order ?? 0) + 1, userId);
 
         await unitRepository.AddAsync(unit, cancellationToken).ConfigureAwait(false);
         await unitRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

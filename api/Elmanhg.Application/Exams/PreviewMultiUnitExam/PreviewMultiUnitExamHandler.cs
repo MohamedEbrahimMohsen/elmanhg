@@ -1,4 +1,3 @@
-using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exams.Shared;
 using Elmanhg.Application.Exceptions;
@@ -16,10 +15,7 @@ public sealed class PreviewMultiUnitExamHandler(ISubjectRepository subjectReposi
 {
     public async Task<MultiUnitExamPreviewResult> Handle(PreviewMultiUnitExamQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        _ = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         var input = request.Selection;
         var selection = await MultiUnitExamPlanner.LoadUnitsAsync(input.SubjectId, input.UnitIds ?? [], subjectRepository, unitRepository, cancellationToken).ConfigureAwait(false);

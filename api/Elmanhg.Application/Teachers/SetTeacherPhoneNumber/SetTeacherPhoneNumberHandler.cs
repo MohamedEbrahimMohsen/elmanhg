@@ -11,13 +11,10 @@ public sealed class SetTeacherPhoneNumberHandler(UserManager<User> userManager, 
 {
     public async Task Handle(SetTeacherPhoneNumberCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         var teacher = await userManager.FindByIdAsync(request.TeacherId.ToString()).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.UserNotFound);
-        teacher.SetContactPhoneNumber(request.PhoneNumber, currentUserService.UserId.Value);
+        teacher.SetContactPhoneNumber(request.PhoneNumber, userId);
         var result = await userManager.UpdateAsync(teacher).ConfigureAwait(false);
         if (!result.Succeeded)
         {

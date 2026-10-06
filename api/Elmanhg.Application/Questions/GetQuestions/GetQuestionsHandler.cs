@@ -27,16 +27,7 @@ public sealed class GetQuestionsHandler(IQuestionRepository questionRepository, 
         var lessonsById = lessons.ToDictionary(x => x.Id);
         var teacherNames = teachers.ToDictionary(x => x.Id, x => x.DisplayName);
 
-        return new PageData<QuestionListItemResult>
-        {
-            Items = page.Items
-                .Select(x => Generate(x, lessonsById, teacherNames))
-                .ToList(),
-            PageNumber = page.PageNumber,
-            PageSize = page.PageSize,
-            TotalItems = page.TotalItems,
-            TotalPages = page.TotalPages,
-        };
+        return page.Map(x => Generate(x, lessonsById, teacherNames));
     }
 
     private static QuestionListItemResult Generate(Question question, Dictionary<Guid, Lesson> lessonsById, Dictionary<Guid, string> teacherNames)

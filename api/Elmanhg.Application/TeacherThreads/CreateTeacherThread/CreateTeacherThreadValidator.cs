@@ -30,8 +30,6 @@ public sealed class CreateTeacherThreadValidator : AbstractValidator<CreateTeach
         RuleFor(x => x.Image)
             .Must(file => file is null || TeacherThreadImageFormats.ContentTypes.Contains(file.ContentType))
             .WithErrorCode(ErrorCodes.TeacherThreadImageTypeInvalid);
-        RuleFor(x => x.Image)
-            .Must(file => file is null || TeacherThreadImageFormats.HasMatchingSignature(file))
-            .WithErrorCode(ErrorCodes.TeacherThreadImageTypeInvalid);
+        RuleFor(x => x.Image).ValidateFileSignature(TeacherThreadImageFormats.Signatures, ErrorCodes.TeacherThreadImageTypeInvalid);
     }
 }

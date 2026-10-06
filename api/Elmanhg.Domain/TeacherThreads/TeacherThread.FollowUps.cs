@@ -1,4 +1,5 @@
 using Core.Errors;
+using Core.Utilities.Time;
 using Elmanhg.Domain.SharedKernel.Exceptions;
 
 namespace Elmanhg.Domain.TeacherThreads;
@@ -22,7 +23,7 @@ public partial class TeacherThread
             throw new ConflictCoreException(ErrorCodes.TeacherThreadFollowUpNotAllowed);
         }
 
-        var at = ToMicroseconds(askedAt);
+        var at = askedAt.TruncateToMicroseconds();
         var message = TeacherMessage.CreateText(Id, StudentId, text, null, at);
         Messages.Add(message);
         Status = TeacherThreadStatus.Open;
@@ -46,7 +47,7 @@ public partial class TeacherThread
             throw new ConflictCoreException(ErrorCodes.TeacherThreadAlreadyRated);
         }
 
-        var at = ToMicroseconds(ratedAt);
+        var at = ratedAt.TruncateToMicroseconds();
         var wasClosed = Status == TeacherThreadStatus.Closed;
         Rating = rating;
         if (Status == TeacherThreadStatus.Answered)

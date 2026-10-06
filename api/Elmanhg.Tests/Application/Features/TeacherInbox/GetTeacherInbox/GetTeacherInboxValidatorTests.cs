@@ -42,4 +42,12 @@ public sealed class GetTeacherInboxValidatorTests
 
         result.Errors.Select(x => x.ErrorCode).Should().Equal(ErrorCodes.TeacherInboxFilterInvalid);
     }
+
+    [Fact]
+    public void Validate_PageOffsetPastIntRange_FailsPageNumberInvalid()
+    {
+        var result = _validator.Validate(new GetTeacherInboxQuery(TeacherInboxFilter.All, int.MaxValue, 20));
+
+        result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.TeacherThreadPageNumberInvalid);
+    }
 }

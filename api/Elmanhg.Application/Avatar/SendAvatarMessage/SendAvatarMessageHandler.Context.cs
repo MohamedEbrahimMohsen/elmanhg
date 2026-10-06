@@ -1,3 +1,4 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Elmanhg.Application.Avatar.Shared;
 using Elmanhg.Application.ContentRetrieval.SearchLessonContent;
@@ -36,7 +37,7 @@ public sealed partial class SendAvatarMessageHandler
     {
         var sessionId = request.SessionId!.Value;
         var questionId = request.QuestionId!.Value;
-        var session = await sessionRepository.FirstOrDefaultAsync(x => x.Id == sessionId && x.StudentId == studentId && (exam ? x.Kind != SessionKind.Quiz && x.SubmittedAt != null : x.Kind == SessionKind.Quiz), cancellationToken, include: query => query.Include(x => x.Items).Include(x => x.Attempts).AsSplitQuery(), asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.SessionNotFound);
+        var session = await sessionRepository.GetRequiredAsync(x => x.Id == sessionId && x.StudentId == studentId && (exam ? x.Kind != SessionKind.Quiz && x.SubmittedAt != null : x.Kind == SessionKind.Quiz), ErrorCodes.SessionNotFound, cancellationToken, include: query => query.Include(x => x.Items).Include(x => x.Attempts).AsSplitQuery(), asNoTracking: true).ConfigureAwait(false);
         var item = session.GetItem(questionId) ?? throw new NotFoundCoreException(ErrorCodes.SessionQuestionNotFound);
         var attempt = session.FindAttempt(questionId);
         if (attempt is null && !exam)
@@ -91,8 +92,8 @@ public sealed partial class SendAvatarMessageHandler
 
     private async Task<(CurriculumUnit Unit, Subject Subject)> LoadUnitAndSubjectAsync(Lesson lesson, CancellationToken cancellationToken)
     {
-        var unit = await unitRepository.GetByIdAsync(lesson.UnitId, cancellationToken, asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.LessonNotFound);
-        var subject = await subjectRepository.GetByIdAsync(unit.SubjectId, cancellationToken, asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.LessonNotFound);
+        var unit = await unitRepository.GetRequiredAsync(lesson.UnitId, ErrorCodes.LessonNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
+        var subject = await subjectRepository.GetRequiredAsync(unit.SubjectId, ErrorCodes.LessonNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
         return (unit, subject);
     }
 }

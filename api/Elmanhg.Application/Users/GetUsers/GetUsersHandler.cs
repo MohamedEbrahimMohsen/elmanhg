@@ -1,5 +1,4 @@
 using Core.DDD.Models;
-using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
@@ -16,12 +15,7 @@ public sealed class GetUsersHandler(IUserRepository userRepository, ISubscriptio
 {
     public async Task<PageData<UserSummaryResult>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var actorId = currentUserService.UserId.Value;
+        var actorId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var page = await userRepository.FindPaginatedAsync(request.PageNumber, request.PageSize, cancellationToken, filter: GetUsersFilter.Build(request), orderBy: query => query.OrderByDescending(x => x.CreationDate).ThenByDescending(x => x.Id), asNoTracking: true).ConfigureAwait(false);
         var ids = page.Items
             .Select(x => x.Id)
@@ -30,16 +24,7 @@ public sealed class GetUsersHandler(IUserRepository userRepository, ISubscriptio
         var entitlements = request.Role == UserRole.Student && ids.Count > 0 ? await LoadEntitlementsAsync(ids, cancellationToken).ConfigureAwait(false) : [];
         var subjectsByTeacher = request.Role == UserRole.Teacher && ids.Count > 0 ? await LoadSubjectIdsAsync(ids, cancellationToken).ConfigureAwait(false) : [];
 
-        return new PageData<UserSummaryResult>
-        {
-            Items = page.Items
-                .Select(x => UserSummaryResultGenerator.Generate(x, actorId, activeAdminCount, entitlements.GetValueOrDefault(x.Id), subjectsByTeacher.GetValueOrDefault(x.Id) ?? []))
-                .ToList(),
-            PageNumber = page.PageNumber,
-            PageSize = page.PageSize,
-            TotalItems = page.TotalItems,
-            TotalPages = page.TotalPages,
-        };
+        return page.Map(x => UserSummaryResultGenerator.Generate(x, actorId, activeAdminCount, entitlements.GetValueOrDefault(x.Id), subjectsByTeacher.GetValueOrDefault(x.Id) ?? []));
     }
 
     private async Task<Dictionary<Guid, StudentEntitlement>> LoadEntitlementsAsync(List<Guid> studentIds, CancellationToken cancellationToken)

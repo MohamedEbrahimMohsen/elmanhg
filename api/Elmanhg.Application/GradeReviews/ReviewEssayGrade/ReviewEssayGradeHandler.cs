@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.EssayGrading.Shared;
 using Elmanhg.Application.Exceptions;
@@ -21,13 +21,8 @@ public sealed class ReviewEssayGradeHandler(IEssayGradeRepository essayGradeRepo
 {
     public async Task<GradeReviewDetailResult> Handle(ReviewEssayGradeCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
-        var grade = await essayGradeRepository.FirstOrDefaultAsync(x => x.Id == request.EssayGradeId && x.SubjectId == request.SubjectId, cancellationToken).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.GradeReviewNotFound);
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
+        var grade = await essayGradeRepository.GetRequiredAsync(x => x.Id == request.EssayGradeId && x.SubjectId == request.SubjectId, ErrorCodes.GradeReviewNotFound, cancellationToken).ConfigureAwait(false);
         await GradeReviewSessionGuard.EnsureNotTestModeAsync(grade.SessionId, sessionRepository, cancellationToken).ConfigureAwait(false);
         var now = timeProvider.GetUtcNow();
         if (request.Decision == GradeReviewDecision.Accepted)

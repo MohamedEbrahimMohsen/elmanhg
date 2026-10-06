@@ -12,7 +12,6 @@ public sealed class GetMyTeacherThreadsValidator : AbstractValidator<GetMyTeache
     {
         var options = askTeacherOptions.Value;
 
-        RuleFor(x => x.PageNumber).ValidateMin(1, ErrorCodes.TeacherThreadPageNumberInvalid);
-        RuleFor(x => x.PageSize).ValidateRange(1, options.ThreadListMaxPageSize, ErrorCodes.TeacherThreadPageSizeInvalid);
+        RuleFor(x => x).ValidatePaging(x => x.PageNumber, x => x.PageSize, options.ThreadListMaxPageSize, ErrorCodes.TeacherThreadPageNumberInvalid, ErrorCodes.TeacherThreadPageSizeInvalid);
     }
 }

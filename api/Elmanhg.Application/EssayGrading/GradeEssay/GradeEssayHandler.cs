@@ -1,3 +1,4 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Elmanhg.Application.EssayGrading.Shared;
 using Elmanhg.Application.Exceptions;
@@ -28,7 +29,7 @@ public sealed class GradeEssayHandler(IEssayGradeRepository essayGradeRepository
 
         var revisions = await questionRepository.GetRevisionsAsync([grade.QuestionId], cancellationToken).ConfigureAwait(false);
         var revision = revisions.FirstOrDefault(x => x.Version == grade.QuestionVersion) ?? throw new NotFoundCoreException(ErrorCodes.QuestionNotFound);
-        var question = await questionRepository.FirstOrDefaultAsync(x => x.Id == grade.QuestionId, cancellationToken, asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.QuestionNotFound);
+        var question = await questionRepository.GetRequiredAsync(x => x.Id == grade.QuestionId, ErrorCodes.QuestionNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
         var context = await EssayGradingContextLoader.LoadAsync(question.LessonId, lessonRepository, unitRepository, subjectRepository, cancellationToken).ConfigureAwait(false);
 
         var options = essayGradingOptions.Value;

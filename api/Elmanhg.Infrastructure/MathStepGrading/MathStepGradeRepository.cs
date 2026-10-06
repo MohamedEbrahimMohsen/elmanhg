@@ -29,18 +29,7 @@ public class MathStepGradeRepository(AppDbContext context) : Repository<MathStep
             .AsNoTracking()
             .Where(x => x.SubjectId == subjectId && x.Status == MathStepGradeStatus.InReview)
             .Where(x => _context.Set<Session>().Any(s => s.Id == x.SessionId && !s.IsTestMode));
-        var total = await query
-            .LongCountAsync(cancellationToken)
-            .ConfigureAwait(false);
-        var offset = PageCalculator.Offset(pageNumber, pageSize);
-        List<MathStepGrade> items = PageCalculator.IsPastEnd(offset, total) ? [] : await query
-            .OrderBy(x => x.RequestedAt)
-            .ThenBy(x => x.Id)
-            .Skip((int)offset)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-        return new PageData<MathStepGrade> { Items = items, PageNumber = pageNumber, PageSize = pageSize, TotalItems = total, TotalPages = PageCalculator.TotalPages(total, pageSize) };
+        return await query.OrderBy(x => x.RequestedAt).ThenBy(x => x.Id).ToPageDataAsync(pageNumber, pageSize, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<Dictionary<Guid, int>> CountInReviewBySubjectAsync(IReadOnlyCollection<Guid>? subjectIds, CancellationToken cancellationToken)

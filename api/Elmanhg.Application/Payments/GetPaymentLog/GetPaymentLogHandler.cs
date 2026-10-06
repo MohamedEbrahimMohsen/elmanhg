@@ -19,15 +19,6 @@ public sealed class GetPaymentLogHandler(IPaymentRepository paymentRepository, I
         var students = await userRepository.FindAsync(x => studentIds.Contains(x.Id), cancellationToken, asNoTracking: true).ConfigureAwait(false);
         var studentsById = students.ToDictionary(x => x.Id);
 
-        return new PageData<AdminPaymentResult>
-        {
-            Items = page.Items
-                .Select(x => AdminPaymentResultGenerator.Generate(x, studentsById.GetValueOrDefault(x.StudentId)))
-                .ToList(),
-            PageNumber = page.PageNumber,
-            PageSize = page.PageSize,
-            TotalItems = page.TotalItems,
-            TotalPages = page.TotalPages,
-        };
+        return page.Map(x => AdminPaymentResultGenerator.Generate(x, studentsById.GetValueOrDefault(x.StudentId)));
     }
 }

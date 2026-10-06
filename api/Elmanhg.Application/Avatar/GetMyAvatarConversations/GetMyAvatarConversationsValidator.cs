@@ -12,10 +12,6 @@ public sealed class GetMyAvatarConversationsValidator : AbstractValidator<GetMyA
     {
         var options = avatarOptions.Value;
 
-        RuleFor(x => x.PageNumber)
-            .ValidateMin(1, ErrorCodes.AvatarConversationsPageNumberInvalid)
-            .Must((query, pageNumber) => ((long)pageNumber - 1) * query.PageSize <= int.MaxValue)
-            .WithErrorCode(ErrorCodes.AvatarConversationsPageNumberInvalid);
-        RuleFor(x => x.PageSize).ValidateRange(1, options.StudentConversationsMaxPageSize, ErrorCodes.AvatarConversationsPageSizeInvalid);
+        RuleFor(x => x).ValidatePaging(x => x.PageNumber, x => x.PageSize, options.StudentConversationsMaxPageSize, ErrorCodes.AvatarConversationsPageNumberInvalid, ErrorCodes.AvatarConversationsPageSizeInvalid);
     }
 }

@@ -1,3 +1,4 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
@@ -16,12 +17,7 @@ public sealed class StartCheckoutHandler(IPaymentRepository paymentRepository, I
 {
     public async Task<CheckoutResult> Handle(StartCheckoutCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var studentId = currentUserService.UserId.Value;
+        var studentId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var options = subscriptionsOptions.Value;
         var now = timeProvider.GetUtcNow();
         var plan = request.Plan!.Value;
@@ -30,7 +26,7 @@ public sealed class StartCheckoutHandler(IPaymentRepository paymentRepository, I
         var subscriptions = await subscriptionRepository.FindAsync(SubscriptionEntitlementSpecification.EntitledFor(studentId, now, options.GracePeriod), cancellationToken, asNoTracking: true).ConfigureAwait(false);
         StudentEntitlement.Resolve(subscriptions, now, options.GracePeriod).EnsureCanPurchase(plan, now, options.RenewalWindow);
         var price = options.PriceFor(plan, period) ?? throw new BadRequestCoreException(ErrorCodes.CheckoutPeriodUnavailable);
-        var user = await userRepository.GetByIdAsync(studentId, cancellationToken, asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.UserNotFound);
+        var user = await userRepository.GetRequiredAsync(studentId, ErrorCodes.UserNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
 
         var payment = Payment.Create(studentId, plan, period, price.Months, new Money(price.AmountMinor, options.Currency));
         var checkout = await paymentGateway.StartCheckoutAsync(new PaymentCheckoutRequest(payment.Id, payment.Amount, plan, period, new PaymentCustomer(user.DisplayName, user.Email, user.PhoneNumber)), cancellationToken).ConfigureAwait(false);

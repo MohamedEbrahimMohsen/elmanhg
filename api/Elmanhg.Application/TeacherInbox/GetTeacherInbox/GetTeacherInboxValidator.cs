@@ -13,7 +13,6 @@ public sealed class GetTeacherInboxValidator : AbstractValidator<GetTeacherInbox
         var options = askTeacherOptions.Value;
 
         RuleFor(x => x.Filter).IsInEnum().WithErrorCode(ErrorCodes.TeacherInboxFilterInvalid);
-        RuleFor(x => x.PageNumber).ValidateMin(1, ErrorCodes.TeacherThreadPageNumberInvalid);
-        RuleFor(x => x.PageSize).ValidateRange(1, options.ThreadListMaxPageSize, ErrorCodes.TeacherThreadPageSizeInvalid);
+        RuleFor(x => x).ValidatePaging(x => x.PageNumber, x => x.PageSize, options.ThreadListMaxPageSize, ErrorCodes.TeacherThreadPageNumberInvalid, ErrorCodes.TeacherThreadPageSizeInvalid);
     }
 }

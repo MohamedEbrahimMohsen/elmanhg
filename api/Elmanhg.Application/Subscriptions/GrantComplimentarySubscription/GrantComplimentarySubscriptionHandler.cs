@@ -15,10 +15,7 @@ public sealed class GrantComplimentarySubscriptionHandler(IUserRepository userRe
 {
     public async Task<AdminSubscriptionResult> Handle(GrantComplimentarySubscriptionCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         var student = await StudentLookup.GetAsync(userRepository, request.StudentId, cancellationToken).ConfigureAwait(false);
         var options = subscriptionsOptions.Value;
@@ -27,7 +24,7 @@ public sealed class GrantComplimentarySubscriptionHandler(IUserRepository userRe
         var held = await subscriptionRepository.FindAsync(SubscriptionEntitlementSpecification.EntitledFor(student.Id, now, options.GracePeriod), cancellationToken, asNoTracking: true).ConfigureAwait(false);
         StudentEntitlement.Resolve(held, now, options.GracePeriod).EnsureCanGrant(request.Plan);
 
-        var subscription = Subscription.Start(student.Id, request.Plan, request.Period, price.Months, now, paymobReference: null, createdBy: currentUserService.UserId.Value);
+        var subscription = Subscription.Start(student.Id, request.Plan, request.Period, price.Months, now, paymobReference: null, createdBy: userId);
         await subscriptionRepository.AddAsync(subscription, cancellationToken).ConfigureAwait(false);
         await subscriptionRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

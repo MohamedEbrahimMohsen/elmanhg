@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Core.Storage;
 using Elmanhg.Application.Exceptions;
@@ -11,16 +11,9 @@ public sealed class UploadLessonImageHandler(ILessonRepository lessonRepository,
 {
     public async Task<UploadLessonImageResult> Handle(UploadLessonImageCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        _ = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
-        var lesson = await lessonRepository.GetByIdAsync(request.LessonId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        if (lesson is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.LessonNotFound);
-        }
+        var lesson = await lessonRepository.GetRequiredAsync(request.LessonId, ErrorCodes.LessonNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
 
         var file = request.File!;
         var key = $"lessons/{lesson.Id}/{Guid.NewGuid():N}{Path.GetExtension(file.FileName).ToLowerInvariant()}";

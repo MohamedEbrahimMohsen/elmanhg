@@ -12,8 +12,7 @@ public sealed class GetUsersValidator : AbstractValidator<GetUsersQuery>
     {
         var options = usersOptions.Value;
 
-        RuleFor(x => x.PageNumber).ValidateMin(1, ErrorCodes.UserListPageNumberInvalid);
-        RuleFor(x => x.PageSize).ValidateRange(1, options.ListMaxPageSize, ErrorCodes.UserListPageSizeInvalid);
+        RuleFor(x => x).ValidatePaging(x => x.PageNumber, x => x.PageSize, options.ListMaxPageSize, ErrorCodes.UserListPageNumberInvalid, ErrorCodes.UserListPageSizeInvalid);
         RuleFor(x => x.Role)
             .IsInEnum()
             .WithErrorCode(ErrorCodes.UserListRoleInvalid);

@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.SlaCalendars.Shared;
@@ -11,14 +11,11 @@ public sealed class UpdateExamPeriodHandler(IExamPeriodRepository examPeriodRepo
 {
     public async Task<ExamPeriodResult> Handle(UpdateExamPeriodCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
-        var examPeriod = await examPeriodRepository.GetByIdAsync(request.ExamPeriodId, cancellationToken).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.ExamPeriodNotFound);
+        var examPeriod = await examPeriodRepository.GetRequiredAsync(request.ExamPeriodId, ErrorCodes.ExamPeriodNotFound, cancellationToken).ConfigureAwait(false);
 
-        examPeriod.Update(request.Name!.Trim(), request.StartDate!.Value, request.EndDate!.Value, currentUserService.UserId.Value);
+        examPeriod.Update(request.Name!.Trim(), request.StartDate!.Value, request.EndDate!.Value, userId);
 
         await examPeriodRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

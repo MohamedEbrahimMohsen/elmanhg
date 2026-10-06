@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Subscriptions.Shared;
@@ -11,13 +11,8 @@ public sealed class GetMyPaymentHandler(IPaymentRepository paymentRepository, IC
 {
     public async Task<PaymentResult> Handle(GetMyPaymentQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
-        var payment = await paymentRepository.FirstOrDefaultAsync(x => x.Id == request.PaymentId && x.StudentId == userId, cancellationToken, asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.PaymentNotFound);
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
+        var payment = await paymentRepository.GetRequiredAsync(x => x.Id == request.PaymentId && x.StudentId == userId, ErrorCodes.PaymentNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
         return PaymentResultGenerator.Generate(payment);
     }
 }

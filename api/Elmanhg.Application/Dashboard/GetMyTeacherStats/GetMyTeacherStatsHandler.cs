@@ -1,4 +1,3 @@
-using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Dashboard.Shared;
 using Elmanhg.Application.Exceptions;
@@ -14,10 +13,7 @@ public sealed class GetMyTeacherStatsHandler(IQuestionRepository questionReposit
 {
     public async Task<MyTeacherStatsResult> Handle(GetMyTeacherStatsQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId is not { } teacherId || teacherId == Guid.Empty)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var teacherId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         var window = DashboardWindow.Resolve(request.From, request.To, timeProvider.GetUtcNow(), dashboardOptions.Value);
         var decisions = await questionRepository.GetDecisionStatsAsync(window.Start, window.End, null, teacherId, cancellationToken).ConfigureAwait(false);

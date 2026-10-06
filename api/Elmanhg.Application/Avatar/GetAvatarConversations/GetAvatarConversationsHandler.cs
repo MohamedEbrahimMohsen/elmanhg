@@ -38,15 +38,6 @@ public sealed class GetAvatarConversationsHandler(IAvatarConversationRepository 
         var lessons = (await lessonRepository.FindAsync(x => lessonIds.Contains(x.Id), cancellationToken, asNoTracking: true).ConfigureAwait(false)).ToDictionary(x => x.Id);
         var subjects = (await subjectRepository.FindAsync(x => subjectIds.Contains(x.Id), cancellationToken, asNoTracking: true).ConfigureAwait(false)).ToDictionary(x => x.Id);
 
-        return new PageData<AdminAvatarConversationResult>
-        {
-            Items = page.Items
-                .Select(x => AdminAvatarConversationResultGenerator.Generate(x, students.GetValueOrDefault(x.StudentId)?.DisplayName ?? string.Empty, x.SubjectId is { } subjectId ? subjects.GetValueOrDefault(subjectId)?.Name : null, x.LessonId is { } lessonId ? lessons.GetValueOrDefault(lessonId)?.Name : null))
-                .ToList(),
-            PageNumber = page.PageNumber,
-            PageSize = page.PageSize,
-            TotalItems = page.TotalItems,
-            TotalPages = page.TotalPages,
-        };
+        return page.Map(x => AdminAvatarConversationResultGenerator.Generate(x, students.GetValueOrDefault(x.StudentId)?.DisplayName ?? string.Empty, x.SubjectId is { } subjectId ? subjects.GetValueOrDefault(subjectId)?.Name : null, x.LessonId is { } lessonId ? lessons.GetValueOrDefault(lessonId)?.Name : null));
     }
 }

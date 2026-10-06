@@ -1,3 +1,5 @@
+using Core.Utilities.Time;
+
 namespace Elmanhg.Domain.TeacherThreads;
 
 public partial class TeacherThread
@@ -26,7 +28,7 @@ public partial class TeacherThread
         }
 
         ApplySlaSchedule(slaPolicy.ScheduleFrom(SlaWindowStartedAt));
-        UpdationDate = ToMicroseconds(rescheduledAt);
+        UpdationDate = rescheduledAt.TruncateToMicroseconds();
         return true;
     }
 

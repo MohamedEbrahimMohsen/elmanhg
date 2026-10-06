@@ -1,4 +1,3 @@
-using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
@@ -14,11 +13,8 @@ public sealed class GetMyEntitlementHandler(ISubscriptionRepository subscription
 {
     public async Task<EntitlementResult> Handle(GetMyEntitlementQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
-        return await StudentEntitlementLoader.LoadAsync(subscriptionRepository, runtimeSettings, currentUserService.UserId.Value, subscriptionsOptions.Value, timeProvider.GetUtcNow(), cancellationToken).ConfigureAwait(false);
+        return await StudentEntitlementLoader.LoadAsync(subscriptionRepository, runtimeSettings, userId, subscriptionsOptions.Value, timeProvider.GetUtcNow(), cancellationToken).ConfigureAwait(false);
     }
 }

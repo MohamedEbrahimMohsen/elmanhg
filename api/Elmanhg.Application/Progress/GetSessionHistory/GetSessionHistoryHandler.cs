@@ -1,5 +1,4 @@
 using Core.DDD.Models;
-using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Progress.Shared;
@@ -14,11 +13,8 @@ public sealed class GetSessionHistoryHandler(ISessionRepository sessionRepositor
 {
     public async Task<PageData<SessionHistoryItemResult>> Handle(GetSessionHistoryQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
-        return await SessionHistoryLoader.LoadAsync(sessionRepository, lessonRepository, unitRepository, currentUserService.UserId.Value, request.Kind, request.PageNumber, request.PageSize, cancellationToken).ConfigureAwait(false);
+        return await SessionHistoryLoader.LoadAsync(sessionRepository, lessonRepository, unitRepository, userId, request.Kind, request.PageNumber, request.PageSize, cancellationToken).ConfigureAwait(false);
     }
 }

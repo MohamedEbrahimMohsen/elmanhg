@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Avatar.Shared;
 using Elmanhg.Application.Exceptions;
@@ -17,15 +17,10 @@ public sealed class GetMyAvatarConversationHandler(IAvatarConversationRepository
 {
     public async Task<StudentAvatarConversationDetailResult> Handle(GetMyAvatarConversationQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         await AvatarGate.EnsureNoExamInProgressAsync(userId, sessionRepository, examsOptions.Value, timeProvider.GetUtcNow(), cancellationToken).ConfigureAwait(false);
 
-        var conversation = await avatarConversationRepository.FirstOrDefaultAsync(x => x.Id == request.ConversationId && x.StudentId == userId, cancellationToken, include: query => query.Include(x => x.Messages), asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.AvatarConversationNotFound);
+        var conversation = await avatarConversationRepository.GetRequiredAsync(x => x.Id == request.ConversationId && x.StudentId == userId, ErrorCodes.AvatarConversationNotFound, cancellationToken, include: query => query.Include(x => x.Messages), asNoTracking: true).ConfigureAwait(false);
         var subject = conversation.SubjectId is { } subjectId ? await subjectRepository.GetByIdAsync(subjectId, cancellationToken, asNoTracking: true).ConfigureAwait(false) : null;
         var lesson = conversation.LessonId is { } lessonId ? await lessonRepository.GetByIdAsync(lessonId, cancellationToken, asNoTracking: true).ConfigureAwait(false) : null;
 

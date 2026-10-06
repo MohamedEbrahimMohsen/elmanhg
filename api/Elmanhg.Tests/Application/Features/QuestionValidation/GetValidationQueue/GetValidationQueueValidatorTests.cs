@@ -53,6 +53,12 @@ public sealed class GetValidationQueueValidatorTests
         Codes(Query() with { MinAgeDays = 366 }).Should().Contain(ErrorCodes.QuestionAgeFilterInvalid);
     }
 
+    [Fact]
+    public void Validate_PageOffsetPastIntRange_FailsPageNumberInvalid()
+    {
+        Codes(Query() with { PageNumber = int.MaxValue, PageSize = 20 }).Should().Contain(ErrorCodes.QuestionPageNumberInvalid);
+    }
+
     private static GetValidationQueueQuery Query() => new(null, null, null, null, null, null);
 
     private List<string> Codes(GetValidationQueueQuery query)

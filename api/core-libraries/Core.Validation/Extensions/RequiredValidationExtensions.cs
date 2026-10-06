@@ -36,6 +36,12 @@ public static class RequiredValidationExtensions
             .WithMessage(DefaultMessage)
             .WithErrorCode(errorCode ?? ValidationErrors.ValidationRequired);
 
+    public static IRuleBuilderOptions<T, Guid?> ValidateRequired<T>(this IRuleBuilder<T, Guid?> ruleBuilder, string? errorCode = null)
+        => ruleBuilder
+            .Must(value => value is { } id && id != Guid.Empty)
+            .WithMessage(DefaultMessage)
+            .WithErrorCode(errorCode ?? ValidationErrors.ValidationRequired);
+
     public static IRuleBuilderOptions<T, IFormFile?> ValidateRequired<T>(this IRuleBuilder<T, IFormFile?> ruleBuilder, string? errorCode = null)
         => ruleBuilder
             .NotNull()

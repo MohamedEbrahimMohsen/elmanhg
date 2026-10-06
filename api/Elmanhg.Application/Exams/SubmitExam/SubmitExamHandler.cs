@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Core.Localization;
 using Core.Storage;
@@ -24,19 +24,10 @@ public sealed class SubmitExamHandler(ISessionRepository sessionRepository, IQue
 {
     public async Task<ExamSessionResult> Handle(SubmitExamCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var now = timeProvider.GetUtcNow();
         var threshold = masteryOptions.Value.CorrectThreshold;
-        var session = await sessionRepository.FirstOrDefaultAsync(x => x.Id == request.SessionId && x.StudentId == userId && x.Kind != SessionKind.Quiz, cancellationToken, include: query => query.Include(x => x.Items).Include(x => x.Attempts).AsSplitQuery()).ConfigureAwait(false);
-        if (session is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.SessionNotFound);
-        }
+        var session = await sessionRepository.GetRequiredAsync(x => x.Id == request.SessionId && x.StudentId == userId && x.Kind != SessionKind.Quiz, ErrorCodes.SessionNotFound, cancellationToken, include: query => query.Include(x => x.Items).Include(x => x.Attempts).AsSplitQuery()).ConfigureAwait(false);
 
         var revisions = await questionRepository.GetRevisionsAsync(session.Items.Select(x => x.QuestionId).ToList(), cancellationToken).ConfigureAwait(false);
         await ExamSubmission.SubmitAsync(session, revisions, questionRepository, questionMasteryRepository, essayGradeRepository, mathStepGradeRepository, mathCheckClient, threshold, now, cancellationToken).ConfigureAwait(false);
