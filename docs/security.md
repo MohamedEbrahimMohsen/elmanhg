@@ -120,7 +120,7 @@ Not needed, therefore not allowed: no iframes (lesson videos are plain links), n
 ## 5. Input handling
 
 - **Rich text:** sanitised on the server by `RichTextSanitizer` (allow-list, [rich-text.md](rich-text.md)) and again in the browser by DOMPurify in `SafeHtml`.
-- **Request bodies:** Kestrel caps every body at 10 MB (`KestrelHardening.MaxRequestBodyBytes`), above the largest business cap; each validator still enforces its own configurable cap.
+- **Request bodies:** Kestrel caps every body at 10 MB (`Core.Hosting` `KestrelHardening.DefaultMaxRequestBodyBytes`), above the largest business cap; each validator still enforces its own configurable cap.
 - **Uploads:** every upload is checked by extension, content type and file signature (magic bytes), never by name alone, and stored under a random name.
 
 | Endpoint | Extensions | Signature | Cap |
@@ -142,7 +142,7 @@ SVG is never accepted, because it can carry script and media is served from the 
 
 ## 6. Secrets
 
-- **Placeholder guard.** Outside Development the API refuses to start, and to migrate, while a known secret still starts with `change-me`, the connection string's parsed `Password` starts with `change-me`, or `CoreOtp:Secret` is empty (`PlaceholderSecretGuard`; the key list is in [deployment.md](deployment.md) §3). The error names the keys, never the values. The ai service refuses a `change-me` service token when `ELMANHG_AI_ENV=production`. Every example value in `deploy/*.env.example` starts with `change-me`; the smoke and load tests replace them with random ones.
+- **Placeholder guard.** Outside Development the API refuses to start, and to migrate, while a known secret still starts with `change-me`, the connection string's parsed `Password` starts with `change-me`, or `CoreOtp:Secret` is empty (`AppSecretGuard`, which passes the key list, the Npgsql password check and `CoreOtp:Secret` to the `Core.Hosting` `PlaceholderSecretGuard`; the key list is in [deployment.md](deployment.md) §3). The error names the keys, never the values. The ai service refuses a `change-me` service token when `ELMANHG_AI_ENV=production`. Every example value in `deploy/*.env.example` starts with `change-me`; the smoke and load tests replace them with random ones.
 - **Secret scanning.** The `security` workflow runs gitleaks 8.30.1 (checksum-verified binary) over the full git history of every pull request and push to main, with `.gitleaks.toml` (the default rules plus an allow-list of the exact reviewed placeholder values, anchored and matched against the extracted secret only, so a marker elsewhere on a line never hides a real credential). Triaged false positives are listed by fingerprint in `.gitleaksignore`, each with its reason. To triage a finding: if it is a real secret, rotate it first (deleting the commit is not enough, the value is already public), then remove it; only a value that is provably not a secret goes into `.gitleaksignore`. A new committed example or test value that the default rules flag is added to that allow-list as an exact, anchored value in the same change.
 - **CI secrets.** `deploy.yml` hands each deploy secret only to the steps that use it (step-level `env`), never to the whole job.
 - **Images.** `.dockerignore` keeps `appsettings.json`, `appsettings.*.json`, `api/**/.env` and `api/**/.env.*` out of the API build context.

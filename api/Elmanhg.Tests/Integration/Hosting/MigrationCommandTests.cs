@@ -1,4 +1,4 @@
-using Elmanhg.Api.Hosting;
+using Core.Hosting;
 using Elmanhg.Infrastructure.Data.Context;
 using Elmanhg.Tests.Integration.Infrastructure;
 using FluentAssertions;
@@ -15,7 +15,7 @@ public sealed class MigrationCommandTests(ApiFactory factory)
     {
         var configuration = new ConfigurationBuilder().AddCommandLine(["--MigrateAndExit=true"]).Build();
 
-        var requested = MigrationCommand.IsRequested(configuration);
+        var requested = MigrationCommand<AppDbContext>.IsRequested(configuration);
 
         requested.Should().BeTrue();
     }
@@ -25,7 +25,7 @@ public sealed class MigrationCommandTests(ApiFactory factory)
     {
         var configuration = new ConfigurationBuilder().AddInMemoryCollection([]).Build();
 
-        var requested = MigrationCommand.IsRequested(configuration);
+        var requested = MigrationCommand<AppDbContext>.IsRequested(configuration);
 
         requested.Should().BeFalse();
     }
@@ -33,7 +33,7 @@ public sealed class MigrationCommandTests(ApiFactory factory)
     [Fact]
     public async Task RunAsync_MigratedDatabase_LeavesNoPendingMigrations()
     {
-        await MigrationCommand.RunAsync(factory.Services, TestContext.Current.CancellationToken);
+        await MigrationCommand<AppDbContext>.RunAsync(factory.Services, TestContext.Current.CancellationToken);
 
         using var scope = factory.Services.CreateScope();
         var database = scope.ServiceProvider.GetRequiredService<AppDbContext>().Database;

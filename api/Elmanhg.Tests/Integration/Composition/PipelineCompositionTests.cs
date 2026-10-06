@@ -1,5 +1,6 @@
 using Core.Auditing;
 using Core.CQRS.Behaviours;
+using Core.Observability;
 using Elmanhg.Application.Sessions.Shared;
 using Elmanhg.Application.Sessions.SubmitAnswer;
 using Elmanhg.Application.Shared.Observability;

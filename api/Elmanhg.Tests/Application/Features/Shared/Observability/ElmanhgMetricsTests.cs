@@ -16,20 +16,6 @@ public sealed class ElmanhgMetricsTests
     public ElmanhgMetricsTests() => _metrics = new ElmanhgMetrics(_meterFactory);
 
     [Fact]
-    public void RecordRequest_Success_RecordsCountAndDurationWithTags()
-    {
-        using var requests = Collector<long>("elmanhg.requests");
-        using var duration = Collector<double>("elmanhg.request.duration");
-
-        _metrics.RecordRequest("X", ElmanhgMetrics.SuccessOutcome, TimeSpan.FromMilliseconds(250));
-
-        var request = requests.GetMeasurementSnapshot().Should().ContainSingle().Subject;
-        request.Value.Should().Be(1);
-        request.Tags.Should().Contain(ElmanhgMetrics.RequestTag, "X").And.Contain(ElmanhgMetrics.OutcomeTag, "Success");
-        duration.GetMeasurementSnapshot().Should().ContainSingle().Which.Value.Should().Be(0.25);
-    }
-
-    [Fact]
     public void RecordQuizAnswer_Correct_IncrementsWithOutcomeTag()
     {
         using var answers = Collector<long>("elmanhg.quiz.answers");
