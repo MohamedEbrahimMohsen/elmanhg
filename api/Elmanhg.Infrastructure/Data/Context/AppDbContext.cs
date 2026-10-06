@@ -1,8 +1,6 @@
 using Core.Auditing;
 using Core.EntityFrameworkCore.Auditing;
 using Core.EntityFrameworkCore.Context;
-using Core.Errors;
-using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Analytics;
 using Elmanhg.Domain.Avatar;
 using Elmanhg.Domain.ContentRetrieval;
@@ -26,8 +24,6 @@ using Elmanhg.Domain.TrainingExports;
 using Elmanhg.Domain.Units;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
-using DomainErrorCodes = Elmanhg.Domain.SharedKernel.Exceptions.ErrorCodes;
 
 namespace Elmanhg.Infrastructure.Data.Context;
 
@@ -106,91 +102,9 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         {
             return await base.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is Session or QuestionMastery))
+        catch (DbUpdateException exception) when (Conflicts.TryTranslate(exception, out var conflict))
         {
-            throw new ConflictCoreException(ErrorCodes.SessionModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is Payment))
-        {
-            throw new ConflictCoreException(ErrorCodes.PaymentModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is Subscription))
-        {
-            throw new ConflictCoreException(ErrorCodes.SubscriptionModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is TeacherThread))
-        {
-            throw new ConflictCoreException(ErrorCodes.TeacherThreadModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is AvatarConversation))
-        {
-            throw new ConflictCoreException(ErrorCodes.AvatarConversationModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is TrainingExport))
-        {
-            throw new ConflictCoreException(ErrorCodes.TrainingExportModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is EssayGrade or MathStepGrade))
-        {
-            throw new ConflictCoreException(ErrorCodes.GradeModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is RuntimeSettingOverride))
-        {
-            throw new ConflictCoreException(ErrorCodes.RuntimeSettingModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is ExamPeriod))
-        {
-            throw new ConflictCoreException(ErrorCodes.ExamPeriodModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: RuntimeSettingKeyIndex })
-        {
-            throw new ConflictCoreException(ErrorCodes.RuntimeSettingModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: PaymobTransactionIndex or PaymentRefundTransactionIndex })
-        {
-            throw new ConflictCoreException(ErrorCodes.PaymentTransactionAlreadyRecorded, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, TableName: nameof(QuestionImportBatches) })
-        {
-            // Two confirms of one import batch id passed the replay check together; the loser surfaces as the batch conflict, which the import pipeline resolves.
-            throw new ConflictCoreException(ErrorCodes.QuestionImportBatchConflict, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: InProgressSessionIndex })
-        {
-            throw new ConflictCoreException(ErrorCodes.SessionAlreadyInProgress, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: AttemptPerQuestionIndex })
-        {
-            throw new ConflictCoreException(DomainErrorCodes.SessionQuestionAlreadyAnswered, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: QuestionMasteryPerStudentIndex })
-        {
-            throw new ConflictCoreException(ErrorCodes.SessionModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: OneOpenExamIndex })
-        {
-            throw new ConflictCoreException(ErrorCodes.ExamAlreadyInProgress, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: LessonOpeningPerStudentIndex })
-        {
-            throw new ConflictCoreException(ErrorCodes.LessonAlreadyOpened, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: SubjectDefaultBlueprintIndex or UnitBlueprintIndex })
-        {
-            throw new ConflictCoreException(ErrorCodes.ExamBlueprintModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: AvatarMessagePositionIndex })
-        {
-            throw new ConflictCoreException(ErrorCodes.AvatarConversationModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: TeacherThreadTrainingTriggerIndex })
-        {
-            // EF inserts the training row before the stale thread UPDATE, so a lost close/rate race surfaces here, not as a concurrency exception.
-            throw new ConflictCoreException(ErrorCodes.TeacherThreadModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: EssayGradeTrainingTriggerIndex })
-        {
-            throw new ConflictCoreException(ErrorCodes.GradeModifiedConcurrently, innerException: exception);
+            throw conflict;
         }
     }
 
@@ -226,6 +140,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         ConfigureIssuedRefreshTokens(modelBuilder);
         ConfigureRuntimeSettings(modelBuilder);
         ConfigureSlaCalendars(modelBuilder);
+        modelBuilder.ApplyRowVersionConvention();
         ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
     }
 
@@ -360,7 +275,6 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.Property(x => x.Scope).IsRequired().HasColumnType("jsonb");
             builder.Property(x => x.ScopeKey).IsRequired();
             builder.Property(x => x.ScorePercent).HasPrecision(5, 2);
-            builder.Property(x => x.Version).IsRowVersion();
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasMany(x => x.Items).WithOne().HasForeignKey(x => x.SessionId).OnDelete(DeleteBehavior.Restrict);
             builder.HasMany(x => x.Attempts).WithOne().HasForeignKey(x => x.SessionId).OnDelete(DeleteBehavior.Restrict);
@@ -400,7 +314,6 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         {
             builder.Property(x => x.LatestNormalisedScore).HasPrecision(5, 4);
             builder.Property(x => x.PreviousNormalisedScore).HasPrecision(5, 4);
-            builder.Property(x => x.Version).IsRowVersion();
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Question>().WithMany().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.StudentId, x.QuestionId }).IsUnique().HasDatabaseName(QuestionMasteryPerStudentIndex);
@@ -428,7 +341,6 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.Property(x => x.Period).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.PaymobReference).HasMaxLength(PaymobReferenceMaxLength);
-            builder.Property(x => x.Version).IsRowVersion();
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.StudentId, x.Plan, x.CurrentPeriodEnd });
             builder.HasIndex(x => new { x.Status, x.CurrentPeriodEnd }, SubscriptionLapseIndex);
@@ -444,7 +356,6 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.Property(x => x.RefundTransactionId).HasMaxLength(PaymobReferenceMaxLength);
             builder.Property(x => x.ReviewReason).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.RawWebhook).HasColumnType("jsonb").HasAnnotation(AuditChangeReader.ExcludedAnnotation, true);
-            builder.Property(x => x.Version).IsRowVersion();
             builder.Ignore(x => x.Amount);
             builder.Ignore(x => x.NeedsReview);
             builder.Ignore(x => x.IsRefundable);
@@ -466,7 +377,6 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         {
             builder.Property(x => x.Context).IsRequired().HasColumnType("jsonb");
             builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
-            builder.Property(x => x.Version).IsRowVersion();
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.TeacherId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
@@ -588,7 +498,6 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         modelBuilder.Entity<AvatarConversation>(builder =>
         {
             builder.Property(x => x.EntryPoint).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
-            builder.Property(x => x.Version).IsRowVersion();
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<CurriculumUnit>().WithMany().HasForeignKey(x => x.UnitId).OnDelete(DeleteBehavior.Restrict);
@@ -633,7 +542,6 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.Property(x => x.ReviewDecision).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.ReviewedScore).HasPrecision(9, 2);
             builder.Property(x => x.ReviewedNormalisedScore).HasPrecision(5, 4);
-            builder.Property(x => x.Version).IsRowVersion();
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Session>().WithMany().HasForeignKey(x => x.SessionId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Question>().WithMany().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);

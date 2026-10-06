@@ -2,7 +2,7 @@ using Core.DDD.Entities;
 
 namespace Elmanhg.Domain.TeacherThreads;
 
-public partial class TeacherThread : AuditEntity
+public partial class TeacherThread : AuditEntity, IVersioned
 {
     public Guid StudentId { get; private set; }
     public Guid SubjectId { get; private set; }

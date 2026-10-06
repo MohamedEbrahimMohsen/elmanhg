@@ -1,9 +1,21 @@
+using Core.DDD.Entities;
 using Core.DDD.Models;
 using Core.Notifications.Entities;
+using Elmanhg.Domain.Avatar;
+using Elmanhg.Domain.EssayGrading;
+using Elmanhg.Domain.Mastery;
+using Elmanhg.Domain.MathStepGrading;
+using Elmanhg.Domain.RuntimeSettings;
+using Elmanhg.Domain.Sessions;
+using Elmanhg.Domain.SlaCalendars;
+using Elmanhg.Domain.Subscriptions;
+using Elmanhg.Domain.TeacherThreads;
+using Elmanhg.Domain.TrainingExports;
 using Elmanhg.Infrastructure.Data.Context;
 using Elmanhg.Tests.Integration.Infrastructure;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Elmanhg.Tests.Integration.Persistence;
@@ -32,6 +44,28 @@ public sealed class AppDbContextTests(ApiFactory factory)
         var hasPendingModelChanges = context.Database.HasPendingModelChanges();
 
         hasPendingModelChanges.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Model_VersionedEntities_MapVersionToXminRowVersion()
+    {
+        using var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var versionProperties = context.Model.GetEntityTypes()
+            .Select(x => x.FindDeclaredProperty(nameof(IVersioned.Version)))
+            .OfType<IProperty>()
+            .Where(x => x.IsConcurrencyToken)
+            .ToList();
+        var tokenTypes = versionProperties.Select(x => x.DeclaringType.ClrType).ToList();
+        var versionedTypes = context.Model.GetEntityTypes()
+            .Where(x => !x.IsOwned() && typeof(IVersioned).IsAssignableFrom(x.ClrType))
+            .Select(x => x.ClrType)
+            .ToList();
+
+        tokenTypes.Should().BeEquivalentTo([typeof(Session), typeof(QuestionMastery), typeof(Payment), typeof(Subscription), typeof(TeacherThread), typeof(AvatarConversation), typeof(TrainingExport), typeof(EssayGrade), typeof(MathStepGrade), typeof(RuntimeSettingOverride), typeof(ExamPeriod)]);
+        tokenTypes.Should().BeEquivalentTo(versionedTypes);
+        versionProperties.Should().AllSatisfy(x => x.GetColumnName().Should().Be("xmin"));
     }
 
     [Fact]

@@ -2,7 +2,7 @@ using Core.DDD.Entities;
 
 namespace Elmanhg.Domain.Avatar;
 
-public class AvatarConversation : AuditEntity, IAuditedEntity
+public class AvatarConversation : AuditEntity, IAuditedEntity, IVersioned
 {
     public Guid StudentId { get; private set; }
     public AvatarEntryPoint EntryPoint { get; private set; }
