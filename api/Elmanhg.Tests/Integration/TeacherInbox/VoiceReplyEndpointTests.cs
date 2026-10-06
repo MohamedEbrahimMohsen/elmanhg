@@ -1,4 +1,4 @@
-using Elmanhg.Application.Shared.Storage;
+using Core.Storage;
 using Elmanhg.Application.TeacherInbox.TranscribeVoiceDraft;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.TeacherThreads;

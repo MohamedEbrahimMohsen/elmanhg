@@ -1,8 +1,7 @@
-using Elmanhg.Application.Shared.Storage;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
-namespace Elmanhg.Infrastructure.Storage;
+namespace Core.Storage.Local;
 
 public sealed class LocalDiskFileStorage(IOptions<FileStorageOptions> fileStorageOptions, IHostEnvironment hostEnvironment) : IFileStorage
 {
@@ -16,7 +15,7 @@ public sealed class LocalDiskFileStorage(IOptions<FileStorageOptions> fileStorag
         return GetPublicUrl(key);
     }
 
-    public string GetPublicUrl(string key) => $"{fileStorageOptions.Value.PublicBaseUrl.TrimEnd('/')}/{key}";
+    public string GetPublicUrl(string key) => fileStorageOptions.Value.GetPublicUrl(key);
 
     public Task<StoredFile?> OpenReadAsync(string key, CancellationToken cancellationToken)
     {
@@ -27,7 +26,7 @@ public sealed class LocalDiskFileStorage(IOptions<FileStorageOptions> fileStorag
         }
 
         var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, FileOptions.Asynchronous);
-        return Task.FromResult<StoredFile?>(new StoredFile(stream, stream.Length, MediaContentTypes.FromKey(key)));
+        return Task.FromResult<StoredFile?>(new StoredFile(stream, stream.Length, StorageContentTypes.FromKey(key)));
     }
 
     public Task DeleteAsync(string key, CancellationToken cancellationToken)
@@ -43,7 +42,7 @@ public sealed class LocalDiskFileStorage(IOptions<FileStorageOptions> fileStorag
 
     private string ResolvePath(string key)
     {
-        var root = Path.GetFullPath(fileStorageOptions.Value.LocalRootPath, hostEnvironment.ContentRootPath);
+        var root = fileStorageOptions.Value.ResolveLocalRoot(hostEnvironment.ContentRootPath);
         var path = Path.GetFullPath(Path.Combine(root, key));
         if (!path.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal))
         {

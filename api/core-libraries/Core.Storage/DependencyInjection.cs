@@ -1,15 +1,21 @@
 using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
-using Elmanhg.Application.Shared.Storage;
+using Core.Storage.Local;
+using Core.Storage.Media;
+using Core.Storage.S3;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
-namespace Elmanhg.Infrastructure.Storage;
+namespace Core.Storage;
 
-public static class FileStorageServiceCollectionExtensions
+public static class DependencyInjection
 {
-    public static IServiceCollection AddFileStorage(this IServiceCollection services)
+    public static IServiceCollection AddCoreFileStorage(this IServiceCollection services)
     {
         services.AddOptions<FileStorageOptions>().BindConfiguration(FileStorageOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddSingleton<IValidateOptions<FileStorageOptions>, FileStorageOptionsValidator>();
@@ -23,6 +29,27 @@ public static class FileStorageServiceCollectionExtensions
             _ => throw new InvalidOperationException("Unsupported FileStorage:Provider."),
         });
         return services;
+    }
+
+    public static IApplicationBuilder UseCorePublicMedia(this IApplicationBuilder app, IReadOnlyList<string> privateFolders)
+    {
+        var storage = app.ApplicationServices.GetRequiredService<IOptions<FileStorageOptions>>().Value;
+        var options = new PublicMediaOptions(new PathString(storage.PublicBaseUrl), privateFolders);
+        if (storage.Provider == FileStorageProvider.S3)
+        {
+            app.UseMiddleware<PublicMediaMiddleware>(options);
+            return app;
+        }
+
+        var root = storage.ResolveLocalRoot(app.ApplicationServices.GetRequiredService<IHostEnvironment>().ContentRootPath);
+        Directory.CreateDirectory(root);
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PublicMediaFileProvider(new PhysicalFileProvider(root), privateFolders),
+            RequestPath = options.RequestPath,
+            OnPrepareResponse = context => context.Context.Response.SetMediaHeaders(MediaCacheControl.PublicImmutable),
+        });
+        return app;
     }
 
     private static AmazonS3Client CreateS3Client(FileStorageOptions options)

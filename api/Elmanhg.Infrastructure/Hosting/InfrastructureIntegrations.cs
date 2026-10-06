@@ -1,3 +1,4 @@
+using Core.Storage;
 using Elmanhg.Application.Configuration.Shared;
 using Elmanhg.Infrastructure.AiService;
 using Elmanhg.Infrastructure.Invitations;
@@ -7,7 +8,6 @@ using Elmanhg.Infrastructure.OtpDelivery.Email;
 using Elmanhg.Infrastructure.OtpDelivery.Sms;
 using Elmanhg.Infrastructure.OtpDelivery.WhatsApp;
 using Elmanhg.Infrastructure.Payments;
-using Elmanhg.Infrastructure.Storage;
 
 namespace Elmanhg.Infrastructure.Hosting;
 

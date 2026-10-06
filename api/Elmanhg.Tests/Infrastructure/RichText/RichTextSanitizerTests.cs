@@ -1,5 +1,5 @@
+using Core.Storage;
 using Elmanhg.Infrastructure.RichText;
-using Elmanhg.Infrastructure.Storage;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 

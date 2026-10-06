@@ -1,10 +1,9 @@
 using Amazon.S3;
 using Amazon.S3.Model;
-using Elmanhg.Application.Shared.Storage;
 using Microsoft.Extensions.Options;
 using System.Net;
 
-namespace Elmanhg.Infrastructure.Storage;
+namespace Core.Storage.S3;
 
 public sealed class S3FileStorage(IAmazonS3 s3, IOptions<FileStorageOptions> fileStorageOptions) : IFileStorage
 {
@@ -17,21 +16,21 @@ public sealed class S3FileStorage(IAmazonS3 s3, IOptions<FileStorageOptions> fil
             Key = key,
             InputStream = content,
             AutoCloseStream = false,
-            ContentType = MediaContentTypes.FromKey(key),
+            ContentType = StorageContentTypes.FromKey(key),
             DisablePayloadSigning = true,
         };
         await s3.PutObjectAsync(request, cancellationToken).ConfigureAwait(false);
         return GetPublicUrl(key);
     }
 
-    public string GetPublicUrl(string key) => $"{fileStorageOptions.Value.PublicBaseUrl.TrimEnd('/')}/{key}";
+    public string GetPublicUrl(string key) => fileStorageOptions.Value.GetPublicUrl(key);
 
     public async Task<StoredFile?> OpenReadAsync(string key, CancellationToken cancellationToken)
     {
         try
         {
             var response = await s3.GetObjectAsync(fileStorageOptions.Value.S3BucketName, key, cancellationToken).ConfigureAwait(false);
-            return new StoredFile(response.ResponseStream, response.ContentLength, MediaContentTypes.FromKey(key));
+            return new StoredFile(response.ResponseStream, response.ContentLength, StorageContentTypes.FromKey(key));
         }
         catch (AmazonS3Exception exception) when (exception.StatusCode == HttpStatusCode.NotFound)
         {

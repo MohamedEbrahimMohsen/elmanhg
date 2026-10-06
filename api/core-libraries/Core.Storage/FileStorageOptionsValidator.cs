@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace Elmanhg.Infrastructure.Storage;
+namespace Core.Storage;
 
 public sealed class FileStorageOptionsValidator : IValidateOptions<FileStorageOptions>
 {
@@ -18,7 +18,7 @@ public sealed class FileStorageOptionsValidator : IValidateOptions<FileStorageOp
         AddIfBlank(failures, options.S3Region, nameof(FileStorageOptions.S3Region));
         if (!string.IsNullOrWhiteSpace(options.S3ServiceUrl) && (!Uri.TryCreate(options.S3ServiceUrl, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps))
         {
-            failures.Add("FileStorage:S3ServiceUrl must be an absolute https URL.");
+            failures.Add($"{FileStorageOptions.SectionName}:S3ServiceUrl must be an absolute https URL.");
         }
 
         return failures.Count == 0 ? ValidateOptionsResult.Success : ValidateOptionsResult.Fail(failures);
@@ -28,7 +28,7 @@ public sealed class FileStorageOptionsValidator : IValidateOptions<FileStorageOp
     {
         if (string.IsNullOrWhiteSpace(value))
         {
-            failures.Add($"FileStorage:{key} is required when the S3 provider is selected.");
+            failures.Add($"{FileStorageOptions.SectionName}:{key} is required when the S3 provider is selected.");
         }
     }
 }

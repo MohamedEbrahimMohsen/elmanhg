@@ -1,7 +1,7 @@
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
 
-namespace Elmanhg.Api.FileStorage;
+namespace Core.Storage.Media;
 
 public sealed class PublicMediaFileProvider(PhysicalFileProvider files, IReadOnlyList<string> privateFolders) : IFileProvider
 {

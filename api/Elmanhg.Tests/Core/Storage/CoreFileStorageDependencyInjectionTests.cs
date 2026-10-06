@@ -1,17 +1,18 @@
-using Elmanhg.Application.Shared.Storage;
-using Elmanhg.Infrastructure.Storage;
+using Core.Storage;
+using Core.Storage.Local;
+using Core.Storage.S3;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NSubstitute;
 
-namespace Elmanhg.Tests.Infrastructure.Storage;
+namespace Elmanhg.Tests.Core.Storage;
 
-public sealed class FileStorageServiceCollectionExtensionsTests
+public sealed class CoreFileStorageDependencyInjectionTests
 {
     [Fact]
-    public void AddFileStorage_Local_ResolvesLocalDiskFileStorage()
+    public void AddCoreFileStorage_Local_ResolvesLocalDiskFileStorage()
     {
         using var provider = BuildProvider(new() { ["FileStorage:Provider"] = "Local" });
         using var scope = provider.CreateScope();
@@ -20,7 +21,7 @@ public sealed class FileStorageServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public void AddFileStorage_S3_ResolvesS3FileStorage()
+    public void AddCoreFileStorage_S3_ResolvesS3FileStorage()
     {
         using var provider = BuildProvider(new()
         {
@@ -28,8 +29,8 @@ public sealed class FileStorageServiceCollectionExtensionsTests
             ["FileStorage:S3ServiceUrl"] = "https://account.r2.cloudflarestorage.com",
             ["FileStorage:S3Region"] = "auto",
             ["FileStorage:S3BucketName"] = "elmanhg-media",
-            ["FileStorage:S3AccessKeyId"] = "placeholder-access-key",
-            ["FileStorage:S3SecretAccessKey"] = "placeholder-secret",
+            ["FileStorage:S3AccessKeyId"] = "not-a-secret-access-key",
+            ["FileStorage:S3SecretAccessKey"] = "not-a-secret-secret-key",
         });
         using var scope = provider.CreateScope();
 
@@ -43,7 +44,7 @@ public sealed class FileStorageServiceCollectionExtensionsTests
         var services = new ServiceCollection();
         services.AddSingleton(Substitute.For<IHostEnvironment>());
         services.AddSingleton<IConfiguration>(new ConfigurationBuilder().AddInMemoryCollection(settings).Build());
-        services.AddFileStorage();
+        services.AddCoreFileStorage();
         return services.BuildServiceProvider();
     }
 }

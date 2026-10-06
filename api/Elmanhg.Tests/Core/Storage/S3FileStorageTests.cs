@@ -1,13 +1,14 @@
 using Amazon.S3;
 using Amazon.S3.Model;
-using Elmanhg.Infrastructure.Storage;
+using Core.Storage;
+using Core.Storage.S3;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using System.Net;
 
-namespace Elmanhg.Tests.Infrastructure.Storage;
+namespace Elmanhg.Tests.Core.Storage;
 
 public sealed class S3FileStorageTests
 {

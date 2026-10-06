@@ -1,4 +1,4 @@
-using Elmanhg.Application.Shared.Storage;
+using Core.Storage;
 using Elmanhg.Domain.TrainingExports;
 using Elmanhg.Tests.Integration.Authorization;
 using Elmanhg.Tests.Integration.Infrastructure;

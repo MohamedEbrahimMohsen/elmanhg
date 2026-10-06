@@ -1,14 +1,15 @@
-using Elmanhg.Api.FileStorage;
-using Elmanhg.Application.Shared.Storage;
+using Core.Storage;
+using Core.Storage.Media;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
 
-namespace Elmanhg.Tests.Api.FileStorage;
+namespace Elmanhg.Tests.Core.Storage;
 
 public sealed class PublicMediaMiddlewareTests
 {
     private static readonly byte[] Bytes = [0x89, 0x50, 0x4E, 0x47];
+    private static readonly string[] PrivateFolders = ["teacher-threads", "training-exports"];
     private readonly IFileStorage _fileStorage = Substitute.For<IFileStorage>();
     private bool _nextCalled;
 
@@ -85,17 +86,37 @@ public sealed class PublicMediaMiddlewareTests
         await _fileStorage.DidNotReceive().OpenReadAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
-    private async Task<HttpContext> InvokeAsync(string path)
+    [Fact]
+    public async Task Invoke_FolderNotInPrivateFolders_IsServed()
+    {
+        _fileStorage.OpenReadAsync("teacher-threads/x.png", Arg.Any<CancellationToken>()).Returns(new StoredFile(new MemoryStream(Bytes), Bytes.Length, "image/png"));
+
+        var context = await InvokeAsync("/api/media/teacher-threads/x.png", privateFolders: []);
+
+        context.Response.StatusCode.Should().Be(StatusCodes.Status200OK);
+        await _fileStorage.Received(1).OpenReadAsync("teacher-threads/x.png", Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Invoke_NonGetRequest_CallsNext()
+    {
+        await InvokeAsync("/api/media/lessons/a.png", method: HttpMethods.Post);
+
+        _nextCalled.Should().BeTrue();
+        await _fileStorage.DidNotReceive().OpenReadAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
+    private async Task<HttpContext> InvokeAsync(string path, string[]? privateFolders = null, string? method = null)
     {
         var context = new DefaultHttpContext();
-        context.Request.Method = HttpMethods.Get;
+        context.Request.Method = method ?? HttpMethods.Get;
         context.Request.Path = path;
         context.Response.Body = new MemoryStream();
         var middleware = new PublicMediaMiddleware(_ =>
         {
             _nextCalled = true;
             return Task.CompletedTask;
-        }, new PathString("/api/media"));
+        }, new PublicMediaOptions(new PathString("/api/media"), privateFolders ?? PrivateFolders));
         await middleware.InvokeAsync(context, _fileStorage);
         return context;
     }

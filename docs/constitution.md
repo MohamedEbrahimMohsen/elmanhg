@@ -1,6 +1,6 @@
 # Constitution
 
-The rules for ALL implementation work in this repo. The stack: **.NET 10 · ASP.NET Core API (controllers) · MediatR 14 + FluentValidation 12 via the vendored `api/core-libraries/` (`Core.*`, copied from Morabh) (`Core.DDD`, `Core.CQRS`, `Core.EntityFrameworkCore`, `Core.Errors`, …) · EF Core 10 + PostgreSQL (Npgsql) · `Elmanhg.Jobs` background host (Hangfire)**. Backend patterns are detailed in `.claude/skills/dotnet-feature/SKILL.md`; the feature pipeline (`feature-planner` → `feature-implementer` → `feature-reviewer`, artifacts in `.process/`) is the standard way features are built. When a rule here conflicts with a generic "best practice", this file wins. New code must be indistinguishable from existing code.
+The rules for ALL implementation work in this repo. The stack: **.NET 10 · ASP.NET Core API (controllers) · MediatR 14 + FluentValidation 12 via the vendored `api/core-libraries/` (`Core.*`, copied from Morabh) (`Core.DDD`, `Core.CQRS`, `Core.EntityFrameworkCore`, `Core.Errors`, `Core.Storage`, …) · EF Core 10 + PostgreSQL (Npgsql) · `Elmanhg.Jobs` background host (Hangfire)**. Backend patterns are detailed in `.claude/skills/dotnet-feature/SKILL.md`; the feature pipeline (`feature-planner` → `feature-implementer` → `feature-reviewer`, artifacts in `.process/`) is the standard way features are built. When a rule here conflicts with a generic "best practice", this file wins. New code must be indistinguishable from existing code.
 
 ---
 
