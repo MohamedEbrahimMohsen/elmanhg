@@ -1,4 +1,5 @@
 using Core.Errors;
+using Core.Utilities.Time;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Subscriptions.Shared;
@@ -37,11 +38,6 @@ public static class AskTeacherGate
         }
     }
 
-    private static DateTimeOffset MonthStart(int year, int month, TimeZoneInfo zone)
-    {
-        var wallClock = new DateTimeOffset(year, month, 1, 0, 0, 0, TimeSpan.Zero);
-        var offset = zone.GetUtcOffset(wallClock - zone.GetUtcOffset(wallClock));
-        // Npgsql writes only UTC offsets to timestamptz, so the bound is returned in UTC.
-        return (wallClock - offset).ToUniversalTime();
-    }
+    // Npgsql writes only UTC offsets to timestamptz, so the bound is returned in UTC.
+    private static DateTimeOffset MonthStart(int year, int month, TimeZoneInfo zone) => zone.StartOfDay(new DateOnly(year, month, 1));
 }

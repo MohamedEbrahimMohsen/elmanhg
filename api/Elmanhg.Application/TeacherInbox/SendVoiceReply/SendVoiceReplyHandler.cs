@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Realtime;
@@ -16,15 +16,10 @@ public sealed class SendVoiceReplyHandler(ITeacherThreadRepository teacherThread
 {
     public async Task<TeacherInboxThreadResult> Handle(SendVoiceReplyCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
-        var thread = await teacherThreadRepository.FirstOrDefaultAsync(x => x.Id == request.ThreadId, cancellationToken, include: query => query.Include(x => x.Messages)).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.TeacherThreadNotFound);
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
+        var thread = await teacherThreadRepository.GetRequiredAsync(x => x.Id == request.ThreadId, ErrorCodes.TeacherThreadNotFound, cancellationToken, include: query => query.Include(x => x.Messages)).ConfigureAwait(false);
         await TeacherInboxAccess.EnsureCanAccessAsync(thread.SubjectId, userId, currentUserService.GetClaim(ClaimTypes.Role), teacherSubjectRepository, cancellationToken).ConfigureAwait(false);
-        var draft = await teacherVoiceDraftRepository.FirstOrDefaultAsync(x => x.Id == request.DraftId && x.ThreadId == thread.Id && x.TeacherId == userId, cancellationToken).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.TeacherVoiceDraftNotFound);
+        var draft = await teacherVoiceDraftRepository.GetRequiredAsync(x => x.Id == request.DraftId && x.ThreadId == thread.Id && x.TeacherId == userId, ErrorCodes.TeacherVoiceDraftNotFound, cancellationToken).ConfigureAwait(false);
 
         var now = timeProvider.GetUtcNow();
         var message = thread.ReplyWithVoice(userId, request.Text ?? string.Empty, draft.AudioUrl, draft.AudioDurationSeconds, now);

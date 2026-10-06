@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.TeacherInbox.Shared;
@@ -11,13 +11,8 @@ public sealed class GetVoiceDraftHandler(ITeacherVoiceDraftRepository teacherVoi
 {
     public async Task<TeacherVoiceDraftResult> Handle(GetVoiceDraftQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
-        var draft = await teacherVoiceDraftRepository.FirstOrDefaultAsync(x => x.Id == request.DraftId && x.ThreadId == request.ThreadId && x.TeacherId == userId, cancellationToken, asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.TeacherVoiceDraftNotFound);
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
+        var draft = await teacherVoiceDraftRepository.GetRequiredAsync(x => x.Id == request.DraftId && x.ThreadId == request.ThreadId && x.TeacherId == userId, ErrorCodes.TeacherVoiceDraftNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
         return TeacherVoiceDraftResultGenerator.Generate(draft);
     }
 }

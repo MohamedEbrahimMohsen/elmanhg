@@ -41,4 +41,12 @@ public sealed class GetMyPaymentsValidatorTests
 
         result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.PaymentHistoryPageSizeInvalid);
     }
+
+    [Fact]
+    public void Validate_PageOffsetPastIntRange_FailsPageNumberInvalid()
+    {
+        var result = _validator.Validate(new GetMyPaymentsQuery(PageNumber: int.MaxValue, PageSize: 20));
+
+        result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.PaymentHistoryPageNumberInvalid);
+    }
 }

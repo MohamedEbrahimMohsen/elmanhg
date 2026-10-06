@@ -50,4 +50,12 @@ public sealed class GetSessionHistoryValidatorTests
 
         result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.SessionHistoryKindInvalid);
     }
+
+    [Fact]
+    public void Validate_PageOffsetPastIntRange_FailsPageNumberInvalid()
+    {
+        var result = _validator.Validate(new GetSessionHistoryQuery(null, PageNumber: int.MaxValue, PageSize: 20));
+
+        result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.SessionHistoryPageNumberInvalid);
+    }
 }

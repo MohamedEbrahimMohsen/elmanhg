@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.GradeReviews.Shared;
 using Elmanhg.Domain.Lessons;
@@ -14,7 +14,7 @@ public sealed class GetMathStepGradeReviewHandler(IMathStepGradeRepository mathS
 {
     public async Task<GradeReviewDetailResult> Handle(GetMathStepGradeReviewQuery request, CancellationToken cancellationToken)
     {
-        var grade = await mathStepGradeRepository.FirstOrDefaultAsync(x => x.Id == request.MathStepGradeId && x.SubjectId == request.SubjectId && x.ReviewReason != null, cancellationToken, asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.GradeReviewNotFound);
+        var grade = await mathStepGradeRepository.GetRequiredAsync(x => x.Id == request.MathStepGradeId && x.SubjectId == request.SubjectId && x.ReviewReason != null, ErrorCodes.GradeReviewNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
         await GradeReviewSessionGuard.EnsureNotTestModeAsync(grade.SessionId, sessionRepository, cancellationToken).ConfigureAwait(false);
         var snapshot = await GradeReviewRevisionLoader.LoadAsync(grade.QuestionId, grade.QuestionVersion, questionRepository, cancellationToken).ConfigureAwait(false);
         var (_, placements) = await GradeReviewPlacementLoader.LoadAsync([grade.QuestionId], questionRepository, lessonRepository, unitRepository, cancellationToken).ConfigureAwait(false);

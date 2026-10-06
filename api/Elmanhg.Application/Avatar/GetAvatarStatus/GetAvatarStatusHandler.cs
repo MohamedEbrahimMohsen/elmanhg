@@ -1,4 +1,3 @@
-using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Avatar.Shared;
 using Elmanhg.Application.Exceptions;
@@ -18,12 +17,7 @@ public sealed class GetAvatarStatusHandler(ISessionRepository sessionRepository,
 {
     public async Task<AvatarStatusResult> Handle(GetAvatarStatusQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var now = timeProvider.GetUtcNow();
         var examInProgress = await AvatarGate.IsExamInProgressAsync(userId, sessionRepository, examsOptions.Value, now, cancellationToken).ConfigureAwait(false);
         var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, runtimeSettings, userId, subscriptionsOptions.Value, now, cancellationToken).ConfigureAwait(false);

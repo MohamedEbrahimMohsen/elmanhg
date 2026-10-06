@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Payments.Shared;
@@ -12,13 +12,10 @@ public sealed class ResolvePaymentReviewHandler(IPaymentRepository paymentReposi
 {
     public async Task<AdminPaymentResult> Handle(ResolvePaymentReviewCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
-        var payment = await paymentRepository.FirstOrDefaultAsync(x => x.Id == request.PaymentId, cancellationToken).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.PaymentNotFound);
-        payment.ResolveReview(currentUserService.UserId.Value, timeProvider.GetUtcNow());
+        var payment = await paymentRepository.GetRequiredAsync(x => x.Id == request.PaymentId, ErrorCodes.PaymentNotFound, cancellationToken).ConfigureAwait(false);
+        payment.ResolveReview(userId, timeProvider.GetUtcNow());
         await paymentRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         var student = await userRepository.FirstOrDefaultAsync(x => x.Id == payment.StudentId, cancellationToken, asNoTracking: true).ConfigureAwait(false);

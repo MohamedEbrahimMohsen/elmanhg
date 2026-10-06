@@ -1,4 +1,3 @@
-using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Subjects.Shared;
@@ -15,15 +14,11 @@ public sealed class GetSubjectsHandler(ISubjectRepository subjectRepository, ITe
 {
     public async Task<List<SubjectResult>> Handle(GetSubjectsQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         List<Subject> subjects;
         if (currentUserService.GetClaim(ClaimTypes.Role) == nameof(UserRole.Teacher))
         {
-            var userId = currentUserService.UserId.Value;
             var assignedIds = (await teacherSubjectRepository.FindAsync(x => x.TeacherId == userId, cancellationToken, asNoTracking: true).ConfigureAwait(false))
                 .Select(x => x.SubjectId)
                 .ToList();

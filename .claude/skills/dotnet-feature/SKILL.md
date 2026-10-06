@@ -11,7 +11,7 @@ Companion documents: `docs/constitution.md` (wins on conflict) · `docs/PRD.md` 
 
 ## Elmanhg deltas — read before anything below
 
-1. **Database is PostgreSQL**, via `Npgsql.EntityFrameworkCore.PostgreSQL`. `UseNpgsql(...)` with `EnableRetryOnFailure()`. Never `UseSqlServer`, never SQL Server-only features (`rowversion`, `NEWSEQUENTIALID`, `datetime2`). Concurrency tokens use PostgreSQL `xmin`: the entity implements `IVersioned` (`Core.DDD`, `public uint Version { get; private set; }`) and `AppDbContext.OnModelCreating` calls `modelBuilder.ApplyRowVersionConvention()` (`Core.EntityFrameworkCore`), which maps every `IVersioned` root entity's `Version` to `xmin`. Never write `.IsRowVersion()` per entity. Timestamps are `timestamptz` (`DateTimeOffset`, UTC).
+1. **Database is PostgreSQL**, via `Npgsql.EntityFrameworkCore.PostgreSQL`. `UseNpgsql(...)` with `EnableRetryOnFailure()`. Never `UseSqlServer`, never SQL Server-only features (`rowversion`, `NEWSEQUENTIALID`, `datetime2`). Concurrency tokens use PostgreSQL `xmin`: the entity implements `IVersioned` (`Core.DDD`, `public uint Version { get; private set; }`) and `AppDbContext.OnModelCreating` calls `modelBuilder.ApplyRowVersionConvention()` (`Core.EntityFrameworkCore`), which maps every `IVersioned` root entity's `Version` to `xmin`. Never write `.IsRowVersion()` per entity. Timestamps are `timestamptz` (`DateTimeOffset`, UTC). Domain timestamps are truncated with `Core.Utilities.Time` `TruncateToMicroseconds()` (PostgreSQL precision); local-day math uses `zone.LocalDate(instant)` / `zone.StartOfDay(day)`.
 2. **JSON columns** (question body, grading spec, blueprint counts, context bundles) are `jsonb`: `.HasColumnType("jsonb")` on a typed owned model or a `JsonDocument`/`string` with a documented shape. Never serialise to `nvarchar`/`text` by hand.
 3. **Vector search** (AI Avatar retrieval) uses `pgvector` via `Pgvector.EntityFrameworkCore`, only in the stories that need it.
 4. **Integration tests** hit a real PostgreSQL through `Testcontainers.PostgreSql`. No in-memory provider, no SQLite stand-in.
@@ -19,7 +19,7 @@ Companion documents: `docs/constitution.md` (wins on conflict) · `docs/PRD.md` 
    - `Core/` (Core.DDD, Core.CQRS, Core.EntityFrameworkCore, Core.Errors, Core.Exceptions, Core.Identity, Core.OTP, Core.Localization, Core.Logging, Core.Auditing, Core.Cache, Core.Notifications, Core.Queues, Core.Utilities, Core.Validation) is vendored into `api/core-libraries/` in this repo. Copy it, do not reference the Morabh path at build time. When vendoring, swap every SQL Server dependency for Npgsql and drop `Core.Azure` unless a story needs it. `Core.Storage` (file storage `IFileStorage` with Local/S3 providers, `StorageContentTypes`, public media serving with a `PrivateFolders` list, `WriteStoredFileAsync`) is Elmanhg-native, with no Morabh equivalent; files and media always go through it.
    - Before designing **any** feature (login, register, OTP, refresh tokens, audit log, localisation, notifications, error codes, paging, file upload…), search the Morabh repo (`Core/`, `Morabh.Application/`, `Morabh.Domain/`, `Morabh.Infrastructure/`, `Morabh.APIs/`, `CRUD_FEATURE_CREATION_GUIDE.md`, `ErrorCodes.md`, `AuditLogs.md`, `Localization.md`). If it exists, copy it into the matching Elmanhg layer, rename namespaces `Morabh.*` → `Elmanhg.*`, and adapt it to the Elmanhg domain. The plan must name the Morabh source file for every reused piece.
    - Only when nothing in Morabh covers it, write it from scratch — in the same shape, layering, naming and error-code style as the Morabh code. Murabaha/BNPL business logic is never copied.
-   - Promoted in Elmanhg (no Morabh source): `Core.Hosting`, `Core.Observability`, `Core.Spreadsheets`, plus `Core.Cache` (`ICacheableQuery` + `CachingBehaviour`) and `Core.Logging` `TextRedactor`. Cache a query by implementing `ICacheableQuery`; read/write spreadsheets through `ISpreadsheetReader`/`ISpreadsheetWriter`; build rate-limit policies from `Core.Hosting.RateLimiting.RateLimitPartitions`; redact free text with a `TextRedactor`.
+   - Promoted in Elmanhg (no Morabh source): `Core.Hosting`, `Core.Observability`, `Core.Spreadsheets`, plus `Core.Cache` (`ICacheableQuery` + `CachingBehaviour`) and `Core.Logging` `TextRedactor`. Cache a query by implementing `ICacheableQuery`; read/write spreadsheets through `ISpreadsheetReader`/`ISpreadsheetWriter`; build rate-limit policies from `Core.Hosting.RateLimiting.RateLimitPartitions`; redact free text with a `TextRedactor`. Plus the E21.S3 helpers: `ICurrentUserService.GetRequiredUserId(code)`, `IRepository<T>.GetRequiredAsync(id or predicate, code, …)`, `PageData<T>.Map`, `IQueryable<T>.ToPageDataAsync`, `ModelBuilder.ApplySoftDeleteQueryFilters`, `IOtpRepository.ConsumeAsync`, `Core.Utilities.Time` and `AddValidatedOptions`.
 6. **Solution layout**: `api/Elmanhg.slnx` with `Elmanhg.Api`, `Elmanhg.Application`, `Elmanhg.Domain`, `Elmanhg.Infrastructure`, `Elmanhg.Jobs` (background jobs, when needed), `Elmanhg.Tests`, plus `core-libraries/`. Mirror Morabh's project structure.
 7. **Secrets**: environment variables and a gitignored `.env`; `appsettings.json` holds shape and safe defaults only. External providers without credentials in this repo (Paymob, SMS gateway, Claude API, transcription) sit behind an interface with a `Fake*` implementation selected by config, so the app and tests run offline.
 
@@ -389,7 +389,7 @@ public interface ITenantSubscriptionRepository : IRepository<TenantSubscription>
 ```
 
 `IRepository<T>` (Core.DDD) provides: `GetAllAsync`, `GetByIdAsync`, `AddAsync`, `AddRangeAsync`, `Update`, `UpdateRange`, `Delete`, `DeleteRange`, `FindAsync`, `FirstOrDefaultAsync`, `FindPaginatedAsync`, `CountAsync`, `SaveChangesAsync`.
-Only add custom methods when base methods genuinely cannot express the query.
+Only add custom methods when base methods genuinely cannot express the query. Load-or-404 is the extension `GetRequiredAsync(id or predicate, ErrorCodes.XNotFound, cancellationToken, include?, asNoTracking?)` — never `?? throw new NotFoundCoreException` after `GetByIdAsync`/`FirstOrDefaultAsync`.
 
 ---
 
@@ -457,7 +457,7 @@ public sealed class CreateTenantValidator : AbstractValidator<CreateTenantComman
 
 | Extension | Use Case |
 |-----------|----------|
-| `ValidateRequired(errorCode?)` | string?, Guid, int, IFormFile? |
+| `ValidateRequired(errorCode?)` | string?, Guid, Guid? (null or empty fails), int, IFormFile? |
 | `ValidateMaxLength(max, errorCode?)` / `ValidateMinLength(min, errorCode?)` | string |
 | `ValidatePositive` / `ValidateGreaterThanZero` / `ValidateMax` / `ValidateMin` | numeric |
 | `ValidateEmail` / `ValidateUrl` / `ValidateOnlyNumbers` | string |
@@ -465,6 +465,10 @@ public sealed class CreateTenantValidator : AbstractValidator<CreateTenantComman
 | `ValidateImageExtensions` / `ValidateMaxFileSize` | IFormFile |
 | `ValidateDateRequired` | DateOnly/DateTimeOffset |
 | `ValidateListContainOneItem` | collection |
+| `ValidatePaging(pageNumber, pageSize, max, numberCode, sizeCode)` | on `RuleFor(x => x)` — page ≥ 1, offset within `int`, size 1…max |
+| `ValidateDateRange(from, to, code, maxSpan/maxDays?, tooLongCode?)` | on `RuleFor(x => x)` — instants half-open, `DateOnly` inclusive days |
+| `ValidateDistinct(code)` | collection |
+| `ValidateFileSignature(signatures, code)` | IFormFile? — `FileSignature.Png/Jpeg/WebP/Gif/WebM/Ogg/Mp4/Zip` (`ForExtensions(...)` to rebind) |
 
 (Verify exact names in `core-libraries/Core.Validation` before use — the vendored set is the truth.)
 
@@ -477,10 +481,7 @@ public sealed class CreateTenantHandler(ITenantRepository tenantRepository, ICur
 {
     public async Task<TenantResult> Handle(CreateTenantCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         var slugTaken = await tenantRepository.FirstOrDefaultAsync(x => x.Slug == request.Slug, cancellationToken).ConfigureAwait(false);
         if (slugTaken is not null)
@@ -489,7 +490,7 @@ public sealed class CreateTenantHandler(ITenantRepository tenantRepository, ICur
         }
 
         var name = new LocalizedText(arabic: request.NameArabic, english: request.NameEnglish);
-        var tenant = Tenant.Create(name, request.Slug, request.OwnerUserId, currentUserService.UserId.Value);
+        var tenant = Tenant.Create(name, request.Slug, request.OwnerUserId, userId);
 
         await tenantRepository.AddAsync(tenant, cancellationToken).ConfigureAwait(false);
         await tenantRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -501,13 +502,13 @@ public sealed class CreateTenantHandler(ITenantRepository tenantRepository, ICur
 
 ### 5.6 Query Handler
 
-List handlers return `List<TResult>` with `?? []` — never null. Use `FindPaginatedAsync`/`PageData<T>` only when the endpoint is genuinely paginated (admin grids); there is NO blanket PageData mandate. Language-aware ordering via `ILocalizer.IsCurrentLanguageArabic` when bilingual fields exist.
+List handlers return `List<TResult>` with `?? []` — never null. Use `FindPaginatedAsync`/`PageData<T>` only when the endpoint is genuinely paginated (admin grids); there is NO blanket PageData mandate. Language-aware ordering via `ILocalizer.IsCurrentLanguageArabic` when bilingual fields exist. Map a page with `page.Map(XResultGenerator.Generate)` — never copy the four paging fields by hand.
 
 Handler rules:
 - `sealed class`. No `try`/`catch`. Throw core exceptions directly.
 - `SaveChangesAsync` called **once in handler** after all mutations — never inside repo CRUD methods.
 - `.ConfigureAwait(false)` on every `await`.
-- `ICurrentUserService.UserId` null-checked with `UnauthorizedCoreException` (guard current user FIRST).
+- Current user read FIRST via `currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated)` (401).
 - Business rule checks live in the DOMAIN (entity methods throw); the handler orchestrates.
 - Never validate manually in handlers — the `Core.CQRS` `ValidationBehaviour` pipeline enforces validators → 422.
 - Auditing: business mutations opt in via `IAuditableCommand` (Core.Auditing) — pipeline-side; handlers are never modified for auditing.
@@ -610,7 +611,7 @@ public class TenantSubscriptionRepository(AppDbContext context) : Repository<Ten
 
 **`AddAsync`/`Update`/`Delete` do NOT call `SaveChangesAsync`. Call it once in the handler.**
 
-`FindPaginatedAsync` counts with `LongCountAsync`; a page whose offset is past the last row (or past `int` range) returns empty `Items` with correct totals. A hand-written paged query uses `Core.DDD.Models.PageCalculator` (`Offset`, `TotalPages`, `IsPastEnd`), never `(pageNumber - 1) * pageSize` in `int`.
+`FindPaginatedAsync` counts with `LongCountAsync`; a page whose offset is past the last row (or past `int` range) returns empty `Items` with correct totals. A hand-written paged query ends in `.ToPageDataAsync(pageNumber, pageSize, cancellationToken)` (Core.EntityFrameworkCore), never its own `Skip`/`Take` arithmetic.
 
 ### 6.2 AppDbContext — Single Shared Context
 
@@ -628,7 +629,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator) : CoreDb
     {
         base.OnModelCreating(modelBuilder);
         ConfigureTenants(modelBuilder);
-        ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
+        modelBuilder.ApplySoftDeleteQueryFilters();
     }
 }
 ```
@@ -666,7 +667,7 @@ private static void ConfigureTenants(ModelBuilder modelBuilder)
 | `OwnsOne(x => x.ValueObject)` | simple value objects with no separate table |
 | `HasConversion<string>().HasMaxLength(50–100)` | all enums |
 | `OnDelete(DeleteBehavior.Restrict)` | default for all FKs |
-| `HasQueryFilter(e => !e.IsDeleted)` | every ISoftDeletable entity — in `ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries` only |
+| `HasQueryFilter(e => !e.IsDeleted)` | never by hand; `ApplySoftDeleteQueryFilters()` adds it to every root `ISoftDeletable` entity |
 | `HasIndex(...).IsUnique()` | unique business keys |
 | `ValueGeneratedNever()` | child entities with manually assigned IDs |
 | `HasPrecision(18, 2)` (or the currency's scale) | every money `decimal` — `double`/`float` for money PROHIBITED |
@@ -674,7 +675,7 @@ private static void ConfigureTenants(ModelBuilder modelBuilder)
 
 ### 6.4 Soft-Delete Global Filters — MANDATORY for every entity
 
-Never append `.Where(!IsDeleted)` in queries. The global filter method is the single enforcement point — add each new entity there. Use `IgnoreQueryFilters()` only in explicit admin/audit queries with documented reason.
+Never append `.Where(!IsDeleted)` in queries. The convention call is the single enforcement point — a new `Entity` gets the filter automatically. Use `IgnoreQueryFilters()` only in explicit admin/audit queries with documented reason.
 
 ### 6.5 DependencyInjection.cs (Infrastructure)
 
@@ -925,12 +926,8 @@ public void Delete() { var now = DateTimeOffset.UtcNow; Status = EngineerStatus.
 ### 8.5 Soft-delete filtering has exactly one home
 
 ```csharp
-// ✅ DO — the query filter lives ONLY in the global method; every new entity adds a line here
-private static void ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(ModelBuilder modelBuilder)
-{
-    modelBuilder.Entity<User>().HasQueryFilter(x => !x.IsDeleted);
-    modelBuilder.Entity<Engineer>().HasQueryFilter(x => !x.IsDeleted);
-}
+// ✅ DO — the query filter lives ONLY in the convention call at the end of OnModelCreating
+modelBuilder.ApplySoftDeleteQueryFilters();
 
 // ✅ Also DO — a partial-index SQL filter stays WITH the index (it is schema, not querying)
 builder.HasIndex(x => x.Slug).IsUnique().HasFilter("[IsDeleted] = 0");
@@ -1025,8 +1022,10 @@ Updating a test because behaviour **intentionally** changed is fine (§9). Editi
 ### 8.12 Options are validated at startup
 
 ```csharp
-services.AddOptions<EngineersOptions>().BindConfiguration(EngineersOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+services.AddValidatedOptions<EngineersOptions>(EngineersOptions.SectionName);
 ```
+
+`AddValidatedOptions<TOptions, TValidator>` also registers an `IValidateOptions<TOptions>`.
 
 A missing/invalid cap fails the boot, not the first request. `IOptions<T>` in singletons, `IOptionsSnapshot<T>` in scoped services. Mirror the existing registration style in `Program.cs`.
 
@@ -1059,7 +1058,7 @@ private static readonly Regex SlugPattern = new("^[a-z0-9-]+$", RegexOptions.Non
 - [ ] Validator: separate file, `sealed class : AbstractValidator<T>`, Core.Validation extensions
 - [ ] Handler: `sealed class`, no `try`/`catch`, throws `*CoreException` directly
 - [ ] `SaveChangesAsync` called once in handler — never inside repo CRUD methods
-- [ ] `ICurrentUserService.UserId` null-checked with `UnauthorizedCoreException`
+- [ ] Current user via `GetRequiredUserId(ErrorCodes.UserNotAuthenticated)`
 - [ ] Client-facing results `.Localized()`; admin-facing `.Arabic`/`.English` separately
 - [ ] `Result` suffix on all CQRS outputs — never `DTO`, `Response`, `Model`
 - [ ] Business mutations opt into auditing via `IAuditableCommand`
@@ -1069,7 +1068,7 @@ private static readonly Regex SlugPattern = new("^[a-z0-9-]+$", RegexOptions.Non
 - [ ] `AppDbContext`: `DbSet<T> Prop { get; set; }` — no `=> Set<T>()`
 - [ ] `ConfigureLocalized(x => x.Prop)` for every `LocalizedText` — no inline `OwnsOne`
 - [ ] Entity config in named private method — no `ApplyConfigurationsFromAssembly`
-- [ ] New entity added to `ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries`
+- [ ] New entity derives from `Entity` (soft-delete filter applied by convention)
 - [ ] Repos registered in `AddInfrastructure`; open-generic `IRepository<>` registration present
 
 **API**

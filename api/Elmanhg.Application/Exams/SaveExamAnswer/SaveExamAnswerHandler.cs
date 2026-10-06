@@ -1,3 +1,4 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exams.Shared;
@@ -16,18 +17,9 @@ public sealed class SaveExamAnswerHandler(ISessionRepository sessionRepository, 
 {
     public async Task<ExamAnswerSavedResult> Handle(SaveExamAnswerCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var now = timeProvider.GetUtcNow();
-        var session = await sessionRepository.FirstOrDefaultAsync(x => x.Id == request.SessionId && x.StudentId == userId && x.Kind != SessionKind.Quiz, cancellationToken, include: query => query.Include(x => x.Items)).ConfigureAwait(false);
-        if (session is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.SessionNotFound);
-        }
+        var session = await sessionRepository.GetRequiredAsync(x => x.Id == request.SessionId && x.StudentId == userId && x.Kind != SessionKind.Quiz, ErrorCodes.SessionNotFound, cancellationToken, include: query => query.Include(x => x.Items)).ConfigureAwait(false);
 
         var item = session.GetItem(request.QuestionId);
         if (item is null)

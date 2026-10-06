@@ -12,12 +12,11 @@ public sealed class GetAvatarConversationsValidator : AbstractValidator<GetAvata
     {
         var options = avatarOptions.Value;
 
-        RuleFor(x => x.PageNumber).ValidateMin(1, ErrorCodes.AvatarConversationsPageNumberInvalid);
-        RuleFor(x => x.PageSize).ValidateRange(1, options.AdminConversationsMaxPageSize, ErrorCodes.AvatarConversationsPageSizeInvalid);
+        RuleFor(x => x).ValidatePaging(x => x.PageNumber, x => x.PageSize, options.AdminConversationsMaxPageSize, ErrorCodes.AvatarConversationsPageNumberInvalid, ErrorCodes.AvatarConversationsPageSizeInvalid);
         RuleFor(x => x.Search).ValidateMaxLength(options.ConversationSearchMaxLength, ErrorCodes.AvatarConversationsSearchTooLong);
         RuleFor(x => x.EntryPoint)
             .IsInEnum()
             .WithErrorCode(ErrorCodes.AvatarConversationsEntryPointInvalid);
-        RuleFor(x => x).Must(x => x.From is null || x.To is null || x.From < x.To).WithErrorCode(ErrorCodes.AvatarConversationsDateRangeInvalid);
+        RuleFor(x => x).ValidateDateRange(x => x.From, x => x.To, ErrorCodes.AvatarConversationsDateRangeInvalid);
     }
 }

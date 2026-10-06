@@ -13,12 +13,7 @@ public sealed class UpdateRuntimeSettingHandler(IRuntimeSettingOverrideRepositor
 {
     public async Task<RuntimeSettingResult> Handle(UpdateRuntimeSettingCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var definition = registry.Find(request.Key) ?? throw new NotFoundCoreException(ErrorCodes.RuntimeSettingNotFound);
         var rows = await runtimeSettingOverrideRepository.GetAllAsync(cancellationToken).ConfigureAwait(false) ?? [];
         var candidate = RuntimeSettingValues.From(registry, rows).With(definition.Key, request.Value);

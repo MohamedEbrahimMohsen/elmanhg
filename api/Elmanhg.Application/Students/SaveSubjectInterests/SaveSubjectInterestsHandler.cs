@@ -1,3 +1,4 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
@@ -11,10 +12,7 @@ public sealed class SaveSubjectInterestsHandler(IUserRepository userRepository, 
 {
     public async Task Handle(SaveSubjectInterestsCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         var subjectIds = request.SubjectIds.ToList();
         if (subjectIds.Count > 0 && await subjectRepository.CountAsync(cancellationToken, x => subjectIds.Contains(x.Id)).ConfigureAwait(false) != subjectIds.Count)
@@ -22,11 +20,7 @@ public sealed class SaveSubjectInterestsHandler(IUserRepository userRepository, 
             throw new NotFoundCoreException(ErrorCodes.SubjectNotFound);
         }
 
-        var user = await userRepository.GetByIdAsync(currentUserService.UserId.Value, cancellationToken).ConfigureAwait(false);
-        if (user is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.UserNotFound);
-        }
+        var user = await userRepository.GetRequiredAsync(userId, ErrorCodes.UserNotFound, cancellationToken).ConfigureAwait(false);
 
         user.ChooseSubjectInterests(subjectIds, timeProvider.GetUtcNow());
 

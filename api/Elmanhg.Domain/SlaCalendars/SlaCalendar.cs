@@ -1,3 +1,5 @@
+using Core.Utilities.Time;
+
 namespace Elmanhg.Domain.SlaCalendars;
 
 public sealed class SlaCalendar(bool skipWeekends, IReadOnlyCollection<DayOfWeek> weekendDays, TimeZoneInfo timeZone, IReadOnlyList<SlaDateRange> examPeriods)
@@ -12,15 +14,9 @@ public sealed class SlaCalendar(bool skipWeekends, IReadOnlyCollection<DayOfWeek
 
     public bool Counts(DateOnly day) => !SkipWeekends || !WeekendDays.Contains(day.DayOfWeek) || ExamPeriods.Any(x => x.Contains(day));
 
-    public DateOnly LocalDate(DateTimeOffset instant) => DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(instant, TimeZone).DateTime);
+    public DateOnly LocalDate(DateTimeOffset instant) => TimeZone.LocalDate(instant);
 
-    public DateTimeOffset StartOfDay(DateOnly day)
-    {
-        var wallClock = new DateTimeOffset(day.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
-        // Egypt springs forward at local midnight, so that midnight does not exist; the offset just before it gives the transition instant.
-        var offset = TimeZone.GetUtcOffset(wallClock - TimeZone.GetUtcOffset(wallClock));
-        return (wallClock - offset).ToUniversalTime();
-    }
+    public DateTimeOffset StartOfDay(DateOnly day) => TimeZone.StartOfDay(day);
 
     public DateTimeOffset AddCountedTime(DateTimeOffset start, TimeSpan duration)
     {

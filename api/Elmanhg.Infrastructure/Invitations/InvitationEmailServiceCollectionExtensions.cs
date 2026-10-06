@@ -2,6 +2,7 @@ using Core.Http;
 using Core.Messaging.Email;
 using Core.OTP.Delivery;
 using Core.OTP.Delivery.Email;
+using Core.Utilities;
 using Elmanhg.Application.Shared.Email;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -12,8 +13,7 @@ public static class InvitationEmailServiceCollectionExtensions
 {
     public static IServiceCollection AddInvitationEmail(this IServiceCollection services)
     {
-        services.AddOptions<InvitationEmailOptions>().BindConfiguration(InvitationEmailOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
-        services.AddSingleton<IValidateOptions<InvitationEmailOptions>, InvitationEmailOptionsValidator>();
+        services.AddValidatedOptions<InvitationEmailOptions, InvitationEmailOptionsValidator>(InvitationEmailOptions.SectionName);
         services.AddScopedHttpConsumer<ResendInvitationEmailSender, ResendEmailClient>((serviceProvider, client) => client.BaseAddress = HttpBaseAddress.From(OtpDelivery(serviceProvider).Email.BaseUrl)).AddOtpProviderResilience(retryUnsafeMethods: true);
         services.AddScoped<FakeInvitationEmailSender>();
         services.AddProviderSwitch<IInvitationEmailSender, FakeInvitationEmailSender, ResendInvitationEmailSender>(serviceProvider => UsesResend(OtpDelivery(serviceProvider).Email));

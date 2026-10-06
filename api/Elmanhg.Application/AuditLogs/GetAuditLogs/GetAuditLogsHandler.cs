@@ -11,15 +11,6 @@ public sealed class GetAuditLogsHandler(IAuditLogRepository auditLogRepository) 
     {
         var page = await auditLogRepository.FindPaginatedAsync(request.PageNumber, request.PageSize, cancellationToken, filter: GetAuditLogsFilter.Build(request), orderBy: query => query.OrderByDescending(x => x.Timestamp).ThenByDescending(x => x.Id), asNoTracking: true).ConfigureAwait(false);
 
-        return new PageData<AuditLogResult>
-        {
-            Items = page.Items
-                .Select(AuditLogResultGenerator.Generate)
-                .ToList(),
-            PageNumber = page.PageNumber,
-            PageSize = page.PageSize,
-            TotalItems = page.TotalItems,
-            TotalPages = page.TotalPages,
-        };
+        return page.Map(AuditLogResultGenerator.Generate);
     }
 }

@@ -12,7 +12,6 @@ public sealed class GetMyPaymentsValidator : AbstractValidator<GetMyPaymentsQuer
     {
         var options = subscriptionsOptions.Value;
 
-        RuleFor(x => x.PageNumber).ValidateMin(1, ErrorCodes.PaymentHistoryPageNumberInvalid);
-        RuleFor(x => x.PageSize).ValidateRange(1, options.PaymentHistoryMaxPageSize, ErrorCodes.PaymentHistoryPageSizeInvalid);
+        RuleFor(x => x).ValidatePaging(x => x.PageNumber, x => x.PageSize, options.PaymentHistoryMaxPageSize, ErrorCodes.PaymentHistoryPageNumberInvalid, ErrorCodes.PaymentHistoryPageSizeInvalid);
     }
 }

@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.TeacherThreads;
@@ -11,13 +11,8 @@ public sealed class MarkTeacherThreadReadHandler(ITeacherThreadRepository teache
 {
     public async Task Handle(MarkTeacherThreadReadCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
-        var thread = await teacherThreadRepository.FirstOrDefaultAsync(x => x.Id == request.ThreadId && x.StudentId == userId, cancellationToken, include: query => query.Include(x => x.Messages)).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.TeacherThreadNotFound);
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
+        var thread = await teacherThreadRepository.GetRequiredAsync(x => x.Id == request.ThreadId && x.StudentId == userId, ErrorCodes.TeacherThreadNotFound, cancellationToken, include: query => query.Include(x => x.Messages)).ConfigureAwait(false);
         thread.MarkRepliesRead(timeProvider.GetUtcNow());
 
         await teacherThreadRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

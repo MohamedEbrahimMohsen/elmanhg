@@ -17,8 +17,6 @@ public sealed class RefundPaymentValidator : AbstractValidator<RefundPaymentComm
             .ValidateRequired(ErrorCodes.PaymentRefundReasonRequired)
             .ValidateMaxLength(options.RefundReasonMaxLength, ErrorCodes.PaymentRefundReasonTooLong);
         RuleFor(x => x.IdempotencyKey)
-            .ValidateRequired(ErrorCodes.PaymentRefundIdempotencyKeyRequired)
-            .Must(x => x != Guid.Empty)
-            .WithErrorCode(ErrorCodes.PaymentRefundIdempotencyKeyRequired);
+            .ValidateRequired(ErrorCodes.PaymentRefundIdempotencyKeyRequired);
     }
 }

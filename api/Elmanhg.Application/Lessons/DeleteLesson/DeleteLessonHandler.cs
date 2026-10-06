@@ -11,10 +11,7 @@ public sealed class DeleteLessonHandler(ILessonRepository lessonRepository, IQue
 {
     public async Task Handle(DeleteLessonCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         var lesson = await lessonRepository.GetWithObjectivesAsync(request.LessonId, asNoTracking: false, cancellationToken).ConfigureAwait(false);
         if (lesson is null)
@@ -23,7 +20,7 @@ public sealed class DeleteLessonHandler(ILessonRepository lessonRepository, IQue
         }
 
         var hasQuestions = await questionRepository.AnyInLessonAsync(lesson.Id, cancellationToken).ConfigureAwait(false);
-        lesson.Delete(hasQuestions, currentUserService.UserId.Value);
+        lesson.Delete(hasQuestions, userId);
 
         await lessonRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }

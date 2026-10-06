@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Lessons;
@@ -11,19 +11,12 @@ public sealed class CreateLessonHandler(ICurriculumUnitRepository unitRepository
 {
     public async Task<CreateLessonResult> Handle(CreateLessonCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
-        var unit = await unitRepository.GetByIdAsync(request.UnitId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        if (unit is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.UnitNotFound);
-        }
+        var unit = await unitRepository.GetRequiredAsync(request.UnitId, ErrorCodes.UnitNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
 
         var last = await lessonRepository.FirstOrDefaultAsync(x => x.UnitId == unit.Id, cancellationToken, orderBy: query => query.OrderByDescending(x => x.Order), asNoTracking: true).ConfigureAwait(false);
-        var lesson = Lesson.Create(unit, request.Name, (last?.Order ?? 0) + 1, currentUserService.UserId.Value);
+        var lesson = Lesson.Create(unit, request.Name, (last?.Order ?? 0) + 1, userId);
 
         await lessonRepository.AddAsync(lesson, cancellationToken).ConfigureAwait(false);
         await lessonRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

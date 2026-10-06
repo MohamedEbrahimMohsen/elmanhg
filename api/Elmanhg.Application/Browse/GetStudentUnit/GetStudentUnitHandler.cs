@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Browse.Shared;
 using Elmanhg.Application.Exceptions;
@@ -20,23 +20,10 @@ public sealed class GetStudentUnitHandler(ICurriculumUnitRepository unitReposito
 {
     public async Task<StudentUnitResult> Handle(GetStudentUnitQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
+        var unit = await unitRepository.GetRequiredAsync(request.UnitId, ErrorCodes.UnitNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
 
-        var userId = currentUserService.UserId.Value;
-        var unit = await unitRepository.GetByIdAsync(request.UnitId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        if (unit is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.UnitNotFound);
-        }
-
-        var subject = await subjectRepository.GetByIdAsync(unit.SubjectId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        if (subject is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.UnitNotFound);
-        }
+        var subject = await subjectRepository.GetRequiredAsync(unit.SubjectId, ErrorCodes.UnitNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
 
         var lessons = await lessonRepository.FindAsync(x => x.UnitId == unit.Id && x.State == LessonState.Published, cancellationToken, orderBy: query => query.OrderBy(x => x.Order).ThenBy(x => x.CreationDate), asNoTracking: true).ConfigureAwait(false);
         var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, runtimeSettings, userId, subscriptionsOptions.Value, timeProvider.GetUtcNow(), cancellationToken).ConfigureAwait(false);

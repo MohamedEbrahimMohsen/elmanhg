@@ -1,3 +1,4 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Browse.Shared;
@@ -19,29 +20,16 @@ public sealed class GetStudentLessonHandler(ILessonRepository lessonRepository, 
 {
     public async Task<StudentLessonResult> Handle(GetStudentLessonQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var lesson = await lessonRepository.GetWithObjectivesAsync(request.LessonId, asNoTracking: true, cancellationToken).ConfigureAwait(false);
         if (lesson is null || lesson.State != LessonState.Published)
         {
             throw new NotFoundCoreException(ErrorCodes.LessonNotFound);
         }
 
-        var unit = await unitRepository.GetByIdAsync(lesson.UnitId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        if (unit is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.LessonNotFound);
-        }
+        var unit = await unitRepository.GetRequiredAsync(lesson.UnitId, ErrorCodes.LessonNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
 
-        var subject = await subjectRepository.GetByIdAsync(unit.SubjectId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        if (subject is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.LessonNotFound);
-        }
+        var subject = await subjectRepository.GetRequiredAsync(unit.SubjectId, ErrorCodes.LessonNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
 
         var units = await unitRepository.FindAsync(x => x.SubjectId == subject.Id, cancellationToken, orderBy: query => query.OrderBy(x => x.Order).ThenBy(x => x.CreationDate), asNoTracking: true).ConfigureAwait(false);
         var unitIds = units.Select(x => x.Id).ToList();

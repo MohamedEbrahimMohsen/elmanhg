@@ -14,8 +14,7 @@ public sealed class SaveSubjectInterestsValidator : AbstractValidator<SaveSubjec
 
         RuleFor(x => x.SubjectIds).ValidateListMaxItems(options.SubjectInterestsMaxCount, ErrorCodes.SubjectInterestsTooMany);
         RuleFor(x => x.SubjectIds)
-            .Must(ids => ids == null || ids.Distinct().Count() == ids.Count)
-            .WithErrorCode(ErrorCodes.SubjectInterestsDuplicate);
+            .ValidateDistinct(ErrorCodes.SubjectInterestsDuplicate);
         RuleForEach(x => x.SubjectIds).ValidateRequired(ErrorCodes.SubjectIdRequired);
     }
 }

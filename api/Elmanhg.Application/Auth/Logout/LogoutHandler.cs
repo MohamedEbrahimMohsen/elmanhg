@@ -13,12 +13,9 @@ public sealed class LogoutHandler(UserManager<User> userManager, ICurrentUserSer
 {
     public async Task Handle(LogoutCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
-        var user = await userManager.FindByIdAsync(currentUserService.UserId.Value.ToString()).ConfigureAwait(false);
+        var user = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false);
         if (user is null)
         {
             throw new UnauthorizedCoreException(ErrorCodes.UserNotFound);

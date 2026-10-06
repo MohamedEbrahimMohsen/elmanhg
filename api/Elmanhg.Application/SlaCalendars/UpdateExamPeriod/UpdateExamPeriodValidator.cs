@@ -16,7 +16,6 @@ public sealed class UpdateExamPeriodValidator : AbstractValidator<UpdateExamPeri
         RuleFor(x => x.Name).ValidateRequired(ErrorCodes.ExamPeriodNameRequired).ValidateMaxLength(options.ExamPeriodNameMaxLength, ErrorCodes.ExamPeriodNameTooLong);
         RuleFor(x => x.StartDate).ValidateRequired(ErrorCodes.ExamPeriodStartDateRequired);
         RuleFor(x => x.EndDate).ValidateRequired(ErrorCodes.ExamPeriodEndDateRequired);
-        RuleFor(x => x).Must(x => x.StartDate is null || x.EndDate is null || x.EndDate >= x.StartDate).WithErrorCode(ErrorCodes.ExamPeriodDateRangeInvalid);
-        RuleFor(x => x).Must(x => x.StartDate is null || x.EndDate is null || x.EndDate < x.StartDate || x.EndDate.Value.DayNumber - x.StartDate.Value.DayNumber + 1 <= options.ExamPeriodMaxDays).WithErrorCode(ErrorCodes.ExamPeriodTooLong);
+        RuleFor(x => x).ValidateDateRange(x => x.StartDate, x => x.EndDate, ErrorCodes.ExamPeriodDateRangeInvalid, options.ExamPeriodMaxDays, ErrorCodes.ExamPeriodTooLong);
     }
 }

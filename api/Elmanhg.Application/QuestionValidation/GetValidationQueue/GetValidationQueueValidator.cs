@@ -12,8 +12,7 @@ public sealed class GetValidationQueueValidator : AbstractValidator<GetValidatio
     {
         var options = questionValidationOptions.Value;
 
-        RuleFor(x => x.PageNumber).ValidateMin(1, ErrorCodes.QuestionPageNumberInvalid);
-        RuleFor(x => x.PageSize).ValidateRange(1, options.QueueMaxPageSize, ErrorCodes.QuestionPageSizeInvalid);
+        RuleFor(x => x).ValidatePaging(x => x.PageNumber, x => x.PageSize, options.QueueMaxPageSize, ErrorCodes.QuestionPageNumberInvalid, ErrorCodes.QuestionPageSizeInvalid);
         RuleFor(x => x.Type)
             .IsInEnum()
             .WithErrorCode(ErrorCodes.QuestionTypeInvalid);

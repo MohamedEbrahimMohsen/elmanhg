@@ -75,6 +75,14 @@ public sealed class UploadDiagramImageValidatorTests
         result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.LessonImageTooLarge);
     }
 
+    [Fact]
+    public void Validate_EmptyFile_FailsOnlyWithLessonImageRequired()
+    {
+        var result = _validator.Validate(new UploadDiagramImageCommand(Guid.NewGuid(), File("x.png", "image/png", [])));
+
+        result.Errors.Select(x => x.ErrorCode).Should().Equal(ErrorCodes.LessonImageRequired);
+    }
+
     private static FormFile File(string fileName, string contentType, byte[] bytes)
     {
         return new FormFile(new MemoryStream(bytes), 0, bytes.Length, "file", fileName) { Headers = new HeaderDictionary(), ContentType = contentType };

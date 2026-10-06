@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Questions;
@@ -10,18 +10,11 @@ public sealed class RetireQuestionHandler(IQuestionRepository questionRepository
 {
     public async Task Handle(RetireQuestionCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
-        var question = await questionRepository.GetByIdAsync(request.QuestionId, cancellationToken).ConfigureAwait(false);
-        if (question is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.QuestionNotFound);
-        }
+        var question = await questionRepository.GetRequiredAsync(request.QuestionId, ErrorCodes.QuestionNotFound, cancellationToken).ConfigureAwait(false);
 
-        question.Retire(currentUserService.UserId.Value);
+        question.Retire(userId);
 
         await questionRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }

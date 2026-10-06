@@ -1,4 +1,3 @@
-using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.QuestionValidation.Shared;
@@ -13,12 +12,9 @@ public sealed class StartReviewSessionHandler(IReviewSessionRepository reviewSes
 {
     public async Task<ReviewSessionResult> Handle(StartReviewSessionCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
-        var session = ReviewSession.Start(currentUserService.UserId.Value, TimeSpan.FromMinutes(questionValidationOptions.Value.ReviewSessionLifetimeMinutes));
+        var session = ReviewSession.Start(userId, TimeSpan.FromMinutes(questionValidationOptions.Value.ReviewSessionLifetimeMinutes));
 
         await reviewSessionRepository.AddAsync(session, cancellationToken).ConfigureAwait(false);
         await reviewSessionRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

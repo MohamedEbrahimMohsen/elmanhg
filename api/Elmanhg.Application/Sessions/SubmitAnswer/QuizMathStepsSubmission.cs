@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.MathStepGrading;
 using Elmanhg.Domain.Questions;
@@ -18,7 +18,7 @@ public static class QuizMathStepsSubmission
             return;
         }
 
-        var question = await questionRepository.FirstOrDefaultAsync(x => x.Id == item.QuestionId, cancellationToken, include: query => query.IgnoreQueryFilters(), asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.QuestionNotFound);
+        var question = await questionRepository.GetRequiredAsync(x => x.Id == item.QuestionId, ErrorCodes.QuestionNotFound, cancellationToken, include: query => query.IgnoreQueryFilters(), asNoTracking: true).ConfigureAwait(false);
         await mathStepGradeRepository.AddAsync(MathStepGrade.Request(session.StudentId, session.Id, question.SubjectId, item.QuestionId, item.QuestionVersion, item.MaxScore, answer, verdict, submission.SubmittedAt, submission.TimeTakenMilliseconds), cancellationToken).ConfigureAwait(false);
     }
 }

@@ -1,4 +1,5 @@
 using Core.Errors;
+using Core.Utilities.Time;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
@@ -37,7 +38,7 @@ public partial class Session
         }
 
         EnsureNotSubmitted();
-        var at = ToMicroseconds(now);
+        var at = now.TruncateToMicroseconds();
         if (IsPastDeadline(at, grace))
         {
             throw new BusinessRuleViolationCoreException(ErrorCodes.ExamTimeExpired);
@@ -67,7 +68,7 @@ public partial class Session
 
     private static Session CreateExam(Guid studentId, SessionKind kind, string scope, string scopeKey, int? timeLimitMinutes, int passMark, IReadOnlyList<Question> questions, bool isTestMode, DateTimeOffset now)
     {
-        var started = ToMicroseconds(now);
+        var started = now.TruncateToMicroseconds();
         var session = new Session(Guid.NewGuid(), studentId)
         {
             StudentId = studentId,

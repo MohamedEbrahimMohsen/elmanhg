@@ -1,3 +1,4 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
@@ -19,18 +20,14 @@ public sealed class CompleteFakePaymentHandler(IPaymentRepository paymentReposit
 
     public async Task<PaymentResult> Handle(CompleteFakePaymentCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         if (!paymentGateway.SupportsSimulatedCompletion)
         {
             throw new NotFoundCoreException(ErrorCodes.FakeCheckoutUnavailable);
         }
 
-        var userId = currentUserService.UserId.Value;
-        var payment = await paymentRepository.FirstOrDefaultAsync(x => x.Id == request.PaymentId && x.StudentId == userId, cancellationToken).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.PaymentNotFound);
+        var payment = await paymentRepository.GetRequiredAsync(x => x.Id == request.PaymentId && x.StudentId == userId, ErrorCodes.PaymentNotFound, cancellationToken).ConfigureAwait(false);
         if (payment.Status != PaymentStatus.Pending)
         {
             throw new BusinessRuleViolationCoreException(DomainErrorCodes.PaymentNotPending);

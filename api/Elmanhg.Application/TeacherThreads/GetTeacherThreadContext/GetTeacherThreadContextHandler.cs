@@ -20,12 +20,7 @@ public sealed class GetTeacherThreadContextHandler(ILessonRepository lessonRepos
 {
     public async Task<TeacherThreadContextResult> Handle(GetTeacherThreadContextQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, runtimeSettings, userId, subscriptionsOptions.Value, timeProvider.GetUtcNow(), cancellationToken).ConfigureAwait(false);
         if (!entitlement.HasAskTeacher)
         {

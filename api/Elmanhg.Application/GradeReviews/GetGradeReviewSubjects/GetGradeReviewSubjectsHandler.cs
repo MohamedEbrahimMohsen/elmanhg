@@ -1,4 +1,3 @@
-using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.GradeReviews.Shared;
@@ -16,12 +15,7 @@ public sealed class GetGradeReviewSubjectsHandler(ITeacherSubjectRepository teac
 {
     public async Task<List<GradeReviewSubjectResult>> Handle(GetGradeReviewSubjectsQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var isAdmin = currentUserService.GetClaim(ClaimTypes.Role) == nameof(UserRole.Admin);
         List<Guid>? subjectIds = null;
         List<Subject> subjects;
