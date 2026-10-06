@@ -4,6 +4,7 @@ using Elmanhg.Application.Shared.Payments;
 using Elmanhg.Domain.SharedKernel;
 using Elmanhg.Infrastructure.Payments;
 using Elmanhg.Infrastructure.Payments.Paymob;
+using Elmanhg.Tests.Core.Http;
 using Elmanhg.Tests.Infrastructure.OtpDelivery;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -136,7 +137,7 @@ public sealed class PaymobPaymentGatewayRefundTests
 
     private Task<PaymentRefund> RefundAsync()
     {
-        var gateway = new PaymobPaymentGateway(new HttpClient(_handler) { BaseAddress = new Uri("https://accept.paymob.com/") }, Options.Create(_options), NullLogger<PaymobPaymentGateway>.Instance);
+        var gateway = new PaymobPaymentGateway(new HttpClient(_handler) { BaseAddress = new Uri("https://accept.paymob.com/") }, Options.Create(_options), CoreHttpTestSettings.Create(), NullLogger<PaymobPaymentGateway>.Instance);
         return gateway.RefundAsync(new PaymentRefundRequest(_paymentId, "192036465", new Money(19900, "EGP")), TestContext.Current.CancellationToken);
     }
 }

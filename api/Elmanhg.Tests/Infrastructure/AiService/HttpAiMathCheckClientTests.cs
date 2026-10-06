@@ -2,6 +2,7 @@ using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Questions.Schemas;
 using Elmanhg.Infrastructure.AiService;
+using Elmanhg.Tests.Core.Http;
 using Elmanhg.Tests.Infrastructure.OtpDelivery;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -80,7 +81,7 @@ public sealed class HttpAiMathCheckClientTests
 
     private Task<AiMathCheckResult> CheckAsync(AiMathCheckRequest request)
     {
-        var client = new HttpAiMathCheckClient(new HttpClient(_handler) { BaseAddress = new Uri("http://ai.test/") }, Options.Create(AiServiceTestSettings.WithHttp()), NullLogger<HttpAiMathCheckClient>.Instance);
+        var client = new HttpAiMathCheckClient(new HttpClient(_handler) { BaseAddress = new Uri("http://ai.test/") }, Options.Create(AiServiceTestSettings.WithHttp()), CoreHttpTestSettings.Create(), NullLogger<HttpAiMathCheckClient>.Instance);
         return client.CheckAsync(request, TestContext.Current.CancellationToken);
     }
 }

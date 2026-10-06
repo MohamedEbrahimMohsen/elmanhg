@@ -2,6 +2,7 @@ using Core.Errors;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Infrastructure.AiService;
+using Elmanhg.Tests.Core.Http;
 using Elmanhg.Tests.Infrastructure.OtpDelivery;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -200,7 +201,7 @@ public sealed class HttpAiServiceClientTests
 
     private Task<AiEmbeddingResult> EmbedAsync()
     {
-        var client = new HttpAiServiceClient(new HttpClient(_handler) { BaseAddress = new Uri("http://ai.test/") }, Options.Create(AiServiceTestSettings.WithHttp()), NullLogger<HttpAiServiceClient>.Instance);
+        var client = new HttpAiServiceClient(new HttpClient(_handler) { BaseAddress = new Uri("http://ai.test/") }, Options.Create(AiServiceTestSettings.WithHttp()), CoreHttpTestSettings.Create(), NullLogger<HttpAiServiceClient>.Instance);
         return client.EmbedAsync(new AiEmbeddingRequest(AiEmbeddingInputType.Query, ["a", "b"]), TestContext.Current.CancellationToken);
     }
 
@@ -215,7 +216,7 @@ public sealed class HttpAiServiceClientTests
 
     private Task<AiChatReply> ChatAsync(CancellationToken? cancellationToken = null)
     {
-        var client = new HttpAiServiceClient(new HttpClient(_handler) { BaseAddress = new Uri("http://ai.test/") }, Options.Create(AiServiceTestSettings.WithHttp()), NullLogger<HttpAiServiceClient>.Instance);
+        var client = new HttpAiServiceClient(new HttpClient(_handler) { BaseAddress = new Uri("http://ai.test/") }, Options.Create(AiServiceTestSettings.WithHttp()), CoreHttpTestSettings.Create(), NullLogger<HttpAiServiceClient>.Instance);
         return client.ChatAsync(AiServiceTestSettings.ChatRequest(), cancellationToken ?? TestContext.Current.CancellationToken);
     }
 }
