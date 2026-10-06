@@ -1,4 +1,4 @@
-namespace Elmanhg.Application.Shared.Storage;
+namespace Core.Storage;
 
 public sealed record StoredFile(Stream Content, long Length, string ContentType) : IAsyncDisposable
 {

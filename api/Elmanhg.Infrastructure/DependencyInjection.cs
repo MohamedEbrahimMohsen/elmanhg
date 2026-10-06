@@ -1,4 +1,5 @@
 using Core.Spreadsheets;
+using Core.Storage;
 using Elmanhg.Application.Configuration.Shared;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.RichText;
@@ -44,7 +45,6 @@ using Elmanhg.Infrastructure.RichText;
 using Elmanhg.Infrastructure.RuntimeSettings;
 using Elmanhg.Infrastructure.Sessions;
 using Elmanhg.Infrastructure.SlaCalendars;
-using Elmanhg.Infrastructure.Storage;
 using Elmanhg.Infrastructure.Subjects;
 using Elmanhg.Infrastructure.Subscriptions;
 using Elmanhg.Infrastructure.TeacherThreads;
@@ -65,7 +65,7 @@ public static class DependencyInjection
         services.AddMessaging();
         services.AddPayments();
         services.AddAiService();
-        services.AddFileStorage();
+        services.AddCoreFileStorage();
         services.AddTrainingData();
         services.AddSingleton<IRichTextSanitizer, RichTextSanitizer>();
         services.AddSingleton<IRichTextExtractor, RichTextExtractor>();

@@ -1,9 +1,9 @@
-using Elmanhg.Application.Shared.Storage;
+using Core.Storage;
 using FluentAssertions;
 
-namespace Elmanhg.Tests.Application.Shared.Storage;
+namespace Elmanhg.Tests.Core.Storage;
 
-public sealed class MediaContentTypesTests
+public sealed class StorageContentTypesTests
 {
     [Theory]
     [InlineData("lessons/a.png", "image/png")]
@@ -16,14 +16,21 @@ public sealed class MediaContentTypesTests
     [InlineData("teacher-threads/a.ogg", "audio/ogg")]
     [InlineData("teacher-threads/a.m4a", "audio/mp4")]
     [InlineData("teacher-threads/a.mp4", "audio/mp4")]
+    [InlineData("training-exports/a.jsonl", "application/x-ndjson")]
     public void FromKey_KnownExtensions_MapsContentType(string key, string contentType)
     {
-        MediaContentTypes.FromKey(key).Should().Be(contentType);
+        StorageContentTypes.FromKey(key).Should().Be(contentType);
     }
 
     [Fact]
     public void FromKey_UnknownExtension_ReturnsFallback()
     {
-        MediaContentTypes.FromKey("lessons/a.svg").Should().Be("application/octet-stream");
+        StorageContentTypes.FromKey("lessons/a.svg").Should().Be("application/octet-stream");
+    }
+
+    [Fact]
+    public void FromKey_NoExtension_ReturnsFallback()
+    {
+        StorageContentTypes.FromKey("lessons/a").Should().Be("application/octet-stream");
     }
 }

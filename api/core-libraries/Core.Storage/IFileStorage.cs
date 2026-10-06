@@ -1,4 +1,4 @@
-namespace Elmanhg.Application.Shared.Storage;
+namespace Core.Storage;
 
 public interface IFileStorage
 {

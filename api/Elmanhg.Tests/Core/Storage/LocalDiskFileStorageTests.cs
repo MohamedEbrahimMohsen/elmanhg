@@ -1,10 +1,11 @@
-using Elmanhg.Infrastructure.Storage;
+using Core.Storage;
+using Core.Storage.Local;
 using FluentAssertions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 
-namespace Elmanhg.Tests.Infrastructure.Storage;
+namespace Elmanhg.Tests.Core.Storage;
 
 public sealed class LocalDiskFileStorageTests : IDisposable
 {

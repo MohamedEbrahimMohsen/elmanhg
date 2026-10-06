@@ -44,7 +44,7 @@ Also reviewed:
 - The SignalR hub `/api/hubs/notifications` requires `AuthenticatedUser`; the token in `?access_token=` is accepted on the hub path only and never logged ([ask-teacher.md](ask-teacher.md)).
 - Teacher reads of subject-owned data go through `ISubjectScopedRequest` / `SubjectScopeBehaviour`, which fails closed (403 `SUBJECT_OUT_OF_SCOPE`).
 - Owner lookups (sessions, threads, conversations, exports) filter by the caller and return 404 for another owner's id, never 403.
-- Private media: `teacher-threads/` files are served only through `TeacherThreadMediaMiddleware` (`CanViewTeacherThreadMedia`: the owning student, a teacher of the subject, an admin). `training-exports/` files are never served by `/api/media`; only an admin downloads them through `GET /api/training-exports/{id}/file`.
+- Private media: `teacher-threads/` files are served only through `TeacherThreadMediaMiddleware` (`CanViewTeacherThreadMedia`: the owning student, a teacher of the subject, an admin). `training-exports/` files are never served by `/api/media`; only an admin downloads them through `GET /api/training-exports/{id}/file`. The private-folder list is declared once (`MediaStorageExtensions.PrivateFolders`) and `Core.Storage` applies it to both media paths.
 
 Result: no gaps found.
 
@@ -136,7 +136,7 @@ The admin Configuration API (`GET /api/configuration/infrastructure`, [configura
 
 SVG is never accepted, because it can carry script and media is served from the site origin. Media responses carry `X-Content-Type-Options: nosniff`.
 
-- **Paths:** `LocalDiskFileStorage.ResolvePath` and `PublicMediaMiddleware.IsPublicKey` refuse traversal.
+- **Paths:** `LocalDiskFileStorage` (`Core.Storage`) and `PublicMediaMiddleware.IsPublicKey` (`Core.Storage`) refuse traversal; `PublicMediaFileProvider` refuses `~` short names.
 - **Regular expressions** over user input are bounded (`RegexOptions.NonBacktracking` or a timeout).
 - **SQL:** EF Core with parameters only; no `FromSqlRaw` with interpolation.
 

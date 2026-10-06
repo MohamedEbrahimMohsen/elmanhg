@@ -32,6 +32,7 @@
     <ProjectReference Include="..\core-libraries\Core.Logging\Core.Logging.csproj" />
     <ProjectReference Include="..\core-libraries\Core.Observability\Core.Observability.csproj" />
     <ProjectReference Include="..\core-libraries\Core.OTP\Core.OTP.csproj" />
+    <ProjectReference Include="..\core-libraries\Core.Storage\Core.Storage.csproj" />
     <ProjectReference Include="..\core-libraries\Core.Utilities\Core.Utilities.csproj" />
     <ProjectReference Include="..\Elmanhg.Application\Elmanhg.Application.csproj" />
     <ProjectReference Include="..\Elmanhg.Domain\Elmanhg.Domain.csproj" />

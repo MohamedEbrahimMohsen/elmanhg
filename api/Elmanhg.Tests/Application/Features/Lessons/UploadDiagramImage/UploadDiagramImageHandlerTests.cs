@@ -1,9 +1,9 @@
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
+using Core.Storage;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Lessons.UploadDiagramImage;
 using Elmanhg.Application.Questions.Shared;
-using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Units;

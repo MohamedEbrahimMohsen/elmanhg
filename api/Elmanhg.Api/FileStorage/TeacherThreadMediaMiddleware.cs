@@ -1,4 +1,5 @@
-using Elmanhg.Application.Shared.Storage;
+using Core.Storage;
+using Core.Storage.Media;
 using Elmanhg.Application.TeacherThreads.CanViewTeacherThreadMedia;
 using Elmanhg.Application.TeacherThreads.CreateTeacherThread;
 using MediatR;
@@ -31,10 +32,6 @@ public sealed class TeacherThreadMediaMiddleware(RequestDelegate next, PathStrin
             return;
         }
 
-        context.Response.ContentType = file.ContentType;
-        context.Response.ContentLength = file.Length;
-        context.Response.Headers.XContentTypeOptions = "nosniff";
-        context.Response.Headers.CacheControl = "private, no-store";
-        await file.Content.CopyToAsync(context.Response.Body, context.RequestAborted).ConfigureAwait(false);
+        await context.Response.WriteStoredFileAsync(file, MediaCacheControl.PrivateNoStore).ConfigureAwait(false);
     }
 }

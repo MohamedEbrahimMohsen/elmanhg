@@ -1,4 +1,4 @@
-using Elmanhg.Application.Shared.Storage;
+using Core.Storage;
 using Elmanhg.Application.TrainingExports.ExpireTrainingExport;
 using Elmanhg.Domain.TrainingExports;
 using Elmanhg.Tests.Builders;
