@@ -56,8 +56,8 @@ Prometheus receives OTLP from the collector (`--web.enable-otlp-receiver`). Name
 
 | Instrument | Type | Unit | Tags | Emitter | Prometheus name |
 |---|---|---|---|---|---|
-| `elmanhg.requests` | counter | {request} | `elmanhg.request` (request type name), `elmanhg.outcome` | `RequestMetricsBehaviour` (every MediatR request) | `elmanhg_requests_total` |
-| `elmanhg.request.duration` | histogram | s | same | `RequestMetricsBehaviour` | `elmanhg_request_duration_seconds_*` |
+| `elmanhg.requests` | counter | {request} | `elmanhg.request` (request type name), `elmanhg.outcome` | `RequestMetricsBehaviour` (Core.Observability, every MediatR request) | `elmanhg_requests_total` |
+| `elmanhg.request.duration` | histogram | s | same | `RequestMetricsBehaviour` (Core.Observability) | `elmanhg_request_duration_seconds_*` |
 | `elmanhg.quiz.answers` | counter | {answer} | `elmanhg.outcome` (grading outcome, or `Ungraded`) | `QuizAnswerMetricsBehaviour` (SubmitAnswer) | `elmanhg_quiz_answers_total` |
 | `elmanhg.payment.notifications` | counter | {notification} | `elmanhg.outcome` (`PaymentNotificationOutcome`) | `PaymentNotificationMetricsBehaviour` | `elmanhg_payment_notifications_total` |
 | `elmanhg.otp.sends` | counter | {message} | `elmanhg.channel` (`WhatsApp`, `Sms`, `Email`), `elmanhg.outcome` (`Delivered`, `Failed`) | `OtpChannelRouter` | `elmanhg_otp_sends_total` |
@@ -215,7 +215,7 @@ A SaaS backend (Grafana Cloud, Honeycomb, any OTLP endpoint) can replace the loc
 - No PII in query strings: the SPA, the API and Paymob redirects must not put personal data in URLs. Where a query value is sensitive anyway (the Paymob webhook `hmac`, the audit log `actor` filter), no log keeps it: the API request log keeps query keys only, with every value replaced by `[redacted]`, and every Caddy log replaces the whole query string with `?redacted`.
 - Three redaction layers:
   1. The apps do not log PII (audited in #113). The API request log drops query values, truncates client IPs to /24 or /48 and drops the Cloudflare coordinates.
-  2. `LogRedactor` (email, literal or URL-encoded `%40`, and Egyptian mobile patterns, linear-time regexes) cleans the free text of browser error reports before logging.
+  2. `LogRedactor` (a `Core.Logging` `TextRedactor` with the shared email pattern, literal or URL-encoded `%40`, plus the app's Egyptian mobile pattern; linear-time regexes) cleans the free text of browser error reports before logging.
   3. The collector's `transform/redact` processor applies the same two patterns to every log body and every (flattened) attribute before Loki, so a leak in any container is masked at ingestion. `transform/redact-traces` applies them to span and span-event attributes (exception messages included) before Tempo.
 - Every Caddy log, the access log and the default logger that carries the handler error log (`http.log.error.*`, which holds the full request), drops request and response headers (cookies, `Authorization`, `X-Forwarded-For`, `Cf-Connecting-Ip`) and replaces the query string with `?redacted`, and masks client IPs to /24 or /48. Span URLs never carry query values.
 - Replacement markers: `[redacted-email]`, `[redacted-phone]`.
