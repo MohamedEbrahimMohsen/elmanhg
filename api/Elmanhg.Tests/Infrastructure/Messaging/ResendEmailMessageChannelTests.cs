@@ -1,5 +1,7 @@
+using Core.Messaging.Email;
 using Elmanhg.Application.Shared.Messaging;
 using Elmanhg.Infrastructure.Messaging;
+using Elmanhg.Tests.Core.Http;
 using Elmanhg.Tests.Infrastructure.OtpDelivery;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -88,5 +90,5 @@ public sealed class ResendEmailMessageChannelTests
         sent.Should().BeFalse();
     }
 
-    private ResendEmailMessageChannel Channel() => new(new HttpClient(_handler) { BaseAddress = new Uri("https://api.resend.com/") }, Options.Create(OtpDeliveryTestSettings.WithResend()), Options.Create(_reminders), NullLogger<ResendEmailMessageChannel>.Instance);
+    private ResendEmailMessageChannel Channel() => new(new ResendEmailClient(new HttpClient(_handler) { BaseAddress = new Uri("https://api.resend.com/") }, CoreHttpTestSettings.Create()), Options.Create(OtpDeliveryTestSettings.WithResend()), Options.Create(_reminders), NullLogger<ResendEmailMessageChannel>.Instance);
 }

@@ -1,5 +1,6 @@
 using Elmanhg.Application.Configuration.Shared;
 using Elmanhg.Infrastructure.AiService;
+using Elmanhg.Tests.Core.Http;
 using Elmanhg.Tests.Infrastructure.OtpDelivery;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -56,7 +57,7 @@ public sealed class HttpAiConfigurationClientTests
 
     private Task<AiServiceConfigurationResult?> GetAsync()
     {
-        var client = new HttpAiConfigurationClient(new HttpClient(_handler) { BaseAddress = new Uri("http://ai.test/") }, Options.Create(AiServiceTestSettings.WithHttp()), NullLogger<HttpAiConfigurationClient>.Instance);
+        var client = new HttpAiConfigurationClient(new HttpClient(_handler) { BaseAddress = new Uri("http://ai.test/") }, Options.Create(AiServiceTestSettings.WithHttp()), CoreHttpTestSettings.Create(), NullLogger<HttpAiConfigurationClient>.Instance);
         return client.GetAsync(TestContext.Current.CancellationToken);
     }
 }

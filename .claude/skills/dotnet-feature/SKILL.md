@@ -164,6 +164,7 @@ api/
 │                               Core.Exceptions · Core.Validation · Core.Identity · Core.Localization
 │                               Core.Auditing · Core.Queues · Core.Logging · Core.Cache · Core.OTP · Core.Notifications
 │                               Core.Hosting · Core.Observability · Core.Spreadsheets · Core.Utilities · Core.Storage
+│                               Core.Http · Core.Messaging (Elmanhg-built: outbound HTTP, message transports)
 ├── Elmanhg.Domain/
 │   ├── Identity/               User.cs, Role.cs, RoleNames.cs (template)
 │   └── {Area}/                 Entity + ValueObjects + Enums (+ext same file) + Extensions
@@ -988,11 +989,11 @@ Related design point: when a state is genuinely normal — "this engineer has no
 // ❌ DON'T — socket exhaustion, no resilience
 private readonly HttpClient http = new();
 
-// ✅ DO — typed client + one standard resilience handler (check Core.* for an existing client first)
-services.AddHttpClient<GitHubClient>(client => client.BaseAddress = new Uri(options.BaseUrl)).AddStandardResilienceHandler(resilience => resilience.Retry.DisableForUnsafeHttpMethods());
+// ✅ DO — typed client + Core.Http timeout resilience (check Core.* for an existing client first)
+services.AddHttpClient<GitHubClient>((serviceProvider, client) => client.BaseAddress = HttpBaseAddress.From(options.BaseUrl)).AddTimeoutResilience(attempt, total, retryUnsafeMethods: false);
 ```
 
-POST retries only with an idempotency key.
+POST retries only with an idempotency key. Send through `Core.Http`: `SendJsonAsync` (throws `ServiceUnavailableCoreException` with your error code), `TrySendJsonAsync` / `TrySendAsync` (return the failure as a value). Catch only `IsTransientFailure` exceptions. Set the User-Agent with `WithUserAgent(CoreHttpOptions.UserAgent)`. Pick Fake or real with `AddProviderSwitch`. Email, WhatsApp and SMS go through the `Core.Messaging` clients (`ResendEmailClient`, `MetaWhatsAppClient`, `HttpSmsClient`). When a transport client has more than one caller, register each caller with `AddScopedHttpConsumer<TCaller, TClient>` so every caller gets its own named `HttpClient` and circuit breaker; one caller's failures must never trip another's breaker.
 
 ### 8.9 Background work gets a scope per iteration
 

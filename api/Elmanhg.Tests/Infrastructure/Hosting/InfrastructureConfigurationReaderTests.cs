@@ -1,13 +1,14 @@
+using Core.OTP.Delivery;
+using Core.OTP.Delivery.Email;
+using Core.OTP.Delivery.Sms;
+using Core.OTP.Delivery.WhatsApp;
 using Core.Storage;
 using Elmanhg.Application.Configuration.Shared;
 using Elmanhg.Infrastructure.AiService;
 using Elmanhg.Infrastructure.Hosting;
 using Elmanhg.Infrastructure.Messaging;
-using Elmanhg.Infrastructure.OtpDelivery;
-using Elmanhg.Infrastructure.OtpDelivery.Email;
-using Elmanhg.Infrastructure.OtpDelivery.Sms;
-using Elmanhg.Infrastructure.OtpDelivery.WhatsApp;
 using Elmanhg.Infrastructure.Payments;
+using Elmanhg.Tests.Core.Http;
 using Elmanhg.Tests.Infrastructure.AiService;
 using Elmanhg.Tests.Infrastructure.OtpDelivery;
 using FluentAssertions;
@@ -122,7 +123,7 @@ public sealed class InfrastructureConfigurationReaderTests
         var environment = Substitute.For<IHostEnvironment>();
         environment.EnvironmentName.Returns("Testing");
         var aiOptions = Microsoft.Extensions.Options.Options.Create(_aiService);
-        var client = new HttpAiConfigurationClient(new HttpClient(_handler) { BaseAddress = new Uri("http://ai.test/") }, aiOptions, NullLogger<HttpAiConfigurationClient>.Instance);
+        var client = new HttpAiConfigurationClient(new HttpClient(_handler) { BaseAddress = new Uri("http://ai.test/") }, aiOptions, CoreHttpTestSettings.Create(), NullLogger<HttpAiConfigurationClient>.Instance);
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(_configuration).Build();
         var reader = new InfrastructureConfigurationReader(Microsoft.Extensions.Options.Options.Create(_otpDelivery), Microsoft.Extensions.Options.Options.Create(_outOfAppReminders), Microsoft.Extensions.Options.Options.Create(_payments), Microsoft.Extensions.Options.Options.Create(_fileStorage), aiOptions, configuration, environment, client);
         return reader.ReadAsync(TestContext.Current.CancellationToken);

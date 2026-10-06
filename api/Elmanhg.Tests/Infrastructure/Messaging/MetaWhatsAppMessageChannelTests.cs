@@ -1,6 +1,8 @@
+using Core.Messaging.WhatsApp;
 using Elmanhg.Application.Shared.Messaging;
 using Elmanhg.Infrastructure.Messaging;
 using Elmanhg.Infrastructure.OtpDelivery;
+using Elmanhg.Tests.Core.Http;
 using Elmanhg.Tests.Infrastructure.OtpDelivery;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
@@ -94,7 +96,17 @@ public sealed class MetaWhatsAppMessageChannelTests
         entry.Message.Should().Contain("500").And.NotContain(Phone).And.NotContain("201012345678").And.NotContain("meta-token");
     }
 
-    private MetaWhatsAppMessageChannel Channel() => new(new HttpClient(_handler) { BaseAddress = new Uri("https://graph.facebook.com/") }, Options.Create(OtpDeliveryTestSettings.WithMeta()), Options.Create(_reminders), _logger);
+    [Fact]
+    public async Task SendAsync_NonTransientFailure_ReturnsFalse()
+    {
+        _handler.Throw = new InvalidOperationException("unexpected provider fault");
+
+        var sent = await Channel().SendAsync(Reminder, TestContext.Current.CancellationToken);
+
+        sent.Should().BeFalse();
+    }
+
+    private MetaWhatsAppMessageChannel Channel() => new(new MetaWhatsAppClient(new HttpClient(_handler) { BaseAddress = new Uri("https://graph.facebook.com/") }, CoreHttpTestSettings.Create()), Options.Create(OtpDeliveryTestSettings.WithMeta()), Options.Create(_reminders), _logger);
 
     private ServiceProvider BuildResilientProvider()
     {
@@ -106,7 +118,7 @@ public sealed class MetaWhatsAppMessageChannelTests
         services.AddSingleton<IConfiguration>(new ConfigurationBuilder().AddInMemoryCollection(configuration).Build());
         services.AddOtpDelivery();
         services.AddMessaging();
-        services.AddHttpClient<MetaWhatsAppMessageChannel>().ConfigurePrimaryHttpMessageHandler(() => _handler);
+        services.AddHttpClient(nameof(MetaWhatsAppMessageChannel)).ConfigurePrimaryHttpMessageHandler(() => _handler);
         services.PostConfigure<HttpStandardResilienceOptions>($"{nameof(MetaWhatsAppMessageChannel)}-standard", resilience => resilience.Retry.Delay = TimeSpan.Zero);
         return services.BuildServiceProvider();
     }

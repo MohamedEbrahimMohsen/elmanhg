@@ -5,7 +5,7 @@ using System.Diagnostics.Metrics;
 
 namespace Elmanhg.Application.Shared.Observability;
 
-public sealed class ElmanhgMetrics
+public sealed class ElmanhgMetrics : IOtpDeliveryObserver
 {
     public const string OutcomeTag = "elmanhg.outcome";
     public const string ChannelTag = "elmanhg.channel";
