@@ -24,5 +24,7 @@ public static class RateLimitPartitions
 
     public static string UserKey(HttpContext httpContext) => httpContext.User.FindFirst(CurrentUserService.Constants.UserIdClaimType)?.Value is { Length: > 0 } userId ? $"user:{userId}" : $"ip:{ClientIp(httpContext)}";
 
+    // Behind a reverse proxy this is only the real client when forwarded headers run first and trust only known proxies;
+    // otherwise every client shares the proxy's partition.
     public static string ClientIp(HttpContext httpContext) => httpContext.Connection.RemoteIpAddress?.ToString() ?? UnknownClientPartition;
 }

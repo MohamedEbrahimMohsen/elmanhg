@@ -15,6 +15,7 @@ public static class DependencyInjection
         return services;
     }
 
+    // OnRejected throws, so CoreExceptionMiddleware must run before UseRateLimiter to turn it into the 429 error body.
     public static IServiceCollection AddCoreRateLimiting(this IServiceCollection services, string rejectedErrorCode)
     {
         services.AddRateLimiter(options =>
