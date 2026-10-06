@@ -7,7 +7,7 @@ using Elmanhg.Domain.SharedKernel.Exceptions;
 
 namespace Elmanhg.Domain.Sessions;
 
-public partial class Session : AuditEntity
+public partial class Session : AuditEntity, IVersioned
 {
     public Guid StudentId { get; private set; }
     public SessionKind Kind { get; private set; }

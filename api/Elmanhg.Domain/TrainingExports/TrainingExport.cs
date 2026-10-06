@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace Elmanhg.Domain.TrainingExports;
 
-public partial class TrainingExport : AuditEntity, IAuditedEntity
+public partial class TrainingExport : AuditEntity, IAuditedEntity, IVersioned
 {
     // Matches the LastErrorCode column width.
     private const int ErrorCodeMaxLength = 100;

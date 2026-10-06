@@ -2,7 +2,7 @@ using Core.DDD.Entities;
 
 namespace Elmanhg.Domain.SlaCalendars;
 
-public class ExamPeriod : AuditEntity, IAuditedEntity
+public class ExamPeriod : AuditEntity, IAuditedEntity, IVersioned
 {
     public string Name { get; private set; } = default!;
     public DateOnly StartDate { get; private set; }

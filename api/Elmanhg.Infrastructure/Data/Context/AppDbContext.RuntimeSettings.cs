@@ -18,7 +18,6 @@ public partial class AppDbContext
         {
             builder.Property(x => x.Key).IsRequired().HasMaxLength(RuntimeSettingKeyMaxLength);
             builder.Property(x => x.Value).HasColumnType("jsonb");
-            builder.Property(x => x.Version).IsRowVersion();
             builder.HasIndex(x => x.Key).IsUnique().HasDatabaseName(RuntimeSettingKeyIndex);
         });
     }
