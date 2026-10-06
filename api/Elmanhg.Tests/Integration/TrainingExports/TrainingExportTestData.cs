@@ -1,5 +1,5 @@
 using Core.Auditing.Entities;
-using Elmanhg.Application.Shared.Storage;
+using Core.Storage;
 using Elmanhg.Application.TrainingExports.ExpireTrainingExport;
 using Elmanhg.Application.TrainingExports.RunTrainingExport;
 using Elmanhg.Domain.TrainingExports;

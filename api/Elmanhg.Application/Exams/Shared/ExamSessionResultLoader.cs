@@ -1,5 +1,5 @@
 using Core.Localization;
-using Elmanhg.Application.Shared.Storage;
+using Core.Storage;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Sessions;

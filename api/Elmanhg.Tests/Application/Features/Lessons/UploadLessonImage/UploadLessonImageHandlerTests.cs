@@ -1,8 +1,8 @@
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
+using Core.Storage;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Lessons.UploadLessonImage;
-using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Subjects;
 using Elmanhg.Domain.Units;

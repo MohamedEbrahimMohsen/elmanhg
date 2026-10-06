@@ -44,7 +44,7 @@ Also reviewed:
 - The SignalR hub `/api/hubs/notifications` requires `AuthenticatedUser`; the token in `?access_token=` is accepted on the hub path only and never logged ([ask-teacher.md](ask-teacher.md)).
 - Teacher reads of subject-owned data go through `ISubjectScopedRequest` / `SubjectScopeBehaviour`, which fails closed (403 `SUBJECT_OUT_OF_SCOPE`).
 - Owner lookups (sessions, threads, conversations, exports) filter by the caller and return 404 for another owner's id, never 403.
-- Private media: `teacher-threads/` files are served only through `TeacherThreadMediaMiddleware` (`CanViewTeacherThreadMedia`: the owning student, a teacher of the subject, an admin). `training-exports/` files are never served by `/api/media`; only an admin downloads them through `GET /api/training-exports/{id}/file`.
+- Private media: `teacher-threads/` files are served only through `TeacherThreadMediaMiddleware` (`CanViewTeacherThreadMedia`: the owning student, a teacher of the subject, an admin). `training-exports/` files are never served by `/api/media`; only an admin downloads them through `GET /api/training-exports/{id}/file`. The private-folder list is declared once (`MediaStorageExtensions.PrivateFolders`) and `Core.Storage` applies it to both media paths.
 
 Result: no gaps found.
 
@@ -120,7 +120,7 @@ Not needed, therefore not allowed: no iframes (lesson videos are plain links), n
 ## 5. Input handling
 
 - **Rich text:** sanitised on the server by `RichTextSanitizer` (allow-list, [rich-text.md](rich-text.md)) and again in the browser by DOMPurify in `SafeHtml`.
-- **Request bodies:** Kestrel caps every body at 10 MB (`KestrelHardening.MaxRequestBodyBytes`), above the largest business cap; each validator still enforces its own configurable cap.
+- **Request bodies:** Kestrel caps every body at 10 MB (`Core.Hosting` `KestrelHardening.DefaultMaxRequestBodyBytes`), above the largest business cap; each validator still enforces its own configurable cap.
 - **Uploads:** every upload is checked by extension, content type and file signature (magic bytes), never by name alone, and stored under a random name.
 
 | Endpoint | Extensions | Signature | Cap |
@@ -136,13 +136,13 @@ The admin Configuration API (`GET /api/configuration/infrastructure`, [configura
 
 SVG is never accepted, because it can carry script and media is served from the site origin. Media responses carry `X-Content-Type-Options: nosniff`.
 
-- **Paths:** `LocalDiskFileStorage.ResolvePath` and `PublicMediaMiddleware.IsPublicKey` refuse traversal.
+- **Paths:** `LocalDiskFileStorage` (`Core.Storage`) and `PublicMediaMiddleware.IsPublicKey` (`Core.Storage`) refuse traversal; `PublicMediaFileProvider` refuses `~` short names.
 - **Regular expressions** over user input are bounded (`RegexOptions.NonBacktracking` or a timeout).
 - **SQL:** EF Core with parameters only; no `FromSqlRaw` with interpolation.
 
 ## 6. Secrets
 
-- **Placeholder guard.** Outside Development the API refuses to start, and to migrate, while a known secret still starts with `change-me`, the connection string's parsed `Password` starts with `change-me`, or `CoreOtp:Secret` is empty (`PlaceholderSecretGuard`; the key list is in [deployment.md](deployment.md) §3). The error names the keys, never the values. The ai service refuses a `change-me` service token when `ELMANHG_AI_ENV=production`. Every example value in `deploy/*.env.example` starts with `change-me`; the smoke and load tests replace them with random ones.
+- **Placeholder guard.** Outside Development the API refuses to start, and to migrate, while a known secret still starts with `change-me`, the connection string's parsed `Password` starts with `change-me`, or `CoreOtp:Secret` is empty (`AppSecretGuard`, which passes the key list, the Npgsql password check and `CoreOtp:Secret` to the `Core.Hosting` `PlaceholderSecretGuard`; the key list is in [deployment.md](deployment.md) §3). The error names the keys, never the values. The ai service refuses a `change-me` service token when `ELMANHG_AI_ENV=production`. Every example value in `deploy/*.env.example` starts with `change-me`; the smoke and load tests replace them with random ones.
 - **Secret scanning.** The `security` workflow runs gitleaks 8.30.1 (checksum-verified binary) over the full git history of every pull request and push to main, with `.gitleaks.toml` (the default rules plus an allow-list of the exact reviewed placeholder values, anchored and matched against the extracted secret only, so a marker elsewhere on a line never hides a real credential). Triaged false positives are listed by fingerprint in `.gitleaksignore`, each with its reason. To triage a finding: if it is a real secret, rotate it first (deleting the commit is not enough, the value is already public), then remove it; only a value that is provably not a secret goes into `.gitleaksignore`. A new committed example or test value that the default rules flag is added to that allow-list as an exact, anchored value in the same change.
 - **CI secrets.** `deploy.yml` hands each deploy secret only to the steps that use it (step-level `env`), never to the whole job.
 - **Images.** `.dockerignore` keeps `appsettings.json`, `appsettings.*.json`, `api/**/.env` and `api/**/.env.*` out of the API build context.

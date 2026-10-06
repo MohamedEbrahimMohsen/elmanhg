@@ -1,6 +1,6 @@
 using Core.Errors;
+using Core.Storage;
 using Elmanhg.Application.Exceptions;
-using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Application.TrainingExports.DownloadTrainingExport;
 using Elmanhg.Domain.TrainingExports;
 using Elmanhg.Tests.Builders;

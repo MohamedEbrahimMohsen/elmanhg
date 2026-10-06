@@ -16,9 +16,10 @@ Companion documents: `docs/constitution.md` (wins on conflict) · `docs/PRD.md` 
 3. **Vector search** (AI Avatar retrieval) uses `pgvector` via `Pgvector.EntityFrameworkCore`, only in the stories that need it.
 4. **Integration tests** hit a real PostgreSQL through `Testcontainers.PostgreSql`. No in-memory provider, no SQLite stand-in.
 5. **Reuse-first from Morabh.** The canonical implementation of every cross-cutting capability lives at `D:\Personal\Projects\Projects\Morabh\repos\apis`:
-   - `Core/` (Core.DDD, Core.CQRS, Core.EntityFrameworkCore, Core.Errors, Core.Exceptions, Core.Identity, Core.OTP, Core.Localization, Core.Logging, Core.Auditing, Core.Cache, Core.Notifications, Core.Queues, Core.Utilities, Core.Validation) is vendored into `api/core-libraries/` in this repo. Copy it, do not reference the Morabh path at build time. When vendoring, swap every SQL Server dependency for Npgsql and drop `Core.Azure` unless a story needs it.
+   - `Core/` (Core.DDD, Core.CQRS, Core.EntityFrameworkCore, Core.Errors, Core.Exceptions, Core.Identity, Core.OTP, Core.Localization, Core.Logging, Core.Auditing, Core.Cache, Core.Notifications, Core.Queues, Core.Utilities, Core.Validation) is vendored into `api/core-libraries/` in this repo. Copy it, do not reference the Morabh path at build time. When vendoring, swap every SQL Server dependency for Npgsql and drop `Core.Azure` unless a story needs it. `Core.Storage` (file storage `IFileStorage` with Local/S3 providers, `StorageContentTypes`, public media serving with a `PrivateFolders` list, `WriteStoredFileAsync`) is Elmanhg-native, with no Morabh equivalent; files and media always go through it.
    - Before designing **any** feature (login, register, OTP, refresh tokens, audit log, localisation, notifications, error codes, paging, file upload…), search the Morabh repo (`Core/`, `Morabh.Application/`, `Morabh.Domain/`, `Morabh.Infrastructure/`, `Morabh.APIs/`, `CRUD_FEATURE_CREATION_GUIDE.md`, `ErrorCodes.md`, `AuditLogs.md`, `Localization.md`). If it exists, copy it into the matching Elmanhg layer, rename namespaces `Morabh.*` → `Elmanhg.*`, and adapt it to the Elmanhg domain. The plan must name the Morabh source file for every reused piece.
    - Only when nothing in Morabh covers it, write it from scratch — in the same shape, layering, naming and error-code style as the Morabh code. Murabaha/BNPL business logic is never copied.
+   - Promoted in Elmanhg (no Morabh source): `Core.Hosting`, `Core.Observability`, `Core.Spreadsheets`, plus `Core.Cache` (`ICacheableQuery` + `CachingBehaviour`) and `Core.Logging` `TextRedactor`. Cache a query by implementing `ICacheableQuery`; read/write spreadsheets through `ISpreadsheetReader`/`ISpreadsheetWriter`; build rate-limit policies from `Core.Hosting.RateLimiting.RateLimitPartitions`; redact free text with a `TextRedactor`.
 6. **Solution layout**: `api/Elmanhg.slnx` with `Elmanhg.Api`, `Elmanhg.Application`, `Elmanhg.Domain`, `Elmanhg.Infrastructure`, `Elmanhg.Jobs` (background jobs, when needed), `Elmanhg.Tests`, plus `core-libraries/`. Mirror Morabh's project structure.
 7. **Secrets**: environment variables and a gitignored `.env`; `appsettings.json` holds shape and safe defaults only. External providers without credentials in this repo (Paymob, SMS gateway, Claude API, transcription) sit behind an interface with a `Fake*` implementation selected by config, so the app and tests run offline.
 
@@ -162,7 +163,7 @@ api/
 ├── core-libraries/             Core.DDD · Core.CQRS · Core.EntityFrameworkCore · Core.Errors
 │                               Core.Exceptions · Core.Validation · Core.Identity · Core.Localization
 │                               Core.Auditing · Core.Queues · Core.Logging · Core.Cache · Core.OTP · Core.Notifications
-│                               Core.Notifications · Core.OTP · Core.Utilities
+│                               Core.Hosting · Core.Observability · Core.Spreadsheets · Core.Utilities · Core.Storage
 ├── Elmanhg.Domain/
 │   ├── Identity/               User.cs, Role.cs, RoleNames.cs (template)
 │   └── {Area}/                 Entity + ValueObjects + Enums (+ext same file) + Extensions
@@ -830,7 +831,7 @@ Controller rules:
 
 ### 7.4 Program.cs
 
-`Elmanhg.Api/Program.cs` already composes the full `Core.*` pipeline (environment variables + `.env` locally, Core.Identity, Core.CQRS, Core.Exceptions middleware, Core.Localization, Core.Logging, Scalar OpenAPI). Mirror the existing composition when adding registrations — **middleware order is fixed**: forwarded headers → `UseCoreLocalization` → `CoreRequestLoggingMiddleware` → `CoreExceptionMiddleware` → HTTPS redirection → media storage → `UseAuthorization` → rate limiter → endpoints. The exception middleware sits inside request logging (which reads its error code) and before authorization, so a failure in an authorization handler still returns the standard error body; do not reorder. New policies go into the existing `AddAuthorization` block.
+`Elmanhg.Api/Program.cs` already composes the full `Core.*` pipeline (environment variables + `.env` locally, Core.Identity, Core.CQRS, Core.Exceptions middleware, Core.Localization, Core.Logging, Core.Hosting (Kestrel limits, forwarded headers, migrate-and-exit, secret guard, rate limiting), Core.Observability, Scalar OpenAPI). Mirror the existing composition when adding registrations — **middleware order is fixed**: forwarded headers → `UseCoreLocalization` → `CoreRequestLoggingMiddleware` → `CoreExceptionMiddleware` → HTTPS redirection → media storage → `UseAuthorization` → rate limiter → endpoints. The exception middleware sits inside request logging (which reads its error code) and before authorization, so a failure in an authorization handler still returns the standard error body; do not reorder. New policies go into the existing `AddAuthorization` block.
 
 Core endpoint modules take the policy name from the app (`MapCoreNotificationTemplateEndpoints(adminPolicyName)`, `MapCoreFirebaseNotificationEndpoints(adminPolicyName)`); the user and device groups require an authenticated user.
 
@@ -1123,6 +1124,7 @@ private static readonly Regex SlugPattern = new("^[a-z0-9-]+$", RegexOptions.Non
 | Error leakage | developer exception page / `StackTrace` only in Development (§8.7) |
 | File paths | user-supplied path → `Path.GetFullPath` + `StartsWith(root + Path.DirectorySeparatorChar)` |
 | Uploads | size-limited, extension allow-listed (`ValidateImageExtensions` / `ValidateMaxFileSize`), random names, never under `wwwroot` |
+| Media serving | private storage folders are declared once (`MediaStorageExtensions.PrivateFolders`) and passed to `UseCorePublicMedia`; never a second list; responses via `WriteStoredFileAsync` |
 | SSRF | any URL from user input → scheme + host allow-list, block private/link-local/metadata IPs, no auto-redirect |
 | Secrets | none in `appsettings*.json` or fixtures — environment variables / host secret store; a leaked key is rotated, not just removed |
 | Logging | never log tokens, passwords, OTPs, full request bodies, or PII |
