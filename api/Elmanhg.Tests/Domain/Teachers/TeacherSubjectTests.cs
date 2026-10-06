@@ -57,4 +57,14 @@ public sealed class TeacherSubjectTests
         teacherSubject.UpdatedBy.Should().Be(unassignedBy);
         teacherSubject.UpdationDate.Should().BeOnOrAfter(teacherSubject.CreationDate);
     }
+
+    [Fact]
+    public void Unassign_Always_StampsDeletedAtWithUpdationDate()
+    {
+        var teacherSubject = TeacherSubject.Create(User.CreateTeacher("Teacher", "teacher@elmanhg.test"), _subject, Guid.NewGuid());
+
+        teacherSubject.Unassign(Guid.NewGuid());
+
+        teacherSubject.DeletedAt.Should().NotBeNull().And.Be(teacherSubject.UpdationDate);
+    }
 }

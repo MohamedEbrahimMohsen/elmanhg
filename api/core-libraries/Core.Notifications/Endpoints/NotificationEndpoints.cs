@@ -20,9 +20,10 @@ namespace Core.Notifications.Endpoints;
 
 public static class CoreNotificationEndpoints
 {
-    public static RouteGroupBuilder MapCoreFirebaseNotificationEndpoints(this IEndpointRouteBuilder endpoints)
+    public static RouteGroupBuilder MapCoreFirebaseNotificationEndpoints(this IEndpointRouteBuilder endpoints, string adminPolicyName)
     {
-        var group = endpoints.MapGroup("/c/notification");
+        ArgumentException.ThrowIfNullOrWhiteSpace(adminPolicyName);
+        var group = endpoints.MapGroup("/c/notification").RequireAuthorization(adminPolicyName);
 
         group.MapPost("/send/topic", async (SendToTopicCommand request, IMediator mediator, CancellationToken cancellationToken) =>
         {
@@ -89,7 +90,7 @@ public static class CoreNotificationEndpoints
 
     public static RouteGroupBuilder MapCoreDevicesNotificationEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("/c/notification");
+        var group = endpoints.MapGroup("/c/notification").RequireAuthorization();
 
         group.MapPost("/devices/register", async (RegisterUserDeviceCommand request, IMediator mediator, CancellationToken cancellationToken) =>
         {
@@ -102,7 +103,7 @@ public static class CoreNotificationEndpoints
 
     public static RouteGroupBuilder MapCoreUserNotificationEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("/c/notification");
+        var group = endpoints.MapGroup("/c/notification").RequireAuthorization();
 
         group.MapPost("/me/{id}", async (Guid id, IMediator mediator, CancellationToken cancellationToken) =>
         {

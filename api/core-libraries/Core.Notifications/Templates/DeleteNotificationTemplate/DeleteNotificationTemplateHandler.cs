@@ -21,7 +21,7 @@ public sealed class DeleteNotificationTemplateHandler(INotificationTemplateRepos
             throw new BadRequestCoreException(ErrorCodes.NotificationTemplateSystemReservedCannotDeleted);
         }
 
-        notificationTemplate.SoftDelete();
+        notificationTemplate.SoftDelete(DateTimeOffset.UtcNow);
         await notificationTemplateRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 }

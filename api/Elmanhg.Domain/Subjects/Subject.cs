@@ -56,8 +56,9 @@ public class Subject : AuditEntity, IAuditedEntity
             throw new BusinessRuleViolationCoreException(ErrorCodes.SubjectHasUnits);
         }
 
-        SoftDelete();
+        var now = DateTimeOffset.UtcNow;
+        SoftDelete(now);
         UpdatedBy = deletedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
+        UpdationDate = now;
     }
 }

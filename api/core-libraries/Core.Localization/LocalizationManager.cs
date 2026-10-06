@@ -5,7 +5,7 @@ namespace Core.Localization;
 
 public sealed class LocalizationManager(IConfiguration configuration) : ILocalizationManager
 {
-    private readonly string? _defaultLanguage = configuration["Localization:DefaultLanguage"]?.ToLowerInvariant();
+    private readonly string _defaultLanguage = DefaultLanguageResolver.Resolve(configuration[DefaultLanguageResolver.ConfigurationKey]);
 
     public T GetLocalizedValue<T>(T valueAr, T valueEn)
     {
@@ -17,7 +17,6 @@ public sealed class LocalizationManager(IConfiguration configuration) : ILocaliz
         if (currentLang == "ar")
             return valueAr;
 
-        // If the current language is not supported, use the default language, always fallback to English if default language is not set or invalid.
         return _defaultLanguage == "ar" ? valueAr : valueEn;
     }
 }

@@ -140,10 +140,10 @@ public sealed class ProvisioningOptions
 
 - **`Elmanhg.Api`** — thin controllers only: map Request → Command/Query → `mediator.Send` → `Ok(result)`. No business logic. Resources (`Messages.ar/en.resx`) live here.
 - **`Elmanhg.Application`** — vertical slices `{Area}/{UseCase}/`, `Exceptions/ErrorCodes.cs`, options, MediatR pipeline behaviors from `Core.CQRS`.
-- **`Elmanhg.Domain`** — aggregates (Core.DDD bases: private ctor + `Create` factory, guarded domain methods setting `UpdationDate`), enums + extensions, repository interfaces in aggregate folders.
+- **`Elmanhg.Domain`** — aggregates (Core.DDD bases: private ctor + `Create` factory, guarded domain methods setting `UpdationDate`, soft deletes through `SoftDelete(deletedAt)` with the same time), enums + extensions, repository interfaces in aggregate folders.
 - **`Elmanhg.Infrastructure`** — ONE `AppDbContext` (named private config methods, global soft-delete filters, no `ApplyConfigurationsFromAssembly`), repositories (`Repository<T>` base, never saving), external provider adapters built on `Core.Http` / `Core.Messaging` (OTP channel adapters and their router live in `Core.OTP/Delivery`).
 - **`Elmanhg.Tests`** — xUnit + NSubstitute + FluentAssertions per `conventions/dotnet-testing.md`: entity branches, every handler branch, every validator rule; repos/controllers out of scope.
-- Errors: no `try`/`catch` in handlers — throw `Core.Errors` exceptions; `Core.Exceptions` middleware formats responses. Never invent an exception type for a covered status code.
+- Errors: no `try`/`catch` in handlers — throw `Core.Errors` exceptions; `Core.Exceptions` middleware (inside request logging, before authorization) formats responses. Never invent an exception type for a covered status code.
 - Observability: telemetry is wired only in `Elmanhg.Api/Hosting/ObservabilityExtensions.cs` (on `Core.Observability`) and `ai/src/elmanhg_ai/core/telemetry.py`; business metrics go through `ElmanhgMetrics`/`BackgroundJobMetrics`, `Core.Observability` `RequestMetrics`, or a pipeline behaviour, never ad-hoc `Meter`s; logs, span attributes and metric tags never carry phone numbers, emails, OTP codes, tokens or payment payloads, and metric tags carry no ids (docs/observability.md).
 - Core stays app-agnostic: no Elmanhg names, error codes, metric names or Egypt-only defaults in `api/core-libraries`; the app passes them in as parameters or options.
 - One `SaveChangesAsync` per handler, at the end. Full backend detail: `.claude/skills/dotnet-feature/SKILL.md`.

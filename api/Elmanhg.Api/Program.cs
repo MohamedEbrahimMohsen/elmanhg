@@ -167,13 +167,14 @@ app.UseCoreLocalization(builder.Configuration);
 
 app.UseMiddleware<CoreRequestLoggingMiddleware>();
 
+// Inside request logging (it reads the error code) and before authorization, so failures in auth handlers and media get the standard error body.
+app.UseMiddleware<CoreExceptionMiddleware>();
+
 app.UseHttpsRedirection();
 
 app.UseMediaStorage();
 
 app.UseAuthorization();
-
-app.UseMiddleware<CoreExceptionMiddleware>();
 
 app.UseRateLimiter();
 
