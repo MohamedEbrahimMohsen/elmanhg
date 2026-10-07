@@ -39,6 +39,18 @@ public sealed class ReviewSessionTests
     }
 
     [Fact]
+    public void RecordOpening_ActiveSession_LeavesUpdatedByToTheSave()
+    {
+        var session = ReviewSession.Start(_teacherId, Lifetime);
+        session.UpdatedBy = null;
+
+        session.RecordOpening(_builder.Build());
+
+        session.UpdatedBy.Should().BeNull();
+        session.Openings.Should().ContainSingle();
+    }
+
+    [Fact]
     public void RecordOpening_SameVersionTwice_AddsOnce()
     {
         var session = ReviewSession.Start(_teacherId, Lifetime);

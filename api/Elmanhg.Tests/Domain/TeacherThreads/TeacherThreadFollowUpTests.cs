@@ -21,7 +21,7 @@ public sealed class TeacherThreadFollowUpTests
 
         thread.FollowUp("Can you show the units?", askedAt.AddTicks(7), SlaPolicy);
 
-        (thread.Status, thread.SlaDueAt, thread.UpdationDate, thread.UpdatedBy).Should().Be((TeacherThreadStatus.Open, askedAt + ReplySla, askedAt, (Guid?)thread.StudentId));
+        (thread.Status, thread.SlaDueAt, thread.UpdationDate, thread.UpdatedBy).Should().Be((TeacherThreadStatus.Open, askedAt + ReplySla, askedAt, (Guid?)_teacherId));
         thread.SlaWindowStartedAt.Should().Be(askedAt);
         thread.Messages.Should().HaveCount(3);
         (thread.Messages.Last().SenderId, thread.Messages.Last().Text, thread.Messages.Last().CreatedAt).Should().Be((thread.StudentId, "Can you show the units?", askedAt));

@@ -1,4 +1,3 @@
-using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.SlaCalendars;
 using Elmanhg.Infrastructure.Data.Context;
@@ -49,7 +48,7 @@ public sealed class RepositoryPagingTests(ApiFactory factory)
     public async Task EssayGradeGetInReviewPageAsync_PageBeyondIntOffset_ReturnsEmptyPage()
     {
         using var scope = factory.Services.CreateScope();
-        var repository = new EssayGradeRepository(scope.ServiceProvider.GetRequiredService<AppDbContext>(), scope.ServiceProvider.GetRequiredService<ICurrentUser>(), TimeProvider.System);
+        var repository = new EssayGradeRepository(scope.ServiceProvider.GetRequiredService<AppDbContext>());
 
         var page = await repository.GetInReviewPageAsync(Guid.NewGuid(), int.MaxValue, 50, CancellationToken);
 
@@ -61,7 +60,7 @@ public sealed class RepositoryPagingTests(ApiFactory factory)
     public async Task MathStepGradeGetInReviewPageAsync_PageBeyondIntOffset_ReturnsEmptyPage()
     {
         using var scope = factory.Services.CreateScope();
-        var repository = new MathStepGradeRepository(scope.ServiceProvider.GetRequiredService<AppDbContext>(), scope.ServiceProvider.GetRequiredService<ICurrentUser>(), TimeProvider.System);
+        var repository = new MathStepGradeRepository(scope.ServiceProvider.GetRequiredService<AppDbContext>());
 
         var page = await repository.GetInReviewPageAsync(Guid.NewGuid(), int.MaxValue, 50, CancellationToken);
 

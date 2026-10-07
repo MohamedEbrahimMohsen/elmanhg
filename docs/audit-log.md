@@ -45,6 +45,7 @@ An array with one element per changed audited entity. Property keys are camelCas
 - Excluded properties: `Id`, `DeletedAt`, `CreatedBy`, `CreationDate`, `UpdatedBy`, `UpdationDate`, shadow properties and concurrency tokens. The row already carries the actor and the time. `IsDeleted` is left out of `Created` and hard `Deleted` entries.
 - Properties carrying the `Core:AuditExcluded` model annotation (`AuditChangeReader.ExcludedAnnotation`, set in `AppDbContext` with `.HasAnnotation(AuditChangeReader.ExcludedAnnotation, true)`) are also left out: `Payment.RawWebhook`, the provider payload with billing PII. The audit diff is widely readable, so such values never reach it.
 - `Modified` keeps only properties whose value actually changed. An entry with nothing left is dropped.
+- Owned values (`RetrySchedule`, `LocalizedText`) are tracked as their own entries, not as properties of the audited entity, so they are not in the diff: for example, a `TrainingExport` retry step or a change to a localized title adds no property.
 
 ## Audited commands
 
@@ -108,6 +109,19 @@ An array with one element per changed audited entity. Property keys are camelCas
 Audited entities (`IAuditedEntity`): `TeacherSubject`, `Subject`, `CurriculumUnit`, `Lesson`, `LessonObjective`, `Question`, `QuestionImportBatch`, `ExamBlueprint`, `Subscription`, `Payment`, `TrainingExport`, `EssayGrade`, `MathStepGrade`, `RuntimeSettingOverride`, `ExamPeriod`, `AvatarConversation`.
 
 `QuestionRevision` and `QuestionDecision` rows are an append-only history and are not diffed.
+
+## Audit fields
+
+Every `AuditEntity` row carries `CreatedBy`, `CreationDate`, `UpdatedBy` and `UpdationDate`. They are not in the diff. `AuditStampingInterceptor` (`Core.EntityFrameworkCore`, registered with `AddCoreAuditStamping<AppDbContext>()`) sets them inside `SaveChangesAsync`, after domain events are published, so rows that event handlers add or change are stamped too.
+
+- `CreationDate` is the save time on added rows.
+- `CreatedBy` is what the aggregate set, else the acting user.
+- `UpdatedBy` is the acting user when there is one, else what the aggregate set. It is never cleared: background workers and the anonymous Paymob webhook have no acting user, so the aggregate's value (or the old value) stays.
+- `UpdationDate` on changed or deleted rows is what the aggregate set, else the save time.
+
+A domain method sets `UpdatedBy` only from an actor argument it receives, never from an owner property such as `StudentId` or `TeacherId`.
+
+`ExecuteUpdateAsync`, `ExecuteDeleteAsync` and raw SQL are not stamped.
 
 ## Not audited (deliberate)
 

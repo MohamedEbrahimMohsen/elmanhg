@@ -1,4 +1,3 @@
-using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.TrainingData;
 using Elmanhg.Infrastructure.Data.Context;
@@ -6,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.TrainingData;
 
-public class AttemptTrainingRecordRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<AttemptTrainingRecord>(context, currentUser, timeProvider), IAttemptTrainingRecordRepository
+public class AttemptTrainingRecordRepository(AppDbContext context) : Repository<AttemptTrainingRecord>(context), IAttemptTrainingRecordRepository
 {
     public async Task<List<AttemptTrainingRecord>> GetExportPageAsync(TrainingRecordFilter filter, TrainingRecordCursor? after, int limit, CancellationToken cancellationToken)
     {

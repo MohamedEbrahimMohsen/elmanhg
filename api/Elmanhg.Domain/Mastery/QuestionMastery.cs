@@ -59,6 +59,5 @@ public class QuestionMastery : AuditEntity, IVersioned
         }
 
         IsMastered = PreviousNormalisedScore is not null && LatestNormalisedScore >= correctThreshold && PreviousNormalisedScore >= correctThreshold;
-        UpdatedBy = StudentId;
     }
 }

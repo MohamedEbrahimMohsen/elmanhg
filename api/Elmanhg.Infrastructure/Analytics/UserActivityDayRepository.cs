@@ -1,4 +1,3 @@
-using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.Analytics;
 using Elmanhg.Domain.Identity;
@@ -8,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.Analytics;
 
-public class UserActivityDayRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<UserActivityDay>(context, currentUser, timeProvider), IUserActivityDayRepository
+public class UserActivityDayRepository(AppDbContext context) : Repository<UserActivityDay>(context), IUserActivityDayRepository
 {
     public async Task AddIfAbsentAsync(UserActivityDay activity, CancellationToken cancellationToken)
     {

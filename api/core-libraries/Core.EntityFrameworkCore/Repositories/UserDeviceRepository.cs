@@ -1,5 +1,4 @@
 ﻿using Core.DDD.Entities;
-using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Context;
 using Core.Notifications.Entities;
 using Core.Notifications.Repositories;
@@ -8,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Core.EntityFrameworkCore.Repositories;
 
-public class UserDeviceRepository<TUser, TRole, TKey, TContext>(TContext context, ICurrentUser? currentUser = null, TimeProvider? timeProvider = null) : Repository<UserDevice>(context, currentUser, timeProvider), IUserDeviceRepository
+public class UserDeviceRepository<TUser, TRole, TKey, TContext>(TContext context) : Repository<UserDevice>(context), IUserDeviceRepository
     where TUser : IdentityUser<TKey>, IEntity, new()
     where TRole : IdentityRole<TKey>, new()
     where TKey : IEquatable<TKey>, new()

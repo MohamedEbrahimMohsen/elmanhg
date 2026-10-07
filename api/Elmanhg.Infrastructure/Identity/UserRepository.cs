@@ -1,4 +1,3 @@
-using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Infrastructure.Data.Context;
@@ -6,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.Identity;
 
-public class UserRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<User>(context, currentUser, timeProvider), IUserRepository
+public class UserRepository(AppDbContext context) : Repository<User>(context), IUserRepository
 {
     // Serialises admin deactivations so two admins cannot deactivate each other past the last-admin rule; any fixed key unique to this lock.
     private const long AdminRosterLockKey = 106001;

@@ -133,6 +133,7 @@ public sealed class RefreshAccessTokenHandlerTests
         (await act.Should().ThrowAsync<ForbiddenCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.UserSuspended);
         await _refreshTokenService.DidNotReceive().GenerateTokenAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());
         await _issuedRefreshTokenRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+        _issuedRefreshTokenRepository.ReceivedCalls().Should().BeEmpty();
     }
 
     [Fact]

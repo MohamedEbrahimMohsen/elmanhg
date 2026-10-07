@@ -111,11 +111,12 @@ public sealed class TeacherVoiceDraftTests
     {
         var draft = Record();
         draft.CompleteTranscription("text", "whisper-1", RecordedAt.AddSeconds(5));
+        draft.UpdatedBy = null;
         var messageId = Guid.NewGuid();
 
         draft.MarkSent(messageId, RecordedAt.AddMinutes(1));
 
-        (draft.Status, draft.SentMessageId, draft.UpdatedBy, draft.UpdationDate).Should().Be((TeacherVoiceDraftStatus.Sent, (Guid?)messageId, (Guid?)_teacherId, RecordedAt.AddMinutes(1)));
+        (draft.Status, draft.SentMessageId, draft.UpdatedBy, draft.UpdationDate).Should().Be((TeacherVoiceDraftStatus.Sent, (Guid?)messageId, (Guid?)null, RecordedAt.AddMinutes(1)));
     }
 
     [Fact]

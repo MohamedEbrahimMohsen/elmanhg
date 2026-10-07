@@ -103,13 +103,14 @@ public sealed class SessionTests
     public void Resume_InProgress_MovesLastActivityForward()
     {
         var session = _builder.Build();
+        session.UpdatedBy = null;
         var before = session.LastActivityAt;
 
         session.Resume();
 
         session.LastActivityAt.Should().BeOnOrAfter(before);
         session.UpdationDate.Should().Be(session.LastActivityAt);
-        session.UpdatedBy.Should().Be(_builder.StudentId);
+        session.UpdatedBy.Should().BeNull();
     }
 
     [Fact]

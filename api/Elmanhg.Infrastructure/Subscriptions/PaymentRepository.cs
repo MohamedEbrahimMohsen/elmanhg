@@ -1,4 +1,3 @@
-using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.SharedKernel;
 using Elmanhg.Domain.Subscriptions;
@@ -7,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.Subscriptions;
 
-public class PaymentRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<Payment>(context, currentUser, timeProvider), IPaymentRepository
+public class PaymentRepository(AppDbContext context) : Repository<Payment>(context), IPaymentRepository
 {
     public async Task<PaymentTotals> GetTotalsAsync(DateTimeOffset start, DateTimeOffset end, CancellationToken cancellationToken)
     {

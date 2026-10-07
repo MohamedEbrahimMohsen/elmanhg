@@ -74,7 +74,6 @@ public partial class Session : AuditEntity, IVersioned
     private void Touch(DateTimeOffset now)
     {
         LastActivityAt = now;
-        UpdatedBy = StudentId;
         UpdationDate = now;
     }
 

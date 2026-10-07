@@ -81,7 +81,6 @@ public class TeacherVoiceDraft : AuditEntity
 
         SentMessageId = messageId;
         Status = TeacherVoiceDraftStatus.Sent;
-        UpdatedBy = TeacherId;
         UpdationDate = sentAt.TruncateToMicroseconds();
     }
 

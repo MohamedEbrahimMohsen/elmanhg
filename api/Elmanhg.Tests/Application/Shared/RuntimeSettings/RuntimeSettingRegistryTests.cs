@@ -25,6 +25,14 @@ public sealed class RuntimeSettingRegistryTests
     }
 
     [Fact]
+    public void Definitions_DefaultOptions_EachGroupIsContiguous()
+    {
+        var groups = _registry.Definitions.Select(x => x.Group).ToList();
+
+        groups.Where((group, index) => index == 0 || group != groups[index - 1]).Should().Equal(Enum.GetNames<RuntimeSettingGroup>());
+    }
+
+    [Fact]
     public void Definitions_Every_HasArabicAndEnglishLabelAndDescription()
     {
         _registry.Definitions.Should().OnlyContain(x => !string.IsNullOrWhiteSpace(x.Label.Arabic) && !string.IsNullOrWhiteSpace(x.Label.English) && !string.IsNullOrWhiteSpace(x.Description.Arabic) && !string.IsNullOrWhiteSpace(x.Description.English));
