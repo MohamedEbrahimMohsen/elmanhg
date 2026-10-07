@@ -1,6 +1,6 @@
 using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
-using Elmanhg.Domain.Identity;
+using Core.Identity.Tokens.RefreshToken;
 using Elmanhg.Infrastructure.Data.Context;
 using Microsoft.EntityFrameworkCore;
 

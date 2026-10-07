@@ -6,4 +6,5 @@ public static class ErrorCodes
     public const string RefreshTokenIsRequired = "REFRESH_TOKEN_IS_REQUIRED";
     public const string RefreshTokenIsExpired = "REFRESH_TOKEN_IS_EXPIRED";
     public const string RefreshTokenUserNotFound = "REFRESH_TOKEN_USER_NOT_FOUND";
+    public const string RefreshTokenRevoked = "REFRESH_TOKEN_REVOKED";
 }

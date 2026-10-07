@@ -1,6 +1,6 @@
 using Core.DDD.Entities;
 
-namespace Elmanhg.Domain.Identity;
+namespace Core.Identity.Tokens.RefreshToken;
 
 public class IssuedRefreshToken : Entity
 {

@@ -19,7 +19,6 @@ public static class ErrorCodes
     public const string OtpDeliveryFailed = "OTP_DELIVERY_FAILED";
     public const string InvitationNotFound = "INVITATION_NOT_FOUND";
     public const string PasswordRejected = "PASSWORD_REJECTED";
-    public const string RefreshTokenRevoked = "REFRESH_TOKEN_REVOKED";
 
     // USERS
     public const string UserListPageNumberInvalid = "USER_LIST_PAGE_NUMBER_INVALID";

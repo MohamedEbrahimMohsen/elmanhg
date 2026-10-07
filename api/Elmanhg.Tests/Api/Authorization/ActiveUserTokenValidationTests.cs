@@ -1,6 +1,6 @@
+using Core.Identity.Tokens.AccessToken;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Api.Authorization;
-using Elmanhg.Application.Auth.Shared;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Users.CheckUserActive;
 using FluentAssertions;

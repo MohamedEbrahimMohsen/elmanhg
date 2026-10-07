@@ -54,4 +54,16 @@ public sealed class RefreshTokenServiceTests
         (await act.Should().ThrowAsync<UnauthorizedCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.RefreshTokenIsExpired);
         await _signInManager.DidNotReceive().ValidateSecurityStampAsync(Arg.Any<ClaimsPrincipal>());
     }
+
+    [Fact]
+    public async Task ValidateTokenAsync_StaleSecurityStamp_ThrowsRefreshTokenUserNotFound()
+    {
+        var properties = new AuthenticationProperties { ExpiresUtc = Now.AddDays(1) };
+        _protector.Unprotect("t").Returns(new AuthenticationTicket(new ClaimsPrincipal(new ClaimsIdentity("Test")), properties, IdentityConstants.BearerScheme));
+        _signInManager.ValidateSecurityStampAsync(Arg.Any<ClaimsPrincipal>()).Returns((User?)null);
+
+        var act = () => _service.ValidateTokenAsync("t", TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<UnauthorizedCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.RefreshTokenUserNotFound);
+    }
 }

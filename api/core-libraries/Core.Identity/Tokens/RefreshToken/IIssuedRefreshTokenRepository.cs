@@ -1,6 +1,6 @@
 using Core.DDD.Repositories;
 
-namespace Elmanhg.Domain.Identity;
+namespace Core.Identity.Tokens.RefreshToken;
 
 public interface IIssuedRefreshTokenRepository : IRepository<IssuedRefreshToken>
 {
