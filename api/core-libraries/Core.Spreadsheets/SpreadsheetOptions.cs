@@ -7,4 +7,6 @@ public sealed class SpreadsheetOptions
     public bool RightToLeft { get; set; }
 
     public int MaxUncompressedSizeInMb { get; set; } = 100;
+
+    public int MaxCompressedSizeInMb { get; set; } = 100;
 }

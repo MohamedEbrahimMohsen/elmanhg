@@ -180,6 +180,20 @@ public sealed class ClosedXmlSpreadsheetReaderTests
         sheet.Rows[1].Cells.Should().Equal("two", "b");
     }
 
+    [Fact]
+    public void Read_NonSeekableStreamOverCompressedCap_ThrowsConfiguredUnreadableCode()
+    {
+        var content = IncompressibleWorkbook();
+        var reader = new ClosedXmlSpreadsheetReader(Options.Create(new SpreadsheetOptions { UnreadableErrorCode = "PROBE_UNREADABLE", MaxCompressedSizeInMb = 1 }));
+        using var stream = new NonSeekableReadStream(content);
+
+        var act = () => reader.Read(stream, AllSheets);
+
+        content.Length.Should().BeGreaterThan(1024 * 1024);
+        act.Should().Throw<BadRequestCoreException>().Which.ErrorCode.Should().Be("PROBE_UNREADABLE");
+        reader.Read(new MemoryStream(content), AllSheets).Sheets.Single().Name.Should().Be("Mcq");
+    }
+
     private static ClosedXmlSpreadsheetReader OneMegabyteCapReader() => new(Options.Create(new SpreadsheetOptions { UnreadableErrorCode = "PROBE_UNREADABLE", MaxUncompressedSizeInMb = 1 }));
 
     private static byte[] Corrupt(byte[] content, string corruption)
@@ -202,6 +216,24 @@ public sealed class ClosedXmlSpreadsheetReaderTests
         };
         BitConverter.GetBytes(value)[..width].CopyTo(content, offset);
         return content;
+    }
+
+    private static byte[] IncompressibleWorkbook()
+    {
+        var random = new Random(331);
+        using var workbook = new XLWorkbook();
+        var sheet = workbook.Worksheets.Add("Mcq");
+        sheet.Cell(1, 1).Value = "stem";
+        for (var i = 2; i <= 65; i++)
+        {
+            var bytes = new byte[24_000];
+            random.NextBytes(bytes);
+            sheet.Cell(i, 1).Value = Convert.ToBase64String(bytes);
+        }
+
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        return stream.ToArray();
     }
 
     private static byte[] FarCellWorkbook(params string[] names)

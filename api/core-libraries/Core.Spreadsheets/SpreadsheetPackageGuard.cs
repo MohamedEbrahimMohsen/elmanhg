@@ -10,6 +10,30 @@ internal static class SpreadsheetPackageGuard
 {
     private const long BytesPerMegabyte = 1024 * 1024;
 
+    private const int CopyChunkSize = 81920;
+
+    // A non-seekable stream has to be copied before the zip directory can be read; the copy stops at the compressed cap.
+    public static MemoryStream BufferWithinCompressedCap(Stream content, int maxCompressedSizeInMb, string unreadableErrorCode)
+    {
+        var cap = maxCompressedSizeInMb * BytesPerMegabyte;
+        var buffer = new MemoryStream();
+        var chunk = new byte[CopyChunkSize];
+        int read;
+        while ((read = content.Read(chunk, 0, chunk.Length)) > 0)
+        {
+            if (buffer.Length + read > cap)
+            {
+                buffer.Dispose();
+                throw new BadRequestCoreException(unreadableErrorCode);
+            }
+
+            buffer.Write(chunk, 0, read);
+        }
+
+        buffer.Position = 0;
+        return buffer;
+    }
+
     public static void EnsureWithinUncompressedCap(Stream package, int maxUncompressedSizeInMb, string unreadableErrorCode)
     {
         var start = package.Position;

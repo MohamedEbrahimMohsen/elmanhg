@@ -24,4 +24,14 @@ public sealed class SpreadsheetOptionsValidatorTests
 
         result.Failures.Should().ContainSingle().Which.Should().Be("MaxUncompressedSizeInMb must be greater than 0.");
     }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Validate_NonPositiveCompressedCap_Fails(int maxCompressedSizeInMb)
+    {
+        var result = _validator.Validate(null, new SpreadsheetOptions { MaxCompressedSizeInMb = maxCompressedSizeInMb });
+
+        result.Failures.Should().ContainSingle().Which.Should().Be("MaxCompressedSizeInMb must be greater than 0.");
+    }
 }

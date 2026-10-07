@@ -137,7 +137,7 @@ The admin Configuration API (`GET /api/configuration/infrastructure`, [configura
 SVG is never accepted, because it can carry script and media is served from the site origin. Media responses carry `X-Content-Type-Options: nosniff`.
 
 - **Local media types:** with the `Local` provider, `/api/media` serves only the `StorageContentTypes` media map; any other extension (for example `.svg`, `.html`) is served as `application/octet-stream` with `nosniff`, the same as `S3`.
-- **Spreadsheets:** an `.xlsx` whose zip entries declare more than `SpreadsheetOptions.MaxUncompressedSizeInMb` (100 MB) unpacked is refused with `SPREADSHEET_UNREADABLE` before it is loaded.
+- **Spreadsheets:** an `.xlsx` whose zip entries declare more than `SpreadsheetOptions.MaxUncompressedSizeInMb` (100 MB) unpacked is refused with `SPREADSHEET_UNREADABLE` before it is loaded. A non-seekable input is copied into memory only up to `SpreadsheetOptions.MaxCompressedSizeInMb` (100 MB); a larger one is refused with the same code.
 - **Paths:** `LocalDiskFileStorage` (`Core.Storage`) and `PublicMediaMiddleware.IsPublicKey` (`Core.Storage`) refuse traversal; `PublicMediaFileProvider` refuses `~` short names.
 - **Regular expressions** over user input are bounded (`RegexOptions.NonBacktracking` or a timeout).
 - **SQL:** EF Core with parameters only; no `FromSqlRaw` with interpolation.

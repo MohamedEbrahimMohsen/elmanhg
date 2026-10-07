@@ -107,3 +107,33 @@ None from the plan. Out of scope, as the plan says: the same claim-before-side-e
 ### Notes for review (r1)
 - Probe: with the guard's catch temporarily set back to `InvalidDataException` only, all 6 `Read_MalformedZip` rows still passed. As the reviewer expected, `ZipArchive` raises `InvalidDataException` for these corruptions. So the theory is a regression and fuzz pin, not proof that the wider filter is needed. I then restored the guard and rebuilt.
 - The collector config has no automated test. The YAML lines are the C# pattern with each `\` doubled, the same escaping as before.
+
+## CodeRabbit + CI fix
+
+### Files modified
+| Path | Change |
+|---|---|
+| `web/package-lock.json` | `npm audit fix` (no `--force`): `node_modules/source-map-js` 1.2.1 -> 1.2.2 (GHSA-68fv-2mgg-jv7q). The diff is only that entry's version, resolved and integrity lines. No `overrides` were needed. |
+| `api/core-libraries/Core.Spreadsheets/SpreadsheetOptions.cs` | New `MaxCompressedSizeInMb` (default 100). |
+| `api/core-libraries/Core.Spreadsheets/SpreadsheetOptionsValidator.cs` | Also checks that `MaxCompressedSizeInMb` is greater than 0. Each failure is reported on its own. |
+| `api/core-libraries/Core.Spreadsheets/SpreadsheetPackageGuard.cs` | New `BufferWithinCompressedCap`: copies in 80 KB chunks and throws `BadRequestCoreException(UnreadableErrorCode)` as soon as the copy would pass the cap. This is the same code the uncompressed-size guard throws. |
+| `api/core-libraries/Core.Spreadsheets/ClosedXmlSpreadsheetReader.cs` | A non-seekable input now goes through `BufferWithinCompressedCap` instead of an unbounded `CopyTo`. The private `Buffer` was removed. Seekable inputs work as before. |
+| `api/Elmanhg.Tests/Core/Spreadsheets/ClosedXmlSpreadsheetReaderTests.cs` | `Read_NonSeekableStreamOverCompressedCap_ThrowsConfiguredUnreadableCode`: a workbook of random base64 cells, over 1 MB compressed, sent through `NonSeekableReadStream` with a 1 MB cap, throws `PROBE_UNREADABLE`. The same bytes from a seekable `MemoryStream` read fine, which shows the new cap is what rejects it. |
+| `api/Elmanhg.Tests/Core/Spreadsheets/SpreadsheetOptionsValidatorTests.cs` | `Validate_NonPositiveCompressedCap_Fails` (0, -1). |
+| `docs/question-import.md`, `docs/security.md` | Document `MaxCompressedSizeInMb` (Limits section, and the Spreadsheets bullet in security). |
+
+### Default chosen
+The question-import validator caps uploads at `Content:QuestionImportMaxFileSizeInMb` = 5 MB, checked before the reader runs. The core default is 100 MB, the same as `MaxUncompressedSizeInMb`. That is above the app's upload limit and leaves room if that limit is raised later, so current callers behave the same. The app does not override the option in `Elmanhg.Infrastructure/DependencyInjection.cs`.
+
+### Build & test
+- `npm --prefix web audit --audit-level=high`: `found 0 vulnerabilities`, exit 0.
+- `npm --prefix web run typecheck`: exit 0.
+- `npm --prefix web run build`: exit 0.
+- `npm --prefix web test -- --run`: `Test Files 310 passed (310)`, `Tests 1849 passed (1849)`.
+- `dotnet build api/`: `0 Error(s)`, 9 warnings that already existed (for example CS8618 in Core.Notifications).
+- `dotnet test --project api/Elmanhg.Tests --filter-class "Elmanhg.Tests.Core.Spreadsheets.*" --filter-class "*QuestionImport*" --filter-class "*ImportQuestions*" --filter-class "*SpreadsheetComposition*"`: `Passed! total: 130, failed: 0`.
+- The full API suite was not rerun.
+
+### Notes for review
+- The compressed cap applies only to non-seekable inputs, because only those are copied into memory. Seekable streams are already bounded by the caller (the upload size validator).
+- `SpreadsheetPackageGuard` gained a one-line comment explaining why the copy is bounded. It matches the comment style already in that file.
