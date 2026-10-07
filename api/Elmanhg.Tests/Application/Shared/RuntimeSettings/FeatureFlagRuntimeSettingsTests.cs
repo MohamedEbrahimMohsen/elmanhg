@@ -1,3 +1,4 @@
+using Core.Settings;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
@@ -14,7 +15,7 @@ public sealed class FeatureFlagRuntimeSettingsTests
 
         var refunds = definitions.Single(x => x.Key == "features.refundsEnabled");
 
-        (refunds.Group, refunds.Type, refunds.DefaultValue.GetBoolean()).Should().Be((RuntimeSettingGroup.Features, RuntimeSettingType.Boolean, false));
+        (refunds.Group, refunds.Type, refunds.DefaultValue.GetBoolean()).Should().Be((nameof(RuntimeSettingGroup.Features), RuntimeSettingType.Boolean, false));
     }
 
     [Fact]
@@ -24,6 +25,6 @@ public sealed class FeatureFlagRuntimeSettingsTests
 
         var deletion = definitions.Single(x => x.Key == "features.studentsCanDeleteAvatarChats");
 
-        (deletion.Group, deletion.Type, deletion.DefaultValue.GetBoolean()).Should().Be((RuntimeSettingGroup.Features, RuntimeSettingType.Boolean, true));
+        (deletion.Group, deletion.Type, deletion.DefaultValue.GetBoolean()).Should().Be((nameof(RuntimeSettingGroup.Features), RuntimeSettingType.Boolean, true));
     }
 }

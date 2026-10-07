@@ -1,7 +1,7 @@
 using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
+using Core.Settings;
 using Elmanhg.Application.Exceptions;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.TeacherThreads.Shared;
 using Elmanhg.Domain.SlaCalendars;
 using Elmanhg.Domain.TeacherThreads;

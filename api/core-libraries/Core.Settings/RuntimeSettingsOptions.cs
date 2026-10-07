@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Elmanhg.Application.Shared.Options;
+namespace Core.Settings;
 
 public sealed class RuntimeSettingsOptions
 {

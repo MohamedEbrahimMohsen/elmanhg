@@ -1,18 +1,18 @@
 using Core.DDD.Models;
-using Elmanhg.Application.Shared.RuntimeSettings;
+using Core.Settings;
 using FluentAssertions;
 using System.Text.Json;
 
-namespace Elmanhg.Tests.Application.Shared.RuntimeSettings;
+namespace Elmanhg.Tests.Core.Settings;
 
 public sealed class RuntimeSettingValueRulesTests
 {
     private static readonly LocalizedText Text = new("نص", "Text");
-    private static readonly RuntimeSettingDefinition Integer = RuntimeSettingDefinition.ForInteger(new RuntimeSettingKey<int>("test.integer"), RuntimeSettingGroup.AskTeacher, 24, 1, 168, Text, Text);
-    private static readonly RuntimeSettingDefinition Decimal = RuntimeSettingDefinition.ForDecimal(new RuntimeSettingKey<decimal>("test.decimal"), RuntimeSettingGroup.Grading, 0.7m, 0m, 1m, Text, Text);
-    private static readonly RuntimeSettingDefinition Boolean = RuntimeSettingDefinition.ForBoolean(new RuntimeSettingKey<bool>("test.boolean"), RuntimeSettingGroup.Features, false, Text, Text);
-    private static readonly RuntimeSettingDefinition Choice = RuntimeSettingDefinition.ForChoice(new RuntimeSettingKey<string>("test.choice"), RuntimeSettingGroup.Features, "WhatsApp", ["WhatsApp", "Email"], Text, Text);
-    private static readonly RuntimeSettingDefinition ChoiceList = RuntimeSettingDefinition.ForChoiceList(new RuntimeSettingKey<List<string>>("test.choiceList"), RuntimeSettingGroup.Features, ["WhatsApp"], ["WhatsApp", "Email"], Text, Text);
+    private static readonly RuntimeSettingDefinition Integer = RuntimeSettingDefinition.ForInteger(new RuntimeSettingKey<int>("test.integer"), "Probe", 24, 1, 168, Text, Text);
+    private static readonly RuntimeSettingDefinition Decimal = RuntimeSettingDefinition.ForDecimal(new RuntimeSettingKey<decimal>("test.decimal"), "Probe", 0.7m, 0m, 1m, Text, Text);
+    private static readonly RuntimeSettingDefinition Boolean = RuntimeSettingDefinition.ForBoolean(new RuntimeSettingKey<bool>("test.boolean"), "Probe", false, Text, Text);
+    private static readonly RuntimeSettingDefinition Choice = RuntimeSettingDefinition.ForChoice(new RuntimeSettingKey<string>("test.choice"), "Probe", "WhatsApp", ["WhatsApp", "Email"], Text, Text);
+    private static readonly RuntimeSettingDefinition ChoiceList = RuntimeSettingDefinition.ForChoiceList(new RuntimeSettingKey<List<string>>("test.choiceList"), "Probe", ["WhatsApp"], ["WhatsApp", "Email"], Text, Text);
 
     [Fact]
     public void IsValid_IntegerInRange_ReturnsTrue() => RuntimeSettingValueRules.IsValid(Integer, Json("12")).Should().BeTrue();

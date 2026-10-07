@@ -1,3 +1,4 @@
+using Core.Settings;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
@@ -12,7 +13,7 @@ public sealed class OutOfAppReminderRuntimeSettingsTests
     {
         var definitions = Definitions(new AskTeacherOptions());
 
-        definitions.Select(x => (x.Key, x.Group, x.Type)).Should().Equal(("askTeacher.outOfAppReminderEnabled", RuntimeSettingGroup.AskTeacher, RuntimeSettingType.Boolean), ("askTeacher.outOfAppReminderChannels", RuntimeSettingGroup.AskTeacher, RuntimeSettingType.Choice), ("askTeacher.outOfAppReminderStage", RuntimeSettingGroup.AskTeacher, RuntimeSettingType.Choice));
+        definitions.Select(x => (x.Key, x.Group, x.Type)).Should().Equal(("askTeacher.outOfAppReminderEnabled", nameof(RuntimeSettingGroup.AskTeacher), RuntimeSettingType.Boolean), ("askTeacher.outOfAppReminderChannels", nameof(RuntimeSettingGroup.AskTeacher), RuntimeSettingType.Choice), ("askTeacher.outOfAppReminderStage", nameof(RuntimeSettingGroup.AskTeacher), RuntimeSettingType.Choice));
         definitions.Select(x => x.DefaultValue.GetRawText()).Should().Equal("true", "\"Both\"", "\"SecondReminder\"");
         definitions[0].AllowedValues.Should().BeEmpty();
         definitions[1].AllowedValues.Should().Equal("WhatsApp", "Email", "Both");

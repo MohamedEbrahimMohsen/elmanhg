@@ -13,6 +13,7 @@
     <ProjectReference Include="..\core-libraries\Core.Localization\Core.Localization.csproj" />
     <ProjectReference Include="..\core-libraries\Core.Logging\Core.Logging.csproj" />
     <ProjectReference Include="..\core-libraries\Core.OTP\Core.OTP.csproj" />
+    <ProjectReference Include="..\core-libraries\Core.Settings\Core.Settings.csproj" />
     <ProjectReference Include="..\core-libraries\Core.Spreadsheets\Core.Spreadsheets.csproj" />
     <ProjectReference Include="..\core-libraries\Core.Storage\Core.Storage.csproj" />
     <ProjectReference Include="..\core-libraries\Core.Utilities\Core.Utilities.csproj" />

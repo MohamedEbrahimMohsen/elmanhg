@@ -1,4 +1,5 @@
 using Core.Errors;
+using Core.Settings;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.RuntimeSettings;
@@ -19,7 +20,7 @@ public sealed class RuntimeSettingRegistryTests
         var definitions = _registry.Definitions;
 
         definitions.Should().HaveCount(22);
-        definitions.Select(x => x.Group).Should().BeInAscendingOrder();
+        definitions.Select(x => x.Group).Distinct().Should().Equal(Enum.GetNames<RuntimeSettingGroup>());
         definitions[0].Key.Should().Be("features.examsRequireAllLessonsOpened");
     }
 
@@ -45,7 +46,7 @@ public sealed class RuntimeSettingRegistryTests
     {
         var planLimits = new PlanLimitRuntimeSettings(Microsoft.Extensions.Options.Options.Create(new SubscriptionsOptions()));
 
-        var act = () => new RuntimeSettingRegistry([planLimits, planLimits]);
+        var act = () => new RuntimeSettingRegistry([planLimits, planLimits], Enum.GetNames<RuntimeSettingGroup>());
 
         act.Should().Throw<InvalidOperationException>().WithMessage("*plans.freeDailyQuizQuestions*");
     }
@@ -53,7 +54,7 @@ public sealed class RuntimeSettingRegistryTests
     [Fact]
     public void FindProblems_DefaultOutsideRange_ReportsKey()
     {
-        var problems = RuntimeSettingRegistry.FindProblems([new UploadRuntimeSettings(Microsoft.Extensions.Options.Options.Create(new AskTeacherOptions { ImageMaxSizeInMb = 12 }))]);
+        var problems = RuntimeSettingRegistry.FindProblems([new UploadRuntimeSettings(Microsoft.Extensions.Options.Options.Create(new AskTeacherOptions { ImageMaxSizeInMb = 12 }))], Enum.GetNames<RuntimeSettingGroup>());
 
         problems.Should().ContainSingle().Which.Should().Contain("uploads.askTeacherImageMaxSizeInMb");
     }

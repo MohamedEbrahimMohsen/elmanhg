@@ -1,4 +1,4 @@
-namespace Elmanhg.Application.Shared.RuntimeSettings;
+namespace Core.Settings;
 
 public enum RuntimeSettingType
 {

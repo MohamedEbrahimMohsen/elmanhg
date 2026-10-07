@@ -1,9 +1,9 @@
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
+using Core.Settings;
 using Elmanhg.Application.Configuration.ResetRuntimeSetting;
 using Elmanhg.Application.Configuration.Shared;
 using Elmanhg.Application.Exceptions;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Domain.RuntimeSettings;
 using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;

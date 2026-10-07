@@ -1,5 +1,5 @@
+using Core.Settings;
 using Elmanhg.Application.Shared.Messaging;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.TeacherThreads;

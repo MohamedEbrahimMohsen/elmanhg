@@ -1,11 +1,9 @@
-using Elmanhg.Application.Shared.Options;
-using Elmanhg.Domain.RuntimeSettings;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
-namespace Elmanhg.Application.Shared.RuntimeSettings;
+namespace Core.Settings;
 
-public sealed class CachedRuntimeSettings(IRuntimeSettingOverrideRepository runtimeSettingOverrideRepository, RuntimeSettingRegistry registry, IMemoryCache memoryCache, IOptions<RuntimeSettingsOptions> runtimeSettingsOptions) : IRuntimeSettings
+public sealed class CachedRuntimeSettings(IRuntimeSettingOverrideStore runtimeSettingOverrideStore, RuntimeSettingRegistry registry, IMemoryCache memoryCache, IOptions<RuntimeSettingsOptions> runtimeSettingsOptions) : IRuntimeSettings
 {
     public async Task<T> GetAsync<T>(RuntimeSettingKey<T> key, CancellationToken cancellationToken)
     {
@@ -20,8 +18,8 @@ public sealed class CachedRuntimeSettings(IRuntimeSettingOverrideRepository runt
             return cached;
         }
 
-        var rows = await runtimeSettingOverrideRepository.FindAsync(x => x.Value != null, cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        var values = RuntimeSettingValues.From(registry, rows);
+        var overrides = await runtimeSettingOverrideStore.GetOverridesAsync(cancellationToken).ConfigureAwait(false);
+        var values = RuntimeSettingValues.From(registry, overrides);
         memoryCache.Set(RuntimeSettingsCache.Key, values, TimeSpan.FromSeconds(runtimeSettingsOptions.Value.CacheSeconds));
         return values;
     }

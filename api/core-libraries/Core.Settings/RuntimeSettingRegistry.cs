@@ -1,23 +1,24 @@
 using Core.Errors;
 
-namespace Elmanhg.Application.Shared.RuntimeSettings;
+namespace Core.Settings;
 
 public sealed class RuntimeSettingRegistry
 {
     private readonly Dictionary<string, RuntimeSettingDefinition> definitionsByKey;
 
-    public RuntimeSettingRegistry(IEnumerable<IRuntimeSettingDefinitions> groups)
+    public RuntimeSettingRegistry(IEnumerable<IRuntimeSettingDefinitions> groups, IReadOnlyList<string> groupOrder)
     {
         var list = groups.ToList();
-        var problems = FindProblems(list);
+        var problems = FindProblems(list, groupOrder);
         if (problems.Count > 0)
         {
             throw new InvalidOperationException(string.Join(" ", problems));
         }
 
+        var positions = groupOrder.ToList();
         Definitions = list
             .SelectMany(x => x.Definitions)
-            .OrderBy(x => x.Group)
+            .OrderBy(x => positions.IndexOf(x.Group))
             .ToList();
         Constraints = list
             .SelectMany(x => x.Constraints)
@@ -40,7 +41,7 @@ public sealed class RuntimeSettingRegistry
         }
     }
 
-    public static List<string> FindProblems(IReadOnlyList<IRuntimeSettingDefinitions> groups)
+    public static List<string> FindProblems(IReadOnlyList<IRuntimeSettingDefinitions> groups, IReadOnlyList<string> groupOrder)
     {
         var definitions = groups
             .SelectMany(x => x.Definitions)
@@ -49,9 +50,12 @@ public sealed class RuntimeSettingRegistry
             .GroupBy(x => x.Key, StringComparer.Ordinal)
             .Where(x => x.Count() > 1)
             .Select(x => $"Runtime setting {x.Key} is registered more than once.");
+        var unknownGroups = definitions
+            .Where(x => !groupOrder.Contains(x.Group, StringComparer.Ordinal))
+            .Select(x => $"Runtime setting {x.Key}: group {x.Group} is not in the group order.");
         var invalidDefaults = definitions
             .Where(x => !RuntimeSettingValueRules.IsValid(x, x.DefaultValue))
             .Select(x => $"Runtime setting {x.Key}: the configured default {x.DefaultValue.GetRawText()} is outside its allowed values.");
-        return [.. duplicates, .. invalidDefaults];
+        return [.. duplicates, .. unknownGroups, .. invalidDefaults];
     }
 }
