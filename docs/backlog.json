@@ -900,6 +900,21 @@
           "title": "Core.Hosting, Core.Observability, Core.Cache, Core.Spreadsheets, rate limits, redaction",
           "description": "Issue #313, PR #316.",
           "tasks": []
+        },
+        {
+          "title": "Wave-1 follow-ups: OTP cooldown and columns, Core.Storage.S3, cache TTL, messaging tests",
+          "description": "Issue #328, PR #330.",
+          "tasks": []
+        },
+        {
+          "title": "Wave-2/3 follow-ups: audit stamping rule, tighter tests, docs",
+          "description": "Issue #329, PR #332.",
+          "tasks": []
+        },
+        {
+          "title": "Fixes from the independent review of the merged E21 PRs (OTP concurrency, media, auth order)",
+          "description": "Issue #331, PR #333.",
+          "tasks": []
         }
       ]
     }
