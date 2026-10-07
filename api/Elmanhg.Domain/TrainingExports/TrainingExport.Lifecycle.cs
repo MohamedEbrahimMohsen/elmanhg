@@ -1,3 +1,4 @@
+using Core.DDD.Time;
 using Core.Errors;
 using Elmanhg.Domain.SharedKernel.Exceptions;
 
@@ -8,7 +9,7 @@ public partial class TrainingExport
     public void BeginRun(string fileKey, DateTimeOffset startedAt, TimeSpan lease)
     {
         EnsurePending();
-        var at = ToMicroseconds(startedAt);
+        var at = startedAt.TruncateToMicroseconds();
         FileKey = fileKey;
         Retry.Lease(at, lease);
         UpdationDate = at;
@@ -17,7 +18,7 @@ public partial class TrainingExport
     public void Complete(string fileKey, long rowCount, long fileSizeBytes, string sha256, DateTimeOffset completedAt, TimeSpan retention)
     {
         EnsurePending();
-        var at = ToMicroseconds(completedAt);
+        var at = completedAt.TruncateToMicroseconds();
         Retry.RecordSuccess();
         FileKey = fileKey;
         RowCount = rowCount;
@@ -32,7 +33,7 @@ public partial class TrainingExport
     public void FailAttempt(string errorCode, DateTimeOffset failedAt, int maxAttempts, TimeSpan retryBaseDelay)
     {
         EnsurePending();
-        var at = ToMicroseconds(failedAt);
+        var at = failedAt.TruncateToMicroseconds();
         if (Retry.RecordFailure(errorCode, at, maxAttempts, retryBaseDelay))
         {
             Status = TrainingExportStatus.Failed;
@@ -63,7 +64,7 @@ public partial class TrainingExport
 
         FileKey = null;
         Status = TrainingExportStatus.Expired;
-        UpdationDate = ToMicroseconds(expiredAt);
+        UpdationDate = expiredAt.TruncateToMicroseconds();
     }
 
     public void DiscardFile(DateTimeOffset discardedAt)
@@ -74,7 +75,7 @@ public partial class TrainingExport
         }
 
         FileKey = null;
-        UpdationDate = ToMicroseconds(discardedAt);
+        UpdationDate = discardedAt.TruncateToMicroseconds();
     }
 
     private void EnsurePending()

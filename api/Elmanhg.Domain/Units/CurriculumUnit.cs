@@ -49,7 +49,6 @@ public class CurriculumUnit : AuditEntity, IAuditedEntity
 
         Order = order;
         UpdatedBy = updatedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
     }
 
     public void Delete(bool hasLessons, Guid deletedBy)

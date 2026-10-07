@@ -46,7 +46,6 @@ public class Subject : AuditEntity, IAuditedEntity
 
         Order = order;
         UpdatedBy = updatedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
     }
 
     public void Delete(bool hasUnits, Guid deletedBy)

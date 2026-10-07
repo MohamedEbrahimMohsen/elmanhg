@@ -1,3 +1,4 @@
+using Core.DDD.Time;
 using Core.Errors;
 using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Questions.Schemas;
@@ -17,7 +18,7 @@ public partial class MathStepGrade
         }
 
         FinalAnswerVerdict = verdict;
-        UpdationDate = ToMicroseconds(checkedAt);
+        UpdationDate = checkedAt.TruncateToMicroseconds();
     }
 
     public void Complete(MathStepAssessment? assessment, QuestionGrade grade, decimal reviewConfidenceThreshold, DateTimeOffset gradedAt)
@@ -28,7 +29,7 @@ public partial class MathStepGrade
             throw new InvalidOperationException("Math steps are graded after the final answer is checked.");
         }
 
-        var at = ToMicroseconds(gradedAt);
+        var at = gradedAt.TruncateToMicroseconds();
         var needsReview = assessment is not null && assessment.Confidence < reviewConfidenceThreshold;
         Retry.RecordSuccess();
         Score = grade.Score;
@@ -51,7 +52,7 @@ public partial class MathStepGrade
     public void FailAttempt(string errorCode, DateTimeOffset failedAt, int maxAttempts, TimeSpan retryBaseDelay)
     {
         EnsurePending();
-        var at = ToMicroseconds(failedAt);
+        var at = failedAt.TruncateToMicroseconds();
         if (Retry.RecordFailure(errorCode, at, maxAttempts, retryBaseDelay))
         {
             Status = MathStepGradeStatus.InReview;
@@ -79,7 +80,7 @@ public partial class MathStepGrade
             throw new InvalidOperationException("Only a graded math answer that is not yet applied can be applied.");
         }
 
-        var at = ToMicroseconds(appliedAt);
+        var at = appliedAt.TruncateToMicroseconds();
         AppliedAt = at;
         UpdationDate = at;
     }

@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Core.Identity.Tokens.RefreshToken;
 
-public class RefreshTokenService<TUser, TKey>(SignInManager<TUser> signInManager, IOptionsMonitor<BearerTokenOptions> bearerOptions, IOptions<JwtOptions> jwtOptions) : IRefreshTokenService<TUser, TKey> where TUser : IdentityUser<TKey>, new() where TKey : IEquatable<TKey>
+public class RefreshTokenService<TUser, TKey>(SignInManager<TUser> signInManager, IOptionsMonitor<BearerTokenOptions> bearerOptions, IOptions<JwtOptions> jwtOptions, TimeProvider timeProvider) : IRefreshTokenService<TUser, TKey> where TUser : IdentityUser<TKey>, new() where TKey : IEquatable<TKey>
 {
     private readonly JwtOptions _jwt = jwtOptions.Value;
 
@@ -17,7 +17,7 @@ public class RefreshTokenService<TUser, TKey>(SignInManager<TUser> signInManager
         var authProperties = new AuthenticationProperties
         {
             IsPersistent = true,
-            ExpiresUtc = DateTimeOffset.UtcNow.AddDays(_jwt.RefreshTokenExpirationDays)
+            ExpiresUtc = timeProvider.GetUtcNow().AddDays(_jwt.RefreshTokenExpirationDays)
         };
 
         var refreshToken = bearerOptions.Get(IdentityConstants.BearerScheme).RefreshTokenProtector
@@ -35,7 +35,7 @@ public class RefreshTokenService<TUser, TKey>(SignInManager<TUser> signInManager
 
         var ticket = bearerOptions.Get(IdentityConstants.BearerScheme).RefreshTokenProtector.Unprotect(refreshToken);
 
-        if (ticket?.Properties?.ExpiresUtc is null || ticket.Properties.ExpiresUtc < DateTimeOffset.UtcNow)
+        if (ticket?.Properties?.ExpiresUtc is null || ticket.Properties.ExpiresUtc < timeProvider.GetUtcNow())
         {
             throw new UnauthorizedCoreException(ErrorCodes.RefreshTokenIsExpired);
         }

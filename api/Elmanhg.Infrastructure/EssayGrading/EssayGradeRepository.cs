@@ -1,3 +1,4 @@
+using Core.DDD.Identity;
 using Core.DDD.Models;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.EssayGrading;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.EssayGrading;
 
-public class EssayGradeRepository(AppDbContext context) : Repository<EssayGrade>(context), IEssayGradeRepository
+public class EssayGradeRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<EssayGrade>(context, currentUser, timeProvider), IEssayGradeRepository
 {
     public async Task<List<Guid>> GetDueIdsAsync(DateTimeOffset now, int limit, CancellationToken cancellationToken)
     {

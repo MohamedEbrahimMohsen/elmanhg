@@ -5,7 +5,7 @@ namespace Core.OTP.Repositories;
 
 public static class OtpRepositoryExtensions
 {
-    public static async Task<Otp> ConsumeAsync(this IOtpRepository otpRepository, Guid verificationId, OtpRecipientType recipientType, string invalidErrorCode, CancellationToken cancellationToken)
+    public static async Task<Otp> ConsumeAsync(this IOtpRepository otpRepository, Guid verificationId, OtpRecipientType recipientType, string invalidErrorCode, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var otp = await otpRepository.FindByVerificationId(verificationId, cancellationToken).ConfigureAwait(false);
         if (otp is null || otp.RecipientType != recipientType)
@@ -13,7 +13,7 @@ public static class OtpRepositoryExtensions
             throw new BadRequestCoreException(invalidErrorCode);
         }
 
-        otp.MarkUsed();
+        otp.MarkUsed(now);
         return otp;
     }
 }

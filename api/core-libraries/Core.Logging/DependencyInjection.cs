@@ -102,7 +102,7 @@ public static class DependencyInjection
             return;
 
         var period = options.PeriodSeconds is { } s ? TimeSpan.FromSeconds(s) : (TimeSpan?)null;
-        string[] azureRequestLogPropertyColumns = ["TraceId", "ErrorCode", "DebugId", "Method", "Path", "QueryString", "Host", "ClientIp", "ForwardedFor", "Country", "City", "State", "Region", "Timezone", "Latitude", "Longitude", "UserAgent", "StatusCode", "MachineName", "DurationMs", "Environment", "ServiceName", "Version", "Cluster"];
+        string[] azureRequestLogPropertyColumns = ["TraceId", "ErrorCode", "DebugId", "Method", "Path", "QueryString", "Host", "ClientIp", "ForwardedFor", "Country", "City", "State", "Region", "Timezone", "UserAgent", "StatusCode", "MachineName", "DurationMs", "Environment", "ServiceName", "Version", "Cluster"];
         string[] azureLogsPropertyColumns = ["TraceId", "Environment"];
         
         config.WriteTo.Logger(lc => lc

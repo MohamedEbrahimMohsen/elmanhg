@@ -85,9 +85,9 @@ public sealed class OtpTests
     [Fact]
     public void MarkUsed_NotVerified_ThrowsBadRequest()
     {
-        var otp = new OtpBuilder().Build();
+        var otp = new OtpBuilder().IssuedAt(Now).Build();
 
-        var act = otp.MarkUsed;
+        var act = () => otp.MarkUsed(Now);
 
         act.Should().Throw<BadRequestCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.OTPNotVerified);
     }
@@ -95,10 +95,10 @@ public sealed class OtpTests
     [Fact]
     public void MarkUsed_AlreadyUsed_ThrowsBadRequest()
     {
-        var otp = new OtpBuilder().Verified().Build();
-        otp.MarkUsed();
+        var otp = new OtpBuilder().Verified().IssuedAt(Now).Build();
+        otp.MarkUsed(Now);
 
-        var act = otp.MarkUsed;
+        var act = () => otp.MarkUsed(Now);
 
         act.Should().Throw<BadRequestCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.OTPAlreadyUsed);
     }
@@ -106,9 +106,9 @@ public sealed class OtpTests
     [Fact]
     public void MarkUsed_Verified_SetsIsUsed()
     {
-        var otp = new OtpBuilder().Verified().Build();
+        var otp = new OtpBuilder().Verified().IssuedAt(Now).Build();
 
-        otp.MarkUsed();
+        otp.MarkUsed(Now);
 
         otp.IsUsed.Should().BeTrue();
     }
@@ -136,9 +136,9 @@ public sealed class OtpTests
     [Fact]
     public void Verify_MatchingHash_MarksVerified()
     {
-        var otp = new OtpBuilder().Build();
+        var otp = new OtpBuilder().IssuedAt(Now).Build();
 
-        var error = otp.Verify(OtpBuilder.CodeHash);
+        var error = otp.Verify(OtpBuilder.CodeHash, Now);
 
         error.Should().BeNull();
         otp.IsVerified.Should().BeTrue();
@@ -148,9 +148,9 @@ public sealed class OtpTests
     [Fact]
     public void Verify_DifferentHashSameLength_ReturnsNotMatched()
     {
-        var otp = new OtpBuilder().Build();
+        var otp = new OtpBuilder().IssuedAt(Now).Build();
 
-        var error = otp.Verify("code-hasx");
+        var error = otp.Verify("code-hasx", Now);
 
         error.Should().Be(ErrorCodes.OTPNotMatched);
         otp.IsVerified.Should().BeFalse();
@@ -159,11 +159,33 @@ public sealed class OtpTests
     [Fact]
     public void Verify_DifferentLengthHash_ReturnsNotMatched()
     {
-        var otp = new OtpBuilder().Build();
+        var otp = new OtpBuilder().IssuedAt(Now).Build();
 
-        var error = otp.Verify("short");
+        var error = otp.Verify("short", Now);
 
         error.Should().Be(ErrorCodes.OTPNotMatched);
         otp.IsVerified.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Verify_ExpiredAtGivenTime_ReturnsExpired()
+    {
+        var otp = new OtpBuilder().IssuedAt(Now).Build();
+
+        var error = otp.Verify(OtpBuilder.CodeHash, Now.AddMinutes(5));
+
+        error.Should().Be(ErrorCodes.OTPExpired);
+        otp.IsVerified.Should().BeFalse();
+    }
+
+    [Fact]
+    public void MarkUsed_ExpiredAtGivenTime_ThrowsExpired()
+    {
+        var otp = new OtpBuilder().Verified().IssuedAt(Now).Build();
+
+        var act = () => otp.MarkUsed(Now.AddMinutes(5));
+
+        act.Should().Throw<BadRequestCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.OTPExpired);
+        otp.IsUsed.Should().BeFalse();
     }
 }

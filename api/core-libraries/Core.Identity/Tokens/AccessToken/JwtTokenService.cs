@@ -1,7 +1,6 @@
 ﻿using Core.DDD.Entities;
 using Core.Errors;
 using Core.Identity.Exceptions;
-using MediatR;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -9,12 +8,10 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Timers;
-using System.Xml.Linq;
 
 namespace Core.Identity.Tokens.AccessToken;
 
-public class JwtTokenService<TUser, TKey>(SignInManager<TUser> signInManager, IOptions<JwtOptions> jwtOptions, IOptionsMonitor<BearerTokenOptions> bearerOptions) : ITokenService where TUser : IdentityUser<TKey>, IEntity, new() where TKey : IEquatable<TKey>
+public class JwtTokenService<TUser, TKey>(SignInManager<TUser> signInManager, IOptions<JwtOptions> jwtOptions, IOptionsMonitor<BearerTokenOptions> bearerOptions, TimeProvider timeProvider) : ITokenService where TUser : IdentityUser<TKey>, IEntity, new() where TKey : IEquatable<TKey>
 {
     private readonly JwtOptions _jwt = jwtOptions.Value;
 
@@ -27,7 +24,7 @@ public class JwtTokenService<TUser, TKey>(SignInManager<TUser> signInManager, IO
             issuer: _jwt.Issuer,
             audience: _jwt.Audience,
             claims: claims,
-            expires: DateTimeOffset.UtcNow.AddHours(_jwt.ExpirationHours).UtcDateTime,
+            expires: timeProvider.GetUtcNow().AddHours(_jwt.ExpirationHours).UtcDateTime,
             signingCredentials: signingCredentials
         );
 
@@ -44,12 +41,12 @@ public class JwtTokenService<TUser, TKey>(SignInManager<TUser> signInManager, IO
         var ticket = bearerOptions.Get(IdentityConstants.BearerScheme).RefreshTokenProtector
                                   .Unprotect(refreshToken);
 
-        if (ticket?.Properties?.ExpiresUtc is null || ticket.Properties.ExpiresUtc < DateTimeOffset.UtcNow)
+        if (ticket?.Properties?.ExpiresUtc is null || ticket.Properties.ExpiresUtc < timeProvider.GetUtcNow())
         {
             throw new UnauthorizedCoreException(ErrorCodes.RefreshTokenIsExpired);
         }
 
-        var user = await signInManager.ValidateSecurityStampAsync(ticket.Principal);
+        var user = await signInManager.ValidateSecurityStampAsync(ticket.Principal).ConfigureAwait(false);
         if (user == null || user.IsDeleted)
         {
             throw new UnauthorizedCoreException(ErrorCodes.RefreshTokenUserNotFound);

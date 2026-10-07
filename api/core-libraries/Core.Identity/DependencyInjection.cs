@@ -1,4 +1,5 @@
 ﻿using Core.DDD.Entities;
+using Core.DDD.Identity;
 using Core.Identity.Tokens;
 using Core.Identity.Tokens.AccessToken;
 using Core.Identity.Tokens.CurrentUser;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -20,19 +22,17 @@ public static class DependencyInjection
                 this IServiceCollection services,
                 IConfiguration configuration,
                 Action<DbContextOptionsBuilder>? dbContextOptions,
-                Action<IdentityOptions>? identityOptions = null) //,Action<JwtBearerOptions>? jwtOptions = null
+                Action<IdentityOptions>? identityOptions = null)
                 where TUser : IdentityUser<TKey>, IEntity, new()
                 where TKey : IEquatable<TKey>, new()
                 where TRole: IdentityRole<TKey>, new()
                 where TDbContext : DbContext
     {
-        //services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-        //services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-        //services.AddTransient<IRequestHandler<RegisterCommand<TUser>, RegisterResult>, RegisterHandler<TUser>>();
-
         services.AddScoped<ITokenService, JwtTokenService<TUser, TKey>>();
         services.AddScoped<IRefreshTokenService<TUser, TKey>, RefreshTokenService<TUser, TKey>>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddScoped<ICurrentUser>(provider => provider.GetRequiredService<ICurrentUserService>());
 
         var jwtSection = configuration.GetSection(JwtOptions.SectionName);
         services.Configure<JwtOptions>(jwtSection);

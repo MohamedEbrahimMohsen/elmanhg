@@ -1,7 +1,7 @@
-using Core.Utilities.Time;
+using Core.DDD.Time;
 using FluentAssertions;
 
-namespace Elmanhg.Tests.Core.Utilities;
+namespace Elmanhg.Tests.Core.DDD;
 
 public sealed class DateTimeOffsetExtensionsTests
 {

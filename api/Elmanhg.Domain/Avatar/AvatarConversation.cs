@@ -1,5 +1,5 @@
 using Core.DDD.Entities;
-using Core.Utilities.Time;
+using Core.DDD.Time;
 
 namespace Elmanhg.Domain.Avatar;
 

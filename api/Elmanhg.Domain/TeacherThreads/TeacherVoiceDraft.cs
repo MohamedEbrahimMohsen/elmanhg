@@ -1,5 +1,6 @@
 using Core.DDD.Entities;
 using Core.DDD.Models;
+using Core.DDD.Time;
 using Core.Errors;
 using Elmanhg.Domain.SharedKernel.Exceptions;
 
@@ -26,7 +27,7 @@ public class TeacherVoiceDraft : AuditEntity
 
     public static TeacherVoiceDraft Record(Guid threadId, Guid teacherId, string audioKey, string audioUrl, int audioDurationSeconds, DateTimeOffset recordedAt)
     {
-        var at = TeacherThread.ToMicroseconds(recordedAt);
+        var at = recordedAt.TruncateToMicroseconds();
         return new TeacherVoiceDraft(Guid.NewGuid(), teacherId)
         {
             ThreadId = threadId,
@@ -45,7 +46,7 @@ public class TeacherVoiceDraft : AuditEntity
     public void CompleteTranscription(string transcript, string model, DateTimeOffset transcribedAt)
     {
         EnsurePending();
-        var at = TeacherThread.ToMicroseconds(transcribedAt);
+        var at = transcribedAt.TruncateToMicroseconds();
         Transcript = transcript.Trim();
         TranscriptionModel = model;
         Retry.RecordSuccess();
@@ -57,7 +58,7 @@ public class TeacherVoiceDraft : AuditEntity
     public void FailAttempt(DateTimeOffset failedAt, int maxAttempts, TimeSpan retryBaseDelay)
     {
         EnsurePending();
-        var at = TeacherThread.ToMicroseconds(failedAt);
+        var at = failedAt.TruncateToMicroseconds();
         if (Retry.RecordFailure(null, at, maxAttempts, retryBaseDelay))
         {
             Status = TeacherVoiceDraftStatus.Failed;
@@ -81,7 +82,7 @@ public class TeacherVoiceDraft : AuditEntity
         SentMessageId = messageId;
         Status = TeacherVoiceDraftStatus.Sent;
         UpdatedBy = TeacherId;
-        UpdationDate = TeacherThread.ToMicroseconds(sentAt);
+        UpdationDate = sentAt.TruncateToMicroseconds();
     }
 
     private void EnsurePending()

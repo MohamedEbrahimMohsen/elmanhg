@@ -15,7 +15,7 @@ public sealed class MarkNotificationAsReadHandler(INotificationRepository notifi
             throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
         }
 
-        var notification = await notificationRepository.GetByIdAsync(request.NotificationId, cancellationToken);
+        var notification = await notificationRepository.GetByIdAsync(request.NotificationId, cancellationToken).ConfigureAwait(false);
         
         if (notification is null)
         {

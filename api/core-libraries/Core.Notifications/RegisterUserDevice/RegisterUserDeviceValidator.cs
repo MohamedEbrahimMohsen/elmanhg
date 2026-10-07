@@ -14,11 +14,5 @@ public sealed class RegisterUserDeviceValidator : AbstractValidator<RegisterUser
         RuleFor(x => x.PushToken)
             .ValidateRequired(ErrorCodes.PushTokenRequired);
 
-        //RuleFor(x => x.Platform)
-        //    .Must(x => !string.IsNullOrEmpty(x) &&
-        //               (x.Equals("Android", StringComparison.OrdinalIgnoreCase) ||
-        //               x.Equals("IOS", StringComparison.OrdinalIgnoreCase) ||
-        //               x.Equals("Web", StringComparison.OrdinalIgnoreCase)))
-        //    .WithErrorCode(ErrorCodes.DevicePlatformRequired);
     }
 }

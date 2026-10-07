@@ -19,7 +19,6 @@ public partial class Subscription
         Status = SubscriptionStatus.Active;
         CancelledAt = null;
         PaymobReference = paymobReference ?? PaymobReference;
-        UpdationDate = DateTimeOffset.UtcNow;
     }
 
     public bool Lapse(DateTimeOffset now, TimeSpan gracePeriod)
@@ -47,7 +46,6 @@ public partial class Subscription
         }
 
         Status = SubscriptionStatus.PastDue;
-        UpdationDate = DateTimeOffset.UtcNow;
     }
 
     public void Cancel(DateTimeOffset cancelledAt)
@@ -59,7 +57,6 @@ public partial class Subscription
 
         Status = SubscriptionStatus.Cancelled;
         CancelledAt = cancelledAt;
-        UpdationDate = DateTimeOffset.UtcNow;
     }
 
     public void Expire(DateTimeOffset expiredAt)
@@ -71,6 +68,5 @@ public partial class Subscription
 
         Status = SubscriptionStatus.Expired;
         ExpiredAt = expiredAt;
-        UpdationDate = DateTimeOffset.UtcNow;
     }
 }

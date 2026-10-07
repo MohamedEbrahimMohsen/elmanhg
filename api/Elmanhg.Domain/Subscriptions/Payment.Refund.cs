@@ -47,7 +47,6 @@ public partial class Payment
         RefundedBy = refundedBy;
         RefundReason = reason;
         RefundIdempotencyKey = idempotencyKey;
-        UpdationDate = DateTimeOffset.UtcNow;
     }
 
     public void ResolveReview(Guid resolvedBy, DateTimeOffset resolvedAt)
@@ -59,6 +58,5 @@ public partial class Payment
 
         ReviewResolvedAt = resolvedAt;
         ReviewResolvedBy = resolvedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
     }
 }

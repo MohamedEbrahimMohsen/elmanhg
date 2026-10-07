@@ -1,4 +1,4 @@
-using Core.Utilities.Time;
+using Core.DDD.Time;
 
 namespace Elmanhg.Domain.SlaCalendars;
 

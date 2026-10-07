@@ -116,7 +116,7 @@ public sealed class RegisterWithPhoneHandlerTests
 
     private global::Core.OTP.Entities.Otp ArrangeOtp(OtpBuilder builder)
     {
-        var otp = builder.Build();
+        var otp = builder.IssuedAt(Now).Build();
         _otpRepository.FindByVerificationId(otp.VerificationId, Arg.Any<CancellationToken>()).Returns(otp);
         return otp;
     }

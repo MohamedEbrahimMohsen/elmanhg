@@ -23,11 +23,11 @@ public class CoreExceptionMiddleware(RequestDelegate next, ILogger<CoreException
     {
         try
         {
-            await next(context);
+            await next(context).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            await HandleExceptionAsync(context, ex);
+            await HandleExceptionAsync(context, ex).ConfigureAwait(false);
         }
     }
 
@@ -75,6 +75,6 @@ public class CoreExceptionMiddleware(RequestDelegate next, ILogger<CoreException
 
         var apiResponseHandler = context.RequestServices.GetRequiredService<IErrorResponseHandler>();
         var response = apiResponseHandler.GenerateErrorResponse(exceptionDetails);
-        await context.Response.WriteAsync(JsonSerializer.Serialize(response, ErrorSerializerOptions));
+        await context.Response.WriteAsync(JsonSerializer.Serialize(response, ErrorSerializerOptions)).ConfigureAwait(false);
     }
 }

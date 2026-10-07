@@ -1,3 +1,4 @@
+using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.TeacherThreads;
 using Elmanhg.Infrastructure.Data.Context;
@@ -5,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.TeacherThreads;
 
-public class TeacherVoiceDraftRepository(AppDbContext context) : Repository<TeacherVoiceDraft>(context), ITeacherVoiceDraftRepository
+public class TeacherVoiceDraftRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<TeacherVoiceDraft>(context, currentUser, timeProvider), ITeacherVoiceDraftRepository
 {
     public async Task<List<Guid>> GetDueIdsAsync(DateTimeOffset now, int limit, CancellationToken cancellationToken)
     {

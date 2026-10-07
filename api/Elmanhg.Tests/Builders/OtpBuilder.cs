@@ -70,7 +70,7 @@ public sealed class OtpBuilder
         var otp = Otp.Create(_recipientType, _recipient, CodeHash, 5, _maxVerificationAttempts, _reissueCooldownSeconds, _maxReissueCount, _reissueBlockCooldownInHours, _issuedAt);
         if (_verified)
         {
-            otp.Verify(CodeHash);
+            otp.Verify(CodeHash, _issuedAt);
         }
 
         return otp;

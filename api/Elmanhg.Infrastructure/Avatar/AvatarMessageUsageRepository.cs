@@ -1,3 +1,4 @@
+using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.Avatar;
 using Elmanhg.Infrastructure.Data.Context;
@@ -5,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.Avatar;
 
-public class AvatarMessageUsageRepository(AppDbContext context) : Repository<AvatarMessageUsage>(context), IAvatarMessageUsageRepository
+public class AvatarMessageUsageRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<AvatarMessageUsage>(context, currentUser, timeProvider), IAvatarMessageUsageRepository
 {
     public async Task<int> CountOnDayAsync(Guid studentId, string timeZone, DateOnly day, CancellationToken cancellationToken)
     {

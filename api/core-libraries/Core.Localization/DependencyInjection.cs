@@ -37,7 +37,6 @@ public static class DependencyInjection
     public static IServiceCollection AddCoreLocalization(this IServiceCollection services)
     {
         services.AddLocalization(options => options.ResourcesPath = "Resources");
-        services.AddScoped<ILocalizationManager, LocalizationManager>();
         services.AddScoped<ILocalizer, Localizer>();
 
         return services;

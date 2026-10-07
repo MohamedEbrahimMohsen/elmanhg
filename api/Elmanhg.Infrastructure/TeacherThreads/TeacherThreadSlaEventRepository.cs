@@ -1,3 +1,4 @@
+using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.TeacherThreads;
 using Elmanhg.Infrastructure.Data.Context;
@@ -5,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.TeacherThreads;
 
-public class TeacherThreadSlaEventRepository(AppDbContext context) : Repository<TeacherThreadSlaEvent>(context), ITeacherThreadSlaEventRepository
+public class TeacherThreadSlaEventRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<TeacherThreadSlaEvent>(context, currentUser, timeProvider), ITeacherThreadSlaEventRepository
 {
     public async Task<int> CountBreachesAsync(DateTimeOffset start, DateTimeOffset end, Guid? subjectId, CancellationToken cancellationToken)
     {

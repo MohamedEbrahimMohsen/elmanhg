@@ -95,7 +95,7 @@ public class Otp : Entity
         NextAllowedReissueAt = ReissueCount == MaxReissueCount? NextAllowedReissueAt.AddHours(ReissueBlockCooldownInHours) : now.AddSeconds(ReissueCooldownSeconds);
     }
 
-    public string? Verify(string codeHash)
+    public string? Verify(string codeHash, DateTimeOffset now)
     {
         VerificationAttempts++;
 
@@ -104,7 +104,7 @@ public class Otp : Entity
             return ErrorCodes.OTPAlreadyVerified;
         }
 
-        if (ExpiresAt <= DateTimeOffset.UtcNow)
+        if (ExpiresAt <= now)
         {
             return ErrorCodes.OTPExpired;
         }
@@ -124,7 +124,7 @@ public class Otp : Entity
         return null;
     }
 
-    public void MarkUsed()
+    public void MarkUsed(DateTimeOffset now)
     {
         if (!IsVerified)
         {
@@ -136,7 +136,7 @@ public class Otp : Entity
             throw new BadRequestCoreException(ErrorCodes.OTPAlreadyUsed);
         }
 
-        if (ExpiresAt <= DateTimeOffset.UtcNow)
+        if (ExpiresAt <= now)
         {
             throw new BadRequestCoreException(ErrorCodes.OTPExpired);
         }

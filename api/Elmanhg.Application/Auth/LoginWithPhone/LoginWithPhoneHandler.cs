@@ -11,11 +11,11 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Elmanhg.Application.Auth.LoginWithPhone;
 
-public sealed class LoginWithPhoneHandler(UserManager<User> userManager, IOtpRepository otpRepository, ITokenService tokenService, IRefreshTokenService<User, Guid> refreshTokenService) : IRequestHandler<LoginWithPhoneCommand, AuthResult>
+public sealed class LoginWithPhoneHandler(UserManager<User> userManager, IOtpRepository otpRepository, ITokenService tokenService, IRefreshTokenService<User, Guid> refreshTokenService, TimeProvider timeProvider) : IRequestHandler<LoginWithPhoneCommand, AuthResult>
 {
     public async Task<AuthResult> Handle(LoginWithPhoneCommand request, CancellationToken cancellationToken)
     {
-        var otp = await otpRepository.ConsumeAsync(request.VerificationId, OtpRecipientType.Phone, ErrorCodes.OtpInvalid, cancellationToken).ConfigureAwait(false);
+        var otp = await otpRepository.ConsumeAsync(request.VerificationId, OtpRecipientType.Phone, ErrorCodes.OtpInvalid, timeProvider.GetUtcNow(), cancellationToken).ConfigureAwait(false);
 
         var user = await userManager.FindByNameAsync(otp.Recipient).ConfigureAwait(false);
         if (user is null)

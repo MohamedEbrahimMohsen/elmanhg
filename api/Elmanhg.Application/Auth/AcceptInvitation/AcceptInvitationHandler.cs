@@ -11,11 +11,11 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Elmanhg.Application.Auth.AcceptInvitation;
 
-public sealed class AcceptInvitationHandler(UserManager<User> userManager, IOtpRepository otpRepository, ITokenService tokenService, IRefreshTokenService<User, Guid> refreshTokenService) : IRequestHandler<AcceptInvitationCommand, AuthResult>
+public sealed class AcceptInvitationHandler(UserManager<User> userManager, IOtpRepository otpRepository, ITokenService tokenService, IRefreshTokenService<User, Guid> refreshTokenService, TimeProvider timeProvider) : IRequestHandler<AcceptInvitationCommand, AuthResult>
 {
     public async Task<AuthResult> Handle(AcceptInvitationCommand request, CancellationToken cancellationToken)
     {
-        var otp = await otpRepository.ConsumeAsync(request.VerificationId, OtpRecipientType.Email, ErrorCodes.OtpInvalid, cancellationToken).ConfigureAwait(false);
+        var otp = await otpRepository.ConsumeAsync(request.VerificationId, OtpRecipientType.Email, ErrorCodes.OtpInvalid, timeProvider.GetUtcNow(), cancellationToken).ConfigureAwait(false);
 
         var user = await userManager.FindByEmailAsync(otp.Recipient).ConfigureAwait(false);
         if (user is null || !user.IsInvitationPending)

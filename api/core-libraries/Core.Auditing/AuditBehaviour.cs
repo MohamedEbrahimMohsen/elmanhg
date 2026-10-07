@@ -1,9 +1,8 @@
 using System.Diagnostics;
-using System.Security.Claims;
 using Core.Auditing.Entities;
 using Core.Auditing.Repositories;
+using Core.DDD.Identity;
 using Core.Errors;
-using Core.Identity.Tokens.CurrentUser;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -15,7 +14,7 @@ namespace Core.Auditing;
 /// Registered outermost (before other behaviors) so it observes the final outcome —
 /// including validation failures and handler exceptions.
 /// </summary>
-public sealed class AuditBehaviour<TRequest, TResponse>(IAuditLogRepository auditLogRepository, IAuditChangeCollector auditChangeCollector, ICurrentUserService currentUserService, ILogger<AuditBehaviour<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse> where TRequest : notnull
+public sealed class AuditBehaviour<TRequest, TResponse>(IAuditLogRepository auditLogRepository, IAuditChangeCollector auditChangeCollector, ICurrentUser currentUser, TimeProvider timeProvider, ILogger<AuditBehaviour<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse> where TRequest : notnull
 {
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
@@ -44,10 +43,10 @@ public sealed class AuditBehaviour<TRequest, TResponse>(IAuditLogRepository audi
         finally
         {
             var entry = AuditLog.Create(
-                timestamp: DateTimeOffset.UtcNow,
-                actorUserId: currentUserService.UserId,
-                actorUserName: currentUserService.UserName,
-                actorRole: currentUserService.GetClaim(ClaimTypes.Role),
+                timestamp: timeProvider.GetUtcNow(),
+                actorUserId: currentUser.UserId,
+                actorUserName: currentUser.UserName,
+                actorRole: currentUser.Role,
                 action: command.AuditAction,
                 resourceType: command.AuditResourceType,
                 resourceId,

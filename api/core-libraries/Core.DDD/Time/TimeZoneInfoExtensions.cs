@@ -1,4 +1,4 @@
-namespace Core.Utilities.Time;
+namespace Core.DDD.Time;
 
 public static class TimeZoneInfoExtensions
 {

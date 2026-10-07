@@ -1,4 +1,4 @@
-using Core.Utilities.Time;
+using Core.DDD.Time;
 using Elmanhg.Domain.Questions.Grading;
 
 namespace Elmanhg.Domain.Sessions;
