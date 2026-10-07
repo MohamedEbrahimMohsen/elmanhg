@@ -356,10 +356,20 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<Guid>("VerificationId")
                         .HasColumnType("uuid");
 
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("Id");
 
                     b.HasIndex("VerificationId")
                         .IsUnique();
+
+                    b.HasIndex(new[] { "Recipient" }, "IX_Otps_PhoneNumber")
+                        .IsUnique()
+                        .HasFilter("\"IsDeleted\" = false");
 
                     b.ToTable("Otps");
                 });

@@ -168,8 +168,11 @@ app.UseCoreLocalization(builder.Configuration);
 
 app.UseMiddleware<CoreRequestLoggingMiddleware>();
 
-// Inside request logging (it reads the error code) and before authorization, so failures in auth handlers and media get the standard error body.
+// Inside request logging (it reads the error code) and before authentication and authorization, so failures in auth handlers, the active-user check and media get the standard error body.
 app.UseMiddleware<CoreExceptionMiddleware>();
+
+// Called explicitly so it runs inside the exception middleware and request logging instead of at the start of the pipeline; before media, whose private teacher-thread middleware reads the signed-in user.
+app.UseAuthentication();
 
 app.UseHttpsRedirection();
 

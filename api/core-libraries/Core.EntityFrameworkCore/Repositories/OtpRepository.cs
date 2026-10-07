@@ -22,5 +22,26 @@ public class OtpRepository<TUser, TRole, TKey, TContext>(TContext context) : Rep
     {
         return await _dbSet.FirstOrDefaultAsync(otp => otp.VerificationId == verificationId, cancellationToken).ConfigureAwait(false);
     }
+
+    // Saves at once: a concurrent first send for the same recipient loses on the unique recipient index and must re-read the winner's row.
+    public async Task<bool> AddIfAbsentAsync(Otp otp, CancellationToken cancellationToken)
+    {
+        await _dbSet.AddAsync(otp, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            return true;
+        }
+        catch (DbUpdateException)
+        {
+            _context.Entry(otp).State = EntityState.Detached;
+            if (!await _dbSet.AsNoTracking().AnyAsync(x => x.Recipient == otp.Recipient && x.Id != otp.Id, cancellationToken).ConfigureAwait(false))
+            {
+                throw;
+            }
+
+            return false;
+        }
+    }
 }
 

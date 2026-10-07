@@ -41,6 +41,51 @@ public sealed class PublicMediaPipelineTests : IDisposable
     }
 
     [Fact]
+    public async Task UseCorePublicMedia_LocalSvgKey_ServesOctetStreamWithNosniff()
+    {
+        WriteLocalFile("lessons", "a.svg");
+
+        var context = await SendAsync(LocalOptions(), "/api/media/lessons/a.svg");
+
+        context.Response.StatusCode.Should().Be(StatusCodes.Status200OK);
+        context.Response.ContentType.Should().Be("application/octet-stream");
+        context.Response.Headers.XContentTypeOptions.ToString().Should().Be("nosniff");
+    }
+
+    [Fact]
+    public async Task UseCorePublicMedia_LocalHtmlKey_ServesOctetStream()
+    {
+        WriteLocalFile("lessons", "a.html");
+
+        var context = await SendAsync(LocalOptions(), "/api/media/lessons/a.html");
+
+        context.Response.StatusCode.Should().Be(StatusCodes.Status200OK);
+        context.Response.ContentType.Should().Be("application/octet-stream");
+    }
+
+    [Fact]
+    public async Task UseCorePublicMedia_LocalWebmKey_ServesAudioWebm()
+    {
+        WriteLocalFile("lessons", "a.webm");
+
+        var context = await SendAsync(LocalOptions(), "/api/media/lessons/a.webm");
+
+        context.Response.StatusCode.Should().Be(StatusCodes.Status200OK);
+        context.Response.ContentType.Should().Be("audio/webm");
+    }
+
+    [Fact]
+    public async Task UseCorePublicMedia_LocalRootWithTrailingSlash_ServesPublicFile()
+    {
+        WriteLocalFile("lessons", "a.png");
+
+        var context = await SendAsync(LocalOptions("media/"), "/api/media/lessons/a.png");
+
+        context.Response.StatusCode.Should().Be(StatusCodes.Status200OK);
+        ((MemoryStream)context.Response.Body).ToArray().Should().Equal(Bytes);
+    }
+
+    [Fact]
     public async Task UseCorePublicMedia_S3_PrivateFolder_Returns404WithoutReading()
     {
         var context = await SendAsync(S3Options(), "/api/media/teacher-threads/x.png");
@@ -68,7 +113,7 @@ public sealed class PublicMediaPipelineTests : IDisposable
         }
     }
 
-    private static FileStorageOptions LocalOptions() => new() { Provider = FileStorageProvider.Local, LocalRootPath = "media", PublicBaseUrl = "/api/media" };
+    private static FileStorageOptions LocalOptions(string localRootPath = "media") => new() { Provider = FileStorageProvider.Local, LocalRootPath = localRootPath, PublicBaseUrl = "/api/media" };
 
     private static FileStorageOptions S3Options() => new() { Provider = FileStorageProvider.S3, LocalRootPath = "media", PublicBaseUrl = "/api/media", S3BucketName = "media", S3AccessKeyId = "not-a-secret-access-key", S3SecretAccessKey = "not-a-secret-secret-key" };
 

@@ -33,6 +33,7 @@
     "OTP_NOT_VERIFIED": "Verify the code first.",
     "OTP_REACHED_MAX_ATTEMPTS": "Too many wrong codes. Request a new one.",
     "OTP_REACHED_MAX_REISSUE_COUNT": "You reached the code request limit. Try again later.",
+    "OTP_MODIFIED_CONCURRENTLY": "Another request changed this code at the same time. Try again.",
     "OTP_REISSUE_COOLDOWN": "Please wait before requesting a new code.",
     "TOO_MANY_REQUESTS": "Too many requests. Wait a moment and try again.",
     "VALIDATION_PHONE_NUMBER_INVALID_CELLULAR_CODE": "Mobile number must start with 010, 011, 012 or 015.",

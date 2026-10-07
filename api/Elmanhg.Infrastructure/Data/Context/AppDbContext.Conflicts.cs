@@ -1,4 +1,5 @@
 using Core.EntityFrameworkCore.Conflicts;
+using Core.OTP.Entities;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Avatar;
 using Elmanhg.Domain.EssayGrading;
@@ -13,6 +14,7 @@ using Elmanhg.Domain.TrainingExports;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using DomainErrorCodes = Elmanhg.Domain.SharedKernel.Exceptions.ErrorCodes;
+using OtpErrorCodes = Core.OTP.Exceptions.ErrorCodes;
 
 namespace Elmanhg.Infrastructure.Data.Context;
 
@@ -30,6 +32,8 @@ public partial class AppDbContext
         .MapConcurrency<MathStepGrade>(ErrorCodes.GradeModifiedConcurrently)
         .MapConcurrency<RuntimeSettingOverride>(ErrorCodes.RuntimeSettingModifiedConcurrently)
         .MapConcurrency<ExamPeriod>(ErrorCodes.ExamPeriodModifiedConcurrently)
+        // The OTP recipient index is deliberately unmapped: OtpRepository.AddIfAbsentAsync resolves that race by re-reading the row.
+        .MapConcurrency<Otp>(OtpErrorCodes.OtpModifiedConcurrently)
         .MapUniqueConstraint(RuntimeSettingKeyIndex, ErrorCodes.RuntimeSettingModifiedConcurrently)
         .MapUniqueConstraint(PaymobTransactionIndex, ErrorCodes.PaymentTransactionAlreadyRecorded)
         .MapUniqueConstraint(PaymentRefundTransactionIndex, ErrorCodes.PaymentTransactionAlreadyRecorded)

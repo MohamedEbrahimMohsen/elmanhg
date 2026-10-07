@@ -36,6 +36,7 @@ public sealed class GenerateOTPHandlerTests
         _otpHasher.Hash(GeneratedCode).Returns(OtpBuilder.CodeHash);
         _otpSender.SendAsync(Arg.Any<OtpRecipientType>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(OtpChannel.Sms);
         _timeProvider.GetUtcNow().Returns(Now);
+        _otpRepository.AddIfAbsentAsync(Arg.Any<OtpEntity>(), Arg.Any<CancellationToken>()).Returns(true);
         _handler = new GenerateOTPHandler(_otpRepository, _generator, _otpHasher, Options.Create(new OtpOptions()), _otpSender, _timeProvider);
     }
 
@@ -46,8 +47,8 @@ public sealed class GenerateOTPHandlerTests
 
         result.VerificationId.Should().NotBeEmpty();
         result.Channel.Should().Be(OtpChannel.Sms);
-        await _otpRepository.Received(1).AddAsync(Arg.Is<OtpEntity>(x => x.Recipient == PhoneNumber && x.RecipientType == OtpRecipientType.Phone), Arg.Any<CancellationToken>());
-        await _otpRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        await _otpRepository.Received(1).AddIfAbsentAsync(Arg.Is<OtpEntity>(x => x.Recipient == PhoneNumber && x.RecipientType == OtpRecipientType.Phone), Arg.Any<CancellationToken>());
+        await _otpRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
         await _otpSender.Received(1).SendAsync(OtpRecipientType.Phone, PhoneNumber, GeneratedCode, Arg.Any<CancellationToken>());
     }
 
@@ -56,9 +57,9 @@ public sealed class GenerateOTPHandlerTests
     {
         await _handler.Handle(new GenerateOTPCommand(null, "  Mona@Elmanhg.Test "), TestContext.Current.CancellationToken);
 
-        await _otpRepository.Received(1).AddAsync(Arg.Is<OtpEntity>(x => x.Recipient == "mona@elmanhg.test" && x.RecipientType == OtpRecipientType.Email), Arg.Any<CancellationToken>());
+        await _otpRepository.Received(1).AddIfAbsentAsync(Arg.Is<OtpEntity>(x => x.Recipient == "mona@elmanhg.test" && x.RecipientType == OtpRecipientType.Email), Arg.Any<CancellationToken>());
         await _otpSender.Received(1).SendAsync(OtpRecipientType.Email, "mona@elmanhg.test", GeneratedCode, Arg.Any<CancellationToken>());
-        await _otpRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        await _otpRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -80,7 +81,7 @@ public sealed class GenerateOTPHandlerTests
 
         result.ExpiresAt.Should().Be(Now.AddMinutes(5));
         result.NextAllowedReissueAt.Should().Be(Now.AddSeconds(60));
-        await _otpRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        await _otpRepository.Received(1).AddIfAbsentAsync(Arg.Any<OtpEntity>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -91,19 +92,93 @@ public sealed class GenerateOTPHandlerTests
         var result = await _handler.Handle(new GenerateOTPCommand(PhoneNumber), TestContext.Current.CancellationToken);
 
         result.ReissueCount.Should().Be(1);
-        await _otpRepository.DidNotReceive().AddAsync(Arg.Any<OtpEntity>(), Arg.Any<CancellationToken>());
+        await _otpRepository.DidNotReceive().AddIfAbsentAsync(Arg.Any<OtpEntity>(), Arg.Any<CancellationToken>());
         await _otpRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
         await _otpSender.Received(1).SendAsync(OtpRecipientType.Phone, PhoneNumber, GeneratedCode, Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task Handle_DeliveryUnavailable_ThrowsAndSavesNothing()
+    public async Task Handle_DeliveryUnavailable_ThrowsAndDeletesTheClaimedRow()
     {
         _otpSender.SendAsync(Arg.Any<OtpRecipientType>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).ThrowsAsync(new ServiceUnavailableCoreException(AppErrorCodes.OtpChannelUnavailable));
 
         var act = () => _handler.Handle(new GenerateOTPCommand(PhoneNumber), TestContext.Current.CancellationToken);
 
         (await act.Should().ThrowAsync<ServiceUnavailableCoreException>()).Which.ErrorCode.Should().Be(AppErrorCodes.OtpChannelUnavailable);
+        await _otpRepository.Received(1).AddIfAbsentAsync(Arg.Any<OtpEntity>(), Arg.Any<CancellationToken>());
+        _otpRepository.Received(1).Delete(Arg.Is<OtpEntity>(x => x.Recipient == PhoneNumber));
+        await _otpRepository.Received(1).SaveChangesAsync(CancellationToken.None);
+    }
+
+    [Fact]
+    public async Task Handle_ExistingOtp_SavesTheClaimBeforeSending()
+    {
+        _otpRepository.FindByRecipientAsync(PhoneNumber, Arg.Any<CancellationToken>()).Returns(new OtpBuilder().ForPhone(PhoneNumber).IssuedAt(Now.AddMinutes(-2)).Build());
+
+        await _handler.Handle(new GenerateOTPCommand(PhoneNumber), TestContext.Current.CancellationToken);
+
+        Received.InOrder(() =>
+        {
+            _otpRepository.SaveChangesAsync(Arg.Any<CancellationToken>());
+            _otpSender.SendAsync(OtpRecipientType.Phone, PhoneNumber, GeneratedCode, Arg.Any<CancellationToken>());
+        });
+    }
+
+    [Fact]
+    public async Task Handle_LostInsertRaceWithinCooldown_ThrowsCooldownAndSendsNothing()
+    {
+        _otpRepository.AddIfAbsentAsync(Arg.Any<OtpEntity>(), Arg.Any<CancellationToken>()).Returns(false);
+        _otpRepository.FindByRecipientAsync(PhoneNumber, Arg.Any<CancellationToken>()).Returns(null, new OtpBuilder().ForPhone(PhoneNumber).IssuedAt(Now).Build());
+
+        var act = () => _handler.Handle(new GenerateOTPCommand(PhoneNumber), TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<RateLimitExceededCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.OTPReissueCooldown);
+        await _otpSender.DidNotReceive().SendAsync(Arg.Any<OtpRecipientType>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
         await _otpRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_LostInsertRacePastCooldown_ReissuesTheWinnersRowAndSends()
+    {
+        var winner = new OtpBuilder().ForPhone(PhoneNumber).IssuedAt(Now.AddMinutes(-2)).Build();
+        _otpRepository.AddIfAbsentAsync(Arg.Any<OtpEntity>(), Arg.Any<CancellationToken>()).Returns(false);
+        _otpRepository.FindByRecipientAsync(PhoneNumber, Arg.Any<CancellationToken>()).Returns(null, winner);
+
+        var result = await _handler.Handle(new GenerateOTPCommand(PhoneNumber), TestContext.Current.CancellationToken);
+
+        result.ReissueCount.Should().Be(1);
+        result.VerificationId.Should().Be(winner.VerificationId);
+        await _otpRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        await _otpSender.Received(1).SendAsync(OtpRecipientType.Phone, PhoneNumber, GeneratedCode, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_LostInsertRaceAndWinnerGone_ThrowsOtpModifiedConcurrently()
+    {
+        _otpRepository.AddIfAbsentAsync(Arg.Any<OtpEntity>(), Arg.Any<CancellationToken>()).Returns(false);
+        _otpRepository.FindByRecipientAsync(PhoneNumber, Arg.Any<CancellationToken>()).Returns(null, (OtpEntity?)null);
+
+        var act = () => _handler.Handle(new GenerateOTPCommand(PhoneNumber), TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<ConflictCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.OtpModifiedConcurrently);
+        await _otpSender.DidNotReceive().SendAsync(Arg.Any<OtpRecipientType>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await _otpRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_ExistingOtpDeliveryFails_RestoresThePreviousCodeAndRethrows()
+    {
+        var existing = new OtpBuilder().ForPhone(PhoneNumber).IssuedAt(Now.AddMinutes(-2)).Build();
+        var (verificationId, nextAllowedReissueAt) = (existing.VerificationId, existing.NextAllowedReissueAt);
+        _otpRepository.FindByRecipientAsync(PhoneNumber, Arg.Any<CancellationToken>()).Returns(existing);
+        _otpSender.SendAsync(Arg.Any<OtpRecipientType>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).ThrowsAsync(new ServiceUnavailableCoreException(AppErrorCodes.OtpChannelUnavailable));
+
+        var act = () => _handler.Handle(new GenerateOTPCommand(PhoneNumber), TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<ServiceUnavailableCoreException>()).Which.ErrorCode.Should().Be(AppErrorCodes.OtpChannelUnavailable);
+        existing.VerificationId.Should().Be(verificationId);
+        existing.ReissueCount.Should().Be(0);
+        existing.NextAllowedReissueAt.Should().Be(nextAllowedReissueAt);
+        await _otpRepository.Received(2).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 }

@@ -32,10 +32,14 @@ public static class DependencyInjection
 
         var root = storage.ResolveLocalRoot(app.ApplicationServices.GetRequiredService<IHostEnvironment>().ContentRootPath);
         Directory.CreateDirectory(root);
+        // Same content types as the S3 path: anything outside the media map is served as application/octet-stream, never as an inline-renderable type.
         app.UseStaticFiles(new StaticFileOptions
         {
             FileProvider = new PublicMediaFileProvider(new PhysicalFileProvider(root), privateFolders),
             RequestPath = options.RequestPath,
+            ContentTypeProvider = StorageContentTypes.ContentTypeProvider,
+            ServeUnknownFileTypes = true,
+            DefaultContentType = StorageContentTypes.Fallback,
             OnPrepareResponse = context => context.Context.Response.SetMediaHeaders(MediaCacheControl.PublicImmutable),
         });
         return app;
@@ -43,7 +47,7 @@ public static class DependencyInjection
 
     private static IFileStorage Resolve(IServiceProvider serviceProvider)
     {
-        var provider = Options(serviceProvider).Provider;
+        var provider = Options(serviceProvider).Provider ?? throw new InvalidOperationException("FileStorage:Provider is not set.");
         return serviceProvider.GetKeyedService<IFileStorage>(provider) ?? throw new InvalidOperationException($"No file storage is registered for FileStorage:Provider '{provider}'.");
     }
 

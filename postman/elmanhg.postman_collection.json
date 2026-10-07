@@ -80,7 +80,7 @@
       "item": [
         {
           "name": "SendOtp",
-          "description": "Body { phoneNumber } or { email }; the response channel is WhatsApp, Sms or Email.",
+          "description": "Body { phoneNumber } or { email }; the response channel is WhatsApp, Sms or Email. 409 OTP_MODIFIED_CONCURRENTLY when a parallel request changed the same code; 429 OTP_REISSUE_COOLDOWN within the cooldown.",
           "event": [
             {
               "listen": "test",
@@ -112,6 +112,7 @@
         },
         {
           "name": "VerifyOtp",
+          "description": "409 OTP_MODIFIED_CONCURRENTLY when a parallel request changed the same code; try again.",
           "event": [
             {
               "listen": "test",
