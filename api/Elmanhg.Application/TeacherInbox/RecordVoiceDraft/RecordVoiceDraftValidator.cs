@@ -1,6 +1,6 @@
+using Core.Settings;
 using Core.Validation.Extensions;
 using Elmanhg.Application.Exceptions;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using FluentValidation;
 

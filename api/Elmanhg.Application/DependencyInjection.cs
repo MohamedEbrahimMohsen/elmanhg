@@ -1,4 +1,5 @@
 using Core.Cache;
+using Core.Settings;
 using Core.Utilities;
 using Elmanhg.Application.Questions.ImportQuestions;
 using Elmanhg.Application.Shared.Analytics;
@@ -56,7 +57,6 @@ public static class DependencyInjection
         services.AddValidatedOptions<EssayGradingOptions>(EssayGradingOptions.SectionName);
         services.AddValidatedOptions<GradeReviewOptions>(GradeReviewOptions.SectionName);
         services.AddValidatedOptions<TrainingExportsOptions>(TrainingExportsOptions.SectionName);
-        services.AddValidatedOptions<RuntimeSettingsOptions, RuntimeSettingsOptionsValidator>(RuntimeSettingsOptions.SectionName);
         services.AddSingleton<IRuntimeSettingDefinitions, FeatureFlagRuntimeSettings>();
         services.AddSingleton<IRuntimeSettingDefinitions, AskTeacherRuntimeSettings>();
         services.AddSingleton<IRuntimeSettingDefinitions, OutOfAppReminderRuntimeSettings>();
@@ -65,8 +65,7 @@ public static class DependencyInjection
         services.AddSingleton<IRuntimeSettingDefinitions, PlanLimitRuntimeSettings>();
         services.AddSingleton<IRuntimeSettingDefinitions, GradingRuntimeSettings>();
         services.AddSingleton<IRuntimeSettingDefinitions, UploadRuntimeSettings>();
-        services.AddSingleton<RuntimeSettingRegistry>();
-        services.AddScoped<IRuntimeSettings, CachedRuntimeSettings>();
+        services.AddCoreRuntimeSettings<RuntimeSettingOverrideStore>(Enum.GetNames<RuntimeSettingGroup>());
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton(Random.Shared);
         return services;

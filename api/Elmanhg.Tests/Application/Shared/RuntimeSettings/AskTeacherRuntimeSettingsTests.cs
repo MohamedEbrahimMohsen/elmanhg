@@ -1,5 +1,5 @@
+using Core.Settings;
 using Elmanhg.Application.Shared.Options;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;

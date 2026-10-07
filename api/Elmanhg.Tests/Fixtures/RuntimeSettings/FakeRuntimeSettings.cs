@@ -1,3 +1,4 @@
+using Core.Settings;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
@@ -23,7 +24,7 @@ public sealed class FakeRuntimeSettings : IRuntimeSettings
             new PlanLimitRuntimeSettings(subscriptionsOptions),
             new GradingRuntimeSettings(Options.Create(essayGrading ?? new EssayGradingOptions()), Options.Create(mathStepGrading ?? new MathStepGradingOptions())),
             new UploadRuntimeSettings(askTeacherOptions),
-        ]);
+        ], Enum.GetNames<RuntimeSettingGroup>());
         _values = RuntimeSettingValues.Defaults(Registry);
     }
 

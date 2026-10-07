@@ -1,4 +1,4 @@
-using Elmanhg.Application.Shared.RuntimeSettings;
+using Core.Settings;
 using Elmanhg.Application.TeacherThreads.Shared;
 using Elmanhg.Domain.SlaCalendars;
 using MediatR;

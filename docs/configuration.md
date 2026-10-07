@@ -54,11 +54,12 @@ Cross-setting rules: first reminder < second reminder < reply time (`ASK_TEACHER
 
 ## 3. How it works
 
+- **Framework.** The typed keys, definitions, registry, constraints, value rules, JSON values, cached reader and override-store contract live in the app-agnostic `api/core-libraries/Core.Settings` (`AddCoreRuntimeSettings`). The app keeps its settings and feature flags (`Application/Shared/RuntimeSettings/Definitions`), the `RuntimeSettingGroup` enum (its member names are the group order), the `RuntimeSettingOverride` entity and its `AppDbContext` mapping, the `RuntimeSettingOverrideStore` that reads it, and the Configuration endpoints and handlers.
 - **Storage.** Table `RuntimeSettingOverrides`: one row per key that has ever been overridden, `Key` (unique, `IX_RuntimeSettingOverrides_Key`), `Value` (jsonb, nullable) and an xmin concurrency token. A null `Value` means "use the default". The first override inserts the row; Reset sets `Value` to null and never deletes the row, so the audit diff always shows the before and after value.
 - **Defaults.** The default of each setting is the deployment value of the Options key in the table above (or the constant shown there), so behaviour is unchanged until an admin overrides it. A stored value that no longer fits its definition is ignored and the default is used.
 - **Typed definition.** Each setting is declared once with its type (`Integer`, `Decimal`, `Boolean`, `Choice`, `ChoiceList`), range or allowed values, and an Arabic and English label and description. Values travel as plain JSON: number, `true`/`false`, string, array of strings.
-- **Cache.** Every API instance caches the effective values for `RuntimeSettings:CacheSeconds` (default 30, range 1–3600). Update and reset clear the cache on the instance that handled them, so the change takes effect at once there.
-- **Startup validation.** The API refuses to start when a configured default is outside its runtime definition (for example `AskTeacher__ImageMaxSizeInMb=12`) or a key is registered twice.
+- **Cache.** Every API instance caches the effective values for `RuntimeSettings:CacheSeconds` (default 30, range 1–3600). Update and reset clear the cache on the instance that handled them, so the change takes effect at once there. The cache is the process's `IMemoryCache` entry `runtime-settings:values`, not `Core.Cache` (which caches MediatR queries and has no invalidation), so other instances can lag by up to `CacheSeconds` (§8).
+- **Startup validation.** The API refuses to start when a configured default is outside its runtime definition (for example `AskTeacher__ImageMaxSizeInMb=12`), a key is registered twice, or a setting's group is not a `RuntimeSettingGroup` member.
 - **Audit.** Update writes `RuntimeSetting.Update` and reset writes `RuntimeSetting.Reset` (resource type `RuntimeSetting`, resource id = the override row). The diff shows `key` and `value` before and after; a null value means the configuration default. Resetting a setting that is not overridden is a no-op with a Success row and no diff ([audit-log.md](audit-log.md)).
 
 ## 4. Add a setting
@@ -72,14 +73,14 @@ Cross-setting rules: first reminder < second reminder < reply time (`ASK_TEACHER
 2. Add its definition; the default reads the existing, validated Options value:
 
    ```csharp
-   RuntimeSettingDefinition.ForInteger(ReplySlaHours, RuntimeSettingGroup.AskTeacher, subscriptionsOptions.Value.AskTeacherReplySlaHours, 1, 168, new LocalizedText("…", "Teacher reply time (hours)"), new LocalizedText("…", "How long a teacher has to reply…"))
+   RuntimeSettingDefinition.ForInteger(ReplySlaHours, nameof(RuntimeSettingGroup.AskTeacher), subscriptionsOptions.Value.AskTeacherReplySlaHours, 1, 168, new LocalizedText("…", "Teacher reply time (hours)"), new LocalizedText("…", "How long a teacher has to reply…"))
    ```
 
    Factories: `ForInteger`, `ForDecimal`, `ForBoolean`, `ForChoice`, `ForChoiceList`. A flag with no deployment value uses a constant default (for example `features.refundsEnabled`, `false`).
-3. For a new group, add a member to `RuntimeSettingGroup` (its position is the page order) and register the class: `services.AddSingleton<IRuntimeSettingDefinitions, XRuntimeSettings>()`.
+3. For a new group, add a member to `RuntimeSettingGroup` (its position is the page order: `AddApplication` passes `Enum.GetNames<RuntimeSettingGroup>()` to `AddCoreRuntimeSettings`) and register the class: `services.AddSingleton<IRuntimeSettingDefinitions, XRuntimeSettings>()`.
 4. Read it where it is used: `await runtimeSettings.GetAsync(XRuntimeSettings.Key, cancellationToken)`, or `GetValuesAsync` for several keys.
 5. Put a rule that spans settings in the group's `Constraints`.
-6. On the web, add `groups.<Group>.title` and `.description` in `features/configuration/i18n/{ar,en}.json`, and `choices.<value>` labels for Choice values. A new value type is added to `RuntimeSettingType`, `RuntimeSettingValueRules`, `runtimeSettingSchemas.ts` and one editor component.
+6. On the web, add `groups.<Group>.title` and `.description` in `features/configuration/i18n/{ar,en}.json`, and `choices.<value>` labels for Choice values. A new value type is added to `RuntimeSettingType` and `RuntimeSettingValueRules` in `Core.Settings`, to `runtimeSettingSchemas.ts`, and one editor component.
 
 ## 5. Custom sections
 

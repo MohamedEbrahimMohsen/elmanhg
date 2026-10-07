@@ -1,10 +1,10 @@
 using Core.DDD.Repositories;
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
+using Core.Settings;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Payments.Shared;
 using Elmanhg.Application.Shared.Payments;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.Identity;

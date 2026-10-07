@@ -1,11 +1,11 @@
 using Core.DDD.Repositories;
 using Core.Errors;
+using Core.Settings;
 using Elmanhg.Application.EssayGrading.Shared;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.RichText;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.Lessons;

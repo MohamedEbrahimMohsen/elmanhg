@@ -1,7 +1,6 @@
-using Elmanhg.Domain.RuntimeSettings;
 using System.Text.Json;
 
-namespace Elmanhg.Application.Shared.RuntimeSettings;
+namespace Core.Settings;
 
 public sealed class RuntimeSettingValues
 {
@@ -14,7 +13,7 @@ public sealed class RuntimeSettingValues
 
     public static RuntimeSettingValues Defaults(RuntimeSettingRegistry registry) => From(registry, []);
 
-    public static RuntimeSettingValues From(RuntimeSettingRegistry registry, IEnumerable<RuntimeSettingOverride> overrides)
+    public static RuntimeSettingValues From(RuntimeSettingRegistry registry, IEnumerable<IRuntimeSettingOverride> overrides)
     {
         var stored = overrides
             .Where(x => x.Value is not null)

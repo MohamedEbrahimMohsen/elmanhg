@@ -1,9 +1,9 @@
 using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
+using Core.Settings;
 using Elmanhg.Application.ExamBlueprints.Shared;
 using Elmanhg.Application.Exams.Shared;
 using Elmanhg.Application.Exceptions;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Domain.ExamBlueprints;
 using Elmanhg.Domain.Identity;
