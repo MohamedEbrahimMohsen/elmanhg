@@ -915,6 +915,11 @@
           "title": "Fixes from the independent review of the merged E21 PRs (OTP concurrency, media, auth order)",
           "description": "Issue #331, PR #333.",
           "tasks": []
+        },
+        {
+          "title": "Small leftovers: OTP abort after send, redaction boundary, test sizes",
+          "description": "Issue #336, PR #337.",
+          "tasks": []
         }
       ]
     }
