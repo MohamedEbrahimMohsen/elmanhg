@@ -31,4 +31,15 @@ public sealed class FileStorageOptionsTests
 
         options.ResolveLocalRoot(contentRoot).Should().Be(Path.GetFullPath(Path.Combine(contentRoot, "media")));
     }
+
+    [Theory]
+    [InlineData("media/")]
+    [InlineData("media\\")]
+    public void ResolveLocalRoot_TrailingSeparator_IsTrimmed(string localRootPath)
+    {
+        var contentRoot = Path.Combine(Path.GetTempPath(), "x");
+        var options = new FileStorageOptions { LocalRootPath = localRootPath.Replace('\\', Path.DirectorySeparatorChar) };
+
+        options.ResolveLocalRoot(contentRoot).Should().Be(Path.GetFullPath(Path.Combine(contentRoot, "media")));
+    }
 }

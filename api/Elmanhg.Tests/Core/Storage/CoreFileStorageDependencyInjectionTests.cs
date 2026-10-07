@@ -4,6 +4,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 
 namespace Elmanhg.Tests.Core.Storage;
@@ -36,6 +37,21 @@ public sealed class CoreFileStorageDependencyInjectionTests
         var act = () => scope.ServiceProvider.GetRequiredService<IFileStorage>();
 
         act.Should().Throw<InvalidOperationException>().WithMessage("*FileStorage:Provider 'S3'*");
+    }
+
+    [Fact]
+    public void AddCoreFileStorage_NullProvider_ThrowsInvalidOperation()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton(Substitute.For<IHostEnvironment>());
+        services.AddCoreFileStorage();
+        services.AddSingleton<IOptions<FileStorageOptions>>(Options.Create(new FileStorageOptions { Provider = null, LocalRootPath = "media", PublicBaseUrl = "/api/media" }));
+        using var provider = services.BuildServiceProvider();
+        using var scope = provider.CreateScope();
+
+        var act = () => scope.ServiceProvider.GetRequiredService<IFileStorage>();
+
+        act.Should().Throw<InvalidOperationException>().WithMessage("*FileStorage:Provider is not set*");
     }
 
     private static ServiceProvider BuildProvider(Dictionary<string, string?> settings)

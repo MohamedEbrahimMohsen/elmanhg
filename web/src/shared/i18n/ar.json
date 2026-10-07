@@ -33,6 +33,7 @@
     "OTP_NOT_VERIFIED": "تحقق من الرمز أولًا.",
     "OTP_REACHED_MAX_ATTEMPTS": "محاولات خاطئة كثيرة. اطلب رمزًا جديدًا.",
     "OTP_REACHED_MAX_REISSUE_COUNT": "وصلت للحد الأقصى لطلب الرموز. حاول لاحقًا.",
+    "OTP_MODIFIED_CONCURRENTLY": "تم تغيير هذا الرمز بواسطة طلب آخر في نفس الوقت. حاول مرة أخرى.",
     "OTP_REISSUE_COOLDOWN": "انتظر قليلًا قبل طلب رمز جديد.",
     "TOO_MANY_REQUESTS": "طلبات كثيرة. انتظر قليلًا وحاول مرة أخرى.",
     "VALIDATION_PHONE_NUMBER_INVALID_CELLULAR_CODE": "رقم الموبايل يجب أن يبدأ بـ 010 أو 011 أو 012 أو 015.",

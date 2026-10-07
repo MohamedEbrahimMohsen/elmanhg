@@ -7,4 +7,5 @@ public interface IOtpRepository : IRepository<Otp>
 {
     Task<Otp?> FindByRecipientAsync(string recipient, CancellationToken cancellationToken);
     Task<Otp?> FindByVerificationId(Guid verificationId, CancellationToken cancellationToken);
+    Task<bool> AddIfAbsentAsync(Otp otp, CancellationToken cancellationToken);
 }

@@ -87,20 +87,20 @@ processors:
         statements:
           - flatten(attributes)
           - replace_pattern(body, "[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted-email]") where IsString(body)
-          - replace_pattern(body, "(\\+?20)?0?1[0125][0-9]{8}\\b", "[redacted-phone]") where IsString(body)
+          - replace_pattern(body, "(\\+?20)?0?1[0125][0-9]{8}\\b|(?:\\+|\\b)(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4})\\b", "[redacted-phone]") where IsString(body)
           - replace_all_patterns(attributes, "value", "[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted-email]")
-          - replace_all_patterns(attributes, "value", "(\\+?20)?0?1[0125][0-9]{8}\\b", "[redacted-phone]")
+          - replace_all_patterns(attributes, "value", "(\\+?20)?0?1[0125][0-9]{8}\\b|(?:\\+|\\b)(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4})\\b", "[redacted-phone]")
   transform/redact-traces:
     error_mode: ignore
     trace_statements:
       - context: span
         statements:
           - replace_all_patterns(attributes, "value", "[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted-email]")
-          - replace_all_patterns(attributes, "value", "(\\+?20)?0?1[0125][0-9]{8}\\b", "[redacted-phone]")
+          - replace_all_patterns(attributes, "value", "(\\+?20)?0?1[0125][0-9]{8}\\b|(?:\\+|\\b)(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4})\\b", "[redacted-phone]")
       - context: spanevent
         statements:
           - replace_all_patterns(attributes, "value", "[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted-email]")
-          - replace_all_patterns(attributes, "value", "(\\+?20)?0?1[0125][0-9]{8}\\b", "[redacted-phone]")
+          - replace_all_patterns(attributes, "value", "(\\+?20)?0?1[0125][0-9]{8}\\b|(?:\\+|\\b)(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4})\\b", "[redacted-phone]")
 
 exporters:
   otlp/tempo:

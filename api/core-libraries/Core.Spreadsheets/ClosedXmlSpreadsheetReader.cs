@@ -14,10 +14,13 @@ public sealed class ClosedXmlSpreadsheetReader(IOptions<SpreadsheetOptions> spre
 
     public SpreadsheetWorkbook Read(Stream content, SpreadsheetReadLimits limits)
     {
+        using var buffered = content.CanSeek ? null : Buffer(content);
+        var package = buffered ?? content;
+        SpreadsheetPackageGuard.EnsureWithinUncompressedCap(package, spreadsheetOptions.Value.MaxUncompressedSizeInMb, spreadsheetOptions.Value.UnreadableErrorCode);
         XLWorkbook workbook;
         try
         {
-            workbook = new XLWorkbook(content);
+            workbook = new XLWorkbook(package);
         }
         catch (Exception exception) when (exception is InvalidDataException or FileFormatException or OpenXmlPackageException or ArgumentException or InvalidOperationException)
         {
@@ -42,6 +45,14 @@ public sealed class ClosedXmlSpreadsheetReader(IOptions<SpreadsheetOptions> spre
 
             return new SpreadsheetWorkbook(sheets);
         }
+    }
+
+    private static MemoryStream Buffer(Stream content)
+    {
+        var buffer = new MemoryStream();
+        content.CopyTo(buffer);
+        buffer.Position = 0;
+        return buffer;
     }
 
     private static SpreadsheetSheet ReadSheet(IXLWorksheet worksheet, int maxColumns, int maxRows)

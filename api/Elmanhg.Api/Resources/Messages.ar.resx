@@ -86,6 +86,7 @@
   <data name="OTP_REACHED_MAX_ATTEMPTS" xml:space="preserve"><value>محاولات خاطئة كثيرة. اطلب رمزا جديدا.</value></data>
   <data name="OTP_REISSUE_COOLDOWN" xml:space="preserve"><value>انتظر {minutes} دقيقة و{seconds} ثانية قبل طلب رمز جديد.</value></data>
   <data name="OTP_REACHED_MAX_REISSUE_COUNT" xml:space="preserve"><value>وصلت للحد الاقصى لطلب الرموز. حاول لاحقا.</value></data>
+  <data name="OTP_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>تم تغيير هذا الرمز بواسطة طلب آخر في نفس الوقت. حاول مرة أخرى.</value></data>
   <data name="REFRESH_TOKEN_IS_REQUIRED" xml:space="preserve"><value>انتهت جلستك. سجل الدخول مرة اخرى.</value></data>
   <data name="REFRESH_TOKEN_IS_EXPIRED" xml:space="preserve"><value>انتهت جلستك. سجل الدخول مرة اخرى.</value></data>
   <data name="REFRESH_TOKEN_USER_NOT_FOUND" xml:space="preserve"><value>انتهت جلستك. سجل الدخول مرة اخرى.</value></data>

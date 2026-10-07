@@ -86,6 +86,7 @@
   <data name="OTP_REACHED_MAX_ATTEMPTS" xml:space="preserve"><value>Too many wrong codes. Request a new one.</value></data>
   <data name="OTP_REISSUE_COOLDOWN" xml:space="preserve"><value>Wait {minutes} min {seconds} sec before requesting a new code.</value></data>
   <data name="OTP_REACHED_MAX_REISSUE_COUNT" xml:space="preserve"><value>You reached the code request limit. Try again later.</value></data>
+  <data name="OTP_MODIFIED_CONCURRENTLY" xml:space="preserve"><value>Another request changed this code at the same time. Try again.</value></data>
   <data name="REFRESH_TOKEN_IS_REQUIRED" xml:space="preserve"><value>Your session has ended. Sign in again.</value></data>
   <data name="REFRESH_TOKEN_IS_EXPIRED" xml:space="preserve"><value>Your session has ended. Sign in again.</value></data>
   <data name="REFRESH_TOKEN_USER_NOT_FOUND" xml:space="preserve"><value>Your session has ended. Sign in again.</value></data>

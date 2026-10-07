@@ -11,6 +11,7 @@ public static class ErrorCodes
     public const string OTPAlreadyVerified = "OTP_ALREADY_VERIFIED";
     public const string OTPNotVerified = "OTP_NOT_VERIFIED";
     public const string OTPAlreadyUsed = "OTP_ALREADY_USED";
+    public const string OtpModifiedConcurrently = "OTP_MODIFIED_CONCURRENTLY";
 
     public const string OtpInvalid = "OTP_INVALID";
     public const string OtpInvalidFormat = "OTP_INVALID_FORMAT";

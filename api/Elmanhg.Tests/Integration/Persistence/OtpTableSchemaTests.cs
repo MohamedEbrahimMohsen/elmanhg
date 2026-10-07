@@ -21,4 +21,17 @@ public sealed class OtpTableSchemaTests(ApiFactory factory)
         columns.Should().Contain("PhoneNumber");
         columns.Should().NotContain("RequestIP").And.NotContain("UserAgent");
     }
+
+    [Fact]
+    public async Task Migrate_FreshDatabase_OtpsHasUniqueFilteredRecipientIndex()
+    {
+        using var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var definition = await context.Database
+            .SqlQuery<string>($"SELECT indexdef AS \"Value\" FROM pg_indexes WHERE indexname = {AppDbContext.OtpRecipientIndex}")
+            .SingleAsync(TestContext.Current.CancellationToken);
+
+        definition.Should().Contain("UNIQUE").And.Contain("(\"PhoneNumber\")").And.Contain("WHERE").And.Contain("IsDeleted");
+    }
 }

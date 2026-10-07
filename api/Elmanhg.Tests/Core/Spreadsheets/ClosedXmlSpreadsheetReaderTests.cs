@@ -4,6 +4,7 @@ using Core.Spreadsheets;
 using Elmanhg.Tests.Builders;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
+using System.Buffers.Binary;
 using System.Text;
 
 namespace Elmanhg.Tests.Core.Spreadsheets;
@@ -65,6 +66,22 @@ public sealed class ClosedXmlSpreadsheetReaderTests
         act.Should().Throw<BadRequestCoreException>().Which.ErrorCode.Should().Be("PROBE_UNREADABLE");
     }
 
+    [Theory]
+    [InlineData("truncated")]
+    [InlineData("central-directory-offset")]
+    [InlineData("entry-count")]
+    [InlineData("disk-number")]
+    [InlineData("local-header-offset")]
+    [InlineData("entry-name-length")]
+    public void Read_MalformedZip_ThrowsConfiguredUnreadableCode(string corruption)
+    {
+        var content = Corrupt(new QuestionWorkbookBuilder().Sheet("Mcq", ["stem"], ["one"]).Build(), corruption);
+
+        var act = () => _reader.Read(new MemoryStream(content), AllSheets);
+
+        act.Should().Throw<BadRequestCoreException>().Which.ErrorCode.Should().Be("PROBE_UNREADABLE");
+    }
+
     [Fact]
     public void Read_NotASpreadsheetWithDefaultOptions_ThrowsSpreadsheetUnreadable()
     {
@@ -118,6 +135,73 @@ public sealed class ClosedXmlSpreadsheetReaderTests
 
         workbook.Sheets.Select(x => x.Name).Should().Equal("Mcq", "Multi");
         workbook.Sheets.Sum(x => x.Rows.Count).Should().Be(3);
+    }
+
+    [Fact]
+    public void Read_UncompressedSizeOverCap_ThrowsConfiguredUnreadableCode()
+    {
+        using var workbook = new XLWorkbook();
+        var sheet = workbook.Worksheets.Add("Mcq");
+        for (var i = 1; i <= 64; i++)
+        {
+            sheet.Cell(i, 1).Value = new string('a', 32_000) + i;
+        }
+
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        stream.Position = 0;
+
+        var act = () => OneMegabyteCapReader().Read(stream, AllSheets);
+
+        act.Should().Throw<BadRequestCoreException>().Which.ErrorCode.Should().Be("PROBE_UNREADABLE");
+    }
+
+    [Fact]
+    public void Read_UncompressedSizeWithinCap_ReadsWorkbook()
+    {
+        var content = new QuestionWorkbookBuilder().Sheet("Mcq", ["stem", "correct"], ["one", "a"], ["two", "b"]).Build();
+
+        var sheet = OneMegabyteCapReader().Read(new MemoryStream(content), AllSheets).Sheets.Single();
+
+        sheet.Name.Should().Be("Mcq");
+        sheet.Rows.Select(x => x.Number).Should().Equal(2, 3);
+    }
+
+    [Fact]
+    public void Read_NonSeekableStream_ReadsWorkbook()
+    {
+        var content = new QuestionWorkbookBuilder().Sheet("Mcq", ["stem", "correct"], ["one", "a"], ["two", "b"]).Build();
+        using var stream = new NonSeekableReadStream(content);
+
+        var sheet = _reader.Read(stream, AllSheets).Sheets.Single();
+
+        sheet.Headers.Should().Equal("stem", "correct");
+        sheet.Rows.Select(x => x.Number).Should().Equal(2, 3);
+        sheet.Rows[1].Cells.Should().Equal("two", "b");
+    }
+
+    private static ClosedXmlSpreadsheetReader OneMegabyteCapReader() => new(Options.Create(new SpreadsheetOptions { UnreadableErrorCode = "PROBE_UNREADABLE", MaxUncompressedSizeInMb = 1 }));
+
+    private static byte[] Corrupt(byte[] content, string corruption)
+    {
+        const int endRecordLength = 22;
+        var end = content.Length - endRecordLength;
+        var centralDirectory = (int)BinaryPrimitives.ReadUInt32LittleEndian(content.AsSpan(end + 16));
+        if (corruption == "truncated")
+        {
+            return content[..(content.Length / 2)];
+        }
+
+        var (offset, value, width) = corruption switch
+        {
+            "central-directory-offset" => (end + 16, 0x7FFFFFF0u, 4),
+            "entry-count" => (end + 10, 0xFFFFu, 2),
+            "disk-number" => (end + 4, 1u, 2),
+            "local-header-offset" => (centralDirectory + 42, 0x7FFFFFF0u, 4),
+            _ => (centralDirectory + 28, 0xFFFFu, 2),
+        };
+        BitConverter.GetBytes(value)[..width].CopyTo(content, offset);
+        return content;
     }
 
     private static byte[] FarCellWorkbook(params string[] names)
