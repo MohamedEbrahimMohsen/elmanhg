@@ -1,5 +1,4 @@
-using Elmanhg.Application.Auth.Shared;
-using Elmanhg.Domain.Identity;
+using Core.Identity.Tokens.RefreshToken;
 using Elmanhg.Infrastructure.Data.Context;
 using Elmanhg.Tests.Integration.Authorization;
 using Elmanhg.Tests.Integration.Infrastructure;

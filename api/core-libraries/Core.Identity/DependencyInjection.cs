@@ -16,7 +16,7 @@ using System.Text;
 
 namespace Core.Identity;
 
-public static class DependencyInjection
+public static partial class DependencyInjection
 {
     public static IServiceCollection AddCoreIdentity<TUser, TKey, TRole, TDbContext>(
                 this IServiceCollection services,

@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Elmanhg.Application.Auth.Shared;
+namespace Core.Identity.Tokens.AccessToken;
 
 public static class SecurityStampClaim
 {

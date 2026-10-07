@@ -79,6 +79,27 @@ public sealed class SessionEndpointTests(ApiFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
+    [Fact]
+    public async Task Logout_ThenOldAccessToken_Returns401()
+    {
+        using var client = AuthTestClient.Create(factory);
+        using var registered = await AuthTestClient.RegisterByPhoneAsync(client, factory, AuthTestClient.NewPhoneNumber(), TestContext.Current.CancellationToken);
+        var accessToken = (await registered.Content.ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken)).GetProperty("accessToken").GetString();
+        using var logout = await SendLogoutAsync(client, accessToken);
+
+        using var response = await SendLogoutAsync(client, accessToken);
+
+        logout.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    private static async Task<HttpResponseMessage> SendLogoutAsync(HttpClient client, string? accessToken)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, LogoutRoute);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        return await client.SendAsync(request, TestContext.Current.CancellationToken).ConfigureAwait(false);
+    }
+
     private static async Task<HttpResponseMessage> SendRefreshAsync(HttpClient client, string cookie)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, RefreshRoute);

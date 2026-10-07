@@ -5,13 +5,13 @@ using Core.Identity.Tokens.RefreshToken;
 using Elmanhg.Application.Auth.RefreshAccessToken;
 using Elmanhg.Application.Auth.Shared;
 using Elmanhg.Application.Exceptions;
-using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.Identity;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using System.Linq.Expressions;
 using System.Security.Claims;
+using IdentityErrorCodes = Core.Identity.Exceptions.ErrorCodes;
 
 namespace Elmanhg.Tests.Application.Features.Auth.RefreshAccessToken;
 
@@ -43,9 +43,9 @@ public sealed class RefreshAccessTokenHandlerTests
         _issuedRefreshTokenRepository.When(x => x.AddAsync(Arg.Any<IssuedRefreshToken>(), Arg.Any<CancellationToken>())).Do(call => _records.Add(call.Arg<IssuedRefreshToken>()));
         _addIfAbsent = _records.Add;
         _issuedRefreshTokenRepository.When(x => x.AddIfAbsentAsync(Arg.Any<IssuedRefreshToken>(), Arg.Any<CancellationToken>())).Do(call => _addIfAbsent(call.Arg<IssuedRefreshToken>()));
-        var authOptions = Options.Create(new AuthOptions { RefreshTokenReuseGraceSeconds = GraceSeconds });
+        var rotationOptions = Options.Create(new RefreshTokenRotationOptions { ReuseGrace = TimeSpan.FromSeconds(GraceSeconds) });
         var jwtOptions = Options.Create(new JwtOptions { RefreshTokenExpirationDays = 7 });
-        _handler = new RefreshAccessTokenHandler(_tokenService, _refreshTokenService, _issuedRefreshTokenRepository, authOptions, jwtOptions, _timeProvider);
+        _handler = new RefreshAccessTokenHandler(_tokenService, _refreshTokenService, new RefreshTokenRotator<User>(_refreshTokenService, _issuedRefreshTokenRepository, rotationOptions, jwtOptions, _timeProvider));
     }
 
     [Fact]
@@ -93,7 +93,7 @@ public sealed class RefreshAccessTokenHandlerTests
 
         var act = () => _handler.Handle(new RefreshAccessTokenCommand(OldRefreshToken), TestContext.Current.CancellationToken);
 
-        (await act.Should().ThrowAsync<UnauthorizedCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.RefreshTokenRevoked);
+        (await act.Should().ThrowAsync<UnauthorizedCoreException>()).Which.ErrorCode.Should().Be(IdentityErrorCodes.RefreshTokenRevoked);
         (replayed.IsRevoked, successor.IsRevoked, otherSignIn.IsRevoked).Should().Be((true, true, false));
         await _issuedRefreshTokenRepository.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
         await _refreshTokenService.DidNotReceive().GenerateTokenAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());
@@ -119,7 +119,7 @@ public sealed class RefreshAccessTokenHandlerTests
 
         var act = () => _handler.Handle(new RefreshAccessTokenCommand(OldRefreshToken), TestContext.Current.CancellationToken);
 
-        (await act.Should().ThrowAsync<UnauthorizedCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.RefreshTokenRevoked);
+        (await act.Should().ThrowAsync<UnauthorizedCoreException>()).Which.ErrorCode.Should().Be(IdentityErrorCodes.RefreshTokenRevoked);
         await _issuedRefreshTokenRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
@@ -133,6 +133,17 @@ public sealed class RefreshAccessTokenHandlerTests
         (await act.Should().ThrowAsync<ForbiddenCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.UserSuspended);
         await _refreshTokenService.DidNotReceive().GenerateTokenAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());
         await _issuedRefreshTokenRepository.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_ValidToken_SignsAccessTokenWithStampFingerprintClaim()
+    {
+        _user.SecurityStamp = "stamp-one";
+
+        var result = await _handler.Handle(new RefreshAccessTokenCommand(OldRefreshToken), TestContext.Current.CancellationToken);
+
+        _tokenService.Received(1).GenerateTokenAsync(Arg.Is<List<Claim>>(claims => claims.Any(x => x.Type == SecurityStampClaim.ClaimType && x.Value == SecurityStampClaim.Fingerprint("stamp-one"))));
+        result.AccessToken.Should().Be("access-token");
     }
 
     private IssuedRefreshToken Record(string token, Guid familyId, DateTimeOffset? rotatedAt)

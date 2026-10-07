@@ -1,4 +1,4 @@
-using Elmanhg.Application.Auth.Shared;
+using Core.Identity.Tokens.AccessToken;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Users.Shared;
 using Elmanhg.Domain.Identity;

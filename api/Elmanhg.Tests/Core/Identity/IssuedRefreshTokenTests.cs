@@ -1,7 +1,7 @@
-using Elmanhg.Domain.Identity;
+using Core.Identity.Tokens.RefreshToken;
 using FluentAssertions;
 
-namespace Elmanhg.Tests.Domain.Identity;
+namespace Elmanhg.Tests.Core.Identity;
 
 public sealed class IssuedRefreshTokenTests
 {

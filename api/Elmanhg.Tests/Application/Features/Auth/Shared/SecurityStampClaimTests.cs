@@ -1,3 +1,4 @@
+using Core.Identity.Tokens.AccessToken;
 using Elmanhg.Application.Auth.Shared;
 using Elmanhg.Domain.Identity;
 using FluentAssertions;
@@ -15,21 +16,5 @@ public sealed class SecurityStampClaimTests
         var claim = user.GetUserClaims().Single(x => x.Type == SecurityStampClaim.ClaimType);
 
         claim.Value.Should().Be(SecurityStampClaim.Fingerprint("RAW-SECURITY-STAMP")).And.NotContain("RAW-SECURITY-STAMP").And.HaveLength(64);
-    }
-
-    [Fact]
-    public void Matches_SameStamp_ReturnsTrue()
-    {
-        var fingerprint = SecurityStampClaim.Fingerprint("stamp-one");
-
-        SecurityStampClaim.Matches(fingerprint, "stamp-one").Should().BeTrue();
-    }
-
-    [Fact]
-    public void Matches_RotatedStamp_ReturnsFalse()
-    {
-        var fingerprint = SecurityStampClaim.Fingerprint("stamp-one");
-
-        SecurityStampClaim.Matches(fingerprint, "stamp-two").Should().BeFalse();
     }
 }

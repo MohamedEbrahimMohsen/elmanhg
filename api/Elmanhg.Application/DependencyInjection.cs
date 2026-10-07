@@ -1,4 +1,6 @@
 using Core.Cache;
+using Core.Identity;
+using Core.Identity.Tokens.RefreshToken;
 using Core.Settings;
 using Core.Utilities;
 using Elmanhg.Application.Questions.ImportQuestions;
@@ -7,6 +9,7 @@ using Elmanhg.Application.Shared.Authorization;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
+using Elmanhg.Domain.Identity;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +29,8 @@ public static class DependencyInjection
         services.AddCoreCache();
         services.AddTransient<IPipelineBehavior<ImportQuestionsCommand, ImportQuestionsResult>, ImportQuestionsReplayBehaviour>();
         services.AddValidatedOptions<AuthOptions>(AuthOptions.SectionName);
+        services.AddCoreRefreshTokenRotation<User>();
+        services.AddOptions<RefreshTokenRotationOptions>().Configure<IOptions<AuthOptions>>((rotation, auth) => rotation.ReuseGrace = TimeSpan.FromSeconds(auth.Value.RefreshTokenReuseGraceSeconds));
         services.AddOptions<AdminSeedOptions>().BindConfiguration(AdminSeedOptions.SectionName);
         services.AddValidatedOptions<AuditLogsOptions>(AuditLogsOptions.SectionName);
         services.AddValidatedOptions<ContentOptions>(ContentOptions.SectionName);
