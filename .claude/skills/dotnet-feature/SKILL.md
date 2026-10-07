@@ -634,7 +634,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator) : CoreDb
 ```
 
 - ✅ Always `DbSet<T> Xxx { get; set; }` — expression-bodied `=> Set<T>()` is PROHIBITED.
-- `CoreDbContext` (Core.EntityFrameworkCore) handles domain-event dispatch on `SaveChangesAsync`; the `AuditStampingInterceptor` (registered by `AddCoreAuditStamping<AppDbContext>()`) stamps audit fields inside the save, after dispatch — never dispatch events or stamp audit fields manually.
+- `CoreDbContext` (Core.EntityFrameworkCore) handles domain-event dispatch on `SaveChangesAsync`; the `AuditStampingInterceptor` (registered by `AddCoreAuditStamping<AppDbContext>()`) stamps audit fields inside the save, after dispatch — never dispatch events manually, and never stamp the fields the interceptor supplies; the one exception is the §4 audit-fields rule: a method that changes only an owned value or a child collection (so the parent stays `Unchanged`) sets `UpdationDate` itself.
 
 ### 6.3 Entity Configuration
 
