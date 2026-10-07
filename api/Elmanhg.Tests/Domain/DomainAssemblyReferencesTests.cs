@@ -18,7 +18,7 @@ public sealed class DomainAssemblyReferencesTests
     {
         var project = XDocument.Load(FindDomainProject());
 
-        var references = project.Descendants("ProjectReference").Select(x => Path.GetFileName(x.Attribute("Include")!.Value)).ToList();
+        var references = project.Descendants("ProjectReference").Select(x => Path.GetFileName(x.Attribute("Include")!.Value.Replace('\\', '/'))).ToList();
 
         references.Should().Equal("Core.DDD.csproj", "Core.Settings.csproj");
     }
