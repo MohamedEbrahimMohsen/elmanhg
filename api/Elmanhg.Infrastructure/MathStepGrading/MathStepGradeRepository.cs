@@ -1,4 +1,3 @@
-using Core.DDD.Identity;
 using Core.DDD.Models;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.MathStepGrading;
@@ -8,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.MathStepGrading;
 
-public class MathStepGradeRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<MathStepGrade>(context, currentUser, timeProvider), IMathStepGradeRepository
+public class MathStepGradeRepository(AppDbContext context) : Repository<MathStepGrade>(context), IMathStepGradeRepository
 {
     public async Task<List<Guid>> GetDueIdsAsync(DateTimeOffset now, int limit, CancellationToken cancellationToken)
     {

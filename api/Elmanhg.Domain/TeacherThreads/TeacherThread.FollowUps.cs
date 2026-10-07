@@ -28,7 +28,6 @@ public partial class TeacherThread
         Messages.Add(message);
         Status = TeacherThreadStatus.Open;
         ApplySlaSchedule(slaPolicy.ScheduleFrom(at));
-        UpdatedBy = StudentId;
         UpdationDate = at;
         return message;
     }
@@ -56,7 +55,6 @@ public partial class TeacherThread
             ClosedAt = at;
         }
 
-        UpdatedBy = StudentId;
         UpdationDate = at;
         RaiseDomainEvent(wasClosed ? new TeacherThreadRatedAfterClose(this, at) : new TeacherThreadClosed(this));
     }

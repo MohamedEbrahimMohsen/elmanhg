@@ -19,7 +19,7 @@ Companion documents: `docs/constitution.md` (wins on conflict) · `docs/PRD.md` 
    - `Core/` (Core.DDD, Core.CQRS, Core.EntityFrameworkCore, Core.Errors, Core.Exceptions, Core.Identity, Core.OTP, Core.Localization, Core.Logging, Core.Auditing, Core.Cache, Core.Notifications, Core.Queues, Core.Utilities, Core.Validation) is vendored into `api/core-libraries/` in this repo. Copy it, do not reference the Morabh path at build time. When vendoring, swap every SQL Server dependency for Npgsql and drop `Core.Azure` unless a story needs it. `Core.Storage` (file storage `IFileStorage` with the Local provider; the S3 provider lives in `Core.Storage.S3`, registered with `AddCoreS3FileStorage()` after `AddCoreFileStorage()`, so `Core.Storage` has no AWS SDK, `StorageContentTypes`, public media serving with a `PrivateFolders` list, `WriteStoredFileAsync`) is Elmanhg-native, with no Morabh equivalent; files and media always go through it.
    - Before designing **any** feature (login, register, OTP, refresh tokens, audit log, localisation, notifications, error codes, paging, file upload…), search the Morabh repo (`Core/`, `Morabh.Application/`, `Morabh.Domain/`, `Morabh.Infrastructure/`, `Morabh.APIs/`, `CRUD_FEATURE_CREATION_GUIDE.md`, `ErrorCodes.md`, `AuditLogs.md`, `Localization.md`). If it exists, copy it into the matching Elmanhg layer, rename namespaces `Morabh.*` → `Elmanhg.*`, and adapt it to the Elmanhg domain. The plan must name the Morabh source file for every reused piece.
    - Only when nothing in Morabh covers it, write it from scratch — in the same shape, layering, naming and error-code style as the Morabh code. Murabaha/BNPL business logic is never copied.
-   - Promoted in Elmanhg (no Morabh source): `Core.Hosting`, `Core.Observability`, `Core.Spreadsheets`, `Core.Settings`, plus `Core.Cache` (`ICacheableQuery` + `CachingBehaviour`), `Core.Logging` `TextRedactor`, `Core.Queues` (`SweepWorker<TOptions>`, `SweepOptions`, `BackgroundJobMetrics`), `Core.DDD` `RetrySchedule` and `Core.Errors` `BaseException.ErrorCodeOf`. Cache a query by implementing `ICacheableQuery` (lifetime: its own `Ttl`, else a named `CacheProfile` the app maps in `CachingOptions.Profiles`, else `Caching:DefaultSeconds`); read/write spreadsheets through `ISpreadsheetReader`/`ISpreadsheetWriter`; build rate-limit policies from `Core.Hosting.RateLimiting.RateLimitPartitions`; redact free text with a `TextRedactor`; write a background sweep as a `SweepWorker<TOptions>` subclass; keep retry state in a `RetrySchedule` owned value. Read a runtime setting or feature flag with `Core.Settings` `IRuntimeSettings.GetAsync(XRuntimeSettings.Key, cancellationToken)`; the app declares keys, definitions and constraints in `Application/Shared/RuntimeSettings/Definitions` (docs/configuration.md §4) and never re-implements the store, cache or validation. Plus the E21.S3 helpers: `ICurrentUserService.GetRequiredUserId(code)`, `IRepository<T>.GetRequiredAsync(id or predicate, code, …)`, `PageData<T>.Map`, `IQueryable<T>.ToPageDataAsync`, `ModelBuilder.ApplySoftDeleteQueryFilters`, `IOtpRepository.ConsumeAsync`, `Core.DDD.Time` and `AddValidatedOptions`. Plus `Core.DDD.Identity.ICurrentUser` (id, name, role; `ICurrentUserService` extends it) and repository audit stamping. Plus `Core.Identity` refresh-token rotation: refresh a session with `IRefreshTokenService.ValidateTokenAsync` then `IRefreshTokenRotator<TUser>.RotateAsync(user, presentedToken, cancellationToken)` (registered by `AddCoreRefreshTokenRotation<TUser>()`, grace in `RefreshTokenRotationOptions`); the app maps `IssuedRefreshToken` in `AppDbContext` and implements `IIssuedRefreshTokenRepository.AddIfAbsentAsync`; stamp fingerprints go through `SecurityStampClaim`.
+   - Promoted in Elmanhg (no Morabh source): `Core.Hosting`, `Core.Observability`, `Core.Spreadsheets`, `Core.Settings`, plus `Core.Cache` (`ICacheableQuery` + `CachingBehaviour`), `Core.Logging` `TextRedactor`, `Core.Queues` (`SweepWorker<TOptions>`, `SweepOptions`, `BackgroundJobMetrics`), `Core.DDD` `RetrySchedule` and `Core.Errors` `BaseException.ErrorCodeOf`. Cache a query by implementing `ICacheableQuery` (lifetime: its own `Ttl`, else a named `CacheProfile` the app maps in `CachingOptions.Profiles`, else `Caching:DefaultSeconds`); read/write spreadsheets through `ISpreadsheetReader`/`ISpreadsheetWriter`; build rate-limit policies from `Core.Hosting.RateLimiting.RateLimitPartitions`; redact free text with a `TextRedactor`; write a background sweep as a `SweepWorker<TOptions>` subclass; keep retry state in a `RetrySchedule` owned value. Read a runtime setting or feature flag with `Core.Settings` `IRuntimeSettings.GetAsync(XRuntimeSettings.Key, cancellationToken)`; the app declares keys, definitions and constraints in `Application/Shared/RuntimeSettings/Definitions` (docs/configuration.md §4) and never re-implements the store, cache or validation. Plus the E21.S3 helpers: `ICurrentUserService.GetRequiredUserId(code)`, `IRepository<T>.GetRequiredAsync(id or predicate, code, …)`, `PageData<T>.Map`, `IQueryable<T>.ToPageDataAsync`, `ModelBuilder.ApplySoftDeleteQueryFilters`, `IOtpRepository.ConsumeAsync`, `Core.DDD.Time` and `AddValidatedOptions`. Plus `Core.DDD.Identity.ICurrentUser` (id, name, role; `ICurrentUserService` extends it) and audit stamping through the opt-in `AuditStampingInterceptor` (`AddCoreAuditStamping<AppDbContext>()`, after domain-event dispatch). Plus `Core.Identity` refresh-token rotation: refresh a session with `IRefreshTokenService.ValidateTokenAsync` then `IRefreshTokenRotator<TUser>.RotateAsync(user, presentedToken, cancellationToken)` (registered by `AddCoreRefreshTokenRotation<TUser>()`, grace in `RefreshTokenRotationOptions`); the app maps `IssuedRefreshToken` in `AppDbContext` and implements `IIssuedRefreshTokenRepository.AddIfAbsentAsync`; stamp fingerprints go through `SecurityStampClaim`.
    - `Elmanhg.Domain` references only `Core.DDD` and `Core.Settings` (for the `IRuntimeSettingOverride` contract) and never the ASP.NET Core shared framework, directly or transitively: `Core.DDD`, `Core.Errors`, `Core.Settings` and `Core.Utilities` use specific `Microsoft.Extensions.*` packages, never `<FrameworkReference Include="Microsoft.AspNetCore.App" />` (`DomainAssemblyReferencesTests` guards this).
 6. **Solution layout**: `api/Elmanhg.slnx` with `Elmanhg.Api`, `Elmanhg.Application`, `Elmanhg.Domain`, `Elmanhg.Infrastructure`, `Elmanhg.Jobs` (background jobs, when needed), `Elmanhg.Tests`, plus `core-libraries/`. Mirror Morabh's project structure.
 7. **Secrets**: environment variables and a gitignored `.env`; `appsettings.json` holds shape and safe defaults only. External providers without credentials in this repo (Paymob, SMS gateway, Claude API, transcription) sit behind an interface with a `Fake*` implementation selected by config, so the app and tests run offline.
@@ -249,7 +249,7 @@ public class Tenant : AggregateRoot
 Rules:
 - Private constructor. `static Create(...)` is the only way to construct from application code.
 - All state changes through named domain methods. Direct property mutation from handlers is PROHIBITED.
-- `Repository.SaveChangesAsync` stamps `UpdationDate` (from `TimeProvider`) and `UpdatedBy` (from `ICurrentUser`) when the method did not. A method that receives the transition instant sets `UpdationDate = at` so every field of the transition shares it. A method that changes only owned values or child collections stamps `UpdationDate` itself.
+- The `AuditStampingInterceptor` stamps `UpdationDate` (from `TimeProvider`) when the method did not, and `UpdatedBy` as the acting user (`ICurrentUser`) when there is one. A method sets `UpdatedBy` only from an actor argument it receives, never from an owner property (`StudentId`, `TeacherId`). A method that receives the transition instant sets `UpdationDate = at` so every field of the transition shares it. A method that changes only owned values or child collections stamps `UpdationDate` itself.
 - Guard THEN mutate THEN stamp. Braces on every `if`.
 
 ### 4.3 Child Entity
@@ -594,10 +594,10 @@ public static class DependencyInjection
 namespace Elmanhg.Infrastructure.Tenants;
 
 // Simple — generic base covers everything
-public class TenantRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<Tenant>(context, currentUser, timeProvider), ITenantRepository { }
+public class TenantRepository(AppDbContext context) : Repository<Tenant>(context), ITenantRepository { }
 
 // With custom queries
-public class TenantSubscriptionRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<TenantSubscription>(context, currentUser, timeProvider), ITenantSubscriptionRepository
+public class TenantSubscriptionRepository(AppDbContext context) : Repository<TenantSubscription>(context), ITenantSubscriptionRepository
 {
     public async Task<List<TenantSubscription>> GetExpiredAsync(CancellationToken cancellationToken)
     {
@@ -606,7 +606,7 @@ public class TenantSubscriptionRepository(AppDbContext context, ICurrentUser cur
 }
 ```
 
-`Repository<T>` (Core.EntityFrameworkCore) base provides all 13 `IRepository<T>` members plus `_dbSet`, `_context`, and stamps audit fields in `SaveChangesAsync`.
+`Repository<T>` (Core.EntityFrameworkCore) base provides all 13 `IRepository<T>` members plus `_dbSet` and `_context`; its `SaveChangesAsync` only saves (the interceptor stamps).
 
 **`AddAsync`/`Update`/`Delete` do NOT call `SaveChangesAsync`. Call it once in the handler.**
 
@@ -634,7 +634,7 @@ public class AppDbContext(DbContextOptions options, IMediator mediator) : CoreDb
 ```
 
 - ✅ Always `DbSet<T> Xxx { get; set; }` — expression-bodied `=> Set<T>()` is PROHIBITED.
-- `CoreDbContext` (Core.EntityFrameworkCore) handles audit-field stamping and domain-event dispatch on `SaveChangesAsync` — never dispatch events or stamp audit fields manually.
+- `CoreDbContext` (Core.EntityFrameworkCore) handles domain-event dispatch on `SaveChangesAsync`; the `AuditStampingInterceptor` (registered by `AddCoreAuditStamping<AppDbContext>()`) stamps audit fields inside the save, after dispatch — never dispatch events manually, and never stamp the fields the interceptor supplies; the one exception is the §4 audit-fields rule: a method that changes only an owned value or a child collection (so the parent stays `Unchanged`) sets `UpdationDate` itself.
 
 ### 6.3 Entity Configuration
 
@@ -716,7 +716,7 @@ public async Task<bool> IsSlugExistsAsync(string slug, CancellationToken cancell
 - Multiple collection `Include` on a write path → `AsSplitQuery()`.
 - Lazy-loading proxies (`UseLazyLoadingProxies`) PROHIBITED.
 - Raw SQL only inside `Elmanhg.Infrastructure`, parameterised only: `FromSql($"...")` / `ExecuteSql($"...")`. `FromSqlRaw` / `ExecuteSqlRaw` with interpolation or concatenation = SQL injection, BLOCKING.
-- `ExecuteUpdateAsync` / `ExecuteDeleteAsync` bypass `CoreDbContext` — no audit stamping, no domain events, and `ExecuteDeleteAsync` hard-deletes past `ISoftDeletable`. Only for non-audited bulk maintenance the plan names; never a load-modify-save loop over many rows either.
+- `ExecuteUpdateAsync` / `ExecuteDeleteAsync` bypass `CoreDbContext` and the stamping interceptor — no audit stamping, no domain events, and `ExecuteDeleteAsync` hard-deletes past `ISoftDeletable`. Only for non-audited bulk maintenance the plan names; never a load-modify-save loop over many rows either.
 
 ### 6.7 Migrations
 
@@ -1046,7 +1046,7 @@ private static readonly Regex SlugPattern = new("^[a-z0-9-]+$", RegexOptions.Non
 
 **Domain**
 - [ ] Entity extends `AggregateRoot` / `AuditEntity` / `Entity`; private ctor; `static Create(...)`
-- [ ] All state changes via named domain methods; methods stamp `UpdationDate` only with an instant they receive (the repository stamps the rest)
+- [ ] All state changes via named domain methods; methods stamp `UpdationDate` only with an instant they receive (the save stamps the rest); `UpdatedBy` only from an actor argument
 - [ ] `LocalizedText` for every genuinely bilingual field — no plain `string` for bilingual data
 - [ ] Value objects as `sealed record`
 - [ ] Enums + extensions in same file inside the aggregate folder

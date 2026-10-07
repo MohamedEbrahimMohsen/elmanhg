@@ -23,6 +23,16 @@ public sealed class TeacherThreadRatingTests
     }
 
     [Fact]
+    public void Rate_AnsweredThread_LeavesUpdatedByToTheSave()
+    {
+        var thread = new TeacherThreadBuilder().AnsweredBy(_teacherId).Build();
+
+        thread.Rate(4, SubmittedAt.AddHours(5));
+
+        thread.UpdatedBy.Should().Be(_teacherId);
+    }
+
+    [Fact]
     public void Rate_ClosedAfterFinalReply_StoresRatingAndKeepsClosedAt()
     {
         var thread = new TeacherThreadBuilder().AnsweredBy(_teacherId).FinalReplied().Build();

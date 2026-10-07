@@ -84,6 +84,7 @@ builder.Services.AddElmanhgObservability(builder.Configuration, builder.Environm
 builder.Services.AddCoreCQRS();
 builder.Services.AddCoreOtp(builder.Configuration);
 builder.Services.AddCoreEntityFrameworkCore<User, Role, Guid, AppDbContext>();
+builder.Services.AddCoreAuditStamping<AppDbContext>();
 builder.Services.AddCoreUtilities();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();

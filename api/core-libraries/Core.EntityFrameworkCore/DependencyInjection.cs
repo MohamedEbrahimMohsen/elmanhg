@@ -1,12 +1,15 @@
 ﻿using Core.Auditing.Repositories;
 using Core.DDD.Entities;
 using Core.DDD.Repositories;
+using Core.EntityFrameworkCore.Auditing;
 using Core.EntityFrameworkCore.Context;
 using Core.EntityFrameworkCore.Repositories;
 using Core.Notifications.Repositories;
 using Core.OTP.Repositories;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Core.EntityFrameworkCore;
 
@@ -24,6 +27,15 @@ public static class DependencyInjection
         services.AddScoped<INotificationRepository, NotificationRepository<TUser, TRole, TKey, TContext>>();
         services.AddScoped<INotificationTemplateRepository, NotificationTemplateRepository<TUser, TRole, TKey, TContext>>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository<TUser, TRole, TKey, TContext>>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddCoreAuditStamping<TContext>(this IServiceCollection services) where TContext : DbContext
+    {
+        services.TryAddSingleton(TimeProvider.System);
+        services.TryAddScoped<AuditStampingInterceptor>();
+        services.ConfigureDbContext<TContext>((provider, options) => options.AddInterceptors(provider.GetRequiredService<AuditStampingInterceptor>()));
 
         return services;
     }

@@ -118,14 +118,14 @@ public sealed class QuestionMasteryTests
     }
 
     [Fact]
-    public void Record_NewAttempt_StampsUpdatedBy()
+    public void Record_NewAttempt_LeavesUpdatedByToTheSave()
     {
         var mastery = QuestionMastery.Start(_studentId, _questionId, Attempt(1m, 0));
         mastery.UpdatedBy = null;
 
         mastery.Record(Attempt(1m, 1), Threshold);
 
-        mastery.UpdatedBy.Should().Be(_studentId);
+        mastery.UpdatedBy.Should().BeNull();
     }
 
     [Fact]

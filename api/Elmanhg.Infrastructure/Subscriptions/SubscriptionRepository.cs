@@ -1,4 +1,3 @@
-using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Infrastructure.Data.Context;
@@ -6,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.Subscriptions;
 
-public class SubscriptionRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<Subscription>(context, currentUser, timeProvider), ISubscriptionRepository
+public class SubscriptionRepository(AppDbContext context) : Repository<Subscription>(context), ISubscriptionRepository
 {
     public async Task<List<PlanCount>> CountActiveByPlanAsync(CancellationToken cancellationToken)
     {

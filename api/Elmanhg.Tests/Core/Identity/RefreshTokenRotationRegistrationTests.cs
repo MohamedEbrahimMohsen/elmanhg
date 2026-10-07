@@ -1,4 +1,7 @@
+using Core.Errors;
 using Core.Identity;
+using Core.Identity.Exceptions;
+using Core.Identity.Tokens;
 using Core.Identity.Tokens.RefreshToken;
 using Elmanhg.Domain.Identity;
 using FluentAssertions;
@@ -7,7 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Tests.Core.Identity;
 
-public sealed class RefreshTokenRotationRegistrationTests
+public sealed class RefreshTokenRotationRegistrationTests : RefreshTokenRotatorTestBase
 {
     private readonly ServiceCollection _services = new();
 
@@ -21,14 +24,29 @@ public sealed class RefreshTokenRotationRegistrationTests
     }
 
     [Fact]
-    public void AddCoreRefreshTokenRotation_NoConfiguration_DefaultsGraceToTenSeconds()
+    public async Task AddCoreRefreshTokenRotation_NoConfiguration_DefaultsGraceToTenSeconds()
     {
-        _services.AddCoreRefreshTokenRotation<User>();
-        using var provider = _services.BuildServiceProvider();
+        Record(OldRefreshToken, Guid.NewGuid(), rotatedAt: Now.AddSeconds(-10));
+        await using var provider = RegisteredProvider();
+        await using var scope = provider.CreateAsyncScope();
 
-        var options = provider.GetRequiredService<IOptions<RefreshTokenRotationOptions>>().Value;
+        var result = await scope.ServiceProvider.GetRequiredService<IRefreshTokenRotator<User>>().RotateAsync(_user, OldRefreshToken, TestContext.Current.CancellationToken);
 
-        options.ReuseGrace.Should().Be(TimeSpan.FromSeconds(10));
+        result.Should().Be(NewRefreshToken);
+        _records.Should().NotContain(x => x.IsRevoked);
+    }
+
+    [Fact]
+    public async Task AddCoreRefreshTokenRotation_NoConfiguration_RevokesReplayAfterTenSeconds()
+    {
+        var replayed = Record(OldRefreshToken, Guid.NewGuid(), rotatedAt: Now.AddSeconds(-11));
+        await using var provider = RegisteredProvider();
+        await using var scope = provider.CreateAsyncScope();
+
+        var act = () => scope.ServiceProvider.GetRequiredService<IRefreshTokenRotator<User>>().RotateAsync(_user, OldRefreshToken, TestContext.Current.CancellationToken);
+
+        (await act.Should().ThrowAsync<UnauthorizedCoreException>()).Which.ErrorCode.Should().Be(ErrorCodes.RefreshTokenRevoked);
+        replayed.IsRevoked.Should().BeTrue();
     }
 
     [Fact]
@@ -41,5 +59,15 @@ public sealed class RefreshTokenRotationRegistrationTests
         var act = () => provider.GetRequiredService<IOptions<RefreshTokenRotationOptions>>().Value;
 
         act.Should().Throw<OptionsValidationException>();
+    }
+
+    private ServiceProvider RegisteredProvider()
+    {
+        _services.AddSingleton(_refreshTokenService);
+        _services.AddSingleton(_issuedRefreshTokenRepository);
+        _services.AddSingleton(_timeProvider);
+        _services.AddSingleton(Options.Create(new JwtOptions { RefreshTokenExpirationDays = 7 }));
+        _services.AddCoreRefreshTokenRotation<User>();
+        return _services.BuildServiceProvider();
     }
 }
