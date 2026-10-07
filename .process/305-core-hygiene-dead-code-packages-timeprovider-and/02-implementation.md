@@ -75,3 +75,21 @@ No Postman change: no endpoint, route or contract changed. No migration: `has-pe
 - `Lesson.MoveTo` is the only listed method still stamping in memory. If the reviewer would rather have the line removed, the test helper `ContentRetrievalTestData.TouchLessonAsync` must save through `ILessonRepository`. That is a test-infrastructure change I did not make on my own.
 - Line endings: some `sed` edits turned CRLF working files into LF. I normalised every touched text file back to CRLF in the working copy (`core.autocrlf=true`), so commits stay LF and the diffs contain content changes only.
 - Lane boundary: `Application/Shared/RuntimeSettings`, `Application/Configuration`, `Domain/RuntimeSettings` and `Infrastructure/RuntimeSettings` show no changes.
+
+## Merge with main
+`origin/main` brought in Core.Settings (runtime settings and feature flags). The Domain entity `RuntimeSettingOverride` implements `Core.Settings.IRuntimeSettingOverride`, so `Elmanhg.Domain` now references `Core.Settings`. Core.Settings referenced `Core.Utilities` (for `AddValidatedOptions`) and pinned `Microsoft.Extensions.Caching.Memory` inline.
+
+| Conflict / follow-up | Resolution |
+|---|---|
+| `GetMasteryOverviewHandler.cs` usings | Kept `using Core.Settings;` and dropped `using Core.Utilities.Time;`, since `Core.DDD.Time` is already imported. A grep found no other `Core.Utilities.Time` usings in `api/`, `docs/` or `.claude/`. |
+| `Elmanhg.Domain.csproj` | ProjectReferences are now exactly `Core.DDD` and `Core.Settings`. `Core.Utilities` is not referenced. |
+| Shared framework leaking in through Core.Settings → Core.Utilities | `Core.Utilities.csproj` drops `<FrameworkReference Include="Microsoft.AspNetCore.App" />` and gets `Microsoft.Extensions.Options.ConfigurationExtensions` (`BindConfiguration`) plus `Microsoft.Extensions.Options.DataAnnotations` (`ValidateDataAnnotations`) instead. `Core.Settings.csproj` loses its inline `Version` on `Microsoft.Extensions.Caching.Memory` and gets an explicit `Microsoft.Extensions.Options`. `api/Directory.Packages.props` gains the two new ids at 10.0.5, the version the other Microsoft.Extensions packages already use. `Elmanhg.Domain/obj/project.assets.json` no longer mentions `Microsoft.AspNetCore.App`. |
+| `DomainAssemblyReferencesTests` | `DomainProject_References_OnlyCoreDddAndCoreSettings` asserts the ProjectReferences equal `Core.DDD.csproj` and `Core.Settings.csproj`. The new `DomainProject_TransitiveProjects_HaveNoFrameworkReference` walks the ProjectReference graph from the Domain csproj (Core.DDD, Core.Errors, Core.Settings, Core.Utilities) and asserts that none of them has a `FrameworkReference`. I walk the csproj files instead of reading `obj` because that is less brittle. The assembly-reference test is unchanged. |
+| `docs/constitution.md` line 3 | Keeps both sides: this story's `Core.DDD.Time`, `ICurrentUser`, `Core.Utilities` (`IGenerator`, `AddValidatedOptions`) and central-pinning sentence, plus main's `Core.Settings` entry. The FrameworkReference sentence now adds that `Core.DDD`, `Core.Errors`, `Core.Settings` and `Core.Utilities` never take it. The §4 Domain bullet now says the Domain references only `Core.DDD` and `Core.Settings` (for the `IRuntimeSettingOverride` contract). |
+| `.claude/skills/dotnet-feature/SKILL.md` delta 5 | Keeps both sides: main's `Core.Settings` entry and runtime-settings sentence, plus this story's `Core.DDD.Time` (replacing main's `Core.Utilities.Time`) and `ICurrentUser` sentence. A new sub-bullet covers the Domain reference rule and the no-FrameworkReference rule for the four reachable core projects. |
+
+### Build & test after the merge
+- `dotnet build api/ -c Release`: **Build succeeded, 0 errors, 9 warnings.** These are the same 9 pre-existing nullable warnings in vendored core.
+- `dotnet test api/ -c Release --no-build` (Docker, Testcontainers): **Passed. total 5520, succeeded 5520, failed 0, skipped 0.**
+- `dotnet list api/Elmanhg.slnx package --vulnerable --include-transitive`: every project reports "has no vulnerable packages".
+- `dotnet ef migrations has-pending-model-changes --project api/Elmanhg.Infrastructure --startup-project api/Elmanhg.Api --configuration Release --no-build`: **"No changes have been made to the model since the last migration."**

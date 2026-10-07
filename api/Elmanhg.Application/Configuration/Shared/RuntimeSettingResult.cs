@@ -1,4 +1,5 @@
 using Core.Auditing;
+using Core.Settings;
 using Elmanhg.Application.Shared.RuntimeSettings;
 using System.Text.Json;
 using System.Text.Json.Serialization;

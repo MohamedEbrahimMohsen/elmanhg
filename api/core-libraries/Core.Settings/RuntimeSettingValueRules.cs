@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace Elmanhg.Application.Shared.RuntimeSettings;
+namespace Core.Settings;
 
 public static class RuntimeSettingValueRules
 {

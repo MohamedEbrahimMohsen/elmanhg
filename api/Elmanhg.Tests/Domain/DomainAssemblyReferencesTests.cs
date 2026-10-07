@@ -14,14 +14,43 @@ public sealed class DomainAssemblyReferencesTests
     }
 
     [Fact]
-    public void DomainProject_References_OnlyCoreDddAndNoFramework()
+    public void DomainProject_References_OnlyCoreDddAndCoreSettings()
     {
         var project = XDocument.Load(FindDomainProject());
 
         var references = project.Descendants("ProjectReference").Select(x => Path.GetFileName(x.Attribute("Include")!.Value)).ToList();
 
-        references.Should().Equal("Core.DDD.csproj");
-        project.Descendants("FrameworkReference").Should().BeEmpty();
+        references.Should().Equal("Core.DDD.csproj", "Core.Settings.csproj");
+    }
+
+    [Fact]
+    public void DomainProject_TransitiveProjects_HaveNoFrameworkReference()
+    {
+        var projects = CollectProjects(FindDomainProject());
+
+        projects.Should().Contain(path => path.EndsWith("Core.Settings.csproj", StringComparison.Ordinal));
+        projects.Where(path => XDocument.Load(path).Descendants("FrameworkReference").Any()).Should().BeEmpty();
+    }
+
+    private static HashSet<string> CollectProjects(string root)
+    {
+        var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var pending = new Stack<string>([Path.GetFullPath(root)]);
+        while (pending.TryPop(out var path))
+        {
+            if (!visited.Add(path))
+            {
+                continue;
+            }
+
+            var directory = Path.GetDirectoryName(path)!;
+            foreach (var include in XDocument.Load(path).Descendants("ProjectReference").Select(x => x.Attribute("Include")!.Value))
+            {
+                pending.Push(Path.GetFullPath(Path.Combine(directory, include.Replace('\\',Path.DirectorySeparatorChar))));
+            }
+        }
+
+        return visited;
     }
 
     private static string FindDomainProject()

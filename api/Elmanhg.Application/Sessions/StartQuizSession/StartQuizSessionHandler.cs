@@ -1,11 +1,11 @@
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Core.Localization;
+using Core.Settings;
 using Core.Storage;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Sessions.Shared;
 using Elmanhg.Application.Shared.Options;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;

@@ -1,7 +1,7 @@
+using Core.Settings;
 using Elmanhg.Application.Shared.Messaging;
 using Elmanhg.Application.Shared.Observability;
 using Elmanhg.Application.Shared.Realtime;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Domain.TeacherThreads;

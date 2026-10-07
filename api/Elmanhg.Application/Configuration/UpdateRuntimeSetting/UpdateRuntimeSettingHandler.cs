@@ -1,8 +1,8 @@
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
+using Core.Settings;
 using Elmanhg.Application.Configuration.Shared;
 using Elmanhg.Application.Exceptions;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Domain.RuntimeSettings;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;

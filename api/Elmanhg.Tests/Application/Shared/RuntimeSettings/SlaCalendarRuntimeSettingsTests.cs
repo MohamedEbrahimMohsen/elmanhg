@@ -1,4 +1,5 @@
 using Core.Errors;
+using Core.Settings;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.RuntimeSettings;
@@ -20,7 +21,7 @@ public sealed class SlaCalendarRuntimeSettingsTests
 
         var definitions = new SlaCalendarRuntimeSettings(Microsoft.Extensions.Options.Options.Create(options)).Definitions.ToDictionary(x => x.Key);
 
-        definitions.Values.Should().OnlyContain(x => x.Group == RuntimeSettingGroup.SlaCalendar);
+        definitions.Values.Should().OnlyContain(x => x.Group == nameof(RuntimeSettingGroup.SlaCalendar));
         definitions["slaCalendar.skipWeekends"].DefaultValue.GetBoolean().Should().BeTrue();
         definitions["slaCalendar.weekendDays"].DefaultValue.EnumerateArray().Select(x => x.GetString()).Should().Equal("Friday", "Saturday");
         definitions["slaCalendar.weekendDays"].AllowedValues.Should().Equal(AllDays);

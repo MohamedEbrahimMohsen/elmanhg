@@ -1,4 +1,5 @@
 using Core.DDD.Models;
+using Core.Settings;
 using Elmanhg.Application.Shared.Options;
 using Microsoft.Extensions.Options;
 
@@ -17,8 +18,8 @@ public sealed class UploadRuntimeSettings(IOptions<AskTeacherOptions> askTeacher
 
     public IReadOnlyList<RuntimeSettingDefinition> Definitions =>
     [
-        RuntimeSettingDefinition.ForInteger(AskTeacherImageMaxSizeInMb, RuntimeSettingGroup.Uploads, askTeacherOptions.Value.ImageMaxSizeInMb, 1, MaxUploadMegabytes, new LocalizedText("أقصى حجم لصورة سؤال الطالب (ميجابايت)", "Student question photo: max size (MB)"), new LocalizedText("أكبر حجم لصورة يرفقها الطالب بسؤاله.", "The largest photo a student can attach to a question.")),
-        RuntimeSettingDefinition.ForInteger(VoiceReplyMaxSizeInMb, RuntimeSettingGroup.Uploads, askTeacherOptions.Value.VoiceMaxSizeInMb, 1, MaxUploadMegabytes, new LocalizedText("أقصى حجم للرد الصوتي (ميجابايت)", "Voice reply: max size (MB)"), new LocalizedText("أكبر حجم لتسجيل صوتي يرسله المعلّم.", "The largest voice recording a teacher can send.")),
-        RuntimeSettingDefinition.ForInteger(VoiceReplyMaxDurationSeconds, RuntimeSettingGroup.Uploads, askTeacherOptions.Value.VoiceMaxDurationSeconds, 10, 600, new LocalizedText("أقصى مدة للرد الصوتي (ثوانٍ)", "Voice reply: max length (seconds)"), new LocalizedText("أطول مدة لتسجيل صوتي يرسله المعلّم.", "The longest voice recording a teacher can send.")),
+        RuntimeSettingDefinition.ForInteger(AskTeacherImageMaxSizeInMb, nameof(RuntimeSettingGroup.Uploads), askTeacherOptions.Value.ImageMaxSizeInMb, 1, MaxUploadMegabytes, new LocalizedText("أقصى حجم لصورة سؤال الطالب (ميجابايت)", "Student question photo: max size (MB)"), new LocalizedText("أكبر حجم لصورة يرفقها الطالب بسؤاله.", "The largest photo a student can attach to a question.")),
+        RuntimeSettingDefinition.ForInteger(VoiceReplyMaxSizeInMb, nameof(RuntimeSettingGroup.Uploads), askTeacherOptions.Value.VoiceMaxSizeInMb, 1, MaxUploadMegabytes, new LocalizedText("أقصى حجم للرد الصوتي (ميجابايت)", "Voice reply: max size (MB)"), new LocalizedText("أكبر حجم لتسجيل صوتي يرسله المعلّم.", "The largest voice recording a teacher can send.")),
+        RuntimeSettingDefinition.ForInteger(VoiceReplyMaxDurationSeconds, nameof(RuntimeSettingGroup.Uploads), askTeacherOptions.Value.VoiceMaxDurationSeconds, 10, 600, new LocalizedText("أقصى مدة للرد الصوتي (ثوانٍ)", "Voice reply: max length (seconds)"), new LocalizedText("أطول مدة لتسجيل صوتي يرسله المعلّم.", "The longest voice recording a teacher can send.")),
     ];
 }

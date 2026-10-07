@@ -1,4 +1,4 @@
-using Elmanhg.Application.Shared.RuntimeSettings;
+using Core.Settings;
 using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Domain.SlaCalendars;
 using Elmanhg.Domain.TeacherThreads;

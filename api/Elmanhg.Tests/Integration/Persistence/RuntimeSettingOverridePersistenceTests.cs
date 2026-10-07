@@ -1,4 +1,5 @@
 using Core.Errors;
+using Core.Settings;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.RuntimeSettings;
 using Elmanhg.Infrastructure.Data.Context;
@@ -69,5 +70,27 @@ public sealed class RuntimeSettingOverridePersistenceTests(ApiFactory factory)
             .SingleAsync(CancellationToken);
 
         dataType.Should().Be("jsonb");
+    }
+
+    [Fact]
+    public async Task GetOverridesAsync_OverriddenAndResetRows_ReturnsOnlyOverridden()
+    {
+        var overriddenKey = $"test.{Guid.NewGuid():N}";
+        var resetKey = $"test.{Guid.NewGuid():N}";
+        using (var seedScope = factory.Services.CreateScope())
+        {
+            var seed = seedScope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var reset = RuntimeSettingOverride.Create(resetKey, "2", AdminId);
+            reset.Reset(AdminId);
+            seed.RuntimeSettingOverrides.AddRange(RuntimeSettingOverride.Create(overriddenKey, "1", AdminId), reset);
+            await seed.SaveChangesAsync(CancellationToken);
+        }
+
+        using var scope = factory.Services.CreateScope();
+        var store = scope.ServiceProvider.GetRequiredService<IRuntimeSettingOverrideStore>();
+
+        var overrides = await store.GetOverridesAsync(CancellationToken);
+
+        overrides.Where(x => x.Key == overriddenKey || x.Key == resetKey).Select(x => (x.Key, x.Value)).Should().Equal((overriddenKey, "1"));
     }
 }

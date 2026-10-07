@@ -1,4 +1,5 @@
 using Core.DDD.Models;
+using Core.Settings;
 using Elmanhg.Application.Shared.Options;
 using Microsoft.Extensions.Options;
 
@@ -13,7 +14,7 @@ public sealed class GradingRuntimeSettings(IOptions<EssayGradingOptions> essayGr
 
     public IReadOnlyList<RuntimeSettingDefinition> Definitions =>
     [
-        RuntimeSettingDefinition.ForDecimal(EssayReviewConfidenceThreshold, RuntimeSettingGroup.Grading, essayGradingOptions.Value.ReviewConfidenceThreshold, 0m, 1m, new LocalizedText("حد الثقة لتصحيح المقالات", "Essay grading: review threshold"), ThresholdDescription),
-        RuntimeSettingDefinition.ForDecimal(MathStepReviewConfidenceThreshold, RuntimeSettingGroup.Grading, mathStepGradingOptions.Value.ReviewConfidenceThreshold, 0m, 1m, new LocalizedText("حد الثقة لتصحيح خطوات الرياضيات", "Math step grading: review threshold"), ThresholdDescription),
+        RuntimeSettingDefinition.ForDecimal(EssayReviewConfidenceThreshold, nameof(RuntimeSettingGroup.Grading), essayGradingOptions.Value.ReviewConfidenceThreshold, 0m, 1m, new LocalizedText("حد الثقة لتصحيح المقالات", "Essay grading: review threshold"), ThresholdDescription),
+        RuntimeSettingDefinition.ForDecimal(MathStepReviewConfidenceThreshold, nameof(RuntimeSettingGroup.Grading), mathStepGradingOptions.Value.ReviewConfidenceThreshold, 0m, 1m, new LocalizedText("حد الثقة لتصحيح خطوات الرياضيات", "Math step grading: review threshold"), ThresholdDescription),
     ];
 }

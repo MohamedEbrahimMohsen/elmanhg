@@ -1,3 +1,4 @@
+using Core.Settings;
 using Elmanhg.Application.Configuration.Shared;
 using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Domain.RuntimeSettings;
@@ -13,7 +14,7 @@ public sealed class GetRuntimeSettingsHandler(IRuntimeSettingOverrideRepository 
         var values = RuntimeSettingValues.From(registry, rows);
         return registry.Definitions
             .GroupBy(x => x.Group)
-            .Select(group => new RuntimeSettingGroupResult(group.Key, group.Select(definition => RuntimeSettingResultGenerator.Generate(definition, values, rows.FirstOrDefault(x => x.Key == definition.Key))).ToList()))
+            .Select(group => new RuntimeSettingGroupResult(Enum.Parse<RuntimeSettingGroup>(group.Key), group.Select(definition => RuntimeSettingResultGenerator.Generate(definition, values, rows.FirstOrDefault(x => x.Key == definition.Key))).ToList()))
             .ToList();
     }
 }

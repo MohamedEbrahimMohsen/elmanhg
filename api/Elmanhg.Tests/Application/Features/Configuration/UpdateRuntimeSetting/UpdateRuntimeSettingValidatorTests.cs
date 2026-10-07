@@ -1,6 +1,6 @@
+using Core.Settings;
 using Elmanhg.Application.Configuration.UpdateRuntimeSetting;
 using Elmanhg.Application.Exceptions;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Tests.Fixtures.RuntimeSettings;
 using FluentAssertions;
 

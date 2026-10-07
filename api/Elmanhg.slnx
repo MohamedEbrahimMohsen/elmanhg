@@ -17,6 +17,7 @@
     <Project Path="core-libraries/Core.Observability/Core.Observability.csproj" />
     <Project Path="core-libraries/Core.OTP/Core.OTP.csproj" />
     <Project Path="core-libraries/Core.Queues/Core.Queues.csproj" />
+    <Project Path="core-libraries/Core.Settings/Core.Settings.csproj" />
     <Project Path="core-libraries/Core.Spreadsheets/Core.Spreadsheets.csproj" />
     <Project Path="core-libraries/Core.Storage/Core.Storage.csproj" />
     <Project Path="core-libraries/Core.Utilities/Core.Utilities.csproj" />
