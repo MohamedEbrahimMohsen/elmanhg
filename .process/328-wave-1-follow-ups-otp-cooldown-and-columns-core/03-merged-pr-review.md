@@ -4,7 +4,7 @@ MERGED-PR REVIEW: 0 critical, 1 major, 6 minor
 
 Scope: correctness and security of the code merged by PR 315 (E21.S7 Core.Storage, 7cf514af), PR 316 (E21.S10 Core.Hosting/Observability/Cache/Spreadsheets, 13cef235), PR 317 (E21.S1 core bug fixes, d8e8f743) and PR 318 (E21.S5 Core.Http/Core.Messaging, 315a6a9a). Every line reference is to the current file in the worktree D:/Personal/elmanhg-wt/328.
 
-Routing (plan "Review step"): no critical finding, so nothing blocks story 328. The major and minor findings below go into one review-debt issue, quoted as written. None of them is in a file this story changes, except m2 (Core.Storage/DependencyInjection.cs), and m2 is minor.
+Routing (plan "Review step"): no critical finding, so nothing blocks story 328. The major and minor findings below go into one review-debt issue, quoted as written. None of them is in a file this story changes, except M1 (Core.OTP/Entities/OTP.cs; its fix needs the CoreDbContext mapping, so it stays a follow-up) and m2 (Core.Storage/DependencyInjection.cs, minor).
 
 ## Findings
 
