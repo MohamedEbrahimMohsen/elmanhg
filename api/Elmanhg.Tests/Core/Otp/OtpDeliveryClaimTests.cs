@@ -64,16 +64,32 @@ public sealed class OtpDeliveryClaimTests
     }
 
     [Fact]
-    public async Task DeliverAsync_SendCancelled_ReleasesWithoutTheCancelledToken()
+    public async Task DeliverAsync_OperationCanceledWhileRequestLive_ReleasesAndRethrows()
     {
         var otp = new OtpBuilder().IssuedAt(Now).Build();
-        using var cancellation = new CancellationTokenSource();
-        await cancellation.CancelAsync();
-        SendThrows(new OperationCanceledException(cancellation.Token));
+        SendThrows(new OperationCanceledException());
 
-        var act = () => new OtpDeliveryClaim(otp, previous: null).DeliverAsync(_otpSender, _otpRepository, Code, cancellation.Token);
+        var act = () => new OtpDeliveryClaim(otp, previous: null).DeliverAsync(_otpSender, _otpRepository, Code, TestContext.Current.CancellationToken);
 
         await act.Should().ThrowAsync<OperationCanceledException>();
+        _otpRepository.Received(1).Delete(otp);
+        await _otpRepository.Received(1).SaveChangesAsync(CancellationToken.None);
+    }
+
+    [Fact]
+    public async Task DeliverAsync_UnexpectedExceptionWhileRequestLive_ReleasesAndRethrows()
+    {
+        var otp = new OtpBuilder().IssuedAt(Now).Build();
+        var verificationId = otp.VerificationId;
+        var previous = otp.Reissue("next-hash", 5, Now.AddMinutes(2));
+        SendThrows(new InvalidOperationException("probe"));
+
+        var act = () => new OtpDeliveryClaim(otp, previous).DeliverAsync(_otpSender, _otpRepository, Code, TestContext.Current.CancellationToken);
+
+        await act.Should().ThrowAsync<InvalidOperationException>();
+        otp.ReissueCount.Should().Be(0);
+        otp.VerificationId.Should().Be(verificationId);
+        _otpRepository.DidNotReceive().Delete(Arg.Any<OtpEntity>());
         await _otpRepository.Received(1).SaveChangesAsync(CancellationToken.None);
     }
 
