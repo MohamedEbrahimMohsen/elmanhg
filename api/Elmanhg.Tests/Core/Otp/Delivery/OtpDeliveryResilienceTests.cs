@@ -1,6 +1,5 @@
 using Core.Errors;
 using Core.OTP;
-using Core.Messaging.Sms;
 using Core.OTP.Delivery;
 using Core.OTP.Delivery.Email;
 using Core.OTP.Delivery.Sms;
@@ -34,7 +33,7 @@ public sealed class OtpDeliveryResilienceTests
     [Fact]
     public async Task HttpSms_ServerError_MakesExactlyOneAttempt()
     {
-        await SendAndExpectFailure<HttpSmsOtpChannel>(OtpDeliveryTestSettings.WithHttpSms(), Phone, nameof(HttpSmsClient));
+        await SendAndExpectFailure<HttpSmsOtpChannel>(OtpDeliveryTestSettings.WithHttpSms(), Phone, nameof(HttpSmsOtpChannel));
 
         _handler.CallCount.Should().Be(1);
     }

@@ -3,6 +3,7 @@ using Core.Identity;
 using Core.Identity.Tokens.RefreshToken;
 using Core.Settings;
 using Core.Utilities;
+using Elmanhg.Application.Dashboard.Shared;
 using Elmanhg.Application.Questions.ImportQuestions;
 using Elmanhg.Application.Shared.Analytics;
 using Elmanhg.Application.Shared.Authorization;
@@ -52,7 +53,12 @@ public static class DependencyInjection
         services.AddValidatedOptions<DashboardOptions>(DashboardOptions.SectionName)
             .Validate(x => TimeZoneInfo.TryFindSystemTimeZoneById(x.TimeZone, out _), "Dashboard:TimeZone must be a known IANA time zone id.")
             .Validate(x => x.DefaultRangeDays <= x.MaxRangeDays, "Dashboard:DefaultRangeDays must not exceed MaxRangeDays.");
-        services.AddOptions<CachingOptions>().Configure<IOptions<DashboardOptions>>((caching, dashboard) => caching.DefaultTtl = TimeSpan.FromSeconds(dashboard.Value.CacheSeconds));
+        services.AddValidatedOptions<QueryCachingOptions>(QueryCachingOptions.SectionName);
+        services.AddOptions<CachingOptions>().Configure<IOptions<QueryCachingOptions>, IOptions<DashboardOptions>>((caching, queryCaching, dashboard) =>
+        {
+            caching.DefaultTtl = TimeSpan.FromSeconds(queryCaching.Value.DefaultSeconds);
+            caching.Profiles[DashboardCacheKey.Profile] = TimeSpan.FromSeconds(dashboard.Value.CacheSeconds);
+        });
         services.AddValidatedOptions<ClientErrorsOptions>(ClientErrorsOptions.SectionName);
         services.AddValidatedOptions<ContentRetrievalOptions>(ContentRetrievalOptions.SectionName)
             .Validate(x => x.DefaultTopK <= x.MaxTopK, "ContentRetrieval:DefaultTopK must not exceed MaxTopK.");

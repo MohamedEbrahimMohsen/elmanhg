@@ -35,6 +35,19 @@ public sealed class PublicMediaFileProviderTests : IDisposable
     }
 
     [Fact]
+    public void GetFileInfo_UpperCasePrivateFolderWithExistingFile_ReturnsNotFound()
+    {
+        Directory.CreateDirectory(Path.Combine(_root, "TEACHER-THREADS"));
+        File.WriteAllBytes(Path.Combine(_root, "TEACHER-THREADS", "upper.png"), [1]);
+
+        var stored = _files.GetFileInfo("/TEACHER-THREADS/upper.png");
+        var served = _provider.GetFileInfo("/TEACHER-THREADS/upper.png");
+
+        stored.Exists.Should().BeTrue();
+        served.Exists.Should().BeFalse();
+    }
+
+    [Fact]
     public void GetFileInfo_ShortNameAlias_ReturnsNotFound()
     {
         _provider.GetFileInfo("/TEACHE~1/x.png").Exists.Should().BeFalse();

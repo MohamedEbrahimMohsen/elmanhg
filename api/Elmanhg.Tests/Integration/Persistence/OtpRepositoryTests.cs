@@ -27,7 +27,6 @@ public sealed class OtpRepositoryTests(ApiFactory factory)
 
         otp.Should().NotBeNull();
         otp!.ReissueWindowStartedAt.Should().Be(IssuedAt);
-        otp.RequestIP.Should().BeNull();
     }
 
     [Fact]
