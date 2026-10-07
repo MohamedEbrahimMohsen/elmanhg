@@ -84,3 +84,69 @@ There are no other deviations. The single test name not kept is `DeliverAsync_Se
   - The unseparated branch masks the tail of longer digit runs (`1791234567890` → `179[redacted-phone]`, D9a).
   - ClosedXML's `NullReferenceException` on missing OPC parts (`[Content_Types].xml`, `_rels/.rels`) or some deflate corruptions is still a 500 (D13).
 - No Postman change: no endpoint or contract changed.
+
+## CodeRabbit RC1
+
+**Finding (valid).** The contiguous alternative of `LogRedactor.PhonePattern` (`(?:\+?20)?0?1[0125][0-9]{8}`) had no left boundary, so the last 11 digits of a hex id or a longer digit run were masked (`3f2a1b10-1012-3456-9abc-a01012345678` → `…-9abc-a[redacted-phone]`). The collector copy had the same pattern. This also closes follow-up D9a above.
+
+**Change.** The contiguous alternative is dropped, not given its own boundary. Once it gets the same left boundary as the spaced alternative it adds nothing: the spaced alternative `(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|…)` with every separator left out is exactly `(?:20)?0?1[0125][0-9]{8}`, and the shared prefix `(?:\+|(^|[^0-9A-Za-z_]))` covers the old `\+?`. This keeps the group numbering (`${1}` = left boundary, `${2}` = right boundary), so `PhoneReplacementPattern` and the two-pass rule are unchanged. No lookbehind (RE2-safe).
+
+New pattern (C#, verbatim):
+
+```
+(?:\+|(^|[^0-9A-Za-z_])(?:00)?)(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4})([^0-9A-Za-z_]|$)
+```
+
+**International `00` prefix (coordinator follow-up).** The first version of this fix dropped `00201012345678` (the old pattern gave `00[redacted-phone]`, the boundary version left it whole) and still left `0020 ` visible in `call 0020 10 1234 5678` (`call 0020 [redacted-phone]`). The boundary branch now accepts an optional `00` after the boundary: `(^|[^0-9A-Za-z_])(?:00)?`. The `00` sits outside capture 1, so it is replaced along with the number and the numbering is unchanged. `00201012345678` → `[redacted-phone]`, `call 0020 10 1234 5678` → `call [redacted-phone]`. `x00201012345678` stays unchanged. Side effect: `0001012345678` (`00` + local number) is now masked whole.
+
+| Path | Change |
+|---|---|
+| `api/Elmanhg.Application/Shared/Observability/LogRedactor.cs` | `PhonePattern` as above; first comment line updated (every number, not only a spaced one, needs the left boundary; `0020` listed). |
+| `deploy/observability/otel-collector/config.yaml` | All 8 phone statements replaced with the new pattern (`\` and `$` doubled as before). Replacement strings untouched. |
+| `api/Elmanhg.Tests/Application/Features/Shared/Observability/LogRedactorBoundaryTests.cs` | Two rows added to `Redact_TimestampsAndLongerDigitRuns_ReturnsUnchanged`: `user 3f2a1b10-1012-3456-9abc-a01012345678`, `x01012345678`. Two rows added to `Redact_NumberFollowedByPunctuation_KeepsTheFollowingCharacter`: `("00201012345678", "[redacted-phone]")`, `("call 0020 10 1234 5678", "call [redacted-phone]")`. |
+| `docs/observability.md` §12 | Boundary sentence now says every number, contiguous or spaced, needs the left boundary; `0020` added to the prefix list. |
+
+**Verification.** 50 strings (every `LogRedactorTests` / `LogRedactorBoundaryTests` input with its expected output, plus the new cases, with `\n` / `\r\n` tails), two passes with `${1}[redacted-phone]${2}`, old vs new pattern, in four engines: .NET 10.0.401 `RegexOptions.NonBacktracking` and backtracking, Python 3.14 `re`, `google-re2` (pip, scratch venv), Go 1.24 `regexp` (the collector's engine, run in a `golang:1.24-alpine` container).
+
+| Engine | Old pattern | Boundary only (first version) | Final (boundary + `00`) |
+|---|---|---|---|
+| .NET NonBacktracking | 36/50 | 46/50 | 50/50 |
+| .NET backtracking | 36/50 | 46/50 | 50/50 |
+| Python `re` | 36/50 | 46/50 | 50/50 |
+| google-re2 | 36/50 | 46/50 | 50/50 |
+| Go `regexp` | 36/50 | 46/50 | 50/50 |
+
+The first version fails only the four `00` rows below. The old pattern fails those four, `x00201012345678`, and the 9 rows in the next table. Failures are identical in every engine.
+
+| Input | Expected (final) | Old output | First-version output |
+|---|---|---|---|
+| `00201012345678` (also with `
+`) | `[redacted-phone]` | `00[redacted-phone]` | unchanged |
+| `call 0020 10 1234 5678` (also with `
+`) | `call [redacted-phone]` | `call 0020 [redacted-phone]` | `call 0020 [redacted-phone]` |
+| `x00201012345678` | unchanged | `x00[redacted-phone]` | unchanged |
+
+The 9 boundary rows the old pattern fails and both new versions pass:
+
+| Input | Expected (new) | Old output |
+|---|---|---|
+| `user 3f2a1b10-1012-3456-9abc-a01012345678` | unchanged | `user 3f2a1b10-1012-3456-9abc-a[redacted-phone]` |
+| same + `\n` | unchanged | `…-9abc-a[redacted-phone]\n` |
+| `x01012345678` | unchanged | `x[redacted-phone]` |
+| `x01012345678\n` | unchanged | `x[redacted-phone]\n` |
+| `x01012345678\r\n` | unchanged | `x[redacted-phone]\r\n` |
+| `_01012345678` | unchanged | `_[redacted-phone]` |
+| `ts 1759801012345678` | unchanged | `ts 17598[redacted-phone]` |
+| `ts 1759801012345678\n` | unchanged | `ts 17598[redacted-phone]\n` |
+| `id 1791234567890` | unchanged | `id 179[redacted-phone]` |
+
+Rows that both patterns get right and that pin the requested behaviour: `رقم01012345678` → `رقم[redacted-phone]` (also with `\n` and `\r\n`), `+201012345678` → `[redacted-phone]` (also with `\n` and `\r\n`), `a+201012345678` → `a[redacted-phone]`, `tel:+201012345678;` → `tel:[redacted-phone];`, `ts 1759823456789012` unchanged (also with `\r\n`; this epoch-style value has no `1[0125]` + 8-digit tail, so the old pattern left it alone too; `1759801012345678` is the one that shows the fix). Every existing test string keeps its expected output.
+
+**Tests run.**
+
+- `dotnet test --project api/Elmanhg.Tests -- --filter-class "*LogRedactor*"`: Passed, total 37, failed 0 (includes `LogRedactorCollectorParityTests`, all 3 green).
+- `dotnet test --project api/Elmanhg.Tests -- --filter-class "*ReportClientError*"`: Passed, total 12, failed 0.
+- `dotnet build api/`: 0 Warning(s), 0 Error(s).
+- The full suite was not re-run for this fix.
+
+**Behaviour note.** `x01012345678`, `_01012345678` and a number glued to the end of a hex id or a longer digit run are no longer masked. A number glued to a following ASCII letter (`01012345678x`) was already not masked; the rule is now symmetric.
