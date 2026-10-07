@@ -86,7 +86,7 @@ public sealed class TrainingExportWorkerTests
     [Fact]
     public async Task Sweep_Disabled_NeverQueries()
     {
-        using var worker = new TrainingExportWorker(ScopeFactory(), Options.Create(new TrainingExportsOptions { SweepEnabled = false }), _time, _logger, new BackgroundJobMetrics(_meterFactory, _time));
+        using var worker = new TrainingExportWorker(ScopeFactory(), Options.Create(new TrainingExportsOptions { SweepEnabled = false }), _time, _logger, ElmanhgJobMetrics.Create(_meterFactory, _time));
 
         await worker.StartAsync(TestContext.Current.CancellationToken);
         await worker.ExecuteTask!.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
@@ -125,7 +125,7 @@ public sealed class TrainingExportWorkerTests
         using var worker = await RunAsync();
         await runs.WaitForMeasurementsAsync(1, WaitLimit);
 
-        runs.LastMeasurement!.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "training-export").And.Contain(BackgroundJobMetrics.OutcomeTag, "Failed");
+        runs.LastMeasurement!.Tags.Should().Contain(ElmanhgJobMetrics.JobTag, "training-export").And.Contain(ElmanhgJobMetrics.OutcomeTag, "Failed");
     }
 
     private Guid[] StubDue()
@@ -137,7 +137,7 @@ public sealed class TrainingExportWorkerTests
 
     private async Task<TrainingExportWorker> RunAsync()
     {
-        var worker = new TrainingExportWorker(ScopeFactory(), Options.Create(new TrainingExportsOptions()), _time, _logger, new BackgroundJobMetrics(_meterFactory, _time));
+        var worker = new TrainingExportWorker(ScopeFactory(), Options.Create(new TrainingExportsOptions()), _time, _logger, ElmanhgJobMetrics.Create(_meterFactory, _time));
         await worker.StartAsync(TestContext.Current.CancellationToken);
         await _time.TimerCreated.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
         _time.Tick();

@@ -11,8 +11,8 @@ public class TeacherVoiceDraftRepository(AppDbContext context) : Repository<Teac
     {
         return await _dbSet
             .AsNoTracking()
-            .Where(x => x.Status == TeacherVoiceDraftStatus.Pending && x.NextAttemptAt <= now)
-            .OrderBy(x => x.NextAttemptAt)
+            .Where(x => x.Status == TeacherVoiceDraftStatus.Pending && x.Retry.NextAttemptAt <= now)
+            .OrderBy(x => x.Retry.NextAttemptAt)
             .ThenBy(x => x.Id)
             .Select(x => x.Id)
             .Take(limit)

@@ -2,35 +2,40 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 
-namespace Elmanhg.Application.Shared.Observability;
+namespace Core.Queues;
 
 public sealed class BackgroundJobMetrics
 {
-    public const string JobTag = "elmanhg.job";
-    public const string OutcomeTag = "elmanhg.outcome";
-
     private readonly ConcurrentDictionary<string, JobState> _jobs = new();
     private readonly TimeProvider _timeProvider;
+    private readonly ActivitySource _activitySource;
     private readonly Counter<long> _runs;
     private readonly Histogram<double> _duration;
     private readonly Counter<long> _items;
 
-    public BackgroundJobMetrics(IMeterFactory meterFactory, TimeProvider timeProvider)
+    public BackgroundJobMetrics(IMeterFactory meterFactory, TimeProvider timeProvider, string meterName, string metricPrefix, ActivitySource activitySource)
     {
         _timeProvider = timeProvider;
-        var meter = meterFactory.Create(ElmanhgTelemetry.SourceName);
-        _runs = meter.CreateCounter<long>("elmanhg.job.runs", "{run}", "Background job sweeps completed, by job and outcome.");
-        _duration = meter.CreateHistogram<double>("elmanhg.job.duration", "s", "Time one background job sweep took, by job and outcome.");
-        _items = meter.CreateCounter<long>("elmanhg.job.items", "{item}", "Items a background job sweep processed, by job and item outcome.");
-        meter.CreateObservableGauge("elmanhg.job.last_success", () => _jobs.Select(x => new Measurement<long>(Interlocked.Read(ref x.Value.LastSuccessUnixSeconds), new KeyValuePair<string, object?>(JobTag, x.Key))), "s", "Unix time of the last sweep that listed its work, per job.");
-        meter.CreateObservableGauge("elmanhg.job.interval", () => _jobs.Select(x => new Measurement<double>(x.Value.IntervalSeconds, new KeyValuePair<string, object?>(JobTag, x.Key))), "s", "Configured sweep interval, per job.");
+        _activitySource = activitySource;
+        JobTag = $"{metricPrefix}.job";
+        OutcomeTag = $"{metricPrefix}.outcome";
+        var meter = meterFactory.Create(meterName);
+        _runs = meter.CreateCounter<long>($"{metricPrefix}.job.runs", "{run}", "Background job sweeps completed, by job and outcome.");
+        _duration = meter.CreateHistogram<double>($"{metricPrefix}.job.duration", "s", "Time one background job sweep took, by job and outcome.");
+        _items = meter.CreateCounter<long>($"{metricPrefix}.job.items", "{item}", "Items a background job sweep processed, by job and item outcome.");
+        meter.CreateObservableGauge($"{metricPrefix}.job.last_success", () => _jobs.Select(x => new Measurement<long>(Interlocked.Read(ref x.Value.LastSuccessUnixSeconds), new KeyValuePair<string, object?>(JobTag, x.Key))), "s", "Unix time of the last sweep that listed its work, per job.");
+        meter.CreateObservableGauge($"{metricPrefix}.job.interval", () => _jobs.Select(x => new Measurement<double>(x.Value.IntervalSeconds, new KeyValuePair<string, object?>(JobTag, x.Key))), "s", "Configured sweep interval, per job.");
     }
+
+    public string JobTag { get; }
+
+    public string OutcomeTag { get; }
 
     public void Register(string jobName, TimeSpan interval) => _jobs[jobName] = new JobState { IntervalSeconds = interval.TotalSeconds, LastSuccessUnixSeconds = _timeProvider.GetUtcNow().ToUnixTimeSeconds() };
 
     public BackgroundJobRun StartRun(string jobName)
     {
-        var activity = ElmanhgTelemetry.ActivitySource.StartActivity($"job {jobName}");
+        var activity = _activitySource.StartActivity($"job {jobName}");
         activity?.SetTag(JobTag, jobName);
         return new BackgroundJobRun(this, jobName, Stopwatch.GetTimestamp(), activity);
     }

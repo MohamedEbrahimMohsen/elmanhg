@@ -1,23 +1,12 @@
 using Elmanhg.Application.Shared.Options;
+using Elmanhg.Application.Shared.Retries;
 using Elmanhg.Domain.EssayGrading;
-using MediatR;
 using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Application.EssayGrading.FailEssayGrade;
 
-public sealed class FailEssayGradeHandler(IEssayGradeRepository essayGradeRepository, IOptions<EssayGradingOptions> essayGradingOptions, TimeProvider timeProvider) : IRequestHandler<FailEssayGradeCommand>
+public sealed class FailEssayGradeHandler(IEssayGradeRepository essayGradeRepository, IOptions<EssayGradingOptions> essayGradingOptions, TimeProvider timeProvider) : FailRetriedWorkHandler<FailEssayGradeCommand, EssayGrade>(essayGradeRepository, timeProvider)
 {
-    public async Task Handle(FailEssayGradeCommand request, CancellationToken cancellationToken)
-    {
-        var grade = await essayGradeRepository.FirstOrDefaultAsync(x => x.Id == request.EssayGradeId, cancellationToken).ConfigureAwait(false);
-        if (grade is null || grade.Status != EssayGradeStatus.Pending)
-        {
-            return;
-        }
-
-        var options = essayGradingOptions.Value;
-        grade.FailAttempt(request.ErrorCode, timeProvider.GetUtcNow(), options.MaxAttempts, TimeSpan.FromSeconds(options.RetryBaseDelaySeconds));
-
-        await essayGradeRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-    }
+    protected override int MaxAttempts => essayGradingOptions.Value.MaxAttempts;
+    protected override TimeSpan RetryBaseDelay => TimeSpan.FromSeconds(essayGradingOptions.Value.RetryBaseDelaySeconds);
 }

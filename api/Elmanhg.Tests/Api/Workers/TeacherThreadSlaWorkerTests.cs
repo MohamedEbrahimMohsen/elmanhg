@@ -64,7 +64,7 @@ public sealed class TeacherThreadSlaWorkerTests
 
         worker.ExecuteTask!.IsCompleted.Should().BeFalse();
         LoggedLevels().Should().Equal(LogLevel.Warning);
-        runs.LastMeasurement!.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "ask-teacher-sla").And.Contain(BackgroundJobMetrics.OutcomeTag, "PartiallyFailed");
+        runs.LastMeasurement!.Tags.Should().Contain(ElmanhgJobMetrics.JobTag, "ask-teacher-sla").And.Contain(ElmanhgJobMetrics.OutcomeTag, "PartiallyFailed");
     }
 
     [Fact]
@@ -102,7 +102,7 @@ public sealed class TeacherThreadSlaWorkerTests
     [Fact]
     public async Task Execute_Disabled_EndsWithoutSweeping()
     {
-        using var worker = new TeacherThreadSlaWorker(ScopeFactory(), Options.Create(new AskTeacherOptions { SlaSweepEnabled = false }), _time, _logger, new BackgroundJobMetrics(_meterFactory, _time));
+        using var worker = new TeacherThreadSlaWorker(ScopeFactory(), Options.Create(new AskTeacherOptions { SlaSweepEnabled = false }), _time, _logger, ElmanhgJobMetrics.Create(_meterFactory, _time));
 
         await worker.StartAsync(TestContext.Current.CancellationToken);
         await worker.ExecuteTask!.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
@@ -124,7 +124,7 @@ public sealed class TeacherThreadSlaWorkerTests
         using var worker = await RunAsync(new AskTeacherOptions());
         await runs.WaitForMeasurementsAsync(1, WaitLimit);
 
-        runs.LastMeasurement!.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "ask-teacher-sla").And.Contain(BackgroundJobMetrics.OutcomeTag, "Failed");
+        runs.LastMeasurement!.Tags.Should().Contain(ElmanhgJobMetrics.JobTag, "ask-teacher-sla").And.Contain(ElmanhgJobMetrics.OutcomeTag, "Failed");
         LoggedLevels().Should().Equal(LogLevel.Error);
     }
 
@@ -196,7 +196,7 @@ public sealed class TeacherThreadSlaWorkerTests
 
     private async Task<TeacherThreadSlaWorker> RunAsync(AskTeacherOptions options)
     {
-        var worker = new TeacherThreadSlaWorker(ScopeFactory(), Options.Create(options), _time, _logger, new BackgroundJobMetrics(_meterFactory, _time));
+        var worker = new TeacherThreadSlaWorker(ScopeFactory(), Options.Create(options), _time, _logger, ElmanhgJobMetrics.Create(_meterFactory, _time));
         await worker.StartAsync(TestContext.Current.CancellationToken);
         await _time.TimerCreated.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
         _time.Tick();

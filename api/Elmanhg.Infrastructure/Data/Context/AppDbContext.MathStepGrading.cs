@@ -1,3 +1,4 @@
+using Core.DDD.Models;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.MathStepGrading;
 using Elmanhg.Domain.Questions;
@@ -29,7 +30,14 @@ public partial class AppDbContext
             builder.Property(x => x.CostUsd).HasPrecision(12, 6);
             builder.Property(x => x.Model).HasMaxLength(AiIdentifierMaxLength);
             builder.Property(x => x.PromptVersion).HasMaxLength(AiIdentifierMaxLength);
-            builder.Property(x => x.LastErrorCode).HasMaxLength(AiIdentifierMaxLength);
+            builder.OwnsOne(x => x.Retry, retry =>
+            {
+                retry.Property(x => x.Attempts).HasColumnName(nameof(RetrySchedule.Attempts));
+                retry.Property(x => x.NextAttemptAt).HasColumnName(nameof(RetrySchedule.NextAttemptAt));
+                retry.Property(x => x.LastErrorCode).HasColumnName(nameof(RetrySchedule.LastErrorCode)).HasMaxLength(AiIdentifierMaxLength);
+                retry.HasIndex(x => x.NextAttemptAt).HasFilter("\"Status\" = 'Pending'").HasDatabaseName("IX_MathStepGrades_NextAttemptAt");
+            });
+            builder.Navigation(x => x.Retry).IsRequired();
             builder.Property(x => x.ReviewDecision).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.ReviewedScore).HasPrecision(9, 2);
             builder.Property(x => x.ReviewedNormalisedScore).HasPrecision(5, 4);
@@ -38,7 +46,6 @@ public partial class AppDbContext
             builder.HasOne<Question>().WithMany().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.SessionId, x.QuestionId }).IsUnique().HasDatabaseName(MathStepGradePerQuestionIndex);
-            builder.HasIndex(x => x.NextAttemptAt).HasFilter("\"Status\" = 'Pending'");
             builder.HasIndex(x => x.GradedAt).HasFilter("\"Status\" = 'Graded' AND \"AppliedAt\" IS NULL");
             builder.HasIndex(x => new { x.SubjectId, x.Status });
         });

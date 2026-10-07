@@ -30,9 +30,7 @@ public partial class MathStepGrade
 
         var at = ToMicroseconds(gradedAt);
         var needsReview = assessment is not null && assessment.Confidence < reviewConfidenceThreshold;
-        Attempts++;
-        NextAttemptAt = null;
-        LastErrorCode = null;
+        Retry.RecordSuccess();
         Score = grade.Score;
         NormalisedScore = grade.NormalisedScore;
         Feedback = grade.Feedback is null ? null : JsonSerializer.Serialize(grade.Feedback, QuestionJson.SerializerOptions);
@@ -54,17 +52,10 @@ public partial class MathStepGrade
     {
         EnsurePending();
         var at = ToMicroseconds(failedAt);
-        Attempts++;
-        LastErrorCode = errorCode.Length <= ErrorCodeMaxLength ? errorCode : errorCode[..ErrorCodeMaxLength];
-        if (Attempts >= maxAttempts)
+        if (Retry.RecordFailure(errorCode, at, maxAttempts, retryBaseDelay))
         {
             Status = MathStepGradeStatus.InReview;
             ReviewReason = FinalAnswerVerdict is null ? MathStepReviewReason.FinalAnswerUnchecked : MathStepReviewReason.GradingFailed;
-            NextAttemptAt = null;
-        }
-        else
-        {
-            NextAttemptAt = at + (retryBaseDelay * Math.Pow(2, Attempts - 1));
         }
 
         UpdationDate = at;
