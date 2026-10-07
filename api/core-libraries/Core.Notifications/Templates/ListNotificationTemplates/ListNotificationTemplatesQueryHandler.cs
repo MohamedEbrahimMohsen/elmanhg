@@ -2,7 +2,6 @@ using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Core.Notifications.Exceptions;
 using Core.Notifications.Repositories;
-using Core.Notifications.Templates.Shared;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 

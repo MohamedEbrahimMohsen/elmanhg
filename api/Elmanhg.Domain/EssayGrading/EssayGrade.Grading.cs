@@ -1,3 +1,4 @@
+using Core.DDD.Time;
 using Core.Errors;
 using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Questions.Schemas;
@@ -11,7 +12,7 @@ public partial class EssayGrade
     public void Complete(EssayAssessment assessment, QuestionGrade grade, decimal reviewConfidenceThreshold, DateTimeOffset gradedAt)
     {
         EnsurePending();
-        var at = ToMicroseconds(gradedAt);
+        var at = gradedAt.TruncateToMicroseconds();
         var needsReview = assessment.Confidence < reviewConfidenceThreshold;
         Retry.RecordSuccess();
         Score = grade.Score;
@@ -34,7 +35,7 @@ public partial class EssayGrade
     public void FailAttempt(string errorCode, DateTimeOffset failedAt, int maxAttempts, TimeSpan retryBaseDelay)
     {
         EnsurePending();
-        var at = ToMicroseconds(failedAt);
+        var at = failedAt.TruncateToMicroseconds();
         if (Retry.RecordFailure(errorCode, at, maxAttempts, retryBaseDelay))
         {
             Status = EssayGradeStatus.InReview;
@@ -61,7 +62,7 @@ public partial class EssayGrade
             throw new InvalidOperationException("Only a graded essay that is not yet applied can be applied.");
         }
 
-        var at = ToMicroseconds(appliedAt);
+        var at = appliedAt.TruncateToMicroseconds();
         AppliedAt = at;
         UpdationDate = at;
     }

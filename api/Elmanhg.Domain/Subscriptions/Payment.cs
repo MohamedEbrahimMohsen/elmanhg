@@ -62,7 +62,6 @@ public partial class Payment : AuditEntity, IAuditedEntity, IVersioned
         RawWebhook = rawWebhook;
         CompletedAt = completedAt;
         Status = PaymentStatus.Succeeded;
-        UpdationDate = DateTimeOffset.UtcNow;
     }
 
     public void MarkFailed(string paymobTransactionId, string rawWebhook, DateTimeOffset completedAt)
@@ -72,14 +71,12 @@ public partial class Payment : AuditEntity, IAuditedEntity, IVersioned
         RawWebhook = rawWebhook;
         CompletedAt = completedAt;
         Status = PaymentStatus.Failed;
-        UpdationDate = DateTimeOffset.UtcNow;
     }
 
     public void LinkProviderOrder(string providerOrderId)
     {
         EnsurePending();
         ProviderOrderId = providerOrderId;
-        UpdationDate = DateTimeOffset.UtcNow;
     }
 
     public void FlagForReview(PaymentReviewReason reason)

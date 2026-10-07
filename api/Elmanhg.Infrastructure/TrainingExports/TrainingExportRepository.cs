@@ -1,3 +1,4 @@
+using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.TrainingExports;
 using Elmanhg.Infrastructure.Data.Context;
@@ -5,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.TrainingExports;
 
-public class TrainingExportRepository(AppDbContext context) : Repository<TrainingExport>(context), ITrainingExportRepository
+public class TrainingExportRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<TrainingExport>(context, currentUser, timeProvider), ITrainingExportRepository
 {
     public async Task<List<Guid>> GetDueIdsAsync(DateTimeOffset now, int limit, CancellationToken cancellationToken)
     {

@@ -27,61 +27,61 @@ public static class CoreNotificationEndpoints
 
         group.MapPost("/send/topic", async (SendToTopicCommand request, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            var results = await mediator.Send(request, cancellationToken);
+            var results = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
             return Results.Ok(results);
         });
 
         group.MapPost("/send/user", async (SendToUserCommand request, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            var results = await mediator.Send(new SendToUsersCommand([request.UserId], request.Notification), cancellationToken);
+            var results = await mediator.Send(new SendToUsersCommand([request.UserId], request.Notification), cancellationToken).ConfigureAwait(false);
             return Results.Ok(results);
         });
 
         group.MapPost("/send/users", async (SendToUsersCommand request, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            var results = await mediator.Send(request, cancellationToken);
+            var results = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
             return Results.Ok(results);
         });
 
         group.MapPost("/send/all", async (SendToAllCommand request, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            var results = await mediator.Send(request, cancellationToken);
+            var results = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
             return Results.Ok(results);
         });
 
         group.MapPost("/send/multilingual/topic", async (MultilingualSendToTopicCommand request, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            var results = await mediator.Send(request, cancellationToken);
+            var results = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
             return Results.Ok(results);
         });
 
         group.MapPost("/send/multilingual/user", async (MultilingualSendToUserCommand request, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            var results = await mediator.Send(new MultilingualSendToUsersCommand([request.UserId], request.Notification), cancellationToken);
+            var results = await mediator.Send(new MultilingualSendToUsersCommand([request.UserId], request.Notification), cancellationToken).ConfigureAwait(false);
             return Results.Ok(results);
         });
 
         group.MapPost("/send/multilingual/users", async (MultilingualSendToUsersCommand request, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            var results = await mediator.Send(request, cancellationToken);
+            var results = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
             return Results.Ok(results);
         });
 
         group.MapPost("/send/multilingual/all", async (MultilingualSendToAllCommand request, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            var results = await mediator.Send(request, cancellationToken);
+            var results = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
             return Results.Ok(results);
         });
 
         group.MapPost("/subscribe/topic", async (SubscribeToTopicCommand request, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            await mediator.Send(request, cancellationToken);
+            await mediator.Send(request, cancellationToken).ConfigureAwait(false);
             return Results.Ok();
         });
 
         group.MapPost("/unsubscribe/topic", async (UnsubscribeFromTopicCommand request, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            await mediator.Send(request, cancellationToken);
+            await mediator.Send(request, cancellationToken).ConfigureAwait(false);
             return Results.Ok();
         });
 
@@ -94,7 +94,7 @@ public static class CoreNotificationEndpoints
 
         group.MapPost("/devices/register", async (RegisterUserDeviceCommand request, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            await mediator.Send(request, cancellationToken);
+            await mediator.Send(request, cancellationToken).ConfigureAwait(false);
             return Results.Ok();
         });
 
@@ -107,13 +107,13 @@ public static class CoreNotificationEndpoints
 
         group.MapPost("/me/{id}", async (Guid id, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            var isFound =  await mediator.Send(new MarkNotificationAsReadCommand(id), cancellationToken);
+            var isFound =  await mediator.Send(new MarkNotificationAsReadCommand(id), cancellationToken).ConfigureAwait(false);
             return isFound? Results.Ok() : Results.NoContent();
         });
 
         group.MapGet("/me", async ([AsParameters] ListNotificationsQuery request, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            var results = await mediator.Send(request, cancellationToken);
+            var results = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
             return Results.Ok(results);
         });
 

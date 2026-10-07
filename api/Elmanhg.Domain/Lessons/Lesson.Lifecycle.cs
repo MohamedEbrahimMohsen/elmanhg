@@ -15,7 +15,6 @@ public partial class Lesson
         State = LessonState.Published;
         PublishedAt = DateTimeOffset.UtcNow;
         UpdatedBy = publishedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
         RaiseDomainEvent(new LessonPublished(Id, UnitId));
     }
 
@@ -29,7 +28,6 @@ public partial class Lesson
         var wasPublished = State == LessonState.Published;
         State = LessonState.Draft;
         UpdatedBy = updatedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
         if (wasPublished)
         {
             RaiseDomainEvent(new LessonUnpublished(Id, UnitId));
@@ -50,7 +48,6 @@ public partial class Lesson
 
         State = LessonState.Archived;
         UpdatedBy = updatedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
         RaiseDomainEvent(new LessonArchived(Id, UnitId));
     }
 }

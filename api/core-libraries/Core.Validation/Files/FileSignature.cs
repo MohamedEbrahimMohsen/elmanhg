@@ -13,7 +13,11 @@ public sealed class FileSignature
     public IReadOnlyList<string> Extensions { get; }
     public IReadOnlyList<byte?[]> Patterns { get; }
 
-    public static FileSignature Create(IReadOnlyList<string> extensions, params byte?[][] patterns) => new([.. extensions.Select(extension => extension.ToLowerInvariant())], patterns);
+    public static FileSignature Create(IReadOnlyList<string> extensions, params byte?[][] patterns)
+    {
+        ArgumentOutOfRangeException.ThrowIfZero(patterns.Length, nameof(patterns));
+        return new([.. extensions.Select(extension => extension.ToLowerInvariant())], patterns);
+    }
 
     public static readonly FileSignature Png = Create([".png"], [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
     public static readonly FileSignature Jpeg = Create([".jpg", ".jpeg"], [0xFF, 0xD8, 0xFF]);

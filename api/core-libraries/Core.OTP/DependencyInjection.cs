@@ -15,6 +15,7 @@ public static class DependencyInjection
     {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
         services.Configure<OtpOptions>(configuration.GetSection(OtpOptions.SectionName));
+        services.AddOptions<OtpOptions>().ValidateDataAnnotations().ValidateOnStart();
         services.AddScoped<IOtpHasher, HmacOtpHasher>();
         services.TryAddSingleton(TimeProvider.System);
         services.AddValidatorsFromAssemblyContaining<VerifyOTPValidator>();

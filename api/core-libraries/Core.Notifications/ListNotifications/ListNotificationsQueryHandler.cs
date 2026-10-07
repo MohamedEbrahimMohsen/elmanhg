@@ -28,11 +28,11 @@ public sealed class ListNotificationsQueryHandler(INotificationRepository notifi
         {
              results = await notificationRepository.FindPaginatedAsync(request.PageNumber, request.PageSize, cancellationToken, 
                 n => n.UserId == currentUserService.UserId || (n.UserId == null && n.CreatedAtUnixTimeSeconds >= currentUserService.CreatedAtUnixTimeSeconds.Value), 
-                orderBy: n => n.OrderByDescending(n => n.CreatedAt));
+                orderBy: n => n.OrderByDescending(n => n.CreatedAt)).ConfigureAwait(false);
         }
         else 
         {
-            results = await notificationRepository.FindPaginatedAsync(request.PageNumber, request.PageSize, cancellationToken, n => n.UserId == currentUserService.UserId);
+            results = await notificationRepository.FindPaginatedAsync(request.PageNumber, request.PageSize, cancellationToken, n => n.UserId == currentUserService.UserId).ConfigureAwait(false);
         }
         
         int? totalUnread = _enableUnreadNotificationsCount

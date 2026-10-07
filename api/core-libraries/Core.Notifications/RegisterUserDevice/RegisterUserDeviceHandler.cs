@@ -10,7 +10,7 @@ public sealed class RegisterUserDeviceHandler(IUserDeviceRepository userDevicesR
 {
     public async Task Handle(RegisterUserDeviceCommand request, CancellationToken cancellationToken)
     {
-        var userDevice = (await userDevicesRepository.FindAsync(device => device.DeviceId == request.DeviceId, cancellationToken)).FirstOrDefault();
+        var userDevice = (await userDevicesRepository.FindAsync(device => device.DeviceId == request.DeviceId, cancellationToken).ConfigureAwait(false)).FirstOrDefault();
         var platform = Enum.TryParse<DevicePlatform>(request.Platform, ignoreCase: true, out var result) ? result : DevicePlatform.Unknown;
 
         if (userDevice == null)

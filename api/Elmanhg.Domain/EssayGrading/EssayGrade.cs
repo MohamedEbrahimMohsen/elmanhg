@@ -1,5 +1,6 @@
 using Core.DDD.Entities;
 using Core.DDD.Models;
+using Core.DDD.Time;
 using Elmanhg.Domain.Questions.Schemas;
 using Elmanhg.Domain.SharedKernel;
 using System.Text.Json;
@@ -47,7 +48,7 @@ public partial class EssayGrade : AuditEntity, IRetriedWork, IVersioned
         }
 
         ArgumentOutOfRangeException.ThrowIfNegative(timeTakenMilliseconds);
-        var at = ToMicroseconds(requestedAt);
+        var at = requestedAt.TruncateToMicroseconds();
         return new EssayGrade(Guid.NewGuid(), studentId)
         {
             StudentId = studentId,
@@ -73,7 +74,4 @@ public partial class EssayGrade : AuditEntity, IRetriedWork, IVersioned
     public string ReadAnswerText() => JsonSerializer.Deserialize<EssayAnswer>(Answer, QuestionJson.SerializerOptions)?.Text ?? string.Empty;
 
     public IReadOnlyList<EssayCriterionScore> ReadCriteria() => Criteria is null ? [] : JsonSerializer.Deserialize<List<EssayCriterionScore>>(Criteria, QuestionJson.SerializerOptions) ?? [];
-
-    // timestamptz stores whole microseconds; truncating keeps the first response identical to later reads.
-    private static DateTimeOffset ToMicroseconds(DateTimeOffset value) => value.AddTicks(-(value.Ticks % TimeSpan.TicksPerMicrosecond));
 }

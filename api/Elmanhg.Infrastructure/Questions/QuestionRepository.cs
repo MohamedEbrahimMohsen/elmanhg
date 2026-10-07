@@ -1,3 +1,4 @@
+using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.Questions;
 
-public partial class QuestionRepository(AppDbContext context) : Repository<Question>(context), IQuestionRepository
+public partial class QuestionRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<Question>(context, currentUser, timeProvider), IQuestionRepository
 {
     public async Task<bool> AnyInLessonAsync(Guid lessonId, CancellationToken cancellationToken)
     {

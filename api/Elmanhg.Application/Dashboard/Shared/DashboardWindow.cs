@@ -1,4 +1,4 @@
-using Core.Utilities.Time;
+using Core.DDD.Time;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.SharedKernel;
 

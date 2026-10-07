@@ -1,6 +1,6 @@
 using Core.DDD.Entities;
+using Core.DDD.Time;
 using Core.Errors;
-using Core.Utilities.Time;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.SharedKernel.Exceptions;

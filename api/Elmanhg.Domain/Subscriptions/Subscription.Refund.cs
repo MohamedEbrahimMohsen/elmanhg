@@ -23,7 +23,6 @@ public partial class Subscription
         }
 
         CurrentPeriodStart = CurrentPeriodStart < CurrentPeriodEnd ? CurrentPeriodStart : CurrentPeriodEnd;
-        UpdationDate = DateTimeOffset.UtcNow;
         return true;
     }
 }

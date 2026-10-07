@@ -1,3 +1,4 @@
+using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.TrainingData;
 using Elmanhg.Infrastructure.Data.Context;
@@ -5,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.TrainingData;
 
-public class AvatarTrainingRecordRepository(AppDbContext context) : Repository<AvatarTrainingRecord>(context), IAvatarTrainingRecordRepository
+public class AvatarTrainingRecordRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<AvatarTrainingRecord>(context, currentUser, timeProvider), IAvatarTrainingRecordRepository
 {
     public async Task<List<AvatarTrainingRecord>> GetExportPageAsync(TrainingRecordFilter filter, TrainingRecordCursor? after, int limit, CancellationToken cancellationToken)
     {

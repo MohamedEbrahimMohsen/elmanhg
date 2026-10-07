@@ -11,7 +11,7 @@ Companion documents: `docs/constitution.md` (wins on conflict) · `docs/PRD.md` 
 
 ## Elmanhg deltas — read before anything below
 
-1. **Database is PostgreSQL**, via `Npgsql.EntityFrameworkCore.PostgreSQL`. `UseNpgsql(...)` with `EnableRetryOnFailure()`. Never `UseSqlServer`, never SQL Server-only features (`rowversion`, `NEWSEQUENTIALID`, `datetime2`). Concurrency tokens use PostgreSQL `xmin`: the entity implements `IVersioned` (`Core.DDD`, `public uint Version { get; private set; }`) and `AppDbContext.OnModelCreating` calls `modelBuilder.ApplyRowVersionConvention()` (`Core.EntityFrameworkCore`), which maps every `IVersioned` root entity's `Version` to `xmin`. Never write `.IsRowVersion()` per entity. Timestamps are `timestamptz` (`DateTimeOffset`, UTC). Domain timestamps are truncated with `Core.Utilities.Time` `TruncateToMicroseconds()` (PostgreSQL precision); local-day math uses `zone.LocalDate(instant)` / `zone.StartOfDay(day)`.
+1. **Database is PostgreSQL**, via `Npgsql.EntityFrameworkCore.PostgreSQL`. `UseNpgsql(...)` with `EnableRetryOnFailure()`. Never `UseSqlServer`, never SQL Server-only features (`rowversion`, `NEWSEQUENTIALID`, `datetime2`). Concurrency tokens use PostgreSQL `xmin`: the entity implements `IVersioned` (`Core.DDD`, `public uint Version { get; private set; }`) and `AppDbContext.OnModelCreating` calls `modelBuilder.ApplyRowVersionConvention()` (`Core.EntityFrameworkCore`), which maps every `IVersioned` root entity's `Version` to `xmin`. Never write `.IsRowVersion()` per entity. Timestamps are `timestamptz` (`DateTimeOffset`, UTC). Domain timestamps are truncated with `Core.DDD.Time` `TruncateToMicroseconds()` (PostgreSQL precision); local-day math uses `zone.LocalDate(instant)` / `zone.StartOfDay(day)`.
 2. **JSON columns** (question body, grading spec, blueprint counts, context bundles) are `jsonb`: `.HasColumnType("jsonb")` on a typed owned model or a `JsonDocument`/`string` with a documented shape. Never serialise to `nvarchar`/`text` by hand.
 3. **Vector search** (AI Avatar retrieval) uses `pgvector` via `Pgvector.EntityFrameworkCore`, only in the stories that need it.
 4. **Integration tests** hit a real PostgreSQL through `Testcontainers.PostgreSql`. No in-memory provider, no SQLite stand-in.
@@ -19,7 +19,8 @@ Companion documents: `docs/constitution.md` (wins on conflict) · `docs/PRD.md` 
    - `Core/` (Core.DDD, Core.CQRS, Core.EntityFrameworkCore, Core.Errors, Core.Exceptions, Core.Identity, Core.OTP, Core.Localization, Core.Logging, Core.Auditing, Core.Cache, Core.Notifications, Core.Queues, Core.Utilities, Core.Validation) is vendored into `api/core-libraries/` in this repo. Copy it, do not reference the Morabh path at build time. When vendoring, swap every SQL Server dependency for Npgsql and drop `Core.Azure` unless a story needs it. `Core.Storage` (file storage `IFileStorage` with Local/S3 providers, `StorageContentTypes`, public media serving with a `PrivateFolders` list, `WriteStoredFileAsync`) is Elmanhg-native, with no Morabh equivalent; files and media always go through it.
    - Before designing **any** feature (login, register, OTP, refresh tokens, audit log, localisation, notifications, error codes, paging, file upload…), search the Morabh repo (`Core/`, `Morabh.Application/`, `Morabh.Domain/`, `Morabh.Infrastructure/`, `Morabh.APIs/`, `CRUD_FEATURE_CREATION_GUIDE.md`, `ErrorCodes.md`, `AuditLogs.md`, `Localization.md`). If it exists, copy it into the matching Elmanhg layer, rename namespaces `Morabh.*` → `Elmanhg.*`, and adapt it to the Elmanhg domain. The plan must name the Morabh source file for every reused piece.
    - Only when nothing in Morabh covers it, write it from scratch — in the same shape, layering, naming and error-code style as the Morabh code. Murabaha/BNPL business logic is never copied.
-   - Promoted in Elmanhg (no Morabh source): `Core.Hosting`, `Core.Observability`, `Core.Spreadsheets`, `Core.Settings`, plus `Core.Cache` (`ICacheableQuery` + `CachingBehaviour`), `Core.Logging` `TextRedactor`, `Core.Queues` (`SweepWorker<TOptions>`, `SweepOptions`, `BackgroundJobMetrics`), `Core.DDD` `RetrySchedule` and `Core.Errors` `BaseException.ErrorCodeOf`. Cache a query by implementing `ICacheableQuery`; read/write spreadsheets through `ISpreadsheetReader`/`ISpreadsheetWriter`; build rate-limit policies from `Core.Hosting.RateLimiting.RateLimitPartitions`; redact free text with a `TextRedactor`; write a background sweep as a `SweepWorker<TOptions>` subclass; keep retry state in a `RetrySchedule` owned value. Read a runtime setting or feature flag with `Core.Settings` `IRuntimeSettings.GetAsync(XRuntimeSettings.Key, cancellationToken)`; the app declares keys, definitions and constraints in `Application/Shared/RuntimeSettings/Definitions` (docs/configuration.md §4) and never re-implements the store, cache or validation. Plus the E21.S3 helpers: `ICurrentUserService.GetRequiredUserId(code)`, `IRepository<T>.GetRequiredAsync(id or predicate, code, …)`, `PageData<T>.Map`, `IQueryable<T>.ToPageDataAsync`, `ModelBuilder.ApplySoftDeleteQueryFilters`, `IOtpRepository.ConsumeAsync`, `Core.Utilities.Time` and `AddValidatedOptions`.
+   - Promoted in Elmanhg (no Morabh source): `Core.Hosting`, `Core.Observability`, `Core.Spreadsheets`, `Core.Settings`, plus `Core.Cache` (`ICacheableQuery` + `CachingBehaviour`), `Core.Logging` `TextRedactor`, `Core.Queues` (`SweepWorker<TOptions>`, `SweepOptions`, `BackgroundJobMetrics`), `Core.DDD` `RetrySchedule` and `Core.Errors` `BaseException.ErrorCodeOf`. Cache a query by implementing `ICacheableQuery`; read/write spreadsheets through `ISpreadsheetReader`/`ISpreadsheetWriter`; build rate-limit policies from `Core.Hosting.RateLimiting.RateLimitPartitions`; redact free text with a `TextRedactor`; write a background sweep as a `SweepWorker<TOptions>` subclass; keep retry state in a `RetrySchedule` owned value. Read a runtime setting or feature flag with `Core.Settings` `IRuntimeSettings.GetAsync(XRuntimeSettings.Key, cancellationToken)`; the app declares keys, definitions and constraints in `Application/Shared/RuntimeSettings/Definitions` (docs/configuration.md §4) and never re-implements the store, cache or validation. Plus the E21.S3 helpers: `ICurrentUserService.GetRequiredUserId(code)`, `IRepository<T>.GetRequiredAsync(id or predicate, code, …)`, `PageData<T>.Map`, `IQueryable<T>.ToPageDataAsync`, `ModelBuilder.ApplySoftDeleteQueryFilters`, `IOtpRepository.ConsumeAsync`, `Core.DDD.Time` and `AddValidatedOptions`. Plus `Core.DDD.Identity.ICurrentUser` (id, name, role; `ICurrentUserService` extends it) and repository audit stamping.
+   - `Elmanhg.Domain` references only `Core.DDD` and `Core.Settings` (for the `IRuntimeSettingOverride` contract) and never the ASP.NET Core shared framework, directly or transitively: `Core.DDD`, `Core.Errors`, `Core.Settings` and `Core.Utilities` use specific `Microsoft.Extensions.*` packages, never `<FrameworkReference Include="Microsoft.AspNetCore.App" />` (`DomainAssemblyReferencesTests` guards this).
 6. **Solution layout**: `api/Elmanhg.slnx` with `Elmanhg.Api`, `Elmanhg.Application`, `Elmanhg.Domain`, `Elmanhg.Infrastructure`, `Elmanhg.Jobs` (background jobs, when needed), `Elmanhg.Tests`, plus `core-libraries/`. Mirror Morabh's project structure.
 7. **Secrets**: environment variables and a gitignored `.env`; `appsettings.json` holds shape and safe defaults only. External providers without credentials in this repo (Paymob, SMS gateway, Claude API, transcription) sit behind an interface with a `Fake*` implementation selected by config, so the app and tests run offline.
 
@@ -150,7 +151,7 @@ PROHIBITED: `.Result`, `.Wait()`, `GetAwaiter().GetResult()`, `async void`, `Tas
 | DbSet | plural PascalCase, `{ get; set; }` | `public DbSet<Tenant> Tenants { get; set; }` |
 | Private ctor | `private Entity(Guid id, Guid? createdBy)` | `private Tenant(Guid id, Guid? createdBy)` |
 | Factory method | `static [Entity] Create(...)` | `Tenant.Create(...)` |
-| Domain method | verb, mutates state, sets UpdationDate | `tenant.Suspend()`, `tenant.Update(name)` |
+| Domain method | verb, mutates state; stamps `UpdationDate` only with an instant it receives | `tenant.Suspend()`, `tenant.Update(name)` |
 
 **PROHIBITED names**: `DTO`, `Response` (for CQRS outputs), `Model` (for results), `Service` (for use-case logic).
 
@@ -232,7 +233,6 @@ public class Tenant : AggregateRoot
     {
         Name = name;
         Slug = slug;
-        UpdationDate = DateTimeOffset.UtcNow;
     }
 
     public void Suspend()
@@ -242,7 +242,6 @@ public class Tenant : AggregateRoot
             throw new BusinessRuleViolationException(ErrorCodes.TenantAlreadySuspended);
         }
         Status = TenantStatus.Suspended;
-        UpdationDate = DateTimeOffset.UtcNow;
     }
 }
 ```
@@ -250,7 +249,7 @@ public class Tenant : AggregateRoot
 Rules:
 - Private constructor. `static Create(...)` is the only way to construct from application code.
 - All state changes through named domain methods. Direct property mutation from handlers is PROHIBITED.
-- Methods that mutate state MUST set `UpdationDate = DateTimeOffset.UtcNow`.
+- `Repository.SaveChangesAsync` stamps `UpdationDate` (from `TimeProvider`) and `UpdatedBy` (from `ICurrentUser`) when the method did not. A method that receives the transition instant sets `UpdationDate = at` so every field of the transition shares it. A method that changes only owned values or child collections stamps `UpdationDate` itself.
 - Guard THEN mutate THEN stamp. Braces on every `if`.
 
 ### 4.3 Child Entity
@@ -595,10 +594,10 @@ public static class DependencyInjection
 namespace Elmanhg.Infrastructure.Tenants;
 
 // Simple — generic base covers everything
-public class TenantRepository(AppDbContext context) : Repository<Tenant>(context), ITenantRepository { }
+public class TenantRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<Tenant>(context, currentUser, timeProvider), ITenantRepository { }
 
 // With custom queries
-public class TenantSubscriptionRepository(AppDbContext context) : Repository<TenantSubscription>(context), ITenantSubscriptionRepository
+public class TenantSubscriptionRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<TenantSubscription>(context, currentUser, timeProvider), ITenantSubscriptionRepository
 {
     public async Task<List<TenantSubscription>> GetExpiredAsync(CancellationToken cancellationToken)
     {
@@ -607,7 +606,7 @@ public class TenantSubscriptionRepository(AppDbContext context) : Repository<Ten
 }
 ```
 
-`Repository<T>` (Core.EntityFrameworkCore) base provides all 13 `IRepository<T>` members plus `_dbSet`, `_context`.
+`Repository<T>` (Core.EntityFrameworkCore) base provides all 13 `IRepository<T>` members plus `_dbSet`, `_context`, and stamps audit fields in `SaveChangesAsync`.
 
 **`AddAsync`/`Update`/`Delete` do NOT call `SaveChangesAsync`. Call it once in the handler.**
 
@@ -742,7 +741,7 @@ dotnet ef migrations script --idempotent -p api/Elmanhg.Infrastructure -s api/El
 - One `SaveChangesAsync` per command is atomic — that IS the transaction. Explicit `BeginTransactionAsync` only across multiple saves or raw SQL, wrapped in `CreateExecutionStrategy().ExecuteAsync(...)` when retry-on-failure is on (PostgreSQL).
 - Concurrency token on concurrently written aggregates: `public sealed class Order : AuditEntity, IVersioned` with `public uint Version { get; private set; }`; `ApplyRowVersionConvention()` maps it to `xmin`.
 - Conflicts → 409 are declared once in `AppDbContext.Conflicts` (`AppDbContext.Conflicts.cs`), a `Core.EntityFrameworkCore.Conflicts.ConflictMap`: `.MapConcurrency<Order>(ErrorCodes.OrderModifiedConcurrently)` for a stale row version, `.MapUniqueConstraint(OrderNumberIndex, ErrorCodes.OrderNumberTaken)` (or `.MapUniqueTable(...)`) for a unique index race. `SaveChangesAsync` has a single `catch (DbUpdateException) when (Conflicts.TryTranslate(...))`. Registration order is precedence. Never a handler `try`/`catch`, never a new catch block; verify the existing mapping before adding an error code.
-- Side effects that must follow a commit (emails, notifications, webhooks) → outbox row written in the same `SaveChangesAsync`, dispatched by a worker. Check `Core.Queues` / `Core.Notifications` first.
+- Side effects that must follow a commit (emails, notifications, webhooks) → outbox row written in the same `SaveChangesAsync`, dispatched by a worker. Check `Core.Notifications` first; dispatch with a `Core.Queues` `SweepWorker<TOptions>` subclass (core has no outbox type).
 
 ---
 
@@ -884,7 +883,7 @@ True invariants (e.g. enum-column width) stay as a named constant WITH a WHY com
 // ❌ DON'T — invent random/suffix generation in a custom class
 var suffix = new Random().Next(1000, 9999).ToString();
 
-// ✅ DO — inject Core.Utilities.Generator.IGenerator (already DI-registered)
+// ✅ DO — inject Core.Utilities.Generator.IGenerator (registered by `AddCoreUtilities()`)
 candidateSlug = generator.Generate(prefix: baseSlug, size: options.SlugSuffixSize);
 ```
 
@@ -1011,7 +1010,7 @@ The worker is the only place `IServiceScopeFactory` is allowed; a failed iterati
 
 ### 8.10 Secrets & tokens use cryptographic randomness
 
-`IGenerator` (§8.2) is for identifiers like slugs. Anything an attacker must not guess (OTPs, API keys, reset tokens) → `Core.OTP` / `IGenerator` only if backed by `RandomNumberGenerator` — verify in `core-libraries`; otherwise `RandomNumberGenerator.GetInt32` / `GetBytes`. Never `Random`. Secret comparison → `CryptographicOperations.FixedTimeEquals`, never `==`.
+`IGenerator` (§8.2) is for identifiers like slugs. Anything an attacker must not guess (OTPs, API keys, reset tokens) → `IGenerator` (Nanoid on `RandomNumberGenerator`) or `RandomNumberGenerator.GetInt32` / `GetBytes`. Never `Random`. Secret comparison → `CryptographicOperations.FixedTimeEquals`, never `==`.
 
 ### 8.11 Never weaken a test to go green
 
@@ -1047,7 +1046,7 @@ private static readonly Regex SlugPattern = new("^[a-z0-9-]+$", RegexOptions.Non
 
 **Domain**
 - [ ] Entity extends `AggregateRoot` / `AuditEntity` / `Entity`; private ctor; `static Create(...)`
-- [ ] All state changes via named domain methods; methods set `UpdationDate = DateTimeOffset.UtcNow`
+- [ ] All state changes via named domain methods; methods stamp `UpdationDate` only with an instant they receive (the repository stamps the rest)
 - [ ] `LocalizedText` for every genuinely bilingual field — no plain `string` for bilingual data
 - [ ] Value objects as `sealed record`
 - [ ] Enums + extensions in same file inside the aggregate folder
@@ -1093,7 +1092,7 @@ private static readonly Regex SlugPattern = new("^[a-z0-9-]+$", RegexOptions.Non
 
 **Cross-cutting**
 - [ ] File-scoped namespaces everywhere; no file exceeds ~100 lines
-- [ ] Every DO/DON'T catalog entry (§8) honoured: caps in `[Area]Options` not entity constants · `IGenerator` for identifiers · `Is…ExistsAsync` + suffix loop for unique slugs · `Deleted` not `Removed` · soft-delete filter only in the global method · one JSON contract across every serialization path · expected 4xx logged as `Warning`, not `Error`
+- [ ] Every DO/DON'T catalog entry (§8) honoured: caps in `[Area]Options` not entity constants · `IGenerator` for identifiers · `Is…ExistsAsync` + suffix loop for unique slugs · `Deleted` not `Removed` · soft-delete filter only through `modelBuilder.ApplySoftDeleteQueryFilters()`, never a hand-written `HasQueryFilter` · one JSON contract across every serialization path · expected 4xx logged as `Warning`, not `Error`
 - [ ] If a serialization path changed, the **emitted JSON** was inspected — not just the object it came from (§8.6)
 - [ ] `dotnet build` zero new warnings · `dotnet test` green
 - [ ] `dotnet format --verify-no-changes` exits 0 · `dotnet list package --vulnerable --include-transitive` clean
@@ -1139,14 +1138,14 @@ A package is added only if the plan names it with an exact version. Core-first (
 | FluentAssertions ≥ 8 | commercial (Xceed) | do not bump past the repo's licensed/pinned major; alternative `AwesomeAssertions` |
 | MediatR ≥ 13 | dual RPL-1.5 / commercial, licence key | repo is on 14 — key lives in configuration, never committed; major bumps only with a decision record |
 | AutoMapper ≥ 15 | dual RPL-1.5 / commercial | do not add — `[Noun]ResultGenerator` (§5.8) is the mapper |
-| MassTransit ≥ 9 | commercial | do not add — `Core.Queues` (+ Hangfire for scheduled jobs) |
+| MassTransit ≥ 9 | commercial | do not add — a `Core.Queues` `SweepWorker<TOptions>` sweep (+ Hangfire for scheduled jobs) |
 | Moq | avoid (SponsorLink) | NSubstitute |
 | Swashbuckle.AspNetCore | dropped from .NET 10 templates | `Microsoft.AspNetCore.OpenApi` + Scalar (already wired) |
 | Newtonsoft.Json | legacy | System.Text.Json only (§8.6) |
 | Microsoft.EntityFrameworkCore.InMemory | wrong relational behaviour | never in any test project |
 
 - Verify before adding: `dotnet package search <Id> --exact-match`; licence + publish date on `https://www.nuget.org/packages/<Id>/<version>`.
-- If the repo uses Central Package Management (`Directory.Packages.props`), a `.csproj` `PackageReference` has no `Version`; if lock files are on, commit the updated `packages.lock.json` (`dotnet restore --force-evaluate`).
+- If the repo uses Central Package Management (`Directory.Packages.props`), a `.csproj` `PackageReference` has no `Version` (Elmanhg core included: no `Version` in any csproj; HTTP types via `<FrameworkReference Include="Microsoft.AspNetCore.App" />`, never the deprecated 2.x `Microsoft.AspNetCore.*` packages); if lock files are on, commit the updated `packages.lock.json` (`dotnet restore --force-evaluate`).
 
 ---
 

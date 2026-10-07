@@ -7,13 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MediatR" Version="14.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
+    <PackageReference Include="MediatR" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Core.DDD\Core.DDD.csproj" />
     <ProjectReference Include="..\Core.Errors\Core.Errors.csproj" />
-    <ProjectReference Include="..\Core.Identity\Core.Identity.csproj" />
   </ItemGroup>
 
 </Project>

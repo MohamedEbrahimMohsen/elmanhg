@@ -17,18 +17,21 @@ namespace Elmanhg.Tests.Application.Features.Auth.LoginWithEmailCode;
 public sealed class LoginWithEmailCodeHandlerTests
 {
     private const string Email = "mona@elmanhg.test";
+    private static readonly DateTimeOffset Now = new(2026, 9, 1, 10, 0, 0, TimeSpan.Zero);
 
     private readonly UserManager<User> _userManager = UserManagerSubstitute.Create();
     private readonly IOtpRepository _otpRepository = Substitute.For<IOtpRepository>();
     private readonly ITokenService _tokenService = Substitute.For<ITokenService>();
     private readonly IRefreshTokenService<User, Guid> _refreshTokenService = Substitute.For<IRefreshTokenService<User, Guid>>();
+    private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
     private readonly LoginWithEmailCodeHandler _handler;
 
     public LoginWithEmailCodeHandlerTests()
     {
         _tokenService.GenerateTokenAsync(Arg.Any<List<Claim>>()).Returns("access-token");
         _refreshTokenService.GenerateTokenAsync(Arg.Any<User>(), Arg.Any<CancellationToken>()).Returns("refresh-token");
-        _handler = new LoginWithEmailCodeHandler(_userManager, _otpRepository, _tokenService, _refreshTokenService);
+        _timeProvider.GetUtcNow().Returns(Now);
+        _handler = new LoginWithEmailCodeHandler(_userManager, _otpRepository, _tokenService, _refreshTokenService, _timeProvider);
     }
 
     [Fact]
@@ -116,7 +119,7 @@ public sealed class LoginWithEmailCodeHandlerTests
 
     private global::Core.OTP.Entities.Otp ArrangeOtp(OtpBuilder builder)
     {
-        var otp = builder.Build();
+        var otp = builder.IssuedAt(Now).Build();
         _otpRepository.FindByVerificationId(otp.VerificationId, Arg.Any<CancellationToken>()).Returns(otp);
         return otp;
     }

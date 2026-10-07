@@ -1,3 +1,4 @@
+using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Units;
@@ -6,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.Lessons;
 
-public class LessonRepository(AppDbContext context) : Repository<Lesson>(context), ILessonRepository
+public class LessonRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<Lesson>(context, currentUser, timeProvider), ILessonRepository
 {
     public async Task<Lesson?> GetWithObjectivesAsync(Guid lessonId, bool asNoTracking, CancellationToken cancellationToken)
     {

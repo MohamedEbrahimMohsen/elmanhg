@@ -1,5 +1,6 @@
 ﻿using Core.Localization;
 using FluentValidation;
+using FluentValidation.Results;
 using MediatR;
 
 namespace Core.CQRS.Behaviours;
@@ -10,15 +11,12 @@ public class ValidationBehaviour<TRequest, TResponse>(IEnumerable<IValidator<TRe
     {
         if (validators.Any())
         {
-            var context = new ValidationContext<TRequest>(request);
-
-            var validationResults = await Task.WhenAll(
-                validators.Select(v => v.ValidateAsync(context, cancellationToken)));
-
-            var failures = validationResults
-                .Where(r => r.Errors.Any())
-                .SelectMany(r => r.Errors)
-                .ToList();
+            var failures = new List<ValidationFailure>();
+            foreach (var validator in validators)
+            {
+                var result = await validator.ValidateAsync(new ValidationContext<TRequest>(request), cancellationToken).ConfigureAwait(false);
+                failures.AddRange(result.Errors);
+            }
 
             var errorMessages = new List<string>();
             var errorCodes = new List<string>();
@@ -34,6 +32,6 @@ public class ValidationBehaviour<TRequest, TResponse>(IEnumerable<IValidator<TRe
                 throw new ValidationBehaviourException(errorCodes: errorCodes, errorMessages: errorMessages);
             }
         }
-        return await next(cancellationToken);
+        return await next(cancellationToken).ConfigureAwait(false);
     }
 }

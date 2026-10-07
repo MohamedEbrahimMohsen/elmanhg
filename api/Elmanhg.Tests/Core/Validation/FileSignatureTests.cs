@@ -85,5 +85,13 @@ public sealed class FileSignatureTests
         stream.ReadByte().Should().Be(0x89);
     }
 
+    [Fact]
+    public void Create_NoPatterns_ThrowsArgumentOutOfRange()
+    {
+        var act = () => FileSignature.Create([".bin"]);
+
+        act.Should().Throw<ArgumentOutOfRangeException>().Which.ParamName.Should().Be("patterns");
+    }
+
     private static FormFile File(string fileName, byte[] content) => new(new MemoryStream(content), 0, content.Length, "file", fileName);
 }

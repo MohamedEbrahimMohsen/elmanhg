@@ -1,5 +1,6 @@
 using Core.DDD.Entities;
 using Core.DDD.Models;
+using Core.DDD.Time;
 using Elmanhg.Domain.SharedKernel;
 using System.Globalization;
 
@@ -36,12 +37,12 @@ public partial class TrainingExport : AuditEntity, IAuditedEntity, IRetriedWork,
             throw new ArgumentException("An export range must end after it starts.", nameof(to));
         }
 
-        var at = ToMicroseconds(requestedAt);
+        var at = requestedAt.TruncateToMicroseconds();
         return new TrainingExport(Guid.NewGuid(), requestedBy)
         {
             Source = source,
-            From = ToMicroseconds(from),
-            To = ToMicroseconds(to),
+            From = from.TruncateToMicroseconds(),
+            To = to.TruncateToMicroseconds(),
             SubjectId = subjectId,
             Status = TrainingExportStatus.Pending,
             Retry = RetrySchedule.DueAt(at),
@@ -56,7 +57,4 @@ public partial class TrainingExport : AuditEntity, IAuditedEntity, IRetriedWork,
     public bool IsExpiredAt(DateTimeOffset now) => Status == TrainingExportStatus.Completed && ExpiresAt <= now;
 
     public bool HasFileToDeleteAt(DateTimeOffset now) => IsExpiredAt(now) || (Status == TrainingExportStatus.Failed && FileKey is not null);
-
-    // timestamptz stores whole microseconds; truncating keeps the first response identical to later reads.
-    private static DateTimeOffset ToMicroseconds(DateTimeOffset value) => value.AddTicks(-(value.Ticks % TimeSpan.TicksPerMicrosecond));
 }

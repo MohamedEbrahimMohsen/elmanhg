@@ -15,19 +15,19 @@ public static class CoreOTPEndpoints
 
         group.MapPost("/send", async (GenerateOTPCommand request, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            var result = await mediator.Send(request, cancellationToken);
+            var result = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
             return Results.Ok(result);
         });
 
         group.MapPost("/resend", async (GenerateOTPCommand request, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            var result = await mediator.Send(request, cancellationToken);
+            var result = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
             return Results.Ok(result);
         });
 
         group.MapPost("/verify", async (VerifyOTPCommand request, IMediator mediator, CancellationToken cancellationToken) =>
         {
-            var result = await mediator.Send(request, cancellationToken);
+            var result = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
             return Results.Ok(result);
         });
 

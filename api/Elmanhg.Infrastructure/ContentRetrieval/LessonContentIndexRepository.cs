@@ -1,3 +1,4 @@
+using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.ContentRetrieval;
 using Elmanhg.Domain.Lessons;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.ContentRetrieval;
 
-public class LessonContentIndexRepository(AppDbContext context) : Repository<LessonContentIndex>(context), ILessonContentIndexRepository
+public class LessonContentIndexRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<LessonContentIndex>(context, currentUser, timeProvider), ILessonContentIndexRepository
 {
     public async Task<List<Guid>> GetStaleLessonIdsAsync(IReadOnlyCollection<Guid> excludedIds, int batchSize, CancellationToken cancellationToken)
     {

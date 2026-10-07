@@ -87,11 +87,11 @@ public class FirebaseNotificationService(FirebaseMessaging firebaseMessaging, IL
 
     public async Task SubscribeToTopicAsync(List<string> tokens, string topic)
     {
-        await firebaseMessaging.SubscribeToTopicAsync(tokens, topic);
+        await firebaseMessaging.SubscribeToTopicAsync(tokens, topic).ConfigureAwait(false);
     }
     public async Task UnsubscribeFromTopicAsync(List<string> tokens, string topic)
     {
-        await firebaseMessaging.UnsubscribeFromTopicAsync(tokens, topic);
+        await firebaseMessaging.UnsubscribeFromTopicAsync(tokens, topic).ConfigureAwait(false);
     }
 
     // Multicast sends never throw on per-token failures; the failure count alone hides which tokens

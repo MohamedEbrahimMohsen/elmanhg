@@ -1,5 +1,6 @@
 using Core.DDD.Entities;
 using Core.DDD.Models;
+using Core.DDD.Time;
 using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Questions.Schemas;
 using Elmanhg.Domain.SharedKernel;
@@ -51,7 +52,7 @@ public partial class MathStepGrade : AuditEntity, IRetriedWork, IVersioned
         }
 
         ArgumentOutOfRangeException.ThrowIfNegative(timeTakenMilliseconds);
-        var at = ToMicroseconds(requestedAt);
+        var at = requestedAt.TruncateToMicroseconds();
         return new MathStepGrade(Guid.NewGuid(), studentId)
         {
             StudentId = studentId,
@@ -78,7 +79,4 @@ public partial class MathStepGrade : AuditEntity, IRetriedWork, IVersioned
     public MathStepsAnswer ReadAnswer() => JsonSerializer.Deserialize<MathStepsAnswer>(Answer, QuestionJson.SerializerOptions) ?? new MathStepsAnswer([], string.Empty);
 
     public IReadOnlyList<MathStepScore> ReadSteps() => Steps is null ? [] : JsonSerializer.Deserialize<List<MathStepScore>>(Steps, QuestionJson.SerializerOptions) ?? [];
-
-    // timestamptz stores whole microseconds; truncating keeps the first response identical to later reads.
-    private static DateTimeOffset ToMicroseconds(DateTimeOffset value) => value.AddTicks(-(value.Ticks % TimeSpan.TicksPerMicrosecond));
 }
