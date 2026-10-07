@@ -1,7 +1,7 @@
 using Core.Errors;
 using DocumentFormat.OpenXml.Packaging;
 using System.IO.Compression;
-using System.IO.Packaging;
+using System.Xml;
 
 namespace Core.Spreadsheets;
 
@@ -51,11 +51,13 @@ internal static class SpreadsheetPackageGuard
                 }
             }
         }
-        catch (Exception exception) when (exception is InvalidDataException or FileFormatException or OpenXmlPackageException or ArgumentException or InvalidOperationException)
+        catch (Exception exception) when (IsUnreadablePackage(exception))
         {
             throw new BadRequestCoreException(unreadableErrorCode, innerException: exception);
         }
 
         package.Position = start;
     }
+
+    public static bool IsUnreadablePackage(Exception exception) => exception is InvalidDataException or FormatException or XmlException or OpenXmlPackageException or ArgumentException or InvalidOperationException;
 }

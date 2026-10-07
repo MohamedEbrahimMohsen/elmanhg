@@ -78,8 +78,10 @@ processors:
     spike_limit_percentage: 25
   batch: {}
   # Same patterns as LogRedactor in the API: email addresses (literal or URL-encoded @) and Egyptian mobile numbers
-  # (docs/observability.md, PII rules). flatten first: replace_all_patterns only reaches top-level values, and Caddy
-  # nests the URI under request.
+  # (docs/observability.md, PII rules). The phone pattern is LogRedactor.PhonePattern with \ doubled (OTTL string) and
+  # $ doubled (collector config); it runs twice because a match consumes the character after the number.
+  # LogRedactorCollectorParityTests checks the copy. flatten first: replace_all_patterns only reaches top-level values,
+  # and Caddy nests the URI under request.
   transform/redact:
     error_mode: ignore
     log_statements:
@@ -87,20 +89,24 @@ processors:
         statements:
           - flatten(attributes)
           - replace_pattern(body, "[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted-email]") where IsString(body)
-          - replace_pattern(body, "(\\+?20)?0?1[0125][0-9]{8}\\b|(?:\\+|\\b)(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4})\\b", "[redacted-phone]") where IsString(body)
+          - replace_pattern(body, "(?:(?:\\+?20)?0?1[0125][0-9]{8}|(?:\\+|(^|[^0-9A-Za-z_]))(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4}))([^0-9A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}") where IsString(body)
+          - replace_pattern(body, "(?:(?:\\+?20)?0?1[0125][0-9]{8}|(?:\\+|(^|[^0-9A-Za-z_]))(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4}))([^0-9A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}") where IsString(body)
           - replace_all_patterns(attributes, "value", "[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted-email]")
-          - replace_all_patterns(attributes, "value", "(\\+?20)?0?1[0125][0-9]{8}\\b|(?:\\+|\\b)(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4})\\b", "[redacted-phone]")
+          - replace_all_patterns(attributes, "value", "(?:(?:\\+?20)?0?1[0125][0-9]{8}|(?:\\+|(^|[^0-9A-Za-z_]))(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4}))([^0-9A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}")
+          - replace_all_patterns(attributes, "value", "(?:(?:\\+?20)?0?1[0125][0-9]{8}|(?:\\+|(^|[^0-9A-Za-z_]))(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4}))([^0-9A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}")
   transform/redact-traces:
     error_mode: ignore
     trace_statements:
       - context: span
         statements:
           - replace_all_patterns(attributes, "value", "[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted-email]")
-          - replace_all_patterns(attributes, "value", "(\\+?20)?0?1[0125][0-9]{8}\\b|(?:\\+|\\b)(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4})\\b", "[redacted-phone]")
+          - replace_all_patterns(attributes, "value", "(?:(?:\\+?20)?0?1[0125][0-9]{8}|(?:\\+|(^|[^0-9A-Za-z_]))(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4}))([^0-9A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}")
+          - replace_all_patterns(attributes, "value", "(?:(?:\\+?20)?0?1[0125][0-9]{8}|(?:\\+|(^|[^0-9A-Za-z_]))(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4}))([^0-9A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}")
       - context: spanevent
         statements:
           - replace_all_patterns(attributes, "value", "[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted-email]")
-          - replace_all_patterns(attributes, "value", "(\\+?20)?0?1[0125][0-9]{8}\\b|(?:\\+|\\b)(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4})\\b", "[redacted-phone]")
+          - replace_all_patterns(attributes, "value", "(?:(?:\\+?20)?0?1[0125][0-9]{8}|(?:\\+|(^|[^0-9A-Za-z_]))(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4}))([^0-9A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}")
+          - replace_all_patterns(attributes, "value", "(?:(?:\\+?20)?0?1[0125][0-9]{8}|(?:\\+|(^|[^0-9A-Za-z_]))(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4}))([^0-9A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}")
 
 exporters:
   otlp/tempo:
