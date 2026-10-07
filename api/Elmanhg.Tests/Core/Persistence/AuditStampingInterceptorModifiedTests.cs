@@ -3,7 +3,7 @@ using NSubstitute;
 
 namespace Elmanhg.Tests.Core.Persistence;
 
-public sealed class RepositoryAuditStampingModifiedTests : AuditStampingTestBase
+public sealed class AuditStampingInterceptorModifiedTests : AuditStampingTestBase
 {
     [Fact]
     public async Task SaveChangesAsync_ModifiedWithoutUpdationDate_StampsUpdationDateFromTimeProvider()

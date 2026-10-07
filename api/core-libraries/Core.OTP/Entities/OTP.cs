@@ -1,16 +1,9 @@
 ﻿using Core.DDD.Entities;
-using Core.Errors;
-using Core.OTP.Exceptions;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Core.OTP.Entities;
 
 public partial class Otp : Entity, IVersioned
 {
-    // The resend quota is per day, counted from the window's first code; resends never move the window.
-    private static readonly TimeSpan ReissueWindow = TimeSpan.FromDays(1);
-
     public Guid VerificationId { get; private set; }
     public string Recipient { get; private set; }
     public OtpRecipientType RecipientType { get; private set; }
@@ -57,93 +50,4 @@ public partial class Otp : Entity, IVersioned
             IsVerified = false
         };
     }
-
-    public OtpReissueState Reissue(string newCodeHash, int expiresInMinutes, DateTimeOffset now)
-    {
-        var previous = CaptureReissueState();
-        if (ReissueWindowStartedAt + ReissueWindow <= now)
-        {
-            ReissueCount = 0;
-            ReissueWindowStartedAt = now;
-        }
-
-        if (now < NextAllowedReissueAt)
-        {
-            var cooldown = NextAllowedReissueAt - now;
-            throw new RateLimitExceededCoreException(ErrorCodes.OTPReissueCooldown, context: new Dictionary<string, object>
-            {
-                ["days"] = cooldown.Days,
-                ["hours"] = cooldown.Hours,
-                ["minutes"] = cooldown.Minutes,
-                ["seconds"] = cooldown.Seconds
-            });
-        }
-
-        if (ReissueCount >= MaxReissueCount)
-        {
-            throw new RateLimitExceededCoreException(ErrorCodes.OTPReachedMaxReissueCount);
-        }
-
-        VerificationId = Guid.NewGuid();
-        CodeHash = newCodeHash;
-        IsVerified = false;
-        IsUsed = false;
-        VerificationAttempts = 0;
-        ReissueCount++;
-        CreatedAt = now;
-        ExpiresAt = now.AddMinutes(expiresInMinutes);
-        NextAllowedReissueAt = ReissueCount == MaxReissueCount ? now.AddHours(ReissueBlockCooldownInHours) : now.AddSeconds(ReissueCooldownSeconds);
-        return previous;
-    }
-
-    public string? Verify(string codeHash, DateTimeOffset now)
-    {
-        VerificationAttempts++;
-
-        if (IsVerified)
-        {
-            return ErrorCodes.OTPAlreadyVerified;
-        }
-
-        if (ExpiresAt <= now)
-        {
-            return ErrorCodes.OTPExpired;
-        }
-
-        if (VerificationAttempts > MaxVerificationAttempts)
-        {
-            return ErrorCodes.OTPReachedMaxAttempts;
-        }
-
-        if (!HashesMatch(CodeHash, codeHash))
-        {
-            return ErrorCodes.OTPNotMatched;
-        }
-
-        IsVerified = true;
-        VerificationAttempts = 0;
-        return null;
-    }
-
-    public void MarkUsed(DateTimeOffset now)
-    {
-        if (!IsVerified)
-        {
-            throw new BadRequestCoreException(ErrorCodes.OTPNotVerified);
-        }
-
-        if (IsUsed)
-        {
-            throw new BadRequestCoreException(ErrorCodes.OTPAlreadyUsed);
-        }
-
-        if (ExpiresAt <= now)
-        {
-            throw new BadRequestCoreException(ErrorCodes.OTPExpired);
-        }
-
-        IsUsed = true;
-    }
-
-    private static bool HashesMatch(string expected, string actual) => CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(expected), Encoding.UTF8.GetBytes(actual));
 }
