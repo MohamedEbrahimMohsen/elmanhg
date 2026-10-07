@@ -18,8 +18,8 @@ public sealed class RefreshAccessTokenHandler(ITokenService tokenService, IRefre
             throw new ForbiddenCoreException(ErrorCodes.UserSuspended);
         }
 
-        var refreshToken = await refreshTokenRotator.RotateAsync(user, request.RefreshToken, cancellationToken).ConfigureAwait(false);
         var accessToken = tokenService.GenerateTokenAsync(user.GetUserClaims());
+        var refreshToken = await refreshTokenRotator.RotateAsync(user, request.RefreshToken, cancellationToken).ConfigureAwait(false);
         return AuthResultGenerator.Generate(user, accessToken, refreshToken);
     }
 }
