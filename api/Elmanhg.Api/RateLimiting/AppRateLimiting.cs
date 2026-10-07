@@ -1,4 +1,6 @@
-using Core.Errors;
+using Core.Hosting;
+using Core.Hosting.RateLimiting;
+using Core.Utilities;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
 using Microsoft.AspNetCore.RateLimiting;
@@ -11,13 +13,9 @@ public static class AppRateLimiting
 {
     public static IServiceCollection AddAppRateLimiting(this IServiceCollection services)
     {
-        services.AddOptions<RateLimitingOptions>().BindConfiguration(RateLimitingOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddValidatedOptions<RateLimitingOptions>(RateLimitingOptions.SectionName);
 
-        services.AddRateLimiter(options =>
-        {
-            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-            options.OnRejected = (context, cancellationToken) => throw new RateLimitExceededCoreException(ErrorCodes.TooManyRequests);
-        });
+        services.AddCoreRateLimiting(ErrorCodes.TooManyRequests);
 
         services.AddOptions<RateLimiterOptions>().Configure<IOptions<AuthOptions>>((rateLimiter, authOptions) =>
         {
@@ -37,7 +35,7 @@ public static class AppRateLimiting
             rateLimiter.AddPolicy(PublicRateLimitPolicies.PaymentWebhooks, httpContext => RateLimitPartitions.PerClientIp(httpContext, limits.PaymentWebhookPermitLimit, limits.PaymentWebhookWindowSeconds));
             rateLimiter.AddPolicy(StudentRateLimitPolicies.AvatarMessages, httpContext => RateLimitPartitions.PerUser(httpContext, limits.AvatarMessagePermitLimit, limits.AvatarMessageWindowSeconds));
             rateLimiter.AddPolicy(StudentRateLimitPolicies.AskTeacherSubmissions, httpContext => RateLimitPartitions.PerUser(httpContext, limits.AskTeacherSubmissionPermitLimit, limits.AskTeacherSubmissionWindowSeconds));
-            rateLimiter.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext => RateLimitPartitions.ConcurrentStudentRequests(httpContext, limits.StudentConcurrentRequestLimit));
+            rateLimiter.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext => StudentConcurrencyPartitions.ConcurrentStudentRequests(httpContext, limits.StudentConcurrentRequestLimit));
         });
 
         return services;

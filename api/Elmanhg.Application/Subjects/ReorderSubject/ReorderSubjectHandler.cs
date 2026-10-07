@@ -10,10 +10,7 @@ public sealed class ReorderSubjectHandler(ISubjectRepository subjectRepository, 
 {
     public async Task Handle(ReorderSubjectCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         var siblings = await subjectRepository.FindAsync(_ => true, cancellationToken, orderBy: query => query.OrderBy(x => x.Order).ThenBy(x => x.CreationDate)).ConfigureAwait(false);
         var subject = siblings.FirstOrDefault(x => x.Id == request.SubjectId);
@@ -26,7 +23,7 @@ public sealed class ReorderSubjectHandler(ISubjectRepository subjectRepository, 
         siblings.Insert(Math.Min(request.Position, siblings.Count + 1) - 1, subject);
         for (var index = 0; index < siblings.Count; index++)
         {
-            siblings[index].MoveTo(index + 1, currentUserService.UserId.Value);
+            siblings[index].MoveTo(index + 1, userId);
         }
 
         await subjectRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

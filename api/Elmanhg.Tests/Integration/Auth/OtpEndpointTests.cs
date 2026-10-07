@@ -1,6 +1,5 @@
 using Core.OTP.Delivery;
 using Elmanhg.Infrastructure.Data.Context;
-using Elmanhg.Infrastructure.OtpDelivery;
 using Elmanhg.Tests.Integration.Infrastructure;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;

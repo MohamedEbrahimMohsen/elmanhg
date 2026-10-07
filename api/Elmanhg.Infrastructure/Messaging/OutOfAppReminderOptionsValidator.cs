@@ -1,5 +1,5 @@
+using Core.OTP.Delivery;
 using Elmanhg.Infrastructure.Invitations;
-using Elmanhg.Infrastructure.OtpDelivery;
 using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Infrastructure.Messaging;

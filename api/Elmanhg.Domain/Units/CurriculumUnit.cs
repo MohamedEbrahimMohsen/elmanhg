@@ -49,7 +49,6 @@ public class CurriculumUnit : AuditEntity, IAuditedEntity
 
         Order = order;
         UpdatedBy = updatedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
     }
 
     public void Delete(bool hasLessons, Guid deletedBy)
@@ -59,8 +58,9 @@ public class CurriculumUnit : AuditEntity, IAuditedEntity
             throw new BusinessRuleViolationCoreException(ErrorCodes.UnitHasLessons);
         }
 
-        SoftDelete();
+        var now = DateTimeOffset.UtcNow;
+        SoftDelete(now);
         UpdatedBy = deletedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
+        UpdationDate = now;
     }
 }

@@ -127,6 +127,17 @@ public sealed class AiServiceServiceCollectionExtensionsTests
         handler.CallCount.Should().Be(1);
     }
 
+    [Fact]
+    public void AddAiService_UnknownProvider_ThrowsUnsupportedProvider()
+    {
+        using var provider = BuildProvider(new() { ["AiService:Provider"] = "9" });
+        using var scope = provider.CreateScope();
+
+        var act = () => scope.ServiceProvider.GetRequiredService<IAiServiceClient>();
+
+        act.Should().Throw<InvalidOperationException>().WithMessage("*AiService:Provider*");
+    }
+
     private static ServiceProvider BuildProvider(Dictionary<string, string?> settings, Action<IServiceCollection>? configure = null)
     {
         var services = new ServiceCollection();

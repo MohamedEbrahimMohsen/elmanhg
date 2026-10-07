@@ -5,6 +5,7 @@ using Elmanhg.Domain.SharedKernel;
 using Elmanhg.Domain.Subscriptions;
 using Elmanhg.Infrastructure.Payments;
 using Elmanhg.Infrastructure.Payments.Paymob;
+using Elmanhg.Tests.Core.Http;
 using Elmanhg.Tests.Infrastructure.OtpDelivery;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -155,7 +156,7 @@ public sealed class PaymobPaymentGatewayTests
 
     private Task<PaymentCheckout> StartAsync(string displayName = "Mona Ali")
     {
-        var gateway = new PaymobPaymentGateway(new HttpClient(_handler) { BaseAddress = new Uri("https://accept.paymob.com/") }, Options.Create(_options), NullLogger<PaymobPaymentGateway>.Instance);
+        var gateway = new PaymobPaymentGateway(new HttpClient(_handler) { BaseAddress = new Uri("https://accept.paymob.com/") }, Options.Create(_options), CoreHttpTestSettings.Create(), NullLogger<PaymobPaymentGateway>.Instance);
         var request = new PaymentCheckoutRequest(_paymentId, new Money(19900, "EGP"), SubscriptionPlan.Base, BillingPeriod.Monthly, new PaymentCustomer(displayName, null, "01012345678"));
         return gateway.StartCheckoutAsync(request, TestContext.Current.CancellationToken);
     }

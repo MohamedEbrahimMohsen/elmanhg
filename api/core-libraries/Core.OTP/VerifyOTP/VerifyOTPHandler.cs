@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Core.OTP.VerifyOTP;
 
-public sealed class VerifyOTPHandler(IOtpRepository otpRepository, IOtpHasher otpHasher) : IRequestHandler<VerifyOTPCommand, VerifyOTPResult>
+public sealed class VerifyOTPHandler(IOtpRepository otpRepository, IOtpHasher otpHasher, TimeProvider timeProvider) : IRequestHandler<VerifyOTPCommand, VerifyOTPResult>
 {
     public async Task<VerifyOTPResult> Handle(VerifyOTPCommand request,CancellationToken cancellationToken)
     {
@@ -18,7 +18,7 @@ public sealed class VerifyOTPHandler(IOtpRepository otpRepository, IOtpHasher ot
             throw new BadRequestCoreException(ErrorCodes.OtpInvalid);
         }
 
-        var errorCode = otp.Verify(codeHash);
+        var errorCode = otp.Verify(codeHash, timeProvider.GetUtcNow());
         await otpRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         if (errorCode == ErrorCodes.OTPReachedMaxAttempts)

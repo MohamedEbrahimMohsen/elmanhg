@@ -1,8 +1,8 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
+using Core.Storage;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Questions.Shared;
-using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.Lessons;
 using MediatR;
 
@@ -12,16 +12,9 @@ public sealed class UploadDiagramImageHandler(ILessonRepository lessonRepository
 {
     public async Task<UploadDiagramImageResult> Handle(UploadDiagramImageCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        _ = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
-        var lesson = await lessonRepository.GetByIdAsync(request.LessonId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        if (lesson is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.LessonNotFound);
-        }
+        var lesson = await lessonRepository.GetRequiredAsync(request.LessonId, ErrorCodes.LessonNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
 
         var file = request.File!;
         var key = $"{DiagramImageKey.StorageFolder}/{lesson.Id}/{Guid.NewGuid():N}{Path.GetExtension(file.FileName).ToLowerInvariant()}";

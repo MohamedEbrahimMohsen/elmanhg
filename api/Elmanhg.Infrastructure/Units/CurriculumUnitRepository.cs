@@ -1,3 +1,4 @@
+using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.Units;
 using Elmanhg.Infrastructure.Data.Context;
@@ -5,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.Units;
 
-public class CurriculumUnitRepository(AppDbContext context) : Repository<CurriculumUnit>(context), ICurriculumUnitRepository
+public class CurriculumUnitRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<CurriculumUnit>(context, currentUser, timeProvider), ICurriculumUnitRepository
 {
     public async Task<bool> AnyInSubjectAsync(Guid subjectId, CancellationToken cancellationToken)
     {

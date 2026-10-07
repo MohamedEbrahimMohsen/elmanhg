@@ -31,7 +31,7 @@ public class CoreRequestLoggingMiddleware(RequestDelegate next, IHostEnvironment
         {
             try
             {
-                await _next(context);
+                await _next(context).ConfigureAwait(false);
             }
             finally
             {

@@ -119,6 +119,7 @@ A story that adds an options section holding a secret or a per-host value must a
 | `CoreJwt__Key` | yes | empty | secret |
 | `CoreJwt__ExpirationHours` / `CoreJwt__RefreshTokenExpirationDays` | no | `1` / `7` | |
 | `CoreOtp__Secret` | yes | empty | secret; HMAC key of OTP codes |
+| `CoreHttp__UserAgent` | no | `Elmanhg/1.0` | User-Agent sent on every outbound provider call (OTP, email, WhatsApp, SMS, Paymob, AI service) |
 | `TrainingData__StudentIdHashKey` | yes (every environment except Development and Testing) | empty | secret; HMAC key of student ids in training records; the API refuses to start without it outside Development and Testing |
 | `AdminSeed__Email` / `AdminSeed__Password` / `AdminSeed__DisplayName` | first start | empty | the admin is created on the first start when missing; an empty email skips the seed |
 | `CoreLogging__Trace__Cluster` | no | `Local` | log label, for example `production` |

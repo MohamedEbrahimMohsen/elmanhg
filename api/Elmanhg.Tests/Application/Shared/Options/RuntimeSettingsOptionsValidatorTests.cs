@@ -1,3 +1,4 @@
+using Core.Settings;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
@@ -37,6 +38,6 @@ public sealed class RuntimeSettingsOptionsValidatorTests
             new GradingRuntimeSettings(Microsoft.Extensions.Options.Options.Create(new EssayGradingOptions()), Microsoft.Extensions.Options.Options.Create(new MathStepGradingOptions())),
             new UploadRuntimeSettings(askTeacherOptions),
         ];
-        return new RuntimeSettingsOptionsValidator(groups);
+        return new RuntimeSettingsOptionsValidator(groups, Enum.GetNames<RuntimeSettingGroup>());
     }
 }

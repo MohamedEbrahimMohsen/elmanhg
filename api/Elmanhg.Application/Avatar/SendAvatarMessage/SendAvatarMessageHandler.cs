@@ -1,11 +1,10 @@
-using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
+using Core.Settings;
 using Elmanhg.Application.Avatar.Shared;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.RichText;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.Avatar;
 using Elmanhg.Domain.Lessons;
@@ -23,12 +22,7 @@ public sealed partial class SendAvatarMessageHandler(ISessionRepository sessionR
 {
     public async Task<AvatarReplyResult> Handle(SendAvatarMessageCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var now = timeProvider.GetUtcNow();
         await AvatarGate.EnsureNoExamInProgressAsync(userId, sessionRepository, examsOptions.Value, now, cancellationToken).ConfigureAwait(false);
         var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, runtimeSettings, userId, subscriptionsOptions.Value, now, cancellationToken).ConfigureAwait(false);

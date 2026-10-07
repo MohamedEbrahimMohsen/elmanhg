@@ -1,7 +1,7 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
+using Core.Settings;
 using Elmanhg.Application.Exceptions;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.TeacherThreads.Shared;
 using Elmanhg.Domain.SlaCalendars;
 using Elmanhg.Domain.TeacherThreads;
@@ -14,13 +14,8 @@ public sealed class FollowUpTeacherThreadHandler(ITeacherThreadRepository teache
 {
     public async Task<TeacherThreadResult> Handle(FollowUpTeacherThreadCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
-        var thread = await teacherThreadRepository.FirstOrDefaultAsync(x => x.Id == request.ThreadId && x.StudentId == userId, cancellationToken, include: query => query.Include(x => x.Messages)).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.TeacherThreadNotFound);
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
+        var thread = await teacherThreadRepository.GetRequiredAsync(x => x.Id == request.ThreadId && x.StudentId == userId, ErrorCodes.TeacherThreadNotFound, cancellationToken, include: query => query.Include(x => x.Messages)).ConfigureAwait(false);
 
         var slaPolicy = await TeacherThreadSlaPolicyLoader.LoadAsync(runtimeSettings, examPeriodRepository, cancellationToken).ConfigureAwait(false);
         var now = timeProvider.GetUtcNow();

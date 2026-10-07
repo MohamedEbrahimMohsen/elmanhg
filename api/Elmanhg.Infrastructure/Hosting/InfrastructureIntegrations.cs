@@ -1,13 +1,13 @@
+using Core.OTP.Delivery;
+using Core.OTP.Delivery.Email;
+using Core.OTP.Delivery.Sms;
+using Core.OTP.Delivery.WhatsApp;
+using Core.Storage;
 using Elmanhg.Application.Configuration.Shared;
 using Elmanhg.Infrastructure.AiService;
 using Elmanhg.Infrastructure.Invitations;
 using Elmanhg.Infrastructure.Messaging;
-using Elmanhg.Infrastructure.OtpDelivery;
-using Elmanhg.Infrastructure.OtpDelivery.Email;
-using Elmanhg.Infrastructure.OtpDelivery.Sms;
-using Elmanhg.Infrastructure.OtpDelivery.WhatsApp;
 using Elmanhg.Infrastructure.Payments;
-using Elmanhg.Infrastructure.Storage;
 
 namespace Elmanhg.Infrastructure.Hosting;
 

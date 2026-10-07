@@ -1,7 +1,8 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
+using Core.Settings;
 using Elmanhg.Application.Exceptions;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Domain.Avatar;
 using MediatR;
@@ -12,21 +13,17 @@ public sealed class DeleteMyAvatarConversationHandler(IAvatarConversationReposit
 {
     public async Task Handle(DeleteMyAvatarConversationCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var studentId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         if (!await runtimeSettings.GetAsync(FeatureFlagRuntimeSettings.StudentsCanDeleteAvatarChats, cancellationToken).ConfigureAwait(false))
         {
             throw new BusinessRuleViolationCoreException(ErrorCodes.AvatarConversationDeletionDisabled);
         }
 
-        var studentId = currentUserService.UserId.Value;
         var now = timeProvider.GetUtcNow();
         await avatarConversationRepository.ExecuteInTransactionAsync(async token =>
         {
-            var conversation = await avatarConversationRepository.FirstOrDefaultAsync(x => x.Id == request.ConversationId && x.StudentId == studentId, token).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.AvatarConversationNotFound);
+            var conversation = await avatarConversationRepository.GetRequiredAsync(x => x.Id == request.ConversationId && x.StudentId == studentId, ErrorCodes.AvatarConversationNotFound, token).ConfigureAwait(false);
             await avatarConversationRepository.EraseMessagesAsync(conversation.Id, token).ConfigureAwait(false);
             conversation.Delete(now);
             await avatarConversationRepository.SaveChangesAsync(token).ConfigureAwait(false);

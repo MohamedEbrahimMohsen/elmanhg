@@ -1,5 +1,5 @@
+using Core.Storage;
 using Elmanhg.Application.Shared.RichText;
-using Elmanhg.Infrastructure.Storage;
 using Ganss.Xss;
 using Microsoft.Extensions.Options;
 
@@ -17,7 +17,7 @@ public sealed class RichTextSanitizer : IRichTextSanitizer
 
     public RichTextSanitizer(IOptions<FileStorageOptions> fileStorageOptions)
     {
-        _imageUrlPrefix = $"{fileStorageOptions.Value.PublicBaseUrl.TrimEnd('/')}/";
+        _imageUrlPrefix = fileStorageOptions.Value.GetPublicUrl(string.Empty);
         _sanitizer = new HtmlSanitizer();
         _sanitizer.AllowedTags.Clear();
         _sanitizer.AllowedTags.UnionWith(AllowedTags);

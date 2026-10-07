@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Subjects;
@@ -10,18 +10,11 @@ public sealed class UpdateSubjectHandler(ISubjectRepository subjectRepository, I
 {
     public async Task Handle(UpdateSubjectCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
-        var subject = await subjectRepository.GetByIdAsync(request.SubjectId, cancellationToken).ConfigureAwait(false);
-        if (subject is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.SubjectNotFound);
-        }
+        var subject = await subjectRepository.GetRequiredAsync(request.SubjectId, ErrorCodes.SubjectNotFound, cancellationToken).ConfigureAwait(false);
 
-        subject.Rename(request.Name, currentUserService.UserId.Value);
+        subject.Rename(request.Name, userId);
 
         await subjectRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }

@@ -1,6 +1,10 @@
+using Core.Http;
+using Core.Identity.Tokens.RefreshToken;
+using Core.Spreadsheets;
+using Core.Storage;
 using Elmanhg.Application.Configuration.Shared;
+using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.RichText;
-using Elmanhg.Application.Shared.Spreadsheets;
 using Elmanhg.Domain.Analytics;
 using Elmanhg.Domain.Avatar;
 using Elmanhg.Domain.ContentRetrieval;
@@ -43,8 +47,6 @@ using Elmanhg.Infrastructure.RichText;
 using Elmanhg.Infrastructure.RuntimeSettings;
 using Elmanhg.Infrastructure.Sessions;
 using Elmanhg.Infrastructure.SlaCalendars;
-using Elmanhg.Infrastructure.Spreadsheets;
-using Elmanhg.Infrastructure.Storage;
 using Elmanhg.Infrastructure.Subjects;
 using Elmanhg.Infrastructure.Subscriptions;
 using Elmanhg.Infrastructure.TeacherThreads;
@@ -53,27 +55,31 @@ using Elmanhg.Infrastructure.TrainingData;
 using Elmanhg.Infrastructure.TrainingExports;
 using Elmanhg.Infrastructure.Units;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Infrastructure;
 
 public static class DependencyInjection
 {
+    // Product token sent on every outbound provider call unless CoreHttp:UserAgent overrides it.
+    private const string DefaultUserAgent = "Elmanhg/1.0";
+
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
+        services.AddCoreHttp(DefaultUserAgent);
         services.AddOtpDelivery();
         services.AddInvitationEmail();
         services.AddMessaging();
         services.AddPayments();
         services.AddAiService();
-        services.AddFileStorage();
+        services.AddCoreFileStorage();
         services.AddTrainingData();
-        services.AddOptions<ReverseProxyOptions>().BindConfiguration(ReverseProxyOptions.SectionName).ValidateOnStart();
-        services.AddSingleton<IValidateOptions<ReverseProxyOptions>, ReverseProxyOptionsValidator>();
         services.AddSingleton<IRichTextSanitizer, RichTextSanitizer>();
         services.AddSingleton<IRichTextExtractor, RichTextExtractor>();
-        services.AddSingleton<ISpreadsheetReader, ClosedXmlSpreadsheetReader>();
-        services.AddSingleton<ISpreadsheetWriter, ClosedXmlSpreadsheetWriter>();
+        services.AddCoreSpreadsheets(options =>
+        {
+            options.UnreadableErrorCode = ErrorCodes.SpreadsheetUnreadable;
+            options.RightToLeft = true;
+        });
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IIssuedRefreshTokenRepository, IssuedRefreshTokenRepository>();
         services.AddScoped<ISubjectRepository, SubjectRepository>();

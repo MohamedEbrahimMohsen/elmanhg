@@ -1,6 +1,6 @@
+using Core.Settings;
 using Core.Validation.Extensions;
 using Elmanhg.Application.Exceptions;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using FluentValidation;
 
@@ -21,9 +21,7 @@ public sealed class RecordVoiceDraftValidator : AbstractValidator<RecordVoiceDra
         RuleFor(x => x.Audio)
             .Must(file => file is null || TeacherVoiceFormats.HasAllowedMediaType(file))
             .WithErrorCode(ErrorCodes.TeacherVoiceAudioTypeInvalid);
-        RuleFor(x => x.Audio)
-            .Must(file => file is null || file.Length == 0 || TeacherVoiceFormats.HasMatchingSignature(file))
-            .WithErrorCode(ErrorCodes.TeacherVoiceAudioTypeInvalid);
+        RuleFor(x => x.Audio).ValidateFileSignature(TeacherVoiceFormats.Signatures, ErrorCodes.TeacherVoiceAudioTypeInvalid).When(x => x.Audio is { Length: > 0 });
         RuleFor(x => x.DurationSeconds)
             .MustAsync(async (seconds, cancellationToken) => seconds >= 1 && seconds <= await runtimeSettings.GetAsync(UploadRuntimeSettings.VoiceReplyMaxDurationSeconds, cancellationToken).ConfigureAwait(false))
             .WithErrorCode(ErrorCodes.TeacherVoiceDurationInvalid);

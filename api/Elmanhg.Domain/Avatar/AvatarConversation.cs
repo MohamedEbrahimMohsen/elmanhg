@@ -1,8 +1,9 @@
 using Core.DDD.Entities;
+using Core.DDD.Time;
 
 namespace Elmanhg.Domain.Avatar;
 
-public class AvatarConversation : AuditEntity, IAuditedEntity
+public class AvatarConversation : AuditEntity, IAuditedEntity, IVersioned
 {
     public Guid StudentId { get; private set; }
     public AvatarEntryPoint EntryPoint { get; private set; }
@@ -21,7 +22,7 @@ public class AvatarConversation : AuditEntity, IAuditedEntity
 
     public static AvatarConversation Start(Guid studentId, AvatarEntryPoint entryPoint, Guid? subjectId, Guid? unitId, Guid? lessonId, Guid? sessionId, Guid? questionId, DateTimeOffset startedAt)
     {
-        var at = ToMicroseconds(startedAt);
+        var at = startedAt.TruncateToMicroseconds();
         return new AvatarConversation(Guid.NewGuid(), studentId)
         {
             StudentId = studentId,
@@ -50,8 +51,8 @@ public class AvatarConversation : AuditEntity, IAuditedEntity
 
     public void RecordExchange(string question, AvatarAssistantReply reply, DateTimeOffset askedAt, DateTimeOffset repliedAt)
     {
-        var asked = ToMicroseconds(askedAt);
-        var replied = ToMicroseconds(repliedAt);
+        var asked = askedAt.TruncateToMicroseconds();
+        var replied = repliedAt.TruncateToMicroseconds();
         var studentMessage = AvatarMessage.FromStudent(Id, MessageCount, question.Trim(), asked);
         var assistantMessage = AvatarMessage.FromAssistant(Id, MessageCount + 1, reply, replied);
         Messages.Add(studentMessage);
@@ -65,14 +66,10 @@ public class AvatarConversation : AuditEntity, IAuditedEntity
 
     public void Delete(DateTimeOffset deletedAt)
     {
-        var at = ToMicroseconds(deletedAt);
-        SoftDelete();
-        DeletedAt = at;
+        var at = deletedAt.TruncateToMicroseconds();
+        SoftDelete(at);
         MessageCount = 0;
         UpdatedBy = StudentId;
         UpdationDate = at;
     }
-
-    // PostgreSQL timestamptz keeps microseconds; truncating keeps the returned result equal to what is stored.
-    private static DateTimeOffset ToMicroseconds(DateTimeOffset value) => value.AddTicks(-(value.Ticks % TimeSpan.TicksPerMicrosecond));
 }

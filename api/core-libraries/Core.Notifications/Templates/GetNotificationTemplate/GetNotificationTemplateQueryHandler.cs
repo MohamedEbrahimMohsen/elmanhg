@@ -1,8 +1,7 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Core.Notifications.Exceptions;
 using Core.Notifications.Repositories;
-using Core.Notifications.Templates.Shared;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 
@@ -12,12 +11,7 @@ public sealed class GetNotificationTemplateQueryHandler(INotificationTemplateRep
 {
     public async Task<GetNotificationTemplateResult> Handle(GetNotificationTemplateQuery request, CancellationToken cancellationToken)
     {
-        var notificationTemplate = await notificationTemplateRepository.FirstOrDefaultAsync(x => x.Code.ToUpper() == request.Code.ToUpper(), cancellationToken).ConfigureAwait(false);
-
-        if (notificationTemplate == null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.NotificationTemplateNotFound);
-        }
+        var notificationTemplate = await notificationTemplateRepository.GetRequiredAsync(x => x.Code.ToUpper() == request.Code.ToUpper(), ErrorCodes.NotificationTemplateNotFound, cancellationToken).ConfigureAwait(false);
 
         return new GetNotificationTemplateResult(notificationTemplate.Id, notificationTemplate.Code, notificationTemplate.Title, notificationTemplate.Content, notificationTemplate.DeepLink, notificationTemplate.ImageUrl, notificationTemplate.IsSystemReserved);
     }

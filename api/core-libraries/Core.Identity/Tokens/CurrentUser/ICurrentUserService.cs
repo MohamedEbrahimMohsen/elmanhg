@@ -1,12 +1,10 @@
-﻿namespace Core.Identity.Tokens.CurrentUser;
+﻿using Core.DDD.Identity;
 
-public interface ICurrentUserService
+namespace Core.Identity.Tokens.CurrentUser;
+
+public interface ICurrentUserService : ICurrentUser
 {
-    Guid? UserId { get; }
-    string? NationalId { get; }
-    string? UserName { get; }
     string? PhoneNumber { get; }
-    string? LoginType { get; }
     long? CreatedAtUnixTimeSeconds { get; }
     string? GetClaim(string claimName);
 }

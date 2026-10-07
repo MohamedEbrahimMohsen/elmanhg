@@ -12,7 +12,6 @@ public sealed class GetTrainingExportsValidator : AbstractValidator<GetTrainingE
     {
         var options = trainingExportsOptions.Value;
 
-        RuleFor(x => x.PageNumber).ValidateMin(1, ErrorCodes.TrainingExportPageNumberInvalid);
-        RuleFor(x => x.PageSize).ValidateRange(1, options.ListMaxPageSize, ErrorCodes.TrainingExportPageSizeInvalid);
+        RuleFor(x => x).ValidatePaging(x => x.PageNumber, x => x.PageSize, options.ListMaxPageSize, ErrorCodes.TrainingExportPageNumberInvalid, ErrorCodes.TrainingExportPageSizeInvalid);
     }
 }

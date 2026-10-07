@@ -2,7 +2,7 @@
 using Core.DDD.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Core.EntityFramework.Context;
+namespace Core.EntityFrameworkCore.Context;
 
 public static class SeedLocalizedExtensions
 {

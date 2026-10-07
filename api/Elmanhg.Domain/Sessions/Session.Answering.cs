@@ -1,3 +1,4 @@
+using Core.DDD.Time;
 using Core.Errors;
 using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Questions.Schemas;
@@ -59,7 +60,7 @@ public partial class Session
         }
 
         EnsureNotSubmitted();
-        var now = UtcNowToMicroseconds();
+        var now = DateTimeOffset.UtcNow.TruncateToMicroseconds();
         var attempt = Attempt.Create(this, item, answer, grade, MeasureTimeTaken(LastActivityAt, now, reportedTimeTakenMilliseconds), now, AttemptGrader.Auto);
         Attempts.Add(attempt);
         Touch(now);

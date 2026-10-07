@@ -1,8 +1,8 @@
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
+using Core.Settings;
 using Elmanhg.Application.Configuration.Shared;
 using Elmanhg.Application.Exceptions;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Domain.RuntimeSettings;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
@@ -13,12 +13,7 @@ public sealed class ResetRuntimeSettingHandler(IRuntimeSettingOverrideRepository
 {
     public async Task<RuntimeSettingResult> Handle(ResetRuntimeSettingCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var definition = registry.Find(request.Key) ?? throw new NotFoundCoreException(ErrorCodes.RuntimeSettingNotFound);
         var rows = await runtimeSettingOverrideRepository.GetAllAsync(cancellationToken).ConfigureAwait(false) ?? [];
         var values = RuntimeSettingValues.From(registry, rows);

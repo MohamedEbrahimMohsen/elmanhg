@@ -218,4 +218,16 @@ public sealed class LessonLifecycleTests
     }
 
     private Lesson NewLesson() => Lesson.Create(_unit, "Newton's laws", 1, _createdBy);
+
+    [Fact]
+    public void Delete_Draft_StampsDeletedAtWithUpdationDate()
+    {
+        var lesson = NewLesson();
+        lesson.Update("Newton's laws", string.Empty, string.Empty, null, [new LessonObjectiveContent(null, "First")], _createdBy);
+
+        lesson.Delete(false, _actor);
+
+        lesson.DeletedAt.Should().NotBeNull().And.Be(lesson.UpdationDate);
+        lesson.Objectives.Should().OnlyContain(x => x.DeletedAt != null);
+    }
 }

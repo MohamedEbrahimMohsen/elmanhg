@@ -2,6 +2,7 @@ using Core.Auditing;
 using Core.CQRS;
 using Core.EntityFrameworkCore;
 using Core.Exceptions;
+using Core.Hosting;
 using Core.Identity;
 using Core.Localization;
 using Core.Logging;
@@ -98,6 +99,7 @@ builder.Services.AddHostedService<TrainingExportRetentionWorker>();
 builder.Services.AddElmanhgRealtime();
 builder.Services.AddActiveUserTokenValidation();
 builder.Services.AddAppRateLimiting();
+builder.Services.AddCoreReverseProxy();
 #endregion
 
 builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
@@ -106,16 +108,16 @@ var app = builder.Build();
 
 if (!isBuildTimeOpenApiGeneration)
 {
-    PlaceholderSecretGuard.EnsureReplaced(app.Configuration, app.Environment);
+    AppSecretGuard.EnsureReplaced(app.Configuration, app.Environment);
 }
 
 #region DEPLOY-TIME MIGRATION
 // The compose `migrate` service runs `--MigrateAndExit=true`: apply pending migrations, then exit before the seed and the HTTP pipeline.
-if (MigrationCommand.IsRequested(app.Configuration))
+if (MigrationCommand<AppDbContext>.IsRequested(app.Configuration))
 {
     try
     {
-        await MigrationCommand.RunAsync(app.Services, CancellationToken.None);
+        await MigrationCommand<AppDbContext>.RunAsync(app.Services, CancellationToken.None);
     }
     finally
     {
@@ -165,13 +167,14 @@ app.UseCoreLocalization(builder.Configuration);
 
 app.UseMiddleware<CoreRequestLoggingMiddleware>();
 
+// Inside request logging (it reads the error code) and before authorization, so failures in auth handlers and media get the standard error body.
+app.UseMiddleware<CoreExceptionMiddleware>();
+
 app.UseHttpsRedirection();
 
 app.UseMediaStorage();
 
 app.UseAuthorization();
-
-app.UseMiddleware<CoreExceptionMiddleware>();
 
 app.UseRateLimiter();
 

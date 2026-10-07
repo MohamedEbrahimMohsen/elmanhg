@@ -1,11 +1,12 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
+using Core.Spreadsheets;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Questions.Shared;
 using Elmanhg.Application.Questions.Shared.Import;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.RichText;
-using Elmanhg.Application.Shared.Spreadsheets;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Domain.Units;
@@ -19,10 +20,7 @@ public sealed class ImportQuestionsHandler(ILessonRepository lessonRepository, I
 {
     public async Task<ImportQuestionsResult> Handle(ImportQuestionsCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         var content = await QuestionImportFile.ReadAsync(request.File!, cancellationToken).ConfigureAwait(false);
         var hash = QuestionImportFile.Hash(content);
@@ -38,11 +36,7 @@ public sealed class ImportQuestionsHandler(ILessonRepository lessonRepository, I
             throw new NotFoundCoreException(ErrorCodes.LessonNotFound);
         }
 
-        var unit = await unitRepository.GetByIdAsync(lesson.UnitId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        if (unit is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.UnitNotFound);
-        }
+        var unit = await unitRepository.GetRequiredAsync(lesson.UnitId, ErrorCodes.UnitNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
 
         var parse = await QuestionImportParser.ParseAsync(content, lesson, spreadsheetReader, questionValidator, contentOptions.Value, cancellationToken).ConfigureAwait(false);
         if (parse.Errors.Count > 0)
@@ -50,7 +44,6 @@ public sealed class ImportQuestionsHandler(ILessonRepository lessonRepository, I
             throw new BusinessRuleViolationCoreException(ErrorCodes.QuestionImportHasErrors, context: new Dictionary<string, object> { ["count"] = parse.Errors.Count });
         }
 
-        var userId = currentUserService.UserId.Value;
         var batch = QuestionImportBatch.Create(request.BatchId, lesson.Id, hash, parse.Rows.Count, userId);
         var questions = parse.Rows
             .Select(x => Question.CreateImported(lesson, unit, x.Fields.Type.GetValueOrDefault(), QuestionContentFactory.CreateContent(x.Fields, richTextSanitizer), QuestionContentFactory.CreateMetadata(x.Fields), batch.Id, userId))

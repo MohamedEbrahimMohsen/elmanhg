@@ -1,3 +1,4 @@
+using Core.DDD.Time;
 using Core.Errors;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
@@ -25,8 +26,7 @@ public static class AvatarGate
 
     public static async Task<int> CountMessagesTodayAsync(Guid studentId, IAvatarMessageUsageRepository repository, SubscriptionsOptions options, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        var zone = TimeZoneInfo.FindSystemTimeZoneById(options.DailyQuotaTimeZone);
-        var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(now, zone).DateTime);
+        var today = TimeZoneInfo.FindSystemTimeZoneById(options.DailyQuotaTimeZone).LocalDate(now);
         return await repository.CountOnDayAsync(studentId, options.DailyQuotaTimeZone, today, cancellationToken).ConfigureAwait(false);
     }
 

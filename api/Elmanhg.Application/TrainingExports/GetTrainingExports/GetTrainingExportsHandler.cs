@@ -11,15 +11,6 @@ public sealed class GetTrainingExportsHandler(ITrainingExportRepository training
     {
         var page = await trainingExportRepository.FindPaginatedAsync(request.PageNumber, request.PageSize, cancellationToken, orderBy: query => query.OrderByDescending(x => x.RequestedAt).ThenByDescending(x => x.Id), asNoTracking: true).ConfigureAwait(false);
 
-        return new PageData<TrainingExportResult>
-        {
-            Items = page.Items
-                .Select(TrainingExportResultGenerator.Generate)
-                .ToList(),
-            PageNumber = page.PageNumber,
-            PageSize = page.PageSize,
-            TotalItems = page.TotalItems,
-            TotalPages = page.TotalPages,
-        };
+        return page.Map(TrainingExportResultGenerator.Generate);
     }
 }

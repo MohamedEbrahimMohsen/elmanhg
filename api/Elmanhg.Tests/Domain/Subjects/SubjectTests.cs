@@ -107,4 +107,25 @@ public sealed class SubjectTests
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.SubjectHasUnits);
         subject.IsDeleted.Should().BeFalse();
     }
+
+    [Fact]
+    public void Delete_NoUnits_StampsDeletedAtWithUpdationDate()
+    {
+        var subject = Subject.Create("Physics", 1, _createdBy);
+
+        subject.Delete(false, Guid.NewGuid());
+
+        subject.DeletedAt.Should().NotBeNull().And.Be(subject.UpdationDate);
+    }
+
+    [Fact]
+    public void Delete_HasUnits_LeavesDeletedAtNull()
+    {
+        var subject = Subject.Create("Physics", 1, _createdBy);
+
+        var act = () => subject.Delete(true, Guid.NewGuid());
+
+        act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.SubjectHasUnits);
+        subject.DeletedAt.Should().BeNull();
+    }
 }

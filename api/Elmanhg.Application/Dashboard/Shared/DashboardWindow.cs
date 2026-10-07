@@ -1,3 +1,4 @@
+using Core.DDD.Time;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Domain.SharedKernel;
 
@@ -15,16 +16,9 @@ public sealed record DashboardWindow(DateOnly From, DateOnly To, DateOnly Today,
 
     public MetricsWindow ToMetricsWindow() => new(Start, End, TimeZone);
 
-    public DateTimeOffset StartOfDay(DateOnly day)
-    {
-        var zone = TimeZoneInfo.FindSystemTimeZoneById(TimeZone);
-        var wallClock = new DateTimeOffset(day.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
-        // Egypt springs forward at local midnight, so that midnight does not exist; ConvertTimeToUtc would throw on it.
-        var offset = zone.GetUtcOffset(wallClock - zone.GetUtcOffset(wallClock));
-        return (wallClock - offset).ToUniversalTime();
-    }
+    public DateTimeOffset StartOfDay(DateOnly day) => TimeZoneInfo.FindSystemTimeZoneById(TimeZone).StartOfDay(day);
 
-    public static DateOnly LocalDay(DateTimeOffset now, string timeZone) => DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(now, TimeZoneInfo.FindSystemTimeZoneById(timeZone)).DateTime);
+    public static DateOnly LocalDay(DateTimeOffset now, string timeZone) => TimeZoneInfo.FindSystemTimeZoneById(timeZone).LocalDate(now);
 
     public static DashboardWindow Resolve(DateOnly? from, DateOnly? to, DateTimeOffset now, DashboardOptions options)
     {

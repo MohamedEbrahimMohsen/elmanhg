@@ -1,9 +1,9 @@
+using Core.OTP.Delivery;
+using Core.Storage;
 using Elmanhg.Application.Configuration.Shared;
 using Elmanhg.Infrastructure.AiService;
 using Elmanhg.Infrastructure.Messaging;
-using Elmanhg.Infrastructure.OtpDelivery;
 using Elmanhg.Infrastructure.Payments;
-using Elmanhg.Infrastructure.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;

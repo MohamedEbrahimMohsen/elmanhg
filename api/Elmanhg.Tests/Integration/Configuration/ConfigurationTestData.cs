@@ -1,5 +1,5 @@
 using Core.Auditing.Entities;
-using Elmanhg.Application.Shared.RuntimeSettings;
+using Core.Settings;
 using Elmanhg.Domain.RuntimeSettings;
 using Elmanhg.Infrastructure.Data.Context;
 using Elmanhg.Tests.Integration.Authorization;

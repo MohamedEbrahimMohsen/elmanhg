@@ -2,6 +2,7 @@ using Core.Errors;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Infrastructure.AiService;
+using Elmanhg.Tests.Core.Http;
 using Elmanhg.Tests.Infrastructure.OtpDelivery;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -78,7 +79,7 @@ public sealed class HttpAiEssayGradingClientTests
 
     private Task<AiEssayGradingResult> GradeAsync()
     {
-        var client = new HttpAiEssayGradingClient(new HttpClient(_handler) { BaseAddress = new Uri("http://ai.test/") }, Options.Create(AiServiceTestSettings.WithHttp()), NullLogger<HttpAiEssayGradingClient>.Instance);
+        var client = new HttpAiEssayGradingClient(new HttpClient(_handler) { BaseAddress = new Uri("http://ai.test/") }, Options.Create(AiServiceTestSettings.WithHttp()), CoreHttpTestSettings.Create(), NullLogger<HttpAiEssayGradingClient>.Instance);
         return client.GradeAsync(Request, TestContext.Current.CancellationToken);
     }
 }

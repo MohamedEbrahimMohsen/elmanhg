@@ -1,6 +1,8 @@
+using Core.Messaging.Email;
 using Elmanhg.Application.Shared.Email;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Infrastructure.Invitations;
+using Elmanhg.Tests.Core.Http;
 using Elmanhg.Tests.Infrastructure.OtpDelivery;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -54,5 +56,15 @@ public sealed class ResendInvitationEmailSenderTests
         sent.Should().BeFalse();
     }
 
-    private ResendInvitationEmailSender Sender() => new(new HttpClient(_handler) { BaseAddress = new Uri("https://api.resend.com/") }, Options.Create(OtpDeliveryTestSettings.WithResend()), Options.Create(new InvitationEmailOptions { AcceptInviteUrl = Link, Subject = "Elmanhg invitation" }), NullLogger<ResendInvitationEmailSender>.Instance);
+    [Fact]
+    public async Task SendAsync_NonTransientFailure_Throws()
+    {
+        _handler.Throw = new InvalidOperationException("unexpected provider fault");
+
+        var act = () => Sender().SendAsync(new InvitationEmail(Email, "Mona", UserRole.Teacher), TestContext.Current.CancellationToken);
+
+        await act.Should().ThrowAsync<InvalidOperationException>();
+    }
+
+    private ResendInvitationEmailSender Sender() => new(new ResendEmailClient(new HttpClient(_handler) { BaseAddress = new Uri("https://api.resend.com/") }, CoreHttpTestSettings.Create()), Options.Create(OtpDeliveryTestSettings.WithResend()), Options.Create(new InvitationEmailOptions { AcceptInviteUrl = Link, Subject = "Elmanhg invitation" }), NullLogger<ResendInvitationEmailSender>.Instance);
 }

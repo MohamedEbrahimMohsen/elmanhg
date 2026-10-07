@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.MathStepGrading.Shared;
@@ -11,13 +11,8 @@ public sealed class GetMathStepGradeHandler(IMathStepGradeRepository mathStepGra
 {
     public async Task<MathStepGradeResult> Handle(GetMathStepGradeQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
-        var grade = await mathStepGradeRepository.FirstOrDefaultAsync(x => x.SessionId == request.SessionId && x.QuestionId == request.QuestionId && x.StudentId == userId, cancellationToken, asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.MathStepGradeNotFound);
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
+        var grade = await mathStepGradeRepository.GetRequiredAsync(x => x.SessionId == request.SessionId && x.QuestionId == request.QuestionId && x.StudentId == userId, ErrorCodes.MathStepGradeNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
         return MathStepGradeResultGenerator.Generate(grade);
     }
 }

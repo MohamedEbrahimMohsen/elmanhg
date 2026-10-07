@@ -58,4 +58,12 @@ public sealed class GetUsersValidatorTests
 
         result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.UserListSearchTooLong);
     }
+
+    [Fact]
+    public void Validate_PageOffsetPastIntRange_FailsPageNumberInvalid()
+    {
+        var result = _validator.Validate(new GetUsersQuery(UserRole.Student, null, null, PageNumber: int.MaxValue, PageSize: 20));
+
+        result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.UserListPageNumberInvalid);
+    }
 }

@@ -8,19 +8,20 @@ using Microsoft.Extensions.Options;
 
 namespace Core.OTP.GenerateOTP;
 
-public sealed class GenerateOTPHandler(IOtpRepository otpRepository, IGenerator generator, IOtpHasher otpHasher, IOptions<OtpOptions> otpOptions, IOtpSender otpSender) : IRequestHandler<GenerateOTPCommand, GenerateOTPResult>
+public sealed class GenerateOTPHandler(IOtpRepository otpRepository, IGenerator generator, IOtpHasher otpHasher, IOptions<OtpOptions> otpOptions, IOtpSender otpSender, TimeProvider timeProvider) : IRequestHandler<GenerateOTPCommand, GenerateOTPResult>
 {
     private readonly OtpOptions _otpOptions = otpOptions.Value;
     public async Task<GenerateOTPResult> Handle(GenerateOTPCommand request, CancellationToken cancellationToken)
     {
         var (recipientType, recipient) = request.Email is { } email ? (OtpRecipientType.Email, email.Trim().ToLowerInvariant()) : (OtpRecipientType.Phone, request.PhoneNumber ?? string.Empty);
+        var now = timeProvider.GetUtcNow();
         var code = generator.Generate(size: _otpOptions.OtpLength, allowedCharacters: _otpOptions.AllowedCharacters);
-        var otp = await otpRepository.FindAsync(recipient, null, cancellationToken).ConfigureAwait(false);
+        var otp = await otpRepository.FindByRecipientAsync(recipient, cancellationToken).ConfigureAwait(false);
         var codeHash = otpHasher.Hash(code);
 
         if (otp is not null)
         {
-            otp.Reissue(codeHash, _otpOptions.ExpirationMinutes);
+            otp.Reissue(codeHash, _otpOptions.ExpirationMinutes, now);
         }
         else
         {
@@ -31,7 +32,8 @@ public sealed class GenerateOTPHandler(IOtpRepository otpRepository, IGenerator 
                              maxVerificationAttempts: _otpOptions.MaxVerificationAttempts,
                              reissueCooldownSeconds: _otpOptions.ReissueCooldownSeconds,
                              maxReissueCount: _otpOptions.MaxReissueCount,
-                             reissueBlockCooldownInHours: _otpOptions.ReissueBlockCooldownInHours);
+                             reissueBlockCooldownInHours: _otpOptions.ReissueBlockCooldownInHours,
+                             now: now);
             await otpRepository.AddAsync(otp, cancellationToken).ConfigureAwait(false);
         }
 

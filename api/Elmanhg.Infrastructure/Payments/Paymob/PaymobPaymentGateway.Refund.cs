@@ -1,9 +1,8 @@
 using Core.Errors;
+using Core.Http;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Payments;
-using Elmanhg.Infrastructure.OtpDelivery;
 using Microsoft.Extensions.Logging;
-using Polly;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -22,13 +21,13 @@ public sealed partial class PaymobPaymentGateway
             Content = JsonContent.Create(new PaymobRefundRequest(request.ProviderTransactionId, request.Amount.AmountMinor)),
         };
         message.Headers.Authorization = new AuthenticationHeaderValue(TokenScheme, paymentsOptions.Value.Paymob.SecretKey);
-        message.Headers.UserAgent.ParseAdd(OtpProviderHttpExtensions.UserAgent);
+        message.WithUserAgent(coreHttpOptions.Value.UserAgent);
         HttpResponseMessage response;
         try
         {
             response = await httpClient.SendAsync(message, cancellationToken).ConfigureAwait(false);
         }
-        catch (Exception exception) when (exception is HttpRequestException or ExecutionRejectedException || (exception is OperationCanceledException && !cancellationToken.IsCancellationRequested))
+        catch (Exception exception) when (exception.IsTransientFailure(cancellationToken))
         {
             logger.LogError(exception, "Paymob refund for payment {PaymentId} failed before a response arrived.", request.PaymentId);
             throw new ServiceUnavailableCoreException(ErrorCodes.PaymentGatewayUnavailable, innerException: exception);

@@ -1,8 +1,9 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
+using Core.Storage;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.QuestionValidation.Shared;
-using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
@@ -18,17 +19,8 @@ public sealed class GetValidationQuestionHandler(IQuestionRepository questionRep
 {
     public async Task<ValidationQuestionDetailResult> Handle(GetValidationQuestionQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
-        var question = await questionRepository.GetByIdAsync(request.QuestionId, cancellationToken, include: query => query.Include(x => x.Revisions).Include(x => x.Decisions), asNoTracking: true).ConfigureAwait(false);
-        if (question is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.QuestionNotFound);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
+        var question = await questionRepository.GetRequiredAsync(request.QuestionId, ErrorCodes.QuestionNotFound, cancellationToken, include: query => query.Include(x => x.Revisions).Include(x => x.Decisions), asNoTracking: true).ConfigureAwait(false);
 
         if (!await teacherSubjectRepository.IsAssignedAsync(userId, question.SubjectId, cancellationToken).ConfigureAwait(false))
         {

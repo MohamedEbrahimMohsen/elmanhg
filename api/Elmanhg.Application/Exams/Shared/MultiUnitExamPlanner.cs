@@ -1,3 +1,4 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.ExamBlueprints;
@@ -11,11 +12,7 @@ public static class MultiUnitExamPlanner
 {
     public static async Task<MultiUnitExamUnits> LoadUnitsAsync(Guid subjectId, IReadOnlyCollection<Guid> unitIds, ISubjectRepository subjectRepository, ICurriculumUnitRepository unitRepository, CancellationToken cancellationToken)
     {
-        var subject = await subjectRepository.GetByIdAsync(subjectId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        if (subject is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.SubjectNotFound);
-        }
+        var subject = await subjectRepository.GetRequiredAsync(subjectId, ErrorCodes.SubjectNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
 
         var units = await unitRepository.FindAsync(x => x.SubjectId == subjectId && unitIds.Contains(x.Id), cancellationToken, asNoTracking: true).ConfigureAwait(false);
         if (units.Count != unitIds.Distinct().Count())

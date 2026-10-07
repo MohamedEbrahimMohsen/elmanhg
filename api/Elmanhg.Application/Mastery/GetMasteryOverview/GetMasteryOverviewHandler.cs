@@ -1,9 +1,9 @@
-using Core.Errors;
+using Core.DDD.Time;
 using Core.Identity.Tokens.CurrentUser;
+using Core.Settings;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Mastery.Shared;
 using Elmanhg.Application.Shared.Options;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
@@ -20,20 +20,14 @@ public sealed class GetMasteryOverviewHandler(IQuestionMasteryRepository questio
 {
     public async Task<MasteryOverviewResult> Handle(GetMasteryOverviewQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var student = await userRepository.GetByIdAsync(userId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
         var lessons = await questionMasteryRepository.GetLessonCountsAsync(userId, null, cancellationToken).ConfigureAwait(false);
         var subjects = await subjectRepository.GetAllAsync(cancellationToken, orderBy: query => query.OrderBy(x => x.Order).ThenBy(x => x.CreationDate), asNoTracking: true).ConfigureAwait(false) ?? [];
 
         var options = progressOptions.Value;
-        var zone = TimeZoneInfo.FindSystemTimeZoneById(options.StreakTimeZone);
         var now = timeProvider.GetUtcNow();
-        var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(now, zone).DateTime);
+        var today = TimeZoneInfo.FindSystemTimeZoneById(options.StreakTimeZone).LocalDate(now);
         var activeDays = await sessionRepository.GetQuizActivityDaysAsync(userId, options.StreakTimeZone, now.AddDays(-options.StreakMaxDays), cancellationToken).ConfigureAwait(false);
 
         var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, runtimeSettings, userId, subscriptionsOptions.Value, now, cancellationToken).ConfigureAwait(false);

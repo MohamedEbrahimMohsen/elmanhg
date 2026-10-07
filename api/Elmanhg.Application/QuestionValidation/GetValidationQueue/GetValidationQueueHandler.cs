@@ -17,12 +17,7 @@ public sealed class GetValidationQueueHandler(IQuestionRepository questionReposi
 {
     public async Task<PageData<ValidationQueueItemResult>> Handle(GetValidationQueueQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var assignments = await teacherSubjectRepository.FindAsync(x => x.TeacherId == userId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
         var subjectIds = assignments
             .Select(x => x.SubjectId)
@@ -53,16 +48,7 @@ public sealed class GetValidationQueueHandler(IQuestionRepository questionReposi
         var lessonsById = lessons.ToDictionary(x => x.Id);
         var unitsById = units.ToDictionary(x => x.Id);
 
-        return new PageData<ValidationQueueItemResult>
-        {
-            Items = page.Items
-                .Select(x => Generate(x, lessonsById, unitsById, session))
-                .ToList(),
-            PageNumber = page.PageNumber,
-            PageSize = page.PageSize,
-            TotalItems = page.TotalItems,
-            TotalPages = page.TotalPages,
-        };
+        return page.Map(x => Generate(x, lessonsById, unitsById, session));
     }
 
     private async Task<ReviewSession?> ReadSessionAsync(Guid? reviewSessionId, Guid userId, CancellationToken cancellationToken)

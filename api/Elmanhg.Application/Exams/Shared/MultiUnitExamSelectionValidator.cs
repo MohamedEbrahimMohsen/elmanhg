@@ -13,8 +13,7 @@ public sealed class MultiUnitExamSelectionValidator : AbstractValidator<MultiUni
         RuleFor(x => x.UnitIds)
             .Must(list => list is not null && list.Count >= MultiUnitExamSizes.MinUnits)
             .WithErrorCode(ErrorCodes.MultiUnitExamUnitsTooFew)
-            .Must(list => list is null || list.Distinct().Count() == list.Count)
-            .WithErrorCode(ErrorCodes.MultiUnitExamUnitDuplicate);
+            .ValidateDistinct(ErrorCodes.MultiUnitExamUnitDuplicate);
         RuleForEach(x => x.UnitIds).ValidateRequired(ErrorCodes.UnitIdRequired);
         RuleFor(x => x.Size)
             .Must(MultiUnitExamSizes.IsAllowed)

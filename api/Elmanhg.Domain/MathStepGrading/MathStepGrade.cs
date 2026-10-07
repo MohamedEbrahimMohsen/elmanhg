@@ -1,15 +1,15 @@
 using Core.DDD.Entities;
+using Core.DDD.Models;
+using Core.DDD.Time;
 using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Questions.Schemas;
+using Elmanhg.Domain.SharedKernel;
 using System.Text.Json;
 
 namespace Elmanhg.Domain.MathStepGrading;
 
-public partial class MathStepGrade : AuditEntity
+public partial class MathStepGrade : AuditEntity, IRetriedWork, IVersioned
 {
-    // Matches the LastErrorCode column width.
-    private const int ErrorCodeMaxLength = 100;
-
     public Guid StudentId { get; private set; }
     public Guid SessionId { get; private set; }
     public Guid QuestionId { get; private set; }
@@ -20,9 +20,10 @@ public partial class MathStepGrade : AuditEntity
     public MathAnswerVerdict? FinalAnswerVerdict { get; private set; }
     public MathStepGradeStatus Status { get; private set; }
     public MathStepReviewReason? ReviewReason { get; private set; }
-    public int Attempts { get; private set; }
-    public DateTimeOffset? NextAttemptAt { get; private set; }
-    public string? LastErrorCode { get; private set; }
+    public RetrySchedule Retry { get; private set; } = default!;
+    public int Attempts => Retry.Attempts;
+    public DateTimeOffset? NextAttemptAt => Retry.NextAttemptAt;
+    public string? LastErrorCode => Retry.LastErrorCode;
     public DateTimeOffset RequestedAt { get; private set; }
     public DateTimeOffset? GradedAt { get; private set; }
     public decimal? Score { get; private set; }
@@ -51,7 +52,7 @@ public partial class MathStepGrade : AuditEntity
         }
 
         ArgumentOutOfRangeException.ThrowIfNegative(timeTakenMilliseconds);
-        var at = ToMicroseconds(requestedAt);
+        var at = requestedAt.TruncateToMicroseconds();
         return new MathStepGrade(Guid.NewGuid(), studentId)
         {
             StudentId = studentId,
@@ -63,21 +64,19 @@ public partial class MathStepGrade : AuditEntity
             Answer = answer,
             FinalAnswerVerdict = finalAnswerVerdict == MathAnswerVerdict.Unchecked ? null : finalAnswerVerdict,
             Status = MathStepGradeStatus.Pending,
-            Attempts = 0,
-            NextAttemptAt = at,
+            Retry = RetrySchedule.DueAt(at),
             RequestedAt = at,
             TimeTakenMilliseconds = timeTakenMilliseconds,
         };
     }
 
-    public bool IsDueAt(DateTimeOffset now) => Status == MathStepGradeStatus.Pending && NextAttemptAt <= now;
+    public bool IsDueAt(DateTimeOffset now) => Status == MathStepGradeStatus.Pending && Retry.IsDueAt(now);
+
+    public bool IsPending => Status == MathStepGradeStatus.Pending;
 
     public bool IsAwaitingApplication => Status == MathStepGradeStatus.Graded && AppliedAt is null;
 
     public MathStepsAnswer ReadAnswer() => JsonSerializer.Deserialize<MathStepsAnswer>(Answer, QuestionJson.SerializerOptions) ?? new MathStepsAnswer([], string.Empty);
 
     public IReadOnlyList<MathStepScore> ReadSteps() => Steps is null ? [] : JsonSerializer.Deserialize<List<MathStepScore>>(Steps, QuestionJson.SerializerOptions) ?? [];
-
-    // timestamptz stores whole microseconds; truncating keeps the first response identical to later reads.
-    private static DateTimeOffset ToMicroseconds(DateTimeOffset value) => value.AddTicks(-(value.Ticks % TimeSpan.TicksPerMicrosecond));
 }

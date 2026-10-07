@@ -1,7 +1,7 @@
-using Core.Errors;
+using Core.DDD.Repositories;
+using Core.Storage;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Questions.Shared;
-using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Domain.Questions;
 using MediatR;
 
@@ -11,11 +11,7 @@ public sealed class GetQuestionHandler(IQuestionRepository questionRepository, I
 {
     public async Task<QuestionDetailResult> Handle(GetQuestionQuery request, CancellationToken cancellationToken)
     {
-        var question = await questionRepository.GetByIdAsync(request.QuestionId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        if (question is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.QuestionNotFound);
-        }
+        var question = await questionRepository.GetRequiredAsync(request.QuestionId, ErrorCodes.QuestionNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
 
         return QuestionResultGenerator.GenerateDetail(question, fileStorage);
     }

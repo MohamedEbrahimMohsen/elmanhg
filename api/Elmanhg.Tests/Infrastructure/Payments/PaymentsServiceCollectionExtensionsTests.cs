@@ -61,6 +61,17 @@ public sealed class PaymentsServiceCollectionExtensionsTests
     }
 
     [Fact]
+    public void AddPayments_UnknownProvider_ThrowsUnsupportedProvider()
+    {
+        using var provider = BuildProvider(new() { ["Payments:Provider"] = "7" });
+        using var scope = provider.CreateScope();
+
+        var act = () => scope.ServiceProvider.GetRequiredService<IPaymentGateway>();
+
+        act.Should().Throw<InvalidOperationException>().WithMessage("*Payments:Provider*");
+    }
+
+    [Fact]
     public async Task AddPayments_PaymobServerError_MakesExactlyOneAttempt()
     {
         var handler = new StubHttpMessageHandler { StatusCode = HttpStatusCode.InternalServerError };

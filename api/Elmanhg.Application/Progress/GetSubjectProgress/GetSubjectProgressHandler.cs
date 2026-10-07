@@ -1,4 +1,3 @@
-using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Progress.Shared;
@@ -14,11 +13,8 @@ public sealed class GetSubjectProgressHandler(IQuestionMasteryRepository questio
 {
     public async Task<List<SubjectProgressResult>> Handle(GetSubjectProgressQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
-        return await SubjectProgressLoader.LoadAsync(questionMasteryRepository, sessionRepository, subjectRepository, unitRepository, currentUserService.UserId.Value, cancellationToken).ConfigureAwait(false);
+        return await SubjectProgressLoader.LoadAsync(questionMasteryRepository, sessionRepository, subjectRepository, unitRepository, userId, cancellationToken).ConfigureAwait(false);
     }
 }

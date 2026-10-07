@@ -1,3 +1,4 @@
+using Core.Validation.Extensions;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
 using FluentValidation;
@@ -12,7 +13,6 @@ public sealed class RequestTrainingExportValidator : AbstractValidator<RequestTr
         var options = trainingExportsOptions.Value;
 
         RuleFor(x => x.Source).IsInEnum().WithErrorCode(ErrorCodes.TrainingExportSourceInvalid);
-        RuleFor(x => x).Must(x => x.From < x.To).WithErrorCode(ErrorCodes.TrainingExportDateRangeInvalid);
-        RuleFor(x => x).Must(x => x.From >= x.To || x.To - x.From <= TimeSpan.FromDays(options.MaxRangeDays)).WithErrorCode(ErrorCodes.TrainingExportDateRangeTooWide);
+        RuleFor(x => x).ValidateDateRange(x => x.From, x => x.To, ErrorCodes.TrainingExportDateRangeInvalid, TimeSpan.FromDays(options.MaxRangeDays), ErrorCodes.TrainingExportDateRangeTooWide);
     }
 }

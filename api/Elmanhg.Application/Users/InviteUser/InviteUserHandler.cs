@@ -12,10 +12,7 @@ public sealed class InviteUserHandler(UserManager<User> userManager, IInvitation
 {
     public async Task<InviteUserResult> Handle(InviteUserCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         var email = request.Email.Trim();
         var displayName = request.DisplayName.Trim();
@@ -27,7 +24,7 @@ public sealed class InviteUserHandler(UserManager<User> userManager, IInvitation
         var user = request.Role == UserRole.Admin ? User.CreateAdmin(displayName, email) : User.CreateTeacher(displayName, email);
         if (request.PhoneNumber is not null)
         {
-            user.SetContactPhoneNumber(request.PhoneNumber, currentUserService.UserId.Value);
+            user.SetContactPhoneNumber(request.PhoneNumber, userId);
         }
 
         var result = await userManager.CreateAsync(user).ConfigureAwait(false);

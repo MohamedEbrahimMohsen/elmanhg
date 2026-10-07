@@ -58,7 +58,7 @@ The transcription job for one recording. It is created when the teacher uploads 
 | `AudioDurationSeconds` | Reported by the browser, 1..`VoiceMaxDurationSeconds`. |
 | `Status` | `Pending` → `Ready` or `Failed` → `Sent`, stored as a string. |
 | `Transcript`, `TranscriptionModel` | Set when the transcription succeeds (`varchar(100)` model id). |
-| `Attempts`, `NextAttemptAt` | Retry bookkeeping; `NextAttemptAt` is null once the draft leaves `Pending`. |
+| `Attempts`, `NextAttemptAt` | Retry bookkeeping (`RetrySchedule`, Core.DDD; the error code is not stored); `NextAttemptAt` is null once the draft leaves `Pending`. |
 | `RecordedAt`, `TranscribedAt`, `SentMessageId` | Microsecond-truncated times; the id of the voice message once sent. |
 
 Indexes: `(ThreadId, TeacherId)` and `NextAttemptAt` filtered on `Status = 'Pending'` for the worker. The table is in the global soft-delete filter.
@@ -148,7 +148,7 @@ The snapshot (`TeacherThreadContext`) keeps `subjectId`, `subjectName`, `unitId`
 - Voice replies (#96) are stored the same way, under `teacher-threads/{random}{ext}` with `.webm`, `.ogg` or `.m4a`.
 - **Photos and voice replies are private.** `GET /api/media/teacher-threads/...` is served only to an authenticated caller who is the owning student, a teacher assigned to the thread's subject, or an admin (`CanViewTeacherThreadMediaQuery`, which matches `ImageUrl` or `AudioUrl`, and `TeacherThreadMediaMiddleware`). Everyone else, including anonymous callers and unknown files, gets an empty `404`. Unsent draft audio is never served, not even to its teacher: only a sent message's `AudioUrl` passes the check. The response carries `nosniff` and `Cache-Control: private, no-store`.
 - The bytes are streamed through `IFileStorage.OpenReadAsync` for both providers (Local disk and S3). There are no presigned URLs: the bucket stays fully private and every read goes through the API's access check.
-- The public static-file mount for `/api/media` never serves anything inside `teacher-threads` (`PublicMediaFileProvider`), whatever the spelling of the path (case, doubled or encoded separators, trailing dots, `..`, `~` short names). With the S3 provider, public media (lesson images) goes through `PublicMediaMiddleware` instead, which refuses the same private folder in any spelling and any unsafe key, and sends `Cache-Control: public, max-age=31536000, immutable`.
+- The public static-file mount for `/api/media` never serves anything inside `teacher-threads` (`PublicMediaFileProvider` in `Core.Storage`), whatever the spelling of the path (case, doubled or encoded separators, trailing dots, `..`, `~` short names). With the S3 provider, public media (lesson images) goes through `PublicMediaMiddleware` (`Core.Storage`) instead, which refuses the same private folder in any spelling and any unsafe key, and sends `Cache-Control: public, max-age=31536000, immutable`. Both paths take the private folders from the app's single `MediaStorageExtensions.PrivateFolders` list.
 - The web loads the photo and the audio with the signed-in session (`http` mutator) and shows them as data URLs, because `<img>` and `<audio>` cannot send the bearer token.
 
 ## Voice replies (#96)

@@ -1,11 +1,12 @@
+using Core.DDD.Repositories;
 using Core.Errors;
+using Core.Settings;
 using Elmanhg.Application.EssayGrading.Shared;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.MathStepGrading.Shared;
 using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.Shared.RichText;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Shared.RuntimeSettings.Definitions;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.MathStepGrading;
@@ -40,7 +41,7 @@ public sealed class GradeMathStepsHandler(IMathStepGradeRepository mathStepGrade
         var questionGrade = revision.GradeMathSteps(verdict, null);
         if (MathStepsGrader.NeedsStepGrading(spec, answer))
         {
-            var question = await questionRepository.FirstOrDefaultAsync(x => x.Id == grade.QuestionId, cancellationToken, asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.QuestionNotFound);
+            var question = await questionRepository.GetRequiredAsync(x => x.Id == grade.QuestionId, ErrorCodes.QuestionNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
             var context = await EssayGradingContextLoader.LoadAsync(question.LessonId, lessonRepository, unitRepository, subjectRepository, cancellationToken).ConfigureAwait(false);
             var aiRequest = MathStepGradingRequestFactory.Create(snapshot.Stem, spec, answer, context, richTextExtractor, options.ContextFieldMaxLength);
             var result = await mathStepGradingClient.GradeAsync(aiRequest, cancellationToken).ConfigureAwait(false);

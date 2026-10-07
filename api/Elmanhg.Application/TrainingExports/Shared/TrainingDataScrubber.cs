@@ -1,3 +1,4 @@
+using Core.Logging;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -14,6 +15,7 @@ public static class TrainingDataScrubber
     // ASCII, Arabic-Indic and Extended Arabic-Indic digits.
     private const string Digit = @"[0-9\u0660-\u0669\u06F0-\u06F9]";
     private static readonly Regex Number = new($@"\+?{Digit}(?:[ .-]?{Digit}){{7,}}", Options);
+    private static readonly TextRedactor TextRules = new([new(Email, "[email]"), new(Url, "[url]"), new(Handle, "[handle]"), new(Number, "[number]")]);
     private static readonly Regex IsoTimestamp = new(@"^[0-9]{4}-[0-9]{2}-[0-9]{2}(?:T[0-9]{2}:[0-9]{2}(?::[0-9]{2}(?:\.[0-9]+)?)?(?:Z|[+-][0-9]{2}:[0-9]{2})?)?$", Options);
 
     private static readonly HashSet<string> IdentifyingKeys = new(StringComparer.OrdinalIgnoreCase)
@@ -21,13 +23,7 @@ public static class TrainingDataScrubber
         "attemptId", "sessionId", "conversationId", "threadId", "studentId", "userId", "teacherId", "messageId", "studentMessageId", "assistantMessageId", "essayGradeId",
     };
 
-    public static string ScrubText(string text)
-    {
-        var scrubbed = Email.Replace(text, "[email]");
-        scrubbed = Url.Replace(scrubbed, "[url]");
-        scrubbed = Handle.Replace(scrubbed, "[handle]");
-        return Number.Replace(scrubbed, "[number]");
-    }
+    public static string ScrubText(string text) => TextRules.Redact(text);
 
     public static JsonNode? ScrubJson(string? json) => json is null ? null : Scrub(JsonNode.Parse(json), null);
 

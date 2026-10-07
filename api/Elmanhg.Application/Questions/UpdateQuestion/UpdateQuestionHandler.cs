@@ -1,3 +1,4 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
@@ -13,16 +14,9 @@ public sealed class UpdateQuestionHandler(IQuestionRepository questionRepository
 {
     public async Task Handle(UpdateQuestionCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
-        var question = await questionRepository.GetByIdAsync(request.QuestionId, cancellationToken).ConfigureAwait(false);
-        if (question is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.QuestionNotFound);
-        }
+        var question = await questionRepository.GetRequiredAsync(request.QuestionId, ErrorCodes.QuestionNotFound, cancellationToken).ConfigureAwait(false);
 
         var lesson = await lessonRepository.GetWithObjectivesAsync(question.LessonId, asNoTracking: true, cancellationToken).ConfigureAwait(false);
         if (lesson is null)
@@ -33,7 +27,7 @@ public sealed class UpdateQuestionHandler(IQuestionRepository questionRepository
         QuestionBodyMedia.EnsureLessonMedia(request.Question, lesson.Id);
         var content = QuestionContentFactory.CreateContent(request.Question, richTextSanitizer);
         var metadata = QuestionContentFactory.CreateMetadata(request.Question);
-        question.Update(request.Question.Type.GetValueOrDefault(), content, metadata, lesson, currentUserService.UserId.Value);
+        question.Update(request.Question.Type.GetValueOrDefault(), content, metadata, lesson, userId);
 
         await questionRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }

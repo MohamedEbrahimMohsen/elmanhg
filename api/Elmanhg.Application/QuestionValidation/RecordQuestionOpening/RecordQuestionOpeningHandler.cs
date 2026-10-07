@@ -1,3 +1,4 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
@@ -13,23 +14,14 @@ public sealed class RecordQuestionOpeningHandler(IReviewSessionRepository review
 {
     public async Task Handle(RecordQuestionOpeningCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var session = await reviewSessionRepository.GetByIdAsync(request.ReviewSessionId, cancellationToken, include: query => query.Include(x => x.Openings)).ConfigureAwait(false);
         if (session is null || session.TeacherId != userId)
         {
             throw new NotFoundCoreException(ErrorCodes.ReviewSessionNotFound);
         }
 
-        var question = await questionRepository.GetByIdAsync(request.QuestionId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
-        if (question is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.QuestionNotFound);
-        }
+        var question = await questionRepository.GetRequiredAsync(request.QuestionId, ErrorCodes.QuestionNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
 
         if (!await teacherSubjectRepository.IsAssignedAsync(userId, question.SubjectId, cancellationToken).ConfigureAwait(false))
         {

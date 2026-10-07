@@ -1,18 +1,19 @@
 ﻿using Core.DDD.Entities;
+using Core.DDD.Identity;
 using Core.DDD.Models;
 using Core.DDD.Repositories;
 using Core.EntityFrameworkCore.Exceptions;
-using Core.Identity.Tokens.CurrentUser;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace Core.EntityFrameworkCore.Repositories;
 
-public class Repository<T>(DbContext context, ICurrentUserService? currentUserService = null) : IRepository<T> where T : class, IEntity
+public class Repository<T>(DbContext context, ICurrentUser? currentUser = null, TimeProvider? timeProvider = null) : IRepository<T> where T : class, IEntity
 {
     protected readonly DbContext _context = context;
     protected readonly DbSet<T> _dbSet = context.Set<T>();
-    protected readonly ICurrentUserService? _currentUserService = currentUserService;
+    protected readonly ICurrentUser? _currentUser = currentUser;
+    protected readonly TimeProvider _timeProvider = timeProvider ?? TimeProvider.System;
 
     #region GET Methods
     public virtual async Task<List<T>?> GetAllAsync(CancellationToken cancellationToken, 
@@ -212,29 +213,12 @@ public class Repository<T>(DbContext context, ICurrentUserService? currentUserSe
             query = include(query);
         }
 
-        var totalItems = await query.CountAsync(cancellationToken)
-                                    .ConfigureAwait(false);
-
-        var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
-
         if (orderBy != null)
         {
             query = orderBy(query);
         }
 
-        var data = await query.Skip((pageNumber - 1) * pageSize)
-                                     .Take(pageSize)
-                                     .ToListAsync(cancellationToken)
-                                     .ConfigureAwait(false);
-
-        return new PageData<T>()
-        {
-            Items = data,
-            TotalItems = totalItems,
-            TotalPages = totalPages,
-            PageNumber = pageNumber,
-            PageSize = pageSize
-        };
+        return await query.ToPageDataAsync(pageNumber, pageSize, cancellationToken).ConfigureAwait(false);
     }
     #endregion
 
@@ -248,28 +232,31 @@ public class Repository<T>(DbContext context, ICurrentUserService? currentUserSe
         return await _dbSet.CountAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    //public virtual async Task SaveChangesAsync(CancellationToken cancellationToken)
-    //{
-    //    await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-    //}
-
     public virtual async Task SaveChangesAsync(CancellationToken cancellationToken)
     {
-        var events = _context.ChangeTracker.Entries<AuditEntity>()
-            .Select(e => e.Entity);
+        var now = _timeProvider.GetUtcNow();
+        var actorId = _currentUser?.UserId;
 
         foreach (var entry in _context.ChangeTracker.Entries<AuditEntity>())
         {
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.CreationDate = DateTimeOffset.UtcNow;
-                //entry.Entity.CreatedBy = _currentUserService?.UserId;
+                entry.Entity.CreationDate = now;
+                entry.Entity.CreatedBy ??= actorId;
+                entry.Entity.UpdatedBy ??= actorId;
             }
 
-            if (entry.State == EntityState.Modified || entry.State == EntityState.Deleted)
+            if (entry.State is EntityState.Modified or EntityState.Deleted)
             {
-                entry.Entity.UpdationDate = DateTimeOffset.UtcNow;
-                //entry.Entity.UpdatedBy = _currentUserService?.UserId;
+                if (!entry.Property(x => x.UpdationDate).IsModified)
+                {
+                    entry.Entity.UpdationDate = now;
+                }
+
+                if (actorId is not null && !entry.Property(x => x.UpdatedBy).IsModified)
+                {
+                    entry.Entity.UpdatedBy = actorId;
+                }
             }
         }
 

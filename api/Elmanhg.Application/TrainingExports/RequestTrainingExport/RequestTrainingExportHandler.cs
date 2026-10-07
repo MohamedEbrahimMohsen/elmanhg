@@ -1,4 +1,3 @@
-using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Dashboard.Shared;
 using Elmanhg.Application.Exceptions;
@@ -13,13 +12,10 @@ public sealed class RequestTrainingExportHandler(ITrainingExportRepository train
 {
     public async Task<TrainingExportResult> Handle(RequestTrainingExportCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         await DashboardSubjectGuard.EnsureExistsAsync(request.SubjectId, subjectRepository, cancellationToken).ConfigureAwait(false);
-        var export = TrainingExport.Request(request.Source, request.From.ToUniversalTime(), request.To.ToUniversalTime(), request.SubjectId, currentUserService.UserId.Value, timeProvider.GetUtcNow());
+        var export = TrainingExport.Request(request.Source, request.From.ToUniversalTime(), request.To.ToUniversalTime(), request.SubjectId, userId, timeProvider.GetUtcNow());
 
         await trainingExportRepository.AddAsync(export, cancellationToken).ConfigureAwait(false);
         await trainingExportRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

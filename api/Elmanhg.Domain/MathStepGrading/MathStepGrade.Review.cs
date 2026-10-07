@@ -1,4 +1,5 @@
 using Core.DDD.Entities;
+using Core.DDD.Time;
 using Core.Errors;
 using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Sessions;
@@ -45,7 +46,7 @@ public partial class MathStepGrade : IAuditedEntity
 
     private void Resolve(GradeReviewDecision decision, decimal score, decimal normalisedScore, Guid teacherId, string? comment, DateTimeOffset reviewedAt)
     {
-        var at = ToMicroseconds(reviewedAt);
+        var at = reviewedAt.TruncateToMicroseconds();
         ReviewDecision = decision;
         ReviewedScore = score;
         ReviewedNormalisedScore = normalisedScore;

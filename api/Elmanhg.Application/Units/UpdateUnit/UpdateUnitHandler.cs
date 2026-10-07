@@ -10,10 +10,7 @@ public sealed class UpdateUnitHandler(ICurriculumUnitRepository unitRepository, 
 {
     public async Task Handle(UpdateUnitCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         var unit = await unitRepository.GetByIdAsync(request.UnitId, cancellationToken).ConfigureAwait(false);
         if (unit is null || unit.SubjectId != request.SubjectId)
@@ -21,7 +18,7 @@ public sealed class UpdateUnitHandler(ICurriculumUnitRepository unitRepository, 
             throw new NotFoundCoreException(ErrorCodes.UnitNotFound);
         }
 
-        unit.Rename(request.Name, currentUserService.UserId.Value);
+        unit.Rename(request.Name, userId);
 
         await unitRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }

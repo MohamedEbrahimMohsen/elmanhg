@@ -16,7 +16,6 @@ public sealed class GetGradeReviewQueueValidator : AbstractValidator<GetGradeRev
         RuleFor(x => x.Kind)
             .IsInEnum()
             .WithErrorCode(ErrorCodes.GradeReviewKindInvalid);
-        RuleFor(x => x.PageNumber).ValidateMin(1, ErrorCodes.GradeReviewPageNumberInvalid);
-        RuleFor(x => x.PageSize).ValidateRange(1, options.QueueMaxPageSize, ErrorCodes.GradeReviewPageSizeInvalid);
+        RuleFor(x => x).ValidatePaging(x => x.PageNumber, x => x.PageSize, options.QueueMaxPageSize, ErrorCodes.GradeReviewPageNumberInvalid, ErrorCodes.GradeReviewPageSizeInvalid);
     }
 }

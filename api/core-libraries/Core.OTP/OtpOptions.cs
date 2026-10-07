@@ -1,4 +1,6 @@
-﻿namespace Core.OTP;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Core.OTP;
 
 public class OtpOptions
 {
@@ -6,8 +8,10 @@ public class OtpOptions
 
     public string Secret { get; set; } = default!;
     public int OtpLength { get; init; } = 6;
-    public List<string> PhoneCodes { get; set; } = ["010", "011", "012"];
-    public int PhoneLength { get; set; } = 11;
+    [MinLength(1)]
+    public List<string> PhoneCodes { get; set; } = [];
+    [Range(1, int.MaxValue)]
+    public int PhoneLength { get; set; }
     public int EmailMaxLength { get; init; } = 256;
     public string AllowedCharacters { get; init; } = "0123456789";
     public int ExpirationMinutes { get; init; } = 5;

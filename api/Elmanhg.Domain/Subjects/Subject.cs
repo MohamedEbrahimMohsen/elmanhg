@@ -46,7 +46,6 @@ public class Subject : AuditEntity, IAuditedEntity
 
         Order = order;
         UpdatedBy = updatedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
     }
 
     public void Delete(bool hasUnits, Guid deletedBy)
@@ -56,8 +55,9 @@ public class Subject : AuditEntity, IAuditedEntity
             throw new BusinessRuleViolationCoreException(ErrorCodes.SubjectHasUnits);
         }
 
-        SoftDelete();
+        var now = DateTimeOffset.UtcNow;
+        SoftDelete(now);
         UpdatedBy = deletedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
+        UpdationDate = now;
     }
 }

@@ -41,7 +41,7 @@ The Grafana, Loki and Tempo images are AGPL-licensed operator tools. They run un
 | api | one SERVER span per HTTP request (`/health` excluded) | ASP.NET Core instrumentation |
 | api | one CLIENT span per outbound HTTP call (AI service, OTP providers, Paymob), with the exception recorded on failure | HttpClient instrumentation |
 | api | one span per database command | Npgsql's `ActivitySource` (`Npgsql`) |
-| api | one span per background sweep, `job <name>`, tagged `elmanhg.job` and `elmanhg.outcome`, marked as an error when listing failed | `BackgroundJobMetrics` (`ActivitySource` `Elmanhg`) |
+| api | one span per background sweep, `job <name>`, tagged `elmanhg.job` and `elmanhg.outcome`, marked as an error when listing failed | `BackgroundJobMetrics` (Core.Queues) (`ActivitySource` `Elmanhg`) |
 | api | errors: `CoreExceptionMiddleware` tags the request span with `app.error_code`, and adds an `exception` event for 5xx | `Core.Exceptions` |
 | ai | one SERVER span per request (`/health*` excluded) | FastAPI instrumentation |
 | ai | one CLIENT span per model call: `chat <model>`, `embeddings <model>` or `transcription <model>`, with GenAI attributes and token usage (chat and embeddings) | `clients/metered.py` |
@@ -56,18 +56,18 @@ Prometheus receives OTLP from the collector (`--web.enable-otlp-receiver`). Name
 
 | Instrument | Type | Unit | Tags | Emitter | Prometheus name |
 |---|---|---|---|---|---|
-| `elmanhg.requests` | counter | {request} | `elmanhg.request` (request type name), `elmanhg.outcome` | `RequestMetricsBehaviour` (every MediatR request) | `elmanhg_requests_total` |
-| `elmanhg.request.duration` | histogram | s | same | `RequestMetricsBehaviour` | `elmanhg_request_duration_seconds_*` |
+| `elmanhg.requests` | counter | {request} | `elmanhg.request` (request type name), `elmanhg.outcome` | `RequestMetricsBehaviour` (Core.Observability, every MediatR request) | `elmanhg_requests_total` |
+| `elmanhg.request.duration` | histogram | s | same | `RequestMetricsBehaviour` (Core.Observability) | `elmanhg_request_duration_seconds_*` |
 | `elmanhg.quiz.answers` | counter | {answer} | `elmanhg.outcome` (grading outcome, or `Ungraded`) | `QuizAnswerMetricsBehaviour` (SubmitAnswer) | `elmanhg_quiz_answers_total` |
 | `elmanhg.payment.notifications` | counter | {notification} | `elmanhg.outcome` (`PaymentNotificationOutcome`) | `PaymentNotificationMetricsBehaviour` | `elmanhg_payment_notifications_total` |
 | `elmanhg.otp.sends` | counter | {message} | `elmanhg.channel` (`WhatsApp`, `Sms`, `Email`), `elmanhg.outcome` (`Delivered`, `Failed`) | `OtpChannelRouter` | `elmanhg_otp_sends_total` |
 | `elmanhg.client.errors` | counter | {error} | `elmanhg.source` (`Window`, `UnhandledRejection`, `Route`) | `ReportClientErrorHandler` | `elmanhg_client_errors_total` |
 | `elmanhg.ask_teacher.sla_events` | counter | {event} | `elmanhg.kind` (`FirstReminder`, `SecondReminder`, `Breach`) | `ProcessTeacherThreadSlaHandler` | `elmanhg_ask_teacher_sla_events_total` |
-| `elmanhg.job.runs` | counter | {run} | `elmanhg.job`, `elmanhg.outcome` (`Succeeded`, `PartiallyFailed`, `Failed`) | `BackgroundJobMetrics` | `elmanhg_job_runs_total` |
-| `elmanhg.job.duration` | histogram | s | `elmanhg.job`, `elmanhg.outcome` | `BackgroundJobMetrics` | `elmanhg_job_duration_seconds_*` |
-| `elmanhg.job.items` | counter | {item} | `elmanhg.job`, `elmanhg.outcome` (`Succeeded`, `Failed`) | `BackgroundJobMetrics` | `elmanhg_job_items_total` |
-| `elmanhg.job.last_success` | gauge | s (unix time) | `elmanhg.job` | `BackgroundJobMetrics` | `elmanhg_job_last_success_seconds` |
-| `elmanhg.job.interval` | gauge | s | `elmanhg.job` | `BackgroundJobMetrics` | `elmanhg_job_interval_seconds` |
+| `elmanhg.job.runs` | counter | {run} | `elmanhg.job`, `elmanhg.outcome` (`Succeeded`, `PartiallyFailed`, `Failed`) | `BackgroundJobMetrics` (Core.Queues) | `elmanhg_job_runs_total` |
+| `elmanhg.job.duration` | histogram | s | `elmanhg.job`, `elmanhg.outcome` | `BackgroundJobMetrics` (Core.Queues) | `elmanhg_job_duration_seconds_*` |
+| `elmanhg.job.items` | counter | {item} | `elmanhg.job`, `elmanhg.outcome` (`Succeeded`, `Failed`) | `BackgroundJobMetrics` (Core.Queues) | `elmanhg_job_items_total` |
+| `elmanhg.job.last_success` | gauge | s (unix time) | `elmanhg.job` | `BackgroundJobMetrics` (Core.Queues) | `elmanhg_job_last_success_seconds` |
+| `elmanhg.job.interval` | gauge | s | `elmanhg.job` | `BackgroundJobMetrics` (Core.Queues) | `elmanhg_job_interval_seconds` |
 | `http.server.request.duration` | histogram | s | `http.route`, `http.request.method`, `http.response.status_code` | ASP.NET Core (api), FastAPI (ai) | `http_server_request_duration_seconds_*` |
 | (recording rule) | p95 per route | s | `http_route` | Prometheus, over sessions, exams and browse routes of the API | `elmanhg:api_route_latency_p95:rate15m` |
 | `http.client.request.duration` | histogram | s | `server.address`, `http.response.status_code` | HttpClient (api) | `http_client_request_duration_seconds_*` |
@@ -79,7 +79,7 @@ Prometheus receives OTLP from the collector (`--web.enable-otlp-receiver`). Name
 
 Request outcomes (`elmanhg.outcome` on `elmanhg.requests`): `Success`; `VALIDATION_FAILED` for any validation failure; `CANCELLED` when the caller went away; the error code of any other core exception (for example `SESSION_NOT_FOUND`, `AI_SERVICE_UNAVAILABLE`); `UNHANDLED_EXCEPTION` otherwise. Every tag value is a type name, an enum name or an error code, never an id or user data.
 
-Background jobs (`elmanhg.job`): `exam-auto-submit`, `subscription-lapse`, `lesson-content-index`, `teacher-voice-transcription`, `ask-teacher-sla`, `essay-grading`, `training-export`, `training-export-retention`. A job registers when its worker starts (last success = now). Each sweep records one run: `Failed` when listing the work threw, `PartiallyFailed` when at least one item failed, `Succeeded` otherwise. Only a sweep that is not `Failed` advances the last success.
+Background jobs (`elmanhg.job`): `exam-auto-submit`, `subscription-lapse`, `lesson-content-index`, `teacher-voice-transcription`, `ask-teacher-sla`, `essay-grading`, `math-step-grading`, `training-export`, `training-export-retention`. Every worker is a `Core.Queues` `SweepWorker`: a scope per listing and per item, and a failure in the pre-listing step, the listing or an item is logged without stopping the loop. The `exam-auto-submit`, `subscription-lapse`, `lesson-content-index`, `ask-teacher-sla` and `training-export-retention` queries leave out the ids that failed until a sweep returns a short batch; `essay-grading`, `math-step-grading`, `training-export` and `teacher-voice-transcription` instead push a failed item's `NextAttemptAt` back. A job registers when its worker starts (last success = now). Each sweep records one run: `Failed` when listing the work threw, `PartiallyFailed` when at least one item failed, `Succeeded` otherwise. Only a sweep that is not `Failed` advances the last success.
 
 ## 5. Logs
 
@@ -215,7 +215,7 @@ A SaaS backend (Grafana Cloud, Honeycomb, any OTLP endpoint) can replace the loc
 - No PII in query strings: the SPA, the API and Paymob redirects must not put personal data in URLs. Where a query value is sensitive anyway (the Paymob webhook `hmac`, the audit log `actor` filter), no log keeps it: the API request log keeps query keys only, with every value replaced by `[redacted]`, and every Caddy log replaces the whole query string with `?redacted`.
 - Three redaction layers:
   1. The apps do not log PII (audited in #113). The API request log drops query values, truncates client IPs to /24 or /48 and drops the Cloudflare coordinates.
-  2. `LogRedactor` (email, literal or URL-encoded `%40`, and Egyptian mobile patterns, linear-time regexes) cleans the free text of browser error reports before logging.
+  2. `LogRedactor` (a `Core.Logging` `TextRedactor` with the shared email pattern, literal or URL-encoded `%40`, plus the app's Egyptian mobile pattern; linear-time regexes) cleans the free text of browser error reports before logging.
   3. The collector's `transform/redact` processor applies the same two patterns to every log body and every (flattened) attribute before Loki, so a leak in any container is masked at ingestion. `transform/redact-traces` applies them to span and span-event attributes (exception messages included) before Tempo.
 - Every Caddy log, the access log and the default logger that carries the handler error log (`http.log.error.*`, which holds the full request), drops request and response headers (cookies, `Authorization`, `X-Forwarded-For`, `Cf-Connecting-Ip`) and replaces the query string with `?redacted`, and masks client IPs to /24 or /48. Span URLs never carry query values.
 - Replacement markers: `[redacted-email]`, `[redacted-phone]`.

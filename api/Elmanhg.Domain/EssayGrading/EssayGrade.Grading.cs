@@ -1,3 +1,4 @@
+using Core.DDD.Time;
 using Core.Errors;
 using Elmanhg.Domain.Questions.Grading;
 using Elmanhg.Domain.Questions.Schemas;
@@ -11,11 +12,9 @@ public partial class EssayGrade
     public void Complete(EssayAssessment assessment, QuestionGrade grade, decimal reviewConfidenceThreshold, DateTimeOffset gradedAt)
     {
         EnsurePending();
-        var at = ToMicroseconds(gradedAt);
+        var at = gradedAt.TruncateToMicroseconds();
         var needsReview = assessment.Confidence < reviewConfidenceThreshold;
-        Attempts++;
-        NextAttemptAt = null;
-        LastErrorCode = null;
+        Retry.RecordSuccess();
         Score = grade.Score;
         NormalisedScore = grade.NormalisedScore;
         Criteria = JsonSerializer.Serialize(assessment.Criteria, QuestionJson.SerializerOptions);
@@ -36,18 +35,11 @@ public partial class EssayGrade
     public void FailAttempt(string errorCode, DateTimeOffset failedAt, int maxAttempts, TimeSpan retryBaseDelay)
     {
         EnsurePending();
-        var at = ToMicroseconds(failedAt);
-        Attempts++;
-        LastErrorCode = errorCode.Length <= ErrorCodeMaxLength ? errorCode : errorCode[..ErrorCodeMaxLength];
-        if (Attempts >= maxAttempts)
+        var at = failedAt.TruncateToMicroseconds();
+        if (Retry.RecordFailure(errorCode, at, maxAttempts, retryBaseDelay))
         {
             Status = EssayGradeStatus.InReview;
             ReviewReason = EssayReviewReason.GradingFailed;
-            NextAttemptAt = null;
-        }
-        else
-        {
-            NextAttemptAt = at + (retryBaseDelay * Math.Pow(2, Attempts - 1));
         }
 
         UpdationDate = at;
@@ -70,7 +62,7 @@ public partial class EssayGrade
             throw new InvalidOperationException("Only a graded essay that is not yet applied can be applied.");
         }
 
-        var at = ToMicroseconds(appliedAt);
+        var at = appliedAt.TruncateToMicroseconds();
         AppliedAt = at;
         UpdationDate = at;
     }

@@ -2,7 +2,7 @@ using Core.DDD.Entities;
 
 namespace Elmanhg.Domain.SlaCalendars;
 
-public class ExamPeriod : AuditEntity, IAuditedEntity
+public class ExamPeriod : AuditEntity, IAuditedEntity, IVersioned
 {
     public string Name { get; private set; } = default!;
     public DateOnly StartDate { get; private set; }
@@ -29,9 +29,10 @@ public class ExamPeriod : AuditEntity, IAuditedEntity
 
     public void Delete(Guid deletedBy)
     {
-        SoftDelete();
+        var now = DateTimeOffset.UtcNow;
+        SoftDelete(now);
         UpdatedBy = deletedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
+        UpdationDate = now;
     }
 
     public SlaDateRange ToDateRange() => new(StartDate, EndDate);

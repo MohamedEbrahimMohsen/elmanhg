@@ -1,4 +1,5 @@
 using Core.DDD.Entities;
+using Core.DDD.Time;
 
 namespace Elmanhg.Domain.TeacherThreads;
 
@@ -22,7 +23,7 @@ public class TeacherThreadSlaEvent : Entity
             WindowStartedAt = windowStartedAt,
             SlaDueAt = slaDueAt,
             TeacherId = teacherId,
-            OccurredAt = TeacherThread.ToMicroseconds(occurredAt),
+            OccurredAt = occurredAt.TruncateToMicroseconds(),
         };
     }
 }

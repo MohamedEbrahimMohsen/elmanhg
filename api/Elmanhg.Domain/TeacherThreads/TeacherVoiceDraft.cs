@@ -1,4 +1,6 @@
 using Core.DDD.Entities;
+using Core.DDD.Models;
+using Core.DDD.Time;
 using Core.Errors;
 using Elmanhg.Domain.SharedKernel.Exceptions;
 
@@ -14,8 +16,9 @@ public class TeacherVoiceDraft : AuditEntity
     public TeacherVoiceDraftStatus Status { get; private set; }
     public string? Transcript { get; private set; }
     public string? TranscriptionModel { get; private set; }
-    public int Attempts { get; private set; }
-    public DateTimeOffset? NextAttemptAt { get; private set; }
+    public RetrySchedule Retry { get; private set; } = default!;
+    public int Attempts => Retry.Attempts;
+    public DateTimeOffset? NextAttemptAt => Retry.NextAttemptAt;
     public DateTimeOffset RecordedAt { get; private set; }
     public DateTimeOffset? TranscribedAt { get; private set; }
     public Guid? SentMessageId { get; private set; }
@@ -24,7 +27,7 @@ public class TeacherVoiceDraft : AuditEntity
 
     public static TeacherVoiceDraft Record(Guid threadId, Guid teacherId, string audioKey, string audioUrl, int audioDurationSeconds, DateTimeOffset recordedAt)
     {
-        var at = TeacherThread.ToMicroseconds(recordedAt);
+        var at = recordedAt.TruncateToMicroseconds();
         return new TeacherVoiceDraft(Guid.NewGuid(), teacherId)
         {
             ThreadId = threadId,
@@ -33,22 +36,20 @@ public class TeacherVoiceDraft : AuditEntity
             AudioUrl = audioUrl,
             AudioDurationSeconds = audioDurationSeconds,
             Status = TeacherVoiceDraftStatus.Pending,
-            Attempts = 0,
-            NextAttemptAt = at,
+            Retry = RetrySchedule.DueAt(at),
             RecordedAt = at,
         };
     }
 
-    public bool IsDueAt(DateTimeOffset now) => Status == TeacherVoiceDraftStatus.Pending && NextAttemptAt <= now;
+    public bool IsDueAt(DateTimeOffset now) => Status == TeacherVoiceDraftStatus.Pending && Retry.IsDueAt(now);
 
     public void CompleteTranscription(string transcript, string model, DateTimeOffset transcribedAt)
     {
         EnsurePending();
-        var at = TeacherThread.ToMicroseconds(transcribedAt);
+        var at = transcribedAt.TruncateToMicroseconds();
         Transcript = transcript.Trim();
         TranscriptionModel = model;
-        Attempts++;
-        NextAttemptAt = null;
+        Retry.RecordSuccess();
         TranscribedAt = at;
         Status = TeacherVoiceDraftStatus.Ready;
         UpdationDate = at;
@@ -57,16 +58,10 @@ public class TeacherVoiceDraft : AuditEntity
     public void FailAttempt(DateTimeOffset failedAt, int maxAttempts, TimeSpan retryBaseDelay)
     {
         EnsurePending();
-        var at = TeacherThread.ToMicroseconds(failedAt);
-        Attempts++;
-        if (Attempts >= maxAttempts)
+        var at = failedAt.TruncateToMicroseconds();
+        if (Retry.RecordFailure(null, at, maxAttempts, retryBaseDelay))
         {
             Status = TeacherVoiceDraftStatus.Failed;
-            NextAttemptAt = null;
-        }
-        else
-        {
-            NextAttemptAt = at + (retryBaseDelay * Math.Pow(2, Attempts - 1));
         }
 
         UpdationDate = at;
@@ -87,7 +82,7 @@ public class TeacherVoiceDraft : AuditEntity
         SentMessageId = messageId;
         Status = TeacherVoiceDraftStatus.Sent;
         UpdatedBy = TeacherId;
-        UpdationDate = TeacherThread.ToMicroseconds(sentAt);
+        UpdationDate = sentAt.TruncateToMicroseconds();
     }
 
     private void EnsurePending()

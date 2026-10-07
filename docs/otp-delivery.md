@@ -15,6 +15,8 @@ Email codes sign in existing **student** email accounts through `POST /api/auth/
 
 The code is delivered **before** the OTP row is saved. If delivery fails, nothing is stored and the 60 s resend cooldown does not start. Any provider failure (a non-2xx response, a transport error, a timeout or an open circuit) returns 503 `OTP_DELIVERY_FAILED`. There is no fallback from WhatsApp to SMS on a runtime failure: the fallback applies only when WhatsApp is disabled. Logs name the channel and the HTTP status only, never the recipient, the code or the provider's response body.
 
+**Resend limits** (`CoreOtp`). One OTP row per recipient is reused for every resend and is found by recipient only; the `RequestIP` and `UserAgent` columns are not filled, so a new network does not reset the limits. A resend waits `ReissueCooldownSeconds` (60) after the previous code (429 `OTP_REISSUE_COOLDOWN`). A recipient gets at most `MaxReissueCount` (5) resends per 24-hour window; the window starts with the first code and later resends do not move it. The resend that uses up the quota also pushes the next one out by `ReissueBlockCooldownInHours` (24), and a resend over the quota returns 429 `OTP_REACHED_MAX_REISSUE_COUNT`. Codes are compared in constant time.
+
 ## 2. Configuration reference
 
 All keys live under `OtpDelivery` (environment variables use `__`, for example `OtpDelivery__WhatsApp__Provider`). The committed defaults are in `api/Elmanhg.Api/appsettings.example.json`. **Secrets** go in environment variables only, never in a committed file.
@@ -54,6 +56,8 @@ The email body is always Arabic (RTL HTML plus a plain-text part). Its templates
 ## 3. Fakes
 
 `Provider=Fake` is the default for every channel in the committed config, the test host and the build-time OpenAPI run, so development, tests and CI need no keys. `FakeOtpChannel` delivers nothing: in Development it writes each code to the API console, and outside Development it logs a warning on every send. A channel that is enabled with `Provider=Fake` still counts as enabled for routing.
+
+`FakeOtpChannel`, the channel adapters and `OtpChannelRouter` live in `api/core-libraries/Core.OTP/Delivery/`. The app passes its error codes, its Arabic email template and `ElmanhgMetrics` in from `Elmanhg.Infrastructure/OtpDelivery/OtpDeliveryServiceCollectionExtensions.cs`.
 
 ## 4. Startup validation
 
@@ -104,7 +108,7 @@ OtpDelivery__Sms__BodyTemplate=to={phoneNumber}&msg={message}
 
 ## 8. Retries and timeouts
 
-Each adapter is a typed `HttpClient` with the standard resilience handler (`Microsoft.Extensions.Http.Resilience`): retry, circuit breaker, a per-attempt timeout (`AttemptTimeoutSeconds`) and a total timeout (`TotalTimeoutSeconds`). **Resend** requests are retried, because every request carries a fresh `Idempotency-Key` header. **Meta and SMS** requests are POSTs without an idempotency key, so retries are disabled for them, and a failed send returns 503 `OTP_DELIVERY_FAILED` for the user to resend. Every provider request carries `User-Agent: Elmanhg/1.0`.
+Providers are called through the `Core.Messaging` typed clients (`MetaWhatsAppClient`, `ResendEmailClient`, `HttpSmsClient`), whose code is shared by OTP, invitations and teacher reminders. Each caller gets its own named `HttpClient` (registered with `AddScopedHttpConsumer`, named after the caller, e.g. `MetaWhatsAppOtpChannel`, `MetaWhatsAppMessageChannel`, `ResendInvitationEmailSender`), so each caller has its own circuit breaker: a burst of failed reminder sends cannot open the breaker for OTP sends. Each client has the standard resilience handler (`Microsoft.Extensions.Http.Resilience`): retry, circuit breaker, a per-attempt timeout (`AttemptTimeoutSeconds`) and a total timeout (`TotalTimeoutSeconds`). **Resend** requests are retried, because every request carries a fresh `Idempotency-Key` header. **Meta and SMS** requests are POSTs without an idempotency key, so retries are disabled for them, and a failed send returns 503 `OTP_DELIVERY_FAILED` for the user to resend. Every provider request carries the `CoreHttp:UserAgent` header (default `Elmanhg/1.0`).
 
 ## 9. Deployment
 
@@ -114,7 +118,7 @@ On the host, set the `OtpDelivery__*` variables for every channel you switch on 
 
 The Ask a Teacher SLA sweep sends **one** reminder per question outside the app, on WhatsApp and/or by email ([ask-teacher.md](ask-teacher.md) → SLA → Out-of-app reminder). The on/off switch, the channels and the stage are runtime settings (`askTeacher.outOfAppReminder*`, [configuration.md](configuration.md)); everything below is deployment configuration.
 
-**Port and adapters.** `IMessageChannel` (Application, `Shared/Messaging`) sends an `OutboundMessage`; `TeacherThreadReminderMessage` is the only message type. `SendAsync` returns `false` on any provider failure and never throws (except on cancellation), so a failed reminder never fails the sweep. Adapters in `Infrastructure/Messaging`: `MetaWhatsAppMessageChannel` (Meta Cloud API, reuses the `OtpDelivery:WhatsApp` number, token and API version), `ResendEmailMessageChannel` (reuses the `OtpDelivery:Email` key and sender) and `FakeMessageChannel`.
+**Port and adapters.** `IMessageChannel` (Application, `Shared/Messaging`) sends an `OutboundMessage`; `TeacherThreadReminderMessage` is the only message type. `SendAsync` returns `false` on any provider failure and never throws (except on cancellation), so a failed reminder never fails the sweep. Adapters in `Infrastructure/Messaging`: `MetaWhatsAppMessageChannel` (Meta Cloud API, reuses the `OtpDelivery:WhatsApp` number, token and API version), `ResendEmailMessageChannel` (reuses the `OtpDelivery:Email` key and sender) and `FakeMessageChannel`. Both real adapters use the same `Core.Messaging` client code (`MetaWhatsAppClient`, `ResendEmailClient`) as OTP, over their own named `HttpClient` and circuit breaker.
 
 **Selection.**
 

@@ -11,10 +11,7 @@ public sealed class UpdateLessonHandler(ILessonRepository lessonRepository, IRic
 {
     public async Task Handle(UpdateLessonCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
 
         var lesson = await lessonRepository.GetWithObjectivesAsync(request.LessonId, asNoTracking: false, cancellationToken).ConfigureAwait(false);
         if (lesson is null)
@@ -24,7 +21,7 @@ public sealed class UpdateLessonHandler(ILessonRepository lessonRepository, IRic
 
         var explanation = richTextSanitizer.Sanitize(request.Explanation);
         var summary = richTextSanitizer.Sanitize(request.Summary);
-        lesson.Update(request.Name, explanation, summary, request.VideoUrl, request.Objectives.ToList(), currentUserService.UserId.Value);
+        lesson.Update(request.Name, explanation, summary, request.VideoUrl, request.Objectives.ToList(), userId);
 
         await lessonRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }

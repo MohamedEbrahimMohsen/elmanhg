@@ -1,3 +1,5 @@
+using Core.DDD.Time;
+
 namespace Elmanhg.Domain.Sessions;
 
 public partial class Session
@@ -17,7 +19,7 @@ public partial class Session
             return;
         }
 
-        var now = UtcNowToMicroseconds();
+        var now = DateTimeOffset.UtcNow.TruncateToMicroseconds();
         ScorePercent = CalculateScorePercent();
         SubmittedAt = now;
         Touch(now);

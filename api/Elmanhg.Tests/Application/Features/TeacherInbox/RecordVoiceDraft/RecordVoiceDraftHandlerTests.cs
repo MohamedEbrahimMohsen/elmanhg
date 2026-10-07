@@ -1,7 +1,7 @@
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
+using Core.Storage;
 using Elmanhg.Application.Exceptions;
-using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Application.TeacherInbox.RecordVoiceDraft;
 using Elmanhg.Application.TeacherInbox.Shared;
 using Elmanhg.Domain.Identity;

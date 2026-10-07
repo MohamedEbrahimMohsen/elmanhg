@@ -5,17 +5,16 @@ namespace Core.Localization;
 
 public static class LocalizedTextExtensions
 {
-    private static readonly string? _defaultLang = CultureInfo.DefaultThreadCurrentCulture?.TwoLetterISOLanguageName;
-
     public static string Localized(this LocalizedText text)
     {
-        var lang = CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+        var language = CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+        var defaultLanguage = CultureInfo.DefaultThreadCurrentCulture?.TwoLetterISOLanguageName;
 
-        return lang switch
+        return language switch
         {
             "en" => text?.English,
             "ar" => text?.Arabic,
-            _ => _defaultLang == "ar" ? text.Arabic : text.English // always fallback to English if default language is not set or invalid.
+            _ => defaultLanguage == "ar" ? text?.Arabic : text?.English,
         } ?? string.Empty;
     }
 }

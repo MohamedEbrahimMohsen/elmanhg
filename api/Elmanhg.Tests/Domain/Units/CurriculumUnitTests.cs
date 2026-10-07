@@ -99,4 +99,14 @@ public sealed class CurriculumUnitTests
         act.Should().Throw<BusinessRuleViolationCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.UnitHasLessons);
         unit.IsDeleted.Should().BeFalse();
     }
+
+    [Fact]
+    public void Delete_NoLessons_StampsDeletedAtWithUpdationDate()
+    {
+        var unit = CurriculumUnit.Create(_subject, "Mechanics", 1, _createdBy);
+
+        unit.Delete(false, Guid.NewGuid());
+
+        unit.DeletedAt.Should().NotBeNull().And.Be(unit.UpdationDate);
+    }
 }

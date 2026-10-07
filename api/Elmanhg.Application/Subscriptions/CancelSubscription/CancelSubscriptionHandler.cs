@@ -1,8 +1,9 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
+using Core.Settings;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.Subscriptions;
 using MediatR;
@@ -15,13 +16,8 @@ public sealed class CancelSubscriptionHandler(ISubscriptionRepository subscripti
 {
     public async Task<EntitlementResult> Handle(CancelSubscriptionCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
-        var subscription = await subscriptionRepository.FirstOrDefaultAsync(x => x.Id == request.SubscriptionId && x.StudentId == userId, cancellationToken).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.SubscriptionNotFound);
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
+        var subscription = await subscriptionRepository.GetRequiredAsync(x => x.Id == request.SubscriptionId && x.StudentId == userId, ErrorCodes.SubscriptionNotFound, cancellationToken).ConfigureAwait(false);
         var now = timeProvider.GetUtcNow();
         var options = subscriptionsOptions.Value;
         if (subscription.Status != SubscriptionStatus.Cancelled && !subscription.IsEntitledAt(now, options.GracePeriod))

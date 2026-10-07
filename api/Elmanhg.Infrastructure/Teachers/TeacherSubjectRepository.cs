@@ -1,3 +1,4 @@
+using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.Teachers;
 using Elmanhg.Infrastructure.Data.Context;
@@ -5,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.Teachers;
 
-public class TeacherSubjectRepository(AppDbContext context) : Repository<TeacherSubject>(context), ITeacherSubjectRepository
+public class TeacherSubjectRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<TeacherSubject>(context, currentUser, timeProvider), ITeacherSubjectRepository
 {
     public async Task<bool> IsAssignedAsync(Guid teacherId, Guid subjectId, CancellationToken cancellationToken)
     {

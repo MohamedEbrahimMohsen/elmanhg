@@ -1,11 +1,16 @@
 ﻿using Core.DDD.Entities;
 using Core.Errors;
 using Core.OTP.Exceptions;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Core.OTP.Entities;
 
 public class Otp : Entity
 {
+    // The resend quota is per day, counted from the window's first code; resends never move the window.
+    private static readonly TimeSpan ReissueWindow = TimeSpan.FromDays(1);
+
     public Guid VerificationId { get; private set; }
     public string Recipient { get; private set; }
     public OtpRecipientType RecipientType { get; private set; }
@@ -22,15 +27,16 @@ public class Otp : Entity
     public int ReissueCooldownSeconds { get; private set; }
     public int ReissueBlockCooldownInHours { get; private set; }
     public DateTimeOffset NextAllowedReissueAt { get; private set; }
+    public DateTimeOffset ReissueWindowStartedAt { get; private set; }
 
     public bool IsVerified { get; private set; }
     public bool IsUsed { get; private set; }
 
-    public DateTimeOffset CreatedAt { get; private set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset ExpiresAt { get; private set; }
     private Otp(Guid id): base(id) { }
 
-    public static Otp Create(OtpRecipientType recipientType, string recipient, string codeHash, int expiresInMinutes, int maxVerificationAttempts, int reissueCooldownSeconds, int maxReissueCount, int reissueBlockCooldownInHours)
+    public static Otp Create(OtpRecipientType recipientType, string recipient, string codeHash, int expiresInMinutes, int maxVerificationAttempts, int reissueCooldownSeconds, int maxReissueCount, int reissueBlockCooldownInHours, DateTimeOffset now)
     {
         var id = Guid.NewGuid();
         return new Otp(id)
@@ -39,9 +45,10 @@ public class Otp : Entity
             RecipientType = recipientType,
             Recipient = recipient,
             CodeHash = codeHash,
-            CreatedAt = DateTimeOffset.UtcNow,
-            ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(expiresInMinutes),
-            NextAllowedReissueAt = DateTimeOffset.UtcNow.AddSeconds(reissueCooldownSeconds),
+            CreatedAt = now,
+            ReissueWindowStartedAt = now,
+            ExpiresAt = now.AddMinutes(expiresInMinutes),
+            NextAllowedReissueAt = now.AddSeconds(reissueCooldownSeconds),
             ReissueCooldownSeconds = reissueCooldownSeconds,
             VerificationAttempts = 0,
             MaxVerificationAttempts = maxVerificationAttempts,
@@ -52,13 +59,12 @@ public class Otp : Entity
         };
     }
 
-    public void Reissue(string newCodeHash, int expiresInMinutes)
+    public void Reissue(string newCodeHash, int expiresInMinutes, DateTimeOffset now)
     {
-        var now = DateTimeOffset.UtcNow;
-
-        if (CreatedAt.AddDays(1) <= DateTimeOffset.UtcNow)
+        if (ReissueWindowStartedAt + ReissueWindow <= now)
         {
             ReissueCount = 0;
+            ReissueWindowStartedAt = now;
         }
 
         if (now < NextAllowedReissueAt)
@@ -73,7 +79,7 @@ public class Otp : Entity
             });
         }
 
-        if (ReissueCount > MaxReissueCount)
+        if (ReissueCount >= MaxReissueCount)
         {
             throw new RateLimitExceededCoreException(ErrorCodes.OTPReachedMaxReissueCount);
         }
@@ -89,7 +95,7 @@ public class Otp : Entity
         NextAllowedReissueAt = ReissueCount == MaxReissueCount? NextAllowedReissueAt.AddHours(ReissueBlockCooldownInHours) : now.AddSeconds(ReissueCooldownSeconds);
     }
 
-    public string? Verify(string codeHash)
+    public string? Verify(string codeHash, DateTimeOffset now)
     {
         VerificationAttempts++;
 
@@ -98,7 +104,7 @@ public class Otp : Entity
             return ErrorCodes.OTPAlreadyVerified;
         }
 
-        if (ExpiresAt <= DateTimeOffset.UtcNow)
+        if (ExpiresAt <= now)
         {
             return ErrorCodes.OTPExpired;
         }
@@ -108,7 +114,7 @@ public class Otp : Entity
             return ErrorCodes.OTPReachedMaxAttempts;
         }
 
-        if (CodeHash != codeHash)
+        if (!HashesMatch(CodeHash, codeHash))
         {
             return ErrorCodes.OTPNotMatched;
         }
@@ -118,7 +124,7 @@ public class Otp : Entity
         return null;
     }
 
-    public void MarkUsed()
+    public void MarkUsed(DateTimeOffset now)
     {
         if (!IsVerified)
         {
@@ -130,11 +136,13 @@ public class Otp : Entity
             throw new BadRequestCoreException(ErrorCodes.OTPAlreadyUsed);
         }
 
-        if (ExpiresAt <= DateTimeOffset.UtcNow)
+        if (ExpiresAt <= now)
         {
             throw new BadRequestCoreException(ErrorCodes.OTPExpired);
         }
 
         IsUsed = true;
     }
+
+    private static bool HashesMatch(string expected, string actual) => CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(expected), Encoding.UTF8.GetBytes(actual));
 }

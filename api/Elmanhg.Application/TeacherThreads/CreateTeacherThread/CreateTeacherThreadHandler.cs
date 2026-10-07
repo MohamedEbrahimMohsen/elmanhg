@@ -1,9 +1,8 @@
-using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
+using Core.Settings;
+using Core.Storage;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.Options;
-using Elmanhg.Application.Shared.RuntimeSettings;
-using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Application.TeacherThreads.Shared;
 using Elmanhg.Domain.Lessons;
@@ -24,12 +23,7 @@ public sealed class CreateTeacherThreadHandler(ITeacherThreadRepository teacherT
 {
     public async Task<TeacherThreadResult> Handle(CreateTeacherThreadCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var now = timeProvider.GetUtcNow();
         var options = subscriptionsOptions.Value;
         var entitlement = await StudentEntitlementLoader.LoadAsync(subscriptionRepository, runtimeSettings, userId, options, now, cancellationToken).ConfigureAwait(false);

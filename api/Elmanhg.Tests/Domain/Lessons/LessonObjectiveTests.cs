@@ -74,4 +74,14 @@ public sealed class LessonObjectiveTests
         objective.IsDeleted.Should().BeTrue();
         objective.UpdatedBy.Should().Be(deletedBy);
     }
+
+    [Fact]
+    public void Delete_Always_StampsDeletedAtWithUpdationDate()
+    {
+        var objective = LessonObjective.Create(_lessonId, "State the first law", 1, _createdBy);
+
+        objective.Delete(Guid.NewGuid());
+
+        objective.DeletedAt.Should().NotBeNull().And.Be(objective.UpdationDate);
+    }
 }

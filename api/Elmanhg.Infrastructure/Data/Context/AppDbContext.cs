@@ -1,8 +1,7 @@
 using Core.Auditing;
+using Core.DDD.Models;
 using Core.EntityFrameworkCore.Auditing;
 using Core.EntityFrameworkCore.Context;
-using Core.Errors;
-using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Analytics;
 using Elmanhg.Domain.Avatar;
 using Elmanhg.Domain.ContentRetrieval;
@@ -26,8 +25,6 @@ using Elmanhg.Domain.TrainingExports;
 using Elmanhg.Domain.Units;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
-using DomainErrorCodes = Elmanhg.Domain.SharedKernel.Exceptions.ErrorCodes;
 
 namespace Elmanhg.Infrastructure.Data.Context;
 
@@ -106,91 +103,9 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         {
             return await base.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is Session or QuestionMastery))
+        catch (DbUpdateException exception) when (Conflicts.TryTranslate(exception, out var conflict))
         {
-            throw new ConflictCoreException(ErrorCodes.SessionModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is Payment))
-        {
-            throw new ConflictCoreException(ErrorCodes.PaymentModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is Subscription))
-        {
-            throw new ConflictCoreException(ErrorCodes.SubscriptionModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is TeacherThread))
-        {
-            throw new ConflictCoreException(ErrorCodes.TeacherThreadModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is AvatarConversation))
-        {
-            throw new ConflictCoreException(ErrorCodes.AvatarConversationModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is TrainingExport))
-        {
-            throw new ConflictCoreException(ErrorCodes.TrainingExportModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is EssayGrade or MathStepGrade))
-        {
-            throw new ConflictCoreException(ErrorCodes.GradeModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is RuntimeSettingOverride))
-        {
-            throw new ConflictCoreException(ErrorCodes.RuntimeSettingModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateConcurrencyException exception) when (exception.Entries.Any(x => x.Entity is ExamPeriod))
-        {
-            throw new ConflictCoreException(ErrorCodes.ExamPeriodModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: RuntimeSettingKeyIndex })
-        {
-            throw new ConflictCoreException(ErrorCodes.RuntimeSettingModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: PaymobTransactionIndex or PaymentRefundTransactionIndex })
-        {
-            throw new ConflictCoreException(ErrorCodes.PaymentTransactionAlreadyRecorded, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, TableName: nameof(QuestionImportBatches) })
-        {
-            // Two confirms of one import batch id passed the replay check together; the loser surfaces as the batch conflict, which the import pipeline resolves.
-            throw new ConflictCoreException(ErrorCodes.QuestionImportBatchConflict, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: InProgressSessionIndex })
-        {
-            throw new ConflictCoreException(ErrorCodes.SessionAlreadyInProgress, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: AttemptPerQuestionIndex })
-        {
-            throw new ConflictCoreException(DomainErrorCodes.SessionQuestionAlreadyAnswered, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: QuestionMasteryPerStudentIndex })
-        {
-            throw new ConflictCoreException(ErrorCodes.SessionModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: OneOpenExamIndex })
-        {
-            throw new ConflictCoreException(ErrorCodes.ExamAlreadyInProgress, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: LessonOpeningPerStudentIndex })
-        {
-            throw new ConflictCoreException(ErrorCodes.LessonAlreadyOpened, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: SubjectDefaultBlueprintIndex or UnitBlueprintIndex })
-        {
-            throw new ConflictCoreException(ErrorCodes.ExamBlueprintModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: AvatarMessagePositionIndex })
-        {
-            throw new ConflictCoreException(ErrorCodes.AvatarConversationModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: TeacherThreadTrainingTriggerIndex })
-        {
-            // EF inserts the training row before the stale thread UPDATE, so a lost close/rate race surfaces here, not as a concurrency exception.
-            throw new ConflictCoreException(ErrorCodes.TeacherThreadModifiedConcurrently, innerException: exception);
-        }
-        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: EssayGradeTrainingTriggerIndex })
-        {
-            throw new ConflictCoreException(ErrorCodes.GradeModifiedConcurrently, innerException: exception);
+            throw conflict;
         }
     }
 
@@ -226,7 +141,8 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         ConfigureIssuedRefreshTokens(modelBuilder);
         ConfigureRuntimeSettings(modelBuilder);
         ConfigureSlaCalendars(modelBuilder);
-        ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(modelBuilder);
+        modelBuilder.ApplyRowVersionConvention();
+        modelBuilder.ApplySoftDeleteQueryFilters();
     }
 
     private static void ConfigureUsers(ModelBuilder modelBuilder)
@@ -360,7 +276,6 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.Property(x => x.Scope).IsRequired().HasColumnType("jsonb");
             builder.Property(x => x.ScopeKey).IsRequired();
             builder.Property(x => x.ScorePercent).HasPrecision(5, 2);
-            builder.Property(x => x.Version).IsRowVersion();
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasMany(x => x.Items).WithOne().HasForeignKey(x => x.SessionId).OnDelete(DeleteBehavior.Restrict);
             builder.HasMany(x => x.Attempts).WithOne().HasForeignKey(x => x.SessionId).OnDelete(DeleteBehavior.Restrict);
@@ -400,7 +315,6 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         {
             builder.Property(x => x.LatestNormalisedScore).HasPrecision(5, 4);
             builder.Property(x => x.PreviousNormalisedScore).HasPrecision(5, 4);
-            builder.Property(x => x.Version).IsRowVersion();
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Question>().WithMany().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.StudentId, x.QuestionId }).IsUnique().HasDatabaseName(QuestionMasteryPerStudentIndex);
@@ -428,7 +342,6 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.Property(x => x.Period).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.PaymobReference).HasMaxLength(PaymobReferenceMaxLength);
-            builder.Property(x => x.Version).IsRowVersion();
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.StudentId, x.Plan, x.CurrentPeriodEnd });
             builder.HasIndex(x => new { x.Status, x.CurrentPeriodEnd }, SubscriptionLapseIndex);
@@ -444,7 +357,6 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.Property(x => x.RefundTransactionId).HasMaxLength(PaymobReferenceMaxLength);
             builder.Property(x => x.ReviewReason).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.RawWebhook).HasColumnType("jsonb").HasAnnotation(AuditChangeReader.ExcludedAnnotation, true);
-            builder.Property(x => x.Version).IsRowVersion();
             builder.Ignore(x => x.Amount);
             builder.Ignore(x => x.NeedsReview);
             builder.Ignore(x => x.IsRefundable);
@@ -466,7 +378,6 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         {
             builder.Property(x => x.Context).IsRequired().HasColumnType("jsonb");
             builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
-            builder.Property(x => x.Version).IsRowVersion();
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.TeacherId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
@@ -503,7 +414,14 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.HasOne<TeacherThread>().WithMany().HasForeignKey(x => x.ThreadId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.TeacherId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.ThreadId, x.TeacherId });
-            builder.HasIndex(x => x.NextAttemptAt).HasFilter("\"Status\" = 'Pending'");
+            builder.OwnsOne(x => x.Retry, retry =>
+            {
+                retry.Property(x => x.Attempts).HasColumnName(nameof(RetrySchedule.Attempts));
+                retry.Property(x => x.NextAttemptAt).HasColumnName(nameof(RetrySchedule.NextAttemptAt));
+                retry.Ignore(x => x.LastErrorCode);
+                retry.HasIndex(x => x.NextAttemptAt).HasFilter("\"Status\" = 'Pending'").HasDatabaseName("IX_TeacherVoiceDrafts_NextAttemptAt");
+            });
+            builder.Navigation(x => x.Retry).IsRequired();
         });
     }
 
@@ -588,7 +506,6 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         modelBuilder.Entity<AvatarConversation>(builder =>
         {
             builder.Property(x => x.EntryPoint).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
-            builder.Property(x => x.Version).IsRowVersion();
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<CurriculumUnit>().WithMany().HasForeignKey(x => x.UnitId).OnDelete(DeleteBehavior.Restrict);
@@ -628,66 +545,25 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
             builder.Property(x => x.Confidence).HasPrecision(5, 4);
             builder.Property(x => x.Model).HasMaxLength(AiIdentifierMaxLength);
             builder.Property(x => x.PromptVersion).HasMaxLength(AiIdentifierMaxLength);
-            builder.Property(x => x.LastErrorCode).HasMaxLength(AiIdentifierMaxLength);
+            builder.OwnsOne(x => x.Retry, retry =>
+            {
+                retry.Property(x => x.Attempts).HasColumnName(nameof(RetrySchedule.Attempts));
+                retry.Property(x => x.NextAttemptAt).HasColumnName(nameof(RetrySchedule.NextAttemptAt));
+                retry.Property(x => x.LastErrorCode).HasColumnName(nameof(RetrySchedule.LastErrorCode)).HasMaxLength(AiIdentifierMaxLength);
+                retry.HasIndex(x => x.NextAttemptAt).HasFilter("\"Status\" = 'Pending'").HasDatabaseName("IX_EssayGrades_NextAttemptAt");
+            });
+            builder.Navigation(x => x.Retry).IsRequired();
             builder.Property(x => x.CostUsd).HasPrecision(12, 6);
             builder.Property(x => x.ReviewDecision).HasConversion<string>().HasMaxLength(EnumColumnMaxLength);
             builder.Property(x => x.ReviewedScore).HasPrecision(9, 2);
             builder.Property(x => x.ReviewedNormalisedScore).HasPrecision(5, 4);
-            builder.Property(x => x.Version).IsRowVersion();
             builder.HasOne<User>().WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Session>().WithMany().HasForeignKey(x => x.SessionId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Question>().WithMany().HasForeignKey(x => x.QuestionId).OnDelete(DeleteBehavior.Restrict);
             builder.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(x => new { x.SessionId, x.QuestionId }).IsUnique().HasDatabaseName(EssayGradePerQuestionIndex);
-            builder.HasIndex(x => x.NextAttemptAt).HasFilter("\"Status\" = 'Pending'");
             builder.HasIndex(x => x.GradedAt).HasFilter("\"Status\" = 'Graded' AND \"AppliedAt\" IS NULL");
             builder.HasIndex(x => new { x.SubjectId, x.Status });
         });
-    }
-
-    private static void ApplyGlobalFilterToIgnoreSoftDeletionInAllQueries(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<User>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<Subject>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<TeacherSubject>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<CurriculumUnit>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<Lesson>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<LessonObjective>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<LessonOpening>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<Question>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<QuestionRevision>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<QuestionImportBatch>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<QuestionDecision>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<ReviewSession>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<ReviewSessionOpening>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<Session>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<SessionItem>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<Attempt>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<QuestionMastery>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<ExamBlueprint>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<Subscription>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<Payment>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<TeacherThread>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<TeacherMessage>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<TeacherVoiceDraft>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<TeacherThreadSlaEvent>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<TeacherThreadOutOfAppReminder>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<FunnelEvent>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<UserActivityDay>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<LessonContentChunk>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<LessonContentIndex>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<AvatarMessageUsage>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<AvatarConversation>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<AvatarMessage>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<AttemptTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<AvatarTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<TeacherThreadTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<EssayGrade>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<MathStepGrade>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<EssayGradeTrainingRecord>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<TrainingExport>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<IssuedRefreshToken>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<RuntimeSettingOverride>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<ExamPeriod>().HasQueryFilter(x => !x.IsDeleted);
     }
 }

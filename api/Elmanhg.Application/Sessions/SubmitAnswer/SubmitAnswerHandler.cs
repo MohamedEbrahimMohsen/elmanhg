@@ -1,14 +1,15 @@
+using Core.DDD.Repositories;
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Core.Localization;
+using Core.Settings;
+using Core.Storage;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Questions.Shared;
 using Elmanhg.Application.Questions.Shared.Grading;
 using Elmanhg.Application.Sessions.Shared;
 using Elmanhg.Application.Shared.AiService;
 using Elmanhg.Application.Shared.Options;
-using Elmanhg.Application.Shared.RuntimeSettings;
-using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.EssayGrading;
 using Elmanhg.Domain.Lessons;
@@ -27,17 +28,8 @@ public sealed class SubmitAnswerHandler(ISessionRepository sessionRepository, IQ
 {
     public async Task<SessionItemResult> Handle(SubmitAnswerCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
-        var session = await sessionRepository.FirstOrDefaultAsync(x => x.Id == request.SessionId && x.StudentId == userId && x.Kind == SessionKind.Quiz, cancellationToken, include: query => query.Include(x => x.Items).Include(x => x.Attempts).AsSplitQuery()).ConfigureAwait(false);
-        if (session is null)
-        {
-            throw new NotFoundCoreException(ErrorCodes.SessionNotFound);
-        }
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
+        var session = await sessionRepository.GetRequiredAsync(x => x.Id == request.SessionId && x.StudentId == userId && x.Kind == SessionKind.Quiz, ErrorCodes.SessionNotFound, cancellationToken, include: query => query.Include(x => x.Items).Include(x => x.Attempts).AsSplitQuery()).ConfigureAwait(false);
 
         var item = session.GetItem(request.QuestionId);
         if (item is null)

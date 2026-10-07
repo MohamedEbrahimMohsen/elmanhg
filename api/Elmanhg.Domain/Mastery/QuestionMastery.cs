@@ -2,7 +2,7 @@ using Core.DDD.Entities;
 
 namespace Elmanhg.Domain.Mastery;
 
-public class QuestionMastery : AuditEntity
+public class QuestionMastery : AuditEntity, IVersioned
 {
     public Guid StudentId { get; private set; }
     public Guid QuestionId { get; private set; }
@@ -60,6 +60,5 @@ public class QuestionMastery : AuditEntity
 
         IsMastered = PreviousNormalisedScore is not null && LatestNormalisedScore >= correctThreshold && PreviousNormalisedScore >= correctThreshold;
         UpdatedBy = StudentId;
-        UpdationDate = DateTimeOffset.UtcNow;
     }
 }

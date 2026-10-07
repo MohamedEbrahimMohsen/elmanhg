@@ -33,4 +33,12 @@ public sealed class GetMyTeacherThreadsValidatorTests
 
         result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.TeacherThreadPageSizeInvalid);
     }
+
+    [Fact]
+    public void Validate_PageOffsetPastIntRange_FailsPageNumberInvalid()
+    {
+        var result = _validator.Validate(new GetMyTeacherThreadsQuery(int.MaxValue, 20));
+
+        result.Errors.Select(x => x.ErrorCode).Should().Contain(ErrorCodes.TeacherThreadPageNumberInvalid);
+    }
 }

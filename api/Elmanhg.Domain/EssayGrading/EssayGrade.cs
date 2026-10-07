@@ -1,14 +1,14 @@
 using Core.DDD.Entities;
+using Core.DDD.Models;
+using Core.DDD.Time;
 using Elmanhg.Domain.Questions.Schemas;
+using Elmanhg.Domain.SharedKernel;
 using System.Text.Json;
 
 namespace Elmanhg.Domain.EssayGrading;
 
-public partial class EssayGrade : AuditEntity
+public partial class EssayGrade : AuditEntity, IRetriedWork, IVersioned
 {
-    // Matches the LastErrorCode column width.
-    private const int ErrorCodeMaxLength = 100;
-
     public Guid StudentId { get; private set; }
     public Guid SessionId { get; private set; }
     public Guid QuestionId { get; private set; }
@@ -18,9 +18,10 @@ public partial class EssayGrade : AuditEntity
     public string Answer { get; private set; } = "{}";
     public EssayGradeStatus Status { get; private set; }
     public EssayReviewReason? ReviewReason { get; private set; }
-    public int Attempts { get; private set; }
-    public DateTimeOffset? NextAttemptAt { get; private set; }
-    public string? LastErrorCode { get; private set; }
+    public RetrySchedule Retry { get; private set; } = default!;
+    public int Attempts => Retry.Attempts;
+    public DateTimeOffset? NextAttemptAt => Retry.NextAttemptAt;
+    public string? LastErrorCode => Retry.LastErrorCode;
     public DateTimeOffset RequestedAt { get; private set; }
     public DateTimeOffset? GradedAt { get; private set; }
     public decimal? Score { get; private set; }
@@ -47,7 +48,7 @@ public partial class EssayGrade : AuditEntity
         }
 
         ArgumentOutOfRangeException.ThrowIfNegative(timeTakenMilliseconds);
-        var at = ToMicroseconds(requestedAt);
+        var at = requestedAt.TruncateToMicroseconds();
         return new EssayGrade(Guid.NewGuid(), studentId)
         {
             StudentId = studentId,
@@ -58,21 +59,19 @@ public partial class EssayGrade : AuditEntity
             MaxScore = maxScore,
             Answer = JsonSerializer.Serialize(new EssayAnswer(answerText.Trim()), QuestionJson.SerializerOptions),
             Status = EssayGradeStatus.Pending,
-            Attempts = 0,
-            NextAttemptAt = at,
+            Retry = RetrySchedule.DueAt(at),
             RequestedAt = at,
             TimeTakenMilliseconds = timeTakenMilliseconds,
         };
     }
 
-    public bool IsDueAt(DateTimeOffset now) => Status == EssayGradeStatus.Pending && NextAttemptAt <= now;
+    public bool IsDueAt(DateTimeOffset now) => Status == EssayGradeStatus.Pending && Retry.IsDueAt(now);
+
+    public bool IsPending => Status == EssayGradeStatus.Pending;
 
     public bool IsAwaitingApplication => Status == EssayGradeStatus.Graded && AppliedAt is null;
 
     public string ReadAnswerText() => JsonSerializer.Deserialize<EssayAnswer>(Answer, QuestionJson.SerializerOptions)?.Text ?? string.Empty;
 
     public IReadOnlyList<EssayCriterionScore> ReadCriteria() => Criteria is null ? [] : JsonSerializer.Deserialize<List<EssayCriterionScore>>(Criteria, QuestionJson.SerializerOptions) ?? [];
-
-    // timestamptz stores whole microseconds; truncating keeps the first response identical to later reads.
-    private static DateTimeOffset ToMicroseconds(DateTimeOffset value) => value.AddTicks(-(value.Ticks % TimeSpan.TicksPerMicrosecond));
 }

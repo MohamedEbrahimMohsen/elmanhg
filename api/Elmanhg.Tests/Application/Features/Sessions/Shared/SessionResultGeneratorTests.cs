@@ -1,6 +1,6 @@
 using Core.Localization;
+using Core.Storage;
 using Elmanhg.Application.Sessions.Shared;
-using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Tests.Builders;
 using FluentAssertions;
 using NSubstitute;

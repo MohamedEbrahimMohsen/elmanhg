@@ -1,5 +1,5 @@
 using Core.Errors;
-using Elmanhg.Application.Shared.Observability;
+using Core.Queues;
 using Elmanhg.Application.Shared.Options;
 using Elmanhg.Application.TeacherThreads.GetDueSlaThreadIds;
 using Elmanhg.Application.TeacherThreads.ProcessTeacherThreadSla;
@@ -9,102 +9,31 @@ using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Api.Workers;
 
-public sealed class TeacherThreadSlaWorker(IServiceScopeFactory scopeFactory, IOptions<AskTeacherOptions> askTeacherOptions, TimeProvider timeProvider, ILogger<TeacherThreadSlaWorker> logger, BackgroundJobMetrics jobMetrics) : BackgroundService
+public sealed class TeacherThreadSlaWorker(IServiceScopeFactory scopeFactory, IOptions<AskTeacherOptions> askTeacherOptions, TimeProvider timeProvider, ILogger<TeacherThreadSlaWorker> logger, BackgroundJobMetrics jobMetrics) : SweepWorker<AskTeacherOptions>(scopeFactory, askTeacherOptions, timeProvider, logger, jobMetrics)
 {
-    private const string JobName = "ask-teacher-sla";
+    protected override string JobName => "ask-teacher-sla";
 
-    // Ids whose processing failed are left out of later batches until a sweep reaches the end of the backlog, so failing threads cannot hold the head of every batch.
-    private readonly HashSet<Guid> _deferredIds = [];
+    protected override SweepOptions SweepOptionsOf(AskTeacherOptions options) => new() { Enabled = options.SlaSweepEnabled, IntervalSeconds = options.SlaSweepIntervalSeconds, BatchSize = options.SlaSweepBatchSize };
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        var options = askTeacherOptions.Value;
-        if (!options.SlaSweepEnabled)
-        {
-            return;
-        }
-
-        jobMetrics.Register(JobName, TimeSpan.FromSeconds(options.SlaSweepIntervalSeconds));
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(options.SlaSweepIntervalSeconds), timeProvider);
-        while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false))
-        {
-            await SweepAsync(options.SlaSweepBatchSize, stoppingToken).ConfigureAwait(false);
-        }
-    }
-
-    private async Task SweepAsync(int batchSize, CancellationToken stoppingToken)
-    {
-        using var run = jobMetrics.StartRun(JobName);
-        await RescheduleAsync(batchSize, stoppingToken).ConfigureAwait(false);
-        var threadIds = await ListDueAsync(stoppingToken).ConfigureAwait(false);
-        if (threadIds is null)
-        {
-            run.MarkListingFailed();
-        }
-
-        threadIds ??= [];
-        if (threadIds.Count < batchSize)
-        {
-            _deferredIds.Clear();
-        }
-
-        foreach (var threadId in threadIds)
-        {
-            if (await ProcessAsync(threadId, stoppingToken).ConfigureAwait(false))
-            {
-                run.ItemSucceeded();
-                continue;
-            }
-
-            run.ItemFailed();
-            _deferredIds.Add(threadId);
-        }
-    }
-
-    private async Task RescheduleAsync(int batchSize, CancellationToken stoppingToken)
+    protected override async Task BeforeListAsync(SweepOptions sweep, CancellationToken cancellationToken)
     {
         try
         {
             int rescheduled;
             do
             {
-                await using var scope = scopeFactory.CreateAsyncScope();
-                rescheduled = await scope.ServiceProvider.GetRequiredService<ISender>().Send(new RescheduleTeacherThreadSlasCommand(batchSize), stoppingToken).ConfigureAwait(false);
+                await using var scope = ScopeFactory.CreateAsyncScope();
+                rescheduled = await scope.ServiceProvider.GetRequiredService<ISender>().Send(new RescheduleTeacherThreadSlasCommand(sweep.BatchSize), cancellationToken).ConfigureAwait(false);
             }
-            while (rescheduled == batchSize);
+            while (rescheduled == sweep.BatchSize);
         }
-        catch (Exception exception) when (!stoppingToken.IsCancellationRequested)
+        catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
         {
-            logger.Log(exception is ConflictCoreException ? LogLevel.Warning : LogLevel.Error, exception, "Rescheduling Ask a Teacher SLA deadlines failed.");
+            Logger.Log(exception is ConflictCoreException ? LogLevel.Warning : LogLevel.Error, exception, "Rescheduling Ask a Teacher SLA deadlines failed.");
         }
     }
 
-    private async Task<List<Guid>?> ListDueAsync(CancellationToken stoppingToken)
-    {
-        try
-        {
-            await using var scope = scopeFactory.CreateAsyncScope();
-            return await scope.ServiceProvider.GetRequiredService<ISender>().Send(new GetDueSlaThreadIdsQuery([.. _deferredIds]), stoppingToken).ConfigureAwait(false);
-        }
-        catch (Exception exception) when (!stoppingToken.IsCancellationRequested)
-        {
-            logger.LogError(exception, "Listing due Ask a Teacher SLA threads failed.");
-            return null;
-        }
-    }
+    protected override async Task<List<Guid>> ListDueAsync(ISender sender, IReadOnlyCollection<Guid> deferredIds, CancellationToken cancellationToken) => await sender.Send(new GetDueSlaThreadIdsQuery(deferredIds), cancellationToken).ConfigureAwait(false);
 
-    private async Task<bool> ProcessAsync(Guid threadId, CancellationToken stoppingToken)
-    {
-        try
-        {
-            await using var scope = scopeFactory.CreateAsyncScope();
-            await scope.ServiceProvider.GetRequiredService<ISender>().Send(new ProcessTeacherThreadSlaCommand(threadId), stoppingToken).ConfigureAwait(false);
-            return true;
-        }
-        catch (Exception exception) when (!stoppingToken.IsCancellationRequested)
-        {
-            logger.LogWarning(exception, "SLA processing of thread {ThreadId} failed.", threadId);
-            return false;
-        }
-    }
+    protected override async Task ProcessAsync(ISender sender, Guid id, CancellationToken cancellationToken) => await sender.Send(new ProcessTeacherThreadSlaCommand(id), cancellationToken).ConfigureAwait(false);
 }

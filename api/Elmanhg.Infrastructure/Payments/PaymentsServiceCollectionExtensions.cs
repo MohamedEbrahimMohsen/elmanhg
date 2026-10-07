@@ -1,9 +1,10 @@
+using Core.Http;
+using Core.Utilities;
 using Elmanhg.Application.Shared.Payments;
 using Elmanhg.Infrastructure.Payments.Paymob;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
 
 namespace Elmanhg.Infrastructure.Payments;
@@ -12,27 +13,20 @@ public static class PaymentsServiceCollectionExtensions
 {
     public static IServiceCollection AddPayments(this IServiceCollection services)
     {
-        services.AddOptions<PaymentsOptions>().BindConfiguration(PaymentsOptions.SectionName).PostConfigure<IConfiguration, IHostEnvironment>(ApplyAllowFakePaymentsDefault).ValidateDataAnnotations().ValidateOnStart();
-        services.AddSingleton<IValidateOptions<PaymentsOptions>, PaymentsOptionsValidator>();
-        services.AddHttpClient<PaymobPaymentGateway>((serviceProvider, client) => client.BaseAddress = new Uri(Options(serviceProvider).Paymob.BaseUrl.TrimEnd('/') + "/"))
-            .AddStandardResilienceHandler()
-            .Configure((resilience, serviceProvider) =>
-            {
-                var payments = Options(serviceProvider);
-                resilience.AttemptTimeout.Timeout = TimeSpan.FromSeconds(payments.AttemptTimeoutSeconds);
-                resilience.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(payments.TotalTimeoutSeconds);
-                resilience.Retry.DisableForUnsafeHttpMethods();
-            });
+        services.AddValidatedOptions<PaymentsOptions, PaymentsOptionsValidator>(PaymentsOptions.SectionName).PostConfigure<IConfiguration, IHostEnvironment>(ApplyAllowFakePaymentsDefault);
+        services.AddHttpClient<PaymobPaymentGateway>((serviceProvider, client) => client.BaseAddress = HttpBaseAddress.From(Options(serviceProvider).Paymob.BaseUrl)).AddTimeoutResilience(serviceProvider => TimeSpan.FromSeconds(Options(serviceProvider).AttemptTimeoutSeconds), serviceProvider => TimeSpan.FromSeconds(Options(serviceProvider).TotalTimeoutSeconds), retryUnsafeMethods: false);
         services.AddScoped<FakePaymentGateway>();
         services.AddSingleton<IPaymentNotificationReader, PaymobNotificationReader>();
-        services.AddScoped<IPaymentGateway>(serviceProvider => Options(serviceProvider).Provider switch
-        {
-            PaymentProvider.Fake => serviceProvider.GetRequiredService<FakePaymentGateway>(),
-            PaymentProvider.Paymob => serviceProvider.GetRequiredService<PaymobPaymentGateway>(),
-            _ => throw new InvalidOperationException("Unsupported Payments:Provider."),
-        });
+        services.AddProviderSwitch<IPaymentGateway, FakePaymentGateway, PaymobPaymentGateway>(UsesPaymob);
         return services;
     }
+
+    private static bool UsesPaymob(IServiceProvider serviceProvider) => Options(serviceProvider).Provider switch
+    {
+        PaymentProvider.Fake => false,
+        PaymentProvider.Paymob => true,
+        _ => throw new InvalidOperationException("Unsupported Payments:Provider."),
+    };
 
     private static void ApplyAllowFakePaymentsDefault(PaymentsOptions options, IConfiguration configuration, IHostEnvironment hostEnvironment)
     {

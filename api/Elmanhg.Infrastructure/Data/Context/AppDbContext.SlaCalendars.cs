@@ -12,7 +12,6 @@ public partial class AppDbContext
         modelBuilder.Entity<ExamPeriod>(builder =>
         {
             builder.Property(x => x.Name).IsRequired();
-            builder.Property(x => x.Version).IsRowVersion();
             builder.HasIndex(x => new { x.StartDate, x.EndDate });
             builder.ToTable(x => x.HasCheckConstraint("CK_ExamPeriods_DateRange", "\"EndDate\" >= \"StartDate\""));
         });

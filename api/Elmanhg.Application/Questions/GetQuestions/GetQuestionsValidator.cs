@@ -12,8 +12,7 @@ public sealed class GetQuestionsValidator : AbstractValidator<GetQuestionsQuery>
     {
         var options = contentOptions.Value;
 
-        RuleFor(x => x.PageNumber).ValidateMin(1, ErrorCodes.QuestionPageNumberInvalid);
-        RuleFor(x => x.PageSize).ValidateRange(1, options.QuestionListMaxPageSize, ErrorCodes.QuestionPageSizeInvalid);
+        RuleFor(x => x).ValidatePaging(x => x.PageNumber, x => x.PageSize, options.QuestionListMaxPageSize, ErrorCodes.QuestionPageNumberInvalid, ErrorCodes.QuestionPageSizeInvalid);
         RuleFor(x => x.Status)
             .IsInEnum()
             .WithErrorCode(ErrorCodes.QuestionStatusInvalid);

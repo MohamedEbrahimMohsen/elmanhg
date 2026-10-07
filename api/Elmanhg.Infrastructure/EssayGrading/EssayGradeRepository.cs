@@ -1,3 +1,4 @@
+using Core.DDD.Identity;
 using Core.DDD.Models;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.EssayGrading;
@@ -7,15 +8,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.EssayGrading;
 
-public class EssayGradeRepository(AppDbContext context) : Repository<EssayGrade>(context), IEssayGradeRepository
+public class EssayGradeRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<EssayGrade>(context, currentUser, timeProvider), IEssayGradeRepository
 {
     public async Task<List<Guid>> GetDueIdsAsync(DateTimeOffset now, int limit, CancellationToken cancellationToken)
     {
         return await _dbSet
             .AsNoTracking()
-            .Where(x => (x.Status == EssayGradeStatus.Pending && x.NextAttemptAt <= now) || (x.Status == EssayGradeStatus.Graded && x.AppliedAt == null))
+            .Where(x => (x.Status == EssayGradeStatus.Pending && x.Retry.NextAttemptAt <= now) || (x.Status == EssayGradeStatus.Graded && x.AppliedAt == null))
             .OrderBy(x => x.Status == EssayGradeStatus.Pending)
-            .ThenBy(x => x.NextAttemptAt)
+            .ThenBy(x => x.Retry.NextAttemptAt)
             .ThenBy(x => x.Id)
             .Select(x => x.Id)
             .Take(limit)
@@ -29,17 +30,7 @@ public class EssayGradeRepository(AppDbContext context) : Repository<EssayGrade>
             .AsNoTracking()
             .Where(x => x.SubjectId == subjectId && x.Status == EssayGradeStatus.InReview)
             .Where(x => _context.Set<Session>().Any(s => s.Id == x.SessionId && !s.IsTestMode));
-        var total = await query
-            .LongCountAsync(cancellationToken)
-            .ConfigureAwait(false);
-        var items = await query
-            .OrderBy(x => x.RequestedAt)
-            .ThenBy(x => x.Id)
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-        return new PageData<EssayGrade> { Items = items, PageNumber = pageNumber, PageSize = pageSize, TotalItems = total, TotalPages = (total + pageSize - 1) / pageSize };
+        return await query.OrderBy(x => x.RequestedAt).ThenBy(x => x.Id).ToPageDataAsync(pageNumber, pageSize, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<Dictionary<Guid, int>> CountInReviewBySubjectAsync(IReadOnlyCollection<Guid>? subjectIds, CancellationToken cancellationToken)

@@ -1,4 +1,3 @@
-using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.QuestionValidation.Shared;
@@ -14,12 +13,7 @@ public sealed class GetValidationQueueFiltersHandler(ITeacherSubjectRepository t
 {
     public async Task<ValidationQueueFiltersResult> Handle(GetValidationQueueFiltersQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var assignments = await teacherSubjectRepository.FindAsync(x => x.TeacherId == userId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
         var subjectIds = assignments
             .Select(x => x.SubjectId)

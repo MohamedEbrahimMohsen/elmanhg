@@ -1,4 +1,5 @@
 using Core.DDD.Entities;
+using Core.DDD.Time;
 using Core.Errors;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Questions;
@@ -6,7 +7,7 @@ using Elmanhg.Domain.SharedKernel.Exceptions;
 
 namespace Elmanhg.Domain.Sessions;
 
-public partial class Session : AuditEntity
+public partial class Session : AuditEntity, IVersioned
 {
     public Guid StudentId { get; private set; }
     public SessionKind Kind { get; private set; }
@@ -49,7 +50,7 @@ public partial class Session : AuditEntity
         }
 
         var scope = new QuizScope(lesson.Id);
-        var now = UtcNowToMicroseconds();
+        var now = DateTimeOffset.UtcNow.TruncateToMicroseconds();
         var session = new Session(Guid.NewGuid(), studentId)
         {
             StudentId = studentId,
@@ -67,13 +68,8 @@ public partial class Session : AuditEntity
     public void Resume()
     {
         EnsureNotSubmitted();
-        Touch(UtcNowToMicroseconds());
+        Touch(DateTimeOffset.UtcNow.TruncateToMicroseconds());
     }
-
-    // timestamptz stores whole microseconds; truncating here keeps the first response identical to every later read and replay.
-    private static DateTimeOffset ToMicroseconds(DateTimeOffset value) => value.AddTicks(-(value.Ticks % TimeSpan.TicksPerMicrosecond));
-
-    private static DateTimeOffset UtcNowToMicroseconds() => ToMicroseconds(DateTimeOffset.UtcNow);
 
     private void Touch(DateTimeOffset now)
     {

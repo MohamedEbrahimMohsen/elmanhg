@@ -10,7 +10,7 @@ public static class DependencyInjection
 {
     public static IApplicationBuilder UseCoreLocalization(this IApplicationBuilder app, IConfiguration configuration)
     {
-        var defaultLang = configuration["CoreLocalization:DefaultLanguage"]?[..2].ToLowerInvariant() ?? "en";
+        var defaultLang = DefaultLanguageResolver.Resolve(configuration[DefaultLanguageResolver.ConfigurationKey]);
 
         var supportedCultures = new[]
         {
@@ -37,7 +37,6 @@ public static class DependencyInjection
     public static IServiceCollection AddCoreLocalization(this IServiceCollection services)
     {
         services.AddLocalization(options => options.ResourcesPath = "Resources");
-        services.AddScoped<ILocalizationManager, LocalizationManager>();
         services.AddScoped<ILocalizer, Localizer>();
 
         return services;

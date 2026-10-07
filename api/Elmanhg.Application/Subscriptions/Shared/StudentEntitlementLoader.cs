@@ -1,5 +1,5 @@
+using Core.Settings;
 using Elmanhg.Application.Shared.Options;
-using Elmanhg.Application.Shared.RuntimeSettings;
 using Elmanhg.Domain.Subscriptions;
 
 namespace Elmanhg.Application.Subscriptions.Shared;

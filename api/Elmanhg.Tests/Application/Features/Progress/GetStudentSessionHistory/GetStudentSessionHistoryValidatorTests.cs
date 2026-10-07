@@ -43,6 +43,12 @@ public sealed class GetStudentSessionHistoryValidatorTests
         AssertFails(new GetStudentSessionHistoryQuery(Guid.NewGuid(), (SessionHistoryKind)9), ErrorCodes.SessionHistoryKindInvalid);
     }
 
+    [Fact]
+    public void Validate_PageOffsetPastIntRange_FailsPageNumberInvalid()
+    {
+        AssertFails(new GetStudentSessionHistoryQuery(Guid.NewGuid(), null, PageNumber: int.MaxValue, PageSize: 20), ErrorCodes.SessionHistoryPageNumberInvalid);
+    }
+
     private void AssertFails(GetStudentSessionHistoryQuery query, string errorCode)
     {
         _validator.Validate(query).Errors.Select(x => x.ErrorCode).Should().Contain(errorCode);

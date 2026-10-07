@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Core.Identity.Tokens.CurrentUser;
 using Elmanhg.Application.EssayGrading.Shared;
 using Elmanhg.Application.Exceptions;
@@ -11,13 +11,8 @@ public sealed class GetEssayGradeHandler(IEssayGradeRepository essayGradeReposit
 {
     public async Task<EssayGradeResult> Handle(GetEssayGradeQuery request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
-        var grade = await essayGradeRepository.FirstOrDefaultAsync(x => x.SessionId == request.SessionId && x.QuestionId == request.QuestionId && x.StudentId == userId, cancellationToken, asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.EssayGradeNotFound);
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
+        var grade = await essayGradeRepository.GetRequiredAsync(x => x.SessionId == request.SessionId && x.QuestionId == request.QuestionId && x.StudentId == userId, ErrorCodes.EssayGradeNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
         return EssayGradeResultGenerator.Generate(grade);
     }
 }

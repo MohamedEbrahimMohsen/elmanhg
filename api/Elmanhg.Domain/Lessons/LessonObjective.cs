@@ -43,13 +43,13 @@ public class LessonObjective : AuditEntity, IAuditedEntity
         Text = trimmed;
         Order = order;
         UpdatedBy = updatedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
     }
 
     public void Delete(Guid deletedBy)
     {
-        SoftDelete();
+        var now = DateTimeOffset.UtcNow;
+        SoftDelete(now);
         UpdatedBy = deletedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
+        UpdationDate = now;
     }
 }

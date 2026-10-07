@@ -15,4 +15,10 @@ public static class CollectionValidationExtensions
             .Must(list => list == null || list.Count <= maxItems)
             .WithMessage($"{{PropertyName}} must not contain more than {maxItems} items.")
             .WithErrorCode(errorCode ?? ValidationErrors.ValidationListMaxItems);
+
+    public static IRuleBuilderOptions<T, IEnumerable<TItem>?> ValidateDistinct<T, TItem>(this IRuleBuilder<T, IEnumerable<TItem>?> ruleBuilder, string? errorCode = null)
+        => ruleBuilder
+            .Must(items => items is null || items.Distinct().Count() == items.Count())
+            .WithMessage("{PropertyName} must not contain duplicates.")
+            .WithErrorCode(errorCode ?? ValidationErrors.ValidationDistinct);
 }

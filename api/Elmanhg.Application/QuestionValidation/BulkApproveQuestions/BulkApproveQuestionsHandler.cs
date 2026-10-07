@@ -13,12 +13,7 @@ public sealed class BulkApproveQuestionsHandler(IReviewSessionRepository reviewS
 {
     public async Task<BulkApproveQuestionsResult> Handle(BulkApproveQuestionsCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var session = await reviewSessionRepository.GetByIdAsync(request.ReviewSessionId, cancellationToken, include: query => query.Include(x => x.Openings), asNoTracking: true).ConfigureAwait(false);
         if (session is null || session.TeacherId != userId)
         {

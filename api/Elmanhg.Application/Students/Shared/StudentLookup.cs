@@ -1,4 +1,4 @@
-using Core.Errors;
+using Core.DDD.Repositories;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Domain.Identity;
 
@@ -8,6 +8,6 @@ public static class StudentLookup
 {
     public static async Task<User> GetAsync(IUserRepository userRepository, Guid studentId, CancellationToken cancellationToken)
     {
-        return await userRepository.FirstOrDefaultAsync(x => x.Id == studentId && x.Role == UserRole.Student, cancellationToken, asNoTracking: true).ConfigureAwait(false) ?? throw new NotFoundCoreException(ErrorCodes.StudentNotFound);
+        return await userRepository.GetRequiredAsync(x => x.Id == studentId && x.Role == UserRole.Student, ErrorCodes.StudentNotFound, cancellationToken, asNoTracking: true).ConfigureAwait(false);
     }
 }

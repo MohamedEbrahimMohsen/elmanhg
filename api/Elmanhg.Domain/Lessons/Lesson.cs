@@ -106,8 +106,9 @@ public partial class Lesson : AuditEntity, IAuditedEntity
             objective.Delete(deletedBy);
         }
 
-        SoftDelete();
+        var now = DateTimeOffset.UtcNow;
+        SoftDelete(now);
         UpdatedBy = deletedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
+        UpdationDate = now;
     }
 }

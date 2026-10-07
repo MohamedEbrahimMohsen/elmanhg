@@ -1,11 +1,11 @@
 using Core.Errors;
 using Core.Identity.Tokens.CurrentUser;
 using Core.Localization;
+using Core.Settings;
+using Core.Storage;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Sessions.Shared;
 using Elmanhg.Application.Shared.Options;
-using Elmanhg.Application.Shared.RuntimeSettings;
-using Elmanhg.Application.Shared.Storage;
 using Elmanhg.Application.Subscriptions.Shared;
 using Elmanhg.Domain.Identity;
 using Elmanhg.Domain.Lessons;
@@ -24,12 +24,7 @@ public sealed class StartQuizSessionHandler(ISessionRepository sessionRepository
 {
     public async Task<SessionResult> Handle(StartQuizSessionCommand request, CancellationToken cancellationToken)
     {
-        if (currentUserService.UserId == null || currentUserService.UserId == default)
-        {
-            throw new UnauthorizedCoreException(ErrorCodes.UserNotAuthenticated);
-        }
-
-        var userId = currentUserService.UserId.Value;
+        var userId = currentUserService.GetRequiredUserId(ErrorCodes.UserNotAuthenticated);
         var lesson = await lessonRepository.GetByIdAsync(request.LessonId, cancellationToken, asNoTracking: true).ConfigureAwait(false);
         if (lesson is null || lesson.State != LessonState.Published)
         {

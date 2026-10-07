@@ -1,8 +1,10 @@
+using Core.Messaging.Sms;
 using Core.OTP.Delivery;
-using Elmanhg.Infrastructure.OtpDelivery;
+using Core.OTP.Delivery.Email;
+using Core.OTP.Delivery.Sms;
+using Core.OTP.Delivery.WhatsApp;
+using Elmanhg.Application.Exceptions;
 using Elmanhg.Infrastructure.OtpDelivery.Email;
-using Elmanhg.Infrastructure.OtpDelivery.Sms;
-using Elmanhg.Infrastructure.OtpDelivery.WhatsApp;
 using System.Globalization;
 
 namespace Elmanhg.Tests.Infrastructure.OtpDelivery;
@@ -50,6 +52,8 @@ public static class OtpDeliveryTestSettings
         options.Sms.BodyTemplate = "{\"to\":\"{internationalPhoneNumber}\",\"text\":\"{message}\"}";
         return options;
     }
+
+    public static OtpDeliverySetup Setup() => new(ErrorCodes.OtpDeliveryFailed, ErrorCodes.OtpChannelUnavailable, OtpEmailTemplate.Render);
 
     public static Dictionary<string, string?> ToConfiguration(OtpDeliveryOptions options) => new()
     {

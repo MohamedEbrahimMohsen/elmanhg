@@ -29,8 +29,9 @@ public class TeacherSubject : AuditEntity, IAuditedEntity
 
     public void Unassign(Guid unassignedBy)
     {
-        SoftDelete();
+        var now = DateTimeOffset.UtcNow;
+        SoftDelete(now);
         UpdatedBy = unassignedBy;
-        UpdationDate = DateTimeOffset.UtcNow;
+        UpdationDate = now;
     }
 }
