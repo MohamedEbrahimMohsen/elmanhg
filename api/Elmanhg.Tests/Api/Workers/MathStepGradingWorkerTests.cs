@@ -82,7 +82,7 @@ public sealed class MathStepGradingWorkerTests
     [Fact]
     public async Task Sweep_Disabled_NeverQueries()
     {
-        using var worker = new MathStepGradingWorker(ScopeFactory(), Options.Create(new MathStepGradingOptions { SweepEnabled = false }), _time, _logger, new BackgroundJobMetrics(_meterFactory, _time));
+        using var worker = new MathStepGradingWorker(ScopeFactory(), Options.Create(new MathStepGradingOptions { SweepEnabled = false }), _time, _logger, ElmanhgJobMetrics.Create(_meterFactory, _time));
 
         await worker.StartAsync(TestContext.Current.CancellationToken);
         await worker.ExecuteTask!.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
@@ -104,7 +104,7 @@ public sealed class MathStepGradingWorkerTests
         using var worker = await RunAsync();
         await runs.WaitForMeasurementsAsync(1, WaitLimit);
 
-        runs.LastMeasurement!.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "math-step-grading").And.Contain(BackgroundJobMetrics.OutcomeTag, "Failed");
+        runs.LastMeasurement!.Tags.Should().Contain(ElmanhgJobMetrics.JobTag, "math-step-grading").And.Contain(ElmanhgJobMetrics.OutcomeTag, "Failed");
     }
 
     private Guid[] StubDue()
@@ -116,7 +116,7 @@ public sealed class MathStepGradingWorkerTests
 
     private async Task<MathStepGradingWorker> RunAsync()
     {
-        var worker = new MathStepGradingWorker(ScopeFactory(), Options.Create(new MathStepGradingOptions()), _time, _logger, new BackgroundJobMetrics(_meterFactory, _time));
+        var worker = new MathStepGradingWorker(ScopeFactory(), Options.Create(new MathStepGradingOptions()), _time, _logger, ElmanhgJobMetrics.Create(_meterFactory, _time));
         await worker.StartAsync(TestContext.Current.CancellationToken);
         await _time.TimerCreated.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
         _time.Tick();

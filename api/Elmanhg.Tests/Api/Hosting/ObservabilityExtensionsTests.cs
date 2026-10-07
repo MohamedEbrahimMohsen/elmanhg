@@ -1,4 +1,5 @@
 using Core.Observability;
+using Core.Queues;
 using Elmanhg.Api.Hosting;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
@@ -25,6 +26,20 @@ public sealed class ObservabilityExtensionsTests
         var request = requests.GetMeasurementSnapshot().Should().ContainSingle().Subject;
         request.Value.Should().Be(1);
         request.Tags.Should().Contain("elmanhg.request", "X").And.Contain("elmanhg.outcome", "Success");
+    }
+
+    [Fact]
+    public void AddElmanhgObservability_JobRun_UsesElmanhgJobMetricNames()
+    {
+        using var provider = Provider();
+        var metrics = provider.GetRequiredService<BackgroundJobMetrics>();
+        using var runs = new MetricCollector<long>(provider.GetRequiredService<IMeterFactory>(), "Elmanhg", "elmanhg.job.runs");
+
+        metrics.StartRun("x").Dispose();
+
+        var run = runs.GetMeasurementSnapshot().Should().ContainSingle().Subject;
+        run.Value.Should().Be(1);
+        run.Tags.Should().Contain("elmanhg.job", "x").And.Contain("elmanhg.outcome", "Succeeded");
     }
 
     [Fact]

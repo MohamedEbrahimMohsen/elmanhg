@@ -13,9 +13,7 @@ public partial class EssayGrade
         EnsurePending();
         var at = ToMicroseconds(gradedAt);
         var needsReview = assessment.Confidence < reviewConfidenceThreshold;
-        Attempts++;
-        NextAttemptAt = null;
-        LastErrorCode = null;
+        Retry.RecordSuccess();
         Score = grade.Score;
         NormalisedScore = grade.NormalisedScore;
         Criteria = JsonSerializer.Serialize(assessment.Criteria, QuestionJson.SerializerOptions);
@@ -37,17 +35,10 @@ public partial class EssayGrade
     {
         EnsurePending();
         var at = ToMicroseconds(failedAt);
-        Attempts++;
-        LastErrorCode = errorCode.Length <= ErrorCodeMaxLength ? errorCode : errorCode[..ErrorCodeMaxLength];
-        if (Attempts >= maxAttempts)
+        if (Retry.RecordFailure(errorCode, at, maxAttempts, retryBaseDelay))
         {
             Status = EssayGradeStatus.InReview;
             ReviewReason = EssayReviewReason.GradingFailed;
-            NextAttemptAt = null;
-        }
-        else
-        {
-            NextAttemptAt = at + (retryBaseDelay * Math.Pow(2, Attempts - 1));
         }
 
         UpdationDate = at;

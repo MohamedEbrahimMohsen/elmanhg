@@ -60,7 +60,7 @@ public sealed class TeacherVoiceTranscriptionWorkerTests
     [Fact]
     public async Task Sweep_Disabled_NeverQueries()
     {
-        using var worker = new TeacherVoiceTranscriptionWorker(ScopeFactory(), Options.Create(new AskTeacherOptions { TranscriptionSweepEnabled = false }), _time, _logger, new BackgroundJobMetrics(_meterFactory, _time));
+        using var worker = new TeacherVoiceTranscriptionWorker(ScopeFactory(), Options.Create(new AskTeacherOptions { TranscriptionSweepEnabled = false }), _time, _logger, ElmanhgJobMetrics.Create(_meterFactory, _time));
 
         await worker.StartAsync(TestContext.Current.CancellationToken);
         await worker.ExecuteTask!.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
@@ -99,8 +99,8 @@ public sealed class TeacherVoiceTranscriptionWorkerTests
         using var worker = await RunAsync();
         await runs.WaitForMeasurementsAsync(1, WaitLimit);
 
-        runs.LastMeasurement!.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "teacher-voice-transcription").And.Contain(BackgroundJobMetrics.OutcomeTag, "PartiallyFailed");
-        items.GetMeasurementSnapshot().Select(x => (x.Value, x.Tags[BackgroundJobMetrics.OutcomeTag])).Should().BeEquivalentTo([(1L, (object?)"Succeeded"), (1L, (object?)"Failed")]);
+        runs.LastMeasurement!.Tags.Should().Contain(ElmanhgJobMetrics.JobTag, "teacher-voice-transcription").And.Contain(ElmanhgJobMetrics.OutcomeTag, "PartiallyFailed");
+        items.GetMeasurementSnapshot().Select(x => (x.Value, x.Tags[ElmanhgJobMetrics.OutcomeTag])).Should().BeEquivalentTo([(1L, (object?)"Succeeded"), (1L, (object?)"Failed")]);
     }
 
     [Fact]
@@ -116,12 +116,12 @@ public sealed class TeacherVoiceTranscriptionWorkerTests
         using var worker = await RunAsync();
         await runs.WaitForMeasurementsAsync(1, WaitLimit);
 
-        runs.LastMeasurement!.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "teacher-voice-transcription").And.Contain(BackgroundJobMetrics.OutcomeTag, "Failed");
+        runs.LastMeasurement!.Tags.Should().Contain(ElmanhgJobMetrics.JobTag, "teacher-voice-transcription").And.Contain(ElmanhgJobMetrics.OutcomeTag, "Failed");
     }
 
     private async Task<TeacherVoiceTranscriptionWorker> RunAsync()
     {
-        var worker = new TeacherVoiceTranscriptionWorker(ScopeFactory(), Options.Create(new AskTeacherOptions()), _time, _logger, new BackgroundJobMetrics(_meterFactory, _time));
+        var worker = new TeacherVoiceTranscriptionWorker(ScopeFactory(), Options.Create(new AskTeacherOptions()), _time, _logger, ElmanhgJobMetrics.Create(_meterFactory, _time));
         await worker.StartAsync(TestContext.Current.CancellationToken);
         await _time.TimerCreated.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
         _time.Tick();

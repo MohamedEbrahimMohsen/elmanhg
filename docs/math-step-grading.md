@@ -57,7 +57,7 @@ A deferred quiz answer is saved on the item (`SavedAnswer`), and the response ha
 | `FinalAnswerVerdict` | text, null | the CAS verdict; null until the final answer is checked |
 | `Status` | text | `Pending`, `InReview` or `Graded` |
 | `ReviewReason` | text, null | `LowConfidence`, `GradingFailed` or `FinalAnswerUnchecked` when `InReview` |
-| `Attempts`, `NextAttemptAt`, `LastErrorCode` | | the retry schedule; `LastErrorCode` holds at most 100 characters |
+| `Attempts`, `NextAttemptAt`, `LastErrorCode` | | the retry schedule (`RetrySchedule`, Core.DDD, mapped onto these columns); `LastErrorCode` holds at most 100 characters |
 | `RequestedAt`, `GradedAt` | timestamptz | truncated to microseconds |
 | `Score` (9,2), `NormalisedScore` (5,4) | numeric, null | from `MathStepsGrader.Combine` |
 | `Feedback` | jsonb, null | the grade's feedback (`MathStepTally` or the final-only line) |

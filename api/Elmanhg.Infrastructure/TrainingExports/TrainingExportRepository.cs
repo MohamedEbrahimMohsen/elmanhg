@@ -11,8 +11,8 @@ public class TrainingExportRepository(AppDbContext context) : Repository<Trainin
     {
         return await _dbSet
             .AsNoTracking()
-            .Where(x => x.Status == TrainingExportStatus.Pending && x.NextAttemptAt <= now)
-            .OrderBy(x => x.NextAttemptAt)
+            .Where(x => x.Status == TrainingExportStatus.Pending && x.Retry.NextAttemptAt <= now)
+            .OrderBy(x => x.Retry.NextAttemptAt)
             .ThenBy(x => x.Id)
             .Select(x => x.Id)
             .Take(limit)

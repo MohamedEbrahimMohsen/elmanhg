@@ -96,7 +96,7 @@ public sealed class LessonContentIndexWorkerTests
     [Fact]
     public async Task Execute_Disabled_EndsWithoutSweeping()
     {
-        using var worker = new LessonContentIndexWorker(ScopeFactory(), Options.Create(new ContentRetrievalOptions { IndexSweepEnabled = false }), _time, _logger, new BackgroundJobMetrics(_meterFactory, _time));
+        using var worker = new LessonContentIndexWorker(ScopeFactory(), Options.Create(new ContentRetrievalOptions { IndexSweepEnabled = false }), _time, _logger, ElmanhgJobMetrics.Create(_meterFactory, _time));
 
         await worker.StartAsync(TestContext.Current.CancellationToken);
         await worker.ExecuteTask!.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
@@ -122,8 +122,8 @@ public sealed class LessonContentIndexWorkerTests
         using var worker = await RunAsync(new ContentRetrievalOptions());
         await runs.WaitForMeasurementsAsync(1, WaitLimit);
 
-        runs.LastMeasurement!.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "lesson-content-index").And.Contain(BackgroundJobMetrics.OutcomeTag, "Succeeded");
-        items.GetMeasurementSnapshot().Should().ContainSingle().Which.Should().Match<CollectedMeasurement<long>>(x => x.Value == ids.Length && Equals(x.Tags[BackgroundJobMetrics.OutcomeTag], "Succeeded"));
+        runs.LastMeasurement!.Tags.Should().Contain(ElmanhgJobMetrics.JobTag, "lesson-content-index").And.Contain(ElmanhgJobMetrics.OutcomeTag, "Succeeded");
+        items.GetMeasurementSnapshot().Should().ContainSingle().Which.Should().Match<CollectedMeasurement<long>>(x => x.Value == ids.Length && Equals(x.Tags[ElmanhgJobMetrics.OutcomeTag], "Succeeded"));
     }
 
     [Fact]
@@ -139,7 +139,7 @@ public sealed class LessonContentIndexWorkerTests
         using var worker = await RunAsync(new ContentRetrievalOptions());
         await runs.WaitForMeasurementsAsync(1, WaitLimit);
 
-        runs.LastMeasurement!.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "lesson-content-index").And.Contain(BackgroundJobMetrics.OutcomeTag, "Failed");
+        runs.LastMeasurement!.Tags.Should().Contain(ElmanhgJobMetrics.JobTag, "lesson-content-index").And.Contain(ElmanhgJobMetrics.OutcomeTag, "Failed");
     }
 
     [Fact]
@@ -156,12 +156,12 @@ public sealed class LessonContentIndexWorkerTests
         interval.RecordObservableInstruments();
 
         interval.LastMeasurement!.Value.Should().Be(45);
-        interval.LastMeasurement.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "lesson-content-index");
+        interval.LastMeasurement.Tags.Should().Contain(ElmanhgJobMetrics.JobTag, "lesson-content-index");
     }
 
     private async Task<LessonContentIndexWorker> RunAsync(ContentRetrievalOptions options)
     {
-        var worker = new LessonContentIndexWorker(ScopeFactory(), Options.Create(options), _time, _logger, new BackgroundJobMetrics(_meterFactory, _time));
+        var worker = new LessonContentIndexWorker(ScopeFactory(), Options.Create(options), _time, _logger, ElmanhgJobMetrics.Create(_meterFactory, _time));
         await worker.StartAsync(TestContext.Current.CancellationToken);
         await _time.TimerCreated.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
         _time.Tick();

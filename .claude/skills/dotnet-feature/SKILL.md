@@ -19,7 +19,7 @@ Companion documents: `docs/constitution.md` (wins on conflict) · `docs/PRD.md` 
    - `Core/` (Core.DDD, Core.CQRS, Core.EntityFrameworkCore, Core.Errors, Core.Exceptions, Core.Identity, Core.OTP, Core.Localization, Core.Logging, Core.Auditing, Core.Cache, Core.Notifications, Core.Queues, Core.Utilities, Core.Validation) is vendored into `api/core-libraries/` in this repo. Copy it, do not reference the Morabh path at build time. When vendoring, swap every SQL Server dependency for Npgsql and drop `Core.Azure` unless a story needs it. `Core.Storage` (file storage `IFileStorage` with Local/S3 providers, `StorageContentTypes`, public media serving with a `PrivateFolders` list, `WriteStoredFileAsync`) is Elmanhg-native, with no Morabh equivalent; files and media always go through it.
    - Before designing **any** feature (login, register, OTP, refresh tokens, audit log, localisation, notifications, error codes, paging, file upload…), search the Morabh repo (`Core/`, `Morabh.Application/`, `Morabh.Domain/`, `Morabh.Infrastructure/`, `Morabh.APIs/`, `CRUD_FEATURE_CREATION_GUIDE.md`, `ErrorCodes.md`, `AuditLogs.md`, `Localization.md`). If it exists, copy it into the matching Elmanhg layer, rename namespaces `Morabh.*` → `Elmanhg.*`, and adapt it to the Elmanhg domain. The plan must name the Morabh source file for every reused piece.
    - Only when nothing in Morabh covers it, write it from scratch — in the same shape, layering, naming and error-code style as the Morabh code. Murabaha/BNPL business logic is never copied.
-   - Promoted in Elmanhg (no Morabh source): `Core.Hosting`, `Core.Observability`, `Core.Spreadsheets`, plus `Core.Cache` (`ICacheableQuery` + `CachingBehaviour`) and `Core.Logging` `TextRedactor`. Cache a query by implementing `ICacheableQuery`; read/write spreadsheets through `ISpreadsheetReader`/`ISpreadsheetWriter`; build rate-limit policies from `Core.Hosting.RateLimiting.RateLimitPartitions`; redact free text with a `TextRedactor`. Plus the E21.S3 helpers: `ICurrentUserService.GetRequiredUserId(code)`, `IRepository<T>.GetRequiredAsync(id or predicate, code, …)`, `PageData<T>.Map`, `IQueryable<T>.ToPageDataAsync`, `ModelBuilder.ApplySoftDeleteQueryFilters`, `IOtpRepository.ConsumeAsync`, `Core.Utilities.Time` and `AddValidatedOptions`.
+   - Promoted in Elmanhg (no Morabh source): `Core.Hosting`, `Core.Observability`, `Core.Spreadsheets`, plus `Core.Cache` (`ICacheableQuery` + `CachingBehaviour`), `Core.Logging` `TextRedactor`, `Core.Queues` (`SweepWorker<TOptions>`, `SweepOptions`, `BackgroundJobMetrics`), `Core.DDD` `RetrySchedule` and `Core.Errors` `BaseException.ErrorCodeOf`. Cache a query by implementing `ICacheableQuery`; read/write spreadsheets through `ISpreadsheetReader`/`ISpreadsheetWriter`; build rate-limit policies from `Core.Hosting.RateLimiting.RateLimitPartitions`; redact free text with a `TextRedactor`; write a background sweep as a `SweepWorker<TOptions>` subclass; keep retry state in a `RetrySchedule` owned value. Plus the E21.S3 helpers: `ICurrentUserService.GetRequiredUserId(code)`, `IRepository<T>.GetRequiredAsync(id or predicate, code, …)`, `PageData<T>.Map`, `IQueryable<T>.ToPageDataAsync`, `ModelBuilder.ApplySoftDeleteQueryFilters`, `IOtpRepository.ConsumeAsync`, `Core.Utilities.Time` and `AddValidatedOptions`.
 6. **Solution layout**: `api/Elmanhg.slnx` with `Elmanhg.Api`, `Elmanhg.Application`, `Elmanhg.Domain`, `Elmanhg.Infrastructure`, `Elmanhg.Jobs` (background jobs, when needed), `Elmanhg.Tests`, plus `core-libraries/`. Mirror Morabh's project structure.
 7. **Secrets**: environment variables and a gitignored `.env`; `appsettings.json` holds shape and safe defaults only. External providers without credentials in this repo (Paymob, SMS gateway, Claude API, transcription) sit behind an interface with a `Fake*` implementation selected by config, so the app and tests run offline.
 
@@ -665,6 +665,7 @@ private static void ConfigureTenants(ModelBuilder modelBuilder)
 |------|------|
 | `builder.ConfigureLocalized(x => x.Prop)` | ALL `LocalizedText` properties — no exceptions |
 | `OwnsOne(x => x.ValueObject)` | simple value objects with no separate table |
+| `OwnsOne(x => x.Retry, …)` + `Navigation(x => x.Retry).IsRequired()` | a `RetrySchedule` (explicit `HasColumnName`, index names kept) |
 | `HasConversion<string>().HasMaxLength(50–100)` | all enums |
 | `OnDelete(DeleteBehavior.Restrict)` | default for all FKs |
 | `HasQueryFilter(e => !e.IsDeleted)` | never by hand; `ApplySoftDeleteQueryFilters()` adds it to every root `ISoftDeletable` entity |
@@ -1003,6 +1004,8 @@ public sealed class ExpireSubscriptionsWorker(ITenantSubscriptionRepository repo
 using var scope = scopeFactory.CreateScope();
 var repository = scope.ServiceProvider.GetRequiredService<ITenantSubscriptionRepository>();
 ```
+
+Prefer deriving from `Core.Queues.SweepWorker<TOptions>`, which owns the scope per listing/item, the `PeriodicTimer` on `TimeProvider`, the kill switch, deferral and job metrics.
 
 The worker is the only place `IServiceScopeFactory` is allowed; a failed iteration is logged, never kills the loop.
 

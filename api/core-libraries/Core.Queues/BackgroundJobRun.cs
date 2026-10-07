@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Elmanhg.Application.Shared.Observability;
+namespace Core.Queues;
 
 public sealed class BackgroundJobRun : IDisposable
 {

@@ -10,7 +10,7 @@ public partial class TrainingExport
         EnsurePending();
         var at = ToMicroseconds(startedAt);
         FileKey = fileKey;
-        NextAttemptAt = at + lease;
+        Retry.Lease(at, lease);
         UpdationDate = at;
     }
 
@@ -18,13 +18,11 @@ public partial class TrainingExport
     {
         EnsurePending();
         var at = ToMicroseconds(completedAt);
-        Attempts++;
+        Retry.RecordSuccess();
         FileKey = fileKey;
         RowCount = rowCount;
         FileSizeBytes = fileSizeBytes;
         Sha256 = sha256;
-        NextAttemptAt = null;
-        LastErrorCode = null;
         CompletedAt = at;
         ExpiresAt = at + retention;
         Status = TrainingExportStatus.Completed;
@@ -35,16 +33,9 @@ public partial class TrainingExport
     {
         EnsurePending();
         var at = ToMicroseconds(failedAt);
-        Attempts++;
-        LastErrorCode = errorCode.Length <= ErrorCodeMaxLength ? errorCode : errorCode[..ErrorCodeMaxLength];
-        if (Attempts >= maxAttempts)
+        if (Retry.RecordFailure(errorCode, at, maxAttempts, retryBaseDelay))
         {
             Status = TrainingExportStatus.Failed;
-            NextAttemptAt = null;
-        }
-        else
-        {
-            NextAttemptAt = at + (retryBaseDelay * Math.Pow(2, Attempts - 1));
         }
 
         UpdationDate = at;

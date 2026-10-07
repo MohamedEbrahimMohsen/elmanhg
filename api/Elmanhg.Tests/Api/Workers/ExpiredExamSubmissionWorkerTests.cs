@@ -109,8 +109,8 @@ public sealed class ExpiredExamSubmissionWorkerTests
         using var worker = await RunAsync(new ExamsOptions());
         await runs.WaitForMeasurementsAsync(1, WaitLimit);
 
-        runs.LastMeasurement!.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "exam-auto-submit").And.Contain(BackgroundJobMetrics.OutcomeTag, "Succeeded");
-        items.GetMeasurementSnapshot().Should().ContainSingle().Which.Should().Match<CollectedMeasurement<long>>(x => x.Value == ids.Length && Equals(x.Tags[BackgroundJobMetrics.OutcomeTag], "Succeeded"));
+        runs.LastMeasurement!.Tags.Should().Contain(ElmanhgJobMetrics.JobTag, "exam-auto-submit").And.Contain(ElmanhgJobMetrics.OutcomeTag, "Succeeded");
+        items.GetMeasurementSnapshot().Should().ContainSingle().Which.Should().Match<CollectedMeasurement<long>>(x => x.Value == ids.Length && Equals(x.Tags[ElmanhgJobMetrics.OutcomeTag], "Succeeded"));
     }
 
     [Fact]
@@ -126,7 +126,7 @@ public sealed class ExpiredExamSubmissionWorkerTests
         using var worker = await RunAsync(new ExamsOptions());
         await runs.WaitForMeasurementsAsync(1, WaitLimit);
 
-        runs.LastMeasurement!.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "exam-auto-submit").And.Contain(BackgroundJobMetrics.OutcomeTag, "Failed");
+        runs.LastMeasurement!.Tags.Should().Contain(ElmanhgJobMetrics.JobTag, "exam-auto-submit").And.Contain(ElmanhgJobMetrics.OutcomeTag, "Failed");
     }
 
     [Fact]
@@ -143,13 +143,13 @@ public sealed class ExpiredExamSubmissionWorkerTests
         interval.RecordObservableInstruments();
 
         interval.LastMeasurement!.Value.Should().Be(45);
-        interval.LastMeasurement.Tags.Should().Contain(BackgroundJobMetrics.JobTag, "exam-auto-submit");
+        interval.LastMeasurement.Tags.Should().Contain(ElmanhgJobMetrics.JobTag, "exam-auto-submit");
     }
 
     private async Task<ExpiredExamSubmissionWorker> RunAsync(ExamsOptions options)
     {
         var scopeFactory = new ServiceCollection().AddSingleton(_sender).BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
-        var worker = new ExpiredExamSubmissionWorker(scopeFactory, Options.Create(options), _time, _logger, new BackgroundJobMetrics(_meterFactory, _time));
+        var worker = new ExpiredExamSubmissionWorker(scopeFactory, Options.Create(options), _time, _logger, ElmanhgJobMetrics.Create(_meterFactory, _time));
         await worker.StartAsync(TestContext.Current.CancellationToken);
         await _time.TimerCreated.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
         _time.Tick();
