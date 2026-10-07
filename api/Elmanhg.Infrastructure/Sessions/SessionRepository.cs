@@ -1,4 +1,3 @@
-using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.Sessions;
 using Elmanhg.Domain.Sessions.Selection;
@@ -7,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.Sessions;
 
-public partial class SessionRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<Session>(context, currentUser, timeProvider), ISessionRepository
+public partial class SessionRepository(AppDbContext context) : Repository<Session>(context), ISessionRepository
 {
     public async Task<List<QuestionAttemptSummary>> GetAttemptSummariesAsync(Guid studentId, IReadOnlyCollection<Guid> questionIds, decimal correctThreshold, CancellationToken cancellationToken)
     {

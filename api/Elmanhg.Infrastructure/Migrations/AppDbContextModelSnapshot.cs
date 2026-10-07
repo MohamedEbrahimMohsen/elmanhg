@@ -82,6 +82,54 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.ToTable("AuditLogs");
                 });
 
+            modelBuilder.Entity("Core.Identity.Tokens.RefreshToken.IssuedRefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("IssuedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("RotatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("FamilyId");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("IssuedRefreshTokens");
+                });
+
             modelBuilder.Entity("Core.Notifications.Entities.Notification", b =>
                 {
                     b.Property<Guid>("Id")
@@ -302,22 +350,26 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("ReissueWindowStartedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("RequestIP")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserAgent")
-                        .HasColumnType("text");
-
                     b.Property<int>("VerificationAttempts")
                         .HasColumnType("integer");
 
                     b.Property<Guid>("VerificationId")
                         .HasColumnType("uuid");
 
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("Id");
 
                     b.HasIndex("VerificationId")
                         .IsUnique();
+
+                    b.HasIndex(new[] { "Recipient" }, "IX_Otps_PhoneNumber")
+                        .IsUnique()
+                        .HasFilter("\"IsDeleted\" = false");
 
                     b.ToTable("Otps");
                 });
@@ -676,9 +728,6 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("AppliedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("Attempts")
-                        .HasColumnType("integer");
-
                     b.Property<decimal?>("Confidence")
                         .HasPrecision(5, 4)
                         .HasColumnType("numeric(5,4)");
@@ -711,19 +760,12 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<string>("Justification")
                         .HasColumnType("text");
 
-                    b.Property<string>("LastErrorCode")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
                     b.Property<int>("MaxScore")
                         .HasColumnType("integer");
 
                     b.Property<string>("Model")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
-
-                    b.Property<DateTimeOffset?>("NextAttemptAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal?>("NormalisedScore")
                         .HasPrecision(5, 4)
@@ -808,9 +850,6 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.HasIndex("GradedAt")
                         .HasFilter("\"Status\" = 'Graded' AND \"AppliedAt\" IS NULL");
 
-                    b.HasIndex("NextAttemptAt")
-                        .HasFilter("\"Status\" = 'Pending'");
-
                     b.HasIndex("QuestionId");
 
                     b.HasIndex("StudentId");
@@ -883,54 +922,6 @@ namespace Elmanhg.Infrastructure.Migrations
                         .HasFilter("\"UnitId\" IS NOT NULL AND \"IsDeleted\" = false");
 
                     b.ToTable("ExamBlueprints");
-                });
-
-            modelBuilder.Entity("Elmanhg.Domain.Identity.IssuedRefreshToken", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("FamilyId")
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTimeOffset>("IssuedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("RevokedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("RotatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("TokenHash")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ExpiresAt");
-
-                    b.HasIndex("FamilyId");
-
-                    b.HasIndex("TokenHash")
-                        .IsUnique();
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("IssuedRefreshTokens");
                 });
 
             modelBuilder.Entity("Elmanhg.Domain.Identity.Role", b =>
@@ -1289,9 +1280,6 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("AppliedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("Attempts")
-                        .HasColumnType("integer");
-
                     b.Property<decimal?>("Confidence")
                         .HasPrecision(5, 4)
                         .HasColumnType("numeric(5,4)");
@@ -1328,19 +1316,12 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.Property<string>("Justification")
                         .HasColumnType("text");
 
-                    b.Property<string>("LastErrorCode")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
                     b.Property<int>("MaxScore")
                         .HasColumnType("integer");
 
                     b.Property<string>("Model")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
-
-                    b.Property<DateTimeOffset?>("NextAttemptAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal?>("NormalisedScore")
                         .HasPrecision(5, 4)
@@ -1427,9 +1408,6 @@ namespace Elmanhg.Infrastructure.Migrations
 
                     b.HasIndex("GradedAt")
                         .HasFilter("\"Status\" = 'Graded' AND \"AppliedAt\" IS NULL");
-
-                    b.HasIndex("NextAttemptAt")
-                        .HasFilter("\"Status\" = 'Pending'");
 
                     b.HasIndex("QuestionId");
 
@@ -2524,9 +2502,6 @@ namespace Elmanhg.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Attempts")
-                        .HasColumnType("integer");
-
                     b.Property<int>("AudioDurationSeconds")
                         .HasColumnType("integer");
 
@@ -2551,9 +2526,6 @@ namespace Elmanhg.Infrastructure.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
-
-                    b.Property<DateTimeOffset?>("NextAttemptAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset>("RecordedAt")
                         .HasColumnType("timestamp with time zone");
@@ -2589,9 +2561,6 @@ namespace Elmanhg.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("NextAttemptAt")
-                        .HasFilter("\"Status\" = 'Pending'");
 
                     b.HasIndex("TeacherId");
 
@@ -3015,9 +2984,6 @@ namespace Elmanhg.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Attempts")
-                        .HasColumnType("integer");
-
                     b.Property<DateTimeOffset?>("CompletedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -3045,13 +3011,6 @@ namespace Elmanhg.Infrastructure.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("LastErrorCode")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTimeOffset?>("NextAttemptAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset>("RequestedAt")
                         .HasColumnType("timestamp with time zone");
@@ -3095,9 +3054,6 @@ namespace Elmanhg.Infrastructure.Migrations
 
                     b.HasIndex("ExpiresAt")
                         .HasFilter("\"Status\" = 'Completed'");
-
-                    b.HasIndex("NextAttemptAt")
-                        .HasFilter("\"Status\" = 'Pending'");
 
                     b.HasIndex("RequestedAt");
 
@@ -3248,6 +3204,15 @@ namespace Elmanhg.Infrastructure.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("Core.Identity.Tokens.RefreshToken.IssuedRefreshToken", b =>
+                {
+                    b.HasOne("Elmanhg.Domain.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Core.Notifications.Entities.Notification", b =>
@@ -3477,6 +3442,39 @@ namespace Elmanhg.Infrastructure.Migrations
                         .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.OwnsOne("Core.DDD.Models.RetrySchedule", "Retry", b1 =>
+                        {
+                            b1.Property<Guid>("EssayGradeId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("Attempts")
+                                .HasColumnType("integer")
+                                .HasColumnName("Attempts");
+
+                            b1.Property<string>("LastErrorCode")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("LastErrorCode");
+
+                            b1.Property<DateTimeOffset?>("NextAttemptAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("NextAttemptAt");
+
+                            b1.HasKey("EssayGradeId");
+
+                            b1.HasIndex("NextAttemptAt")
+                                .HasDatabaseName("IX_EssayGrades_NextAttemptAt")
+                                .HasFilter("\"Status\" = 'Pending'");
+
+                            b1.ToTable("EssayGrades");
+
+                            b1.WithOwner()
+                                .HasForeignKey("EssayGradeId");
+                        });
+
+                    b.Navigation("Retry")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Elmanhg.Domain.ExamBlueprints.ExamBlueprint", b =>
@@ -3491,15 +3489,6 @@ namespace Elmanhg.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("UnitId")
                         .OnDelete(DeleteBehavior.Restrict);
-                });
-
-            modelBuilder.Entity("Elmanhg.Domain.Identity.IssuedRefreshToken", b =>
-                {
-                    b.HasOne("Elmanhg.Domain.Identity.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Elmanhg.Domain.Lessons.Lesson", b =>
@@ -3574,6 +3563,39 @@ namespace Elmanhg.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.OwnsOne("Core.DDD.Models.RetrySchedule", "Retry", b1 =>
+                        {
+                            b1.Property<Guid>("MathStepGradeId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("Attempts")
+                                .HasColumnType("integer")
+                                .HasColumnName("Attempts");
+
+                            b1.Property<string>("LastErrorCode")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("LastErrorCode");
+
+                            b1.Property<DateTimeOffset?>("NextAttemptAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("NextAttemptAt");
+
+                            b1.HasKey("MathStepGradeId");
+
+                            b1.HasIndex("NextAttemptAt")
+                                .HasDatabaseName("IX_MathStepGrades_NextAttemptAt")
+                                .HasFilter("\"Status\" = 'Pending'");
+
+                            b1.ToTable("MathStepGrades");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MathStepGradeId");
+                        });
+
+                    b.Navigation("Retry")
                         .IsRequired();
                 });
 
@@ -3792,6 +3814,34 @@ namespace Elmanhg.Infrastructure.Migrations
                         .HasForeignKey("ThreadId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.OwnsOne("Core.DDD.Models.RetrySchedule", "Retry", b1 =>
+                        {
+                            b1.Property<Guid>("TeacherVoiceDraftId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("Attempts")
+                                .HasColumnType("integer")
+                                .HasColumnName("Attempts");
+
+                            b1.Property<DateTimeOffset?>("NextAttemptAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("NextAttemptAt");
+
+                            b1.HasKey("TeacherVoiceDraftId");
+
+                            b1.HasIndex("NextAttemptAt")
+                                .HasDatabaseName("IX_TeacherVoiceDrafts_NextAttemptAt")
+                                .HasFilter("\"Status\" = 'Pending'");
+
+                            b1.ToTable("TeacherVoiceDrafts");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TeacherVoiceDraftId");
+                        });
+
+                    b.Navigation("Retry")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Elmanhg.Domain.Teachers.TeacherSubject", b =>
@@ -3815,6 +3865,39 @@ namespace Elmanhg.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.OwnsOne("Core.DDD.Models.RetrySchedule", "Retry", b1 =>
+                        {
+                            b1.Property<Guid>("TrainingExportId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("Attempts")
+                                .HasColumnType("integer")
+                                .HasColumnName("Attempts");
+
+                            b1.Property<string>("LastErrorCode")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("LastErrorCode");
+
+                            b1.Property<DateTimeOffset?>("NextAttemptAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("NextAttemptAt");
+
+                            b1.HasKey("TrainingExportId");
+
+                            b1.HasIndex("NextAttemptAt")
+                                .HasDatabaseName("IX_TrainingExports_NextAttemptAt")
+                                .HasFilter("\"Status\" = 'Pending'");
+
+                            b1.ToTable("TrainingExports");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TrainingExportId");
+                        });
+
+                    b.Navigation("Retry")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Elmanhg.Domain.Units.CurriculumUnit", b =>

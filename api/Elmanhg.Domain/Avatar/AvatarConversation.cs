@@ -59,7 +59,6 @@ public class AvatarConversation : AuditEntity, IAuditedEntity, IVersioned
         Messages.Add(assistantMessage);
         MessageCount += 2;
         LastMessageAt = replied;
-        UpdatedBy = StudentId;
         UpdationDate = replied;
         RaiseDomainEvent(new AvatarExchangeRecorded(this, studentMessage, assistantMessage));
     }
@@ -69,7 +68,6 @@ public class AvatarConversation : AuditEntity, IAuditedEntity, IVersioned
         var at = deletedAt.TruncateToMicroseconds();
         SoftDelete(at);
         MessageCount = 0;
-        UpdatedBy = StudentId;
         UpdationDate = at;
     }
 }

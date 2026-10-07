@@ -1,4 +1,3 @@
-using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.TeacherThreads;
 using Elmanhg.Infrastructure.Data.Context;
@@ -6,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.TeacherThreads;
 
-public class TeacherThreadRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<TeacherThread>(context, currentUser, timeProvider), ITeacherThreadRepository
+public class TeacherThreadRepository(AppDbContext context) : Repository<TeacherThread>(context), ITeacherThreadRepository
 {
     public async Task<List<Guid>> GetSlaDueIdsAsync(DateTimeOffset now, IReadOnlyCollection<Guid> excludedIds, int limit, CancellationToken cancellationToken)
     {

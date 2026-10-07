@@ -1,10 +1,10 @@
 using Core.Storage;
 using Core.Storage.Local;
-using Core.Storage.S3;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 
 namespace Elmanhg.Tests.Core.Storage;
@@ -21,7 +21,7 @@ public sealed class CoreFileStorageDependencyInjectionTests
     }
 
     [Fact]
-    public void AddCoreFileStorage_S3_ResolvesS3FileStorage()
+    public void AddCoreFileStorage_S3ProviderWithoutS3Registration_ThrowsInvalidOperation()
     {
         using var provider = BuildProvider(new()
         {
@@ -34,7 +34,24 @@ public sealed class CoreFileStorageDependencyInjectionTests
         });
         using var scope = provider.CreateScope();
 
-        scope.ServiceProvider.GetRequiredService<IFileStorage>().Should().BeOfType<S3FileStorage>();
+        var act = () => scope.ServiceProvider.GetRequiredService<IFileStorage>();
+
+        act.Should().Throw<InvalidOperationException>().WithMessage("*FileStorage:Provider 'S3'*");
+    }
+
+    [Fact]
+    public void AddCoreFileStorage_NullProvider_ThrowsInvalidOperation()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton(Substitute.For<IHostEnvironment>());
+        services.AddCoreFileStorage();
+        services.AddSingleton<IOptions<FileStorageOptions>>(Options.Create(new FileStorageOptions { Provider = null, LocalRootPath = "media", PublicBaseUrl = "/api/media" }));
+        using var provider = services.BuildServiceProvider();
+        using var scope = provider.CreateScope();
+
+        var act = () => scope.ServiceProvider.GetRequiredService<IFileStorage>();
+
+        act.Should().Throw<InvalidOperationException>().WithMessage("*FileStorage:Provider is not set*");
     }
 
     private static ServiceProvider BuildProvider(Dictionary<string, string?> settings)

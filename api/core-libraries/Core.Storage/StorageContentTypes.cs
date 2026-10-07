@@ -20,6 +20,8 @@ public static class StorageContentTypes
 
     private static readonly FileExtensionContentTypeProvider Provider = Create();
 
+    public static IContentTypeProvider ContentTypeProvider => Provider;
+
     public static string FromKey(string key) => Provider.TryGetContentType(key, out var contentType) ? contentType : Fallback;
 
     private static FileExtensionContentTypeProvider Create()

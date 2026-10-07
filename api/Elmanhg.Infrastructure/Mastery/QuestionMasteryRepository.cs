@@ -1,4 +1,3 @@
-using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.Lessons;
 using Elmanhg.Domain.Mastery;
@@ -10,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.Mastery;
 
-public class QuestionMasteryRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<QuestionMastery>(context, currentUser, timeProvider), IQuestionMasteryRepository
+public class QuestionMasteryRepository(AppDbContext context) : Repository<QuestionMastery>(context), IQuestionMasteryRepository
 {
     public async Task<List<LessonMasteryCount>> GetLessonCountsAsync(Guid studentId, Guid? subjectId, CancellationToken cancellationToken)
     {

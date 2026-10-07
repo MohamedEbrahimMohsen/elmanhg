@@ -60,13 +60,14 @@ public sealed class AvatarConversationTests
     public void RecordExchange_Second_ContinuesPositionsAndStampsConversation()
     {
         var conversation = new AvatarConversationBuilder().ForStudent(_studentId).WithExchange("q1", "r1").Build();
+        conversation.UpdatedBy = null;
         var repliedAt = StartedAt.AddHours(1);
 
         conversation.RecordExchange("q2", AvatarConversationBuilder.Reply("r2"), repliedAt.AddSeconds(-3), repliedAt);
 
         conversation.Messages.Skip(2).Select(x => x.Position).Should().Equal(2, 3);
         conversation.MessageCount.Should().Be(4);
-        (conversation.LastMessageAt, conversation.UpdationDate, conversation.UpdatedBy).Should().Be((repliedAt, repliedAt, (Guid?)_studentId));
+        (conversation.LastMessageAt, conversation.UpdationDate, conversation.UpdatedBy).Should().Be((repliedAt, repliedAt, (Guid?)null));
     }
 
     [Fact]
@@ -91,12 +92,13 @@ public sealed class AvatarConversationTests
     public void Delete_Conversation_SoftDeletesAndZeroesMessageCount()
     {
         var conversation = new AvatarConversationBuilder().ForStudent(_studentId).WithExchange("q1", "r1").Build();
+        conversation.UpdatedBy = null;
         var deletedAt = StartedAt.AddDays(1);
 
         conversation.Delete(deletedAt.AddTicks(7));
 
         (conversation.IsDeleted, conversation.MessageCount).Should().Be((true, 0));
-        (conversation.DeletedAt, conversation.UpdationDate, conversation.UpdatedBy).Should().Be(((DateTimeOffset?)deletedAt, deletedAt, (Guid?)_studentId));
+        (conversation.DeletedAt, conversation.UpdationDate, conversation.UpdatedBy).Should().Be(((DateTimeOffset?)deletedAt, deletedAt, (Guid?)null));
     }
 
     [Fact]

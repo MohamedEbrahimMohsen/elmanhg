@@ -13,7 +13,7 @@ public sealed class CachingBehaviour<TRequest, TResponse>(IMemoryCache memoryCac
             return await next(cancellationToken).ConfigureAwait(false);
         }
 
-        var ttl = query.Ttl ?? cachingOptions.Value.DefaultTtl;
+        var ttl = cachingOptions.Value.ResolveTtl(query);
         if (ttl <= TimeSpan.Zero)
         {
             return await next(cancellationToken).ConfigureAwait(false);

@@ -95,11 +95,37 @@ public sealed class LocalDiskFileStorageTests : IDisposable
         await act.Should().ThrowAsync<ArgumentException>();
     }
 
+    [Fact]
+    public async Task SaveAsync_RootWithTrailingSeparator_WritesFile()
+    {
+        byte[] bytes = [0x89, 0x50, 0x4E, 0x47];
+
+        var url = await TrailingSeparatorStorage().SaveAsync(new MemoryStream(bytes), "lessons/a.png", TestContext.Current.CancellationToken);
+
+        url.Should().Be("/api/media/lessons/a.png");
+        File.Exists(Path.Combine(_contentRoot, "media", "lessons", "a.png")).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task OpenReadAsync_RootWithTrailingSeparatorKeyEscapingRoot_ThrowsArgumentException()
+    {
+        var act = () => TrailingSeparatorStorage().OpenReadAsync("../x.png", TestContext.Current.CancellationToken);
+
+        await act.Should().ThrowAsync<ArgumentException>();
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_contentRoot))
         {
             Directory.Delete(_contentRoot, recursive: true);
         }
+    }
+
+    private LocalDiskFileStorage TrailingSeparatorStorage()
+    {
+        var hostEnvironment = Substitute.For<IHostEnvironment>();
+        hostEnvironment.ContentRootPath.Returns(_contentRoot);
+        return new LocalDiskFileStorage(Options.Create(new FileStorageOptions { Provider = FileStorageProvider.Local, LocalRootPath = "media/", PublicBaseUrl = "/api/media" }), hostEnvironment);
     }
 }

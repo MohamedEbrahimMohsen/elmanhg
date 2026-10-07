@@ -34,7 +34,6 @@ public class ReviewSession : AuditEntity
             Openings.Add(ReviewSessionOpening.Create(Id, question.Id, question.Version));
         }
 
-        UpdatedBy = TeacherId;
         UpdationDate = DateTimeOffset.UtcNow;
     }
 

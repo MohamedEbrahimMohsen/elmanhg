@@ -114,6 +114,7 @@ public partial class AppDbContext(DbContextOptions options, IMediator mediator, 
         base.OnModelCreating(modelBuilder);
         modelBuilder.HasPostgresExtension("vector");
         ConfigureUsers(modelBuilder);
+        ConfigureOtps(modelBuilder);
         ConfigureSubjects(modelBuilder);
         ConfigureUnits(modelBuilder);
         ConfigureLessons(modelBuilder);

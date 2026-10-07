@@ -1,9 +1,5 @@
-using Amazon;
-using Amazon.Runtime;
-using Amazon.S3;
 using Core.Storage.Local;
 using Core.Storage.Media;
-using Core.Storage.S3;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,15 +15,8 @@ public static class DependencyInjection
     {
         services.AddOptions<FileStorageOptions>().BindConfiguration(FileStorageOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddSingleton<IValidateOptions<FileStorageOptions>, FileStorageOptionsValidator>();
-        services.AddSingleton<IAmazonS3>(serviceProvider => CreateS3Client(Options(serviceProvider)));
-        services.AddScoped<LocalDiskFileStorage>();
-        services.AddScoped<S3FileStorage>();
-        services.AddScoped<IFileStorage>(serviceProvider => Options(serviceProvider).Provider switch
-        {
-            FileStorageProvider.Local => serviceProvider.GetRequiredService<LocalDiskFileStorage>(),
-            FileStorageProvider.S3 => serviceProvider.GetRequiredService<S3FileStorage>(),
-            _ => throw new InvalidOperationException("Unsupported FileStorage:Provider."),
-        });
+        services.AddKeyedScoped<IFileStorage, LocalDiskFileStorage>(FileStorageProvider.Local);
+        services.AddScoped<IFileStorage>(serviceProvider => Resolve(serviceProvider));
         return services;
     }
 
@@ -43,34 +32,23 @@ public static class DependencyInjection
 
         var root = storage.ResolveLocalRoot(app.ApplicationServices.GetRequiredService<IHostEnvironment>().ContentRootPath);
         Directory.CreateDirectory(root);
+        // Same content types as the S3 path: anything outside the media map is served as application/octet-stream, never as an inline-renderable type.
         app.UseStaticFiles(new StaticFileOptions
         {
             FileProvider = new PublicMediaFileProvider(new PhysicalFileProvider(root), privateFolders),
             RequestPath = options.RequestPath,
+            ContentTypeProvider = StorageContentTypes.ContentTypeProvider,
+            ServeUnknownFileTypes = true,
+            DefaultContentType = StorageContentTypes.Fallback,
             OnPrepareResponse = context => context.Context.Response.SetMediaHeaders(MediaCacheControl.PublicImmutable),
         });
         return app;
     }
 
-    private static AmazonS3Client CreateS3Client(FileStorageOptions options)
+    private static IFileStorage Resolve(IServiceProvider serviceProvider)
     {
-        var config = new AmazonS3Config
-        {
-            RequestChecksumCalculation = RequestChecksumCalculation.WHEN_REQUIRED,
-            ResponseChecksumValidation = ResponseChecksumValidation.WHEN_REQUIRED,
-        };
-        if (string.IsNullOrWhiteSpace(options.S3ServiceUrl))
-        {
-            config.RegionEndpoint = RegionEndpoint.GetBySystemName(options.S3Region);
-        }
-        else
-        {
-            config.ServiceURL = options.S3ServiceUrl;
-            config.AuthenticationRegion = options.S3Region;
-            config.ForcePathStyle = options.S3ForcePathStyle;
-        }
-
-        return new AmazonS3Client(new BasicAWSCredentials(options.S3AccessKeyId, options.S3SecretAccessKey), config);
+        var provider = Options(serviceProvider).Provider ?? throw new InvalidOperationException("FileStorage:Provider is not set.");
+        return serviceProvider.GetKeyedService<IFileStorage>(provider) ?? throw new InvalidOperationException($"No file storage is registered for FileStorage:Provider '{provider}'.");
     }
 
     private static FileStorageOptions Options(IServiceProvider serviceProvider) => serviceProvider.GetRequiredService<IOptions<FileStorageOptions>>().Value;

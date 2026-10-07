@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Core.OTP.Entities;
 
-public class Otp : Entity
+public partial class Otp : Entity, IVersioned
 {
     // The resend quota is per day, counted from the window's first code; resends never move the window.
     private static readonly TimeSpan ReissueWindow = TimeSpan.FromDays(1);
@@ -15,9 +15,6 @@ public class Otp : Entity
     public string Recipient { get; private set; }
     public OtpRecipientType RecipientType { get; private set; }
     public string CodeHash { get; private set; }
-    
-    public string? RequestIP { get; private set; }
-    public string? UserAgent { get; private set; }
 
     public int VerificationAttempts { get; private set; }
     public int MaxVerificationAttempts { get; private set; }
@@ -34,7 +31,9 @@ public class Otp : Entity
 
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset ExpiresAt { get; private set; }
-    private Otp(Guid id): base(id) { }
+    public uint Version { get; private set; }
+
+    private Otp(Guid id) : base(id) { }
 
     public static Otp Create(OtpRecipientType recipientType, string recipient, string codeHash, int expiresInMinutes, int maxVerificationAttempts, int reissueCooldownSeconds, int maxReissueCount, int reissueBlockCooldownInHours, DateTimeOffset now)
     {
@@ -59,8 +58,9 @@ public class Otp : Entity
         };
     }
 
-    public void Reissue(string newCodeHash, int expiresInMinutes, DateTimeOffset now)
+    public OtpReissueState Reissue(string newCodeHash, int expiresInMinutes, DateTimeOffset now)
     {
+        var previous = CaptureReissueState();
         if (ReissueWindowStartedAt + ReissueWindow <= now)
         {
             ReissueCount = 0;
@@ -92,7 +92,8 @@ public class Otp : Entity
         ReissueCount++;
         CreatedAt = now;
         ExpiresAt = now.AddMinutes(expiresInMinutes);
-        NextAllowedReissueAt = ReissueCount == MaxReissueCount? NextAllowedReissueAt.AddHours(ReissueBlockCooldownInHours) : now.AddSeconds(ReissueCooldownSeconds);
+        NextAllowedReissueAt = ReissueCount == MaxReissueCount ? now.AddHours(ReissueBlockCooldownInHours) : now.AddSeconds(ReissueCooldownSeconds);
+        return previous;
     }
 
     public string? Verify(string codeHash, DateTimeOffset now)

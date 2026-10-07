@@ -3,6 +3,7 @@ using Core.OTP.Entities;
 using Core.OTP.Exceptions;
 using Elmanhg.Tests.Builders;
 using FluentAssertions;
+using OtpEntity = Core.OTP.Entities.Otp;
 
 namespace Elmanhg.Tests.Core.Otp;
 
@@ -59,6 +60,53 @@ public sealed class OtpTests
     }
 
     [Fact]
+    public void Reissue_BelowMax_ReturnsThePreviousState()
+    {
+        var otp = new OtpBuilder().WithReissueCooldownSeconds(0).WithMaxReissueCount(2).IssuedAt(Now).Build();
+        var verificationId = otp.VerificationId;
+
+        var previous = otp.Reissue("next-hash", 5, Now.AddMinutes(1));
+
+        previous.VerificationId.Should().Be(verificationId);
+        previous.CodeHash.Should().Be(OtpBuilder.CodeHash);
+        previous.ReissueCount.Should().Be(0);
+        previous.NextAllowedReissueAt.Should().Be(Now);
+        previous.ExpiresAt.Should().Be(Now.AddMinutes(5));
+        previous.CreatedAt.Should().Be(Now);
+        previous.ReissueWindowStartedAt.Should().Be(Now);
+    }
+
+    [Fact]
+    public void RestoreReissue_AfterReissue_RestoresThePreviousCodeAndLimits()
+    {
+        var otp = new OtpBuilder().IssuedAt(Now).Build();
+        otp.Verify("wrong-hash", Now);
+        var before = Snapshot(otp);
+        var previous = otp.Reissue("next-hash", 5, Now.AddMinutes(2));
+
+        otp.RestoreReissue(previous);
+
+        Snapshot(otp).Should().Be(before);
+        otp.Verify(OtpBuilder.CodeHash, Now.AddMinutes(2)).Should().BeNull();
+    }
+
+    [Fact]
+    public void RestoreReissue_AfterWindowReset_RestoresTheOldWindowAndCount()
+    {
+        var otp = new OtpBuilder().WithReissueCooldownSeconds(0).WithMaxReissueCount(5).IssuedAt(Now.AddDays(-1)).Build();
+        otp.Reissue("first-hash", 5, Now.AddDays(-1).AddMinutes(1));
+        otp.Reissue("second-hash", 5, Now.AddDays(-1).AddMinutes(2));
+        var previous = otp.Reissue("third-hash", 5, Now);
+        otp.ReissueWindowStartedAt.Should().Be(Now);
+
+        otp.RestoreReissue(previous);
+
+        otp.ReissueCount.Should().Be(2);
+        otp.ReissueWindowStartedAt.Should().Be(Now.AddDays(-1));
+        otp.CodeHash.Should().Be("second-hash");
+    }
+
+    [Fact]
     public void Reissue_DayAfterWindowStartDespiteRecentReissue_ResetsCount()
     {
         var otp = new OtpBuilder().WithReissueCooldownSeconds(0).WithMaxReissueCount(1).WithReissueBlockCooldownInHours(0).IssuedAt(Now).Build();
@@ -80,6 +128,39 @@ public sealed class OtpTests
 
         otp.ReissueWindowStartedAt.Should().Be(Now);
         otp.CreatedAt.Should().Be(Now.AddHours(5));
+    }
+
+    [Fact]
+    public void Reissue_LastAllowedResend_BlocksFromThatResend()
+    {
+        var otp = new OtpBuilder().WithReissueCooldownSeconds(60).WithMaxReissueCount(1).WithReissueBlockCooldownInHours(24).IssuedAt(Now).Build();
+
+        otp.Reissue("next-hash", 5, Now.AddHours(2));
+
+        otp.NextAllowedReissueAt.Should().Be(Now.AddHours(26));
+    }
+
+    [Fact]
+    public void Reissue_BlockedAfterLastAllowedResend_ThrowsCooldownUntilBlockEnds()
+    {
+        var otp = new OtpBuilder().WithReissueCooldownSeconds(60).WithMaxReissueCount(1).WithReissueBlockCooldownInHours(24).IssuedAt(Now).Build();
+        otp.Reissue("next-hash", 5, Now.AddHours(2));
+
+        var act = () => otp.Reissue("blocked-hash", 5, Now.AddHours(25));
+
+        var exception = act.Should().Throw<RateLimitExceededCoreException>().Which;
+        exception.ErrorCode.Should().Be(ErrorCodes.OTPReissueCooldown);
+        exception.Context.Should().ContainKey("hours").WhoseValue.Should().Be(1);
+    }
+
+    [Fact]
+    public void Reissue_BelowMax_NextAllowedIsCooldownFromResend()
+    {
+        var otp = new OtpBuilder().WithReissueCooldownSeconds(60).WithMaxReissueCount(3).IssuedAt(Now).Build();
+
+        otp.Reissue("next-hash", 5, Now.AddMinutes(10));
+
+        otp.NextAllowedReissueAt.Should().Be(Now.AddMinutes(10).AddSeconds(60));
     }
 
     [Fact]
@@ -188,4 +269,6 @@ public sealed class OtpTests
         act.Should().Throw<BadRequestCoreException>().Which.ErrorCode.Should().Be(ErrorCodes.OTPExpired);
         otp.IsUsed.Should().BeFalse();
     }
+
+    private static OtpReissueState Snapshot(OtpEntity otp) => new(otp.VerificationId, otp.CodeHash, otp.IsVerified, otp.IsUsed, otp.VerificationAttempts, otp.ReissueCount, otp.ReissueWindowStartedAt, otp.CreatedAt, otp.ExpiresAt, otp.NextAllowedReissueAt);
 }

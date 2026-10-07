@@ -1,4 +1,3 @@
-using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.Analytics;
 using Elmanhg.Infrastructure.Data.Context;
@@ -6,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.Analytics;
 
-public class FunnelEventRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<FunnelEvent>(context, currentUser, timeProvider), IFunnelEventRepository
+public class FunnelEventRepository(AppDbContext context) : Repository<FunnelEvent>(context), IFunnelEventRepository
 {
     public async Task<List<FunnelStepCount>> CountVisitorsByStepAsync(DateTimeOffset start, DateTimeOffset end, CancellationToken cancellationToken)
     {

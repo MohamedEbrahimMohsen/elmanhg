@@ -1,5 +1,4 @@
 using Core.DDD.Entities;
-using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Context;
 using Core.Notifications.Entities;
 using Core.Notifications.Repositories;
@@ -7,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Core.EntityFrameworkCore.Repositories;
 
-public class NotificationTemplateRepository<TUser, TRole, TKey, TContext>(TContext context, ICurrentUser? currentUser = null, TimeProvider? timeProvider = null) : Repository<NotificationTemplate>(context, currentUser, timeProvider), INotificationTemplateRepository
+public class NotificationTemplateRepository<TUser, TRole, TKey, TContext>(TContext context) : Repository<NotificationTemplate>(context), INotificationTemplateRepository
     where TUser : IdentityUser<TKey>, IEntity, new()
     where TRole : IdentityRole<TKey>, new()
     where TKey : IEquatable<TKey>, new()

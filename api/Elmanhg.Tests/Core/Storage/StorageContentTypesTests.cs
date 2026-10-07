@@ -29,6 +29,14 @@ public sealed class StorageContentTypesTests
     }
 
     [Fact]
+    public void ContentTypeProvider_Svg_IsNotMapped()
+    {
+        StorageContentTypes.ContentTypeProvider.TryGetContentType("a.svg", out _).Should().BeFalse();
+        StorageContentTypes.ContentTypeProvider.TryGetContentType("a.png", out var png).Should().BeTrue();
+        png.Should().Be("image/png");
+    }
+
+    [Fact]
     public void FromKey_NoExtension_ReturnsFallback()
     {
         StorageContentTypes.FromKey("lessons/a").Should().Be("application/octet-stream");

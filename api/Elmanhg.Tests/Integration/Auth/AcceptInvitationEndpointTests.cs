@@ -4,6 +4,7 @@ using Elmanhg.Tests.Integration.Authorization;
 using Elmanhg.Tests.Integration.Infrastructure;
 using Elmanhg.Tests.Integration.Users;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
@@ -96,6 +97,7 @@ public sealed class AcceptInvitationEndpointTests(ApiFactory factory)
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var otp = new OtpBuilder().ForEmail(email.ToLowerInvariant()).Verified().Build();
+        await context.Otps.Where(x => x.Recipient == otp.Recipient).ExecuteDeleteAsync(CancellationToken).ConfigureAwait(false);
         context.Otps.Add(otp);
         await context.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
         return otp.VerificationId;

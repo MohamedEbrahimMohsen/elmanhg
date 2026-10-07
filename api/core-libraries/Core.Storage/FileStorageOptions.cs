@@ -29,5 +29,5 @@ public sealed class FileStorageOptions
 
     public string GetPublicUrl(string key) => $"{PublicBaseUrl.TrimEnd('/')}/{key}";
 
-    public string ResolveLocalRoot(string contentRootPath) => Path.GetFullPath(LocalRootPath, contentRootPath);
+    public string ResolveLocalRoot(string contentRootPath) => Path.TrimEndingDirectorySeparator(Path.GetFullPath(LocalRootPath, contentRootPath));
 }

@@ -10,6 +10,8 @@ using Elmanhg.Application.Dashboard.GetStudentMetrics;
 using Elmanhg.Application.Dashboard.GetSubscriberMetrics;
 using Elmanhg.Application.Dashboard.GetSuccessRateMetrics;
 using Elmanhg.Application.Dashboard.GetValidationMetrics;
+using Elmanhg.Application.Dashboard.Shared;
+using Elmanhg.Application.Shared.Options;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,13 +35,13 @@ public sealed class DashboardCachingTests
     ];
 
     [Fact]
-    public void AddApplication_DashboardCacheSeconds_SetsCachingDefaultTtl()
+    public void AddApplication_DashboardCacheSeconds_SetsDashboardQueryTtl()
     {
         using var provider = BuildProvider(new Dictionary<string, string?> { ["Dashboard:CacheSeconds"] = "45" });
 
         var options = provider.GetRequiredService<IOptions<CachingOptions>>().Value;
 
-        options.DefaultTtl.Should().Be(TimeSpan.FromSeconds(45));
+        options.ResolveTtl(new GetFunnelMetricsQuery(null, null)).Should().Be(TimeSpan.FromSeconds(45));
     }
 
     [Fact]
@@ -49,17 +51,49 @@ public sealed class DashboardCachingTests
 
         var options = provider.GetRequiredService<IOptions<CachingOptions>>().Value;
 
-        options.DefaultTtl.Should().Be(TimeSpan.FromSeconds(60));
+        options.ResolveTtl(new GetFunnelMetricsQuery(null, null)).Should().Be(TimeSpan.FromSeconds(60));
     }
 
     [Fact]
-    public void AddApplication_DashboardCacheSecondsZero_DisablesCaching()
+    public void AddApplication_DashboardCacheSecondsZero_DisablesDashboardCaching()
     {
         using var provider = BuildProvider(new Dictionary<string, string?> { ["Dashboard:CacheSeconds"] = "0" });
 
         var options = provider.GetRequiredService<IOptions<CachingOptions>>().Value;
 
-        options.DefaultTtl.Should().Be(TimeSpan.Zero);
+        options.ResolveTtl(new GetFunnelMetricsQuery(null, null)).Should().Be(TimeSpan.Zero);
+        options.DefaultTtl.Should().Be(TimeSpan.FromSeconds(60));
+    }
+
+    [Fact]
+    public void AddApplication_CachingDefaultSeconds_SetsDefaultTtlOnly()
+    {
+        using var provider = BuildProvider(new Dictionary<string, string?> { ["Caching:DefaultSeconds"] = "15" });
+
+        var options = provider.GetRequiredService<IOptions<CachingOptions>>().Value;
+
+        options.DefaultTtl.Should().Be(TimeSpan.FromSeconds(15));
+        options.ResolveTtl(new GetFunnelMetricsQuery(null, null)).Should().Be(TimeSpan.FromSeconds(60));
+    }
+
+    [Fact]
+    public void AddApplication_NoCachingConfiguration_DefaultTtlIsSixtySeconds()
+    {
+        using var provider = BuildProvider([]);
+
+        var options = provider.GetRequiredService<IOptions<CachingOptions>>().Value;
+
+        options.DefaultTtl.Should().Be(TimeSpan.FromSeconds(60));
+    }
+
+    [Fact]
+    public void AddApplication_CachingDefaultSecondsOutOfRange_FailsValidation()
+    {
+        using var provider = BuildProvider(new Dictionary<string, string?> { ["Caching:DefaultSeconds"] = "3601" });
+
+        var act = () => provider.GetRequiredService<IOptions<QueryCachingOptions>>().Value;
+
+        act.Should().Throw<OptionsValidationException>();
     }
 
     [Theory]
@@ -69,6 +103,15 @@ public sealed class DashboardCachingTests
         var cacheable = query is ICacheableQuery { Ttl: null };
 
         cacheable.Should().BeTrue();
+    }
+
+    [Theory]
+    [MemberData(nameof(DashboardCardQueries))]
+    public void DashboardCardQuery_UsesDashboardCacheProfile(object query)
+    {
+        var profile = ((ICacheableQuery)query).CacheProfile;
+
+        profile.Should().Be(DashboardCacheKey.Profile);
     }
 
     [Fact]

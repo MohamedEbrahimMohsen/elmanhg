@@ -1,4 +1,3 @@
-using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.ContentRetrieval;
 using Elmanhg.Domain.Lessons;
@@ -10,7 +9,7 @@ using Pgvector.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.ContentRetrieval;
 
-public class LessonContentChunkRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<LessonContentChunk>(context, currentUser, timeProvider), ILessonContentChunkRepository
+public class LessonContentChunkRepository(AppDbContext context) : Repository<LessonContentChunk>(context), ILessonContentChunkRepository
 {
     public async Task<List<LessonContentMatch>> SearchAsync(Guid lessonId, float[] queryEmbedding, string embeddingModel, int top, bool includeQuestionExplanations, CancellationToken cancellationToken)
     {

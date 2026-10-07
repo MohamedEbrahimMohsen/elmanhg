@@ -18,6 +18,7 @@
     <ProjectReference Include="..\core-libraries\Core.Messaging\Core.Messaging.csproj" />
     <ProjectReference Include="..\core-libraries\Core.Spreadsheets\Core.Spreadsheets.csproj" />
     <ProjectReference Include="..\core-libraries\Core.Storage\Core.Storage.csproj" />
+    <ProjectReference Include="..\core-libraries\Core.Storage.S3\Core.Storage.S3.csproj" />
     <ProjectReference Include="..\Elmanhg.Application\Elmanhg.Application.csproj" />
     <ProjectReference Include="..\Elmanhg.Domain\Elmanhg.Domain.csproj" />
   </ItemGroup>

@@ -1,4 +1,3 @@
-using Core.DDD.Identity;
 using Core.EntityFrameworkCore.Repositories;
 using Elmanhg.Domain.Avatar;
 using Elmanhg.Infrastructure.Data.Context;
@@ -6,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Elmanhg.Infrastructure.Avatar;
 
-public class AvatarConversationRepository(AppDbContext context, ICurrentUser currentUser, TimeProvider timeProvider) : Repository<AvatarConversation>(context, currentUser, timeProvider), IAvatarConversationRepository
+public class AvatarConversationRepository(AppDbContext context) : Repository<AvatarConversation>(context), IAvatarConversationRepository
 {
     public async Task ExecuteInTransactionAsync(Func<CancellationToken, Task> operation, CancellationToken cancellationToken)
     {
