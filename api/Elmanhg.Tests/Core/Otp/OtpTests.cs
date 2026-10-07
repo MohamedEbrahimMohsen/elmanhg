@@ -83,6 +83,39 @@ public sealed class OtpTests
     }
 
     [Fact]
+    public void Reissue_LastAllowedResend_BlocksFromThatResend()
+    {
+        var otp = new OtpBuilder().WithReissueCooldownSeconds(60).WithMaxReissueCount(1).WithReissueBlockCooldownInHours(24).IssuedAt(Now).Build();
+
+        otp.Reissue("next-hash", 5, Now.AddHours(2));
+
+        otp.NextAllowedReissueAt.Should().Be(Now.AddHours(26));
+    }
+
+    [Fact]
+    public void Reissue_BlockedAfterLastAllowedResend_ThrowsCooldownUntilBlockEnds()
+    {
+        var otp = new OtpBuilder().WithReissueCooldownSeconds(60).WithMaxReissueCount(1).WithReissueBlockCooldownInHours(24).IssuedAt(Now).Build();
+        otp.Reissue("next-hash", 5, Now.AddHours(2));
+
+        var act = () => otp.Reissue("blocked-hash", 5, Now.AddHours(25));
+
+        var exception = act.Should().Throw<RateLimitExceededCoreException>().Which;
+        exception.ErrorCode.Should().Be(ErrorCodes.OTPReissueCooldown);
+        exception.Context.Should().ContainKey("hours").WhoseValue.Should().Be(1);
+    }
+
+    [Fact]
+    public void Reissue_BelowMax_NextAllowedIsCooldownFromResend()
+    {
+        var otp = new OtpBuilder().WithReissueCooldownSeconds(60).WithMaxReissueCount(3).IssuedAt(Now).Build();
+
+        otp.Reissue("next-hash", 5, Now.AddMinutes(10));
+
+        otp.NextAllowedReissueAt.Should().Be(Now.AddMinutes(10).AddSeconds(60));
+    }
+
+    [Fact]
     public void MarkUsed_NotVerified_ThrowsBadRequest()
     {
         var otp = new OtpBuilder().IssuedAt(Now).Build();

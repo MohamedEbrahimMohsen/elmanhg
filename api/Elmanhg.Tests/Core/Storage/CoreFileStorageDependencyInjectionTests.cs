@@ -1,6 +1,5 @@
 using Core.Storage;
 using Core.Storage.Local;
-using Core.Storage.S3;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,7 +20,7 @@ public sealed class CoreFileStorageDependencyInjectionTests
     }
 
     [Fact]
-    public void AddCoreFileStorage_S3_ResolvesS3FileStorage()
+    public void AddCoreFileStorage_S3ProviderWithoutS3Registration_ThrowsInvalidOperation()
     {
         using var provider = BuildProvider(new()
         {
@@ -34,7 +33,9 @@ public sealed class CoreFileStorageDependencyInjectionTests
         });
         using var scope = provider.CreateScope();
 
-        scope.ServiceProvider.GetRequiredService<IFileStorage>().Should().BeOfType<S3FileStorage>();
+        var act = () => scope.ServiceProvider.GetRequiredService<IFileStorage>();
+
+        act.Should().Throw<InvalidOperationException>().WithMessage("*FileStorage:Provider 'S3'*");
     }
 
     private static ServiceProvider BuildProvider(Dictionary<string, string?> settings)

@@ -125,7 +125,7 @@ The signed-in teacher's own numbers, shown on the teacher home and «إحصائ�
 
 ## Caching
 
-Every card is cached in memory for `Dashboard:CacheSeconds` (60), keyed by card, range and subject as sent. There is no invalidation: a number can be up to a minute old, and a default-range entry may be served for up to a minute past midnight. `0` disables the cache (the test host does this).
+Every card is cached in memory for `Dashboard:CacheSeconds` (60), keyed by card, range and subject as sent. There is no invalidation: a number can be up to a minute old, and a default-range entry may be served for up to a minute past midnight. `0` disables the cache (the test host does this). The cards use the `dashboard` cache profile, whose lifetime is `Dashboard:CacheSeconds`. The query cache's own default, `Caching:DefaultSeconds`, applies only to cacheable queries without a profile or their own lifetime, and none exists today.
 
 The teacher stats card is not cached: the cache key comes from the request, which carries no caller, so caching would share one teacher's numbers with another.
 

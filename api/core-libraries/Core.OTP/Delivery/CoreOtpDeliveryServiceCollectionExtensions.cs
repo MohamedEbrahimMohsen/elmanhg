@@ -22,7 +22,7 @@ public static class CoreOtpDeliveryServiceCollectionExtensions
         services.AddSingleton(setup);
         services.AddScopedHttpConsumer<MetaWhatsAppOtpChannel, MetaWhatsAppClient>((serviceProvider, client) => client.BaseAddress = HttpBaseAddress.From(Options(serviceProvider).WhatsApp.BaseUrl)).AddOtpProviderResilience(retryUnsafeMethods: false);
         services.AddScopedHttpConsumer<ResendEmailOtpChannel, ResendEmailClient>((serviceProvider, client) => client.BaseAddress = HttpBaseAddress.From(Options(serviceProvider).Email.BaseUrl)).AddOtpProviderResilience(retryUnsafeMethods: true);
-        services.AddHttpClient<HttpSmsClient>().AddOtpProviderResilience(retryUnsafeMethods: false);
+        services.AddHttpClient<HttpSmsClient>(nameof(HttpSmsOtpChannel)).AddOtpProviderResilience(retryUnsafeMethods: false);
         services.AddScoped<HttpSmsOtpChannel>();
         services.AddProviderSwitch<IOtpChannel, MetaWhatsAppOtpChannel>(serviceProvider => OtpDeliveryProviders.UsesMeta(Options(serviceProvider).WhatsApp), serviceProvider => Fake(serviceProvider, OtpChannel.WhatsApp));
         services.AddProviderSwitch<IOtpChannel, ResendEmailOtpChannel>(serviceProvider => OtpDeliveryProviders.UsesResend(Options(serviceProvider).Email), serviceProvider => Fake(serviceProvider, OtpChannel.Email));

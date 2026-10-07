@@ -278,6 +278,14 @@ Training export files are stored under `training-exports/` (the `api-media` volu
 
 Caddy proxies the SignalR hub `/api/hubs/notifications` (WebSockets) with the existing `/api/*` rule; the access log already redacts the `access_token` query value.
 
+### Query cache (`api.env`)
+
+Not a secret; validated at startup.
+
+| Variable | Default | Notes |
+|---|---|---|
+| `Caching__DefaultSeconds` | `60` | 0 to 3600; in-memory lifetime for a cacheable query that sets neither its own lifetime nor a cache profile; `0` disables it. Dashboard cards use `Dashboard__CacheSeconds` instead |
+
 ### Dashboard (`api.env`, [docs/dashboard.md](dashboard.md))
 
 None is a secret; the baked defaults suit staging and production. Validated at startup, so a value out of range, an unknown time zone or a default range above the maximum stops the API.
