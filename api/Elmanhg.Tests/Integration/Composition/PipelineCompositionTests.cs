@@ -1,6 +1,8 @@
 using Core.Auditing;
+using Core.Cache;
 using Core.CQRS.Behaviours;
 using Core.Observability;
+using Elmanhg.Application.Dashboard.GetFunnelMetrics;
 using Elmanhg.Application.Sessions.Shared;
 using Elmanhg.Application.Sessions.SubmitAnswer;
 using Elmanhg.Application.Shared.Observability;
@@ -47,6 +49,16 @@ public sealed class PipelineCompositionTests(ApiFactory factory)
         var metricsIndex = behaviours.FindIndex(x => x is RequestMetricsBehaviour<PipelineProbeRequest, Unit>);
         metricsIndex.Should().Be(1);
         metricsIndex.Should().BeLessThan(behaviours.FindIndex(x => x is ValidationBehaviour<PipelineProbeRequest, Unit>));
+    }
+
+    [Fact]
+    public void Resolve_CacheableQueryPipeline_IncludesCachingBehaviour()
+    {
+        using var scope = factory.Services.CreateScope();
+
+        var behaviours = scope.ServiceProvider.GetServices<IPipelineBehavior<GetFunnelMetricsQuery, FunnelMetricsResult>>();
+
+        behaviours.Should().ContainItemsAssignableTo<CachingBehaviour<GetFunnelMetricsQuery, FunnelMetricsResult>>();
     }
 
     [Fact]

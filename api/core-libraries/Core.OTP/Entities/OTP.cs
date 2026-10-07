@@ -15,9 +15,6 @@ public class Otp : Entity
     public string Recipient { get; private set; }
     public OtpRecipientType RecipientType { get; private set; }
     public string CodeHash { get; private set; }
-    
-    public string? RequestIP { get; private set; }
-    public string? UserAgent { get; private set; }
 
     public int VerificationAttempts { get; private set; }
     public int MaxVerificationAttempts { get; private set; }
@@ -92,7 +89,7 @@ public class Otp : Entity
         ReissueCount++;
         CreatedAt = now;
         ExpiresAt = now.AddMinutes(expiresInMinutes);
-        NextAllowedReissueAt = ReissueCount == MaxReissueCount? NextAllowedReissueAt.AddHours(ReissueBlockCooldownInHours) : now.AddSeconds(ReissueCooldownSeconds);
+        NextAllowedReissueAt = ReissueCount == MaxReissueCount ? now.AddHours(ReissueBlockCooldownInHours) : now.AddSeconds(ReissueCooldownSeconds);
     }
 
     public string? Verify(string codeHash, DateTimeOffset now)

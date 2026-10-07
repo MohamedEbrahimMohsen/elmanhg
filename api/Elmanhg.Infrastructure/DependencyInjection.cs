@@ -2,6 +2,7 @@ using Core.Http;
 using Core.Identity.Tokens.RefreshToken;
 using Core.Spreadsheets;
 using Core.Storage;
+using Core.Storage.S3;
 using Elmanhg.Application.Configuration.Shared;
 using Elmanhg.Application.Exceptions;
 using Elmanhg.Application.Shared.RichText;
@@ -71,7 +72,7 @@ public static class DependencyInjection
         services.AddMessaging();
         services.AddPayments();
         services.AddAiService();
-        services.AddCoreFileStorage();
+        services.AddCoreFileStorage().AddCoreS3FileStorage();
         services.AddTrainingData();
         services.AddSingleton<IRichTextSanitizer, RichTextSanitizer>();
         services.AddSingleton<IRichTextExtractor, RichTextExtractor>();
