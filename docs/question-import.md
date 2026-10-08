@@ -91,7 +91,7 @@ Import-specific codes:
 | `QUESTION_IMPORT_FILE_TYPE_INVALID` | not `.xlsx`, or the bytes are not a zip archive (no `PK` header) | 422 |
 | `QUESTION_IMPORT_FILE_TOO_LARGE` | over the size cap | 422 |
 | `QUESTION_IMPORT_BATCH_ID_REQUIRED` | import without `batchId` | 422 |
-| `SPREADSHEET_UNREADABLE` | a zip archive that is not a readable workbook, or whose entries unpack to more than 100 MB | 400 |
+| `SPREADSHEET_UNREADABLE` | a zip archive that is not a readable workbook (including one without `[Content_Types].xml`, `_rels/.rels`, the workbook part or a sheet part the workbook declares), or whose entries unpack to more than 100 MB | 400 |
 | `QUESTION_IMPORT_EMPTY` | no data rows in any type sheet | 400 |
 | `QUESTION_IMPORT_TOO_MANY_ROWS` | more rows than the cap (context `max`) | 400 |
 | `QUESTION_IMPORT_HAS_ERRORS` | import of a file with any problem (context `count`) | 400 |
@@ -108,6 +108,7 @@ The report carries codes only; the web translates them.
 - `Content:QuestionImportMaxRows` (500): data rows per file, across all type sheets.
 - `Content:QuestionImportMaxFileSizeInMb` (5).
 - The unpacked size of the workbook (sum of the zip entries) is capped at `SpreadsheetOptions.MaxUncompressedSizeInMb` (100 MB, core default; must be greater than 0, checked at startup) and checked before the workbook is loaded.
+- Before the workbook is loaded, the package must have `[Content_Types].xml`, `_rels/.rels` with a workbook relationship whose part exists, the workbook's relationships part, and a relationship and part for every sheet the workbook declares; only those three small XML parts are parsed (DTDs refused). Otherwise `SPREADSHEET_UNREADABLE`.
 - A file that arrives as a non-seekable stream is copied into memory before that check, and the copy stops at `SpreadsheetOptions.MaxCompressedSizeInMb` (100 MB, core default, above the 5 MB upload limit; must be greater than 0, checked at startup) with the same unreadable code (`SPREADSHEET_UNREADABLE`). The import endpoints already refuse files over `Content:QuestionImportMaxFileSizeInMb` before reading, so this cap never applies to a valid upload.
 - Only the first 256 columns of a type sheet are read, and sheets that are not type sheets are not read at all. Reading stops one data row past the row cap. The work stays bounded even when a small file declares a cell far away (for example `XFD1048576`).
 - `.xlsx` only (checked by extension and by the zip signature `50 4B 03 04` at the start of the file; the content type is not checked because browsers send `application/octet-stream` for it on machines without Office). CSV and `.xls` are not accepted.
