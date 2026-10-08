@@ -61,3 +61,7 @@ VERDICT: CHANGES_REQUESTED
 - `ClosedXmlSpreadsheetReaderPackagePartsTests` constrains it: the exact inner message proves the pre-check made the refusal. It has no percent-encoded valid row, which is why Blocking #1 went unnoticed.
 - The new `TrainingDataScrubberTests` theory is a consistency guard. It asserts real output, so it is not vacuous.
 - `PostPreview_WorkbookWithoutPackageRelationships_Returns400SpreadsheetUnreadable` constrains the change: before it, this input produced a 500.
+
+## Status after rework r1
+
+Finding 1 (percent-encoded part names) was fixed in rework r1 (see 02-implementation.md, "Rework r1"): `ResolvePartName` keeps the escaped form, four valid-variant rows cover escaped and literal space/Arabic targets, three of them fail with the old decoding, and CI on PR 340 is green. The non-blocking OpcPartReader items were also applied. No open blocking findings.
