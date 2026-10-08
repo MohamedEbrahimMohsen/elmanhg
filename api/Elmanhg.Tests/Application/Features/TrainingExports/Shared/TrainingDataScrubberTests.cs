@@ -23,6 +23,16 @@ public sealed class TrainingDataScrubberTests
         TrainingDataScrubber.ScrubText("كلمني ٠١٠١٢٣٤٥٦٧٨").Should().Be("كلمني [number]");
     }
 
+    [Theory]
+    [InlineData("۰۱۰۱۲۳۴۵۶۷۸")]
+    [InlineData("٠١٠ ١٢٣٤ ٥٦٧٨")]
+    [InlineData("٠1٠1234٥678")]
+    [InlineData("+٢٠ ١٠ ١٢٣٤ ٥٦٧٨")]
+    public void ScrubText_MobileNumberInAnyDigitScript_Replaced(string number)
+    {
+        TrainingDataScrubber.ScrubText("كلمني " + number).Should().Be("كلمني [number]");
+    }
+
     [Fact]
     public void ScrubText_InternationalPhone_Replaced()
     {

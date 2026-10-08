@@ -2,6 +2,7 @@ using ClosedXML.Excel;
 using Elmanhg.Domain.Questions;
 using Elmanhg.Infrastructure.Data.Context;
 using Elmanhg.Tests.Builders;
+using Elmanhg.Tests.Core.Spreadsheets;
 using Elmanhg.Tests.Integration.Authorization;
 using Elmanhg.Tests.Integration.Infrastructure;
 using FluentAssertions;
@@ -110,6 +111,19 @@ public sealed class QuestionImportEndpointTests(ApiFactory factory)
         var lessonId = await SeedLessonAsync();
         using var admin = await AdminClientAsync();
         using var form = Form(lessonId, [0x50, 0x4B, 0x03, 0x04, .. Encoding.UTF8.GetBytes("not a workbook")]);
+
+        using var response = await admin.PostAsync($"{Route}/preview", form, TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await ReadCodeAsync(response)).Should().Be("SPREADSHEET_UNREADABLE");
+    }
+
+    [Fact]
+    public async Task PostPreview_WorkbookWithoutPackageRelationships_Returns400SpreadsheetUnreadable()
+    {
+        var lessonId = await SeedLessonAsync();
+        using var admin = await AdminClientAsync();
+        using var form = Form(lessonId, SpreadsheetPackageCorruption.CorruptPart(ValidWorkbook(), "package-relationships-missing"));
 
         using var response = await admin.PostAsync($"{Route}/preview", form, TestContext.Current.CancellationToken);
 
