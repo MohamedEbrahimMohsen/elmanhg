@@ -11,7 +11,7 @@ receivers:
     protocols:
       grpc:
         endpoint: 0.0.0.0:4317
-  filelog/containers:
+  file_log/containers:
     include: [/var/lib/docker/containers/*/*-json.log]
     start_at: end
     storage: file_storage
@@ -138,6 +138,6 @@ service:
       processors: [memory_limiter, batch]
       exporters: [otlphttp/prometheus]
     logs:
-      receivers: [filelog/containers]
+      receivers: [file_log/containers]
       processors: [memory_limiter, transform/redact, batch]
       exporters: [otlphttp/loki]
