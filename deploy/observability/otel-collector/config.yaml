@@ -80,6 +80,7 @@ processors:
   # Same patterns as LogRedactor in the API: email addresses (literal or URL-encoded @) and Egyptian mobile numbers
   # (docs/observability.md, PII rules). The phone pattern is LogRedactor.PhonePattern with \ doubled (OTTL string) and
   # $ doubled (collector config); it runs twice because a match consumes the character after the number.
+  # Its digit classes hold the Arabic-Indic (U+0660-U+0669) and Extended Arabic-Indic (U+06F0-U+06F9) digits as literal characters: RE2 has no \u escape and .NET has no \x{...} escape.
   # LogRedactorCollectorParityTests checks the copy. flatten first: replace_all_patterns only reaches top-level values,
   # and Caddy nests the URI under request.
   transform/redact:
@@ -89,24 +90,24 @@ processors:
         statements:
           - flatten(attributes)
           - replace_pattern(body, "[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted-email]") where IsString(body)
-          - replace_pattern(body, "(?:\\+|(^|[^0-9A-Za-z_])(?:00)?)(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4})([^0-9A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}") where IsString(body)
-          - replace_pattern(body, "(?:\\+|(^|[^0-9A-Za-z_])(?:00)?)(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4})([^0-9A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}") where IsString(body)
+          - replace_pattern(body, "(?:\\+|(^|[^0-9٠-٩۰-۹A-Za-z_])(?:[0٠۰][0٠۰])?)(?:[2٢۲][0٠۰][ -]?)?(?:[0٠۰][ -]?)?[1١۱][ -]?[0125٠١٢٥۰۱۲۵](?:[ -]?[0-9٠-٩۰-۹]{4}[ -]?[0-9٠-٩۰-۹]{4}|[0-9٠-٩۰-۹][ -]?[0-9٠-٩۰-۹]{3}[ -]?[0-9٠-٩۰-۹]{4})([^0-9٠-٩۰-۹A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}") where IsString(body)
+          - replace_pattern(body, "(?:\\+|(^|[^0-9٠-٩۰-۹A-Za-z_])(?:[0٠۰][0٠۰])?)(?:[2٢۲][0٠۰][ -]?)?(?:[0٠۰][ -]?)?[1١۱][ -]?[0125٠١٢٥۰۱۲۵](?:[ -]?[0-9٠-٩۰-۹]{4}[ -]?[0-9٠-٩۰-۹]{4}|[0-9٠-٩۰-۹][ -]?[0-9٠-٩۰-۹]{3}[ -]?[0-9٠-٩۰-۹]{4})([^0-9٠-٩۰-۹A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}") where IsString(body)
           - replace_all_patterns(attributes, "value", "[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted-email]")
-          - replace_all_patterns(attributes, "value", "(?:\\+|(^|[^0-9A-Za-z_])(?:00)?)(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4})([^0-9A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}")
-          - replace_all_patterns(attributes, "value", "(?:\\+|(^|[^0-9A-Za-z_])(?:00)?)(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4})([^0-9A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}")
+          - replace_all_patterns(attributes, "value", "(?:\\+|(^|[^0-9٠-٩۰-۹A-Za-z_])(?:[0٠۰][0٠۰])?)(?:[2٢۲][0٠۰][ -]?)?(?:[0٠۰][ -]?)?[1١۱][ -]?[0125٠١٢٥۰۱۲۵](?:[ -]?[0-9٠-٩۰-۹]{4}[ -]?[0-9٠-٩۰-۹]{4}|[0-9٠-٩۰-۹][ -]?[0-9٠-٩۰-۹]{3}[ -]?[0-9٠-٩۰-۹]{4})([^0-9٠-٩۰-۹A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}")
+          - replace_all_patterns(attributes, "value", "(?:\\+|(^|[^0-9٠-٩۰-۹A-Za-z_])(?:[0٠۰][0٠۰])?)(?:[2٢۲][0٠۰][ -]?)?(?:[0٠۰][ -]?)?[1١۱][ -]?[0125٠١٢٥۰۱۲۵](?:[ -]?[0-9٠-٩۰-۹]{4}[ -]?[0-9٠-٩۰-۹]{4}|[0-9٠-٩۰-۹][ -]?[0-9٠-٩۰-۹]{3}[ -]?[0-9٠-٩۰-۹]{4})([^0-9٠-٩۰-۹A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}")
   transform/redact-traces:
     error_mode: ignore
     trace_statements:
       - context: span
         statements:
           - replace_all_patterns(attributes, "value", "[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted-email]")
-          - replace_all_patterns(attributes, "value", "(?:\\+|(^|[^0-9A-Za-z_])(?:00)?)(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4})([^0-9A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}")
-          - replace_all_patterns(attributes, "value", "(?:\\+|(^|[^0-9A-Za-z_])(?:00)?)(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4})([^0-9A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}")
+          - replace_all_patterns(attributes, "value", "(?:\\+|(^|[^0-9٠-٩۰-۹A-Za-z_])(?:[0٠۰][0٠۰])?)(?:[2٢۲][0٠۰][ -]?)?(?:[0٠۰][ -]?)?[1١۱][ -]?[0125٠١٢٥۰۱۲۵](?:[ -]?[0-9٠-٩۰-۹]{4}[ -]?[0-9٠-٩۰-۹]{4}|[0-9٠-٩۰-۹][ -]?[0-9٠-٩۰-۹]{3}[ -]?[0-9٠-٩۰-۹]{4})([^0-9٠-٩۰-۹A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}")
+          - replace_all_patterns(attributes, "value", "(?:\\+|(^|[^0-9٠-٩۰-۹A-Za-z_])(?:[0٠۰][0٠۰])?)(?:[2٢۲][0٠۰][ -]?)?(?:[0٠۰][ -]?)?[1١۱][ -]?[0125٠١٢٥۰۱۲۵](?:[ -]?[0-9٠-٩۰-۹]{4}[ -]?[0-9٠-٩۰-۹]{4}|[0-9٠-٩۰-۹][ -]?[0-9٠-٩۰-۹]{3}[ -]?[0-9٠-٩۰-۹]{4})([^0-9٠-٩۰-۹A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}")
       - context: spanevent
         statements:
           - replace_all_patterns(attributes, "value", "[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[redacted-email]")
-          - replace_all_patterns(attributes, "value", "(?:\\+|(^|[^0-9A-Za-z_])(?:00)?)(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4})([^0-9A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}")
-          - replace_all_patterns(attributes, "value", "(?:\\+|(^|[^0-9A-Za-z_])(?:00)?)(?:20[ -]?)?(?:0[ -]?)?1[ -]?[0125](?:[ -]?[0-9]{4}[ -]?[0-9]{4}|[0-9][ -]?[0-9]{3}[ -]?[0-9]{4})([^0-9A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}")
+          - replace_all_patterns(attributes, "value", "(?:\\+|(^|[^0-9٠-٩۰-۹A-Za-z_])(?:[0٠۰][0٠۰])?)(?:[2٢۲][0٠۰][ -]?)?(?:[0٠۰][ -]?)?[1١۱][ -]?[0125٠١٢٥۰۱۲۵](?:[ -]?[0-9٠-٩۰-۹]{4}[ -]?[0-9٠-٩۰-۹]{4}|[0-9٠-٩۰-۹][ -]?[0-9٠-٩۰-۹]{3}[ -]?[0-9٠-٩۰-۹]{4})([^0-9٠-٩۰-۹A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}")
+          - replace_all_patterns(attributes, "value", "(?:\\+|(^|[^0-9٠-٩۰-۹A-Za-z_])(?:[0٠۰][0٠۰])?)(?:[2٢۲][0٠۰][ -]?)?(?:[0٠۰][ -]?)?[1١۱][ -]?[0125٠١٢٥۰۱۲۵](?:[ -]?[0-9٠-٩۰-۹]{4}[ -]?[0-9٠-٩۰-۹]{4}|[0-9٠-٩۰-۹][ -]?[0-9٠-٩۰-۹]{3}[ -]?[0-9٠-٩۰-۹]{4})([^0-9٠-٩۰-۹A-Za-z_]|$$)", "$${1}[redacted-phone]$${2}")
 
 exporters:
   otlp/tempo:

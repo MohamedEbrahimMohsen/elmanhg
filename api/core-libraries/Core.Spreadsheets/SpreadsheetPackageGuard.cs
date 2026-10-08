@@ -5,7 +5,7 @@ using System.Xml;
 
 namespace Core.Spreadsheets;
 
-// ClosedXML unpacks every part into memory before any row or column cap applies; the declared sizes are checked first. System.IO.Compression stops an entry at its declared size.
+// ClosedXML unpacks every part into memory before any row or column cap applies; the declared sizes are checked first, then the parts ClosedXML needs (SpreadsheetPackageParts). System.IO.Compression stops an entry at its declared size.
 internal static class SpreadsheetPackageGuard
 {
     private const long BytesPerMegabyte = 1024 * 1024;
@@ -34,7 +34,7 @@ internal static class SpreadsheetPackageGuard
         return buffer;
     }
 
-    public static void EnsureWithinUncompressedCap(Stream package, int maxUncompressedSizeInMb, string unreadableErrorCode)
+    public static void EnsureReadablePackage(Stream package, int maxUncompressedSizeInMb, string unreadableErrorCode)
     {
         var start = package.Position;
         var cap = maxUncompressedSizeInMb * BytesPerMegabyte;
@@ -50,6 +50,8 @@ internal static class SpreadsheetPackageGuard
                     throw new BadRequestCoreException(unreadableErrorCode);
                 }
             }
+
+            SpreadsheetPackageParts.EnsurePresent(archive);
         }
         catch (Exception exception) when (IsUnreadablePackage(exception))
         {

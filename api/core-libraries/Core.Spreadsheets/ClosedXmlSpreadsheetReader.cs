@@ -11,7 +11,7 @@ public sealed partial class ClosedXmlSpreadsheetReader(IOptions<SpreadsheetOptio
         var options = spreadsheetOptions.Value;
         using var buffered = content.CanSeek ? null : SpreadsheetPackageGuard.BufferWithinCompressedCap(content, options.MaxCompressedSizeInMb, options.UnreadableErrorCode);
         var package = buffered ?? content;
-        SpreadsheetPackageGuard.EnsureWithinUncompressedCap(package, options.MaxUncompressedSizeInMb, options.UnreadableErrorCode);
+        SpreadsheetPackageGuard.EnsureReadablePackage(package, options.MaxUncompressedSizeInMb, options.UnreadableErrorCode);
         XLWorkbook workbook;
         try
         {
