@@ -920,6 +920,11 @@
           "title": "Small leftovers: OTP abort after send, redaction boundary, test sizes",
           "description": "Issue #336, PR #337.",
           "tasks": []
+        },
+        {
+          "title": "Last gaps: Arabic-Indic digit redaction, missing spreadsheet parts, per-context parity",
+          "description": "Issue #339, PR #340.",
+          "tasks": []
         }
       ]
     }
